@@ -97,7 +97,7 @@ const phone = siteSettings?.phone ?? '';
 const ig = siteSettings?.socialInstagram ?? '';
 const fb = siteSettings?.socialFacebook ?? '';
 
-// Grouped nav structure. Flat items render as plain anchor links; dropdown
+// Core nav structure. Flat items render as plain anchor links; dropdown
 // items render as native <details>/<summary> disclosure groups on desktop
 // (server-rendered, see the nav markup below) and as indented expandable
 // groups in MobileNav.
@@ -113,42 +113,17 @@ const fb = siteSettings?.socialFacebook ?? '';
 // "Contact" is intentionally NOT in the primary nav — the "Book a consultation"
 // CTA at the right of the nav row does that job, and the MobileNav drawer also
 // surfaces the CTA at the top.
-// Build Services dropdown children. Services and Process are always shown;
-// E-Design and Gift Certificates are gated by visibility.
-const servicesDropdownItems = [
-  { label: 'Services',          href: '/services' },
-  ...(visible.eDesign          ? [{ label: 'E-Design',          href: '/e-design' }]          : []),
-  { label: 'Process',           href: '/process' },
-  ...(visible.giftCertificates ? [{ label: 'Gift Certificates', href: '/gift-certificates' }] : []),
-];
+//
+// Core nav: /, /about, /services, /faq, /journal, /contact (CTA button).
+// Module routes (/portfolio, /process, /e-design, /shop, /gift-certificates,
+// /quiz, /calculator, /guides, /press, /resources) are opt-in via modules/
+// and are NOT linked from the core nav.
 
-// Build Resources dropdown children. FAQ is always shown; the rest are gated.
-const resourcesDropdownItems = [
-  ...(visible.styleQuiz        ? [{ label: 'Style Quiz',      href: '/quiz' }]        : []),
-  ...(visible.budgetCalculator ? [{ label: 'Cost Calculator', href: '/calculator' }]  : []),
-  ...(visible.guides           ? [{ label: 'Guides',          href: '/guides' }]      : []),
-  { label: 'FAQ',              href: '/faq' },
-  ...(visible.journal          ? [{ label: 'Journal',         href: '/journal' }]     : []),
-  ...(visible.portfolio        ? [{ label: 'Before & After',  href: '/portfolio/before-after' }] : []),
-];
-
-// Assemble the full nav. Flat items Portfolio and Shop are gated by visibility.
-// Dropdown groups are omitted entirely when their children list ends up empty.
 const NAV_ITEMS = [
-  { kind: 'flat' as const,     label: 'Home',  href: '/' },
-  ...(visible.portfolio ? [{ kind: 'flat' as const, label: 'Portfolio', href: '/portfolio' }] : []),
-  // Services dropdown — always present (Services + Process are core).
-  {
-    kind: 'dropdown' as const,
-    label: 'Services',
-    items: servicesDropdownItems,
-  },
-  ...(visible.shop ? [{ kind: 'flat' as const, label: 'Shop', href: '/shop' }] : []),
-  // Resources dropdown — only show when at least one child is visible (FAQ always is).
-  ...(resourcesDropdownItems.length > 0
-    ? [{ kind: 'dropdown' as const, label: 'Resources', items: resourcesDropdownItems }]
-    : []),
-  { kind: 'flat' as const,     label: 'About', href: '/about' },
+  { kind: 'flat' as const, label: 'About',    href: '/about' },
+  { kind: 'flat' as const, label: 'Services', href: '/services' },
+  { kind: 'flat' as const, label: 'FAQ',      href: '/faq' },
+  ...(visible.journal ? [{ kind: 'flat' as const, label: 'Journal', href: '/journal' }] : []),
 ];
 
 // Flatten NAV_ITEMS into the shape MobileNav expects (a list of NavLink[]

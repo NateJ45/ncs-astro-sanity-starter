@@ -162,25 +162,6 @@ export async function getAboutPage() {
   }`);
 }
 
-// ---- Process page ---------------------------------------------------------
-
-export async function getProcessPage() {
-  return client.fetch(`*[_type == "processPage"][0]{
-    seoTitle,
-    seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    faqSectionEyebrow, faqSectionHeadline,
-    "processSteps": *[_type == "processStep"] | order(orderRank asc, stepNumber asc),
-    "faqs": *[_type == "faqItem" && alsoShowOnProcessPage == true] | order(category asc, displayOrder asc),
-    finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
-    finalCtaBackgroundImage${IMAGE_PROJECTION},
-    finalCta${CTA_PROJECTION}
-  }`);
-}
-
 // ---- Services page --------------------------------------------------------
 
 export async function getServicesPage() {
@@ -255,19 +236,6 @@ export async function getContactPage() {
   }`);
 }
 
-// ---- Portfolio index page -------------------------------------------------
-
-export async function getPortfolioPage() {
-  return client.fetch(`*[_type == "portfolioPage"][0]{
-    seoTitle,
-    seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent
-  }`);
-}
-
 // ---- 404 page -------------------------------------------------------------
 
 export async function getNotFoundPage() {
@@ -284,50 +252,13 @@ export async function getNotFoundPage() {
   }`);
 }
 
-// ---- Projects (post-launch portfolio) -------------------------------------
+// ---- Projects (used by Footer.astro for Latest Projects column) -----------
 
 export async function getAllProjects() {
   return client.fetch(`*[_type == "project"] | order(orderRank asc, coalesce(displayOrder, 999) asc, publishedAt desc){
     _id, title, slug, location, year, roomType, designStyle, briefSummary,
     heroImage${IMAGE_PROJECTION}
   }`);
-}
-
-export async function getProjectBySlug(slug: string) {
-  // Note: stickyCtaLabel is spread in via `...` since the schema field is on
-  // the project doc itself. journalPage's stickyCtaLabel is passed in
-  // separately so `journalPageStickyCta` from journal/[slug].astro is keyed
-  // to the right source.
-  //
-  // relatedJournalEntries is a reverse reference: journal posts whose "Related
-  // project" field points at this project. Deriving it here means the link is
-  // kept only on the journal side, so there is nothing for an editor to
-  // maintain on the project, and the project page surfaces coverage on its own.
-  return client.fetch(
-    `*[_type == "project" && slug.current == $slug][0]{
-      ...,
-      heroImage${IMAGE_PROJECTION},
-      gallery[]${IMAGE_PROJECTION},
-      beforeAfters[]{
-        ...,
-        beforeImage${IMAGE_PROJECTION},
-        afterImage${IMAGE_PROJECTION}
-      },
-      "servicesUsed": servicesUsed[]->{ name, slug, price },
-      "relatedTestimonial": relatedTestimonial->,
-      "relatedJournalEntries": *[_type == "journalEntry" && relatedProject._ref == ^._id] | order(publishedAt desc){
-        _id,
-        title,
-        slug,
-        excerpt,
-        publishedAt,
-        featured,
-        coverImage${IMAGE_PROJECTION},
-        "categories": categories[]->{ _id, title, slug, description }
-      }
-    }`,
-    { slug },
-  );
 }
 
 // ---- Journal --------------------------------------------------------------
@@ -420,103 +351,6 @@ export async function getAllJournalSlugs(): Promise<string[]> {
   return list.map((e) => e.slug?.current).filter(Boolean);
 }
 
-// ---- E-Design page --------------------------------------------------------
-
-export async function getEDesignPage() {
-  return client.fetch(`*[_type == "eDesignPage"][0]{
-    seoTitle,
-    seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    intro,
-    howItWorks[]{
-      stepNumber, title, body
-    },
-    whatsIncluded,
-    tiers[]{
-      name, price, priceNumeric, features, bestFor, ctaLabel
-    },
-    "faqRefs": faqRefs[]->{
-      question, answer, category
-    },
-    finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
-    finalCtaBackgroundImage${IMAGE_PROJECTION},
-    finalCta${CTA_PROJECTION}
-  }`);
-}
-
-// ---- Shop page + collections + items -------------------------------------
-
-export async function getShopPage() {
-  return client.fetch(`*[_type == "shopPage"][0]{
-    seoTitle,
-    seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    enabled,
-    intro,
-    disclosure,
-    "collections": collections[]->{
-      _id,
-      title,
-      "slug": slug.current,
-      blurb,
-      orderRank,
-      "items": *[_type == "shopItem" && collection._ref == ^._id]
-        | order(orderRank asc){
-          _id, title,
-          image${IMAGE_PROJECTION},
-          vendor, affiliateUrl, note
-        }
-    }
-  }`);
-}
-
-// ---- Gift certificates page -----------------------------------------------
-
-export async function getGiftPage() {
-  return client.fetch(`*[_type == "giftPage"][0]{
-    seoTitle,
-    seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    intro,
-    options[]{
-      label, amount, blurb
-    },
-    howItWorks[]{
-      stepNumber, title, body
-    },
-    finePrint,
-    ctaLabel
-  }`);
-}
-
-// ---- Resources hub page ---------------------------------------------------
-
-export async function getResourcesPage() {
-  return client.fetch(`*[_type == "resourcesPage"][0]{
-    seoTitle,
-    seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    intro,
-    cards[]{
-      title, blurb,
-      icon${IMAGE_PROJECTION},
-      link
-    }
-  }`);
-}
-
 // ---- Privacy page ---------------------------------------------------------
 
 export async function getPrivacyPage() {
@@ -532,21 +366,9 @@ export async function getPrivacyPage() {
   }`);
 }
 
-// ---- Press page + press items ---------------------------------------------
+// ---- Press items (used by core: about.astro + index.astro PressStrip) ----
 
-export async function getPressPage() {
-  return client.fetch(`*[_type == "pressPage"][0]{
-    seoTitle,
-    seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    intro
-  }`);
-}
-
-// Press items ordered by orderRank for the strip + /press listing.
+// Press items ordered by orderRank for the PressStrip on the home + about pages.
 export async function getPressItems() {
   return client.fetch(`*[_type == "pressItem"] | order(orderRank asc){
     _id, outlet,
@@ -555,112 +377,3 @@ export async function getPressItems() {
   }`);
 }
 
-// ---- Style quiz config ----------------------------------------------------
-
-export async function getStyleQuiz() {
-  return client.fetch(`*[_type == "styleQuiz"][0]{
-    seoImage${IMAGE_PROJECTION},
-    introEyebrow, introHeadline, introSubhead,
-    introImage${IMAGE_PROJECTION},
-    questions[]{
-      prompt, helpText,
-      answers[]{
-        label,
-        image${IMAGE_PROJECTION},
-        archetypeWeights[]{ archetypeSlug, weight }
-      }
-    },
-    qualifiers[]{
-      prompt, type,
-      options[]{ label, value }
-    },
-    archetypes[]{
-      name,
-      "slug": slug.current,
-      description,
-      images[]${IMAGE_PROJECTION},
-      "recommendedServiceRef": recommendedServiceRef->{ _id, name, "slug": slug.current },
-      resultCtaLabel
-    },
-    gate{ mode, heading, blurb, consentNote, espTag },
-    routing{
-      highIntentRule, bookCtaLabel, guideCtaLabel,
-      "guideRef": guideRef->{ _id, title, "slug": slug.current }
-    }
-  }`);
-}
-
-// ---- Budget calculator config ---------------------------------------------
-
-export async function getBudgetCalculator() {
-  return client.fetch(`*[_type == "budgetCalculator"][0]{
-    seoImage${IMAGE_PROJECTION},
-    introEyebrow, introHeadline, introSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    rooms[]{ label, baseLow, baseHigh },
-    scopeOptions[]{ label, addLow, addHigh },
-    addOns[]{ label, low, high },
-    resultCopy,
-    disclaimer,
-    ctaLabel,
-    consultPriceNote
-  }`);
-}
-
-// ---- Lead magnets ---------------------------------------------------------
-
-// All published lead magnets ordered for /guides index.
-export async function getLeadMagnets() {
-  return client.fetch(`*[_type == "leadMagnet" && published == true]
-    | order(orderRank asc){
-      _id, title,
-      "slug": slug.current,
-      summary,
-      coverImage${IMAGE_PROJECTION},
-      gateHeading, gateBlurb, buttonLabel, successMessage, espTag,
-      seoTitle, seoDescription, orderRank
-    }`);
-}
-
-// Single published lead magnet by slug for /guides/[slug].
-export async function getLeadMagnet(slug: string) {
-  return client.fetch(
-    `*[_type == "leadMagnet" && slug.current == $slug && published == true][0]{
-      _id, title,
-      "slug": slug.current,
-      summary,
-      coverImage${IMAGE_PROJECTION},
-      file{ asset->{ url } },
-      gateHeading, gateBlurb, buttonLabel, successMessage, espTag,
-      seoTitle, seoDescription
-    }`,
-    { slug },
-  );
-}
-
-// Static path generation for /guides/[slug].
-export async function getAllLeadMagnetSlugs(): Promise<string[]> {
-  const list: Array<{ slug: { current: string } }> = await client.fetch(
-    `*[_type == "leadMagnet" && published == true && defined(slug.current)]{ slug }`,
-  );
-  return list.map((m) => m.slug?.current).filter(Boolean);
-}
-
-// ---- Projects with before/after pairs ------------------------------------
-
-// Projects that have at least one beforeAfter pair — for /portfolio/before-after.
-export async function getProjectsWithBeforeAfter() {
-  return client.fetch(`*[_type == "project" && count(beforeAfters) > 0]
-    | order(orderRank asc, coalesce(displayOrder, 999) asc, publishedAt desc){
-      _id, title,
-      "slug": slug.current,
-      location, year, roomType, designStyle, briefSummary,
-      heroImage${IMAGE_PROJECTION},
-      beforeAfters[]{
-        beforeImage${IMAGE_PROJECTION},
-        afterImage${IMAGE_PROJECTION},
-        caption
-      }
-    }`);
-}
