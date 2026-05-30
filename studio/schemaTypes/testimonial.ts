@@ -73,13 +73,6 @@ export const testimonial = defineType({
       initialValue: false,
     }),
     defineField({
-      name: 'relatedProject',
-      title: 'Related project',
-      type: 'reference',
-      to: [{ type: 'project' }],
-      description: 'If this testimonial is about a specific project, link it here.',
-    }),
-    defineField({
       name: 'sourceType',
       title: 'Source type',
       type: 'string',

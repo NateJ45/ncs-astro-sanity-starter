@@ -36,7 +36,6 @@ export const ctaBlock = defineType({
       to: [
         { type: 'homePage' },
         { type: 'aboutPage' },
-        { type: 'processPage' },
         { type: 'servicesPage' },
         { type: 'faqPage' },
         { type: 'contactPage' },

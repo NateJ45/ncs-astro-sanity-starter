@@ -524,14 +524,6 @@ export const journalEntry = defineType({
 
     // ---------- Related ----------
     defineField({
-      name: 'relatedProject',
-      title: 'Related project',
-      type: 'reference',
-      description: 'Optional. If this post walks through a specific portfolio project, link it here. The post will link back to the project page.',
-      to: [{ type: 'project' }],
-      group: 'related',
-    }),
-    defineField({
       name: 'relatedPosts',
       title: 'Related posts',
       type: 'array',
