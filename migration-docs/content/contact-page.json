@@ -1,0 +1,46 @@
+{
+  "_type": "contactPage",
+  "_id": "contactPage",
+  "seoTitle": "Contact — Reid Design LLC",
+  "seoDescription": "Start the conversation with Reid Design LLC. Free 20-minute discovery call. Responses within one business day.",
+  "heroEyebrow": "Request a Consultation",
+  "heroHeadline": "Start the Conversation",
+  "heroSubhead": "Fill out the form and I'll be in touch within one business day. No commitment, just a conversation about what your space could become.",
+  "formIntroNote": "[NEW per audit] If you can, mention which room or rooms, your rough timeline, and what's not working in the space. The more honest you are, the better the first conversation goes.",
+  "whatToExpectEyebrow": "What to Expect",
+  "whatToExpectHeadline": "No Forms, No Funnels",
+  "whatToExpectContent": [
+    {
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "text": "When you submit this form, it goes directly to me, not to an automated sequence. I read every message personally and respond with a note about next steps, usually within 24 hours on weekdays."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "text": "The discovery call is free, 20 minutes, and completely informal. We'll figure out together whether your project is a good fit for what I do."
+        }
+      ]
+    }
+  ],
+  "schedulingLink": "[TODO: Calendly link, once Staci creates her account. Per Nathan's call, Calendly is the chosen tool.]",
+  "schedulingLinkLabel": "Or schedule a 20-minute discovery call directly",
+  "availabilityNote": null,
+  "formProjectTypeOptions": [
+    "In-Home Consultation",
+    "Full Room Design",
+    "Full Room Design + Styling",
+    "Shopping & Sourcing",
+    "Builder / Realtor Inquiry",
+    "Not Sure Yet"
+  ],
+  "note": "Email, social links, service area, and availability status pull from siteSettings. Form Project Type options are wired up in the Astro form component to match this list exactly."
+}

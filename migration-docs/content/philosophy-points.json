@@ -1,0 +1,23 @@
+[
+  {
+    "_type": "philosophyPoint",
+    "_id": "philosophyPoint.yourVisionFirst",
+    "title": "Your vision first",
+    "description": "I design for you, not for my portfolio. A beautiful room that doesn't fit how you actually live isn't a success, it's just expensive.",
+    "displayOrder": 1
+  },
+  {
+    "_type": "philosophyPoint",
+    "_id": "philosophyPoint.spacesThatLast",
+    "title": "Spaces that last",
+    "description": "Trends fade; well-chosen design doesn't. I prioritize pieces that feel right five years from now, not just five minutes after they're photographed.",
+    "displayOrder": 2
+  },
+  {
+    "_type": "philosophyPoint",
+    "_id": "philosophyPoint.detailsMatter",
+    "title": "The details matter",
+    "description": "Every throw pillow has a reason. The details are what separate a good room from one you can't stop thinking about.",
+    "displayOrder": 3
+  }
+]

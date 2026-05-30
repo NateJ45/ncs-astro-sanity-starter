@@ -1,0 +1,89 @@
+{
+  "_type": "aboutPage",
+  "_id": "aboutPage",
+  "seoTitle": "About Staci Perkins — Reid Design LLC",
+  "seoDescription": "Meet Staci Perkins, founder of Reid Design LLC. Plainfield-based interior designer creating warm, livable homes across Greater Indianapolis.",
+  "heroEyebrow": "The Designer",
+  "heroHeadline": "People Hire People.",
+  "heroSubhead": "Here's who you'd be working with.",
+  "storyEyebrow": "My Story",
+  "storyHeadline": "Why I Started Reid Design",
+  "storyContent": [
+    {
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "text": "I didn't start Reid Design because everything was perfectly lined up. I started it because I've always known how much a home can shape the way you feel. A well-designed space isn't just about how it looks, it's about how it functions, how it flows, and how it supports your everyday life."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "text": "Growing up, I watched my grandmother rearrange furniture the way other people solved puzzles, intuitively, patiently, until something clicked. I didn't realize it at the time, but that's where it started for me. I learned early on that a space can feel right, or it can feel off. And that difference matters."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "text": "Over time, that instinct turned into something I couldn't ignore. I saw how many homeowners wanted a home that felt warm, cohesive, and truly theirs, but felt overwhelmed by where to begin or discouraged by the process."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "text": "So I built Reid Design to be different. Approachable. Thoughtful. Honest."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "text": "I'm based in Plainfield and work with clients across Greater Indianapolis who want more than just a pretty space, they want a home that works. I'm transparent about cost, clear about the process, and intentional with every detail so your space feels both elevated and livable."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "text": "Because at the end of the day, design isn't about perfection. It's about creating a home that feels like you, comfortable, functional, and lived in."
+        }
+      ]
+    }
+  ],
+  "staciPhoto": "[TODO: upload existing Staci portrait from Squarespace About page, confirm quality. See images-checklist.md]",
+  "staciAttribution": "Staci Perkins · Founder, Reid Design LLC",
+  "backgroundLine": "[TODO: Staci writes one accurate sentence. Examples to model from: 'Based in Plainfield since [year], working with homeowners across Greater Indianapolis.' Or with credentials: 'Interior designer with [N] years of experience and trade accounts with [actual vendors].' The audit flagged that this must be real, not aspirational.]",
+  "serviceAreaMention": "[NEW per audit] Serving Plainfield, Indianapolis, and the surrounding suburbs.",
+  "philosophyHeadline": "What I Believe",
+  "philosophyEyebrow": "The Design Philosophy",
+  "finalCtaEyebrow": "Let's Work Together",
+  "finalCtaHeadline": "Ready to Start?",
+  "finalCtaSubhead": "I'd love to learn about your space. The discovery call is free and there's no commitment.",
+  "finalCta": {
+    "_type": "ctaBlock",
+    "label": "Let's Talk",
+    "linkType": "Internal page",
+    "internalLink": { "_type": "reference", "_ref": "contactPage" },
+    "openInNewTab": false
+  }
+}

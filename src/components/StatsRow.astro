@@ -1,0 +1,23 @@
+---
+import StatsCounter from './StatsCounter';
+
+interface StatItem {
+  number: number;
+  suffix?: string;
+  label: string;
+}
+
+interface Props {
+  stats: StatItem[];
+}
+
+const { stats } = Astro.props as Props;
+---
+
+{stats.length > 0 && (
+  <section class="bg-background" aria-label="Studio stats">
+    <div class="mx-auto max-w-content px-m py-section-md">
+      <StatsCounter stats={stats} client:visible />
+    </div>
+  </section>
+)}

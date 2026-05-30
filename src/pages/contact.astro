@@ -1,0 +1,201 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Pulls contactPage singleton from Sanity, renders form + scheduling link + map + sidebar.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getContactPage, getSiteSettings } from '@/lib/queries';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { telHref } from '@/lib/phone';
+import { site } from '@/data/site';
+import Hero from '@/components/Hero.astro';
+import PortableText from '@/components/PortableText';
+import ContactForm from '@/components/ContactForm';
+import CopyEmailButton from '@/components/CopyEmailButton';
+import CalendlyInline from '@/components/CalendlyInline';
+import ServiceAreaMap from '@/components/ServiceAreaMap.astro';
+import { Mail, Phone } from 'lucide-react';
+import PostInquiryRoadmap from '@/components/PostInquiryRoadmap.astro';
+
+const [page, siteSettings] = await Promise.all([
+  getContactPage().catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+const title = page?.seoTitle ?? 'Contact Reid Design';
+const description = page?.seoDescription ?? 'Start a conversation about your space. Plainfield, Indianapolis, and the surrounding suburbs.';
+
+const heroEyebrow   = page?.heroEyebrow   ?? 'Request a Consultation.';
+const heroHeadline  = page?.heroHeadline  ?? 'Start the Conversation.';
+const heroSubhead   = page?.heroSubhead   ?? '';
+const formIntroNote = page?.formIntroNote ?? '';
+
+const schedulingLink      = page?.schedulingLink;
+const schedulingLinkLabel = page?.schedulingLinkLabel ?? 'Schedule a 20-minute discovery call.';
+
+const availability = page?.availabilityNote ?? siteSettings?.availabilityStatus;
+const email        = siteSettings?.email;
+const phone        = siteSettings?.phone;
+
+// Satisfaction guarantee — renders near the form CTA when set in siteSettings.
+const satisfactionGuarantee = siteSettings?.satisfactionGuarantee;
+
+// Post-inquiry roadmap — prefer the structured steps when present;
+// fall through to the legacy whatToExpectContent when the array is empty.
+const roadmapSteps = (page?.postInquiryRoadmap ?? []).filter(
+  (s: any) => s?.title?.trim()
+);
+const hasRoadmap = roadmapSteps.length > 0;
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Contact', url: `${site.url}/contact` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+  {/* Hero — same image-or-text shape every other page uses. */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    headingId="contact-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent}
+  />
+
+  <section class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 lg:grid-cols-3 gap-section-md">
+    {/* Form column */}
+    <div class="lg:col-span-2">
+      {formIntroNote && (
+        <p class="mb-m text-foreground/80 text-base">{formIntroNote}</p>
+      )}
+
+      {/* Satisfaction guarantee line — renders above the form when set in
+          siteSettings so it reassures visitors before they fill anything in. */}
+      {satisfactionGuarantee && (
+        <p class="mb-m flex items-start gap-xs text-sm text-foreground/80 border-l-2 border-primary pl-s py-px">
+          {satisfactionGuarantee}
+        </p>
+      )}
+
+      <ContactForm
+        client:visible
+        projectTypes={page?.formProjectTypeOptions}
+        locations={page?.formLocationOptions}
+        budgets={page?.formBudgetOptions}
+        timelines={page?.formTimelineOptions}
+        sources={page?.formSourceOptions}
+      />
+
+      {/* Email failsafe — surfaced right after the form so visitors who hit
+          a submission error or just prefer email have a clear alternate path
+          without scrolling away to the sidebar. The widget itself opens a
+          mail draft on click and has a small copy button beside it. */}
+      {email && (
+        <p class="mt-m flex flex-wrap items-center gap-xs text-sm text-foreground/75">
+          <Mail size={14} aria-hidden="true" className="text-secondary" />
+          <span>Prefer email? Reach Staci directly at</span>
+          <CopyEmailButton client:visible email={email} variant="link" />
+        </p>
+      )}
+      {phone && (
+        <p class="mt-s flex flex-wrap items-center gap-xs text-sm text-foreground/75">
+          <Phone size={14} aria-hidden="true" className="text-secondary" />
+          <span>Or call</span>
+          <a href={telHref(phone)} class="text-link hover:text-primary-dark underline underline-offset-2 font-medium">{phone}</a>
+        </p>
+      )}
+
+      {schedulingLink && (
+        <CalendlyInline client:visible url={schedulingLink} loadLabel={schedulingLinkLabel} />
+      )}
+
+      {/* Post-inquiry roadmap — structured steps when present.
+          Falls back to the legacy whatToExpectContent when the roadmap array
+          is empty so the page degrades gracefully before Staci fills it in. */}
+      {hasRoadmap ? (
+        <PostInquiryRoadmap
+          steps={roadmapSteps}
+          eyebrow={page?.whatToExpectEyebrow}
+          headline={page?.whatToExpectHeadline}
+        />
+      ) : page?.whatToExpectContent && (
+        <div class="mt-section-lg border-t border-border-soft pt-l">
+          {page.whatToExpectEyebrow && (
+            <p class="text-xs uppercase tracking-[0.22em] text-foreground/80 mb-s">{page.whatToExpectEyebrow}</p>
+          )}
+          {page.whatToExpectHeadline && (
+            <h2 class="font-display text-h3 text-foreground">{page.whatToExpectHeadline}</h2>
+          )}
+          <PortableText client:visible value={page.whatToExpectContent} className="mt-s text-foreground/90" />
+        </div>
+      )}
+    </div>
+
+    {/* Sidebar */}
+    {/* Sticky on lg+ so the email + service area + map ride along while the
+        visitor reads/fills the form. top-24 (6rem) gives clearance under the
+        site header when it's revealed via scroll-up. self-start prevents the
+        aside from stretching to fill the grid row, which would otherwise
+        defeat the sticky positioning. */}
+    <aside class="space-y-l lg:sticky lg:top-24 lg:self-start">
+      {availability && (
+        <div class="flex items-center gap-2 text-sm text-foreground">
+          <span class="inline-block w-2 h-2 rounded-full bg-tertiary" aria-hidden="true"></span>
+          <span>{availability}</span>
+        </div>
+      )}
+
+      {email && (
+        <div>
+          <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Email</p>
+          <CopyEmailButton client:visible email={email} variant="link" />
+        </div>
+      )}
+
+      {phone && (
+        <div>
+          <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Call</p>
+          <a
+            href={telHref(phone)}
+            class="inline-flex items-center gap-xs text-sm text-link hover:text-primary-dark transition-colors"
+          >
+            <Phone size={14} aria-hidden="true" />
+            {phone}
+          </a>
+        </div>
+      )}
+
+      {schedulingLink && (
+        <div>
+          <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Prefer to schedule?</p>
+          <a
+            href={schedulingLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center px-m py-s border border-primary text-link hover:bg-accent transition-colors text-sm font-semibold"
+          >
+            {schedulingLinkLabel}
+          </a>
+        </div>
+      )}
+
+      {siteSettings?.serviceAreas && siteSettings.serviceAreas.length > 0 && (
+        <div>
+          <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Service area</p>
+          <ul class="text-sm text-foreground space-y-0.5">
+            {siteSettings.serviceAreas.slice(0, 8).map((area: string) => <li>{area}</li>)}
+          </ul>
+        </div>
+      )}
+
+      <div>
+        <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Where Reid Design is</p>
+        <ServiceAreaMap height={280} />
+      </div>
+    </aside>
+  </section>
+</BaseLayout>

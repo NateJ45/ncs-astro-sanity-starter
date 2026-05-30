@@ -1,0 +1,222 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Gift Certificates page. Informational — no payment processing.
+// CTA routes to /contact?type=gift-certificate.
+//
+// Sections:
+//   1. Hero
+//   2. Intro copy
+//   3. Gift certificate options (amount + blurb cards)
+//   4. How it works steps
+//   5. Fine print
+//   6. Final CTA dark panel
+//
+// Graceful coming-soon state when the giftPage Sanity doc is absent.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getGiftPage, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+
+const [page, siteSettings] = await Promise.all([
+  getGiftPage().catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.giftCertificates) return Astro.redirect('/');
+
+const title       = page?.seoTitle       ?? 'Gift Certificates · Reid Design';
+const description = page?.seoDescription ?? 'Give the gift of a beautifully designed room. Reid Design gift certificates available for in-home consultations and design packages.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'Give the Gift of Good Design.';
+const heroHeadline = page?.heroHeadline ?? 'Gift Certificates for the Home They Deserve.';
+const heroSubhead  = page?.heroSubhead  ?? '';
+
+const CONTACT_HREF = '/contact?type=gift-certificate';
+const ctaLabel     = page?.ctaLabel ?? 'Inquire about a Gift Certificate';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home',              url: site.url },
+    { name: 'Gift Certificates', url: `${site.url}/gift-certificates` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    headingId="gift-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent ?? undefined}
+  />
+
+  {/* ======= COMING-SOON STATE ================================================ */}
+  {!page ? (
+    <section class="bg-background" aria-labelledby="gift-coming-soon">
+      <div class="mx-auto max-w-content px-m py-section-lg text-center">
+        <SectionHeading
+          eyebrow="Coming Soon."
+          headline="Gift certificate details are on the way."
+          subhead="In the meantime, reach out directly and we'll sort out the details with you."
+          headingId="gift-coming-soon"
+          align="center"
+          class="mx-auto"
+        />
+        <div class="mt-l flex justify-center">
+          <a
+            href={CONTACT_HREF}
+            class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-accent-dark transition-colors"
+          >
+            {ctaLabel}
+          </a>
+        </div>
+      </div>
+    </section>
+  ) : (
+    <>
+      {/* ------- 2. Intro copy ----------------------------------------------- */}
+      {page.intro && (
+        <section class="bg-background" aria-labelledby="gift-intro-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <div class="max-w-3xl mx-auto">
+              <SectionHeading
+                eyebrow="The Gift."
+                headline="Give Something That Changes a Room."
+                headingId="gift-intro-heading"
+              />
+              <p class="mt-l text-foreground/85 text-lg leading-relaxed">
+                {page.intro}
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 3. Gift certificate options --------------------------------- */}
+      {page.options && page.options.length > 0 && (
+        <section class="surface-warm bg-muted" aria-labelledby="gift-options-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <SectionHeading
+              eyebrow="The Options."
+              headline="Certificate Amounts."
+              headingId="gift-options-heading"
+              align="center"
+              class="mx-auto"
+            />
+
+            <div class="mt-section-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-l">
+              {page.options.map((option: { label: string; amount: string; blurb?: string }) => (
+                <article class="card-lift relative flex flex-col bg-card text-card-foreground border border-border-soft rounded-md overflow-hidden shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] transition-colors hover:border-primary/40">
+                  {/* Brand-stripe signature */}
+                  <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+                  <div class="flex flex-col flex-1 p-l">
+                    {/* Amount in monospace — price-transparency pattern from ServiceCard */}
+                    <p class="text-sm font-mono uppercase tracking-eyebrow text-link">
+                      {option.amount}
+                    </p>
+                    <h3 class="mt-xs font-display text-h3 text-foreground">
+                      {option.label}
+                    </h3>
+                    {option.blurb && (
+                      <p class="mt-m text-foreground/80 text-base leading-relaxed">
+                        {option.blurb}
+                      </p>
+                    )}
+                    <div class="mt-l pt-m flex-1 flex items-end">
+                      <a
+                        href={CONTACT_HREF}
+                        class="inline-flex items-center min-h-[44px] py-s text-xs font-semibold uppercase tracking-eyebrow text-link hover:text-primary-dark transition-colors"
+                      >
+                        {ctaLabel} <span aria-hidden="true" class="ml-xs">→</span>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 4. How it works --------------------------------------------- */}
+      {page.howItWorks && page.howItWorks.length > 0 && (
+        <section class="bg-background" aria-labelledby="gift-how-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <div class="max-w-3xl mx-auto">
+              <SectionHeading
+                eyebrow="The Process."
+                headline="How It Works."
+                headingId="gift-how-heading"
+              />
+
+              <ol class="mt-l space-y-l list-none p-0">
+                {page.howItWorks.map((step: { stepNumber: number; title: string; body?: string }) => (
+                  <li class="flex items-start gap-l">
+                    <span
+                      class="font-mono text-3xl font-bold text-tertiary/60 leading-none shrink-0 w-10 text-right"
+                      aria-hidden="true"
+                    >
+                      {String(step.stepNumber).padStart(2, '0')}
+                    </span>
+                    <div>
+                      <h3 class="font-display text-h3 text-foreground">{step.title}</h3>
+                      {step.body && (
+                        <p class="mt-xs text-foreground/80 leading-relaxed">{step.body}</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 5. Fine print ----------------------------------------------- */}
+      {page.finePrint && (
+        <section class="bg-muted" aria-label="Terms and conditions">
+          <div class="mx-auto max-w-content px-m py-m">
+            <p class="text-xs text-muted-foreground leading-relaxed max-w-3xl mx-auto text-center">
+              {page.finePrint}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 6. Final CTA ------------------------------------------------ */}
+      <section class="bg-accent-dark text-bg" aria-labelledby="gift-final-cta">
+        <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+        <div class="mx-auto max-w-content px-m py-section-lg text-center">
+          <p class="text-xs uppercase tracking-[0.22em] text-bg/75">Ready to Give the Gift?</p>
+          <div class="mt-s mb-m h-px w-12 bg-bg/40 mx-auto" aria-hidden="true"></div>
+          <h2 id="gift-final-cta" class="font-display text-h1 leading-tight text-bg">
+            Make Someone's Home Brighter.
+          </h2>
+          <p class="mt-m text-lg text-bg/85 max-w-2xl mx-auto">
+            Reach out and we'll send the details on how to purchase and deliver a gift certificate.
+          </p>
+          <div class="mt-l flex justify-center">
+            <a
+              href={CONTACT_HREF}
+              class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-primary transition-colors"
+            >
+              {ctaLabel}
+            </a>
+          </div>
+        </div>
+      </section>
+    </>
+  )}
+</BaseLayout>

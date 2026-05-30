@@ -1,0 +1,68 @@
+{
+  "name": "reid-design-site",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "build:full": "npm run typegen && astro build",
+    "preview": "wrangler dev",
+    "astro": "astro",
+    "deploy": "npm run build && wrangler deploy",
+    "generate-types": "wrangler types",
+    "typegen": "npm --prefix studio run typegen",
+    "og": "node scripts/generate-og-default.mjs",
+    "og:pages": "node scripts/generate-og-pages.mjs",
+    "llms:full": "node scripts/generate-llms-full.mjs",
+    "studio:dev": "npm --prefix studio run dev",
+    "studio:deploy": "npm --prefix studio run deploy",
+    "studio:import": "node scripts/import-content.mjs"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "13.5.5",
+    "@astrojs/mdx": "^5.0.6",
+    "@astrojs/react": "^5.0.5",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/geist": "^5.2.9",
+    "@fontsource-variable/source-sans-3": "^5.2.9",
+    "@fontsource/cormorant-garamond": "^5.2.11",
+    "@fontsource/pinyon-script": "^5.2.8",
+    "@portabletext/react": "^6.2.0",
+    "@portabletext/types": "^4.0.2",
+    "@sanity/client": "^7.22.0",
+    "@sanity/image-url": "^2.1.1",
+    "@tabler/icons-react": "^3.44.0",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "astro": "^6.3.8",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lenis": "^1.3.23",
+    "lucide-react": "^1.16.0",
+    "motion": "^12.40.0",
+    "next-themes": "^0.4.6",
+    "radix-ui": "^1.4.3",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-photo-album": "^3.6.0",
+    "shadcn": "^4.8.1",
+    "sharp": "^0.34.5",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0",
+    "wrangler": "^4.95.0",
+    "yet-another-react-lightbox": "^3.32.0"
+  },
+  "overrides": {
+    "vite": "^7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "opentype.js": "^2.0.0",
+    "tailwindcss": "^4.3.0"
+  }
+}

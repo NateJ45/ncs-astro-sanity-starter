@@ -1,0 +1,168 @@
+---
+// Safe to edit by hand
+// /guides/[slug] — Individual lead magnet landing + gated download page.
+//
+// Static prerender: getAllLeadMagnetSlugs() returns only published magnets.
+// When there are zero published magnets this file generates 0 paths — the
+// build still succeeds because getStaticPaths returning an empty array is valid.
+//
+// Layout:
+//   - Hero (text variant) with the magnet title + summary as headline/subhead
+//   - Two-column at lg: cover image on the left, gate form on the right
+//   - On success the form reveals the download link (fileUrl from Sanity asset)
+//   - FinalCta closes the page
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getLeadMagnet, getAllLeadMagnetSlugs, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import LeadMagnetForm from '@/components/LeadMagnetForm';
+import FinalCta from '@/components/FinalCta.astro';
+
+export async function getStaticPaths() {
+  const [slugs, settings] = await Promise.all([
+    getAllLeadMagnetSlugs().catch(() => []),
+    getSiteSettings().catch(() => null),
+  ]);
+  // When guides is off, return no paths — detail pages 404.
+  const visible = getSectionVisibility(settings?.sectionVisibility);
+  if (!visible.guides) return [];
+  // Zero published magnets → zero paths → index still builds (empty state).
+  return slugs.map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+
+const [magnet, siteSettings] = await Promise.all([
+  getLeadMagnet(slug).catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+// If the magnet isn't found (shouldn't happen via static paths, but be safe)
+// redirect to the index rather than rendering a broken page.
+if (!magnet) {
+  return Astro.redirect('/guides', 302);
+}
+
+// Resolve the download URL from the Sanity file asset.
+// The getLeadMagnet query projects: file{ asset->{ url } }
+const fileUrl: string = magnet.file?.asset?.url ?? '';
+
+const title =
+  magnet.seoTitle ??
+  `${magnet.title}: A Free Guide from Reid Design`;
+const description =
+  magnet.seoDescription ??
+  magnet.summary ??
+  `Download the free "${magnet.title}" guide from Reid Design. Practical advice for your home.`;
+
+// The ESP form-action URL comes from siteSettings (shared across all forms).
+const formActionUrl = siteSettings?.newsletter?.formActionUrl ?? null;
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Guides', url: `${site.url}/guides` },
+    { name: magnet.title ?? 'Guide', url: `${site.url}/guides/${slug}` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings}>
+
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow="Free Guide"
+    headline={magnet.title ?? 'A free guide from Reid Design.'}
+    subhead={magnet.summary ?? 'Practical advice for your home. Download it free.'}
+    headingId="guide-hero-heading"
+    size="short"
+  />
+
+  {/* ------- 2. Two-column layout: cover + gate form ------------------------- */}
+  <section class="bg-background" aria-labelledby="guide-content-heading">
+    <div class="mx-auto max-w-content px-m py-section-md">
+      <h2 id="guide-content-heading" class="sr-only">About this guide</h2>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-section-md items-start">
+
+        {/* Left column — cover image + summary copy */}
+        <div>
+          {magnet.coverImage?.asset && (
+            <div class="rounded-md overflow-hidden shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] border border-border-soft">
+              {/* Brand accent stripe on the cover image block. */}
+              <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+              <SanityImage
+                source={magnet.coverImage}
+                width={900}
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                class="w-full object-cover"
+                loading="eager"
+              />
+            </div>
+          )}
+
+          {magnet.summary && (
+            <div class="mt-l space-y-s">
+              <p class="text-xs uppercase tracking-eyebrow text-foreground/80">What you'll get</p>
+              <div class="h-px w-12 bg-primary/60" aria-hidden="true"></div>
+              <p class="text-foreground/85 leading-relaxed">{magnet.summary}</p>
+            </div>
+          )}
+
+          {/* Back to all guides link */}
+          <p class="mt-l">
+            <a
+              href="/guides"
+              class="inline-flex items-center gap-xs text-xs uppercase tracking-eyebrow font-semibold text-link hover:text-primary-dark transition-colors"
+            >
+              <span aria-hidden="true">←</span> All guides
+            </a>
+          </p>
+        </div>
+
+        {/* Right column — gated email form (or no-download notice when file isn't set) */}
+        <div>
+          {fileUrl ? (
+            <LeadMagnetForm
+              client:visible
+              fileUrl={fileUrl}
+              gateHeading={magnet.gateHeading}
+              gateBlurb={magnet.gateBlurb}
+              buttonLabel={magnet.buttonLabel}
+              successMessage={magnet.successMessage}
+              espTag={magnet.espTag}
+              formActionUrl={formActionUrl}
+              slug={slug}
+            />
+          ) : (
+            <div class="rounded-md border border-border bg-card p-l">
+              <div class="h-0.5 bg-primary mb-l" aria-hidden="true"></div>
+              <p class="font-display text-h4 text-foreground">
+                This guide is almost ready.
+              </p>
+              <p class="mt-s text-sm text-foreground/80 leading-relaxed">
+                Staci is finishing it up. Check back soon, or
+                <a href="/contact" class="text-link underline underline-offset-2 ml-[0.25ch]">reach out</a>
+                and she'll send it directly when it's done.
+              </p>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  {/* ------- 3. Final CTA ---------------------------------------------------- */}
+  <FinalCta
+    eyebrow="Ready to Go Further?"
+    headline="Let's talk about your space."
+    subhead="A guide is a start. A consultation is where things actually move."
+  />
+
+</BaseLayout>

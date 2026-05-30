@@ -1,0 +1,90 @@
+---
+// Safe to edit by hand
+// As-seen-in logo strip. Renders a horizontal row of press outlet logos.
+// Suppresses entirely when the pressItem collection is empty — call sites
+// don't need conditional wrappers.
+//
+// Usage: pass pressItems from getPressItems(). Each item needs a logo image
+// and outlet name. Items without logos are skipped so partial data doesn't
+// break the strip.
+
+import SanityImage from '@/components/SanityImage.astro';
+
+interface PressItem {
+  _id?: string;
+  outlet?: string;
+  logo?: {
+    asset?: { _ref?: string; _id?: string };
+    alt?: string;
+  } | null;
+  url?: string;
+}
+
+interface Props {
+  items?: PressItem[] | null;
+  /** Optional eyebrow label above the strip. Defaults to "As Seen In." */
+  eyebrow?: string;
+}
+
+const { items, eyebrow = 'As Seen In.' } = Astro.props as Props;
+
+// Only keep items that have a logo image — a text-only row looks broken.
+const logoItems = (items ?? []).filter((item) => item?.logo?.asset);
+
+// Suppress the whole component when there are no logos to show.
+if (logoItems.length === 0) return null;
+---
+
+{/* Press strip — sits on bg-muted between sections so it reads as an
+    editorial accent, not a main content section. */}
+<div
+  class="bg-muted border-y border-border-soft"
+  aria-label="Press coverage"
+>
+  <div class="mx-auto max-w-content px-m py-m">
+    {eyebrow && (
+      <p class="text-center text-xs uppercase tracking-eyebrow text-foreground/80 mb-m">
+        {eyebrow}
+      </p>
+    )}
+
+    {/* Logo row — flexbox wraps gracefully on narrow viewports. Each logo is
+        either a link (when url is set) or a plain img (when not). Logos render
+        at a fixed height with auto width to preserve aspect ratios. Grayscale
+        by default, full color on hover — standard "as seen in" treatment. */}
+    <ul
+      class="flex flex-wrap items-center justify-center gap-l list-none p-0"
+      role="list"
+    >
+      {logoItems.map((item) => (
+        <li>
+          {item.url ? (
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Read the ${item.outlet ?? 'press'} coverage (opens in new tab)`}
+              class="inline-flex"
+            >
+              <SanityImage
+                source={item.logo}
+                width={200}
+                sizes="120px"
+                class="h-8 w-auto object-contain opacity-60 hover:opacity-90 transition-opacity grayscale hover:grayscale-0"
+                alt={item.logo?.alt ?? item.outlet ?? ''}
+              />
+            </a>
+          ) : (
+            <SanityImage
+              source={item.logo}
+              width={200}
+              sizes="120px"
+              class="h-8 w-auto object-contain opacity-60 grayscale"
+              alt={item.logo?.alt ?? item.outlet ?? ''}
+            />
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>

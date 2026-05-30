@@ -1,0 +1,251 @@
+---
+// Safe to edit by hand
+// Home page Featured Work section.
+//
+// Layout:
+//   - 1 large editorial "hero" project card on the left (image + title + brief +
+//     location/year meta) at ~60% width on desktop.
+//   - Up to 3 compact horizontal companion cards stacked on the right (~40%).
+//   - Stacks vertically on mobile: hero, then companions in a 1-col list.
+//
+// Data is auto-populated by the home page query — featured-then-newest, capped
+// at 4 (1 hero + 3 companions). Staci pins one via the `featured` boolean on
+// the project doc; otherwise the section just shows latest 4 in publish order.
+// Section is render-suppressed entirely when no projects exist.
+
+import SanityImage from '@/components/SanityImage.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+
+interface ProjectLite {
+  _id?: string;
+  title?: string;
+  slug?: { current?: string };
+  location?: string;
+  year?: number;
+  roomType?: string;
+  briefSummary?: string;
+  heroImage?: any;
+  featured?: boolean;
+}
+
+interface Props {
+  projects?: ProjectLite[];
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  cta?: any;
+  headingId?: string;
+}
+
+const {
+  projects = [],
+  eyebrow,
+  headline,
+  subhead,
+  cta,
+  headingId = 'featured-work-heading',
+} = Astro.props as Props;
+
+const hasProjects = Array.isArray(projects) && projects.length > 0;
+const [hero, ...rest] = projects;
+const companions = rest.slice(0, 3);
+const hasCompanions = companions.length > 0;
+
+// Hero card aspect ratio adapts to how many companions stack alongside it,
+// so the right column doesn't end with a big void. Mobile always stays in
+// the portrait band (4/5) so the bottom-overlay text fits inside the image
+// area — wide mobile aspect would push the title above the image and the
+// overflow:hidden card would clip it.
+//   0 companions → wide editorial spread on desktop (16/10, leaves room
+//                  for the multi-line overlay content without clipping the
+//                  chips row at the top)
+//   with companions → the hero image FILLS the grid-stretched card height
+//                  (lg:h-full) so it always matches the companion panel
+//                  exactly, with a min-height floor so it stays substantial.
+//                  This avoids the bg-card strip that showed when an
+//                  aspect-locked image was shorter than the stretched card.
+const heroAspectClass = !hasCompanions
+  ? 'aspect-[4/5] lg:aspect-[16/10]'
+  : 'aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[28rem]';
+
+// Humanize the camelCase room-type enum value ("modernCoastal" → "Modern coastal").
+function humanizeRoom(value?: string): string {
+  if (!value) return '';
+  return value.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()).trim();
+}
+
+const heroRoomLabel = humanizeRoom(hero?.roomType);
+const heroHref = hero?.slug?.current ? `/portfolio/${hero.slug.current}` : '#';
+---
+
+{hasProjects && (
+  <section class="surface-warm bg-muted" aria-labelledby={headingId}>
+    <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow={eyebrow}
+        headline={headline}
+        subhead={subhead}
+        headingId={headingId}
+        align="center"
+        class="mx-auto"
+      />
+
+      <div
+        class:list={[
+          'mt-section-lg',
+          hasCompanions
+            ? 'grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] gap-l lg:gap-section-md'
+            : 'mx-auto max-w-4xl',
+        ]}
+      >
+        {/* ------- Hero project — full-bleed editorial card ---------------- */}
+        {/* Image fills the card; title + brief overlay on a dark gradient so
+            the card stays compact and reads as a single editorial spread. */}
+        <a
+          href={heroHref}
+          class="card-lift card-lift-slow group relative block rounded-md overflow-hidden bg-card border border-border-soft hover:border-primary/40 transition-colors shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] lg:h-full"
+        >
+          {/* Brand accent stripe — matches the card grammar across the site. */}
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-primary z-20" aria-hidden="true"></div>
+
+          <div
+            class:list={[
+              'overflow-hidden bg-muted relative',
+              heroAspectClass,
+            ]}
+          >
+            {hero?.heroImage?.asset ? (
+              <SanityImage
+                source={hero.heroImage}
+                width={1400}
+                sizes="(min-width: 1024px) 60vw, 100vw"
+                class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]"
+              />
+            ) : (
+              <div class="w-full h-full" aria-hidden="true"></div>
+            )}
+
+            {/* Full-height gradient so overlay text reads on any image —
+                strong at the bottom for the title block, with a subtle
+                ~20% wash across the rest of the image to handle bright
+                window light or pale wall tones intersecting the title. */}
+            <div
+              class="absolute inset-0 z-[1] bg-gradient-to-t from-black/90 via-black/55 to-black/20 pointer-events-none"
+              aria-hidden="true"
+            ></div>
+
+            {/* Room-type chip top-left — same chip pattern as ProjectCard. */}
+            {heroRoomLabel && (
+              <span
+                class="absolute top-m left-m z-[2] inline-flex items-center px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-eyebrow rounded-full bg-bg/85 text-primary-dark backdrop-blur-sm"
+                aria-hidden="true"
+              >
+                {heroRoomLabel}
+              </span>
+            )}
+
+            {/* Featured pin — only when Staci flagged this project. */}
+            {hero?.featured && (
+              <span
+                class="absolute top-m right-m z-[2] inline-flex items-center gap-1 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-eyebrow rounded-full bg-primary-dark text-white"
+                aria-hidden="true"
+              >
+                ★ Featured
+              </span>
+            )}
+
+            {/* Editorial text overlay — pinned to the bottom of the image.
+                Right padding (`pr-28 md:pr-36`) reserves a corridor for the
+                ★ Featured pill at top-right so a long title never wraps
+                into the pill's column. */}
+            <div class="absolute inset-x-0 bottom-0 z-[3] p-l md:p-section-md pr-28 md:pr-36">
+              <p class="text-xs uppercase tracking-widest text-white/80">
+                {hero?.location}{hero?.location && hero?.year ? ' · ' : ''}{hero?.year}
+              </p>
+              <h3 class="mt-s font-display text-h2 leading-tight text-white drop-shadow-sm max-w-2xl">
+                {hero?.title}
+              </h3>
+              {hero?.briefSummary && (
+                <p class="mt-s text-white/90 text-base leading-relaxed max-w-prose">
+                  {hero.briefSummary}
+                </p>
+              )}
+              <span class="mt-m inline-flex items-center text-sm font-semibold uppercase tracking-eyebrow text-white group-hover:text-primary transition-colors">
+                See the project
+                <span class="ml-2 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">→</span>
+              </span>
+            </div>
+            <div class="img-curtain" aria-hidden="true"></div>
+          </div>
+        </a>
+
+        {/* ------- Companion projects — one cohesive panel ----------------
+            The companions live inside a SINGLE card (one bronze stripe, one
+            border, one resting shadow) with each project as a row separated
+            by hairline dividers, so the right column reads as one held-
+            together unit rather than loose floating cards. On lg+ the panel
+            fills the grid-stretched column (`lg:h-full`) and each row is
+            `lg:flex-1` so the rows distribute the height evenly and the panel
+            bottom lines up with the hero. Per-row hover tints the row. */}
+        {hasCompanions && (
+          <div class="card-lift card-lift-slow flex flex-col rounded-md overflow-hidden bg-card border border-border-soft shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] lg:h-full">
+            {/* One brand accent stripe for the whole panel. */}
+            <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+            {companions.map((p, i) => {
+              const cHref = p.slug?.current ? `/portfolio/${p.slug.current}` : '#';
+              const cRoom = humanizeRoom(p.roomType);
+              return (
+                <a
+                  href={cHref}
+                  class:list={[
+                    'group/row flex items-stretch gap-m flex-1 min-h-[8.5rem] transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none',
+                    i > 0 && 'border-t border-border-soft',
+                  ]}
+                >
+                  {/* Square thumb on mobile; fills the row height on lg+. */}
+                  <div class="relative w-28 sm:w-36 lg:w-40 xl:w-44 aspect-square lg:aspect-auto shrink-0 overflow-hidden bg-muted self-stretch">
+                    {p.heroImage?.asset ? (
+                      <SanityImage
+                        source={p.heroImage}
+                        width={500}
+                        sizes="(min-width: 1280px) 176px, (min-width: 1024px) 160px, (min-width: 640px) 144px, 112px"
+                        class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover/row:scale-[1.04]"
+                      />
+                    ) : (
+                      <div class="w-full h-full" aria-hidden="true"></div>
+                    )}
+                  </div>
+
+                  <div class="flex-1 min-w-0 py-m pr-m flex flex-col justify-center">
+                    {cRoom && (
+                      <p class="text-[0.65rem] font-semibold uppercase tracking-eyebrow text-link">
+                        {cRoom}
+                      </p>
+                    )}
+                    <h4 class="mt-1 font-display text-h4 leading-tight text-foreground group-hover/row:text-primary-dark transition-colors line-clamp-2">
+                      {p.title}
+                    </h4>
+                    <p class="mt-1 text-xs uppercase tracking-widest text-foreground/80 truncate">
+                      {p.location}{p.location && p.year ? ' · ' : ''}{p.year}
+                    </p>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div class="mt-section-lg flex justify-center">
+        <CtaLink
+          cta={cta}
+          variant="secondary"
+          fallbackHref="/portfolio"
+          fallbackLabel="See all work"
+        />
+      </div>
+    </div>
+  </section>
+)}

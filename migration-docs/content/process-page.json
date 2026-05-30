@@ -1,0 +1,22 @@
+{
+  "_type": "processPage",
+  "_id": "processPage",
+  "seoTitle": "Process — Reid Design LLC",
+  "seoDescription": "From first call to final reveal, here's exactly what working with Reid Design looks like. No surprises, no stress.",
+  "heroEyebrow": "The Process",
+  "heroHeadline": "From First Call to Final Reveal",
+  "heroSubhead": "Here's exactly what working with Reid Design looks like, no surprises, no stress.",
+  "faqSectionEyebrow": "Common Questions",
+  "faqSectionHeadline": "Things People Ask Before We Start",
+  "finalCtaEyebrow": "Ready to Begin?",
+  "finalCtaHeadline": "Have questions before we start?",
+  "finalCtaSubhead": "I'd love to hear about your space. The first conversation is free and there's no commitment.",
+  "finalCta": {
+    "_type": "ctaBlock",
+    "label": "Start a Conversation",
+    "linkType": "Internal page",
+    "internalLink": { "_type": "reference", "_ref": "contactPage" },
+    "openInNewTab": false
+  },
+  "note": "Process steps populate automatically from all processStep documents in stepNumber order. FAQ items populate from faqItem documents where alsoShowOnProcessPage is true."
+}

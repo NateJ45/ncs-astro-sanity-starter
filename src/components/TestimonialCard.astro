@@ -1,0 +1,133 @@
+---
+// Safe to edit by hand
+// Grid testimonial card. Sits below the featured pull-quote on the homepage.
+// Compact quote + attribution + date/source.
+// Optional photo + location render when present — both add real trust currency
+// for a local studio. Cards without them keep the same visual rhythm.
+
+import SanityImage from '@/components/SanityImage.astro';
+
+interface SanityImageObject {
+  asset?: { _ref?: string; _id?: string };
+  alt?: string;
+  hotspot?: { x: number; y: number; height: number; width: number };
+  crop?: { top: number; bottom: number; left: number; right: number };
+}
+
+interface Props {
+  testimonial: {
+    quote?: string;
+    attribution?: string;
+    date?: string;
+    source?: string;
+    /** sourceType drives the small badge on the card footer:
+        'google' | 'houzz' | 'facebook' | 'direct' | 'other'.
+        Renders nothing when absent so existing cards are unaffected. */
+    sourceType?: string;
+    location?: string;
+    photo?: SanityImageObject | null;
+    /** Optional reference to a project case study. When set, the card renders
+        a "See this project →" link in the footer so visitors can jump from
+        the social proof straight into the related work. */
+    relatedProject?: {
+      title?: string;
+      slug?: string;
+    } | null;
+  };
+}
+
+const { testimonial } = Astro.props as Props;
+
+function formatDate(d?: string): string {
+  if (!d) return '';
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+const dateLabel = formatDate(testimonial.date);
+const sourceLabel = testimonial.source && testimonial.source !== 'Other' ? testimonial.source : '';
+// Location + date + source — location leads when present (local trust signal).
+const attributionMeta = [testimonial.location, dateLabel, sourceLabel].filter(Boolean).join(' · ');
+const hasPhoto = !!testimonial.photo?.asset;
+
+// sourceType badge label map — only the platform-specific values get a label.
+// 'direct' and 'other' and missing values silently produce nothing.
+const SOURCE_LABELS: Record<string, string> = {
+  google: 'Google',
+  houzz: 'Houzz',
+  facebook: 'Facebook',
+};
+const sourceBadge = testimonial.sourceType ? SOURCE_LABELS[testimonial.sourceType] : undefined;
+
+// Cap card quote at ~3 lines worth so cards stay visually consistent in the grid.
+// We render the full quote (no truncation in markup), but apply line-clamp for layout.
+---
+
+<figure class="card-lift flex flex-col h-full bg-card text-card-foreground border border-border-soft rounded-md overflow-hidden shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]">
+  {/* Brand accent stripe — matches ServiceCard / ProjectCard / JournalCard.
+      Padding moved from <figure> to an inner div so the stripe can sit flush
+      to the rounded corners (figure has overflow-hidden). */}
+  <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+  <div class="flex flex-col flex-1 p-l">
+  {/* Small bronze quote mark above the quote text. Soft brand cue without
+      shouting; absent when there's no photo to give the card a single anchor. */}
+  <span
+    aria-hidden="true"
+    class="block font-display text-3xl leading-none text-primary/30 select-none mb-xs"
+  >
+    “
+  </span>
+  <blockquote class="font-display text-lg leading-relaxed text-foreground/90 italic line-clamp-6">
+    {testimonial.quote}
+  </blockquote>
+  <figcaption class="mt-m pt-m border-t border-border-soft flex items-center gap-s">
+    {hasPhoto ? (
+      <SanityImage
+        source={testimonial.photo}
+        width={120}
+        height={120}
+        sizes="56px"
+        class="w-14 h-14 rounded-full object-cover shrink-0 ring-1 ring-border-soft"
+      />
+    ) : (
+      // Initial-monogram fallback. Keeps card heights consistent even when
+      // a photo isn't available, and is a quieter trust signal than the
+      // generic gray circle a missing photo would otherwise produce.
+      <div
+        class="shrink-0 w-14 h-14 rounded-full bg-muted text-secondary flex items-center justify-center font-display text-xl"
+        aria-hidden="true"
+      >
+        {(testimonial.attribution ?? '?').slice(0, 1).toUpperCase()}
+      </div>
+    )}
+    <div class="min-w-0">
+      <p class="font-display text-h4 text-foreground leading-tight">{testimonial.attribution}</p>
+      {attributionMeta && (
+        <p class="mt-xs text-xs uppercase tracking-eyebrow text-foreground/80">{attributionMeta}</p>
+      )}
+    </div>
+  </figcaption>
+
+  {/* Related-project link — only rendered when the testimonial's
+      relatedProject reference is set. Lets the visitor jump from the social
+      proof into the actual case study. */}
+  {testimonial.relatedProject?.slug && (
+    <a
+      href={`/portfolio/${testimonial.relatedProject.slug}`}
+      class="mt-m inline-flex items-center gap-xs text-xs uppercase tracking-eyebrow font-semibold text-link hover:text-primary-dark transition-colors"
+    >
+      See this project <span aria-hidden="true">→</span>
+    </a>
+  )}
+
+  {/* Source platform badge — shows which review platform the quote came from.
+      Omitted when sourceType is absent, 'direct', or 'other'. */}
+  {sourceBadge && (
+    <p class="mt-s inline-flex items-center text-xs text-foreground/75 bg-muted px-s py-0.5 rounded-full border border-border-soft">
+      {sourceBadge}
+    </p>
+  )}
+  </div>
+</figure>

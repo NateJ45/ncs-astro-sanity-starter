@@ -1,0 +1,50 @@
+<!--
+  Reid Design favicon. A Warm Bronze (#9C7661) circle with cream (#F5F0EB)
+  "RD" initials set in a system serif (Cormorant Garamond isn't embeddable in
+  a 1KB favicon, but Georgia / Cambria / system serifs render the letterforms
+  with a comparable feel).
+
+  Theme behavior:
+    - On light browser tabs (white): bronze circle reads as a warm brand mark.
+    - On dark browser tabs: the bronze→cream contrast holds, and the
+      prefers-color-scheme block subtly lifts the bronze to a slightly
+      brighter shade so the circle isn't muddy against a near-black tab strip.
+
+  Why a solid disc instead of a transparent monogram: at 16x16 most browsers
+  composite the favicon over arbitrary tab backgrounds — a solid disc
+  guarantees the mark is always legible. The cream RD inside maintains
+  internal contrast even when the disc itself is rendering on a midtone tab.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .disc { fill: #9C7661; }
+    .mark { fill: #F5F0EB; }
+    @media (prefers-color-scheme: dark) {
+      .disc { fill: #B89274; } /* Bronze lifted, matching dark-mode --primary token */
+      .mark { fill: #1F1B17; } /* Deep warm near-black for high-contrast monogram */
+    }
+  </style>
+
+  <!-- Bronze disc — the brand mark. -->
+  <circle class="disc" cx="32" cy="32" r="30" />
+
+  <!--
+    "RD" monogram drawn as a single grouped text element. font-family chains
+    a serif stack with multiple OSes' best Cormorant-adjacent serif fallbacks
+    so this looks brand-aligned without embedding a webfont.
+
+    text-anchor + dominant-baseline keep the letterforms optically centered
+    inside the disc. font-weight 600 gives stems enough body to read at 16px.
+  -->
+  <text
+    class="mark"
+    x="32"
+    y="32"
+    font-family="Cormorant Garamond, Georgia, Cambria, 'Times New Roman', serif"
+    font-size="32"
+    font-weight="600"
+    text-anchor="middle"
+    dominant-baseline="central"
+    letter-spacing="-1"
+  >RD</text>
+</svg>

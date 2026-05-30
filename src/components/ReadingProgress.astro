@@ -1,0 +1,59 @@
+---
+// Safe to edit by hand
+// Reading-progress bar. Fixed thin bronze track + an inner fill that scales
+// horizontally (0 → 1) as the user scrolls through the article body.
+//
+// Why scale instead of width: scale animates on the GPU and avoids the layout
+// thrash that animating width would cause on every scroll tick.
+//
+// The component takes no props — it finds the first <article> on the page and
+// measures its scroll position. Drop it inside BaseLayout's slot on any page
+// that wraps its main read in <article>.
+---
+
+<div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress__bar" data-reading-progress-fill></div>
+</div>
+
+<script>
+  // Re-init on first load and on every View Transitions navigation so the
+  // bar resets correctly when the visitor clicks through to the next post.
+  function initReadingProgress() {
+    const fill = document.querySelector<HTMLElement>('[data-reading-progress-fill]');
+    const article = document.querySelector<HTMLElement>('article');
+    if (!fill || !article) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      // Static full bar reads as "you're reading something" without animating
+      // on every scroll tick — keeps the affordance, drops the motion.
+      fill.style.transform = 'scaleX(1)';
+      return;
+    }
+
+    let ticking = false;
+    const update = () => {
+      const rect = article.getBoundingClientRect();
+      const viewport = window.innerHeight;
+      const total = rect.height - viewport;
+      // 0 while the article is below the fold, 1 once you've scrolled past
+      // its bottom by a full viewport. Clamp to [0, 1].
+      const scrolled = Math.min(Math.max(-rect.top / Math.max(total, 1), 0), 1);
+      fill.style.transform = `scaleX(${scrolled})`;
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+  }
+
+  initReadingProgress();
+  document.addEventListener('astro:page-load', initReadingProgress);
+</script>

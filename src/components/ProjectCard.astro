@@ -1,0 +1,81 @@
+---
+// Safe to edit by hand
+// Project card for the /portfolio grid. Hero image with gentle hover scale,
+// title, location · year meta, brief summary, plus a small room-type chip
+// floating top-left on the hero so the room category reads at a glance when
+// scanning the grid.
+
+import SanityImage from '@/components/SanityImage.astro';
+
+interface Props {
+  project: {
+    title?: string;
+    slug?: { current?: string };
+    location?: string;
+    year?: number;
+    roomType?: string;
+    briefSummary?: string;
+    heroImage?: any;
+  };
+}
+
+const { project } = Astro.props as Props;
+const href = project.slug?.current ? `/portfolio/${project.slug.current}` : '#';
+
+// Humanize the camelCase room-type enum value ("modernCoastal" → "Modern coastal").
+// Matches the helper the PortfolioFilterChips already uses so the labels stay
+// consistent between the chip filter and the card chips.
+function humanizeRoom(value?: string): string {
+  if (!value) return '';
+  return value
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (c) => c.toUpperCase())
+    .trim();
+}
+const roomLabel = humanizeRoom(project.roomType);
+---
+
+<a
+  href={href}
+  class="card-lift card-lift-slow group block rounded-md overflow-hidden bg-card border border-border-soft hover:border-primary/40 transition-colors shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]"
+>
+  {/* Brand accent stripe — matches ServiceCard / JournalCard / TestimonialCard
+      so the marketing-card grammar reads as one brand across the site. */}
+  <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+  <div class="aspect-[4/3] overflow-hidden bg-muted relative img-zoom">
+    {project.heroImage?.asset ? (
+      <SanityImage
+        source={project.heroImage}
+        width={800}
+        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        class="w-full h-full object-cover"
+      />
+    ) : (
+      <div class="w-full h-full" aria-hidden="true"></div>
+    )}
+    {/* Room-type chip — cream background + bronze text, floating top-left.
+        backdrop-blur keeps the chip readable on busy photos. Hidden if the
+        project doesn't have a roomType set so the image stays clean. */}
+    {roomLabel && (
+      <span
+        class="absolute top-s left-s inline-flex items-center px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-eyebrow rounded-full bg-bg/85 text-primary-dark backdrop-blur-sm"
+        aria-hidden="true"
+      >
+        {roomLabel}
+      </span>
+    )}
+    <div class="img-tint" aria-hidden="true"></div>
+  </div>
+  <div class="p-m">
+    <h3 class="font-display text-h4 text-foreground group-hover:text-primary-dark transition-colors">
+      {project.title}
+    </h3>
+    <p class="mt-xs text-xs uppercase tracking-widest text-foreground/80">
+      {project.location}{project.location && project.year ? ' · ' : ''}{project.year}
+    </p>
+    {project.briefSummary && (
+      <p class="mt-s text-sm text-foreground/80">{project.briefSummary}</p>
+    )}
+  </div>
+</a>

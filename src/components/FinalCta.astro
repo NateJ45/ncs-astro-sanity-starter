@@ -1,0 +1,146 @@
+---
+// Safe to edit by hand
+// The full-bleed call-to-action section that closes every interior page (and the home page).
+// Charcoal Dark panel with editorial headline, optional subhead, and a Bronze CTA pill.
+// This is intentionally the only section on the page that uses the dark brand panel:
+// it punctuates the read and pushes toward booking a consultation.
+//
+// scriptAccent: optional single word/phrase from the headline to render in handwritten
+// Pinyon Script via the `.font-script` utility. Inherits the heading color (text-bg) so
+// it reads correctly on the Charcoal Dark surface in both light and dark theme.
+// Falls back silently when undefined, blank, or not found. No existing CTA is affected.
+
+import CtaLink from '@/components/CtaLink.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import { splitScriptAccent } from '@/lib/scriptAccent';
+
+interface CtaBlock {
+  label?: string;
+  linkType?: 'internal' | 'external' | 'email' | 'phone';
+  internalLink?: { _type?: string; slug?: string } | null;
+  externalUrl?: string;
+  emailAddress?: string;
+  phoneNumber?: string;
+  openInNewTab?: boolean;
+}
+
+interface Props {
+  /** Optional eyebrow label above the headline (e.g., "Ready to Begin?"). */
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  cta?: CtaBlock | null;
+  /** Optional secondary CTA rendered as an outlined inverse button next to the primary. */
+  secondaryCta?: CtaBlock | null;
+  /** Override the default heading id (defaults to "final-cta"). */
+  headingId?: string;
+  /** Fallback CTA label when cta.label isn't set. */
+  fallbackCtaLabel?: string;
+  /**
+   * Optional single word/phrase from the headline to render in handwritten
+   * Pinyon Script. Must match the headline text exactly (case-sensitive). Leave
+   * blank to skip. Use sparingly, one accent per heading. The script word
+   * inherits the heading color (text-bg / cream) so contrast is correct on
+   * the Charcoal Dark surface in both themes.
+   */
+  scriptAccent?: string;
+  /**
+   * Optional decorative background photo. When set, it fills the panel behind a
+   * fixed charcoal scrim that keeps the cream headline and bronze button
+   * readable. When absent, the panel renders as the solid Charcoal Dark surface,
+   * exactly as before. The shape matches what SanityImage accepts.
+   */
+  backgroundImage?: {
+    asset?: { _ref?: string; _id?: string };
+    alt?: string;
+    hotspot?: { x: number; y: number; height: number; width: number };
+    crop?: { top: number; bottom: number; left: number; right: number };
+  } | null;
+}
+
+const {
+  eyebrow,
+  headline = 'Ready to Love Your Space?',
+  subhead = "Let's start with a conversation.",
+  cta,
+  secondaryCta,
+  headingId = 'final-cta',
+  fallbackCtaLabel = 'Book a Consultation',
+  scriptAccent,
+  backgroundImage,
+} = Astro.props as Props;
+
+// Only treat the background as present when a real asset is attached, so an
+// empty image object never flips on the overlay path.
+const hasBackground = !!backgroundImage?.asset;
+
+// Split the headline around the script-accent word when provided.
+const { found: scriptFound, before: scriptBefore, word: scriptWord, after: scriptAfter } =
+  splitScriptAccent(headline, scriptAccent);
+---
+
+<section
+  class:list={['bg-accent-dark text-bg', hasBackground && 'relative overflow-hidden']}
+  aria-labelledby={headingId}
+>
+  {/* Optional background photo + fixed charcoal scrim. Rendered only when an
+      image is set; otherwise the section stays the solid Charcoal Dark panel.
+      The scrim is tuned dark enough that the cream headline and bronze button
+      stay readable over any photo. The image is decorative, so it is
+      aria-hidden with empty alt and sits at z-0 behind the stripe + content. */}
+  {hasBackground && (
+    <div class="absolute inset-0 z-0" aria-hidden="true">
+      <SanityImage
+        source={backgroundImage}
+        width={1920}
+        sizes="100vw"
+        loading="lazy"
+        alt=""
+        class="w-full h-full object-cover"
+      />
+      <div class="absolute inset-0 bg-accent-dark/70"></div>
+    </div>
+  )}
+
+  {/* Bronze accent stripe, same 2px brand signature used at the top of the
+      site header, mobile menu, footer, and every marketing card. Softens the
+      transition from the previous (usually light) section into this dark
+      panel and ties the close-of-page back into the brand vocabulary. */}
+  <div class:list={['h-0.5 bg-primary', hasBackground && 'relative z-10']} aria-hidden="true"></div>
+
+  <div class:list={['mx-auto max-w-content px-m py-section-lg text-center', hasBackground && 'relative z-10']}>
+    {eyebrow && (
+      <p class="text-xs uppercase tracking-[0.22em] text-bg/75">{eyebrow}</p>
+    )}
+    {/* Cream hairline accent beneath the eyebrow that matches SectionHeading's
+        inverse-tone treatment so headings carry the same editorial signature
+        on both light and dark surfaces. */}
+    {eyebrow && (
+      <div class="mt-s mb-m h-px w-12 bg-bg/40 mx-auto" aria-hidden="true"></div>
+    )}
+    <h2 id={headingId} class="font-display text-h1 leading-tight text-bg">
+      {scriptFound
+        ? <>{scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}</>
+        : headline}
+    </h2>
+    {subhead && (
+      <p class="mt-m text-lg text-bg/85 max-w-2xl mx-auto">{subhead}</p>
+    )}
+    <div class="mt-l flex flex-wrap justify-center gap-s">
+      <CtaLink
+        cta={cta}
+        variant="primary"
+        onDark
+        fallbackHref="/contact"
+        fallbackLabel={fallbackCtaLabel}
+      />
+      {secondaryCta && (
+        <CtaLink
+          cta={secondaryCta}
+          variant="secondary"
+          onDark
+        />
+      )}
+    </div>
+  </div>
+</section>

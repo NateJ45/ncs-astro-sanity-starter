@@ -1,0 +1,363 @@
+---
+// Safe to edit by hand
+// Page hero. Two shapes:
+//   1) "image" hero (home, optionally Process/Services if Staci ever adds a hero photo)
+//      — full-bleed Sanity background image with a dark scrim, h1 + subhead + CTAs overlay.
+//   2) "text" hero (About, Contact, FAQ, Process by default)
+//      — clean editorial heading on Soft Linen with eyebrow + headline + subhead.
+//
+// The image hero is the LCP element on the homepage. SanityImage is set to loading="eager"
+// in that case and the headline uses font-display (Cormorant Garamond), which BaseLayout
+// preloads inline. Don't add layout-shift animations to this section.
+
+import HeroBackground from '@/components/HeroBackground.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import { splitScriptAccent } from '@/lib/scriptAccent';
+import { ChevronDown } from 'lucide-react';
+
+interface CtaBlock {
+  label?: string;
+  linkType?: 'internal' | 'external' | 'email' | 'phone';
+  internalLink?: { _type?: string; slug?: string } | null;
+  externalUrl?: string;
+  emailAddress?: string;
+  phoneNumber?: string;
+  openInNewTab?: boolean;
+}
+
+interface SanityImageObject {
+  asset?: { _ref?: string; _id?: string };
+  alt?: string;
+  hotspot?: { x: number; y: number; height: number; width: number };
+  crop?: { top: number; bottom: number; left: number; right: number };
+}
+
+interface Props {
+  eyebrow?: string;
+  headline: string;
+  subhead?: string;
+  backgroundImage?: SanityImageObject | null;
+  /** Optional list of hero images. 2+ render a cross-fading slideshow; 1 (or
+      falling back to backgroundImage) renders a single static image. */
+  backgroundImages?: SanityImageObject[] | null;
+  primaryCta?: CtaBlock | null;
+  secondaryCta?: CtaBlock | null;
+  headingId: string;
+  /** "tall" = fills the viewport below the header on first load (homepage), "short" = generous but not full screen (interior pages). */
+  size?: 'tall' | 'short';
+  /**
+   * Optional list of words to cycle through in place of the FIRST word of the
+   * headline. Animates once on first visit per session, then locks back to
+   * the original. Honors prefers-reduced-motion. Pass undefined to skip.
+   */
+  rotatingWords?: string[];
+  /**
+   * Optional single word/phrase in the headline to render in script
+   * (Pinyon Script). One per hero — the editorial-signature flourish.
+   * The first occurrence in the headline string is wrapped. If the word
+   * isn't found, the headline renders unchanged.
+   *
+   * Don't combine with `rotatingWords` — they may target the same first
+   * word; pick one effect per hero. If both are passed, rotatingWords wins.
+   */
+  scriptAccent?: string;
+}
+
+const {
+  eyebrow,
+  headline,
+  subhead,
+  backgroundImage,
+  backgroundImages,
+  primaryCta,
+  secondaryCta,
+  headingId,
+  size = 'short',
+  rotatingWords,
+  scriptAccent,
+} = Astro.props as Props;
+
+// Split the headline into a first word + the rest, so the rotator can swap
+// the first word in place without touching the rest of the line. Matches
+// alphanumerics + apostrophes; falls back to the whole headline if the regex
+// doesn't catch (e.g., headline starts with punctuation).
+const rotateEnabled = Array.isArray(rotatingWords) && rotatingWords.length > 1;
+const firstWordMatch = rotateEnabled ? headline.match(/^([\w'’]+)(.*)$/s) : null;
+const headlineFirst = firstWordMatch ? firstWordMatch[1] : headline;
+const headlineRest = firstWordMatch ? firstWordMatch[2] : '';
+const rotatingPayload = rotateEnabled ? JSON.stringify([headlineFirst, ...rotatingWords!]) : '';
+
+// Script accent: split the headline around the accent word so it can be
+// rendered in three pieces (before / accent-span / after). Only fires when
+// rotatingWords isn't active — the two flourishes shouldn't compete.
+// Delegates to the shared splitScriptAccent helper so Hero and SectionHeading
+// use identical logic.
+const {
+  found: scriptFound,
+  before: scriptBefore,
+  word: scriptWord,
+  after: scriptAfter,
+} = splitScriptAccent(rotateEnabled ? headline : headline, rotateEnabled ? undefined : scriptAccent);
+
+// Subhead emphasis: parse markdown-style _word_ markers into <em> spans so
+// editors can italicize a key word in the Sanity subhead without HTML.
+// Example: "Pick the tier that fits _where you are_." → italic on "where you are".
+// Falls back to plain text when no markers are present.
+function parseSubhead(s?: string): Array<{ type: 'text' | 'em'; value: string }> {
+  if (!s) return [];
+  const parts = s.split(/(_[^_]+_)/g);
+  return parts.map((part) =>
+    part.startsWith('_') && part.endsWith('_') && part.length > 2
+      ? { type: 'em' as const, value: part.slice(1, -1) }
+      : { type: 'text' as const, value: part },
+  );
+}
+const subheadParts = parseSubhead(subhead);
+
+// Prefer the slideshow array; fall back to the single backgroundImage so every
+// other page (which only passes backgroundImage) is unaffected.
+const heroImageList = (Array.isArray(backgroundImages) ? backgroundImages : []).filter(
+  (img) => !!img?.asset,
+);
+const effectiveImages = heroImageList.length > 0
+  ? heroImageList
+  : (backgroundImage?.asset ? [backgroundImage] : []);
+const hasImage = effectiveImages.length > 0;
+
+// "tall" (homepage) fills the screen below the sticky header on first load.
+// The exact fill height comes from the .hero-fill class plus the measured
+// --header-h variable (see the inline script and scoped <style> below).
+// "short" stays a generous editorial band for interior pages.
+const wrapperHeight =
+  size === 'tall'
+    ? 'hero-fill'
+    : 'min-h-[42svh] md:min-h-[52svh]';
+---
+
+{/* Full-viewport home hero plumbing (size="tall" only): measure the sticky
+    header into --header-h so the hero fills exactly the space below it, and
+    wire the scroll cue to glide past the hero. Runs synchronously so the
+    height is set before first paint (no layout shift), then refreshes on
+    load, resize, and View Transitions navigations. */}
+{size === 'tall' && (
+  <script is:inline>
+    (function () {
+      function setHeaderH() {
+        var header = document.querySelector('header.site-header');
+        if (header) {
+          document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+        }
+      }
+      function wireCue() {
+        var cue = document.querySelector('[data-scroll-cue]');
+        if (!cue || cue.dataset.wired === '1') return;
+        cue.dataset.wired = '1';
+        cue.addEventListener('click', function () {
+          var hero = cue.closest('section');
+          if (!hero) return;
+          var hh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 0;
+          var top = hero.offsetTop + hero.offsetHeight - hh;
+          if (window.lenis && typeof window.lenis.scrollTo === 'function') {
+            window.lenis.scrollTo(top);
+          } else {
+            window.scrollTo({ top: top, behavior: 'smooth' });
+          }
+        });
+      }
+      setHeaderH();
+      wireCue();
+      if (!window.__reidHeroBound) {
+        window.__reidHeroBound = true;
+        window.addEventListener('resize', setHeaderH, { passive: true });
+        window.addEventListener('load', setHeaderH);
+        document.addEventListener('astro:page-load', function () { setHeaderH(); wireCue(); });
+      }
+    })();
+  </script>
+)}
+
+{/* Rotating-word animator. Runs once per session: cycles the wrapped word
+    through alternates every 850ms for ~5 seconds, then locks back to the
+    original. Skipped under prefers-reduced-motion or when sessionStorage
+    already holds the seen flag. Inline + idempotent so View Transitions
+    don't re-trigger on every navigation. */}
+{rotateEnabled && (
+  <script is:inline>
+    (function () {
+      try {
+        if (sessionStorage.getItem('reid-design-hero-rotated') === '1') return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      } catch (_) { /* ignore */ }
+
+      function init() {
+        const el = document.querySelector('[data-rotating-word]');
+        if (!el || el.dataset.rotated === '1') return;
+        el.dataset.rotated = '1';
+        let words;
+        try { words = JSON.parse(el.dataset.rotatingWords || '[]'); } catch (_) { return; }
+        if (!Array.isArray(words) || words.length < 2) return;
+
+        const original = words[0];
+        const intervalMs = 850;
+        // words.length ticks lands us on the original at the final cycle
+        // because words[length % length] === words[0] === original. The
+        // earlier `length + 1` produced one redundant tick that flashed the
+        // original word twice in a row at the end of the sequence.
+        const totalCycles = words.length;
+        let count = 0;
+
+        const id = setInterval(() => {
+          count += 1;
+          const target = count >= totalCycles ? original : words[count % words.length];
+          el.style.transition = 'opacity 200ms ease-out';
+          el.style.opacity = '0';
+          setTimeout(() => {
+            el.textContent = target;
+            el.style.opacity = '1';
+          }, 200);
+
+          if (count >= totalCycles) {
+            clearInterval(id);
+            try { sessionStorage.setItem('reid-design-hero-rotated', '1'); } catch (_) {}
+          }
+        }, intervalMs);
+      }
+      init();
+      document.addEventListener('astro:page-load', init);
+    })();
+  </script>
+)}
+
+{hasImage ? (
+  <section
+    class:list={[
+      'relative overflow-hidden bg-accent-dark text-bg flex flex-col justify-end',
+      wrapperHeight,
+    ]}
+    aria-labelledby={headingId}
+  >
+    {/* Background: single static image or a cross-fading slideshow (2+ images),
+        plus the readability overlays. See HeroBackground.astro. */}
+    <HeroBackground images={effectiveImages} />
+
+    {/* Content sits at the bottom of the section thanks to justify-end on the
+        section itself. Avoids the h-full-on-flex-item brittleness that left
+        content floating mid-hero on min-height containers. */}
+    <div class="relative mx-auto w-full max-w-content px-m pb-section-lg pt-section-md">
+      {/*
+        hero-entry-stagger triggers the global page-load fade-up animation
+        defined in globals.css. Each direct child of this wrapper fades up
+        with a small per-child delay (eyebrow → hairline → h1 → subhead →
+        CTAs). Reduced-motion users get the final composition instantly.
+
+        Cream hairline beneath the eyebrow mirrors the SectionHeading
+        inverse-tone treatment so heroes carry the same editorial signature
+        as every interior section heading.
+      */}
+      <div class="hero-entry-stagger max-w-3xl">
+        {eyebrow && (
+          <p class="text-xs uppercase tracking-eyebrow text-bg/85">{eyebrow}</p>
+        )}
+        {eyebrow && (
+          <div class="mt-xs mb-m h-px w-12 bg-bg/40" aria-hidden="true"></div>
+        )}
+        <h1 id={headingId} class="font-display text-h1 leading-headline-tight tracking-[-0.02em] text-bg">
+          {rotateEnabled ? (
+            <>
+              <span data-rotating-word data-rotating-words={rotatingPayload}>
+                {headlineFirst}
+              </span>{headlineRest}
+            </>
+          ) : scriptFound ? (
+            <>
+              {scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}
+            </>
+          ) : (
+            headline
+          )}
+        </h1>
+        {subhead && (
+          <p class="mt-m max-w-2xl text-lg text-bg/90">
+            {subheadParts.map((part) =>
+              part.type === 'em'
+                ? <em class="italic font-display text-bg/95">{part.value}</em>
+                : part.value
+            )}
+          </p>
+        )}
+        {(primaryCta || secondaryCta) && (
+          <div class="mt-l flex flex-wrap gap-s">
+            {primaryCta && <CtaLink cta={primaryCta} variant="primary" onDark />}
+            {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" onDark />}
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Soft pulsing scroll cue at the bottom-center of the hero. Tells
+        visitors there is more below; clicking it glides past the hero.
+        Static under prefers-reduced-motion (see the scoped <style>). */}
+    {size === 'tall' && (
+      <button
+        type="button"
+        data-scroll-cue
+        aria-label="Scroll down to see more"
+        class="scroll-cue absolute bottom-4 left-1/2 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full text-bg/85 hover:text-bg hover:bg-bg/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bg/70"
+      >
+        <ChevronDown size={28} strokeWidth={1.5} aria-hidden="true" />
+      </button>
+    )}
+  </section>
+) : (
+  <section class="bg-background" aria-labelledby={headingId}>
+    <div class:list={['mx-auto max-w-content px-m py-section-lg flex items-end', wrapperHeight]}>
+      <SectionHeading
+        eyebrow={eyebrow}
+        headline={headline}
+        subhead={subhead}
+        headingId={headingId}
+        level="h1"
+      />
+    </div>
+  </section>
+)}
+
+<style>
+  /* Full-viewport home hero. Fill the screen below the sticky header on first
+     load. --header-h is measured by the inline script above; the per-breakpoint
+     fallback covers the brief pre-measure window and the no-JS case (mobile
+     header ~7rem, desktop with the eyebrow strip ~9.5rem). svh keeps the hero
+     within the initially-visible viewport on mobile (address bar shown) so it
+     never forces an immediate scroll; the vh line is the pre-svh fallback. */
+  .hero-fill {
+    min-height: calc(100vh - var(--header-h, 7rem));
+    min-height: calc(100svh - var(--header-h, 7rem));
+  }
+  @media (min-width: 1024px) {
+    .hero-fill {
+      min-height: calc(100vh - var(--header-h, 9.5rem));
+      min-height: calc(100svh - var(--header-h, 9.5rem));
+    }
+  }
+
+  /* Scroll cue: a soft down-bob plus opacity pulse so it reads as "there is
+     more below" without shouting. Centered with translateX(-50%) (the keyframe
+     re-applies it each step). Reduced-motion users get a static, clearly
+     visible chevron instead. */
+  .scroll-cue {
+    transform: translateX(-50%);
+    animation: scroll-cue-bob 2.4s ease-in-out infinite;
+  }
+  @keyframes scroll-cue-bob {
+    0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
+    50%      { transform: translate(-50%, 0.4rem); opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-cue {
+      animation: none;
+      opacity: 0.85;
+      transform: translateX(-50%);
+    }
+  }
+</style>

@@ -1,0 +1,147 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// "Personal" section on the About page: a few human, off-the-clock modules that
+// make Staci read as a person, not a brand. Every module self-hides when its
+// data is empty, and the whole section renders nothing when all are empty.
+// Fed by the aboutPage singleton's `personal` field group (see queries.ts).
+
+import SectionHeading from '@/components/SectionHeading.astro';
+import SanityImage from '@/components/SanityImage.astro';
+
+interface CurrentlyRow { label?: string; value?: string }
+interface RapidFireRow { prompt?: string; answer?: string }
+interface LocalSpotRow { name?: string; note?: string }
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  intro?: string;
+  currentlyList?: CurrentlyRow[];
+  rapidFire?: RapidFireRow[];
+  localSpots?: LocalSpotRow[];
+  beyondDesign?: string;
+  candidPhoto?: any;
+}
+
+const {
+  eyebrow,
+  headline,
+  intro,
+  currentlyList = [],
+  rapidFire = [],
+  localSpots = [],
+  beyondDesign,
+  candidPhoto,
+} = Astro.props;
+
+// Drop half-empty Sanity rows so they do not render blank lines.
+const currently = (currentlyList ?? []).filter((r) => r?.label?.trim() && r?.value?.trim());
+const rapid = (rapidFire ?? []).filter((r) => r?.prompt?.trim() && r?.answer?.trim());
+const spots = (localSpots ?? []).filter((r) => r?.name?.trim());
+const hasBeyond = Boolean(beyondDesign?.trim() || candidPhoto?.asset);
+
+const hasAnything =
+  currently.length > 0 || rapid.length > 0 || spots.length > 0 || hasBeyond;
+
+const cardClass =
+  'card-lift bg-card rounded-md border border-border-soft shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] overflow-hidden';
+---
+
+{hasAnything && (
+  <section class="bg-background" aria-labelledby="about-personal-heading">
+    <div class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow={eyebrow ?? 'Off the Clock.'}
+        headline={headline ?? 'A little more about me.'}
+        headingId="about-personal-heading"
+        align="center"
+        class="mx-auto"
+      />
+      {intro && (
+        <p class="mt-m mx-auto max-w-2xl text-center text-foreground/85 text-lg leading-relaxed">
+          {intro}
+        </p>
+      )}
+
+      <div class="mt-section-lg grid grid-cols-1 lg:grid-cols-2 gap-l items-start">
+        {(currently.length > 0 || hasBeyond) && (
+          <div class="space-y-l">
+            {currently.length > 0 && (
+              <article class={cardClass}>
+                <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+                <div class="p-l">
+                  <h3 class="font-display text-h3 text-foreground">Currently</h3>
+                  <dl class="mt-m divide-y divide-border-soft">
+                    {currently.map((row) => (
+                      <div class="flex items-baseline justify-between gap-m py-s">
+                        <dt class="text-xs uppercase tracking-eyebrow text-foreground/80 shrink-0">{row.label}</dt>
+                        <dd class="text-foreground text-right">{row.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </article>
+            )}
+            {hasBeyond && (
+              <article class={cardClass}>
+                <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+                <div class="p-l">
+                  <h3 class="font-display text-h3 text-foreground">Beyond design</h3>
+                  {candidPhoto?.asset && (
+                    <SanityImage
+                      source={candidPhoto}
+                      width={900}
+                      sizes="(min-width: 1024px) 40vw, 100vw"
+                      quality={75}
+                      class="w-full h-auto rounded-md mt-m"
+                    />
+                  )}
+                  {beyondDesign && (
+                    <p class="mt-m text-foreground/85 leading-relaxed whitespace-pre-line">{beyondDesign}</p>
+                  )}
+                </div>
+              </article>
+            )}
+          </div>
+        )}
+
+        {(rapid.length > 0 || spots.length > 0) && (
+          <div class="space-y-l">
+            {rapid.length > 0 && (
+              <article class={cardClass}>
+                <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+                <div class="p-l">
+                  <h3 class="font-display text-h3 text-foreground">Rapid fire</h3>
+                  <dl class="mt-m grid grid-cols-1 sm:grid-cols-2 gap-m">
+                    {rapid.map((row) => (
+                      <div>
+                        <dt class="text-xs uppercase tracking-eyebrow text-foreground/80">{row.prompt}</dt>
+                        <dd class="mt-xs text-foreground">{row.answer}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </article>
+            )}
+            {spots.length > 0 && (
+              <article class={cardClass}>
+                <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+                <div class="p-l">
+                  <h3 class="font-display text-h3 text-foreground">Favorite local spots</h3>
+                  <ul class="mt-m space-y-s">
+                    {spots.map((row) => (
+                      <li class="flex flex-col">
+                        <span class="text-foreground font-semibold">{row.name}</span>
+                        {row.note && <span class="text-foreground/80 text-sm">{row.note}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+)}

@@ -1,0 +1,34 @@
+{
+  "_type": "faqPage",
+  "_id": "faqPage",
+  "seoTitle": "FAQ — Reid Design LLC",
+  "seoDescription": "Honest answers about pricing, process, timelines, and what working with an interior designer actually looks like.",
+  "heroEyebrow": "Common Questions",
+  "heroHeadline": "Everything You Want to Know",
+  "heroSubhead": "Honest answers about pricing, process, timelines, and what working with an interior designer actually looks like.",
+  "categoryOrder": [
+    "Pricing & Cost",
+    "Getting Started",
+    "The Process",
+    "Logistics",
+    "Service Area"
+  ],
+  "finalCtaEyebrow": "Not Finding Your Answer?",
+  "finalCtaHeadline": "Just ask",
+  "finalCtaSubhead": "If your question isn't here, reach out directly. I read every message personally and respond within one business day.",
+  "finalCta": {
+    "_type": "ctaBlock",
+    "label": "Send a Message",
+    "linkType": "Internal page",
+    "internalLink": { "_type": "reference", "_ref": "contactPage" },
+    "openInNewTab": false
+  },
+  "secondaryCta": {
+    "_type": "ctaBlock",
+    "label": "Read About the Process",
+    "linkType": "Internal page",
+    "internalLink": { "_type": "reference", "_ref": "processPage" },
+    "openInNewTab": false
+  },
+  "note": "FAQ items populate automatically from all faqItem documents, grouped by category in the order specified in categoryOrder, sorted by displayOrder within each category."
+}

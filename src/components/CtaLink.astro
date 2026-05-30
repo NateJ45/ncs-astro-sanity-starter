@@ -1,0 +1,128 @@
+---
+// Safe to edit by hand
+// Resolves a Sanity ctaBlock to the right <a href>:
+//   - internal: maps the referenced page _type to its route (homePage → /, etc.)
+//   - external: passes through the URL, opens in new tab by default
+//   - email: builds a mailto: link
+//   - phone: builds a tel: link
+//
+// Two visual variants + a tone modifier:
+//   - "primary" — Bronze CTA pill (per CLAUDE.md: bg-primary-dark + text-white, NOT bg-primary,
+//     to clear WCAG AA on small label text; hover state goes to Charcoal Dark)
+//   - "secondary" — outlined link with bronze border + text-link, theme-aware in both modes
+//   - `onDark` toggle — for CTAs sitting over a dark surface (hero image overlay,
+//     Charcoal Dark Final CTA panel). Swaps the secondary variant from bronze
+//     text-on-light to cream text-on-transparent so it's actually legible
+//     against the dark background. Passing a `class` override to recolor used
+//     to work, but Tailwind v4 generates utilities alphabetically and
+//     `text-link` > `text-bg` in the cascade — the bronze always won. Use
+//     onDark={true} from now on instead of overriding via className.
+//
+// Both variants share generous padding, uppercase tracking, and a 44×44 minimum tap target.
+
+interface CtaBlock {
+  label?: string;
+  linkType?: 'internal' | 'external' | 'email' | 'phone';
+  internalLink?: { _type?: string; slug?: string } | null;
+  externalUrl?: string;
+  emailAddress?: string;
+  phoneNumber?: string;
+  openInNewTab?: boolean;
+}
+
+interface Props {
+  cta?: CtaBlock | null;
+  variant?: 'primary' | 'secondary';
+  /** When true, swap variant colors for legibility on a dark surface. */
+  onDark?: boolean;
+  /** Fallback href if the CTA can't be resolved (e.g., siteSettings hasn't been populated). */
+  fallbackHref?: string;
+  /** Fallback label if cta.label is missing. */
+  fallbackLabel?: string;
+  class?: string;
+}
+
+const {
+  cta,
+  variant = 'primary',
+  onDark = false,
+  fallbackHref = '/contact',
+  fallbackLabel = 'Get in touch',
+  class: extraClass = '',
+} = Astro.props as Props;
+
+// Map Sanity document _type to its route. Mirrors the routes in src/pages/.
+// Singletons go to a fixed path; journalEntry uses {slug} for the dynamic
+// /journal/[slug] route.
+const TYPE_TO_PATH: Record<string, string> = {
+  homePage: '/',
+  aboutPage: '/about',
+  processPage: '/process',
+  servicesPage: '/services',
+  faqPage: '/faq',
+  contactPage: '/contact',
+  journalPage: '/journal',
+};
+
+function resolveHref(c?: CtaBlock | null): string {
+  if (!c?.linkType) return fallbackHref;
+  switch (c.linkType) {
+    case 'internal': {
+      const t = c.internalLink?._type;
+      if (!t) return fallbackHref;
+      // Slug-based types need the slug appended. Singletons use a fixed path.
+      if (t === 'journalEntry' && c.internalLink?.slug) {
+        return `/journal/${c.internalLink.slug}`;
+      }
+      return TYPE_TO_PATH[t] ?? fallbackHref;
+    }
+    case 'external':
+      return c.externalUrl ?? fallbackHref;
+    case 'email':
+      return c.emailAddress ? `mailto:${c.emailAddress}` : fallbackHref;
+    case 'phone':
+      return c.phoneNumber ? `tel:${c.phoneNumber.replace(/[^\d+]/g, '')}` : fallbackHref;
+    default:
+      return fallbackHref;
+  }
+}
+
+const href = resolveHref(cta);
+const label = cta?.label ?? fallbackLabel;
+const isExternal = cta?.linkType === 'external';
+const newTab = cta?.openInNewTab || isExternal;
+
+// Per CLAUDE.md: bg-primary + white at button label sizes hits only 4.05:1 (under AA 4.5:1).
+// Use bg-primary-dark (#7A5D4C) + literal text-white → 5.5:1. Hover deepens to Charcoal Dark.
+//
+// Focus ring offset uses --background by default, but under onDark we offset
+// against transparent so the ring still reads on the photographic surface.
+const baseClasses =
+  onDark
+    ? 'press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent'
+    : 'press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+
+// onDark swaps the secondary variant from bronze-on-light to cream-on-transparent.
+// The primary variant keeps the bronze button — bronze on top of the dark hero
+// gradient still reads at 5.5:1 (white-on-bronze-dark) and stays visually anchored.
+const variantClasses = (() => {
+  if (variant === 'primary') {
+    return onDark
+      ? 'bg-primary-dark text-white hover:bg-primary'
+      : 'bg-primary-dark text-white hover:bg-accent-dark';
+  }
+  // secondary
+  return onDark
+    ? 'border border-white/70 text-white hover:bg-white/10 hover:border-white'
+    : 'border border-primary text-link hover:bg-accent';
+})();
+---
+
+<a
+  href={href}
+  class:list={[baseClasses, variantClasses, extraClass]}
+  target={newTab ? '_blank' : undefined}
+  rel={newTab ? 'noopener noreferrer' : undefined}
+>
+  {label}
+</a>

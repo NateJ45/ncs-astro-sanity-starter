@@ -1,0 +1,142 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Journal index page. Hero, category chips (display-only for now), responsive
+// post grid, final CTA. Sanity-driven via getJournalPage() + getAllJournalEntries()
+// + getAllJournalCategories().
+//
+// First post gets the `featured` card treatment (spans 2 columns at lg, larger
+// type). If editors flag multiple posts as featured, the first by date wins
+// the big slot; others get normal cards.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import {
+  getJournalPage,
+  getAllJournalEntries,
+  getAllJournalCategories,
+  getSiteSettings,
+} from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import JournalCard from '@/components/JournalCard.astro';
+import JournalCategoryChip from '@/components/JournalCategoryChip.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import NewsletterSignup from '@/components/NewsletterSignup';
+
+const [page, entries, categories, siteSettings] = await Promise.all([
+  getJournalPage().catch(() => null),
+  getAllJournalEntries().catch(() => []),
+  getAllJournalCategories().catch(() => []),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.journal) return Astro.redirect('/');
+
+const title       = page?.seoTitle       ?? 'Journal · Reid Design';
+const description = page?.seoDescription ?? 'Notes from a Plainfield interior designer — project walkthroughs, style thinking, and the occasional opinion.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'The Journal.';
+const heroHeadline = page?.heroHeadline ?? 'Notes from the studio.';
+const heroSubhead  = page?.heroSubhead  ?? 'Project walkthroughs, design thinking, and the occasional opinion. Written between projects.';
+
+// Categories with at least one post (filters out empty taxonomies).
+const usedCategories = (categories ?? []).filter((c: any) => (c.postCount ?? 0) > 0);
+
+// Posts have already come back sorted "featured desc, publishedAt desc" via the query.
+const list = entries ?? [];
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Journal', url: `${site.url}/journal` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    headingId="journal-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent ?? 'studio'}
+  />
+
+  {/* ------- 2. Category chips (display-only for now) ----------------------- */}
+  {usedCategories.length > 0 && (
+    <section class="bg-background" aria-label="Journal categories">
+      <div class="mx-auto max-w-content px-m pt-l">
+        <ul class="flex flex-wrap gap-xs list-none p-0">
+          {usedCategories.map((cat: any) => (
+            <li>
+              <JournalCategoryChip
+                title={cat.title}
+                tooltip={cat.description ?? `${cat.postCount} ${cat.postCount === 1 ? 'post' : 'posts'}`}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {/* ------- 3. Post grid --------------------------------------------------- */}
+  <section class="bg-background" aria-labelledby="journal-posts-heading">
+    <div class="mx-auto max-w-content px-m py-section-md">
+      {/* Visually-hidden H2 — same reason as the portfolio grid: keeps the
+          heading hierarchy from skipping H1 directly to each card's H3. */}
+      <h2 id="journal-posts-heading" class="sr-only">Recent posts</h2>
+
+      {list.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-l" data-stagger-grid>
+          {list.map((entry: any, i: number) => (
+            <JournalCard entry={entry} featured={i === 0 && entry.featured} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-section-lg">
+          <p class="text-foreground/80 text-lg max-w-prose mx-auto">
+            The first journal entries are on their way.
+          </p>
+          <p class="mt-s text-muted-foreground">
+            In the meantime, <a href="/portfolio" class="text-link underline underline-offset-2">browse the portfolio</a> or
+            <a href="/contact" class="text-link underline underline-offset-2"> start a conversation</a>.
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* ------- 4. Newsletter signup — between post grid and Final CTA.
+         Renders only when newsletter is enabled and configured in siteSettings.
+         Island hydrates when scrolled into view. */}
+  {siteSettings?.newsletter?.enabled && (
+    <section class="bg-muted" aria-label="Newsletter signup">
+      <div class="mx-auto max-w-content px-m py-section-md">
+        <div class="max-w-lg mx-auto">
+          <NewsletterSignup
+            client:visible
+            newsletter={siteSettings.newsletter}
+            source="journal-index"
+          />
+        </div>
+      </div>
+    </section>
+  )}
+
+  {/* ------- 5. Final CTA ---------------------------------------------------- */}
+  <FinalCta
+    headline={page?.finalCtaHeadline}
+    subhead={page?.finalCtaSubhead}
+    cta={page?.finalCta}
+    scriptAccent={page?.finalCtaScriptAccent}
+    backgroundImage={page?.finalCtaBackgroundImage}
+  />
+</BaseLayout>

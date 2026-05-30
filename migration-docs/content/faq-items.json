@@ -1,0 +1,382 @@
+[
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.howMuchCost",
+    "question": "How much does interior design cost in Indianapolis?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Costs vary by scope. At Reid Design: an in-home consultation is $150 for a 60 to 90 minute session. Full Room Design starts at $650 and includes a complete design plan with mood direction, layout, furniture and decor selections, and a sourcing list with direct shopping links. Full Room Design + Styling starts at $850 and adds hands-on shopping, paint color selections, and an in-home styling and final reveal. Hourly Shopping & Sourcing is $75 per hour, no minimum. Full-service and custom whole-home projects are quoted after the consultation. The Indianapolis market generally runs $50 to $200 per hour for hourly work, with full room packages from $1,000 to $5,000."
+          }
+        ]
+      }
+    ],
+    "category": "Pricing & Cost",
+    "displayOrder": 1,
+    "alsoShowOnProcessPage": true
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.hiddenFees",
+    "question": "Are there hidden fees I should know about?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "No. The design fee is stated upfront before any work begins. The only additional cost is the furnishings and materials you choose to purchase, and you're always in control of that budget. For full-service clients, trade vendor markups are disclosed transparently at the start. For homes outside the local area, a small travel fee may apply, always quoted upfront before booking."
+          }
+        ]
+      }
+    ],
+    "category": "Pricing & Cost",
+    "displayOrder": 2,
+    "alsoShowOnProcessPage": false
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.paymentPlans",
+    "question": "Do you offer payment plans?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "For larger full-service projects, fees are structured in milestones, a deposit at signing, a second payment at concept presentation, and a final payment at installation. For smaller packages like consultations and Shopping & Sourcing hours, full payment is required upfront."
+          }
+        ]
+      }
+    ],
+    "category": "Pricing & Cost",
+    "displayOrder": 3,
+    "alsoShowOnProcessPage": false
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.firstConversation",
+    "question": "What happens on the first conversation?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "The intro conversation is short, free, and completely informal. We trade a few notes about your space, goals, rough budget, and timeline, by phone or message, whichever is easier for you. My main goal is to figure out whether I'm the right fit for your project. There's no pitch and no pressure. If we're a fit, we book the in-home consultation from there."
+          }
+        ]
+      }
+    ],
+    "category": "Getting Started",
+    "displayOrder": 1,
+    "alsoShowOnProcessPage": true
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.knowMyStyle",
+    "question": "Do I need to know my style before reaching out?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Absolutely not. Most clients can't articulate their style cleanly, that's part of what the consultation uncovers. If you have a Pinterest board or Instagram saves, bring those. If you have nothing, that's fine too. Knowing what you hate is just as useful as knowing what you love."
+          }
+        ]
+      }
+    ],
+    "category": "Getting Started",
+    "displayOrder": 2,
+    "alsoShowOnProcessPage": false
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.goodFit",
+    "question": "Who's a good fit, and who's not?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Reid Design is a great fit if you want a designer who listens, works with what you already have when it makes sense, and is honest about what things cost. It's probably not the right fit if you want a fully hands-off luxury experience, or if you're looking for someone to act as a general contractor on a major renovation. If you're unsure, the intro call is the easiest way to figure out together whether we should work together."
+          }
+        ]
+      }
+    ],
+    "category": "Getting Started",
+    "displayOrder": 3,
+    "alsoShowOnProcessPage": false
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.whatToPrepare",
+    "question": "What should I prepare before the consultation?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Not much, but a few things help. Take a few photos of the room or rooms you want to address, including the corners and any areas that frustrate you. If you've been collecting inspiration on Pinterest or Instagram, save the link or have it ready to share. Think about your budget range, even a loose one, so we can talk realistically about scope. Most important: be honest about what you don't like. That's more useful than describing what you want."
+          }
+        ]
+      }
+    ],
+    "category": "Getting Started",
+    "displayOrder": 4,
+    "alsoShowOnProcessPage": true
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.background",
+    "question": "What's your background as a designer?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "[TODO: Staci to write one accurate sentence about her background. The audit flagged this as needing real input, not aspirational copy.]"
+          }
+        ]
+      }
+    ],
+    "category": "Getting Started",
+    "displayOrder": 5,
+    "alsoShowOnProcessPage": false
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.allNewFurniture",
+    "question": "Do I need to buy all new furniture?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Not at all. I love working with pieces you already own, a room that incorporates meaningful things feels more personal than one that's entirely new. We'll identify what's worth keeping, what can be repurposed, and what genuinely needs to go."
+          }
+        ]
+      }
+    ],
+    "category": "The Process",
+    "displayOrder": 1,
+    "alsoShowOnProcessPage": true
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.involvement",
+    "question": "How involved do I need to be during the project?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "As involved as you want. Some clients love seeing every decision. Others hand it off completely and want to be surprised at the reveal. Both are valid. The one non-negotiable: you review and approve the design plan before anything is purchased."
+          }
+        ]
+      }
+    ],
+    "category": "The Process",
+    "displayOrder": 2,
+    "alsoShowOnProcessPage": false
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.dontLikePlan",
+    "question": "What if I don't like the design plan?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Every package includes one full revision round. The thorough consultation up front means major revisions are rare, but the protection is always there. Nothing gets ordered until you give explicit approval."
+          }
+        ]
+      }
+    ],
+    "category": "The Process",
+    "displayOrder": 3,
+    "alsoShowOnProcessPage": true
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.timing",
+    "question": "How long does a project take?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "The consultation is a single 60 to 90 minute visit. The design plan typically takes 2 to 3 weeks to build after the consultation. From there, shopping and styling timing depends on scope and on furniture lead times, anywhere from a few weeks for in-stock items to several months for custom pieces. Hourly Shopping & Sourcing turnaround depends on what you need. I'll always give you a realistic estimate, not a best-case scenario."
+          }
+        ]
+      }
+    ],
+    "category": "Logistics",
+    "displayOrder": 1,
+    "alsoShowOnProcessPage": true
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.damaged",
+    "question": "What if something arrives damaged?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "For full-service clients where I manage purchasing, I handle all claims, returns, and reorders. Vendor relationships and trade accounts come with better resolution processes than retail. I deal with it so you don't have to."
+          }
+        ]
+      }
+    ],
+    "category": "Logistics",
+    "displayOrder": 2,
+    "alsoShowOnProcessPage": false
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.contractors",
+    "question": "Do you work with contractors?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "For full-service projects involving renovation, I coordinate with contractors but don't act as a general contractor. I can provide referrals to trusted tradespeople in the Indianapolis area and manage design-side communication."
+          }
+        ]
+      }
+    ],
+    "category": "Logistics",
+    "displayOrder": 3,
+    "alsoShowOnProcessPage": false
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.tradeAccess",
+    "question": "How does trade vendor access work?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "I have accounts with vendors not open to the public. These lines offer more distinctive pieces, and my trade pricing is passed along to you, frequently offsetting a portion of the design fee."
+          }
+        ]
+      }
+    ],
+    "category": "Logistics",
+    "displayOrder": 4,
+    "alsoShowOnProcessPage": true
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.commercial",
+    "question": "Are you available for commercial projects?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "My primary focus is residential, but I'm open to small commercial spaces, boutiques, offices, short-term rentals. Reach out and describe your project."
+          }
+        ]
+      }
+    ],
+    "category": "Logistics",
+    "displayOrder": 5,
+    "alsoShowOnProcessPage": true
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.serviceArea",
+    "question": "What areas does Reid Design serve?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Plainfield, Indianapolis, and the surrounding communities, Carmel, Fishers, Westfield, Zionsville, Noblesville, Geist, McCordsville, Broad Ripple, and nearby neighborhoods. Homes within about 30 minutes of Plainfield are covered with no travel fee. Further-out homes are welcome too, just with a small travel fee that's quoted upfront."
+          }
+        ]
+      }
+    ],
+    "category": "Service Area",
+    "displayOrder": 1,
+    "alsoShowOnProcessPage": true
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.suburbsExtra",
+    "question": "Are there extra fees for suburban clients?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Most suburbs are within the no-travel-fee zone, including Carmel, Fishers, Westfield, Zionsville, Noblesville, and Plainfield. The pricing on the services page is the same regardless of which of those suburbs you're in. For homes 45 minutes or more from Plainfield, a small travel fee covers the drive time, $50 for 45 to 75 minutes, $75 to $100 for 75 to 120 minutes. Always quoted upfront before booking."
+          }
+        ]
+      }
+    ],
+    "category": "Service Area",
+    "displayOrder": 2,
+    "alsoShowOnProcessPage": false
+  },
+  {
+    "_type": "faqItem",
+    "_id": "faqItem.outsideArea",
+    "question": "What if I'm not in the Indianapolis area?",
+    "answer": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Reid Design is currently focused on in-person work in the Indianapolis area, so projects further out aren't a fit right now. If you're in a neighboring region and the drive works, reach out and we'll see what's possible."
+          }
+        ]
+      }
+    ],
+    "category": "Service Area",
+    "displayOrder": 3,
+    "alsoShowOnProcessPage": false
+  }
+]

@@ -1,0 +1,257 @@
+---
+// Safe to edit by hand
+// Home page Featured Journal section.
+//
+// Layout mirrors FeaturedWork so the two sections read as a paired editorial
+// rhythm: 1 large image-overlay hero card + up to 3 compact companion entries
+// stacked beside it. Journal cover images tend to read as wider editorial
+// scenes, so the hero aspect is slightly more landscape than the Work hero.
+//
+// Degrades to a centered single-card layout when only the hero entry exists
+// (early days of the journal).
+//
+// Data: featured-then-newest journal entries, capped at 4. Section is
+// suppressed entirely when no entries exist.
+
+import SanityImage from '@/components/SanityImage.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import JournalCategoryChip from '@/components/JournalCategoryChip.astro';
+
+interface JournalLite {
+  _id?: string;
+  title?: string;
+  slug?: { current?: string };
+  excerpt?: string;
+  publishedAt?: string;
+  coverImage?: any;
+  categories?: Array<{ title?: string; slug?: { current?: string }; description?: string }>;
+  featured?: boolean;
+}
+
+interface Props {
+  entries?: JournalLite[];
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  cta?: any;
+  headingId?: string;
+}
+
+const {
+  entries = [],
+  eyebrow,
+  headline,
+  subhead,
+  cta,
+  headingId = 'featured-journal-heading',
+} = Astro.props as Props;
+
+const hasEntries = Array.isArray(entries) && entries.length > 0;
+const [hero, ...rest] = entries;
+const companions = rest.slice(0, 3);
+const hasCompanions = companions.length > 0;
+
+// Hero aspect adapts to companion count so column heights roughly match.
+// Mobile always stays in the portrait band (4/5) so the bottom-overlay text
+// fits inside the image area — wide mobile aspect would push the title +
+// excerpt above the image and the overflow:hidden card clips them off.
+// On lg, the no-companions case uses 16/10 (not 2/1) so the long-form
+// overlay content — chips row + multi-line title + excerpt + CTA — has
+// enough vertical room. With 2/1 the chips row was being clipped above the
+// image top edge whenever the title wrapped to 3 lines.
+// With companions, the hero image FILLS the grid-stretched card (lg:h-full
+// + min-height floor) so it always matches the companion panel exactly and
+// never leaves a bg-card strip below the image. Mirrors FeaturedWork.
+const heroAspectClass = !hasCompanions
+  ? 'aspect-[4/5] lg:aspect-[16/10]'
+  : 'aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[28rem]';
+
+const heroHref = hero?.slug?.current ? `/journal/${hero.slug.current}` : '#';
+const heroPrimaryCategory = hero?.categories?.[0];
+
+function formatDate(d?: string): string {
+  if (!d) return '';
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+const heroDate = formatDate(hero?.publishedAt);
+---
+
+{hasEntries && (
+  <section class="surface-warm bg-muted" aria-labelledby={headingId}>
+    <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow={eyebrow}
+        headline={headline}
+        subhead={subhead}
+        headingId={headingId}
+        align="center"
+        class="mx-auto"
+      />
+
+      <div
+        class:list={[
+          'mt-section-lg',
+          hasCompanions
+            ? 'grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] gap-l lg:gap-section-md'
+            : 'mx-auto max-w-4xl',
+        ]}
+      >
+        {/* ------- Hero entry — full-bleed editorial card ------------------ */}
+        {/* Cover image fills the card with a bottom gradient. Category +
+            date eyebrow, title, and lede excerpt overlay on the gradient.
+            Same treatment as the Work hero so the two sections feel paired. */}
+        <a
+          href={heroHref}
+          class="card-lift card-lift-slow group relative block rounded-md overflow-hidden bg-card border border-border-soft hover:border-primary/40 transition-colors shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] lg:h-full"
+        >
+          <div class="absolute top-0 left-0 right-0 h-0.5 bg-primary z-20" aria-hidden="true"></div>
+
+          <div
+            class:list={[
+              'overflow-hidden bg-muted relative',
+              heroAspectClass,
+            ]}
+          >
+            {hero?.coverImage?.asset ? (
+              <SanityImage
+                source={hero.coverImage}
+                width={1600}
+                sizes={hasCompanions ? '(min-width: 1024px) 60vw, 100vw' : '(min-width: 1024px) 56rem, 100vw'}
+                class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]"
+              />
+            ) : (
+              <div class="w-full h-full" aria-hidden="true"></div>
+            )}
+
+            {/* Full-height gradient so overlay text reads on any image —
+                strong at the bottom for the title block, with a subtle
+                ~20% wash across the rest of the image to handle bright
+                window light or pale wall tones intersecting the title. */}
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/20 pointer-events-none"
+              aria-hidden="true"
+            ></div>
+
+            {hero?.featured && (
+              <span
+                class="absolute top-m right-m inline-flex items-center gap-1 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-eyebrow rounded-full bg-primary-dark text-white"
+                aria-hidden="true"
+              >
+                ★ Featured
+              </span>
+            )}
+
+            {/* Editorial text overlay — pinned to bottom. Cream chip styles
+                are inverted on the dark gradient to preserve legibility.
+                Right padding (`pr-28 md:pr-36`) reserves a corridor for the
+                ★ Featured pill at top-right so a long title never wraps
+                into the pill's column. */}
+            <div class="absolute inset-x-0 bottom-0 p-l md:p-section-md pr-28 md:pr-36">
+              <div class="flex flex-wrap items-center gap-x-m gap-y-xs">
+                {heroPrimaryCategory?.title && (
+                  <span class="inline-flex items-center px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-eyebrow rounded-full bg-bg/85 text-primary-dark backdrop-blur-sm">
+                    {heroPrimaryCategory.title}
+                  </span>
+                )}
+                {heroDate && (
+                  <time datetime={hero?.publishedAt} class="text-xs uppercase tracking-widest text-white/85">
+                    {heroDate}
+                  </time>
+                )}
+              </div>
+
+              {/* Mobile uses h3 sizing because journal titles can run long;
+                  desktop steps up to h2 for editorial impact. line-clamp-3
+                  is a safety net so unusually long titles never blow out
+                  the overlay area on small viewports. */}
+              <h3 class="mt-s font-display text-h3 md:text-h2 leading-tight text-white drop-shadow-sm max-w-2xl line-clamp-3">
+                {hero?.title}
+              </h3>
+
+              {hero?.excerpt && (
+                <p class="mt-s text-white/90 text-sm md:text-base leading-relaxed max-w-prose line-clamp-3">
+                  {hero.excerpt}
+                </p>
+              )}
+
+              <span class="mt-m inline-flex items-center text-sm font-semibold uppercase tracking-eyebrow text-white group-hover:text-primary transition-colors">
+                Read the article
+                <span class="ml-2 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">→</span>
+              </span>
+            </div>
+          </div>
+        </a>
+
+        {/* ------- Companion entries — one cohesive panel -----------------
+            Same pattern as FeaturedWork: the companions share a SINGLE card
+            (one bronze stripe, one border, one shadow) with each entry as a
+            row split by hairline dividers, so the right column reads as one
+            held-together unit. Fills the grid-stretched column on lg+ and
+            distributes rows with `lg:flex-1` so it lines up with the hero. */}
+        {hasCompanions && (
+          <div class="card-lift card-lift-slow flex flex-col rounded-md overflow-hidden bg-card border border-border-soft shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] lg:h-full">
+            {/* One brand accent stripe for the whole panel. */}
+            <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+            {companions.map((p, i) => {
+              const cHref = p.slug?.current ? `/journal/${p.slug.current}` : '#';
+              const cCat = p.categories?.[0];
+              const cDate = formatDate(p.publishedAt);
+              return (
+                <a
+                  href={cHref}
+                  class:list={[
+                    'group/row flex items-stretch gap-m flex-1 min-h-[8.5rem] transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none',
+                    i > 0 && 'border-t border-border-soft',
+                  ]}
+                >
+                  <div class="relative w-28 sm:w-36 lg:w-40 xl:w-44 aspect-square lg:aspect-auto shrink-0 overflow-hidden bg-muted self-stretch">
+                    {p.coverImage?.asset ? (
+                      <SanityImage
+                        source={p.coverImage}
+                        width={500}
+                        sizes="(min-width: 1280px) 176px, (min-width: 1024px) 160px, (min-width: 640px) 144px, 112px"
+                        class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover/row:scale-[1.04]"
+                      />
+                    ) : (
+                      <div class="w-full h-full" aria-hidden="true"></div>
+                    )}
+                  </div>
+
+                  <div class="flex-1 min-w-0 py-m pr-m flex flex-col justify-center">
+                    {cCat?.title && (
+                      <p class="text-[0.65rem] font-semibold uppercase tracking-eyebrow text-link truncate">
+                        {cCat.title}
+                      </p>
+                    )}
+                    <h4 class="mt-1 font-display text-h4 leading-tight text-foreground group-hover/row:text-primary-dark transition-colors line-clamp-2">
+                      {p.title}
+                    </h4>
+                    {cDate && (
+                      <p class="mt-1 text-xs uppercase tracking-widest text-foreground/80 truncate">
+                        {cDate}
+                      </p>
+                    )}
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div class="mt-section-lg flex justify-center">
+        <CtaLink
+          cta={cta}
+          variant="secondary"
+          fallbackHref="/journal"
+          fallbackLabel="Read more from the journal"
+        />
+      </div>
+    </div>
+  </section>
+)}

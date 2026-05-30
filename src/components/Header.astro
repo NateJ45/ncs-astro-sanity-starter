@@ -1,0 +1,577 @@
+---
+// Foundation, edit with care
+// Site header. Two structural rows on desktop, one on mobile:
+//   ┌─────────────────────────────────────── 4px Warm Bronze accent stripe
+//   │ ─────────────────────────────────────── eyebrow strip (desktop-only)
+//   │   Plainfield Interior Design · ...    staci@…  · IG · FB · theme
+//   ├─────────────────────────────────────── main row
+//   │   [logo]                  [nav]  │  [Book a consultation CTA]
+//   └───────────────────────────────────────
+// On mobile the eyebrow strip is hidden (its info lives in the redesigned
+// MobileNav drawer) and the main row centers the logo with the hamburger
+// pinned absolute to the right.
+//
+// siteSettings is optional. Defaults render cleanly so the header works
+// even before Sanity content is wired up.
+
+import { getImage } from 'astro:assets';
+import { site } from '@/data/site';
+import { Mail, Phone } from 'lucide-react';
+import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
+import ThemeToggle from './ThemeToggle';
+import MobileNav from './MobileNav';
+import { ChevronDown } from 'lucide-react';
+import logoLightAsset from '@/assets/logo-light.png';
+import logoDarkAsset from '@/assets/logo-dark.png';
+import { getSectionVisibility, type SectionVisibility } from '@/lib/sectionVisibility';
+import { telHref } from '@/lib/phone';
+
+// Pre-render every logo variant we'll need via Astro's image pipeline so we
+// have the hashed WebP URLs available at build time. The header displays at
+// h-[6.25rem] (≈95×100 px) with w-auto, so a 100w/200w pair covers 1×/2×
+// retina. The mobile drawer displays at h-16 (≈61×64 px), so 128w is plenty.
+// Pre-computing all four URLs means we can render ONE <img> with no src in
+// the HTML and let an inline script pick the right variant based on the
+// current theme — that's the only way to keep Lighthouse from flagging the
+// inactive logo as "image larger than displayed" (because Lighthouse
+// analyses the DOM, not the network log).
+const logoLight1x = await getImage({ src: logoLightAsset, format: 'webp', width: 100 });
+const logoLight2x = await getImage({ src: logoLightAsset, format: 'webp', width: 200 });
+const logoDark1x = await getImage({ src: logoDarkAsset, format: 'webp', width: 100 });
+const logoDark2x = await getImage({ src: logoDarkAsset, format: 'webp', width: 200 });
+const logoLightSrcset = `${logoLight1x.src} 1x, ${logoLight2x.src} 2x`;
+const logoDarkSrcset = `${logoDark1x.src} 1x, ${logoDark2x.src} 2x`;
+
+// Mobile drawer logos — separate getImage() calls at the smaller size the
+// drawer displays at. Their URLs are passed into MobileNav as plain
+// strings (the React island can't import assets directly).
+const logoLightWebpMobile = await getImage({ src: logoLightAsset, format: 'webp', width: 128 });
+const logoDarkWebpMobile = await getImage({ src: logoDarkAsset, format: 'webp', width: 128 });
+
+interface Props {
+  siteSettings?: {
+    siteName?: string;
+    title?: string;
+    tagline?: string;
+    email?: string;
+    phone?: string;
+    socialInstagram?: string;
+    socialFacebook?: string;
+    availabilityStatus?: string;
+    sectionVisibility?: {
+      showPortfolio?: boolean | null;
+      showJournal?: boolean | null;
+      showShop?: boolean | null;
+      showEDesign?: boolean | null;
+      showGiftCertificates?: boolean | null;
+      showPress?: boolean | null;
+      showResources?: boolean | null;
+      showGuides?: boolean | null;
+      showStyleQuiz?: boolean | null;
+      showBudgetCalculator?: boolean | null;
+    } | null;
+  } | null;
+}
+
+const { siteSettings } = Astro.props as Props;
+
+// Normalize section visibility from siteSettings. Unset => visible.
+const visible: SectionVisibility = getSectionVisibility(siteSettings?.sectionVisibility);
+const brandName = siteSettings?.siteName ?? siteSettings?.title ?? site.name;
+const availability = siteSettings?.availabilityStatus ?? '';
+
+// Subset of siteSettings the mobile menu needs. Pass as a plain object so the
+// React island doesn't try to serialize the whole Sanity document graph.
+const mobileNavSettings = siteSettings
+  ? {
+      tagline: siteSettings.tagline,
+      email: siteSettings.email,
+      phone: siteSettings.phone,
+      socialInstagram: siteSettings.socialInstagram,
+      socialFacebook: siteSettings.socialFacebook,
+    }
+  : null;
+
+const email = siteSettings?.email ?? '';
+const phone = siteSettings?.phone ?? '';
+const ig = siteSettings?.socialInstagram ?? '';
+const fb = siteSettings?.socialFacebook ?? '';
+
+// Grouped nav structure. Flat items render as plain anchor links; dropdown
+// items render as native <details>/<summary> disclosure groups on desktop
+// (server-rendered, see the nav markup below) and as indented expandable
+// groups in MobileNav.
+//
+// Why <details> and not a React island: the desktop nav must exist in the
+// server-rendered HTML so search-engine crawlers see every internal link and
+// so there is no flash-of-missing-nav (or CLS) before hydration. A native
+// <details> disclosure is crawlable, keyboard-accessible, and works with zero
+// JS. A tiny progressive-enhancement script (further down) adds the niceties
+// browsers don't give us for free: open-on-hover, close-on-outside-click,
+// close-on-Escape, and close-on-navigation. The links work without it.
+//
+// "Contact" is intentionally NOT in the primary nav — the "Book a consultation"
+// CTA at the right of the nav row does that job, and the MobileNav drawer also
+// surfaces the CTA at the top.
+// Build Services dropdown children. Services and Process are always shown;
+// E-Design and Gift Certificates are gated by visibility.
+const servicesDropdownItems = [
+  { label: 'Services',          href: '/services' },
+  ...(visible.eDesign          ? [{ label: 'E-Design',          href: '/e-design' }]          : []),
+  { label: 'Process',           href: '/process' },
+  ...(visible.giftCertificates ? [{ label: 'Gift Certificates', href: '/gift-certificates' }] : []),
+];
+
+// Build Resources dropdown children. FAQ is always shown; the rest are gated.
+const resourcesDropdownItems = [
+  ...(visible.styleQuiz        ? [{ label: 'Style Quiz',      href: '/quiz' }]        : []),
+  ...(visible.budgetCalculator ? [{ label: 'Cost Calculator', href: '/calculator' }]  : []),
+  ...(visible.guides           ? [{ label: 'Guides',          href: '/guides' }]      : []),
+  { label: 'FAQ',              href: '/faq' },
+  ...(visible.journal          ? [{ label: 'Journal',         href: '/journal' }]     : []),
+  ...(visible.portfolio        ? [{ label: 'Before & After',  href: '/portfolio/before-after' }] : []),
+];
+
+// Assemble the full nav. Flat items Portfolio and Shop are gated by visibility.
+// Dropdown groups are omitted entirely when their children list ends up empty.
+const NAV_ITEMS = [
+  { kind: 'flat' as const,     label: 'Home',  href: '/' },
+  ...(visible.portfolio ? [{ kind: 'flat' as const, label: 'Portfolio', href: '/portfolio' }] : []),
+  // Services dropdown — always present (Services + Process are core).
+  {
+    kind: 'dropdown' as const,
+    label: 'Services',
+    items: servicesDropdownItems,
+  },
+  ...(visible.shop ? [{ kind: 'flat' as const, label: 'Shop', href: '/shop' }] : []),
+  // Resources dropdown — only show when at least one child is visible (FAQ always is).
+  ...(resourcesDropdownItems.length > 0
+    ? [{ kind: 'dropdown' as const, label: 'Resources', items: resourcesDropdownItems }]
+    : []),
+  { kind: 'flat' as const,     label: 'About', href: '/about' },
+];
+
+// Flatten NAV_ITEMS into the shape MobileNav expects (a list of NavLink[]
+// with optional sub-items for the groups). MobileNav already handles both
+// shapes via its updated interface.
+const NAV_LINKS = NAV_ITEMS;
+
+const pathname = Astro.url.pathname;
+function isActive(href: string) {
+  if (href === '/') return pathname === '/';
+  return pathname.startsWith(href);
+}
+// A dropdown group is "active" (its trigger underline locks wide + aria-current
+// is set) when the current route matches any of its child links.
+function isGroupActive(items: { href: string }[]) {
+  return items.some((item) => isActive(item.href));
+}
+---
+
+<header class="site-header bg-background">
+  {/* Brand accent stripe — same visual signature used at the top of the
+      mobile menu drawer. Visible on every viewport. */}
+  <div class="h-1 bg-primary" aria-hidden="true"></div>
+
+  {/* Eyebrow strip (desktop only). Carries the locked positioning line and
+      utility controls (email + social icons + theme toggle). Mobile gets
+      the same info through the MobileNav drawer. Breakpoint bumped from
+      md (768 px) to lg (1024 px) so the eyebrow strip + nav row only
+      appear once there's room for the full nav + CTA without squishing
+      the logo. */}
+  <div class="hidden lg:block bg-muted border-b border-border-soft">
+    <div class="mx-auto flex max-w-content items-center justify-between px-l py-2">
+      <div class="flex items-center gap-m">
+        <p class="text-xs uppercase tracking-eyebrow text-foreground/80">
+          Plainfield Interior Design · Serving Greater Indianapolis
+        </p>
+        {/* Availability status, mirroring the mobile pill. Same pulsing dot
+            and link to /contact, so the trust signal is consistent at every
+            width (compact "Open" on phones, full status from md up). */}
+        {availability && (
+          <>
+            <span class="h-3 w-px bg-border-soft" aria-hidden="true"></span>
+            <a
+              href="/contact"
+              class="inline-flex items-center gap-1.5 text-xs uppercase tracking-eyebrow font-semibold text-foreground hover:text-link transition-colors"
+              aria-label={`${availability}. Get in touch.`}
+            >
+              <span class="relative flex w-2 h-2 shrink-0" aria-hidden="true">
+                <span class="absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-60 animate-ping"></span>
+                <span class="relative inline-flex w-2 h-2 rounded-full bg-tertiary"></span>
+              </span>
+              {availability}
+            </a>
+          </>
+        )}
+      </div>
+      <div class="flex items-center gap-m">
+        {email && (
+          <a
+            href={`mailto:${email}`}
+            class="inline-flex items-center gap-xs text-xs text-foreground hover:text-link transition-colors"
+          >
+            <Mail size={12} aria-hidden="true" />
+            {email}
+          </a>
+        )}
+        {phone && (
+          <a
+            href={telHref(phone)}
+            class="inline-flex items-center gap-xs text-xs text-foreground hover:text-link transition-colors"
+          >
+            <Phone size={12} aria-hidden="true" />
+            {phone}
+          </a>
+        )}
+        {(ig || fb) && (
+          <div class="flex items-center gap-1">
+            {ig && (
+              <a
+                href={ig}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                class="inline-flex h-7 w-7 items-center justify-center rounded-full text-foreground hover:bg-accent hover:text-link transition-colors"
+              >
+                <IconBrandInstagram size={14} stroke={1.5} />
+              </a>
+            )}
+            {fb && (
+              <a
+                href={fb}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                class="inline-flex h-7 w-7 items-center justify-center rounded-full text-foreground hover:bg-accent hover:text-link transition-colors"
+              >
+                <IconBrandFacebook size={14} stroke={1.5} />
+              </a>
+            )}
+          </div>
+        )}
+        {/* Hydrate when idle, not on load — the anti-FOUC inline script in
+            BaseLayout already applies the correct theme class before first
+            paint, so this React island only needs to be live by the time the
+            visitor moves to click it. Demoting from client:load shaves real
+            TBT off mobile Lighthouse runs. */}
+        <ThemeToggle client:idle />
+      </div>
+    </div>
+  </div>
+
+  {/* Main nav row. Mobile (and tablet) center the logo; desktop ≥1024 px
+      justifies logo left, nav+CTA grouped right. Breakpoint matches the
+      eyebrow strip above — at viewports between md and lg the desktop
+      layout would squish, so mobile-style header stays in use. */}
+  <div class="relative mx-auto flex max-w-content items-center justify-center lg:justify-between px-l py-m border-b border-border">
+    {/* Mobile-only availability pill, mirroring the hamburger menu's
+        absolute-right placement. Gives mobile visitors an at-a-glance trust
+        signal ("Open / accepting new clients") and a single-tap path to
+        /contact — meaningfully conversion-positive in a tiny footprint. Renders
+        nothing when siteSettings.availabilityStatus is empty so the slot just
+        stays empty negative space. */}
+    {availability && (
+      <a
+        href="/contact"
+        class="lg:hidden absolute left-m top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 rounded-full bg-muted border border-border-soft text-foreground hover:border-primary hover:text-primary-dark transition-colors"
+        aria-label={`${availability}. Tap to start a conversation.`}
+      >
+        <span
+          class="relative flex w-2 h-2 shrink-0"
+          aria-hidden="true"
+        >
+          {/* Soft pulsing halo — kills under prefers-reduced-motion via the
+              global rule that flattens all animations. */}
+          <span class="absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-60 animate-ping"></span>
+          <span class="relative inline-flex w-2 h-2 rounded-full bg-tertiary"></span>
+        </span>
+        {/* On the narrowest phones the centered logo leaves room only for a
+            compact "Open". From md up, where the pill has space before the
+            logo, show the full availabilityStatus so the roomy header doesn't
+            read as half-empty. The complete status is always in the aria-label
+            and on the Contact page. */}
+        <span class="md:hidden text-[0.65rem] uppercase tracking-eyebrow font-semibold whitespace-nowrap">
+          Open
+        </span>
+        <span class="hidden md:inline text-[0.65rem] uppercase tracking-eyebrow font-semibold whitespace-nowrap">
+          {availability}
+        </span>
+      </a>
+    )}
+
+    <a
+      href="/"
+      class="inline-flex items-center hover:opacity-80 transition-opacity"
+      aria-label={`${brandName} home`}
+    >
+      {/*
+        Single theme-aware logo. The img ships with NO src/srcset so the
+        browser doesn't start fetching anything; the inline script below
+        sets the right variant synchronously before paint based on the
+        current html.dark state, then re-applies on theme-toggle and
+        astro:after-swap (handled in the anti-FOUC script in BaseLayout).
+        Net result: only one logo file is ever fetched per page load, and
+        Lighthouse no longer sees a dark-variant in light-mode DOM (or
+        vice-versa).
+
+        Dimensions and aspect ratio (100×106) match the source 378:400,
+        so the browser reserves the right layout box before the file lands
+        — no CLS.
+      */}
+      <img
+        alt={brandName}
+        width={100}
+        height={106}
+        class="h-[6.25rem] w-auto"
+        loading="eager"
+        decoding="async"
+        data-theme-logo
+        data-logo-light-src={logoLight1x.src}
+        data-logo-light-srcset={logoLightSrcset}
+        data-logo-dark-src={logoDark1x.src}
+        data-logo-dark-srcset={logoDarkSrcset}
+      />
+    </a>
+    {/* Synchronous inline setup — runs immediately after the img element
+        is parsed, so the src is set before the browser begins any image
+        fetch. Re-applied across View Transitions navs by the anti-FOUC
+        listener in BaseLayout. */}
+    <script is:inline>
+      (function () {
+        const img = document.querySelector('header img[data-theme-logo]');
+        if (!img) return;
+        const dark = document.documentElement.classList.contains('dark');
+        img.src = dark ? img.dataset.logoDarkSrc : img.dataset.logoLightSrc;
+        img.srcset = dark ? img.dataset.logoDarkSrcset : img.dataset.logoLightSrcset;
+      })();
+    </script>
+
+    {/* Nav + CTA grouped on the right (lg+ only).
+
+        The desktop nav is server-rendered as real <a> tags (flat links) plus
+        native <details> disclosure groups (the two dropdowns). Everything is in
+        the HTML at build time — crawlable, keyboard-usable, and present before
+        any JS runs (no flash, no CLS). The progressive-enhancement script at the
+        bottom of this file layers on hover-to-open + outside-click/Escape/
+        navigation close; the nav is fully functional without it. */}
+    <div class="hidden lg:flex items-center gap-l">
+      <nav class="site-nav flex items-center gap-l" aria-label="Primary">
+        {NAV_ITEMS.map((item) =>
+          item.kind === 'flat' ? (
+            <a
+              href={item.href}
+              class:list={[
+                'nav-underline text-sm tracking-wide transition-colors',
+                isActive(item.href)
+                  ? 'text-link font-semibold'
+                  : 'text-foreground hover:text-link',
+              ]}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          ) : (
+            <details class="site-nav__group relative">
+              {/* <summary> is the disclosure toggle. It carries .nav-underline
+                  so it gets the same bronze underline as flat links, and
+                  aria-current="page" (which locks the underline wide) when one
+                  of its children is the active route. role/aria-expanded are
+                  managed natively by <details>. */}
+              <summary
+                class:list={[
+                  'nav-underline text-sm tracking-wide transition-colors',
+                  'inline-flex items-center gap-0.5 cursor-pointer select-none list-none',
+                  'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm',
+                  isGroupActive(item.items)
+                    ? 'text-link font-semibold'
+                    : 'text-foreground hover:text-link',
+                ]}
+                aria-current={isGroupActive(item.items) ? 'page' : undefined}
+              >
+                {item.label}
+                <ChevronDown
+                  size={14}
+                  className="site-nav__chevron mt-px transition-transform duration-150"
+                  aria-hidden="true"
+                />
+              </summary>
+
+              {/* Menu panel. Absolutely positioned under the summary so it
+                  doesn't shift layout. Uses popover tokens to match the mobile
+                  drawer + shadcn dropdowns, and the bronze ring + shadow of the
+                  card rhythm. */}
+              <div
+                class="site-nav__menu absolute left-0 top-full mt-2 min-w-[200px] rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 z-50"
+              >
+                {item.items.map((sub) => (
+                  <a
+                    href={sub.href}
+                    class:list={[
+                      'block rounded-md px-2.5 py-1.5 text-sm transition-colors',
+                      'hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground outline-none',
+                      isActive(sub.href) ? 'font-semibold text-link' : 'text-foreground',
+                    ]}
+                    aria-current={isActive(sub.href) ? 'page' : undefined}
+                  >
+                    {sub.label}
+                  </a>
+                ))}
+              </div>
+            </details>
+          )
+        )}
+      </nav>
+      <span class="h-6 w-px bg-border-soft" aria-hidden="true"></span>
+      <a
+        href="/contact"
+        class:list={[
+          'press-tactile inline-flex items-center px-m py-2 rounded-md text-xs uppercase tracking-eyebrow font-semibold',
+          isActive('/contact')
+            ? 'bg-accent-dark text-white'
+            : 'bg-primary-dark text-white hover:bg-accent-dark',
+        ]}
+      >
+        Book a consultation
+      </a>
+    </div>
+
+    <MobileNav
+      client:only="react"
+      links={NAV_LINKS}
+      siteSettings={mobileNavSettings}
+      logoLightUrl={logoLightWebpMobile.src}
+      logoDarkUrl={logoDarkWebpMobile.src}
+    />
+  </div>
+</header>
+
+<style>
+  /* Desktop dropdown groups (native <details>). The links are server-rendered
+     and fully usable with no JS; these styles + the script below add the
+     dropdown affordances. */
+
+  /* Hide the default disclosure triangle in every engine. */
+  .site-nav__group > summary {
+    list-style: none;
+  }
+  .site-nav__group > summary::-webkit-details-marker,
+  .site-nav__group > summary::marker {
+    display: none;
+    content: "";
+  }
+
+  /* Rotate the chevron when the group is open. */
+  .site-nav__group[open] > summary .site-nav__chevron {
+    transform: rotate(180deg);
+  }
+
+  /* The menu panel starts hidden until the <details> is open. <details>
+     natively hides non-summary children when closed, but we keep an explicit
+     rule so the absolutely-positioned panel never flashes during hydration. */
+  .site-nav__menu {
+    display: none;
+  }
+  .site-nav__group[open] > .site-nav__menu {
+    display: block;
+  }
+</style>
+
+{/* Progressive enhancement for the desktop dropdown nav. Everything still
+    works without this (native <details> toggles on click/Enter/Space, links
+    are real <a> tags). This adds: open-on-hover with a small close delay,
+    close-on-outside-click, close-on-Escape, and close-when-a-link-is-followed.
+    Re-binds on astro:page-load so it survives View Transitions navigations. */}
+<script>
+  // Query groups fresh each call — the nav DOM is replaced on every View
+  // Transitions navigation, so a captured list would go stale.
+  function currentGroups() {
+    return Array.from(
+      document.querySelectorAll<HTMLDetailsElement>('.site-nav__group'),
+    );
+  }
+
+  function closeAllGroups(except?: HTMLDetailsElement) {
+    for (const g of currentGroups()) {
+      if (g !== except) g.open = false;
+    }
+  }
+
+  function initHeaderNav() {
+    const groups = currentGroups();
+    if (groups.length === 0) return;
+
+    const closeAll = closeAllGroups;
+
+    for (const group of groups) {
+      const summary = group.querySelector('summary');
+      let closeTimer: number | undefined;
+
+      const cancelClose = () => {
+        if (closeTimer) {
+          window.clearTimeout(closeTimer);
+          closeTimer = undefined;
+        }
+      };
+
+      // Hover intent: open immediately on enter, close after a short delay on
+      // leave so a diagonal mouse path to the menu doesn't snap it shut. Only
+      // engages on pointers that can actually hover (skips touch).
+      group.addEventListener('pointerenter', (e) => {
+        if (e.pointerType === 'touch') return;
+        cancelClose();
+        closeAll(group);
+        group.open = true;
+      });
+      group.addEventListener('pointerleave', (e) => {
+        if (e.pointerType === 'touch') return;
+        cancelClose();
+        closeTimer = window.setTimeout(() => {
+          group.open = false;
+        }, 140);
+      });
+
+      // When opened via keyboard/click, make sure the others close.
+      summary?.addEventListener('click', () => {
+        // <details> toggles AFTER this handler, so the post-toggle state is the
+        // inverse of the current one. If it's about to open, close the rest.
+        if (!group.open) closeAll(group);
+      });
+
+      // Following a link inside the menu should close the group (so it isn't
+      // left open behind the next page during a View Transitions swap).
+      group.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => {
+          group.open = false;
+        });
+      });
+    }
+  }
+
+  // Document-level listeners bind ONCE (guarded by a window flag), so they
+  // don't stack up across View Transitions navigations. They query the nav
+  // groups fresh each time they fire, so the swapped-in DOM is always covered.
+  const w = window as typeof window & { __headerNavBound?: boolean };
+  if (!w.__headerNavBound) {
+    w.__headerNavBound = true;
+
+    // Close any open group when clicking outside the nav.
+    document.addEventListener('pointerdown', (e) => {
+      const target = e.target as Node;
+      if (!currentGroups().some((g) => g.contains(target))) closeAllGroups();
+    });
+
+    // Escape closes the open group and returns focus to its summary.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      const openGroup = currentGroups().find((g) => g.open);
+      if (openGroup) {
+        openGroup.open = false;
+        openGroup.querySelector('summary')?.focus();
+      }
+    });
+  }
+
+  initHeaderNav();
+  document.addEventListener('astro:page-load', initHeaderNav);
+</script>

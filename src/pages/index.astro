@@ -1,0 +1,389 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Home page. Section order is conversion-tuned (see the 2026-05 reorder):
+// visual proof and social proof come early, price transparency mid-funnel,
+// the long-read journal sits late for visitors in research mode.
+//   1. Hero (Plainfield-first eyebrow, headline, two CTAs, background image)
+//   2. Meet Staci (photo, intro copy, CTA to About)
+//   3. Featured Work (hero project + companions — visual proof, the hook)
+//   4. Kind Words (1 featured testimonial + grid — social proof, early)
+//   5. How It Works (4-step process preview, CTA to Process)
+//   6. How Reid Design Can Help (services grid + pricing)
+//   7. Featured Journal (hero entry + companions — depth for considerers)
+//   8. Service area cue line
+//   9. Final CTA (full-bleed)
+//
+// Featured Work (3) + Featured Journal (7) auto-populate from the Project +
+// JournalEntry collections, ordered featured-first then by publish date.
+// Staci pins a piece via the `featured` boolean on the doc; otherwise the
+// section shows the latest 4. Both suppress entirely when there's no content.
+//
+// Background cadence alternates background / muted down the page so adjacent
+// sections never share a surface (the one muted/muted seam — Featured Journal
+// into the Service-area cue — is bridged by the bronze SectionDivider).
+//
+// Everything inside each section is editable in Sanity via the homePage singleton plus the
+// service / testimonial / processStep / project / journalEntry collections.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getHomePage, getSiteSettings, getPressItems } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import PortableText from '@/components/PortableText';
+import ProcessStep from '@/components/ProcessStep.astro';
+import FeaturedTestimonial from '@/components/FeaturedTestimonial.astro';
+import TestimonialGrid from '@/components/TestimonialGrid.astro';
+import ServiceCard from '@/components/ServiceCard.astro';
+import ServiceAreaCue from '@/components/ServiceAreaCue.astro';
+import SectionDivider from '@/components/SectionDivider.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import FeaturedWork from '@/components/FeaturedWork.astro';
+import FeaturedJournal from '@/components/FeaturedJournal.astro';
+import PressStrip from '@/components/PressStrip.astro';
+
+const [page, siteSettings, pressItems] = await Promise.all([
+  getHomePage().catch(() => null),
+  getSiteSettings().catch(() => null),
+  getPressItems().catch(() => []),
+]);
+
+// Derive section visibility. Unset fields count as visible so the live site
+// is unchanged until Staci explicitly turns something off in Studio.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+
+// Top-level SEO meta. Fall back to site identity when Sanity is empty (e.g., before content seed).
+const title       = page?.seoTitle       ?? site.name;
+const description = page?.seoDescription ?? 'Plainfield interior design for homes that feel genuinely yours.';
+
+// Hero defaults — keep them aligned with CLAUDE.md voice in case the homePage doc is bare.
+const heroEyebrow  = page?.heroEyebrow  ?? 'Plainfield, Indiana.';
+const heroHeadline = page?.heroHeadline ?? 'Interior design for homes that feel genuinely yours.';
+const heroSubhead  = page?.heroSubhead  ?? '';
+
+// Collections: services with showOnHomepage, testimonialsToShow (in order), process steps in order.
+const services       = page?.services       ?? [];
+const processSteps   = page?.processSteps   ?? [];
+const featuredQuote  = page?.featuredTestimonial;
+const gridQuotes     = page?.testimonialsToShow ?? [];
+
+// Google Business URL for "Read more on Google" link + reviews note.
+// Both are sourced from siteSettings so one edit covers every surface.
+const googleBusinessUrl = siteSettings?.googleBusinessUrl;
+const reviewsNote       = siteSettings?.reviewsNote;
+
+// Section copy fallbacks (lock the home page in even before all Sanity copy lands).
+const meetStaciEyebrow  = page?.meetStaciEyebrow  ?? 'The Designer.';
+const meetStaciHeadline = page?.meetStaciHeadline ?? 'Hi, I’m Staci.';
+const meetStaciContent  = page?.meetStaciContent  ?? null;
+
+const processPreviewEyebrow  = page?.processPreviewEyebrow  ?? 'How It Works.';
+const processPreviewHeadline = page?.processPreviewHeadline ?? 'A clear path from first conversation to final reveal.';
+const processPreviewSubhead  = page?.processPreviewSubhead  ??
+  'No guesswork and no pressure. From our first conversation to the day everything comes together, you will always know exactly where things stand and what happens next.';
+
+const testimonialsEyebrow      = page?.testimonialsEyebrow      ?? 'Kind Words.';
+const testimonialsHeadline     = page?.testimonialsHeadline     ?? 'Words from real homes.';
+const testimonialsScriptAccent = page?.testimonialsScriptAccent;
+const testimonialsSubhead      = page?.testimonialsSubhead      ??
+  'The part that matters most: how it felt to work together, and how each space holds up to everyday life long after the last pillow is placed.';
+const testimonialsAttribution  = page?.testimonialsAttribution;
+
+const servicesGridEyebrow        = page?.servicesGridEyebrow        ?? 'Reid Design.';
+const servicesGridHeadline       = page?.servicesGridHeadline       ?? 'How we can help your home.';
+const servicesGridScriptAccent   = page?.servicesGridScriptAccent;
+const servicesGridSubhead        = page?.servicesGridSubhead;
+const servicesGridFootnote  = page?.servicesGridFootnote;
+
+// Featured Work section. Auto-fetches the 4 most-relevant projects
+// (featured-pinned items first, then newest). Empty array suppresses the
+// section, so the home page degrades gracefully pre-launch.
+// Subhead defaults are written for conversion — they explain what a click
+// will reveal so visitors are pulled into a case study, not just an image.
+const featuredWorkEyebrow  = page?.featuredWorkEyebrow  ?? 'Recent Work';
+const featuredWorkHeadline = page?.featuredWorkHeadline ?? 'Rooms that feel finished.';
+const featuredWorkSubhead  = page?.featuredWorkSubhead  ??
+  'A look at recent projects across Plainfield and the Indianapolis suburbs. Each one starts with a conversation about how the space actually needs to function, then the design follows from there. Open any project to see the brief, the design call, and exactly how the room came together.';
+const featuredProjects     = page?.featuredProjects     ?? [];
+
+// Featured Journal section. Same auto-fetch logic for journal entries.
+const featuredJournalEyebrow  = page?.featuredJournalEyebrow  ?? 'From the Journal';
+const featuredJournalHeadline = page?.featuredJournalHeadline ?? 'How I think about design.';
+const featuredJournalSubhead  = page?.featuredJournalSubhead  ??
+  'Posts on the design moves that change a room, source roundups behind specific projects, and the occasional honest note about what I would do differently. The thinking that informs every consultation.';
+const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
+---
+
+<BaseLayout {title} {description} {siteSettings} seoImage={page?.seoImage}>
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  {/* rotatingWords cycles the first word of the headline once on first visit
+      per session, then settles back to the original. Tasteful flourish that
+      hints at the design vocabulary without becoming a marquee. Honors
+      prefers-reduced-motion. Both rotatingWords and scriptAccent are
+      Sanity-editable on homePage; sensible defaults keep the design intact
+      if Staci clears the fields. */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    backgroundImages={page?.heroImages}
+    primaryCta={page?.heroPrimaryCta}
+    secondaryCta={page?.heroSecondaryCta}
+    headingId="hero-heading"
+    size="tall"
+    rotatingWords={page?.heroRotatingWords ?? ['Lived-in', 'Considered', 'Quiet']}
+    scriptAccent={page?.heroScriptAccent}
+  />
+
+  {/* ------- 2. Meet Staci --------------------------------------------------- */}
+  <section
+    class="bg-background"
+    aria-labelledby="meet-staci-heading"
+  >
+    <div data-reveal class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-2 gap-l md:gap-section-md items-center">
+      {page?.meetStaciPhoto?.asset ? (
+        <div class="order-1 md:order-1">
+          {/* width=800 caps the responsive ladder at 800w — the column
+              never exceeds ~648 px (45vw of a 1440 px viewport) and
+              mobile only needs ~750 px even at high DPR. The previous
+              900 px cap was triggering Lighthouse's "image larger than
+              displayed" warning by ~112 KB on the Meet Staci photo. */}
+          <SanityImage
+            source={page.meetStaciPhoto}
+            width={800}
+            sizes="(min-width: 768px) 45vw, 100vw"
+            quality={75}
+            class="w-full h-auto rounded-md"
+          />
+        </div>
+      ) : (
+        <div class="order-1 md:order-1 aspect-[4/5] bg-muted rounded-md" aria-hidden="true"></div>
+      )}
+
+      <div class="order-2 md:order-2">
+        <p class="text-xs uppercase tracking-[0.22em] text-foreground/80 mb-s">{meetStaciEyebrow}</p>
+        <h2 id="meet-staci-heading" class="font-display text-h2 text-foreground">
+          {meetStaciHeadline}
+        </h2>
+        {meetStaciContent ? (
+          <PortableText
+            value={meetStaciContent}
+            className="mt-m text-foreground/85 text-lg leading-relaxed"
+          />
+        ) : (
+          <p class="mt-m text-foreground/85 text-lg leading-relaxed">
+            Plainfield-based interior designer working with homeowners across Greater Indianapolis to
+            create spaces that feel calm, considered, and unmistakably theirs.
+          </p>
+        )}
+        <div class="mt-l flex justify-center md:justify-start">
+          <CtaLink
+            cta={page?.meetStaciCta}
+            variant="secondary"
+            fallbackHref="/about"
+            fallbackLabel="Get to Know Me"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ------- 3. Featured Work (visual proof, the hook) ---------------------- */}
+  {/* Auto-populated by query: 1 hero + up to 3 companion cards, ordered
+      featured-then-newest. Section is render-suppressed when there are no
+      projects yet or when portfolio is off. surface-warm bg-muted. */}
+  {visible.portfolio && (
+    <FeaturedWork
+      projects={featuredProjects}
+      eyebrow={featuredWorkEyebrow}
+      headline={featuredWorkHeadline}
+      subhead={featuredWorkSubhead}
+      cta={page?.featuredWorkCta}
+    />
+  )}
+
+  {/* ------- 4. Kind Words (social proof, early) ---------------------------- */}
+  {(featuredQuote || gridQuotes.length > 0) && (
+    <section
+      class="surface-warm bg-background"
+      aria-labelledby="testimonials-heading"
+    >
+      <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
+        <SectionHeading
+          eyebrow={testimonialsEyebrow}
+          headline={testimonialsHeadline}
+          subhead={testimonialsSubhead}
+          headingId="testimonials-heading"
+          align="center"
+          class="mx-auto"
+          scriptAccent={testimonialsScriptAccent}
+        />
+
+        {featuredQuote && (
+          <div class="mt-section-lg">
+            <FeaturedTestimonial testimonial={featuredQuote} />
+          </div>
+        )}
+
+        {gridQuotes.length > 0 && (
+          <div class="mt-section-lg">
+            <TestimonialGrid testimonials={gridQuotes} limit={6} />
+          </div>
+        )}
+
+        {testimonialsAttribution && (
+          <p class="mt-section-md text-center text-sm text-muted-foreground italic">
+            {testimonialsAttribution}
+          </p>
+        )}
+
+        {/* reviewsNote + Google link — both suppress when unset.
+            reviewsNote is a short plain-text line from siteSettings
+            (e.g., "Rated 5 stars on Google."). The Google link renders
+            only when googleBusinessUrl is populated so there's never a
+            dead link. */}
+        {(reviewsNote || googleBusinessUrl) && (
+          <p class="mt-l text-center text-sm text-foreground/75 flex flex-wrap items-center justify-center gap-s">
+            {reviewsNote && <span>{reviewsNote}</span>}
+            {googleBusinessUrl && (
+              <a
+                href={googleBusinessUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-xs text-link underline underline-offset-2 hover:text-primary-dark transition-colors font-medium"
+              >
+                Read more on Google <span aria-hidden="true">↗</span>
+              </a>
+            )}
+          </p>
+        )}
+      </div>
+    </section>
+  )}
+
+  {/* ------- 5. How It Works (process preview) ------------------------------- */}
+  <section
+    class="bg-muted"
+    aria-labelledby="process-preview-heading"
+  >
+    <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow={processPreviewEyebrow}
+        headline={processPreviewHeadline}
+        subhead={processPreviewSubhead}
+        headingId="process-preview-heading"
+        align="center"
+        class="mx-auto"
+      />
+
+      {processSteps.length > 0 && (
+        <div class="mt-section-lg grid grid-cols-1 md:grid-cols-2 gap-section-md">
+          {processSteps.slice(0, 4).map((step: any, i: number, arr) => (
+            <ProcessStep step={step} variant="preview" isLast={i === arr.length - 1} />
+          ))}
+        </div>
+      )}
+
+      <div class="mt-section-lg flex justify-center">
+        <CtaLink
+          cta={page?.processPreviewCta}
+          variant="secondary"
+          fallbackHref="/process"
+          fallbackLabel="See the Full Process"
+        />
+      </div>
+    </div>
+  </section>
+
+  {/* ------- 6. How Reid Design Can Help (services grid + pricing) ---------- */}
+  {/* bg-background (not muted) so the cadence alternates cleanly now that
+      Kind Words moved above How It Works. */}
+  <section
+    class="surface-warm bg-background"
+    aria-labelledby="services-heading"
+  >
+    <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow={servicesGridEyebrow}
+        headline={servicesGridHeadline}
+        subhead={servicesGridSubhead}
+        headingId="services-heading"
+        align="center"
+        class="mx-auto"
+        scriptAccent={servicesGridScriptAccent}
+      />
+
+      {services.length > 0 && (
+        <div class="mt-section-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-m" data-stagger-grid>
+          {services.slice(0, 4).map((service: any) => (
+            <ServiceCard service={service} compact={true} />
+          ))}
+        </div>
+      )}
+
+      <div class="mt-section-lg flex justify-center">
+        <CtaLink
+          cta={page?.servicesGridCta}
+          variant="secondary"
+          fallbackHref="/services"
+          fallbackLabel="See All Services"
+        />
+      </div>
+
+      {servicesGridFootnote && (
+        <p class="mt-section-md text-center text-sm text-muted-foreground italic">
+          {servicesGridFootnote}
+        </p>
+      )}
+    </div>
+  </section>
+
+  {/* ------- 7. Featured Journal (depth for considerers) -------------------- */}
+  {/* Moved late in the funnel: the long-read journal speaks to visitors in
+      research mode, after Work + testimonials + services have warmed them.
+      surface-warm bg-muted (set in the component). Hidden when journal is off. */}
+  {visible.journal && (
+    <FeaturedJournal
+      entries={featuredJournalEntries}
+      eyebrow={featuredJournalEyebrow}
+      headline={featuredJournalHeadline}
+      subhead={featuredJournalSubhead}
+      cta={page?.featuredJournalCta}
+    />
+  )}
+
+  {/* ------- Press strip (as seen in) --------------------------------------- */}
+  {/* Sits between Featured Journal and the service-area cue. PressStrip
+      suppresses itself when the pressItem collection is empty; also hidden
+      when the press section is turned off in siteSettings. */}
+  {visible.press && <PressStrip items={pressItems} />}
+
+  {/* Bronze ornament between Featured Journal and the service-area cue.
+      Both sit on muted-toned backgrounds, so the alternating color cadence
+      isn't doing the work — this is the case the ornament was built for. */}
+  <div class="bg-muted">
+    <SectionDivider variant="ornament" />
+  </div>
+
+  {/* ------- 8. Service area cue line --------------------------------------- */}
+  <ServiceAreaCue
+    text={page?.serviceAreaCue}
+    cities={siteSettings?.serviceAreas}
+    eyebrow="Where Reid Design works"
+  />
+
+  {/* ------- 9. Final CTA --------------------------------------------------- */}
+  <FinalCta
+    eyebrow={page?.finalCtaEyebrow}
+    headline={page?.finalCtaHeadline}
+    subhead={page?.finalCtaSubhead}
+    cta={page?.finalCta}
+    scriptAccent={page?.finalCtaScriptAccent}
+    backgroundImage={page?.finalCtaBackgroundImage}
+  />
+</BaseLayout>

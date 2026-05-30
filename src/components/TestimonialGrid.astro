@@ -1,0 +1,28 @@
+---
+// Safe to edit by hand
+// Responsive grid of TestimonialCards. 1 column on mobile, 2 at md, 3 at lg.
+// Default cap is 6 cards (the homepage spec); pass a different `limit` to show more.
+
+import TestimonialCard from '@/components/TestimonialCard.astro';
+
+interface Props {
+  testimonials?: Array<{
+    quote?: string;
+    attribution?: string;
+    date?: string;
+    source?: string;
+  }> | null;
+  limit?: number;
+}
+
+const { testimonials, limit = 6 } = Astro.props as Props;
+const items = (testimonials ?? []).filter((t) => t?.quote).slice(0, limit);
+---
+
+{items.length > 0 && (
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-m">
+    {items.map((t) => (
+      <TestimonialCard testimonial={t} />
+    ))}
+  </div>
+)}

@@ -1,0 +1,287 @@
+---
+// Foundation, edit with care
+// Project detail page. Hero image + meta, intro story (Portable Text with anchor IDs),
+// optional gallery (justified album + lightbox), optional before/after pairs,
+// related testimonial, services used, next/previous navigation, sticky TOC.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getAllProjects, getProjectBySlug, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema, projectSchema } from '@/lib/schemas';
+import { extractHeadings } from '@/lib/portable-text-headings';
+import { readingTimeFromPortableText, formatReadingTime } from '@/lib/reading-time';
+import { site } from '@/data/site';
+import { urlFor } from '@/lib/sanity';
+import SanityImage from '@/components/SanityImage.astro';
+import PortableText from '@/components/PortableText';
+import CaseStudyTOC from '@/components/CaseStudyTOC';
+import ProjectGallery from '@/components/ProjectGallery';
+import BeforeAfterSlider from '@/components/BeforeAfterSlider';
+import ProjectMetaBand from '@/components/ProjectMetaBand.astro';
+import StickyCTAChip from '@/components/StickyCTAChip';
+import JournalCard from '@/components/JournalCard.astro';
+
+// Static site: enumerate all project slugs at build time.
+// Returns [] when portfolio is off — no detail pages build and they 404.
+export async function getStaticPaths() {
+  const [projects, settings] = await Promise.all([
+    getAllProjects().catch(() => []),
+    getSiteSettings().catch(() => null),
+  ]);
+  const visible = getSectionVisibility(settings?.sectionVisibility);
+  if (!visible.portfolio) return [];
+
+  if (!Array.isArray(projects) || projects.length === 0) return [];
+
+  return projects.map((p, i) => {
+    const prev = projects[i - 1] ?? null;
+    const next = projects[i + 1] ?? null;
+    return {
+      params: { slug: p.slug?.current ?? '' },
+      props: {
+        prev: prev ? { title: prev.title, slug: prev.slug?.current } : null,
+        next: next ? { title: next.title, slug: next.slug?.current } : null,
+      },
+    };
+  }).filter((entry) => entry.params.slug);
+}
+
+const { slug } = Astro.params;
+const { prev, next } = Astro.props as {
+  prev: { title?: string; slug?: string } | null;
+  next: { title?: string; slug?: string } | null;
+};
+
+const [project, siteSettings] = await Promise.all([
+  getProjectBySlug(slug as string),
+  getSiteSettings().catch(() => null),
+]);
+
+if (!project) {
+  return Astro.redirect('/404');
+}
+
+// SEO overrides win when set; fall back to title + briefSummary so existing
+// projects keep working without a content update.
+const title = project.metaTitle ?? `${project.title} — ${project.location}`;
+const description = project.metaDescription ?? project.briefSummary ?? 'A Reid Design project case study.';
+const heroOg = project.heroImage?.asset
+  ? urlFor(project.heroImage).width(1200).height(630).fit('crop').quality(80).format('webp').url()
+  : undefined;
+
+const headings = extractHeadings(project.introStory);
+const readMinutes = readingTimeFromPortableText(project.introStory);
+// When the intro story has no h2/h3/h4 headings, the TOC component returns
+// null. We still need to know that here so the grid template collapses to
+// a single column on lg+, otherwise the empty 260 px sidebar slot would
+// push the article off-center to the right.
+const hasToc = headings.length > 0;
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Portfolio', url: `${site.url}/portfolio` },
+    { name: project.title ?? slug, url: `${site.url}/portfolio/${slug}` },
+  ]),
+  projectSchema(project, heroOg ?? null),
+];
+---
+
+<BaseLayout
+  {title}
+  {description}
+  ogImage={heroOg}
+  {schemas}
+  {siteSettings}
+>
+  {/* Hero */}
+  <section
+    class="mx-auto max-w-content px-m pt-section-md pb-l"
+    aria-labelledby="project-hero-heading"
+  >
+    <p class="text-xs uppercase tracking-widest text-foreground/80 mb-s">
+      <a href="/portfolio" class="hover:text-primary transition-colors">Portfolio</a> · {project.roomType?.replace(/([A-Z])/g, ' $1').toLowerCase()}
+    </p>
+    <h1 id="project-hero-heading" class="font-display text-h1 text-foreground">{project.title}</h1>
+    <p class="mt-s text-foreground/80 text-lg">{project.briefSummary}</p>
+    <div class="mt-m flex flex-wrap items-center gap-m text-sm text-muted-foreground">
+      {project.location && <span>{project.location}</span>}
+      {project.year && <span>·</span>}
+      {project.year && <span>{project.year}</span>}
+      {readMinutes > 0 && <span>·</span>}
+      {readMinutes > 0 && <span>{formatReadingTime(readMinutes)}</span>}
+    </div>
+  </section>
+
+  {project.heroImage?.asset && (
+    /*
+      Hero image sized to read like an editorial feature, not a billboard.
+      max-w-4xl (56rem ≈ 896 px) keeps the photo as the visual focal point
+      of the page without dominating it on wide desktops — matches the
+      reference editorial sites (theologymatters.com etc.) and pairs well
+      with the slightly-narrower body column that follows. The requested
+      Sanity width caps at 1800 so we're not asking the CDN for a 1920 px
+      file for an ~900 px slot even on 2× retina.
+    */
+    <section class="mx-auto max-w-4xl px-m" aria-label="Project hero image">
+      <figure>
+        <div class="relative overflow-hidden rounded-md">
+          <SanityImage
+            source={project.heroImage}
+            width={1800}
+            loading="eager"
+            sizes="(min-width: 920px) 896px, 100vw"
+            class="w-full h-auto"
+          />
+          <div class="img-curtain" aria-hidden="true"></div>
+        </div>
+        {project.heroImage.caption && (
+          <figcaption class="mt-s text-sm text-foreground/80 italic text-center">
+            {project.heroImage.caption}
+          </figcaption>
+        )}
+      </figure>
+    </section>
+  )}
+
+  {/* Project metadata band — "the room / the brief / the call" */}
+  <ProjectMetaBand
+    roomType={project.roomType}
+    briefLine={project.briefLine}
+    designCall={project.designCall}
+  />
+
+  {/* Body: TOC sidebar + story.
+
+      Grid layout:
+        - Mobile: single column.
+        - lg+ with TOC: 260 px TOC + article capped at 65ch (matches the
+          max-w-prose Tailwind sets on .prose), centered as a pair via
+          `lg:justify-center` so the empty space splits evenly on both
+          sides instead of stacking up on the right.
+        - lg+ without TOC: single article column, also centered. This
+          avoids the previous bug where an empty 260 px sidebar slot was
+          still reserved on stories that had no headings, pushing the
+          article off-center.
+      The article keeps `max-w-prose` for safety in case any case ever
+      ships outside this grid; the grid column cap is what does the work
+      in practice. */}
+  <section
+    class:list={[
+      'mx-auto max-w-content px-m py-section-md grid grid-cols-1 gap-section-md lg:justify-center',
+      hasToc
+        ? 'lg:grid-cols-[260px_minmax(0,65ch)]'
+        : 'lg:grid-cols-[minmax(0,65ch)]',
+    ]}
+    aria-label="Project story"
+  >
+    {hasToc && <CaseStudyTOC client:idle headings={headings} />}
+
+    <article class="max-w-prose">
+      {/* `client:visible` defers the 94KB Sanity client bundle that PortableText
+          pulls in (via the urlFor import) until the visitor scrolls the
+          intro story into view. The HTML is still server-rendered by Astro,
+          so visitors see the content immediately — only the React
+          hydration is deferred. */}
+      <PortableText client:visible value={project.introStory} className="text-foreground/90" />
+
+      {Array.isArray(project.beforeAfters) && project.beforeAfters.length > 0 && (
+        <div class="mt-section-lg">
+          <h2 class="font-display text-h2 text-foreground" id="before-and-after">Before and after</h2>
+          {project.beforeAfters.map((pair: any) => (
+            <BeforeAfterSlider
+              client:visible
+              beforeImage={pair.beforeImage}
+              afterImage={pair.afterImage}
+              caption={pair.caption}
+            />
+          ))}
+        </div>
+      )}
+
+      {Array.isArray(project.gallery) && project.gallery.length > 0 && (
+        <div class="mt-section-lg">
+          <h2 class="font-display text-h2 text-foreground" id="gallery">Gallery</h2>
+          <ProjectGallery client:visible images={project.gallery} />
+        </div>
+      )}
+
+      {Array.isArray(project.servicesUsed) && project.servicesUsed.length > 0 && (
+        <div class="mt-section-lg">
+          <h2 class="font-display text-h3 text-foreground" id="services-used">Services used on this project</h2>
+          <ul class="mt-s flex flex-wrap gap-s list-none p-0">
+            {project.servicesUsed.map((s: any) => (
+              <li>
+                <a
+                  href={`/services#${s.slug?.current ?? ''}`}
+                  class="inline-flex items-center px-s py-1.5 border border-border-soft rounded-full text-sm text-foreground hover:border-primary hover:text-primary-dark transition-colors"
+                >
+                  {s.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {project.relatedTestimonial && (
+        <blockquote class="mt-section-lg border-l-4 border-primary pl-m italic text-foreground/90 text-lg">
+          <p>“{project.relatedTestimonial.quote}”</p>
+          <footer class="mt-s text-sm not-italic text-muted-foreground">
+            — {project.relatedTestimonial.attribution}
+          </footer>
+        </blockquote>
+      )}
+    </article>
+  </section>
+
+  {/* Featured in the journal — journal posts whose "Related project" points at
+      this project. Derived by reverse query in getProjectBySlug, so the link is
+      maintained only on the journal side. Section hides when there are none. */}
+  {Array.isArray(project.relatedJournalEntries) && project.relatedJournalEntries.length > 0 && (
+    <section class="bg-muted" aria-labelledby="project-journal-heading">
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <h2 id="project-journal-heading" class="font-display text-h2 text-foreground mb-l">
+          Featured in the journal
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-l">
+          {project.relatedJournalEntries.slice(0, 3).map((post: any) => (
+            <JournalCard entry={post} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {/* Next / previous */}
+  {(prev || next) && (
+    <nav class="border-t border-border-soft" aria-label="More projects">
+      <div class="mx-auto max-w-content px-m py-l grid grid-cols-1 md:grid-cols-2 gap-m">
+        {prev ? (
+          <a href={`/portfolio/${prev.slug}`} class="group">
+            <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Previous project</p>
+            <p class="font-display text-h4 text-foreground group-hover:text-primary-dark transition-colors">← {prev.title}</p>
+          </a>
+        ) : <div></div>}
+        {next ? (
+          <a href={`/portfolio/${next.slug}`} class="group md:text-right">
+            <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Next project</p>
+            <p class="font-display text-h4 text-foreground group-hover:text-primary-dark transition-colors">{next.title} →</p>
+          </a>
+        ) : <div></div>}
+      </div>
+    </nav>
+  )}
+
+  {/* Sticky contextual CTA — appears past 50% scroll, hides on scroll-up.
+      Label is Sanity-editable per-project (project.stickyCtaLabel); clearing
+      the field hides the chip for that project. The fallback keeps existing
+      projects looking identical. */}
+  {project?.stickyCtaLabel !== '' && (
+    <StickyCTAChip
+      client:idle
+      label={project?.stickyCtaLabel ?? 'Want a room like this?'}
+      href="/contact"
+    />
+  )}
+</BaseLayout>

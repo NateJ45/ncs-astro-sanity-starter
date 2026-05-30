@@ -1,0 +1,62 @@
+---
+// Safe to edit by hand
+// "Plainfield-first" service area cue. Sits between the Services grid and the
+// Final CTA on the home page. Two render modes:
+//
+//   1) `cities` array passed → confident typographic row, Plainfield in bronze,
+//      the rest in Warm Taupe. This is the high-end editorial treatment.
+//   2) Only `text` passed → quieter italic fallback (legacy behavior).
+//
+// The cities mode signals "local studio" much more strongly than a single
+// sentence. It also gives Google another local-SEO anchor on the home page.
+
+interface Props {
+  /** Optional fallback line ("Serving Plainfield, Indianapolis, and the surrounding suburbs.") */
+  text?: string;
+  /** Preferred: ordered array of service-area city names. First entry rendered in bronze. */
+  cities?: string[];
+  /** Eyebrow above the cities row. Defaults to a short geographic eyebrow. */
+  eyebrow?: string;
+}
+
+const { text, cities, eyebrow = 'Service area' } = Astro.props as Props;
+
+const cityList = Array.isArray(cities) ? cities.filter(Boolean) : [];
+const cue = text ?? 'Serving Plainfield, Indianapolis, and the surrounding suburbs.';
+---
+
+<div class="bg-muted border-y border-border-soft">
+  <div class="mx-auto max-w-content px-m py-section-md text-center">
+    {cityList.length > 0 ? (
+      <>
+        <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-m">{eyebrow}</p>
+        <p
+          class="font-display text-h3 leading-snug flex flex-wrap items-baseline justify-center gap-x-s gap-y-xs"
+          aria-label={`Reid Design serves ${cityList.join(', ')}`}
+        >
+          {cityList.map((city, i) => (
+            <>
+              <span
+                class:list={[
+                  i === 0
+                    ? 'text-link font-medium'
+                    : 'text-foreground/85 font-normal',
+                ]}
+              >
+                {city}
+              </span>
+              {i < cityList.length - 1 && (
+                <span class="text-foreground/40 font-normal" aria-hidden="true">·</span>
+              )}
+            </>
+          ))}
+        </p>
+        {text && (
+          <p class="mt-m text-sm text-foreground/85 italic max-w-2xl mx-auto">{text}</p>
+        )}
+      </>
+    ) : (
+      <p class="text-sm text-foreground/75 italic">{cue}</p>
+    )}
+  </div>
+</div>

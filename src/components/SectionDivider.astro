@@ -1,0 +1,49 @@
+---
+// Safe to edit by hand
+// Optional ornament divider between sections that share a background color
+// and need a visual break. Reserved for moments where the alternating
+// bg-background / bg-muted color cadence ISN'T doing the work — most section
+// transitions don't need this, color change is enough.
+//
+// Three variants:
+//   - `ornament` (default): small bronze ✺ glyph, generous vertical space
+//   - `line`:               hairline rule with bronze accent dot in the middle
+//   - `dots`:               three bronze dots, looser and quieter
+//
+// Visual reference: matches the journal post divider treatment so the
+// pattern reads as "Reid Design" rather than generic editorial chrome.
+
+interface Props {
+  variant?: 'ornament' | 'line' | 'dots';
+  /** Override the default fluid vertical padding. */
+  class?: string;
+}
+
+const { variant = 'ornament', class: extraClass = '' } = Astro.props as Props;
+---
+
+<div
+  class:list={['mx-auto max-w-content px-m py-m text-center', extraClass]}
+  aria-hidden="true"
+>
+  {variant === 'ornament' && (
+    <span class="font-display text-2xl text-link tracking-[0.6em] select-none">
+      ✺
+    </span>
+  )}
+
+  {variant === 'line' && (
+    <div class="relative flex items-center justify-center max-w-md mx-auto">
+      <span class="block w-full h-px bg-border-soft" aria-hidden="true"></span>
+      <span class="absolute inline-block w-1.5 h-1.5 rounded-full bg-primary"></span>
+    </div>
+  )}
+
+  {variant === 'dots' && (
+    <span class="inline-flex items-center gap-3 text-link/70 select-none" aria-hidden="true">
+      <span class="inline-block w-1 h-1 rounded-full bg-current"></span>
+      <span class="inline-block w-1 h-1 rounded-full bg-current"></span>
+      <span class="inline-block w-1 h-1 rounded-full bg-current"></span>
+    </span>
+  )}
+</div>

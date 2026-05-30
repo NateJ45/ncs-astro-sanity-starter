@@ -1,0 +1,108 @@
+---
+// Safe to edit by hand
+// The hero background layer. With 0-1 images it renders a single static photo
+// exactly as the hero always has. With 2+ images it renders a slow cross-fading
+// slideshow with a subtle Ken Burns zoom, driven by CSS plus a small inline
+// script (the same pattern the hero already uses for its other scripts).
+//
+// The first slide is the LCP image (eager + high priority) and carries its alt,
+// like the single-image hero; the additional slides use empty alt so they are
+// decorative. Reduced-motion users get a single static image (the script never
+// starts and the CSS animation/transition is disabled).
+
+import SanityImage from '@/components/SanityImage.astro';
+
+interface SanityImageObject {
+  asset?: { _ref?: string; _id?: string };
+  alt?: string;
+  hotspot?: { x: number; y: number; height: number; width: number };
+  crop?: { top: number; bottom: number; left: number; right: number };
+}
+
+interface Props {
+  images: SanityImageObject[];
+}
+
+const { images } = Astro.props as Props;
+const slides = (images ?? []).filter((img) => !!img?.asset);
+const isSlideshow = slides.length >= 2;
+const first = slides[0];
+---
+
+{first && (
+  <>
+    {isSlideshow ? (
+      <div class="hero-slideshow" data-hero-slideshow>
+        {slides.map((img, i) => (
+          <SanityImage
+            source={img}
+            width={2400}
+            sizes="100vw"
+            loading={i === 0 ? 'eager' : 'lazy'}
+            fetchpriority={i === 0 ? 'high' : 'low'}
+            quality={70}
+            alt={i === 0 ? undefined : ''}
+            class={`hero-slide${i === 0 ? ' is-active' : ''}`}
+          />
+        ))}
+      </div>
+    ) : (
+      <SanityImage
+        source={first}
+        width={2400}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        quality={70}
+        class="absolute inset-0 w-full h-full object-cover"
+      />
+    )}
+
+    {/* Uniform overlay, minimum readability across the whole image. */}
+    <div class="absolute inset-0 bg-accent-dark/25" aria-hidden="true"></div>
+    {/* Bottom-weighted gradient, extra darkening behind the text area. */}
+    <div
+      class="absolute inset-0 bg-gradient-to-t from-accent-dark/85 via-accent-dark/45 to-transparent"
+      aria-hidden="true"
+    ></div>
+  </>
+)}
+
+{isSlideshow && (
+  <script is:inline>
+    (function () {
+      function initHeroSlideshow() {
+        // Tear down any timer from a previous page first. The tab and its
+        // document-level listeners persist across Astro View Transitions, so
+        // re-wiring without this would stack intervals on detached slides.
+        if (window.__reidHeroSlideshowTimer) {
+          clearInterval(window.__reidHeroSlideshowTimer);
+          window.__reidHeroSlideshowTimer = null;
+        }
+        var box = document.querySelector('[data-hero-slideshow]');
+        if (!box) return;
+        var slides = box.querySelectorAll('.hero-slide');
+        if (slides.length < 2) return;
+        var reduce = false;
+        try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) {}
+        if (reduce) return; // first slide stays visible, no motion
+
+        var current = 0;
+        var STEP_MS = 4500; // 3s hold + 1.5s cross-fade
+        window.__reidHeroSlideshowTimer = setInterval(function () {
+          if (document.hidden) return; // pause while the tab is hidden
+          slides[current].classList.remove('is-active');
+          current = (current + 1) % slides.length;
+          slides[current].classList.add('is-active');
+        }, STEP_MS);
+      }
+      initHeroSlideshow();
+      // Register the navigation re-init once (mirrors Hero.astro's
+      // window.__reidHeroBound guard) so the listener never stacks.
+      if (!window.__reidHeroSlideshowBound) {
+        window.__reidHeroSlideshowBound = true;
+        document.addEventListener('astro:page-load', initHeroSlideshow);
+      }
+    })();
+  </script>
+)}

@@ -1,0 +1,34 @@
+---
+// Safe to edit by hand
+// Small category pill. Used on journal cards and at the top of post pages.
+// When `href` is provided, renders as a link; otherwise as a static badge.
+// (We don't have category-filtered routes yet — chips are display-only — but
+// the link-mode prop lets us add filter pages later without touching callers.)
+
+interface Props {
+  title?: string;
+  href?: string;
+  tooltip?: string;
+  /** "default" (soft Cream pill) or "inverse" (used on dark hero overlays). */
+  tone?: 'default' | 'inverse';
+}
+
+const { title, href, tooltip, tone = 'default' } = Astro.props as Props;
+if (!title) return null;
+
+const base = 'inline-flex items-center px-s py-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] rounded-full';
+const toneClass =
+  tone === 'inverse'
+    ? 'bg-bg/15 text-bg border border-bg/25'
+    : 'bg-muted text-foreground/80 border border-border-soft';
+---
+
+{href ? (
+  <a href={href} class:list={[base, toneClass, 'hover:bg-accent hover:text-foreground transition-colors']} title={tooltip}>
+    {title}
+  </a>
+) : (
+  <span class:list={[base, toneClass]} title={tooltip}>
+    {title}
+  </span>
+)}

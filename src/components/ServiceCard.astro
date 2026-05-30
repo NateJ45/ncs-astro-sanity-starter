@@ -1,0 +1,116 @@
+---
+// Safe to edit by hand
+// Service tier card. Used on:
+//   - Home services grid (compact, only services with showOnHomepage)
+//   - Services page (full, with anchor id for deep-linking from JSON-LD)
+//
+// Each card carries: name, price (string for display flexibility — "$150",
+// "starting at $650", "Custom quote"), short description, feature bullets,
+// best-for line, CTA to /contact. The CTA label comes from service.ctaLabel.
+//
+// Layout is a flex column so cards in a CSS grid stay the same height
+// regardless of feature count; the CTA always pins to the bottom.
+
+import SanityImage from '@/components/SanityImage.astro';
+
+interface SanityImageObject {
+  asset?: { _ref?: string; _id?: string };
+  alt?: string;
+  hotspot?: { x: number; y: number; height: number; width: number };
+  crop?: { top: number; bottom: number; left: number; right: number };
+}
+
+interface Props {
+  service: {
+    name?: string;
+    slug?: { current?: string };
+    price?: string;
+    shortDescription?: string;
+    features?: string[];
+    bestFor?: string;
+    ctaLabel?: string;
+    featuredImage?: SanityImageObject | null;
+  };
+  /** When true, render an anchor id from the slug so /services?#consultation deep-links. */
+  withAnchor?: boolean;
+  /** When true, condensed card for the homepage grid (hides "Best for" + truncates features). */
+  compact?: boolean;
+}
+
+const { service, withAnchor = false, compact = false } = Astro.props as Props;
+const id = withAnchor && service.slug?.current ? service.slug.current : undefined;
+const features = service.features ?? [];
+const visibleFeatures = compact ? features.slice(0, 4) : features;
+const moreCount = compact ? Math.max(0, features.length - visibleFeatures.length) : 0;
+const ctaLabel = service.ctaLabel ?? 'Start a Conversation';
+const hasImage = !!service.featuredImage?.asset;
+---
+
+<article
+  id={id}
+  class="card-lift group relative flex flex-col h-full bg-card text-card-foreground border border-border-soft rounded-md overflow-hidden transition-colors hover:border-primary/40 scroll-mt-24 shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]"
+>
+  {/* Brand accent stripe — same 2px Warm Bronze signature used at the top of
+      the site header, mobile menu, and footer. Gives each service card a
+      distinct "spine" + reinforces brand presence without dominating. */}
+  <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+  {hasImage && (
+    <div class="aspect-[4/3] overflow-hidden bg-muted">
+      <SanityImage
+        source={service.featuredImage}
+        width={640}
+        sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+        class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]"
+      />
+    </div>
+  )}
+
+  <div class="flex flex-col flex-1 p-l">
+  <header>
+    <h3 class="font-display text-h3 text-foreground">{service.name}</h3>
+    {service.price && (
+      <p class="mt-xs text-sm font-mono uppercase tracking-eyebrow text-link">
+        {service.price}
+      </p>
+    )}
+  </header>
+
+  {service.shortDescription && (
+    <p class="mt-m text-foreground/85 text-base leading-relaxed">{service.shortDescription}</p>
+  )}
+
+  {visibleFeatures.length > 0 && (
+    <ul class="mt-m space-y-1.5 text-sm text-foreground">
+      {visibleFeatures.map((feature) => (
+        <li class="flex items-start gap-s">
+          <span
+            class="mt-1.5 inline-block w-1.5 h-1.5 rounded-full bg-tertiary shrink-0"
+            aria-hidden="true"
+          ></span>
+          <span>{feature}</span>
+        </li>
+      ))}
+      {moreCount > 0 && (
+        <li class="text-xs text-muted-foreground italic">+ {moreCount} more</li>
+      )}
+    </ul>
+  )}
+
+  {!compact && service.bestFor && (
+    <div class="mt-m pt-m border-t border-border-soft">
+      <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-xs">Best for</p>
+      <p class="text-sm text-foreground/80 italic">{service.bestFor}</p>
+    </div>
+  )}
+
+  <div class="mt-l pt-m flex-1 flex items-end">
+    <a
+      href="/contact"
+      class="inline-flex items-center min-h-[44px] py-s text-xs font-semibold uppercase tracking-eyebrow text-link hover:text-primary-dark transition-colors"
+    >
+      {ctaLabel} <span aria-hidden="true" class="ml-xs">→</span>
+    </a>
+  </div>
+  </div>
+</article>

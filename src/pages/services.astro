@@ -1,0 +1,308 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Services page. Full tier ladder with prices so visitors can self-qualify before
+// they reach the contact form.
+//
+// Sections:
+//   1. Hero (text-only)
+//   2. Services list (full cards with features + best-for, anchor-deep-linkable by slug)
+//   3. Builder & Realtor partnerships (separate audience block)
+//   4. Service area + travel-fee tiers from siteSettings
+//   5. Final CTA
+//
+// Per CLAUDE.md: this page also injects an ItemList of Service JSON-LD with each Service
+// linked to the LocalBusiness via @id. serviceListSchema() builds it.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getServicesPage, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema, serviceListSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import ServiceCard from '@/components/ServiceCard.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import PortableText from '@/components/PortableText';
+import FinalCta from '@/components/FinalCta.astro';
+import StickyCTAChip from '@/components/StickyCTAChip';
+
+const [page, siteSettings] = await Promise.all([
+  getServicesPage().catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+const title       = page?.seoTitle       ?? 'Services & Pricing · Reid Design';
+const description = page?.seoDescription ?? 'Interior design services for every space and stage — from $150 consultations to full-room design across Greater Indianapolis.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'What We Offer.';
+const heroHeadline = page?.heroHeadline ?? 'Design Services for Every Space and Stage.';
+const heroSubhead  = page?.heroSubhead  ?? '';
+
+const listEyebrow  = page?.servicesListEyebrow  ?? 'The Tiers.';
+const listHeadline = page?.servicesListHeadline ?? 'Find the right fit for your project.';
+const listSubhead  = page?.servicesListSubhead;
+
+const services   = page?.services ?? [];
+const builders   = page?.builderRealtorSection;
+const areaSec    = page?.serviceAreaSection;
+const travelFees = page?.travelFees ?? [];
+
+// Satisfaction guarantee — sourced from siteSettings. Renders near the final
+// CTA so it lands just as the visitor is deciding whether to reach out.
+const satisfactionGuarantee = siteSettings?.satisfactionGuarantee;
+
+// Section visibility — used to gate the E-Design cross-link.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Services', url: `${site.url}/services` },
+  ]),
+  serviceListSchema(services),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  {/* scriptAccent script-emphasizes one word in the headline (default "reveal"
+      from "...a full room reveal"). Sanity-editable so Staci can change the
+      headline + the accent word together. Falls back gracefully if she clears
+      it or changes the headline so the word no longer appears. */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    headingId="services-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent ?? 'reveal'}
+  />
+
+  {/* ------- 2. Services list ----------------------------------------------- */}
+  <section
+    class="surface-warm bg-background"
+    aria-labelledby="services-list-heading"
+  >
+    <div class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow={listEyebrow}
+        headline={listHeadline}
+        subhead={listSubhead}
+        headingId="services-list-heading"
+        align="center"
+        class="mx-auto"
+      />
+
+      {/* On-this-page TOC — small anchor-chip row beneath the section heading.
+          Each chip jumps to the corresponding service anchor (ServiceCard
+          already renders an id={slug} when withAnchor=true) or to one of
+          the two later sections on the page. Only renders when there are
+          enough services to justify the navigation. */}
+      {services.length >= 3 && (
+        <nav class="mt-m flex flex-col items-center gap-s" aria-label="On this page">
+          <p class="text-xs uppercase tracking-eyebrow text-foreground/80">On this page</p>
+          <ul class="flex flex-wrap justify-center gap-xs list-none p-0">
+            {services.map((service: any) => (
+              service.slug?.current && (
+                <li>
+                  <a
+                    href={`#${service.slug.current}`}
+                    class="press-tactile inline-flex items-center min-h-[36px] px-s py-1.5 text-xs uppercase tracking-eyebrow text-foreground/85 border border-border-soft rounded-full hover:border-primary hover:text-link transition-colors"
+                  >
+                    {service.name}
+                  </a>
+                </li>
+              )
+            ))}
+            {builders && (builders.headline || builders.description) && (
+              <li>
+                <a
+                  href="#builders"
+                  class="press-tactile inline-flex items-center min-h-[36px] px-s py-1.5 text-xs uppercase tracking-eyebrow text-foreground/85 border border-border-soft rounded-full hover:border-primary hover:text-link transition-colors"
+                >
+                  Builders &amp; Realtors
+                </a>
+              </li>
+            )}
+            {(areaSec?.headline || travelFees.length > 0) && (
+              <li>
+                <a
+                  href="#service-area"
+                  class="press-tactile inline-flex items-center min-h-[36px] px-s py-1.5 text-xs uppercase tracking-eyebrow text-foreground/85 border border-border-soft rounded-full hover:border-primary hover:text-link transition-colors"
+                >
+                  Service area
+                </a>
+              </li>
+            )}
+          </ul>
+        </nav>
+      )}
+
+      {services.length > 0 ? (
+        <div class="mt-section-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-l" data-stagger-grid>
+          {services.map((service: any) => (
+            <ServiceCard service={service} withAnchor={true} />
+          ))}
+        </div>
+      ) : null}
+
+      {/* Cross-link to the dedicated E-Design landing page.
+          Renders beneath the services grid only when both the E-Design service
+          exists (slug "e-design") AND the eDesign section is on. The link is
+          deliberately subtle — a chip-style
+          note rather than a full section — so it doesn't compete visually
+          with the service cards above. */}
+      {visible.eDesign && services.some((s: any) => s.slug?.current === 'e-design') && (
+        <div class="mt-section-md flex justify-center">
+          <a
+            href="/e-design"
+            class="press-tactile inline-flex items-center gap-xs min-h-[36px] px-m py-1.5 text-xs uppercase tracking-eyebrow text-link border border-border-soft rounded-full hover:border-primary hover:text-primary-dark transition-colors"
+          >
+            See the full E-Design overview <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      )}
+
+      {services.length === 0 && (
+        <p class="mt-section-lg text-center text-muted-foreground italic">
+          Services are being updated. <a href="/contact" class="text-link underline underline-offset-2">Get in touch</a> and we'll talk through what you need.
+        </p>
+      )}
+    </div>
+  </section>
+
+  {/* ------- 3. Builders & Realtors ----------------------------------------- */}
+  {builders && (builders.headline || builders.description) && (
+    <section
+      id="builders"
+      class="bg-muted scroll-mt-24"
+      aria-labelledby="builders-realtors-heading"
+    >
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <SectionHeading
+          eyebrow={builders.eyebrow ?? 'For Professionals.'}
+          headline={builders.headline ?? 'Builder & Realtor Partnerships.'}
+          headingId="builders-realtors-heading"
+          class="max-w-3xl"
+        />
+
+        {builders.description && (
+          <div class="mt-l max-w-3xl">
+            <PortableText
+              value={builders.description}
+              className="text-foreground/85 text-lg leading-relaxed"
+            />
+          </div>
+        )}
+
+        {(builders.forBuildersText || builders.forRealtorsText || builders.forContractorsText) && (
+          <div class="mt-section-md grid grid-cols-1 md:grid-cols-3 gap-l">
+            {builders.forBuildersText && (
+              <article class="bg-card p-l rounded-md border border-border-soft">
+                <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">For Builders</p>
+                <p class="text-foreground/85 leading-relaxed">{builders.forBuildersText}</p>
+              </article>
+            )}
+            {builders.forRealtorsText && (
+              <article class="bg-card p-l rounded-md border border-border-soft">
+                <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">For Realtors</p>
+                <p class="text-foreground/85 leading-relaxed">{builders.forRealtorsText}</p>
+              </article>
+            )}
+            {builders.forContractorsText && (
+              <article class="bg-card p-l rounded-md border border-border-soft">
+                <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">For Contractors</p>
+                <p class="text-foreground/85 leading-relaxed">{builders.forContractorsText}</p>
+              </article>
+            )}
+          </div>
+        )}
+
+        {builders.cta && (
+          <div class="mt-section-md flex justify-center md:justify-start">
+            <CtaLink
+              cta={builders.cta}
+              variant="primary"
+              fallbackHref="/contact"
+              fallbackLabel="Start a Partnership Conversation"
+            />
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {/* ------- 4. Service area + travel fees ---------------------------------- */}
+  {(areaSec?.headline || travelFees.length > 0) && (
+    <section
+      id="service-area"
+      class="bg-background scroll-mt-24"
+      aria-labelledby="service-area-heading"
+    >
+      <div class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-2 gap-l md:gap-section-md items-start">
+        <div>
+          <SectionHeading
+            eyebrow={areaSec?.eyebrow ?? 'Service Area.'}
+            headline={areaSec?.headline ?? 'Travel for Out-of-Area Projects.'}
+            headingId="service-area-heading"
+          />
+          {areaSec?.description && (
+            <p class="mt-m text-foreground/85 text-lg leading-relaxed">{areaSec.description}</p>
+          )}
+        </div>
+
+        {travelFees.length > 0 && (
+          <div class="bg-muted p-l rounded-md">
+            <p class="text-xs uppercase tracking-widest text-foreground/80 mb-m">Travel fee tiers</p>
+            <dl class="divide-y divide-border-soft">
+              {travelFees.map((tier: any) => (
+                <div class="flex items-baseline justify-between py-s gap-m">
+                  <dt class="text-foreground/85">{tier.distanceLabel}</dt>
+                  <dd class="font-mono text-sm font-semibold text-link whitespace-nowrap">
+                    {tier.fee}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  {/* ------- 5. Satisfaction guarantee + Final CTA -------------------------- */}
+  {/* The guarantee line sits in its own band just above the dark FinalCta
+      panel so it reads as a final reassurance before the ask. Renders
+      nothing when the siteSettings field is blank. */}
+  {satisfactionGuarantee && (
+    <section class="bg-background" aria-label="Satisfaction guarantee">
+      <div class="mx-auto max-w-content px-m py-l">
+        <p class="text-center text-foreground/80 text-sm border border-border-soft rounded-md py-m px-l bg-muted">
+          {satisfactionGuarantee}
+        </p>
+      </div>
+    </section>
+  )}
+
+  <FinalCta
+    eyebrow={page?.finalCtaEyebrow}
+    headline={page?.finalCtaHeadline}
+    subhead={page?.finalCtaSubhead}
+    cta={page?.finalCta}
+    scriptAccent={page?.finalCtaScriptAccent}
+    backgroundImage={page?.finalCtaBackgroundImage}
+  />
+
+  {/* Sticky contextual CTA — appears past 50% scroll on this long page.
+      Label is Sanity-editable on servicesPage; clearing the field hides the
+      chip altogether. */}
+  {page?.stickyCtaLabel !== '' && (
+    <StickyCTAChip
+      client:idle
+      label={page?.stickyCtaLabel ?? 'Ready to talk it through?'}
+      href="/contact"
+    />
+  )}
+</BaseLayout>

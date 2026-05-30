@@ -1,0 +1,284 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Journal post detail page. Hero (eyebrow with date + reading time + categories),
+// title + excerpt, cover image, body Portable Text (rich with custom blocks),
+// related posts grid, related project link if attached, prev/next navigation,
+// final CTA. BreadcrumbList + BlogPosting JSON-LD.
+//
+// Static-site routing: getStaticPaths enumerates every journalEntry slug at
+// build time. The query is duplicated (once for paths, once for the full doc)
+// — Astro caches each call per slug, so the perf hit is just the static map.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import {
+  getAllJournalEntries,
+  getJournalEntryBySlug,
+  getJournalPage,
+  getSiteSettings,
+} from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema, blogPostingSchema } from '@/lib/schemas';
+import { readingTimeFromPortableText, formatReadingTime } from '@/lib/reading-time';
+import { extractHeadings } from '@/lib/portable-text-headings';
+import { site } from '@/data/site';
+import { urlFor } from '@/lib/sanity';
+
+import SanityImage from '@/components/SanityImage.astro';
+import JournalPortableText from '@/components/JournalPortableText';
+import JournalCard from '@/components/JournalCard.astro';
+import JournalCategoryChip from '@/components/JournalCategoryChip.astro';
+import ReadingProgress from '@/components/ReadingProgress.astro';
+import StickyCTAChip from '@/components/StickyCTAChip';
+import CaseStudyTOC from '@/components/CaseStudyTOC';
+import FinalCta from '@/components/FinalCta.astro';
+
+// Enumerate slugs + carry prev/next refs (newest-first iteration).
+// Returns [] when journal is off — no detail pages build and they 404.
+export async function getStaticPaths() {
+  const [entries, settings] = await Promise.all([
+    getAllJournalEntries().catch(() => []),
+    getSiteSettings().catch(() => null),
+  ]);
+  const visible = getSectionVisibility(settings?.sectionVisibility);
+  if (!visible.journal) return [];
+
+  if (!Array.isArray(entries) || entries.length === 0) return [];
+
+  return entries
+    .map((e, i) => {
+      const prev = entries[i - 1] ?? null; // newer post
+      const next = entries[i + 1] ?? null; // older post
+      return {
+        params: { slug: e.slug?.current ?? '' },
+        props: {
+          prev: prev ? { title: prev.title, slug: prev.slug?.current } : null,
+          next: next ? { title: next.title, slug: next.slug?.current } : null,
+        },
+      };
+    })
+    .filter((entry) => entry.params.slug);
+}
+
+const { slug } = Astro.params;
+const { prev, next } = Astro.props as {
+  prev: { title?: string; slug?: string } | null;
+  next: { title?: string; slug?: string } | null;
+};
+
+const [entry, siteSettings, journalPage] = await Promise.all([
+  getJournalEntryBySlug(slug as string),
+  getSiteSettings().catch(() => null),
+  // Pulled here purely so the sticky CTA chip label can come from
+  // journalPage.stickyCtaLabel without doubling up the singleton fetch
+  // elsewhere. Cached by the GROQ layer across getStaticPaths.
+  getJournalPage().catch(() => null),
+]);
+
+if (!entry) {
+  return Astro.redirect('/404');
+}
+
+// Meta
+const title = entry.seoTitle ?? `${entry.title} · Reid Design Journal`;
+const description = entry.seoDescription ?? entry.excerpt ?? 'A note from Reid Design.';
+const coverOg = entry.coverImage?.asset
+  ? urlFor(entry.coverImage).width(1200).height(630).fit('crop').quality(80).format('webp').url()
+  : undefined;
+
+// Derived
+const readMinutes = readingTimeFromPortableText(entry.body);
+// TOC headings: pulled from the body's h2/h3/h4 blocks. When there's nothing
+// to show, hasToc=false collapses the body grid to a single article column
+// so we don't reserve a phantom 260 px sidebar slot.
+const headings = extractHeadings(entry.body);
+const hasToc = headings.length > 0;
+const dateLabel = entry.publishedAt
+  ? new Date(entry.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  : '';
+const updatedLabel =
+  entry.updatedAt && entry.updatedAt !== entry.publishedAt
+    ? new Date(entry.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    : '';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Journal', url: `${site.url}/journal` },
+    { name: entry.title ?? slug, url: `${site.url}/journal/${slug}` },
+  ]),
+  blogPostingSchema(entry, coverOg ?? null),
+];
+---
+
+<BaseLayout
+  {title}
+  {description}
+  ogImage={coverOg}
+  {schemas}
+  {siteSettings}
+>
+  {/* Thin bronze progress bar tracking scroll through the article. */}
+  <ReadingProgress />
+
+  {/* ------- 1. Article header --------------------------------------------- */}
+  <article>
+    <header class="bg-background">
+      <div class="mx-auto max-w-3xl px-m pt-section-lg pb-l">
+        <p class="text-xs uppercase tracking-widest text-foreground/80 mb-s">
+          <a href="/journal" class="hover:text-primary-dark transition-colors">Journal</a>
+          {dateLabel && <span class="mx-xs">·</span>}
+          {dateLabel && <time datetime={entry.publishedAt}>{dateLabel}</time>}
+          {readMinutes > 0 && <span class="mx-xs">·</span>}
+          {readMinutes > 0 && <span>{formatReadingTime(readMinutes)}</span>}
+        </p>
+        <h1 class="font-display text-h1 text-foreground leading-tight">{entry.title}</h1>
+        {entry.excerpt && (
+          <p class="mt-m text-foreground/80 text-xl leading-relaxed">{entry.excerpt}</p>
+        )}
+        {Array.isArray(entry.categories) && entry.categories.length > 0 && (
+          <ul class="mt-l flex flex-wrap gap-xs list-none p-0">
+            {entry.categories.map((cat: any) => (
+              <li>
+                <JournalCategoryChip title={cat.title} tooltip={cat.description} />
+              </li>
+            ))}
+          </ul>
+        )}
+        {entry.author && (
+          <p class="mt-l text-sm text-muted-foreground">
+            By <span class="text-foreground font-semibold">{entry.author}</span>
+            {updatedLabel && <span> · Updated {updatedLabel}</span>}
+          </p>
+        )}
+      </div>
+    </header>
+
+    {/* ------- 2. Cover image ----------------------------------------------
+        Same editorial cap as the portfolio hero: max-w-4xl (~896 px) so the
+        photo reads as a feature image rather than a billboard. Sanity
+        request width matches at 1800 so we're not requesting a 1920 px
+        file for a slot that maxes around 900 px even at 2× retina. */}
+    {entry.coverImage?.asset && (
+      <figure class="mx-auto max-w-4xl px-m">
+        <SanityImage
+          source={entry.coverImage}
+          width={1800}
+          loading="eager"
+          sizes="(min-width: 920px) 896px, 100vw"
+          class="w-full h-auto rounded-md"
+        />
+        {entry.coverImage.caption && (
+          <figcaption class="mt-s text-sm text-foreground/80 italic text-center">
+            {entry.coverImage.caption}
+          </figcaption>
+        )}
+      </figure>
+    )}
+
+    {/* ------- 3. Body + TOC ------------------------------------------------
+        Same grid structure as the portfolio case-study body: 260 px TOC
+        sidebar on lg+ when the post has h2/h3/h4 headings, single article
+        column otherwise. `lg:justify-center` centers the pair within the
+        section so empty space splits evenly. The article column is sized
+        at minmax(0, 48rem) which matches the previous max-w-3xl reading
+        width Staci's posts were written for. */}
+    <div
+      class:list={[
+        'mx-auto max-w-content px-m py-section-lg grid grid-cols-1 gap-section-md lg:justify-center',
+        hasToc
+          ? 'lg:grid-cols-[260px_minmax(0,48rem)]'
+          : 'lg:grid-cols-[minmax(0,48rem)]',
+      ]}
+    >
+      {hasToc && <CaseStudyTOC client:idle headings={headings} />}
+
+      <div>
+        {/* `client:visible` defers Sanity client + the journal-specific renderers
+            (inline images, before/after slider, source cards, galleries) until
+            the visitor scrolls the body into view. The article HTML is still
+            server-rendered above the fold, so reading starts immediately. */}
+        <JournalPortableText client:visible value={entry.body} />
+
+        {/* Related project link (if this post walks through a specific portfolio piece).
+            Centered on mobile so the cross-link reads as a deliberate "go see
+            this project" affordance instead of a stray paragraph clinging to
+            the left edge. Desktop keeps left-aligned (still inside the
+            article column). */}
+        {entry.relatedProject?.slug?.current && (
+          <aside class="mt-section-lg pt-l border-t border-border-soft text-center md:text-left">
+            <p class="text-xs uppercase tracking-widest text-foreground/80 mb-s">Related project</p>
+            <a
+              href={`/portfolio/${entry.relatedProject.slug.current}`}
+              class="group inline-flex items-baseline gap-s text-foreground hover:text-primary-dark transition-colors"
+            >
+              <span class="font-display text-h3">{entry.relatedProject.title}</span>
+              <span aria-hidden="true" class="text-xl transition-transform group-hover:translate-x-1">→</span>
+            </a>
+            {(entry.relatedProject.location || entry.relatedProject.year) && (
+              <p class="mt-xs text-sm text-muted-foreground">
+                {entry.relatedProject.location}
+                {entry.relatedProject.location && entry.relatedProject.year && <span> · </span>}
+                {entry.relatedProject.year}
+              </p>
+            )}
+          </aside>
+        )}
+      </div>
+    </div>
+  </article>
+
+  {/* ------- 4. Related posts --------------------------------------------- */}
+  {Array.isArray(entry.relatedPosts) && entry.relatedPosts.length > 0 && (
+    <section class="bg-muted" aria-labelledby="related-posts-heading">
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <h2 id="related-posts-heading" class="font-display text-h2 text-foreground mb-l">
+          Keep reading
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-l">
+          {entry.relatedPosts.slice(0, 3).map((post: any) => (
+            <JournalCard entry={post} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {/* ------- 5. Next / previous post -------------------------------------- */}
+  {(prev || next) && (
+    <nav class="border-t border-border-soft bg-background" aria-label="More journal posts">
+      <div class="mx-auto max-w-content px-m py-l grid grid-cols-1 md:grid-cols-2 gap-m">
+        {prev ? (
+          <a href={`/journal/${prev.slug}`} class="group">
+            <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Newer post</p>
+            <p class="font-display text-h4 text-foreground group-hover:text-primary-dark transition-colors">← {prev.title}</p>
+          </a>
+        ) : <div></div>}
+        {next ? (
+          <a href={`/journal/${next.slug}`} class="group md:text-right">
+            <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Older post</p>
+            <p class="font-display text-h4 text-foreground group-hover:text-primary-dark transition-colors">{next.title} →</p>
+          </a>
+        ) : <div></div>}
+      </div>
+    </nav>
+  )}
+
+  {/* ------- 6. Final CTA -------------------------------------------------- */}
+  <FinalCta
+    headline="Working on a project of your own?"
+    subhead="Reid Design takes on a small handful of projects at a time. Get in touch and let's see if we're a fit."
+    fallbackCtaLabel="Start a Conversation"
+    backgroundImage={journalPage?.finalCtaBackgroundImage}
+  />
+
+  {/* Sticky contextual CTA — appears past 50% scroll on long posts.
+      Label is Sanity-editable on journalPage; clearing the field hides the
+      chip across every journal post. */}
+  {journalPage?.stickyCtaLabel !== '' && (
+    <StickyCTAChip
+      client:idle
+      label={journalPage?.stickyCtaLabel ?? 'Have a room in mind?'}
+      href="/contact"
+    />
+  )}
+</BaseLayout>

@@ -1,0 +1,16 @@
+# Cloudflare applies these headers to every route. Mirrors the NCS portfolio pattern.
+# Content-Security-Policy beyond frame-ancestors is intentionally not set — getting it right
+# requires testing because of the Sanity CDN, Web3Forms POST, Calendly iframe, and the
+# Cloudflare Analytics beacon. Revisit post-launch.
+#
+# frame-ancestors: replaces the legacy X-Frame-Options so we can selectively allow
+# the deployed Sanity Studio (and local studio dev servers on :3333/:3334) to iframe
+# the live site for the iframe-pane preview plugin. 'self' lets the site embed itself.
+# Modern browsers prefer CSP frame-ancestors over X-Frame-Options when both are present.
+
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: frame-ancestors 'self' https://reid-design.sanity.studio https://*.sanity.studio https://www.sanity.io https://*.sanity.io http://localhost:3333 http://localhost:3334
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cross-Origin-Opener-Policy: same-origin

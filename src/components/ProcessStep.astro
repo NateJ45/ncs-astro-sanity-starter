@@ -1,0 +1,94 @@
+---
+// Safe to edit by hand
+// Numbered process step. Used twice:
+//   - Home process preview ("preview" mode): number, title, time, shortDescription, optional tier note
+//   - Process page ("full" mode): adds fullDescription PortableText and feature bullets
+//
+// The step number is a large display numeral (font-display, light-weight) sitting to the
+// left of the content column on desktop, stacked above on mobile. Bronze tint for the
+// number plays against Charcoal text.
+
+import PortableText from '@/components/PortableText';
+import ProcessStepIllustration from '@/components/ProcessStepIllustration.astro';
+
+interface PortableTextBlock {
+  _type?: string;
+  [key: string]: any;
+}
+
+interface Props {
+  step: {
+    stepNumber?: number;
+    title?: string;
+    timeEstimate?: string;
+    shortDescription?: string;
+    fullDescription?: PortableTextBlock[];
+    features?: string[];
+    tierNote?: string;
+  };
+  /** "preview" (homepage) shows just shortDescription. "full" (Process page) shows fullDescription + features. */
+  variant?: 'preview' | 'full';
+  /** When true, skips the connector line below the step number badge. Pass on the last step in any sequence. */
+  isLast?: boolean;
+}
+
+const { step, variant = 'preview', isLast = false } = Astro.props as Props;
+const padNum = (n?: number) => (typeof n === 'number' ? String(n).padStart(2, '0') : '01');
+---
+
+<article class="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-m md:gap-l items-stretch">
+  <div class="flex flex-col items-start gap-s">
+    {/* Soft-sage line illustration above the step numeral. Renders nothing for
+        steps outside 1-4 so the numeral-only treatment still works. */}
+    <ProcessStepIllustration stepNumber={step.stepNumber} />
+    <div class="font-display text-[clamp(3rem,8vw,5.5rem)] leading-none text-link/85 select-none">
+      {padNum(step.stepNumber)}
+    </div>
+    {!isLast && <div class="step-connector" aria-hidden="true"></div>}
+  </div>
+
+  <div>
+    {/* A11y: step title bumps up to H2 in the "full" variant because on the
+        Process page each step IS a major page section beneath the H1. In the
+        homepage "preview" variant the steps are nested under a "How It Works"
+        section H2, so H3 is the correct relative level there. */}
+    <header class="flex flex-wrap items-baseline gap-x-m gap-y-xs">
+      {variant === 'full' ? (
+        <h2 class="font-display text-h3 text-foreground">{step.title}</h2>
+      ) : (
+        <h3 class="font-display text-h3 text-foreground">{step.title}</h3>
+      )}
+      {step.timeEstimate && (
+        <p class="text-xs uppercase tracking-widest text-foreground/80">{step.timeEstimate}</p>
+      )}
+    </header>
+
+    {variant === 'preview' && step.shortDescription && (
+      <p class="mt-s text-foreground/85 max-w-2xl">{step.shortDescription}</p>
+    )}
+
+    {variant === 'full' && step.fullDescription && (
+      <div class="mt-s max-w-2xl">
+        <PortableText client:visible value={step.fullDescription} />
+      </div>
+    )}
+
+    {variant === 'full' && step.features && step.features.length > 0 && (
+      <ul class="mt-m grid gap-1.5 sm:grid-cols-2 text-sm text-foreground/85 max-w-2xl">
+        {step.features.map((f) => (
+          <li class="flex items-start gap-s">
+            <span
+              class="mt-1.5 inline-block w-1.5 h-1.5 rounded-full bg-tertiary shrink-0"
+              aria-hidden="true"
+            ></span>
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {step.tierNote && (
+      <p class="mt-m text-xs italic text-muted-foreground max-w-2xl">{step.tierNote}</p>
+    )}
+  </div>
+</article>

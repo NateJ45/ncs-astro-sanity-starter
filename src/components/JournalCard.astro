@@ -1,0 +1,89 @@
+---
+// Safe to edit by hand
+// Card for the /journal index grid. Cover image on top, primary category +
+// date eyebrow, title, excerpt. Whole card is clickable.
+//
+// `featured` style: when an entry has featured = true and it's the first one
+// in the grid, the index page renders a larger variant via the `featured` prop.
+
+import SanityImage from '@/components/SanityImage.astro';
+import JournalCategoryChip from '@/components/JournalCategoryChip.astro';
+
+interface Props {
+  entry: {
+    title?: string;
+    slug?: { current?: string };
+    excerpt?: string;
+    publishedAt?: string;
+    coverImage?: any;
+    categories?: Array<{ title?: string; slug?: { current?: string }; description?: string }>;
+    featured?: boolean;
+  };
+  featured?: boolean;
+}
+
+const { entry, featured = false } = Astro.props as Props;
+const href = entry.slug?.current ? `/journal/${entry.slug.current}` : '#';
+const primaryCategory = entry.categories?.[0];
+
+function formatDate(d?: string): string {
+  if (!d) return '';
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+const dateLabel = formatDate(entry.publishedAt);
+
+// Featured card spans 2 columns on lg and uses a wider hero aspect.
+// Resting shadow matches the rest of the card grammar (ServiceCard,
+// ProjectCard, TestimonialCard) — soft warm 4px ambient depth.
+const wrapperClass = featured
+  ? 'card-lift card-lift-slow group block bg-card border border-border-soft rounded-md overflow-hidden hover:border-primary/40 transition-colors lg:col-span-2 shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]'
+  : 'card-lift card-lift-slow group block bg-card border border-border-soft rounded-md overflow-hidden hover:border-primary/40 transition-colors shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]';
+const aspectClass = featured ? 'aspect-[16/9]' : 'aspect-[4/3]';
+const titleClass = featured ? 'font-display text-h2 text-foreground' : 'font-display text-h3 text-foreground';
+---
+
+<a href={href} class:list={[wrapperClass]}>
+  {/* Brand accent stripe — matches every other marketing card. */}
+  <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+  <div class:list={[aspectClass, 'overflow-hidden bg-muted relative img-zoom']}>
+    {entry.coverImage?.asset ? (
+      <SanityImage
+        source={entry.coverImage}
+        width={featured ? 1400 : 800}
+        sizes={featured ? '(min-width: 1024px) 66vw, 100vw' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'}
+        class="w-full h-full object-cover"
+      />
+    ) : (
+      <div class="w-full h-full" aria-hidden="true"></div>
+    )}
+    <div class="img-tint img-tint-light" aria-hidden="true"></div>
+    {entry.featured && (
+      <span class="absolute top-m left-m inline-flex items-center px-s py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] rounded-full bg-primary-dark text-white">
+        ★ Featured
+      </span>
+    )}
+  </div>
+  <div class:list={[featured ? 'p-section-md' : 'p-l']}>
+    <div class="flex flex-wrap items-center gap-x-m gap-y-xs">
+      {primaryCategory?.title && (
+        <JournalCategoryChip title={primaryCategory.title} tooltip={primaryCategory.description} />
+      )}
+      {dateLabel && (
+        <time datetime={entry.publishedAt} class="text-xs uppercase tracking-widest text-foreground/80">
+          {dateLabel}
+        </time>
+      )}
+    </div>
+    <h3 class:list={[titleClass, 'mt-s group-hover:text-primary-dark transition-colors']}>
+      {entry.title}
+    </h3>
+    {entry.excerpt && (
+      <p class:list={[featured ? 'mt-m text-base' : 'mt-s text-sm', 'text-foreground/80 leading-relaxed']}>
+        {entry.excerpt}
+      </p>
+    )}
+  </div>
+</a>

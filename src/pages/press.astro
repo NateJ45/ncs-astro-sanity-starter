@@ -1,0 +1,156 @@
+---
+// Safe to edit by hand
+// Press page. Lists all press items — outlet name, publication date, quote,
+// and a link to the original piece. Ordered by orderRank (set in Studio).
+// Suppresses entirely when the pressItem collection is empty at build time,
+// but the page is always live at /press so search engines can find it.
+//
+// The PressStrip logo row appears at the top as an "as seen in" visual signal
+// before the full article-by-article list.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getPressPage, getPressItems, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+import Hero from '@/components/Hero.astro';
+import PressStrip from '@/components/PressStrip.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+
+const [page, pressItems, siteSettings] = await Promise.all([
+  getPressPage().catch(() => null),
+  getPressItems().catch(() => []),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.press) return Astro.redirect('/');
+
+const pressArr: any[] = Array.isArray(pressItems) ? pressItems : [];
+
+const title       = page?.seoTitle       ?? 'Press · Reid Design';
+const description = page?.seoDescription ?? 'Reid Design in the media: features, mentions, and coverage from publications across Indiana.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'In the Press.';
+const heroHeadline = page?.heroHeadline ?? "Where Reid Design's work has been featured.";
+const heroSubhead  = page?.heroSubhead  ?? '';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Press', url: `${site.url}/press` },
+  ]),
+];
+
+// Format a date string (ISO or partial) into a human-readable label.
+function formatDate(d?: string): string {
+  if (!d) return '';
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+  {/* Hero — text variant (no image unless the pressPage singleton provides one). */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    headingId="press-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent}
+  />
+
+  {/* As-seen-in logo strip — suppresses itself when no logos are present. */}
+  <PressStrip items={pressArr} />
+
+  {/* Press intro copy from the pressPage singleton. */}
+  {page?.intro && (
+    <section class="bg-background" aria-label="About our press coverage">
+      <div class="mx-auto max-w-3xl px-m pt-section-md pb-0">
+        <p class="text-foreground/85 text-lg leading-relaxed">{page.intro}</p>
+      </div>
+    </section>
+  )}
+
+  {/* Press items list. */}
+  {pressArr.length > 0 ? (
+    <section class="bg-background" aria-labelledby="press-list-heading">
+      <h2 id="press-list-heading" class="sr-only">Press coverage list</h2>
+
+      <div class="mx-auto max-w-3xl px-m py-section-lg space-y-l">
+        {pressArr.map((item: any) => {
+          const dateLabel = formatDate(item.date);
+
+          return (
+            <article
+              class="card-lift bg-card border border-border-soft rounded-md overflow-hidden shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]"
+              aria-labelledby={`press-item-${item._id}`}
+            >
+              {/* Brand stripe — consistent with the card rhythm across the site. */}
+              <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+              <div class="p-l">
+                {/* Outlet name + date. */}
+                <div class="flex flex-wrap items-baseline gap-m justify-between mb-m">
+                  <h3
+                    id={`press-item-${item._id}`}
+                    class="font-display text-h3 text-foreground leading-tight"
+                  >
+                    {item.outlet ?? 'Press feature'}
+                  </h3>
+                  {dateLabel && (
+                    <p class="shrink-0 text-xs uppercase tracking-eyebrow text-foreground/80">
+                      {dateLabel}
+                    </p>
+                  )}
+                </div>
+
+                {/* Pull quote from the article — in italics so it reads as
+                    quoted material, not Staci's own copy. */}
+                {item.quote && (
+                  <blockquote class="mt-s font-display text-lg italic text-foreground/80 leading-relaxed border-l-2 border-primary pl-m">
+                    {item.quote}
+                  </blockquote>
+                )}
+
+                {/* Link to the original piece. */}
+                {item.url && (
+                  <p class="mt-m">
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center gap-xs text-xs uppercase tracking-eyebrow font-semibold text-link hover:text-primary-dark transition-colors"
+                    >
+                      Read the article <span aria-hidden="true">↗</span>
+                    </a>
+                  </p>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  ) : (
+    <section class="bg-background" aria-label="No press items yet">
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <div class="rounded-md border border-border bg-muted p-section-md text-center">
+          <p class="font-display text-h3 text-foreground">Press features are on the way.</p>
+          <p class="mt-s text-foreground/80 max-w-prose mx-auto">
+            Coverage from print and online publications will appear here as it's published.
+            In the meantime, take a look at
+            <a href="/portfolio" class="text-link underline underline-offset-2 hover:text-primary"> the portfolio</a>
+            or
+            <a href="/contact" class="text-link underline underline-offset-2 hover:text-primary"> start a conversation</a>.
+          </p>
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>

@@ -1,0 +1,152 @@
+---
+// Safe to edit by hand
+// Before/After gallery page. Lists all projects that have at least one
+// before/after pair, ordered by displayOrder then publishedAt.
+//
+// Uses the existing BeforeAfterSlider.tsx React island (client:visible).
+// Projects without pairs are excluded at the query layer (getProjectsWithBeforeAfter).
+// Graceful empty state when no projects have pairs yet.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getProjectsWithBeforeAfter, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+import BeforeAfterSlider from '@/components/BeforeAfterSlider';
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+
+const [projects, siteSettings] = await Promise.all([
+  getProjectsWithBeforeAfter().catch(() => []),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard — before/after is part of the portfolio section.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.portfolio) return Astro.redirect('/');
+
+const title       = 'Before & After · Reid Design Portfolio';
+const description = 'Side-by-side before and after reveals from Reid Design projects across Plainfield and Indianapolis.';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Portfolio', url: `${site.url}/portfolio` },
+    { name: 'Before & After', url: `${site.url}/portfolio/before-after` },
+  ]),
+];
+
+const projectsArr: any[] = Array.isArray(projects) ? projects : [];
+const hasProjects = projectsArr.length > 0;
+
+// Humanize camelCase enum values (e.g. "livingRoom" → "Living Room") for
+// the room type chip — mirrors the pattern in portfolio/index.astro.
+function humanize(value: string): string {
+  return value
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (c) => c.toUpperCase())
+    .trim();
+}
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings}>
+  {/* Page header — text-only, same "short" layout as other interior pages. */}
+  <section class="bg-background" aria-labelledby="before-after-heading">
+    <div class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow="Before & After."
+        headline="See the difference."
+        subhead="Drag the slider to reveal what changed. Each pair is from a real project, same room, same angle."
+        headingId="before-after-heading"
+        level="h1"
+        align="center"
+        class="mx-auto"
+      />
+
+      {/* Back link to the full portfolio. */}
+      <div class="mt-l flex justify-center">
+        <a
+          href="/portfolio"
+          class="inline-flex items-center gap-xs text-sm text-link hover:text-primary-dark transition-colors underline underline-offset-2"
+        >
+          <span aria-hidden="true">←</span> All projects
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {hasProjects ? (
+    <section class="bg-muted" aria-labelledby="before-after-projects-heading">
+      <h2 id="before-after-projects-heading" class="sr-only">Before and after project sliders</h2>
+
+      <div class="mx-auto max-w-content px-m pb-section-lg space-y-section-lg">
+        {projectsArr.map((project) => {
+          const pairs = (project.beforeAfters ?? []).filter(
+            (p: any) => p?.beforeImage?.asset && p?.afterImage?.asset
+          );
+          if (pairs.length === 0) return null;
+
+          return (
+            <article aria-labelledby={`project-${project._id}-heading`}>
+              {/* Project header — title + room chip + link to the case study. */}
+              <div class="mb-m flex flex-wrap items-baseline gap-m justify-between">
+                <div>
+                  <h3
+                    id={`project-${project._id}-heading`}
+                    class="font-display text-h3 text-foreground"
+                  >
+                    {project.title}
+                  </h3>
+                  {(project.roomType || project.location) && (
+                    <p class="mt-xs text-xs uppercase tracking-eyebrow text-foreground/80">
+                      {[project.roomType ? humanize(project.roomType) : null, project.location]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+                  )}
+                </div>
+                {project.slug && (
+                  <a
+                    href={`/portfolio/${project.slug}`}
+                    class="shrink-0 text-xs uppercase tracking-eyebrow font-semibold text-link hover:text-primary-dark transition-colors inline-flex items-center gap-xs"
+                  >
+                    Full project <span aria-hidden="true">→</span>
+                  </a>
+                )}
+              </div>
+
+              {/* One BeforeAfterSlider per pair. Multiple pairs stack vertically. */}
+              {pairs.map((pair: any) => (
+                <BeforeAfterSlider
+                  client:visible
+                  beforeImage={pair.beforeImage}
+                  afterImage={pair.afterImage}
+                  caption={pair.caption}
+                />
+              ))}
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  ) : (
+    <section class="bg-muted" aria-label="No before and after content yet">
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <div class="rounded-md border border-border bg-card p-section-md text-center">
+          <h2 class="font-display text-h3 text-foreground">Before and afters are coming soon.</h2>
+          <p class="mt-s text-foreground/80 max-w-prose mx-auto">
+            These side-by-side reveals take time to photograph well. Check back once the first
+            projects wrap up, or browse the full portfolio in the meantime.
+          </p>
+          <div class="mt-l flex justify-center">
+            <CtaLink
+              variant="secondary"
+              fallbackHref="/portfolio"
+              fallbackLabel="Browse the Portfolio"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>

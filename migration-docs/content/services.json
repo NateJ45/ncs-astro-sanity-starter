@@ -1,0 +1,104 @@
+[
+  {
+    "_type": "service",
+    "_id": "service.inHomeConsultation",
+    "name": "In-home consultation",
+    "slug": { "_type": "slug", "current": "in-home-consultation" },
+    "price": "$150",
+    "priceNumeric": 150,
+    "shortDescription": "A 60 to 90 minute in-home visit where we walk your space, talk through what's not working, and leave you with a clear plan.",
+    "features": [
+      "60 to 90 minute in-home visit",
+      "Layout assessment and guidance",
+      "Color and finish direction (includes paint color help and sample testing)",
+      "Clear next-steps plan"
+    ],
+    "bestFor": "Homeowners who know something feels off but aren't sure where to start.",
+    "longDescription": "[NEW per audit] The consultation is the entry point. We walk through the room or rooms you want to address, talk about how you actually live in the space, and identify what's working and what isn't. Color and finish help is included, because picking paint colors and coordinating finishes is what most people get stuck on first. I bring physical samples and test them in your actual light. You leave with a clear next-steps plan, whether that means doing the work yourself or moving into a Full Room Design package.",
+    "displayOrder": 1,
+    "showOnHomepage": true,
+    "ctaLabel": "Book a consultation"
+  },
+  {
+    "_type": "service",
+    "_id": "service.fullRoomDesign",
+    "name": "Full room design",
+    "slug": { "_type": "slug", "current": "full-room-design" },
+    "price": "starting at $650",
+    "priceNumeric": 650,
+    "shortDescription": "A complete plan for one room — layout, furniture, decor, paint direction, and a sourcing list with direct shopping links. You shop at your own pace.",
+    "features": [
+      "Layout and furniture placement",
+      "Mood board and concept direction",
+      "Furniture and decor recommendations",
+      "Color palette and finish guidance",
+      "Curated sourcing list with shopping links",
+      "One revision round"
+    ],
+    "bestFor": "A single-room reset where you want a plan you can act on at your own pace.",
+    "longDescription": "The signature service. A complete design plan that takes a single space from confused to cohesive. We start by understanding how you use the room and what's getting in the way. From there, you get a full concept to react to before anything is purchased. The deliverables go home with you: a clear PDF with sources, dimensions, and recommendations organized so you can shop with confidence at your own pace.",
+    "displayOrder": 2,
+    "showOnHomepage": true,
+    "ctaLabel": "Start a project"
+  },
+  {
+    "_type": "service",
+    "_id": "service.fullRoomDesignPlusStyling",
+    "name": "Full room design + styling",
+    "slug": { "_type": "slug", "current": "full-room-design-plus-styling" },
+    "price": "starting at $850",
+    "priceNumeric": 850,
+    "shortDescription": "Everything in Full Room Design, plus me on the ground — shopping with you, picking paint, hanging the art, styling the shelves.",
+    "features": [
+      "Everything in Full Room Design",
+      "Hands-on shopping and sourcing",
+      "Paint color selections",
+      "Rug, art, and styling direction",
+      "In-home styling and final reveal"
+    ],
+    "bestFor": "When you'd rather hand the project off than manage it.",
+    "longDescription": "The version where I do the parts that take real time. The plan is the same as Full Room Design — concept, layout, furniture and decor selections, paint — but I'm there for the rest of it too. I shop with you (or for you), pick the paint colors on the wall in your actual light, and come back to install: hanging art, styling shelves, laying rugs, fluffing the couch until it looks like a magazine and feels like your house. The day I leave is the day you stop having a project and start having a finished room.",
+    "displayOrder": 3,
+    "showOnHomepage": true,
+    "ctaLabel": "Start a project"
+  },
+  {
+    "_type": "service",
+    "_id": "service.shoppingAndSourcing",
+    "name": "Shopping & sourcing",
+    "slug": { "_type": "slug", "current": "shopping-and-sourcing" },
+    "price": "$75 per hour",
+    "priceNumeric": 75,
+    "shortDescription": "Help finding the right pieces — billed hourly, no minimum, trade-vendor access included.",
+    "features": [
+      "Trade-only and retail vendor sourcing",
+      "Curated finds matched to your style",
+      "Shopping coordination and in-store visits",
+      "Vendor and lead-time management"
+    ],
+    "bestFor": "When you have the vision and just need the right finds.",
+    "longDescription": "You already know what you want. You just need someone who knows where to find it. As a designer, I have access to trade-only vendors and lines that aren't in retail stores, and I'm happy to put those relationships to work for you on an hourly basis. Billed at $75 per hour, no minimum. Great for filling in the last few pieces of a space, replacing one item that's not working, or adding warmth to a room that feels almost-done.",
+    "displayOrder": 4,
+    "showOnHomepage": true,
+    "ctaLabel": "Start a project"
+  },
+  {
+    "_type": "service",
+    "_id": "service.builderRealtorPartnerships",
+    "name": "Builder & realtor partnerships",
+    "slug": { "_type": "slug", "current": "builder-realtor-partnerships" },
+    "price": "Custom",
+    "priceNumeric": null,
+    "shortDescription": "For builders, realtors, and contractors in the Plainfield and Indianapolis area. Finish selections, staging, move-in styling — whatever the project needs.",
+    "features": [
+      "Finish selections and fixture packages for new construction",
+      "Staging for listings and move-in styling for buyers",
+      "Design-side coordination for renovation projects"
+    ],
+    "bestFor": "Builders, realtors, and contractors looking for a design partner.",
+    "longDescription": "[NEW per audit, reframed as invitation] Reid Design is open to collaboration with builders, realtors, and contractors. Whether it's finish selections for new construction, staging for listings, or move-in styling packages, I'd love to talk about whether a partnership makes sense. Scope and pricing get worked out per project or packaged per home.",
+    "displayOrder": 5,
+    "showOnHomepage": false,
+    "ctaLabel": "Discuss a partnership"
+  }
+]

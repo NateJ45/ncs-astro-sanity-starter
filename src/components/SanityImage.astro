@@ -1,0 +1,125 @@
+---
+// Foundation, edit with care
+// Wrapper for Sanity-hosted images. Reads the image object (with hotspot/crop/alt),
+// asks Sanity's CDN to deliver an optimized variant, and renders an <img> with a
+// real responsive srcset.
+//
+// Sanity's CDN is the image-processing pipeline here — Astro's built-in <Image>
+// is reserved for local files under src/assets/. Sanity transforms beat Astro
+// Sharp at runtime for two reasons: (1) it's edge-cached worldwide, (2) it can
+// emit AVIF on the fly.
+//
+// Always pulls alt text from the Sanity image field (editors set it once on
+// the image and it carries everywhere). Pass `width` to drive the maximum
+// requested size, `height` if you need a specific aspect-ratio crop, and
+// `loading` to override the default "lazy". Set `loading="eager"` for
+// above-the-fold hero images.
+
+import { urlFor, parseSanityAssetDimensions } from '@/lib/sanity';
+
+interface SanityImageObject {
+  asset?: { _ref?: string; _id?: string };
+  alt?: string;
+  hotspot?: { x: number; y: number; height: number; width: number };
+  crop?: { top: number; bottom: number; left: number; right: number };
+}
+
+interface Props {
+  source: SanityImageObject | undefined | null;
+  /** Maximum width the image will ever render at. Used as the upper bound of the responsive srcset. */
+  width: number;
+  /** Optional height — only set when you need a specific aspect-ratio crop. */
+  height?: number;
+  /** Override the alt text from Sanity. Pass "" only for decorative images that have an adjacent text equivalent. */
+  alt?: string;
+  loading?: 'lazy' | 'eager';
+  /** Provide explicit sizes attribute for responsive serving. Strongly recommended for any non-fixed-width image. */
+  sizes?: string;
+  class?: string;
+  /** Quality 0-100. Default 75 for content, drop to 65 for big hero photos. */
+  quality?: number;
+  /**
+   * Output format. Default 'auto' lets Sanity choose the best format the
+   * client supports — AVIF on modern browsers (~25% smaller than WebP),
+   * WebP elsewhere, JPEG/PNG as final fallback. Pass 'webp' to force WebP.
+   */
+  format?: 'auto' | 'webp';
+  /**
+   * Network-priority hint. Pass "high" on the page's LCP image so the
+   * browser fetches it ahead of other resources in the queue (Lighthouse
+   * flags this on hero photos). Defaults to undefined so the browser uses
+   * its own heuristics for everything else.
+   */
+  fetchpriority?: 'high' | 'low' | 'auto';
+}
+
+const {
+  source,
+  width,
+  height,
+  alt,
+  loading = 'lazy',
+  sizes,
+  class: className,
+  quality = 75,
+  format = 'auto',
+  fetchpriority,
+} = Astro.props;
+
+// Build the URL. If source is null/undefined we render nothing — pages should handle absence explicitly.
+if (!source?.asset) {
+  return null;
+}
+
+// If the caller didn't pass an explicit height we derive one from the
+// asset's intrinsic dimensions so the rendered <img> always carries both
+// `width` and `height` attributes. Without both the browser can't reserve
+// aspect-ratio space and the page racks up CLS while images stream in
+// (this was the portfolio-detail CLS regression Lighthouse was flagging).
+const intrinsic = parseSanityAssetDimensions(source);
+const derivedHeight =
+  height ?? (intrinsic ? Math.round((intrinsic.height * width) / intrinsic.width) : undefined);
+
+// Build a single optimized URL at a target width. Reusable for srcset entries.
+function buildUrl(targetWidth: number) {
+  let b = urlFor(source).width(targetWidth).quality(quality);
+  if (height) {
+    // Caller-supplied height = aspect-ratio crop. Scale proportionally so
+    // every srcset variant keeps the same crop ratio.
+    const ratio = targetWidth / width;
+    b = b.height(Math.round(height * ratio));
+  }
+  return format === 'webp' ? b.format('webp').url() : b.auto('format').url();
+}
+
+// Responsive srcset ladder. Capped at the requested width so we never ask
+// Sanity for more than what the layout will display at full-bleed. The fixed
+// breakpoints map to common viewport widths: phones (400), small tablets (600),
+// mobile retina at DPR 1.875 (700, bridges the 600→800 gap Lighthouse flagged),
+// mobile retina at DPR 2 (800), laptops (900), large screens (1200),
+// retina-laptop (1600), retina-desktop (2400).
+const BREAKPOINTS = [400, 600, 700, 800, 900, 1200, 1600, 2400];
+const widths = BREAKPOINTS.filter((w) => w <= width);
+// Always include the explicit width so the largest srcset slot matches it.
+if (widths[widths.length - 1] !== width) widths.push(width);
+
+const srcset = widths.map((w) => `${buildUrl(w)} ${w}w`).join(', ');
+// `src` is the largest variant — used by browsers that don't support srcset
+// (vanishingly rare) and by accessibility tools that grab a single src.
+const src = buildUrl(width);
+
+const resolvedAlt = alt !== undefined ? alt : (source.alt ?? '');
+---
+
+<img
+  src={src}
+  srcset={srcset}
+  width={width}
+  height={derivedHeight}
+  alt={resolvedAlt}
+  loading={loading}
+  decoding="async"
+  fetchpriority={fetchpriority}
+  sizes={sizes ?? `(max-width: ${width}px) 100vw, ${width}px`}
+  class={className}
+/>

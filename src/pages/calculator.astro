@@ -1,0 +1,149 @@
+---
+// Safe to edit by hand
+// /calculator — Budget calculator page.
+// Fetches the budgetCalculator singleton from Sanity. If the doc is absent or
+// doesn't have any rooms configured, renders a warm "coming soon" state rather
+// than crashing. Passes the full config to the React island.
+//
+// Page sections:
+//   1. Hero (from Sanity intro fields; text-only hero if no background image)
+//   2. BudgetCalculator island (client:visible)
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import BudgetCalculator from '@/components/BudgetCalculator';
+import { getBudgetCalculator, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+const [calc, siteSettings] = await Promise.all([
+  getBudgetCalculator().catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.budgetCalculator) return Astro.redirect('/');
+
+const title       = 'Budget Calculator · Reid Design';
+const description = 'Get a rough idea of what a design project costs before reaching out. Use the Reid Design budget calculator to build your estimate by room, scope, and add-ons.';
+
+// Validate the calc doc: we need at least one room to be meaningful.
+const hasValidCalc =
+  calc &&
+  Array.isArray(calc.rooms) &&
+  calc.rooms.length >= 1 &&
+  Array.isArray(calc.scopeOptions) &&
+  calc.scopeOptions.length >= 1;
+
+// Hero fields fall back to sensible defaults so the page looks intentional
+// even before Staci fills out the doc in Studio.
+const heroEyebrow  = calc?.introEyebrow  ?? 'Plan your project';
+const heroHeadline = calc?.introHeadline ?? 'What does a design project cost?';
+const heroSubhead  = calc?.introSubhead  ?? 'Use this as a starting point, not a firm quote. Every space is different, and a consultation is the only way to get specifics.';
+
+// Typed config object passed to the island. Keeps the island free of any
+// Sanity-client import and avoids shipping the URL builder to the browser.
+interface CalcConfig {
+  rooms: Array<{ label: string; baseLow: number; baseHigh: number }>;
+  scopeOptions: Array<{ label: string; addLow: number; addHigh: number }>;
+  addOns: Array<{ label: string; low: number; high: number }>;
+  resultCopy: string;
+  disclaimer: string;
+  ctaLabel: string;
+  consultPriceNote: string;
+}
+
+let calcConfig: CalcConfig | null = null;
+
+if (hasValidCalc) {
+  calcConfig = {
+    rooms: (calc.rooms ?? []).map((r: any) => ({
+      label: r.label ?? '',
+      baseLow: r.baseLow ?? 0,
+      baseHigh: r.baseHigh ?? 0,
+    })),
+    scopeOptions: (calc.scopeOptions ?? []).map((s: any) => ({
+      label: s.label ?? '',
+      addLow: s.addLow ?? 0,
+      addHigh: s.addHigh ?? 0,
+    })),
+    addOns: Array.isArray(calc.addOns)
+      ? calc.addOns.map((a: any) => ({
+          label: a.label ?? '',
+          low: a.low ?? 0,
+          high: a.high ?? 0,
+        }))
+      : [],
+    resultCopy:
+      calc.resultCopy ??
+      'Based on what you described, a project like this typically runs {{low}} to {{high}}. That said, every home is different.',
+    disclaimer:
+      calc.disclaimer ??
+      'This is a rough estimate to help you plan, not a quote. Actual cost depends on your space, finish level, and shopping budget.',
+    ctaLabel: calc.ctaLabel ?? 'Book a consultation',
+    consultPriceNote: calc.consultPriceNote ?? '',
+  };
+}
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Budget Calculator', url: `${site.url}/calculator` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={calc?.seoImage}>
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={calc?.heroImage ?? null}
+    headingId="calculator-hero-heading"
+    size="short"
+    scriptAccent={calc?.heroScriptAccent ?? undefined}
+  />
+
+  {/* ------- 2. Calculator island or coming-soon state ----------------------- */}
+  <main id="calculator-main">
+    {hasValidCalc && calcConfig ? (
+      <BudgetCalculator client:visible config={calcConfig} />
+    ) : (
+      <section
+        class="mx-auto max-w-content px-m py-section-lg text-center"
+        aria-labelledby="calc-coming-heading"
+      >
+        <div class="mx-auto max-w-xl">
+          <div class="h-0.5 bg-primary w-16 mx-auto mb-l" aria-hidden="true"></div>
+          <h2
+            id="calc-coming-heading"
+            class="font-display text-h2 text-foreground"
+          >
+            Coming soon
+          </h2>
+          <p class="mt-m text-foreground/80 text-lg">
+            Staci is putting together the number ranges for this tool. In the meantime,
+            reach out and she will walk you through pricing in a quick call.
+          </p>
+          <div class="mt-l flex flex-wrap justify-center gap-s">
+            <a
+              href="/contact?type=consultation"
+              class="inline-flex items-center px-l py-s bg-primary-dark text-white font-semibold uppercase tracking-widest text-sm hover:bg-accent-dark transition-colors press-tactile"
+            >
+              Book a consultation
+            </a>
+            <a
+              href="/services"
+              class="inline-flex items-center px-l py-s border border-primary text-link font-semibold uppercase tracking-widest text-sm hover:bg-accent transition-colors press-tactile"
+            >
+              See service pricing
+            </a>
+          </div>
+        </div>
+      </section>
+    )}
+  </main>
+</BaseLayout>

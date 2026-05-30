@@ -1,0 +1,158 @@
+---
+// Safe to edit by hand
+// Portfolio index. Grid of project cards, sorted by displayOrder then publishedAt.
+// Renders an empty state when no projects exist yet (launch state).
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getAllProjects, getPortfolioPage, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+import Hero from '@/components/Hero.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import PortfolioFilterChips from '@/components/PortfolioFilterChips';
+import PortfolioCursor from '@/components/PortfolioCursor';
+
+const [projects, page, siteSettings] = await Promise.all([
+  getAllProjects().catch(() => []),
+  getPortfolioPage().catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard. Redirect home when portfolio is explicitly off.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.portfolio) return Astro.redirect('/');
+
+const title       = page?.seoTitle       ?? 'Portfolio';
+const description = page?.seoDescription ?? 'A look at recent Reid Design projects across Plainfield and the Indianapolis area.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'Recent work';
+const heroHeadline = page?.heroHeadline ?? 'Projects across Plainfield and Indianapolis.';
+const heroSubhead  = page?.heroSubhead  ?? 'A look at how rooms come together. Each project starts with a conversation about how the space needs to function, then works back from there.';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Portfolio', url: `${site.url}/portfolio` },
+  ]),
+];
+
+const hasProjects = Array.isArray(projects) && projects.length > 0;
+
+// Compute unique room types + design styles present in the actual content so
+// the filter chips don't offer values that won't match anything. Humanize the
+// camelCase enum values for display.
+function humanize(value: string): string {
+  return value
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (c) => c.toUpperCase())
+    .trim();
+}
+
+const projectsArr: any[] = Array.isArray(projects) ? projects : [];
+const roomOptions = [
+  ...new Map(
+    projectsArr
+      .filter((p) => p.roomType)
+      .map((p) => [p.roomType, { value: p.roomType, label: humanize(p.roomType) }]),
+  ).values(),
+];
+const styleOptions = [
+  ...new Map(
+    projectsArr
+      .filter((p) => p.designStyle)
+      .map((p) => [p.designStyle, { value: p.designStyle, label: humanize(p.designStyle) }]),
+  ).values(),
+];
+
+// Portfolio index now backed by the portfolioPage singleton. The fallback
+// asset _ref preserves the previous hero image for any environment where the
+// singleton hasn't been populated yet — defensive only; the patch script
+// backfills the field on launch.
+const fallbackHeroImage = {
+  asset: { _ref: 'image-95cf8e9cffed47a11f9f74386dc1659d3b45ffba-4736x4280-jpg' },
+  alt: 'Reid Design kitchen with island and woven counter stools.',
+};
+const heroBackground = page?.heroImage ?? fallbackHeroImage;
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={heroBackground}
+    headingId="portfolio-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent ?? 'Plainfield'}
+  />
+
+  {hasProjects ? (
+    <section class="mx-auto max-w-content px-m pb-section-lg" aria-labelledby="portfolio-projects-heading">
+      {/* Visually-hidden H2 — gives the project grid a proper heading-level
+          parent so screen-reader navigation goes H1 → H2 → H3 (each card)
+          instead of skipping straight to H3. Audit-caught regression. */}
+      <h2 id="portfolio-projects-heading" class="sr-only">Projects</h2>
+
+      {/* Filter chips + before/after link in the same row. */}
+      <div class="mb-l flex flex-col sm:flex-row sm:items-center sm:justify-between gap-m">
+        <PortfolioFilterChips client:visible rooms={roomOptions} styles={styleOptions} />
+        {/* Before/after link — contextual shortcut for visitors who came
+            specifically to see transformation reveals. Hidden until there's
+            content at /portfolio/before-after, but safe to show preemptively
+            because that page has its own graceful empty state. */}
+        <a
+          href="/portfolio/before-after"
+          class="shrink-0 inline-flex items-center gap-xs text-xs uppercase tracking-eyebrow font-semibold text-link hover:text-primary-dark transition-colors"
+        >
+          Before &amp; After <span aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      {/* Grid. data-* attributes drive the client-side filter; the
+          is-filtered-out class is added by the chips island to fade-and-scale
+          non-matching items. */}
+      <ul
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-l list-none p-0"
+        data-portfolio-cursor-zone
+        data-stagger-grid
+      >
+        {projects.map((p: any) => (
+          <li
+            data-project-item
+            data-roomtype={p.roomType ?? ''}
+            data-designstyle={p.designStyle ?? ''}
+            class="transition-all duration-300 ease-out"
+          >
+            <ProjectCard project={p} />
+          </li>
+        ))}
+      </ul>
+
+      {/* Empty state when filters match nothing. The island toggles
+          display:none/block on this element. */}
+      <p
+        data-portfolio-empty-filter
+        class="hidden mt-section-md text-center text-foreground/85 italic"
+      >
+        No projects match those filters yet. <a href="#" onclick="event.preventDefault(); document.querySelectorAll('[data-project-item]').forEach(el => el.classList.remove('is-filtered-out')); history.replaceState(null, '', window.location.pathname); window.location.reload();" class="text-link underline underline-offset-2">Clear filters</a> to see everything.
+      </p>
+
+      {/* Bronze "View →" custom cursor — desktop only, hover-aware. */}
+      <PortfolioCursor client:idle />
+    </section>
+  ) : (
+    <section class="mx-auto max-w-content px-m pb-section-lg">
+      <div class="rounded-md border border-border bg-muted p-section-md text-center">
+        <h2 class="font-display text-h3 text-foreground">Case studies are on the way.</h2>
+        <p class="mt-s text-foreground/80 max-w-prose mx-auto">
+          The first projects under Reid Design LLC are wrapping up now, with full write-ups
+          coming shortly. In the meantime, you can read about
+          <a href="/process" class="text-link underline underline-offset-2 hover:text-primary"> how Reid Design works</a>
+          or
+          <a href="/contact" class="text-link underline underline-offset-2 hover:text-primary"> start a conversation about your space</a>.
+        </p>
+      </div>
+    </section>
+  )}
+</BaseLayout>

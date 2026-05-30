@@ -1,0 +1,173 @@
+[
+  {
+    "_type": "processStep",
+    "_id": "processStep.consultation",
+    "stepNumber": 1,
+    "title": "In-home consultation",
+    "timeEstimate": "Single visit",
+    "shortDescription": "A free intro chat to make sure we're a fit, then a 60 to 90 minute in-home visit to walk your space and build a clear plan.",
+    "fullDescription": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Every project starts with a quick intro conversation by phone or message, no charge and no pressure, to make sure we're a good fit. Once we are, we book the in-home visit."
+          }
+        ]
+      },
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "The consultation itself is 60 to 90 minutes in your space. I take measurements, photos, and a lot of notes. We walk through the rooms together and talk about what's working, what isn't, and what you've always wished the space could feel like."
+          }
+        ]
+      },
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "This is where I get to know how you actually live, not just what you think you're supposed to say to a designer. The more honest you are, the better the result."
+          }
+        ]
+      }
+    ],
+    "features": [
+      "60 to 90 minutes",
+      "In your home",
+      "Layout assessment",
+      "Clear next steps"
+    ],
+    "tierNote": null,
+    "relatedServices": [
+      { "_type": "reference", "_ref": "service.inHomeConsultation" }
+    ]
+  },
+  {
+    "_type": "processStep",
+    "_id": "processStep.designPlan",
+    "stepNumber": 2,
+    "title": "Design plan created",
+    "timeEstimate": "2 to 3 weeks",
+    "shortDescription": "Mood board, layout, furniture and decor selections, and a sourcing list with direct shopping links. You see everything before anything is purchased.",
+    "fullDescription": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "I go to work. You get a full design plan: a mood board that captures the direction, a layout showing how the room comes together, color and finish guidance, and a curated product selection with everything from sofas to throw pillows. Every piece is chosen for a reason."
+          }
+        ]
+      },
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "We meet to walk through the plan together. You see everything before a single item is purchased. If something isn't right, we revise, one full revision round is included."
+          }
+        ]
+      }
+    ],
+    "features": [
+      "Mood board",
+      "Layout plan",
+      "Sourcing list",
+      "Revision round"
+    ],
+    "tierNote": null,
+    "relatedServices": [
+      { "_type": "reference", "_ref": "service.fullRoomDesign" },
+      { "_type": "reference", "_ref": "service.fullRoomDesignPlusStyling" }
+    ]
+  },
+  {
+    "_type": "processStep",
+    "_id": "processStep.shoppingSelections",
+    "stepNumber": 3,
+    "title": "Shopping + selections",
+    "timeEstimate": "Per project scope",
+    "shortDescription": "You shop the curated list at your own pace, or I source and order it for you. Trade vendor access is included either way.",
+    "fullDescription": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Once you approve the plan, the sourcing happens. With Full Room Design, you get a curated shopping list with direct links and shop at your own pace. With Full Room Design + Styling, I take it from there, place orders, track shipments, and coordinate vendors."
+          }
+        ]
+      },
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Either way, you get access to my trade-only vendor relationships, lines and pricing not available in retail stores, which often offsets a meaningful chunk of the design fee."
+          }
+        ]
+      }
+    ],
+    "features": [
+      "Shopping list with links",
+      "Trade vendor access",
+      "Order management*"
+    ],
+    "tierNote": "*Included with Full Room Design + Styling",
+    "relatedServices": [
+      { "_type": "reference", "_ref": "service.fullRoomDesign" },
+      { "_type": "reference", "_ref": "service.fullRoomDesignPlusStyling" },
+      { "_type": "reference", "_ref": "service.shoppingAndSourcing" }
+    ]
+  },
+  {
+    "_type": "processStep",
+    "_id": "processStep.stylingReveal",
+    "stepNumber": 4,
+    "title": "Styling + final reveal",
+    "timeEstimate": "Final visit",
+    "shortDescription": "Everything gets placed, styled, and accessorized. Then I step back, you walk in. This is the moment.",
+    "fullDescription": [
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "Everything arrives, gets placed, styled, and accessorized, down to the last throw pillow and stack of books. I'm there for installation day to make sure every piece ends up exactly right. Then I step back, you walk in, and this is the part I love most."
+          }
+        ]
+      },
+      {
+        "_type": "block",
+        "style": "normal",
+        "children": [
+          {
+            "_type": "span",
+            "text": "This step is included with Full Room Design + Styling. With the plan-only tier, you handle the installation at your own pace using the design plan as your guide."
+          }
+        ]
+      }
+    ],
+    "features": [
+      "Surfaces styled",
+      "Accessories placed",
+      "Final walkthrough"
+    ],
+    "tierNote": "Included with Full Room Design + Styling",
+    "relatedServices": [
+      { "_type": "reference", "_ref": "service.fullRoomDesignPlusStyling" }
+    ]
+  }
+]

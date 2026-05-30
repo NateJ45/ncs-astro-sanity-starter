@@ -1,0 +1,145 @@
+---
+// Safe to edit by hand
+// /guides — Lead magnet index. Lists all published leadMagnet documents from Sanity.
+// Shows a friendly empty state when none are published so the page still builds cleanly.
+//
+// Layout: Hero (text variant) → card grid (brand-stripe cards per CLAUDE.md) → FinalCta.
+// Cards link to /guides/[slug] for the individual gate + download landing.
+//
+// SEO note: the seoTitle / seoDescription on each leadMagnet document are used on
+// the individual /guides/[slug] page. The index uses generic fallbacks here.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getLeadMagnets, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import FinalCta from '@/components/FinalCta.astro';
+
+const [magnets, siteSettings] = await Promise.all([
+  getLeadMagnets().catch(() => []),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.guides) return Astro.redirect('/');
+
+const list = magnets ?? [];
+
+const title = 'Free Guides · Reid Design';
+const description =
+  'Practical design resources from Staci at Reid Design. Free downloads to help you make better decisions for your home, before you call a designer.';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Guides', url: `${site.url}/guides` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings}>
+
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow="Free Resources"
+    headline="Design guides worth keeping."
+    subhead="Practical downloads to help you make better decisions for your home. No fluff, no pitch, just the good stuff."
+    headingId="guides-hero-heading"
+    size="short"
+    scriptAccent="guides"
+  />
+
+  {/* ------- 2. Guide cards -------------------------------------------------- */}
+  <section class="bg-background" aria-labelledby="guides-grid-heading">
+    <div class="mx-auto max-w-content px-m py-section-md">
+      <h2 id="guides-grid-heading" class="sr-only">Available guides</h2>
+
+      {list.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-l">
+          {list.map((magnet: any) => {
+            const href = `/guides/${magnet.slug}`;
+            return (
+              <a
+                href={href}
+                class="card-lift card-lift-slow group block bg-card border border-border-soft rounded-md overflow-hidden hover:border-primary/40 transition-colors shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]"
+                aria-label={`Download: ${magnet.title}`}
+              >
+                {/* Brand accent stripe — matches every marketing card in the system. */}
+                <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+                {/* Cover image — placeholder when no cover is set. */}
+                {magnet.coverImage?.asset ? (
+                  <div class="aspect-[16/10] overflow-hidden bg-muted">
+                    <SanityImage
+                      source={magnet.coverImage}
+                      width={800}
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]"
+                    />
+                  </div>
+                ) : (
+                  <div class="aspect-[16/10] bg-muted flex items-center justify-center">
+                    <span class="text-muted-foreground text-sm">Free Guide</span>
+                  </div>
+                )}
+
+                {/* Card body */}
+                <div class="p-l">
+                  <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-xs">
+                    Free Download
+                  </p>
+                  <h3 class="font-display text-h3 text-foreground group-hover:text-primary-dark transition-colors">
+                    {magnet.title}
+                  </h3>
+                  {magnet.summary && (
+                    <p class="mt-s text-sm text-foreground/80 leading-relaxed line-clamp-3">
+                      {magnet.summary}
+                    </p>
+                  )}
+                  <p class="mt-m inline-flex items-center gap-xs text-xs uppercase tracking-eyebrow font-semibold text-link group-hover:text-primary-dark transition-colors">
+                    Get the guide <span aria-hidden="true">→</span>
+                  </p>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="text-center py-section-lg">
+          <p class="font-display text-h3 text-foreground">Guides are on their way.</p>
+          <p class="mt-m text-foreground/80 max-w-prose mx-auto leading-relaxed">
+            Staci is putting together a set of practical downloads to help you think through
+            your space before we ever talk. Check back soon.
+          </p>
+          <div class="mt-l flex flex-wrap justify-center gap-s">
+            <a
+              href="/journal"
+              class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s border border-primary text-link hover:bg-accent text-xs font-semibold uppercase tracking-[0.18em] rounded-sm transition-colors"
+            >
+              Browse the journal
+            </a>
+            <a
+              href="/contact"
+              class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s bg-primary-dark text-white text-xs font-semibold uppercase tracking-[0.18em] rounded-sm hover:bg-accent-dark transition-colors"
+            >
+              Start a conversation
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {/* ------- 3. Final CTA ---------------------------------------------------- */}
+  <FinalCta
+    eyebrow="Ready to Begin?"
+    headline="Let's talk about your space."
+    subhead="Every project starts with a conversation. Book a consultation and see what's possible."
+  />
+
+</BaseLayout>

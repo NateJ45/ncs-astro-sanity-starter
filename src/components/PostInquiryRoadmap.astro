@@ -1,0 +1,86 @@
+---
+// Safe to edit by hand
+// Renders the postInquiryRoadmap array from the contactPage Sanity singleton
+// as a numbered step list so visitors know what happens after they hit Send.
+//
+// Fallback behavior: when the roadmap array is empty, this component renders
+// nothing and contact.astro falls back to the existing whatToExpectContent
+// block. The two never render together (contact.astro handles the branching).
+
+interface Step {
+  title?: string;
+  body?: string;
+  timeEstimate?: string;
+}
+
+interface Props {
+  steps?: Step[] | null;
+  /** Optional eyebrow above the section. Defaults to "After You Reach Out." */
+  eyebrow?: string;
+  /** Optional heading. Defaults to "Here's what happens next." */
+  headline?: string;
+}
+
+const {
+  steps,
+  eyebrow = 'After You Reach Out.',
+  headline = "Here's what happens next.",
+} = Astro.props as Props;
+
+// Filter to steps that have at least a title — skip blanks so seeding a
+// partial list doesn't create empty numbered holes.
+const validSteps = (steps ?? []).filter((s) => s?.title?.trim());
+
+// Suppress entirely when there's nothing to show.
+if (validSteps.length === 0) return null;
+---
+
+<section aria-labelledby="roadmap-heading" class="mt-section-lg border-t border-border-soft pt-l">
+  {/* Eyebrow + headline — left-aligned in the form column context. */}
+  {eyebrow && (
+    <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">{eyebrow}</p>
+  )}
+  {headline && (
+    <h2 id="roadmap-heading" class="font-display text-h3 text-foreground">{headline}</h2>
+  )}
+
+  {/* Numbered step list. Each step is a card-like surface with the brand stripe
+      and resting shadow so it reads as part of the design system. */}
+  <ol class="mt-l space-y-m" role="list">
+    {validSteps.map((step, idx) => (
+      <li class="card-lift flex gap-m bg-card border border-border-soft rounded-md overflow-hidden shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]">
+        {/* Bronze brand stripe on the left edge (vertical orientation for list items). */}
+        <div class="w-0.5 shrink-0 bg-primary" aria-hidden="true"></div>
+
+        <div class="flex gap-m items-start py-m pr-m">
+          {/* Step number — monospace, bronze-tinted, aria-hidden so the list
+              semantics carry the order without the screen reader reading
+              "zero one" before every step. */}
+          <span
+            class="shrink-0 font-mono text-sm font-semibold text-link/80 min-w-[1.5rem] pt-px"
+            aria-hidden="true"
+          >
+            {String(idx + 1).padStart(2, '0')}
+          </span>
+
+          <div class="min-w-0">
+            <h3 class="font-display text-h4 text-foreground leading-tight">{step.title}</h3>
+
+            {step.body && (
+              <p class="mt-xs text-foreground/80 leading-relaxed">{step.body}</p>
+            )}
+
+            {/* Time estimate — rendered as a quiet badge when present.
+                Helps visitors calibrate expectations ("within 48 hours"). */}
+            {step.timeEstimate && (
+              <p class="mt-s inline-flex items-center gap-xs text-xs uppercase tracking-eyebrow text-foreground/80 bg-muted px-s py-0.5 rounded-full">
+                <span aria-hidden="true">&#128337;</span>
+                {step.timeEstimate}
+              </p>
+            )}
+          </div>
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>

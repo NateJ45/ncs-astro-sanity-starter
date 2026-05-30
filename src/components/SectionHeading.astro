@@ -1,0 +1,114 @@
+---
+// Safe to edit by hand
+// The eyebrow + headline pairing used at the top of nearly every section.
+// Pass `headingId` so the parent <section> can use aria-labelledby={headingId}
+// for an accessible name (per CLAUDE.md a11y guidance).
+//
+// Variants:
+//   - level: which heading tag (h1 for hero, h2 for sections, h3 for sub-sections). Default h2.
+//   - align: "left" (default) or "center" for centered section heads
+//   - tone: "default" (foreground on light surfaces) or "inverse" (bg/light on dark CTA banners)
+//
+// Script accent:
+//   - scriptAccent?: optional single word/phrase from the headline to render
+//     in Pinyon Script via the `.font-script` utility. The first occurrence is
+//     wrapped. Falls back to plain rendering when undefined, empty, or not
+//     found — so no existing heading is affected unless the prop is explicitly
+//     passed with a matching string.
+//   - Logic is shared with Hero.astro via splitScriptAccent() in src/lib/scriptAccent.ts.
+//   - At most one script accent per heading (editorial discipline, per CLAUDE.md).
+
+import { splitScriptAccent } from '@/lib/scriptAccent';
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  headingId: string;
+  level?: 'h1' | 'h2' | 'h3';
+  align?: 'left' | 'center';
+  tone?: 'default' | 'inverse';
+  /**
+   * Optional single word/phrase from the headline to render in handwritten
+   * Pinyon Script. Must match the headline text exactly (case-sensitive).
+   * Leave undefined or blank to skip. Use sparingly — one accent per heading.
+   */
+  scriptAccent?: string;
+  class?: string;
+}
+
+const {
+  eyebrow,
+  headline,
+  subhead,
+  headingId,
+  level = 'h2',
+  align = 'left',
+  tone = 'default',
+  scriptAccent,
+  class: extraClass = '',
+} = Astro.props as Props;
+
+// Split the headline around the script-accent word when provided.
+// When not found or not set, `found` is false and we render `headline` plain.
+const { found: scriptFound, before: scriptBefore, word: scriptWord, after: scriptAfter } =
+  splitScriptAccent(headline ?? '', scriptAccent);
+
+const headingClass =
+  level === 'h1'
+    ? 'font-display text-h1 leading-headline-tight tracking-[-0.02em]'
+    : level === 'h2'
+    ? 'font-display text-h2 leading-tight'
+    : 'font-display text-h3 leading-tight';
+
+const wrapperAlign = align === 'center' ? 'text-center mx-auto' : 'text-left';
+const toneHeadline = tone === 'inverse' ? 'text-bg' : 'text-foreground';
+// Default tone swapped from text-secondary (Warm Taupe, fails AA at 12px) to
+// text-foreground/80 (4.77:1 on Cream). Inverse tone (used on FinalCta's
+// dark Charcoal panel) keeps cream-on-dark.
+const toneEyebrow = tone === 'inverse' ? 'text-bg/75' : 'text-foreground/80';
+const toneSub = tone === 'inverse' ? 'text-bg/80' : 'text-foreground/80';
+
+// Bronze hairline accent beneath the eyebrow. Matches the brand-stripe
+// signature now repeating on every marketing card so section headings read
+// with the same editorial vocabulary. On inverse tone (dark FinalCta panel)
+// the hairline switches to lifted cream so it stays visible.
+const accentColor = tone === 'inverse' ? 'bg-bg/40' : 'bg-primary/60';
+const accentAlign = align === 'center' ? 'mx-auto' : '';
+---
+
+<div class:list={[wrapperAlign, 'max-w-3xl', extraClass]}>
+  {eyebrow && (
+    <>
+      <p class:list={['text-xs uppercase tracking-eyebrow', toneEyebrow]}>{eyebrow}</p>
+      <div
+        class:list={['mt-s mb-m h-px w-12', accentAlign, accentColor]}
+        aria-hidden="true"
+      ></div>
+    </>
+  )}
+  {headline && (
+    level === 'h1' ? (
+      <h1 id={headingId} class:list={[headingClass, toneHeadline]}>
+        {scriptFound
+          ? <>{scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}</>
+          : headline}
+      </h1>
+    ) : level === 'h2' ? (
+      <h2 id={headingId} class:list={[headingClass, toneHeadline]}>
+        {scriptFound
+          ? <>{scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}</>
+          : headline}
+      </h2>
+    ) : (
+      <h3 id={headingId} class:list={[headingClass, toneHeadline]}>
+        {scriptFound
+          ? <>{scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}</>
+          : headline}
+      </h3>
+    )
+  )}
+  {subhead && (
+    <p class:list={['mt-m text-lg', toneSub]}>{subhead}</p>
+  )}
+</div>

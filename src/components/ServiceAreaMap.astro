@@ -1,0 +1,50 @@
+---
+// Safe to edit by hand
+// OpenStreetMap iframe centered on Plainfield, IN with the broader service area visible.
+// No API key, no JS, no tracker. The iframe is keyboard-focusable; aria-label
+// describes what the visitor is looking at for screen readers.
+//
+// To recenter or rezoom, get a new bbox from openstreetmap.org/export.
+
+interface Props {
+  /** Override the visible bbox if Staci's coverage area shifts. Format: minLon,minLat,maxLon,maxLat */
+  bbox?: string;
+  /** Marker position. Defaults to Plainfield, IN. */
+  markerLat?: number;
+  markerLon?: number;
+  /** Iframe height in pixels (width is always 100%). */
+  height?: number;
+  class?: string;
+}
+
+const {
+  bbox = '-86.85,39.55,-85.95,39.95', // Roughly Plainfield → Noblesville → Greenfield
+  markerLat = 39.7042,
+  markerLon = -86.3994,
+  height = 360,
+  class: className,
+} = Astro.props as Props;
+
+const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${markerLat},${markerLon}`;
+const link = `https://www.openstreetmap.org/?mlat=${markerLat}&mlon=${markerLon}#map=10/${markerLat}/${markerLon}`;
+---
+
+<figure class={`m-0 ${className ?? ''}`}>
+  <iframe
+    src={src}
+    width="100%"
+    height={height}
+    style="border: 0; border-radius: 0.5rem;"
+    title="Map showing Reid Design's service area centered on Plainfield, Indiana"
+    aria-label="Map showing Reid Design's service area centered on Plainfield, Indiana, extending through Indianapolis and the northern suburbs"
+    loading="lazy"
+  ></iframe>
+  <figcaption class="mt-xs text-xs text-muted-foreground">
+    Based in Plainfield, serving Greater Indianapolis. <a
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="underline hover:text-primary"
+    >View larger map</a>
+  </figcaption>
+</figure>

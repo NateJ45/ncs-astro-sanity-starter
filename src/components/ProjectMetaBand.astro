@@ -1,0 +1,69 @@
+---
+// Safe to edit by hand
+// Project metadata band. Sits between the project hero image and the long
+// intro story. Three columns: "The room" / "The brief" / "The call".
+//
+// This is the "show the thinking, not the credentials" rule made visible.
+// Visitors who don't read the full body still get the design story in three
+// short lines. When fields are missing it falls back to a two-column layout
+// (or one) so the band always reads as deliberate, never half-empty.
+
+interface Props {
+  roomType?: string;
+  /** One-sentence client situation. Falls back gracefully when absent. */
+  briefLine?: string;
+  /** One-sentence Staci design move. Falls back gracefully when absent. */
+  designCall?: string;
+}
+
+const { roomType, briefLine, designCall } = Astro.props as Props;
+
+// Humanize the camelCased room enum value ("modernCoastal" → "Modern coastal").
+function humanizeRoom(value?: string): string {
+  if (!value) return '';
+  return value
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (c) => c.toUpperCase())
+    .trim();
+}
+
+const roomLabel = humanizeRoom(roomType);
+
+// Build the columns array so the layout stays balanced when fields are absent.
+const columns = [
+  roomLabel && { eyebrow: 'The room', body: roomLabel },
+  briefLine && { eyebrow: 'The brief', body: briefLine },
+  designCall && { eyebrow: 'The call', body: designCall },
+].filter(Boolean) as Array<{ eyebrow: string; body: string }>;
+
+if (columns.length === 0) return null;
+---
+
+<aside
+  class="mx-auto max-w-content px-m py-section-md"
+  aria-label="Project at a glance"
+>
+  <div
+    class:list={[
+      'border-t border-b border-border-soft py-l grid gap-l text-left',
+      columns.length === 3 && 'md:grid-cols-3',
+      columns.length === 2 && 'md:grid-cols-2',
+      columns.length === 1 && 'md:grid-cols-1',
+    ]}
+  >
+    {columns.map((col) => (
+      <div>
+        <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">
+          {col.eyebrow}
+        </p>
+        <p class:list={[
+          col.eyebrow === 'The room'
+            ? 'font-display text-h3 text-foreground'
+            : 'font-display italic text-h4 text-foreground/90 leading-snug',
+        ]}>
+          {col.body}
+        </p>
+      </div>
+    ))}
+  </div>
+</aside>

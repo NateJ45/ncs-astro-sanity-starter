@@ -1,0 +1,428 @@
+---
+// Foundation, edit with care
+// Site-wide layout. Provides:
+//   - <html lang>, document head, OG/Twitter meta
+//   - Anti-FOUC theme bootstrap (runs before first paint)
+//   - Cormorant Garamond font preload (LCP element on hero)
+//   - Cloudflare Web Analytics beacon (conditional)
+//   - Astro View Transitions <ClientRouter />
+//   - Skip-to-main link, Header, <main id="main">, Footer
+//   - Lenis smooth scroll init (prefers-reduced-motion-aware)
+//   - BackToTop React island
+
+import { ClientRouter } from 'astro:transitions';
+import { site } from '@/data/site';
+import { urlFor } from '@/lib/sanity';
+import { localBusinessSchema } from '@/lib/schemas';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import BackToTop from '@/components/BackToTop';
+import { Toaster } from '@/components/ui/sonner';
+import '@/styles/globals.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Override the default OG image. If omitted, BaseLayout looks for a per-page OG at /og/&lt;slug&gt;.png, falling back to /og-default.png. */
+  ogImage?: string;
+  /** Raw Sanity image object for a per-page social share override (seoImage on the page singleton). Resolved through the Sanity image pipeline to a 1200x630 OG URL. Lower priority than ogImage, higher than the siteSettings default. */
+  seoImage?: any;
+  /** Pre-serialized JSON-LD strings injected into <head>. LocalBusiness is auto-injected from siteSettings on every page; pass per-page schemas (Service, FAQPage, BreadcrumbList, CreativeWork) here. */
+  schemas?: string[];
+  /** Sanity siteSettings document — drives footer, header, and the LocalBusiness schema. */
+  siteSettings?: any;
+  /** When true, emit <meta name="robots" content="noindex, follow">. Used by the 404 page so it never gets indexed. Defaults to false (the page is indexable). */
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  ogImage,
+  seoImage,
+  schemas = [],
+  siteSettings = null,
+  noindex = false,
+} = Astro.props as Props;
+
+const canonical = new URL(Astro.url.pathname, site.url).toString();
+
+// Per-page OG image: convention is /og/<route-slug>.png generated at build time.
+// `/` → /og/home.png, `/contact` → /og/contact.png, `/portfolio/foo` → /og/portfolio-foo.png.
+// Falls back to og-default.png if the slug-specific file isn't there.
+function ogPathForRoute(pathname: string): string {
+  const trimmed = pathname.replace(/^\/|\/$/g, '');
+  if (!trimmed) return '/og/home.png';
+  return `/og/${trimmed.replace(/\//g, '-')}.png`;
+}
+
+// Resolve a raw Sanity image object to a 1200x630 OG URL through the image
+// pipeline. Returns null when there's no asset (so the ?? chain falls through
+// to the next source) or if the URL builder throws on a malformed object.
+function ogUrlFromImage(img: any): string | null {
+  if (!img?.asset) return null;
+  try { return urlFor(img).width(1200).height(630).fit('crop').auto('format').url(); } catch { return null; }
+}
+
+// OG image priority: explicit ogImage prop (a real photo passed by detail
+// pages) > per-page seoImage override (page singleton) > global seoImage
+// default (siteSettings) > the build-time /og/<route>.png convention.
+const perPageOg = ogUrlFromImage(seoImage);
+const globalOg = ogUrlFromImage(siteSettings?.seoImage);
+const resolvedOg = ogImage ?? perPageOg ?? globalOg ?? ogPathForRoute(Astro.url.pathname);
+const absOg = resolvedOg.startsWith('http') ? resolvedOg : new URL(resolvedOg, site.url).toString();
+
+// Build the document title. If the editor-supplied seoTitle already contains
+// the brand anywhere (e.g. "Reid Design LLC — Plainfield Interior Design" or
+// "About Staci · Reid Design"), use it verbatim. Otherwise append " — Reid
+// Design LLC" so the tab + search-result line carries the brand. Strips a
+// trailing " — Reid Design LLC" once before evaluating so any legacy
+// pre-baked suffix is handled. The looser brand check (matches "Reid Design"
+// not just "Reid Design LLC") catches the most common editor abbreviation
+// without producing duplicates.
+const brandSuffix = ` — ${site.name}`;
+const cleanTitle = title.endsWith(brandSuffix)
+  ? title.slice(0, -brandSuffix.length)
+  : title;
+const brandRoot = 'Reid Design'; // base brand match for de-duplication
+const hasBrandInline = cleanTitle.toLowerCase().includes(brandRoot.toLowerCase());
+const fullTitle = cleanTitle === site.name || hasBrandInline
+  ? cleanTitle
+  : `${cleanTitle} — ${site.name}`;
+
+// Auto-inject LocalBusiness on every page when siteSettings is available.
+// Pages can still pass their own additional schemas (Service, FAQPage, BreadcrumbList).
+const allSchemas = siteSettings ? [localBusinessSchema(siteSettings), ...schemas] : schemas;
+
+// Cloudflare Web Analytics token — only render the beacon when present.
+const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    {/* Mobile browser UI chrome color, theme-aware (Soft Linen / Charcoal Dark). */}
+    <meta name="theme-color" content="#FAF8F5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#2A2A2A" media="(prefers-color-scheme: dark)" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {/* Note: Cormorant Garamond is loaded via @fontsource @import in globals.css.
+        Vite hashes the woff2 filename at build time so a static preload here
+        would 404. If hero h1 LCP needs faster fonts, switch to font-display: optional
+        or generate the preload tag from the built CSS manifest. */}
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={absOg} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={fullTitle} />
+
+    {/* Twitter */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={absOg} />
+
+    {/* JSON-LD (LocalBusiness auto-injected from siteSettings + per-page schemas) */}
+    {allSchemas.map((json) => (
+      <script type="application/ld+json" set:html={json} />
+    ))}
+
+    {/* Anti-FOUC theme bootstrap — must run inline before first paint.
+        Also re-applies the theme + theme-aware images (header logo) after
+        every Astro View Transitions navigation: the transition swap
+        replaces <html>'s className with the new page's (empty), so without
+        this listener a user who set dark mode would see the next page
+        render in light. The listener registers exactly once via the
+        __themeBootstrapBound flag. */}
+    <script is:inline define:vars={{ key: site.themeStorageKey }}>
+      (function () {
+        function applyTheme() {
+          let dark = false;
+          try {
+            const stored = localStorage.getItem(key) ?? 'system';
+            dark =
+              stored === 'dark' ||
+              (stored === 'system' &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.classList.toggle('dark', dark);
+            document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+          } catch (_) { /* localStorage unavailable, default light */ }
+
+          // Theme-aware images (header logo) — swap src/srcset to match the
+          // active theme. Single-img approach means only one variant is ever
+          // fetched per page load, so Lighthouse doesn't flag the inactive
+          // variant as "image larger than displayed."
+          const imgs = document.querySelectorAll('img[data-theme-logo]');
+          for (let i = 0; i < imgs.length; i++) {
+            const img = imgs[i];
+            const nextSrc = dark ? img.dataset.logoDarkSrc : img.dataset.logoLightSrc;
+            const nextSrcset = dark ? img.dataset.logoDarkSrcset : img.dataset.logoLightSrcset;
+            if (nextSrc && img.src !== nextSrc) img.src = nextSrc;
+            if (nextSrcset && img.srcset !== nextSrcset) img.srcset = nextSrcset;
+          }
+        }
+        applyTheme();
+        if (!window.__themeBootstrapBound) {
+          window.__themeBootstrapBound = true;
+          // The first applyTheme() runs in <head> before the body is
+          // parsed, so theme-aware imgs below the fold (footer logo) don't
+          // exist yet and never get their src set. Run once more after the
+          // body is in the DOM. (Header logo is handled by its own inline
+          // script directly after the img, so it's already set by here.)
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyTheme, { once: true });
+          }
+          // View Transitions: html className gets reset on every swap, so
+          // re-apply the persisted theme after each navigation.
+          document.addEventListener('astro:after-swap', applyTheme);
+        }
+      })();
+    </script>
+
+    {/* Cloudflare Web Analytics — conditional, no cookie banner needed. */}
+    {cfToken && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={`{"token": "${cfToken}"}`}
+      ></script>
+    )}
+
+    <ClientRouter />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <Header siteSettings={siteSettings} />
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <Footer siteSettings={siteSettings} />
+
+    {/*
+      Both islands were previously `client:load` which forced the JS to
+      execute before the first paint completed. Neither is interactive
+      until later in the page lifecycle (BackToTop only appears after the
+      visitor scrolls 600px; Toaster only mounts a region, the toast call
+      sites import it on demand). Hydrating with `client:idle` lets the
+      browser settle the main thread first and shifts ~10–20ms of TBT off
+      the critical path on mobile.
+    */}
+    <BackToTop client:idle />
+
+    {/* Sonner toast region. Used by CopyEmailButton and ContactForm. Position bottom-right by default. */}
+    <Toaster client:idle position="bottom-right" />
+
+    {/* Lenis smooth scroll. The reduced-motion guard in globals.css already
+        kills smooth-scroll behavior; we also bail out here so we don't pay
+        for the Lenis runtime when the user prefers reduced motion.
+
+        Wrapped in requestIdleCallback so the ~10KB Lenis chunk isn't
+        fetched until the browser is genuinely idle — keeps it out of the
+        critical-path race with hero LCP. setTimeout fallback for browsers
+        without rIC support. */}
+    <script>
+      function startLenis() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        import('lenis').then(({ default: Lenis }) => {
+          const lenis = new Lenis({ smoothWheel: true, lerp: 0.1 });
+          // Expose the instance so in-page controls (e.g. the homepage hero
+          // scroll cue) can trigger a smooth programmatic scroll through Lenis
+          // instead of fighting it with a native scrollTo.
+          (window as Window & { lenis?: typeof lenis }).lenis = lenis;
+          function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+          requestAnimationFrame(raf);
+
+          // Astro View Transitions reuse this single Lenis instance across
+          // navigations. If a link is clicked mid-scroll, Lenis is still
+          // smoothing toward the PREVIOUS page's scroll target and, while it is
+          // smoothing, it ignores the router's scroll-to-top reset. The new
+          // (often shorter) page then inherits that stale target, clamped to
+          // its own maximum, so it opens at the bottom.
+          //
+          // Fix: on a forward navigation (a link/button click, navigationType
+          // "push" or "replace") snap Lenis to the top instantly, which kills
+          // the in-flight momentum and cancels any active scrollTo animation.
+          // On history traversal (browser back/forward, navigationType
+          // "traverse") leave the scroll position alone so the browser's scroll
+          // restoration still works. navigationType is only carried on the
+          // before-swap event, so capture it there and read it in after-swap.
+          // resize() re-reads the new page's scroll height either way.
+          let lastNavType = 'push';
+          document.addEventListener('astro:before-swap', (e) => {
+            lastNavType = (e as any).navigationType;
+          });
+          document.addEventListener('astro:after-swap', () => {
+            if (lastNavType !== 'traverse') {
+              lenis.scrollTo(0, { immediate: true, force: true });
+            }
+            lenis.resize();
+          });
+        });
+      }
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(startLenis, { timeout: 2000 });
+      } else {
+        setTimeout(startLenis, 1500);
+      }
+    </script>
+
+    {/* Polish layer: scroll-triggered reveal observer + sticky-header
+        hide-on-scroll-down behavior. Both honor prefers-reduced-motion.
+        Re-init on astro:page-load so they survive View Transitions. */}
+    <script>
+      function initPolish() {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // ---- Scroll reveals ---------------------------------------------
+        // Mark elements visible the moment they cross the viewport edge so
+        // the fade-up reads as the user scrolls toward them, not after.
+        const reveals = document.querySelectorAll<HTMLElement>('[data-reveal]:not(.is-visible)');
+        if (reveals.length > 0) {
+          if (reduceMotion || !('IntersectionObserver' in window)) {
+            // No motion / no observer support: just show everything immediately.
+            reveals.forEach((el) => el.classList.add('is-visible'));
+          } else {
+            const observer = new IntersectionObserver(
+              (entries) => {
+                for (const entry of entries) {
+                  if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                  }
+                }
+              },
+              { rootMargin: '0px 0px -10% 0px', threshold: 0.05 },
+            );
+            reveals.forEach((el) => observer.observe(el));
+          }
+        }
+
+        // ---- Grid stagger entrance ------------------------------------------
+        // Adds .is-staggered to each [data-stagger-grid] container as it enters
+        // the viewport. The CSS transition-delay on nth-child handles sequencing.
+        const staggerGrids = document.querySelectorAll<HTMLElement>('[data-stagger-grid]:not(.is-staggered)');
+        if (staggerGrids.length > 0) {
+          if (reduceMotion || !('IntersectionObserver' in window)) {
+            staggerGrids.forEach((el) => el.classList.add('is-staggered'));
+          } else {
+            const staggerObserver = new IntersectionObserver(
+              (entries) => {
+                for (const entry of entries) {
+                  if (entry.isIntersecting) {
+                    entry.target.classList.add('is-staggered');
+                    staggerObserver.unobserve(entry.target);
+                  }
+                }
+              },
+              { rootMargin: '0px 0px -60px 0px', threshold: 0.05 },
+            );
+            staggerGrids.forEach((el) => staggerObserver.observe(el));
+          }
+        }
+
+        // ---- Image curtain reveal -------------------------------------------
+        // Adds .is-revealed to each .img-curtain when it enters the viewport.
+        // Under reduced-motion, CSS hides curtains entirely so this loop is moot.
+        const curtains = document.querySelectorAll<HTMLElement>('.img-curtain:not(.is-revealed)');
+        if (curtains.length > 0) {
+          if (reduceMotion || !('IntersectionObserver' in window)) {
+            curtains.forEach((el) => el.classList.add('is-revealed'));
+          } else {
+            const curtainObserver = new IntersectionObserver(
+              (entries) => {
+                for (const entry of entries) {
+                  if (entry.isIntersecting) {
+                    entry.target.classList.add('is-revealed');
+                    curtainObserver.unobserve(entry.target);
+                  }
+                }
+              },
+              { rootMargin: '0px 0px -80px 0px', threshold: 0.1 },
+            );
+            curtains.forEach((el) => curtainObserver.observe(el));
+          }
+        }
+
+        // ---- Process connector lines ----------------------------------------
+        // Adds .is-visible to each .step-connector when it enters the viewport,
+        // triggering the scaleY draw animation on the ::after fill.
+        const connectors = document.querySelectorAll<HTMLElement>('.step-connector:not(.is-visible)');
+        if (connectors.length > 0) {
+          if (reduceMotion || !('IntersectionObserver' in window)) {
+            connectors.forEach((el) => el.classList.add('is-visible'));
+          } else {
+            const connectorObserver = new IntersectionObserver(
+              (entries) => {
+                for (const entry of entries) {
+                  if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    connectorObserver.unobserve(entry.target);
+                  }
+                }
+              },
+              { rootMargin: '0px 0px -60px 0px', threshold: 0.05 },
+            );
+            connectors.forEach((el) => connectorObserver.observe(el));
+          }
+        }
+
+        // ---- Sticky-header hide on scroll-down --------------------------
+        // The header is position:sticky via .site-header. We swap a data-state
+        // attribute that the CSS translates into a translateY(-100%) when the
+        // user scrolls downward past the hero band.
+        const header = document.querySelector<HTMLElement>('.site-header');
+        if (header && !(header as any).__polishWired) {
+          (header as any).__polishWired = true;
+          let lastY = window.scrollY;
+          let ticking = false;
+          const SHOW_THRESHOLD = 80; // small jitter buffer
+          const HIDE_AFTER = 120;    // don't hide until past hero band
+
+          const onScroll = () => {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(() => {
+              const y = window.scrollY;
+              const dy = y - lastY;
+              if (reduceMotion) {
+                header.removeAttribute('data-state');
+              } else if (y < HIDE_AFTER) {
+                header.removeAttribute('data-state');
+              } else if (dy > 4) {
+                header.setAttribute('data-state', 'hidden');
+              } else if (dy < -4) {
+                header.removeAttribute('data-state');
+              }
+              lastY = y;
+              ticking = false;
+            });
+          };
+          window.addEventListener('scroll', onScroll, { passive: true });
+        }
+      }
+
+      // Run on first load and after every View Transitions navigation.
+      initPolish();
+      document.addEventListener('astro:page-load', initPolish);
+    </script>
+  </body>
+</html>

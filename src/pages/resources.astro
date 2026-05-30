@@ -1,0 +1,197 @@
+---
+// Safe to edit by hand
+// /resources — Resources hub page.
+// Fetches the resourcesPage singleton from Sanity. Renders a hero + an ordered
+// grid of resource cards (linking to the quiz, calculator, guides, FAQ, journal).
+//
+// Fallback: if the Sanity doc is absent or has no cards configured, the page
+// renders a hardcoded set of nav-like default cards so the route is never empty.
+// These defaults are intentionally nav-style links (no prices), so hardcoding
+// them here is fine per CLAUDE.md conventions.
+//
+// Card design: brand-stripe top + card-lift shadow — same rhythm as ServiceCard
+// and JournalCard. Icon image rendered via SanityImage when present.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import { getResourcesPage, getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+const [page, siteSettings] = await Promise.all([
+  getResourcesPage().catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.resources) return Astro.redirect('/');
+
+const title       = page?.seoTitle       ?? 'Free Resources · Reid Design';
+const description = page?.seoDescription ?? 'Planning tools and guides from Reid Design: the style quiz, budget calculator, free guides, FAQ, and more.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'Free tools + guides';
+const heroHeadline = page?.heroHeadline ?? 'Start here before you call';
+const heroSubhead  = page?.heroSubhead  ?? 'Everything you need to walk into that first conversation knowing what you want and what to expect.';
+
+// ── Default resource cards ─────────────────────────────────────────────────────
+// Used when the Sanity doc has no cards configured. These are nav-link cards
+// (no prices), so hardcoding is acceptable per CLAUDE.md conventions.
+// Keep labels short and direct — plain language, no marketing speak.
+
+interface ResourceCard {
+  title: string;
+  blurb: string;
+  link: string;
+  icon?: null; // Sanity icon only, no fallback image
+  _isFallback?: boolean;
+}
+
+const FALLBACK_CARDS: ResourceCard[] = [
+  {
+    title: 'Style Quiz',
+    blurb: 'Find your design archetype and get a personal recommendation from Staci.',
+    link: '/quiz',
+  },
+  {
+    title: 'Budget Calculator',
+    blurb: 'Get a rough idea of what a project costs before reaching out.',
+    link: '/calculator',
+  },
+  {
+    title: 'Free Guides',
+    blurb: 'Room-by-room checklists and sourcing guides you can download and keep.',
+    link: '/guides',
+  },
+  {
+    title: 'FAQ',
+    blurb: 'Pricing, process, logistics, and service area, all in one place.',
+    link: '/faq',
+  },
+  {
+    title: 'Journal',
+    blurb: 'Behind-the-scenes look at projects, sourcing notes, and design decisions.',
+    link: '/journal',
+  },
+];
+
+// Map a card's link to the section it belongs to, so we can hide it when that
+// section is off. Cards pointing at core pages (FAQ) always show.
+function isCardVisible(link: string): boolean {
+  if (link === '/quiz')        return visible.styleQuiz;
+  if (link === '/calculator')  return visible.budgetCalculator;
+  if (link === '/guides')      return visible.guides;
+  if (link === '/journal')     return visible.journal;
+  // All other links (including /faq, /services, external) are always visible.
+  return true;
+}
+
+// Use Sanity cards when they exist; fall back to the defaults. Filter both sets
+// by visibility so off-section cards don't appear in the resources hub.
+const hasSanityCards = Array.isArray(page?.cards) && page.cards.length > 0;
+const rawCards = hasSanityCards ? page.cards : FALLBACK_CARDS;
+const cards = rawCards.filter((card: any) => isCardVisible(card.link ?? '/'));
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Resources', url: `${site.url}/resources` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage ?? null}
+    headingId="resources-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent ?? undefined}
+  />
+
+  {/* ------- 2. Optional intro copy ------------------------------------------ */}
+  {page?.intro && (
+    <section class="bg-background border-b border-border">
+      <div class="mx-auto max-w-content px-m py-section-md">
+        <p class="max-w-2xl mx-auto text-center text-foreground/80 text-lg leading-relaxed">
+          {page.intro}
+        </p>
+      </div>
+    </section>
+  )}
+
+  {/* ------- 3. Resource cards grid ------------------------------------------ */}
+  <section
+    class="bg-muted surface-warm"
+    aria-label="Free tools and resources"
+  >
+    <div class="mx-auto max-w-content px-m py-section-lg">
+      <ul
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-m list-none p-0 m-0"
+        role="list"
+      >
+        {cards.map((card: any) => {
+          // Normalize across Sanity cards and fallback cards.
+          const cardTitle: string   = card.title   ?? '';
+          const cardBlurb: string   = card.blurb   ?? '';
+          const cardLink: string    = card.link     ?? '/';
+          const cardIcon            = card.icon?.asset ? card.icon : null;
+          const isExternal: boolean = cardLink.startsWith('http');
+
+          return (
+            <li>
+              <a
+                href={cardLink}
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noopener noreferrer' : undefined}
+                class="card-lift card-lift-slow group relative flex flex-col h-full bg-card text-card-foreground border border-border-soft rounded-md overflow-hidden transition-colors hover:border-primary/40 shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] no-underline"
+                aria-label={cardTitle}
+              >
+                {/* Brand accent stripe — same 2px bronze as ServiceCard / JournalCard */}
+                <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+                {/* Optional icon image */}
+                {cardIcon && (
+                  <div class="aspect-[3/2] overflow-hidden bg-muted">
+                    <SanityImage
+                      source={cardIcon}
+                      width={480}
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]"
+                    />
+                  </div>
+                )}
+
+                <div class="flex flex-col flex-1 p-l">
+                  <h2 class="font-display text-h3 text-foreground group-hover:text-primary-dark transition-colors">
+                    {cardTitle}
+                  </h2>
+
+                  {cardBlurb && (
+                    <p class="mt-s text-foreground/80 text-base leading-relaxed flex-1">
+                      {cardBlurb}
+                    </p>
+                  )}
+
+                  {/* Arrow CTA — visual affordance; screen readers get the full label from aria-label above */}
+                  <p
+                    class="mt-m text-xs font-semibold uppercase tracking-eyebrow text-link group-hover:text-primary-dark transition-colors flex items-center gap-xs"
+                    aria-hidden="true"
+                  >
+                    {isExternal ? 'Visit' : 'Go'}{' '}
+                    <span aria-hidden="true">&#8594;</span>
+                  </p>
+                </div>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
