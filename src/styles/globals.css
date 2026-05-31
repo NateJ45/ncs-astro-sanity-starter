@@ -28,19 +28,16 @@
    font-display, text-h1, p-l, max-w-content. */
 
 @theme {
-  /* Brand palette */
-  --color-primary:      #9C7661; /* Warm Bronze */
-  --color-primary-dark: #7A5D4C; /* Bronze Dark — for body anchor text */
-  --color-accent:       #3D3D3D; /* Charcoal — headings + body */
-  --color-accent-dark:  #2A2A2A; /* Charcoal Dark — dark surfaces */
-  --color-secondary:    #B8A99A; /* Warm Taupe — borders, eyebrows */
-  --color-tertiary:     #A8B5A0; /* Soft Sage — sparingly */
-
-  --color-bg:           #FAF8F5; /* Soft Linen — primary surface */
-  --color-bg-soft:      #F5F0EB; /* Cream — alternating surface */
-
-  --color-border-soft:  #E8E4E0; /* Light Gray — faint dividers */
-
+  /* Brand palette — neutral Slate default. Swap per project. */
+  --color-primary:      #586577; /* Slate */
+  --color-primary-dark: #434E5C; /* Slate Dark — body anchor text */
+  --color-accent:       #2A2D31; /* Ink — headings + body */
+  --color-accent-dark:  #1E2024; /* Ink Dark — dark surfaces */
+  --color-secondary:    #AAB0B8; /* Cool Gray — borders, eyebrows */
+  --color-tertiary:     #9DB0A6; /* Muted Sage — sparingly */
+  --color-bg:           #FBFBFA; /* Paper — primary surface */
+  --color-bg-soft:      #F3F4F2; /* Soft Paper — alternating surface */
+  --color-border-soft:  #E6E7E5; /* Faint dividers */
   --color-white-pure:   #FFFFFF;
 
   /* Fonts */
@@ -198,39 +195,33 @@
 
 :root {
     /* Surfaces */
-    --background: #FAF8F5;          /* Soft Linen */
-    --foreground: #3D3D3D;          /* Charcoal */
+    --background: #FBFBFA;
+    --foreground: #2A2D31;
     --card: #FFFFFF;
-    --card-foreground: #3D3D3D;
+    --card-foreground: #2A2D31;
     --popover: #FFFFFF;
-    --popover-foreground: #3D3D3D;
+    --popover-foreground: #2A2D31;
 
     /* Brand */
-    --primary: #9C7661;             /* Warm Bronze */
+    --primary: #586577;
     --primary-foreground: #FFFFFF;
-    --secondary: #B8A99A;           /* Warm Taupe */
-    --secondary-foreground: #3D3D3D;
+    --secondary: #AAB0B8;
+    --secondary-foreground: #2A2D31;
 
     /* Quiet surfaces / muted text */
-    --muted: #F5F0EB;               /* Cream */
-    --muted-foreground: #6B6B6B;    /* Mid-gray — passes AA on Soft Linen */
+    --muted: #F3F4F2;
+    --muted-foreground: #5F6469;    /* ~5.6:1 on #FBFBFA — passes AA */
 
-    /* Accent (used by shadcn primitives like hover backgrounds).
-       Visibly darker than --muted (`#F5F0EB` Cream) so hover/focus states
-       actually read on the header eyebrow strip and every other muted-on-
-       muted surface. The previous identical value (#F5F0EB) made
-       hover:bg-accent invisible whenever the parent was bg-muted (which
-       includes the header eyebrow row, footer, and every surface-warm
-       section). Audit-flagged. */
-    --accent: #ECE5DB;              /* Warm Cream Dark — soft hover surface */
-    --accent-foreground: #3D3D3D;
+    /* Accent */
+    --accent: #E8E9E7;
+    --accent-foreground: #2A2D31;
 
     /* States */
     --destructive: oklch(0.577 0.245 27.325);
-    --border: #E8E4E0;              /* Light Gray */
-    --input: #E8E4E0;
-    --ring: #9C7661;                /* Warm Bronze focus rings */
-    --link: #7A5D4C;                /* Bronze Dark for link text on light surfaces (AA on Soft Linen) */
+    --border: #E6E7E5;
+    --input: #E6E7E5;
+    --ring: #586577;
+    --link: #434E5C;                /* ~8:1 on #FBFBFA — passes AA */
 
     /* Charts (kept neutral, not used at launch) */
     --chart-1: oklch(0.87 0 0);
@@ -242,14 +233,14 @@
     --radius: 0.5rem;
 
     /* Sidebar (reserved for Studio-style admin contexts, not used on site) */
-    --sidebar: #FAF8F5;
-    --sidebar-foreground: #3D3D3D;
-    --sidebar-primary: #9C7661;
+    --sidebar: #FBFBFA;
+    --sidebar-foreground: #2A2D31;
+    --sidebar-primary: #586577;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #F5F0EB;
-    --sidebar-accent-foreground: #3D3D3D;
-    --sidebar-border: #E8E4E0;
-    --sidebar-ring: #9C7661;
+    --sidebar-accent: #F3F4F2;
+    --sidebar-accent-foreground: #2A2D31;
+    --sidebar-border: #E6E7E5;
+    --sidebar-ring: #586577;
 }
 
 /* ---------- Dark mode --------------------------------------------------
@@ -258,29 +249,29 @@
    their identity; surfaces flip to deep warm grays. */
 
 .dark {
-    --background: #1F1B17;          /* Deep warm near-black */
-    --foreground: #F5F0EB;          /* Cream text */
-    --card: #2A2520;
-    --card-foreground: #F5F0EB;
-    --popover: #2A2520;
-    --popover-foreground: #F5F0EB;
+    --background: #17191C;
+    --foreground: #F2F3F2;
+    --card: #202327;
+    --card-foreground: #F2F3F2;
+    --popover: #202327;
+    --popover-foreground: #F2F3F2;
 
-    --primary: #B89274;             /* Bronze lifted for dark surface contrast */
-    --primary-foreground: #1F1B17;
-    --secondary: #6B5F54;            /* Muted taupe */
-    --secondary-foreground: #F5F0EB;
+    --primary: #8A96A6;
+    --primary-foreground: #17191C;
+    --secondary: #5A6068;
+    --secondary-foreground: #F2F3F2;
 
-    --muted: #2A2520;
-    --muted-foreground: #B8A99A;
+    --muted: #202327;
+    --muted-foreground: #AAB0B8;
 
-    --accent: #3A332D;
-    --accent-foreground: #F5F0EB;
+    --accent: #2C3036;
+    --accent-foreground: #F2F3F2;
 
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 12%);
     --input: oklch(1 0 0 / 15%);
-    --ring: #B89274;
-    --link: #B89274;                /* Lifted Bronze for link text on dark surfaces (6.4:1 on #1F1B17) */
+    --ring: #8A96A6;
+    --link: #8A96A6;
 
     --chart-1: oklch(0.87 0 0);
     --chart-2: oklch(0.556 0 0);
@@ -288,14 +279,14 @@
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
 
-    --sidebar: #2A2520;
-    --sidebar-foreground: #F5F0EB;
-    --sidebar-primary: #B89274;
-    --sidebar-primary-foreground: #1F1B17;
-    --sidebar-accent: #3A332D;
-    --sidebar-accent-foreground: #F5F0EB;
+    --sidebar: #202327;
+    --sidebar-foreground: #F2F3F2;
+    --sidebar-primary: #8A96A6;
+    --sidebar-primary-foreground: #17191C;
+    --sidebar-accent: #2C3036;
+    --sidebar-accent-foreground: #F2F3F2;
     --sidebar-border: oklch(1 0 0 / 12%);
-    --sidebar-ring: #B89274;
+    --sidebar-ring: #8A96A6;
 }
 
 /* ---------- Base resets and defaults ---------------------------------- */
