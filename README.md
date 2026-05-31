@@ -1,8 +1,30 @@
 # ncs-astro-sanity-starter
 
-A reusable starter for building small-business marketing sites on Astro + Sanity + Cloudflare Workers. The infrastructure is already standing: theme system, SEO, animation/polish layer, forms plumbing, image handling, a typed Sanity layer, and an in-Studio editor guide. A new project pours in two things, its business info and its design, and the rest is in place.
+A reusable starter for building small-business marketing sites on Astro + Sanity + Cloudflare Workers. The infrastructure is already standing: theme system, SEO, animation/polish layer, forms plumbing, image handling, a typed Sanity layer, and an in-Studio editor guide. A new project pours in two things -- its business info and its design -- and the rest is in place.
 
 Provenance: forked and genericized from a finished client build.
+
+---
+
+## Where to start
+
+**To adopt this starter for a new client, read `docs/bootstrap/NEW-PROJECT.md` first.** It is the single entry point: identity setup, design reskin, module enable, seed, and deploy, in order.
+
+Before making any changes, also read `CLAUDE.md` for the Foundation-vs-Safe-to-edit taxonomy (some files require a planned session; others are safe to edit freely).
+
+---
+
+## Docs layout
+
+| Path | What it covers |
+|---|---|
+| `CLAUDE.md` | Stack conventions, the rules that bite, Foundation taxonomy, code style |
+| `docs/bootstrap/NEW-PROJECT.md` | **Start here.** Step-by-step adoption runbook for a new project |
+| `docs/bootstrap/setup-checklist.md` | Pre-launch checklist (run before DNS cutover) |
+| `docs/brand/voice.md` | Voice template -- fill in per project |
+| `docs/modules/README.md` | Module index, preset bundles, rough enable time |
+| `docs/modules/<name>.md` | Per-module enable guide (schemas, desk, queries, nav, seed, verify) |
+| `docs/agent/*.md` | Deep reference for AI agents: theme tokens, components, SEO, Sanity, deployment, etc. |
 
 ---
 
@@ -39,7 +61,7 @@ The home, about, and footer include Featured Work, Process, and Press sections t
 
 ## Modules (opt-in, staged under `modules/`, OFF by default)
 
-`portfolio`, `process`, `newsletter`, `lead-magnets`, `style-quiz`, `budget-calculator`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`. Each is self-contained (schema + pages + islands + seed). Per-module enable guides land in `docs/modules/` (authored in a later phase). `portfolio` + `process` together are the informal creative-studio pair.
+`portfolio`, `process`, `newsletter`, `lead-magnets`, `style-quiz`, `budget-calculator`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`. Each is self-contained (schema + pages + islands + seed). Per-module enable guides are in `docs/modules/`. `portfolio` + `process` together are the informal creative-studio preset.
 
 ---
 
@@ -60,12 +82,12 @@ The build works with no Sanity project configured: `src/lib/sanity.ts`'s `sanity
 
 Editing this short list rebrands the whole site:
 
-- `src/styles/globals.css` — the `@theme` palette tokens and `:root`/`.dark` (and `--tint-rgb`)
-- fonts — the `@fontsource` imports + the `--font-*` tokens (default: Libre Baskerville + Inter; the script accent is opt-in)
-- `src/data/site.ts` — identity constants
+- `src/styles/globals.css` -- the `@theme` palette tokens and `:root`/`.dark` (and `--tint-rgb`)
+- fonts -- the `@fontsource` imports + the `--font-*` tokens (default: Libre Baskerville + Inter; the script accent is opt-in)
+- `src/data/site.ts` -- identity constants
 - logo / favicon / OG inputs, then `npm run og`
 
-The full step-by-step adoption runbook lands at `docs/bootstrap/NEW-PROJECT.md` (authored in a later phase).
+The step-by-step adoption runbook is at `docs/bootstrap/NEW-PROJECT.md`.
 
 ---
 
@@ -76,4 +98,4 @@ npm run build
 npm run deploy   # = wrangler deploy
 ```
 
-After any Sanity schema change, also run `npm run typegen` then `npm run studio:deploy`. See `CLAUDE.md` for the conventions and the gotchas that bite, and `OPERATIONS.md` for the tactical playbook.
+After any Sanity schema change, also run `npm run typegen` then `npm run studio:deploy`. See `CLAUDE.md` for the conventions and the gotchas that bite.

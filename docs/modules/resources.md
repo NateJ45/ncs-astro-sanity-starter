@@ -111,6 +111,9 @@ in the `sectionVisibility` conditional:
 ```
 
 Place it after the Journal entry so the nav reads: About, Services, FAQ, Journal, Resources.
+If you are enabling multiple modules at once, add all their nav entries in a
+single edit to `NAV_ITEMS`. A reasonable order when several modules are enabled:
+Portfolio (after Services), then Journal, then Guides, then Resources.
 
 ### Step 6 -- Seed placeholder content
 

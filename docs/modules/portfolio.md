@@ -94,7 +94,11 @@ Copy-Item -Recurse -Force modules/portfolio/src/* src/
 
 ### Step 4b -- Add query functions to `src/lib/queries.ts`
 
-The portfolio pages import `getPortfolioPage`, `getProjectBySlug`, and `getProjectsWithBeforeAfter` from `@/lib/queries`. These are not in the core starter; add them before the press section in `src/lib/queries.ts`:
+The portfolio pages import `getPortfolioPage`, `getProjectBySlug`, and `getProjectsWithBeforeAfter` from `@/lib/queries`. These are not in the core starter; add them before the press section in `src/lib/queries.ts`.
+
+**Note:** `getAllProjects` (used by the portfolio index and the `[slug]` page's
+`getStaticPaths`) is already in the core starter -- do NOT add it again.
+Only add the three functions shown below:
 
 ```ts
 // ---- Portfolio module -------------------------------------------------------
@@ -152,8 +156,6 @@ export async function getProjectBySlug(slug: string) {
 }
 ```
 
-Note: `getAllProjects` (used by the portfolio index and the `[slug]` page's `getStaticPaths`) is already in the core starter.
-
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
 
 Locate the `NAV_ITEMS` array (around line 112). Add the portfolio link, wrapped in the `sectionVisibility` conditional:
@@ -163,6 +165,9 @@ Locate the `NAV_ITEMS` array (around line 112). Add the portfolio link, wrapped 
 ```
 
 Place it after the Services entry and before the Journal entry so the nav reads: About, Services, Portfolio, Journal.
+If you are enabling multiple modules at once, add all their nav entries in a
+single edit to `NAV_ITEMS`. A reasonable order when several modules are enabled:
+Portfolio (after Services), then Journal, then Guides, then Resources.
 
 ### Step 6 -- Seed placeholder content
 

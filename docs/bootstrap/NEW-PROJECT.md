@@ -119,13 +119,23 @@ palette. Keep the token structure; only change the values.
 The default typefaces are Libre Baskerville (display) and Inter (body).
 To swap them:
 
-1. Remove the existing `@fontsource` imports at the top of `globals.css`:
+1. Remove the existing `@fontsource` imports at the top of `globals.css`
+   (there are three lines to remove):
    ```css
    @import "@fontsource/libre-baskerville/400.css";
-   @import "@fontsource-variable/inter/wght.css";
+   @import "@fontsource/libre-baskerville/700.css";
+   @import "@fontsource-variable/inter";
    ```
-2. Install and import your chosen packages (e.g.
-   `npm install @fontsource/playfair-display`).
+2. Install your chosen font package, then add its import(s) in place:
+   ```powershell
+   npm install @fontsource/playfair-display
+   ```
+   Then in `globals.css`, add the import (regular `@fontsource` packages use
+   a weight path; `@fontsource-variable` packages import the package root):
+   ```css
+   @import "@fontsource/playfair-display/400.css";
+   @import "@fontsource/playfair-display/700.css";
+   ```
 3. Update `--font-display` and `--font-body` in the `@theme` block to match.
 
 The script accent is opt-in and OFF by default. To enable it:
