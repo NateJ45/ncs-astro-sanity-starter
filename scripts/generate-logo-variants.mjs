@@ -1,20 +1,25 @@
-// Generate two transparent PNG variants of the Reid Design logo from the
-// source JPG (dark ink on white background). Outputs go to src/assets/ so
-// they're picked up by Astro's <Image> pipeline (auto WebP + hashed names).
+// Generate two transparent PNG variants of the project logo from a source
+// raster image (expects dark ink on a white/light background). Outputs go to
+// src/assets/ so they're picked up by Astro's <Image> pipeline (auto WebP +
+// hashed names).
 //
-//   src/assets/logo-light.png  — original Charcoal ink on transparent background.
-//                                For use on light surfaces (Soft Linen, white).
-//   src/assets/logo-dark.png   — Cream ink on transparent background.
-//                                For use on the dark mode surface (Charcoal Dark).
+//   src/assets/logo-light.png  — Charcoal (#3D3D3D) ink on transparent background.
+//                                For use on light surfaces.
+//   src/assets/logo-dark.png   — Cream (#F5F0EB) ink on transparent background.
+//                                For use on dark surfaces / dark mode.
 //
 // Strategy:
-//   1. Trim the original JPG's white border so the logo fills its bounding box.
+//   1. Trim the source image's white border so the logo fills its bounding box.
 //   2. Convert to grayscale + negate to build a single-channel alpha mask
 //      (dark ink → opaque, light background → transparent).
 //   3. Build a solid-color canvas in the target ink color.
 //   4. Join the alpha mask onto the canvas → transparent PNG with colored ink.
 //
-// Run with: node scripts/generate-logo-variants.mjs
+// Input: a raster logo file (JPG or PNG) with a white/near-white background
+// and dark ink. Pass the path as the first CLI argument, or set a default
+// source path in the `sourceFile` variable below.
+//
+// Run with: node scripts/generate-logo-variants.mjs [path/to/source-logo.jpg]
 
 import sharp from 'sharp';
 import { existsSync, mkdirSync } from 'node:fs';
@@ -27,19 +32,21 @@ const root = resolve(__dirname, '..');
 // pipeline can emit WebP variants at build time. Anything that needs the
 // PNG bytes (this script + optimize-logo-files.mjs) reads/writes here now.
 const assetsDir = resolve(root, 'src', 'assets');
-// Source logo variant. The 09-Logos folder ships with several iterations
-// (reid-design-logo.jpg, -logo-2.jpg, etc.) — point this at whichever is the
-// current published mark. Override via CLI arg: `node generate-logo-variants.mjs reid-design-logo-3.jpg`
-const sourceFile = process.argv[2] ?? 'reid-design-logo-2.jpg';
-const src = resolve(
-  root,
-  '..',
-  'Reid Design Pictures',
-  'Reid Design Pictures',
-  '09-Logos',
-  sourceFile,
-);
-console.log(`Source logo: ${sourceFile}`);
+
+// Source logo path. Pass the absolute or relative-to-cwd path as the first CLI
+// argument, e.g.:
+//   node scripts/generate-logo-variants.mjs src/assets/my-logo-source.jpg
+//
+// When no argument is given the script looks for `logo-source.jpg` in
+// src/assets/ as a convention. Drop your flat white-background logo raster
+// there before running. SVG-only logos do not go through this script — they are
+// used directly by Header.astro / Footer.astro.
+const sourceArg = process.argv[2];
+const src = sourceArg
+  ? resolve(process.cwd(), sourceArg)
+  : resolve(assetsDir, 'logo-source.jpg');
+const sourceFile = src.split(/[\\/]/).pop();
+console.log(`Source logo: ${src}`);
 
 if (!existsSync(src)) {
   console.error('Source logo not found:', src);
@@ -85,4 +92,4 @@ await makeVariant({ r: 0x3d, g: 0x3d, b: 0x3d }, resolve(assetsDir, 'logo-light.
 await makeVariant({ r: 0xf5, g: 0xf0, b: 0xeb }, resolve(assetsDir, 'logo-dark.png'), 'logo-dark.png (Cream)');
 
 console.log('\nDone. Header.astro / Footer.astro import these directly via @/assets/.');
-console.log('Then run `node scripts/optimize-logo-files.mjs` to shrink them before building.');
+console.log('Optionally run an image-optimizer script on these PNGs before committing.');

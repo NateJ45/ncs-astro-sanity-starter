@@ -3,14 +3,14 @@
 // per-route convention in BaseLayout (the pathname with slashes turned into
 // dashes; falls back to og-default.png when a route has no matching file).
 //
-// Covers every page singleton PLUS the dynamic collections (projects, journal
-// entries, guides), so /portfolio/<slug>, /journal/<slug>, and /guides/<slug>
-// each get their own branded card instead of the generic default.
+// Covers the core route singletons. When your project adds dynamic collections
+// (blog posts, case studies, etc.) extend COLLECTIONS below with the matching
+// Sanity _type, prefix, and field names.
 //
 // Run via `npm run og:pages` after editing seoTitle in Sanity or after adding a
-// project / post / guide. Output PNGs are committed to git so Cloudflare does
-// not need Sanity access at build time. BaseLayout picks the right PNG per
-// pathname; anything without a file gracefully falls back to og-default.png.
+// page. Output PNGs are committed to git so Cloudflare does not need Sanity
+// access at build time. BaseLayout picks the right PNG per pathname; anything
+// without a file gracefully falls back to og-default.png.
 
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -61,7 +61,12 @@ const client = createClient({
 });
 
 const outDir = resolve(root, 'public/og');
-const WORDMARK = 'Reid Design LLC';
+
+// Business name for the OG wordmark. Reads SITE_NAME from env first so CI can
+// override without touching source; falls back to the value in src/data/site.ts
+// (hard-coded here to avoid a TypeScript import from a plain .mjs script).
+// Update this default when you replace the starter identity in src/data/site.ts.
+const WORDMARK = env.SITE_NAME ?? 'Studio Starter';
 
 let count = 0;
 async function render(slug, tagline) {
@@ -74,23 +79,16 @@ async function render(slug, tagline) {
 // ---- Page singletons → /og/<slug>.png -----------------------------------
 // `slug` matches the route (slashes already dash-free here). `defaultTitle` is
 // the fallback when Sanity's seoTitle / heroHeadline are both empty.
+// These are the core routes every starter project ships with. Add rows for any
+// additional page singletons you define in your Sanity schema.
 const SINGLETONS = [
-  { type: 'homePage',         slug: 'home',              defaultTitle: 'Plainfield interior design for homes that feel genuinely yours.' },
-  { type: 'aboutPage',        slug: 'about',             defaultTitle: 'About Reid Design LLC and Staci Perkins' },
-  { type: 'processPage',      slug: 'process',           defaultTitle: 'How Reid Design works, from first call to final reveal' },
-  { type: 'servicesPage',     slug: 'services',          defaultTitle: 'Interior design services in Plainfield and Indianapolis' },
-  { type: 'faqPage',          slug: 'faq',               defaultTitle: 'Common questions about working with Reid Design' },
-  { type: 'contactPage',      slug: 'contact',           defaultTitle: 'Start a conversation with Reid Design' },
-  { type: 'portfolioPage',    slug: 'portfolio',         defaultTitle: 'Recent interior design projects across Indianapolis' },
-  { type: 'journalPage',      slug: 'journal',           defaultTitle: 'The Reid Design journal' },
-  { type: 'eDesignPage',      slug: 'e-design',          defaultTitle: 'Online interior design, delivered digitally' },
-  { type: 'shopPage',         slug: 'shop',              defaultTitle: 'Shop the pieces and sources Staci loves' },
-  { type: 'giftPage',         slug: 'gift-certificates', defaultTitle: 'Give the gift of interior design' },
-  { type: 'resourcesPage',    slug: 'resources',         defaultTitle: 'Design resources and recommendations' },
-  { type: 'pressPage',        slug: 'press',             defaultTitle: 'Reid Design in the press' },
-  { type: 'privacyPage',      slug: 'privacy',           defaultTitle: 'Privacy policy' },
-  { type: 'styleQuiz',        slug: 'quiz',              defaultTitle: 'Find your interior design style' },
-  { type: 'budgetCalculator', slug: 'calculator',        defaultTitle: 'Estimate your room furnishing budget' },
+  { type: 'homePage',     slug: 'home',     defaultTitle: 'Welcome' },
+  { type: 'aboutPage',    slug: 'about',    defaultTitle: 'About us' },
+  { type: 'servicesPage', slug: 'services', defaultTitle: 'Services' },
+  { type: 'faqPage',      slug: 'faq',      defaultTitle: 'Frequently asked questions' },
+  { type: 'contactPage',  slug: 'contact',  defaultTitle: 'Get in touch' },
+  { type: 'journalPage',  slug: 'journal',  defaultTitle: 'Journal' },
+  { type: 'privacyPage',  slug: 'privacy',  defaultTitle: 'Privacy policy' },
 ];
 
 for (const page of SINGLETONS) {
@@ -102,35 +100,25 @@ for (const page of SINGLETONS) {
 }
 
 // ---- Dynamic collections → /og/<prefix>-<slug>.png ----------------------
-// Mirrors BaseLayout: /portfolio/foo → portfolio-foo.png, etc.
-const COLLECTIONS = [
-  {
-    prefix: 'portfolio',
-    query: `*[_type=="project" && defined(slug.current)]{ "slug": slug.current, metaTitle, title }`,
-    pick: (d) => d.metaTitle || d.title,
-  },
-  {
-    prefix: 'journal',
-    query: `*[_type=="journalEntry" && defined(slug.current)]{ "slug": slug.current, seoTitle, title }`,
-    pick: (d) => d.seoTitle || d.title,
-  },
-  {
-    prefix: 'guides',
-    query: `*[_type=="leadMagnet" && defined(slug.current)]{ "slug": slug.current, title }`,
-    pick: (d) => d.title,
-  },
-];
-
-for (const col of COLLECTIONS) {
-  const docs = await client.fetch(col.query).catch(() => []);
-  for (const d of docs) {
-    const tagline = col.pick(d);
-    if (!d.slug || !tagline) continue;
-    await render(`${col.prefix}-${d.slug}`, tagline);
-  }
-}
-
-// ---- Static (non-singleton) routes --------------------------------------
-await render('portfolio-before-after', 'Before and after transformations');
+// Mirrors BaseLayout: /journal/my-post → journal-my-post.png, etc.
+// Add an entry here for each dynamic collection your project defines.
+// Example (uncomment and adapt when you have a journal or case-study schema):
+//
+// const COLLECTIONS = [
+//   {
+//     prefix: 'journal',
+//     query: `*[_type=="journalEntry" && defined(slug.current)]{ "slug": slug.current, seoTitle, title }`,
+//     pick: (d) => d.seoTitle || d.title,
+//   },
+// ];
+//
+// for (const col of COLLECTIONS) {
+//   const docs = await client.fetch(col.query).catch(() => []);
+//   for (const d of docs) {
+//     const tagline = col.pick(d);
+//     if (!d.slug || !tagline) continue;
+//     await render(`${col.prefix}-${d.slug}`, tagline);
+//   }
+// }
 
 console.log(`\nDone. ${count} OG images written to ${outDir}`);

@@ -2,7 +2,7 @@
 // inlines the substantive site content (services and prices, the process,
 // FAQs, service area and contact, plus the current portfolio, journal, and
 // guides) pulled live from Sanity, so a language model can answer questions
-// about Reid Design from a single document.
+// about this business from a single document.
 //
 // Run via `npm run llms:full`. Needs SANITY_API_READ_TOKEN (or the write token)
 // because this dataset filters anonymous reads down to the page singletons.
@@ -61,7 +61,10 @@ function ptToPlainText(blocks) {
     .trim();
 }
 
-const SITE = 'https://reiddesignllc.com';
+// Site URL for generating absolute links in the output document.
+// Reads from env (PUBLIC_SITE_URL or SITE_URL) so CI/CD can override without
+// touching source. Matches the `url` field in src/data/site.ts at rest.
+const SITE = env.PUBLIC_SITE_URL ?? env.SITE_URL ?? 'https://example.com';
 
 const [settings, services, steps, faqs, projects, journal, guides] = await Promise.all([
   client.fetch(`*[_type=="siteSettings"][0]{ email, phone, serviceAreas, availabilityStatus }`).catch(() => null),
@@ -76,11 +79,13 @@ const [settings, services, steps, faqs, projects, journal, guides] = await Promi
 const lines = [];
 const p = (s = '') => lines.push(s);
 
-p('# Reid Design LLC — Full Site Content');
+// Site name for the document heading. Reads SITE_NAME from env so CI can
+// override without touching source; mirrors `name` in src/data/site.ts.
+const siteName = env.SITE_NAME ?? 'Studio Starter';
+
+p(`# ${siteName} — Full Site Content`);
 p('');
-p('> Reid Design LLC is a residential interior design studio in Plainfield, Indiana, run by Staci Perkins. It serves homeowners in Plainfield, Indianapolis, and the surrounding suburbs (Carmel, Fishers, Westfield, Zionsville, Noblesville) with warm, livable, mid-market design. Services run from a $150 in-home consultation up to full room design, styling, shopping and sourcing, and online E-Design. Pricing is shown openly on the site.');
-p('');
-p('This is the expanded companion to /llms.txt. It inlines the substantive content of the site so a language model can answer questions about Reid Design from a single document. For the short link map, see /llms.txt.');
+p(`> This is the expanded companion to /llms.txt for ${siteName}. It inlines the substantive content of the site pulled from Sanity so a language model can answer questions about this business from a single document. For the short link map, see /llms.txt.`);
 p('');
 
 if (Array.isArray(services) && services.length) {

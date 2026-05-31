@@ -54,7 +54,7 @@ function wrapToLines(text, maxCharsPerLine = 28) {
  * Render an OG image PNG.
  *
  * @param {object} opts
- * @param {string} opts.wordmark - top-line brand text (e.g., "Reid Design LLC")
+ * @param {string} opts.wordmark - top-line brand text (e.g., "Studio Starter")
  * @param {string|string[]} opts.tagline - subtitle. String gets wrapped to ~28 chars/line.
  * @param {string} opts.outPath - absolute path to write the PNG to
  * @param {Partial<typeof DEFAULTS>} [opts.theme] - color overrides
