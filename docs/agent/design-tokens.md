@@ -4,19 +4,19 @@
 
 ## Typography
 
-- Headings (h1 through h6): **Cormorant Garamond**. Self-hosted via `@fontsource/cormorant-garamond`. Editorial serif that carries the premium-but-warm tone the audit landed on.
-- Body, UI, buttons: **Source Sans 3** (variable). Self-hosted via `@fontsource-variable/source-sans-3`.
-- Script accent on ONE word per hero or section heading: **Pinyon Script**. Self-hosted via `@fontsource/pinyon-script`. Used ONLY via the `font-script` utility for the editorial-signature flourish (see Polish layer → Script accents). Don't use this font for body, buttons, or anywhere outside the explicit accent slot — it'd read flashy fast.
+- Headings (h1 through h6): **Libre Baskerville**. Self-hosted via `@fontsource/libre-baskerville`. Editorial serif that reads as premium without narrowing the brand voice to any specific style.
+- Body, UI, buttons: **Inter** (variable). Self-hosted via `@fontsource-variable/inter`. Single file covers all weights.
+- Script accent (opt-in): no script font is loaded by default. The `@utility font-script` declaration and `--font-script` token exist in `globals.css`, but the font file is only fetched when you add a `@fontsource` import for a script typeface and point `--font-script` at it. See `animation.md` for the full opt-in steps and usage discipline.
 - Labels, eyebrows, monospace numerals: `ui-monospace, 'SF Mono', monospace` (system, no file).
 
-Font families are declared in the `@theme` block in `src/styles/globals.css` as `--font-display`, `--font-body`, `--font-mono`, which Tailwind exposes automatically as `font-display`, `font-body`, `font-mono` utility classes. Give Cormorant Garamond a `<link rel="preload">` hint in `BaseLayout.astro` if the homepage hero h1 is the LCP element.
+Font families are declared in the `@theme` block in `src/styles/globals.css` as `--font-display`, `--font-body`, `--font-mono`, which Tailwind exposes automatically as `font-display`, `font-body`, `font-mono` utility classes.
 
 ### Typographic micro-rules
 
 Two utility classes layered on top of the families. Use them instead of ad-hoc arbitrary values so the system stays consistent across components.
 
-- `tracking-eyebrow` (`0.18em`) — applied to every uppercase eyebrow label above a heading. Used in `Hero.astro`, `SectionHeading.astro`, `ServiceCard.astro`, `TestimonialCard.astro`, `FeaturedTestimonial.astro`. Token: `--tracking-eyebrow`.
-- `leading-headline-tight` (`1.05`) — applied to hero-scale H1s. Combined with `tracking-[-0.02em]` it gives Cormorant Garamond editorial display proportions at the 40px to 80px hero range. Token: `--leading-headline-tight`.
+- `tracking-eyebrow` (`0.18em`) -- applied to every uppercase eyebrow label above a heading. Token: `--tracking-eyebrow`.
+- `leading-headline-tight` (`1.05`) -- applied to hero-scale H1s. Combined with `tracking-[-0.02em]` it gives Libre Baskerville editorial display proportions at the 40px to 80px hero range. Token: `--leading-headline-tight`.
 
 Both are declared in `src/styles/globals.css` via `@utility`. Don't replace with arbitrary values (`leading-[1.05]`, `tracking-[0.18em]`) in new code; use the named utilities so a future scale change is one edit.
 
@@ -44,3 +44,17 @@ In Tailwind v4, `max-w-{key}` resolves to `--spacing-{key}` BEFORE `--container-
 **Rule for adding new spacing tokens:** the key must NOT match any Tailwind built-in container size: `3xs`, `2xs`, `xs`, `sm`, `md`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl`, `6xl`, `7xl`. Use `--spacing-section-*` or another distinct prefix.
 
 If you ever suspect this regressed, the diagnostic is: open the page in the dev server and inspect the compiled CSS for a `.max-w-2xl` rule. It MUST read `max-width: var(--container-2xl)`. If it reads `var(--spacing-2xl)`, a colliding token has been re-introduced somewhere in the cascade.
+
+---
+
+## Color tokens
+
+See `theme-and-color.md` for the full palette reference, the `--tint-rgb` token, and the light/dark discipline. A short summary of what to use in component code:
+
+- Body text and headings: `text-foreground`
+- Page and card surfaces: `bg-background`, `bg-card`, `bg-muted`
+- Brand action color: `bg-primary`, `text-primary-foreground`
+- Tinted overlays (polish layer): `rgba(var(--tint-rgb), <opacity>)`
+- Borders: `border-border`
+
+Never hardcode hex values in component markup. All palette and semantic tokens are in `globals.css`; change the token, not every usage site.
