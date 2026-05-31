@@ -26,8 +26,8 @@ const [calc, siteSettings] = await Promise.all([
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.budgetCalculator) return Astro.redirect('/');
 
-const title       = 'Budget Calculator · Reid Design';
-const description = 'Get a rough idea of what a design project costs before reaching out. Use the Reid Design budget calculator to build your estimate by room, scope, and add-ons.';
+const title       = 'Budget Calculator · Studio Starter';
+const description = 'Get a rough idea of what a design project costs before reaching out. Use the budget calculator to build your estimate by room, scope, and add-ons.';
 
 // Validate the calc doc: we need at least one room to be meaningful.
 const hasValidCalc =
@@ -38,7 +38,7 @@ const hasValidCalc =
   calc.scopeOptions.length >= 1;
 
 // Hero fields fall back to sensible defaults so the page looks intentional
-// even before Staci fills out the doc in Studio.
+// even before the Studio doc is filled out.
 const heroEyebrow  = calc?.introEyebrow  ?? 'Plan your project';
 const heroHeadline = calc?.introHeadline ?? 'What does a design project cost?';
 const heroSubhead  = calc?.introSubhead  ?? 'Use this as a starting point, not a firm quote. Every space is different, and a consultation is the only way to get specifics.';
@@ -125,8 +125,8 @@ const schemas = [
             Coming soon
           </h2>
           <p class="mt-m text-foreground/80 text-lg">
-            Staci is putting together the number ranges for this tool. In the meantime,
-            reach out and she will walk you through pricing in a quick call.
+            This calculator is almost ready. In the meantime,
+            reach out and we can walk you through pricing on a quick call.
           </p>
           <div class="mt-l flex flex-wrap justify-center gap-s">
             <a

@@ -376,11 +376,11 @@ export default function BudgetCalculator({ config }: Props) {
                         aria-live="polite"
                         className="text-sm text-destructive"
                       >
-                        {emailMsg || "Something went wrong. Try again or email owner@example.com."}
+                        {emailMsg || "Something went wrong. Please try again."}
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      No spam. Just your estimate. Staci reads every reply personally.
+                      No spam. Just your estimate.
                     </p>
                   </>
                 )}

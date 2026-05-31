@@ -244,12 +244,12 @@ export const styleQuiz = defineType({
               name: 'description',
               title: 'Archetype description',
               type: 'array',
-              description: 'Shown on the result screen. Describe this archetype in Staci\'s voice.',
+              description: 'Shown on the result screen. Describe this archetype in the studio voice.',
               options: {
                 // Per spec: Canvas enabled on archetype descriptions with voice purpose
                 canvasApp: {
                   purpose:
-                    'Archetype result description shown after the quiz. Voice: warm, plain-spoken, slightly informal, confident about money; sounds like a smart friend, not a brochure; banned vocabulary: transformative, curated, elevated, tailored, investment in your space; no em-dashes. 2-3 sentences that name the style and make the visitor feel understood.',
+                    'Archetype result description shown after the quiz. Voice: warm, plain-spoken, slightly informal, confident about money; sounds like a smart friend, not a brochure; banned vocabulary: transformative, curated, elevated, tailored, investment in your space; no em-dashes. 2-3 sentences that name the style and make the visitor feel understood. Replace this with the studio voice guidelines before publishing.',
                 },
               },
               of: [
@@ -270,7 +270,7 @@ export const styleQuiz = defineType({
               name: 'images',
               title: 'Archetype images',
               type: 'array',
-              description: "Staci's own project photos that represent this archetype. Shown in the result.",
+              description: "Project photos that represent this archetype. Shown in the result.",
               of: [
                 defineArrayMember({
                   type: 'image',

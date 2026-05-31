@@ -301,7 +301,7 @@ function GateForm({ gate, archetypeName, mode, onSuccess, onSkip }: GateFormProp
         <p id="quiz-gate-consent" className="text-xs text-muted-foreground">
           {gate.consentNote
             ? gate.consentNote
-            : 'No spam, ever. Staci reads every reply personally.'}
+            : 'No spam, ever.'}
           {' '}
           <a href="/privacy" className="text-link underline underline-offset-2 hover:text-primary transition-colors">
             Privacy policy

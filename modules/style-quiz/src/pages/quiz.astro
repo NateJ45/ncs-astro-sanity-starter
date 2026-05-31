@@ -24,9 +24,9 @@ const [quiz, siteSettings] = await Promise.all([
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.styleQuiz) return Astro.redirect('/');
 
-const title = 'What Is Your Design Style? · Reid Design';
+const title = 'What Is Your Design Style? · Studio Starter';
 const description =
-  'Take the Reid Design style quiz to find your design archetype and get a custom recommendation from Staci.';
+  'Take the style quiz to find your design archetype and get a personalized recommendation.';
 
 const schemas = [
   breadcrumbSchema([
@@ -183,15 +183,15 @@ const heroSubhead = quiz?.introSubhead ?? '';
             Coming soon
           </h2>
           <p class="mt-m text-foreground/80 text-lg">
-            Staci is putting the finishing touches on this quiz. Check back soon
-            to find your design style and get a personal recommendation.
+            This quiz is almost ready. Check back soon to find your design style
+            and get a personal recommendation.
           </p>
           <div class="mt-l flex flex-wrap justify-center gap-s">
             <a
               href="/contact"
               class="inline-flex items-center px-l py-s bg-primary-dark text-white font-semibold uppercase tracking-widest text-sm hover:bg-accent-dark transition-colors press-tactile"
             >
-              Talk to Staci directly
+              Get in touch
             </a>
             <a
               href="/portfolio"

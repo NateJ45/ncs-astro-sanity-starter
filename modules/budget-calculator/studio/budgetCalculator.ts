@@ -1,5 +1,5 @@
 // Budget calculator singleton. Drives the /calculator page.
-// Rooms, scope options, and add-ons are all editable here so Staci
+// Rooms, scope options, and add-ons are all editable here so the studio owner
 // can keep the number ranges current without touching code.
 // One instance only; singleton enforcement in sanity.config.ts.
 // Safe to edit by hand.
