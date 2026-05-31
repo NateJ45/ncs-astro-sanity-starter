@@ -29,8 +29,8 @@ const [page, siteSettings] = await Promise.all([
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.resources) return Astro.redirect('/');
 
-const title       = page?.seoTitle       ?? 'Free Resources · Reid Design';
-const description = page?.seoDescription ?? 'Planning tools and guides from Reid Design: the style quiz, budget calculator, free guides, FAQ, and more.';
+const title       = page?.seoTitle       ?? 'Free Resources · Studio Starter';
+const description = page?.seoDescription ?? 'Planning tools and guides from the studio: style quiz, budget calculator, free guides, FAQ, and more.';
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'Free tools + guides';
 const heroHeadline = page?.heroHeadline ?? 'Start here before you call';
@@ -52,7 +52,7 @@ interface ResourceCard {
 const FALLBACK_CARDS: ResourceCard[] = [
   {
     title: 'Style Quiz',
-    blurb: 'Find your design archetype and get a personal recommendation from Staci.',
+    blurb: 'Find your design direction and get a personal recommendation tailored to your answers.',
     link: '/quiz',
   },
   {
@@ -62,17 +62,17 @@ const FALLBACK_CARDS: ResourceCard[] = [
   },
   {
     title: 'Free Guides',
-    blurb: 'Room-by-room checklists and sourcing guides you can download and keep.',
+    blurb: 'Practical downloads covering common decisions. Take them, keep them.',
     link: '/guides',
   },
   {
     title: 'FAQ',
-    blurb: 'Pricing, process, logistics, and service area, all in one place.',
+    blurb: 'Pricing, process, and logistics, all in one place.',
     link: '/faq',
   },
   {
     title: 'Journal',
-    blurb: 'Behind-the-scenes look at projects, sourcing notes, and design decisions.',
+    blurb: 'Behind-the-scenes project notes, sourcing decisions, and design thinking.',
     link: '/journal',
   },
 ];

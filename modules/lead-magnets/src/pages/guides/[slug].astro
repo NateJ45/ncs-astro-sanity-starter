@@ -54,11 +54,11 @@ const fileUrl: string = magnet.file?.asset?.url ?? '';
 
 const title =
   magnet.seoTitle ??
-  `${magnet.title}: A Free Guide from Reid Design`;
+  `${magnet.title}: A Free Guide`;
 const description =
   magnet.seoDescription ??
   magnet.summary ??
-  `Download the free "${magnet.title}" guide from Reid Design. Practical advice for your home.`;
+  `Download the free "${magnet.title}" guide from the studio. Practical, no-fluff advice.`;
 
 // The ESP form-action URL comes from siteSettings (shared across all forms).
 const formActionUrl = siteSettings?.newsletter?.formActionUrl ?? null;
@@ -77,8 +77,8 @@ const schemas = [
   {/* ------- 1. Hero --------------------------------------------------------- */}
   <Hero
     eyebrow="Free Guide"
-    headline={magnet.title ?? 'A free guide from Reid Design.'}
-    subhead={magnet.summary ?? 'Practical advice for your home. Download it free.'}
+    headline={magnet.title ?? 'A free guide from the studio.'}
+    subhead={magnet.summary ?? 'Practical, no-fluff advice. Download it free.'}
     headingId="guide-hero-heading"
     size="short"
   />
@@ -146,9 +146,9 @@ const schemas = [
                 This guide is almost ready.
               </p>
               <p class="mt-s text-sm text-foreground/80 leading-relaxed">
-                Staci is finishing it up. Check back soon, or
+                The studio is finishing it up. Check back soon, or
                 <a href="/contact" class="text-link underline underline-offset-2 ml-[0.25ch]">reach out</a>
-                and she'll send it directly when it's done.
+                and we'll send it directly when it's done.
               </p>
             </div>
           )}

@@ -218,7 +218,7 @@ export default function LeadMagnetForm({
       </form>
 
       <p className="mt-s text-xs text-foreground/70 leading-relaxed">
-        Your email goes straight to Staci's list. No spam, unsubscribe any time.{' '}
+        Your email goes straight to the studio list. No spam, unsubscribe any time.{' '}
         <a href="/privacy" className="underline underline-offset-2 hover:text-link transition-colors">
           Privacy policy
         </a>
