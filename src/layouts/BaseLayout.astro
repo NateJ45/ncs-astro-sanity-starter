@@ -73,19 +73,14 @@ const resolvedOg = ogImage ?? perPageOg ?? globalOg ?? ogPathForRoute(Astro.url.
 const absOg = resolvedOg.startsWith('http') ? resolvedOg : new URL(resolvedOg, site.url).toString();
 
 // Build the document title. If the editor-supplied seoTitle already contains
-// the brand anywhere (e.g. "Reid Design LLC — Plainfield Interior Design" or
-// "About Staci · Reid Design"), use it verbatim. Otherwise append " — Reid
-// Design LLC" so the tab + search-result line carries the brand. Strips a
-// trailing " — Reid Design LLC" once before evaluating so any legacy
-// pre-baked suffix is handled. The looser brand check (matches "Reid Design"
-// not just "Reid Design LLC") catches the most common editor abbreviation
-// without producing duplicates.
+// the brand name anywhere, use it verbatim. Otherwise append " — {site.name}"
+// so the tab + search-result line carries the brand. Strips a trailing suffix
+// once before evaluating so any legacy pre-baked suffix is handled.
 const brandSuffix = ` — ${site.name}`;
 const cleanTitle = title.endsWith(brandSuffix)
   ? title.slice(0, -brandSuffix.length)
   : title;
-const brandRoot = 'Reid Design'; // base brand match for de-duplication
-const hasBrandInline = cleanTitle.toLowerCase().includes(brandRoot.toLowerCase());
+const hasBrandInline = cleanTitle.toLowerCase().includes(site.name.toLowerCase());
 const fullTitle = cleanTitle === site.name || hasBrandInline
   ? cleanTitle
   : `${cleanTitle} — ${site.name}`;

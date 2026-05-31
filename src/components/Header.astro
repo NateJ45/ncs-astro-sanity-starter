@@ -1,9 +1,9 @@
 ---
 // Foundation, edit with care
 // Site header. Two structural rows on desktop, one on mobile:
-//   ┌─────────────────────────────────────── 4px Warm Bronze accent stripe
+//   ┌─────────────────────────────────────── 4px accent stripe
 //   │ ─────────────────────────────────────── eyebrow strip (desktop-only)
-//   │   Plainfield Interior Design · ...    staci@…  · IG · FB · theme
+//   │   [site tagline]           email  · IG · FB · theme
 //   ├─────────────────────────────────────── main row
 //   │   [logo]                  [nav]  │  [Book a consultation CTA]
 //   └───────────────────────────────────────
@@ -21,32 +21,22 @@ import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
 import ThemeToggle from './ThemeToggle';
 import MobileNav from './MobileNav';
 import { ChevronDown } from 'lucide-react';
-import logoLightAsset from '@/assets/logo-light.png';
-import logoDarkAsset from '@/assets/logo-dark.png';
+import logoLightAsset from '@/assets/logo-light.svg';
+import logoDarkAsset from '@/assets/logo-dark.svg';
 import { getSectionVisibility, type SectionVisibility } from '@/lib/sectionVisibility';
 import { telHref } from '@/lib/phone';
 
-// Pre-render every logo variant we'll need via Astro's image pipeline so we
-// have the hashed WebP URLs available at build time. The header displays at
-// h-[6.25rem] (≈95×100 px) with w-auto, so a 100w/200w pair covers 1×/2×
-// retina. The mobile drawer displays at h-16 (≈61×64 px), so 128w is plenty.
-// Pre-computing all four URLs means we can render ONE <img> with no src in
-// the HTML and let an inline script pick the right variant based on the
-// current theme — that's the only way to keep Lighthouse from flagging the
-// inactive logo as "image larger than displayed" (because Lighthouse
-// analyses the DOM, not the network log).
-const logoLight1x = await getImage({ src: logoLightAsset, format: 'webp', width: 100 });
-const logoLight2x = await getImage({ src: logoLightAsset, format: 'webp', width: 200 });
-const logoDark1x = await getImage({ src: logoDarkAsset, format: 'webp', width: 100 });
-const logoDark2x = await getImage({ src: logoDarkAsset, format: 'webp', width: 200 });
-const logoLightSrcset = `${logoLight1x.src} 1x, ${logoLight2x.src} 2x`;
-const logoDarkSrcset = `${logoDark1x.src} 1x, ${logoDark2x.src} 2x`;
+// SVG logos are passed through Astro's image pipeline for cache-busted URLs.
+// SVGs are resolution-independent so no 1x/2x variants are needed — one URL
+// serves all pixel densities. The same URL is used for both desktop and mobile.
+const logoLightImg = await getImage({ src: logoLightAsset });
+const logoDarkImg = await getImage({ src: logoDarkAsset });
+const logoLightSrcset = logoLightImg.src;
+const logoDarkSrcset = logoDarkImg.src;
 
-// Mobile drawer logos — separate getImage() calls at the smaller size the
-// drawer displays at. Their URLs are passed into MobileNav as plain
-// strings (the React island can't import assets directly).
-const logoLightWebpMobile = await getImage({ src: logoLightAsset, format: 'webp', width: 128 });
-const logoDarkWebpMobile = await getImage({ src: logoDarkAsset, format: 'webp', width: 128 });
+// Mobile drawer logos — same SVG URLs, passed as plain strings into MobileNav.
+const logoLightWebpMobile = logoLightImg;
+const logoDarkWebpMobile = logoDarkImg;
 
 interface Props {
   siteSettings?: {
@@ -158,7 +148,7 @@ function isGroupActive(items: { href: string }[]) {
     <div class="mx-auto flex max-w-content items-center justify-between px-l py-2">
       <div class="flex items-center gap-m">
         <p class="text-xs uppercase tracking-eyebrow text-foreground/80">
-          Plainfield Interior Design · Serving Greater Indianapolis
+          {siteSettings?.tagline ?? site.name}
         </p>
         {/* Availability status, mirroring the mobile pill. Same pulsing dot
             and link to /contact, so the trust signal is consistent at every
@@ -296,15 +286,15 @@ function isGroupActive(items: { href: string }[]) {
       */}
       <img
         alt={brandName}
-        width={100}
-        height={106}
-        class="h-[6.25rem] w-auto"
+        width={280}
+        height={60}
+        class="h-12 w-auto"
         loading="eager"
         decoding="async"
         data-theme-logo
-        data-logo-light-src={logoLight1x.src}
+        data-logo-light-src={logoLightImg.src}
         data-logo-light-srcset={logoLightSrcset}
-        data-logo-dark-src={logoDark1x.src}
+        data-logo-dark-src={logoDarkImg.src}
         data-logo-dark-srcset={logoDarkSrcset}
       />
     </a>

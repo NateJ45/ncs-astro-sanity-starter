@@ -21,8 +21,8 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title = page?.seoTitle ?? 'Contact Reid Design';
-const description = page?.seoDescription ?? 'Start a conversation about your space. Plainfield, Indianapolis, and the surrounding suburbs.';
+const title = page?.seoTitle ?? `Contact ${site.name}`;
+const description = page?.seoDescription ?? 'Start a conversation about your space.';
 
 const heroEyebrow   = page?.heroEyebrow   ?? 'Request a Consultation.';
 const heroHeadline  = page?.heroHeadline  ?? 'Start the Conversation.';
@@ -97,7 +97,7 @@ const schemas = [
       {email && (
         <p class="mt-m flex flex-wrap items-center gap-xs text-sm text-foreground/75">
           <Mail size={14} aria-hidden="true" className="text-secondary" />
-          <span>Prefer email? Reach Staci directly at</span>
+          <span>Prefer email? Reach us directly at</span>
           <CopyEmailButton client:visible email={email} variant="link" />
         </p>
       )}
@@ -115,7 +115,7 @@ const schemas = [
 
       {/* Post-inquiry roadmap — structured steps when present.
           Falls back to the legacy whatToExpectContent when the roadmap array
-          is empty so the page degrades gracefully before Staci fills it in. */}
+          is empty so the page degrades gracefully before content is filled in. */}
       {hasRoadmap ? (
         <PostInquiryRoadmap
           steps={roadmapSteps}
@@ -193,7 +193,7 @@ const schemas = [
       )}
 
       <div>
-        <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Where Reid Design is</p>
+        <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Studio location</p>
         <ServiceAreaMap height={280} />
       </div>
     </aside>

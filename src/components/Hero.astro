@@ -1,7 +1,7 @@
 ---
 // Safe to edit by hand
 // Page hero. Two shapes:
-//   1) "image" hero (home, optionally Process/Services if Staci ever adds a hero photo)
+//   1) "image" hero (home, optionally Process/Services if a hero photo is added)
 //      — full-bleed Sanity background image with a dark scrim, h1 + subhead + CTAs overlay.
 //   2) "text" hero (About, Contact, FAQ, Process by default)
 //      — clean editorial heading on Soft Linen with eyebrow + headline + subhead.
@@ -167,8 +167,8 @@ const wrapperHeight =
       }
       setHeaderH();
       wireCue();
-      if (!window.__reidHeroBound) {
-        window.__reidHeroBound = true;
+      if (!window.__heroLayoutBound) {
+        window.__heroLayoutBound = true;
         window.addEventListener('resize', setHeaderH, { passive: true });
         window.addEventListener('load', setHeaderH);
         document.addEventListener('astro:page-load', function () { setHeaderH(); wireCue(); });
@@ -186,7 +186,7 @@ const wrapperHeight =
   <script is:inline>
     (function () {
       try {
-        if (sessionStorage.getItem('reid-design-hero-rotated') === '1') return;
+        if (sessionStorage.getItem('hero-word-rotated') === '1') return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       } catch (_) { /* ignore */ }
 
@@ -219,7 +219,7 @@ const wrapperHeight =
 
           if (count >= totalCycles) {
             clearInterval(id);
-            try { sessionStorage.setItem('reid-design-hero-rotated', '1'); } catch (_) {}
+            try { sessionStorage.setItem('hero-word-rotated', '1'); } catch (_) {}
           }
         }, intervalMs);
       }

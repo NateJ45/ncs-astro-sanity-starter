@@ -1,26 +1,25 @@
 ---
 // Safe to edit by hand for copy + structure changes.
-// Home page. Section order is conversion-tuned (see the 2026-05 reorder):
+// Home page. Section order is conversion-tuned:
 // visual proof and social proof come early, price transparency mid-funnel,
 // the long-read journal sits late for visitors in research mode.
-//   1. Hero (Plainfield-first eyebrow, headline, two CTAs, background image)
-//   2. Meet Staci (photo, intro copy, CTA to About)
+//   1. Hero (eyebrow, headline, two CTAs, background image)
+//   2. Meet the Designer (photo, intro copy, CTA to About)
 //   3. Featured Work (hero project + companions — visual proof, the hook)
 //   4. Kind Words (1 featured testimonial + grid — social proof, early)
 //   5. How It Works (4-step process preview, CTA to Process)
-//   6. How Reid Design Can Help (services grid + pricing)
+//   6. How We Can Help (services grid + pricing)
 //   7. Featured Journal (hero entry + companions — depth for considerers)
 //   8. Service area cue line
 //   9. Final CTA (full-bleed)
 //
 // Featured Work (3) + Featured Journal (7) auto-populate from the Project +
 // JournalEntry collections, ordered featured-first then by publish date.
-// Staci pins a piece via the `featured` boolean on the doc; otherwise the
+// Content editors pin a piece via the `featured` boolean on the doc; otherwise the
 // section shows the latest 4. Both suppress entirely when there's no content.
 //
 // Background cadence alternates background / muted down the page so adjacent
-// sections never share a surface (the one muted/muted seam — Featured Journal
-// into the Service-area cue — is bridged by the bronze SectionDivider).
+// sections never share a surface.
 //
 // Everything inside each section is editable in Sanity via the homePage singleton plus the
 // service / testimonial / processStep / project / journalEntry collections.
@@ -53,16 +52,16 @@ const [page, siteSettings, pressItems] = await Promise.all([
 ]);
 
 // Derive section visibility. Unset fields count as visible so the live site
-// is unchanged until Staci explicitly turns something off in Studio.
+// is unchanged until the editor explicitly turns something off in Studio.
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 
 // Top-level SEO meta. Fall back to site identity when Sanity is empty (e.g., before content seed).
 const title       = page?.seoTitle       ?? site.name;
-const description = page?.seoDescription ?? 'Plainfield interior design for homes that feel genuinely yours.';
+const description = page?.seoDescription ?? 'Your tagline goes here.';
 
-// Hero defaults — keep them aligned with CLAUDE.md voice in case the homePage doc is bare.
-const heroEyebrow  = page?.heroEyebrow  ?? 'Plainfield, Indiana.';
-const heroHeadline = page?.heroHeadline ?? 'Interior design for homes that feel genuinely yours.';
+// Hero defaults — replace with your studio's voice before launch.
+const heroEyebrow  = page?.heroEyebrow  ?? 'Your City, Your State.';
+const heroHeadline = page?.heroHeadline ?? 'Your headline goes here.';
 const heroSubhead  = page?.heroSubhead  ?? '';
 
 // Collections: services with showOnHomepage, testimonialsToShow (in order), process steps in order.
@@ -77,8 +76,8 @@ const googleBusinessUrl = siteSettings?.googleBusinessUrl;
 const reviewsNote       = siteSettings?.reviewsNote;
 
 // Section copy fallbacks (lock the home page in even before all Sanity copy lands).
-const meetStaciEyebrow  = page?.meetStaciEyebrow  ?? 'The Designer.';
-const meetStaciHeadline = page?.meetStaciHeadline ?? 'Hi, I’m Staci.';
+const meetStaciEyebrow  = page?.meetStaciEyebrow  ?? "The Designer.";
+const meetStaciHeadline = page?.meetStaciHeadline ?? "Hi, I’m [Your Name].";
 const meetStaciContent  = page?.meetStaciContent  ?? null;
 
 const processPreviewEyebrow  = page?.processPreviewEyebrow  ?? 'How It Works.';
@@ -93,7 +92,7 @@ const testimonialsSubhead      = page?.testimonialsSubhead      ??
   'The part that matters most: how it felt to work together, and how each space holds up to everyday life long after the last pillow is placed.';
 const testimonialsAttribution  = page?.testimonialsAttribution;
 
-const servicesGridEyebrow        = page?.servicesGridEyebrow        ?? 'Reid Design.';
+const servicesGridEyebrow        = page?.servicesGridEyebrow        ?? site.name + '.';
 const servicesGridHeadline       = page?.servicesGridHeadline       ?? 'How we can help your home.';
 const servicesGridScriptAccent   = page?.servicesGridScriptAccent;
 const servicesGridSubhead        = page?.servicesGridSubhead;
@@ -107,7 +106,7 @@ const servicesGridFootnote  = page?.servicesGridFootnote;
 const featuredWorkEyebrow  = page?.featuredWorkEyebrow  ?? 'Recent Work';
 const featuredWorkHeadline = page?.featuredWorkHeadline ?? 'Rooms that feel finished.';
 const featuredWorkSubhead  = page?.featuredWorkSubhead  ??
-  'A look at recent projects across Plainfield and the Indianapolis suburbs. Each one starts with a conversation about how the space actually needs to function, then the design follows from there. Open any project to see the brief, the design call, and exactly how the room came together.';
+  'A look at recent projects. Each one starts with a conversation about how the space actually needs to function, then the design follows from there.';
 const featuredProjects     = page?.featuredProjects     ?? [];
 
 // Featured Journal section. Same auto-fetch logic for journal entries.
@@ -125,7 +124,7 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
       hints at the design vocabulary without becoming a marquee. Honors
       prefers-reduced-motion. Both rotatingWords and scriptAccent are
       Sanity-editable on homePage; sensible defaults keep the design intact
-      if Staci clears the fields. */}
+      if the editor clears the fields. */}
   <Hero
     eyebrow={heroEyebrow}
     headline={heroHeadline}
@@ -140,7 +139,7 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
     scriptAccent={page?.heroScriptAccent}
   />
 
-  {/* ------- 2. Meet Staci --------------------------------------------------- */}
+  {/* ------- 2. Meet the Designer -------------------------------------------- */}
   <section
     class="bg-background"
     aria-labelledby="meet-staci-heading"
@@ -152,7 +151,7 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
               never exceeds ~648 px (45vw of a 1440 px viewport) and
               mobile only needs ~750 px even at high DPR. The previous
               900 px cap was triggering Lighthouse's "image larger than
-              displayed" warning by ~112 KB on the Meet Staci photo. */}
+              displayed" warning by ~112 KB on the designer photo. */}
           <SanityImage
             source={page.meetStaciPhoto}
             width={800}
@@ -177,8 +176,8 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
           />
         ) : (
           <p class="mt-m text-foreground/85 text-lg leading-relaxed">
-            Plainfield-based interior designer working with homeowners across Greater Indianapolis to
-            create spaces that feel calm, considered, and unmistakably theirs.
+            Your intro copy goes here. Tell visitors who you are, where you work,
+            and what makes your approach distinct.
           </p>
         )}
         <div class="mt-l flex justify-center md:justify-start">
@@ -302,7 +301,7 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
     </section>
   )}
 
-  {/* ------- 6. How Reid Design Can Help (services grid + pricing) ---------- */}
+  {/* ------- 6. How We Can Help (services grid + pricing) ------------------- */}
   {/* bg-background (not muted) so the cadence alternates cleanly now that
       Kind Words moved above How It Works. */}
   <section
@@ -376,7 +375,7 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
   <ServiceAreaCue
     text={page?.serviceAreaCue}
     cities={siteSettings?.serviceAreas}
-    eyebrow="Where Reid Design works"
+    eyebrow="Where we work"
   />
 
   {/* ------- 9. Final CTA --------------------------------------------------- */}

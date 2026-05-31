@@ -19,7 +19,7 @@ interface Props {
   threshold?: number;
 }
 
-const SESSION_KEY = 'reid-design-sticky-cta-dismissed';
+const SESSION_KEY = 'sticky-cta-dismissed';
 
 export default function StickyCTAChip({
   label,

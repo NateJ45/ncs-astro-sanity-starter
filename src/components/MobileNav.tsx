@@ -76,7 +76,7 @@ export default function MobileNav({ links, siteSettings, logoLightUrl, logoDarkU
 
   const tagline =
     siteSettings?.tagline ??
-    'Plainfield interior design for homes that feel genuinely yours.';
+    'Your tagline goes here.';
   const email = siteSettings?.email;
   const phone = siteSettings?.phone;
   const ig = siteSettings?.socialInstagram;
@@ -228,10 +228,10 @@ export default function MobileNav({ links, siteSettings, logoLightUrl, logoDarkU
             <div className="border-t border-border-soft px-l py-l flex justify-center">
               <img
                 src={logoLightUrl}
-                alt="Reid Design"
-                width={64}
-                height={68}
-                className="block dark:hidden h-16 w-auto"
+                alt="Studio Starter"
+                width={280}
+                height={60}
+                className="block dark:hidden h-10 w-auto"
                 loading="lazy"
                 decoding="async"
               />
@@ -240,9 +240,9 @@ export default function MobileNav({ links, siteSettings, logoLightUrl, logoDarkU
                   src={logoDarkUrl}
                   alt=""
                   aria-hidden="true"
-                  width={64}
-                  height={68}
-                  className="hidden dark:block h-16 w-auto"
+                  width={280}
+                  height={60}
+                  className="hidden dark:block h-10 w-auto"
                   loading="lazy"
                   decoding="async"
                 />

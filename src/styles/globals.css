@@ -1,4 +1,4 @@
-/* Reid Design — global stylesheet. Foundation, edit with care.
+/* Studio Starter — global stylesheet. Foundation, edit with care.
    Brand tokens declared here (Tailwind 4 @theme block) and mapped
    onto shadcn's semantic tokens (:root / .dark) so brand identity
    carries everywhere the design system is referenced. */
@@ -12,7 +12,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ---------- Reid Design brand tokens ---------------------------------- */
+/* ---------- Brand tokens ---------------------------------- */
 /* Reachable as utility classes: bg-bg, text-accent, border-secondary,
    font-display, text-h1, p-l, max-w-content. */
 
@@ -180,7 +180,7 @@
   letter-spacing: 0;
 }
 
-/* ---------- Light mode (Reid Design overrides shadcn defaults) -------- */
+/* ---------- Light mode (overrides shadcn defaults) -------------------- */
 
 :root {
     /* Surfaces */
@@ -235,9 +235,8 @@
 }
 
 /* ---------- Dark mode --------------------------------------------------
-   Reid Design is light-primary. Dark mode supports OS-level preference
-   but is not the brand's default read. Warm Bronze and Charcoal hold
-   their identity; surfaces flip to deep warm grays. */
+   Light mode is the primary display. Dark mode supports OS-level preference.
+   Slate and Ink hold their identity; surfaces flip to deep cool grays. */
 
 .dark {
     --background: #17191C;
@@ -891,7 +890,7 @@ body::before {
 
   /* Print-only header + footer injected into every page. */
   body::after {
-    content: "Reid Design LLC · reiddesignllc.com · Plainfield, IN";
+    content: "Studio Starter · example.com";
     display: block;
     margin-top: 0.5in;
     padding-top: 0.25in;

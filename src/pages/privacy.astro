@@ -6,7 +6,7 @@
 // live and accurate.
 //
 // Reuses PortableText for the body when Sanity content is present; falls back
-// to static HTML copy for the period before Staci publishes the doc.
+// to static HTML copy for the period before the editor publishes the doc.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
@@ -20,8 +20,8 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title       = page?.seoTitle       ?? 'Privacy Policy · Reid Design';
-const description = page?.seoDescription ?? 'How Reid Design handles the information you share when you reach out or subscribe.';
+const title       = page?.seoTitle       ?? `Privacy Policy · ${site.name}`;
+const description = page?.seoDescription ?? 'How we handle the information you share when you reach out or subscribe.';
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'Transparency first.';
 const heroHeadline = page?.heroHeadline ?? 'Privacy Policy';
@@ -44,7 +44,7 @@ const schemas = [
 ];
 
 // Contact email for the fallback copy
-const contactEmail = siteSettings?.email ?? 'owner@example.com';
+const contactEmail = siteSettings?.email ?? `hello@${site.domain}`;
 
 // Whether to use Sanity body content
 const hasSanityBody = Boolean(page?.body);
@@ -77,9 +77,8 @@ const hasSanityBody = Boolean(page?.body);
       ) : (
         <div class="space-y-l text-foreground leading-relaxed">
           <p class="text-foreground/80">
-            This is the privacy policy for Reid Design LLC, a one-person interior design studio
-            based in Plainfield, Indiana. The goal here is to be straightforward about what
-            information is collected and why.
+            This is the privacy policy for {site.name}. The goal here is to be
+            straightforward about what information is collected and why.
           </p>
 
           <div>

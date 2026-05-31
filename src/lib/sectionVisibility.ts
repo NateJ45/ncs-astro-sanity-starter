@@ -2,7 +2,7 @@
 // Normalizes the sectionVisibility object from siteSettings into a flat set of
 // booleans. The critical rule: an UNSET field (undefined or null) counts as
 // VISIBLE — only an explicit `false` hides a section. This means the live site
-// is completely unchanged until Staci explicitly turns something off in Studio.
+// is completely unchanged until the editor explicitly turns something off in Studio.
 //
 // Usage:
 //   import { getSectionVisibility } from '@/lib/sectionVisibility';
@@ -45,7 +45,7 @@ export interface SectionVisibility {
  *   - undefined / null / true  =>  visible (true)
  *   - explicit false           =>  hidden  (false)
  *
- * This guarantees the live site is unaffected until Staci explicitly sets a
+ * This guarantees the live site is unaffected until the editor explicitly sets a
  * toggle to off in Studio.
  */
 export function getSectionVisibility(raw?: RawSectionVisibility | null): SectionVisibility {

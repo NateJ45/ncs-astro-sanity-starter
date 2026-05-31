@@ -10,8 +10,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
 const result = await renderOg({
-  wordmark: 'Reid Design LLC',
-  tagline: ['Plainfield interior design for homes', 'that feel genuinely yours.'],
+  wordmark: 'Studio Starter',
+  tagline: ['Your tagline goes here.'],
   outPath: resolve(root, 'public/og-default.png'),
 });
 

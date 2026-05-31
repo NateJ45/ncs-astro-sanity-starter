@@ -3,10 +3,9 @@
 // Custom 404. Warm, on-brand, two clear paths back. No search (there isn't one).
 //
 // Layout: two-column on desktop (text + photograph), stacked on mobile. The
-// photo grounds the page as Reid Design — using a styled vignette from the
-// media library (Staci's dogs on the studio sofa) reads as "smart friend, not
-// 404 chrome." Asset is referenced by _ref so it pipes through the same
-// SanityImage CDN/transform pipeline as every other photo on the site.
+// photo is sourced from Sanity and can be replaced with any studio photo.
+// Asset is referenced by _ref so it pipes through the same SanityImage
+// CDN/transform pipeline as every other photo on the site.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getNotFoundPage, getSiteSettings } from '@/lib/queries';
@@ -21,7 +20,7 @@ const [notFoundPage, siteSettings] = await Promise.all([
 // populated. Sanity singleton always wins if its image field is set.
 const fallbackPhoto = {
   asset: { _ref: 'image-ce9be41407b946b7453724575c3cfd7aec2f7c4c-3024x4032-jpg' },
-  alt: 'Reid Design studio dogs resting on a sofa.',
+  alt: 'Studio photo.',
 };
 
 const seoTitle       = notFoundPage?.seoTitle       ?? 'Page not found';

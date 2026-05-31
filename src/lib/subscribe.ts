@@ -11,7 +11,7 @@
 //     metadata so the ESP can segment subscribers automatically. Do NOT rename this param
 //     without updating all call-sites — the styleQuiz.gate.espTag and leadMagnet.espTag
 //     schema fields flow directly into it.
-//   - `source`: human-readable label for Staci's records (e.g. "footer", "guides/room-checklist").
+//   - `source`: human-readable label for subscriber records (e.g. "footer", "guides/room-checklist").
 //   - Honeypot: the form component is responsible for the honeypot field. If it's filled,
 //     the component should short-circuit and fake success BEFORE calling subscribeEmail.
 //     This helper does no honeypot check itself — it only handles the network call.
@@ -108,7 +108,7 @@ export async function subscribeEmail(opts: SubscribeOptions): Promise<SubscribeR
     return {
       ok: false,
       message:
-        "Newsletter signup isn't connected yet. Email owner@example.com directly to get on the list.",
+        "Newsletter signup isn't connected yet. Contact us directly to get on the list.",
     };
   }
 
@@ -119,7 +119,7 @@ export async function subscribeEmail(opts: SubscribeOptions): Promise<SubscribeR
       body: JSON.stringify({
         access_key: WEB3FORMS_KEY,
         subject: `Newsletter signup${tag ? ` [${tag}]` : ''}${source ? ` via ${source}` : ''}`,
-        from_name: 'Reid Design LLC website',
+        from_name: 'Studio website',
         email,
         name: name || undefined,
         tag: tag || undefined,
@@ -128,13 +128,13 @@ export async function subscribeEmail(opts: SubscribeOptions): Promise<SubscribeR
     });
     const json = await res.json().catch(() => ({}));
     if (res.ok && (json as Record<string, unknown>).success !== false) {
-      return { ok: true, message: "You're in. Staci will be in touch." };
+      return { ok: true, message: "You're in. We'll be in touch." };
     }
     return {
       ok: false,
       message:
         (json as Record<string, unknown>).message as string ||
-        "Couldn't sign you up right now. Try again, or email owner@example.com.",
+        "Couldn't sign you up right now. Try again, or contact us directly.",
     };
   } catch {
     return {

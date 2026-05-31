@@ -9,8 +9,8 @@
 //   - Stacks vertically on mobile: hero, then companions in a 1-col list.
 //
 // Data is auto-populated by the home page query — featured-then-newest, capped
-// at 4 (1 hero + 3 companions). Staci pins one via the `featured` boolean on
-// the project doc; otherwise the section just shows latest 4 in publish order.
+// at 4 (1 hero + 3 companions). The editor pins one via the `featured` boolean
+// on the project doc; otherwise the section shows latest 4 in publish order.
 // Section is render-suppressed entirely when no projects exist.
 
 import SanityImage from '@/components/SanityImage.astro';
@@ -145,7 +145,7 @@ const heroHref = hero?.slug?.current ? `/portfolio/${hero.slug.current}` : '#';
               </span>
             )}
 
-            {/* Featured pin — only when Staci flagged this project. */}
+            {/* Featured pin — only when this project is flagged as featured. */}
             {hero?.featured && (
               <span
                 class="absolute top-m right-m z-[2] inline-flex items-center gap-1 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-eyebrow rounded-full bg-primary-dark text-white"

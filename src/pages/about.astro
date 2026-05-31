@@ -1,10 +1,10 @@
 ---
 // Safe to edit by hand for copy + structure changes.
-// About page. Tells Staci's story so visitors feel they're hiring a person, not a brand.
+// About page. Tells the designer's story so visitors feel they're hiring a person, not a brand.
 //
 // Sections:
 //   1. Hero (text-only)
-//   2. Story (Staci portrait + intro story PortableText + attribution + background line + service area mention)
+//   2. Story (designer portrait + intro story PortableText + attribution + background line + service area mention)
 //   3. Philosophy (3+ philosophyPoint documents in a responsive grid)
 //   4. Final CTA
 //
@@ -34,15 +34,15 @@ const [page, siteSettings, pressItems] = await Promise.all([
 
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 
-const title       = page?.seoTitle       ?? 'About Staci · Reid Design';
-const description = page?.seoDescription ?? 'Meet Staci Perkins, founder of Reid Design — a Plainfield-based interior designer working across Greater Indianapolis.';
+const title       = page?.seoTitle       ?? `About · ${site.name}`;
+const description = page?.seoDescription ?? `Meet the designer behind ${site.name}.`;
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'The Designer.';
 const heroHeadline = page?.heroHeadline ?? 'People Hire People.';
 const heroSubhead  = page?.heroSubhead  ?? "Here's who you'd be working with.";
 
 const storyEyebrow  = page?.storyEyebrow  ?? 'My Story.';
-const storyHeadline = page?.storyHeadline ?? 'Why I Started Reid Design.';
+const storyHeadline = page?.storyHeadline ?? 'Why I Started This Studio.';
 
 const philosophyEyebrow  = page?.philosophyEyebrow  ?? 'How I Work.';
 const philosophyHeadline = page?.philosophyHeadline ?? 'A philosophy that puts your home first.';

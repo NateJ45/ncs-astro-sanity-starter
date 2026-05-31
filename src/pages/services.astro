@@ -32,8 +32,8 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title       = page?.seoTitle       ?? 'Services & Pricing · Reid Design';
-const description = page?.seoDescription ?? 'Interior design services for every space and stage — from $150 consultations to full-room design across Greater Indianapolis.';
+const title       = page?.seoTitle       ?? `Services & Pricing · ${site.name}`;
+const description = page?.seoDescription ?? 'Design services for every space and stage.';
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'What We Offer.';
 const heroHeadline = page?.heroHeadline ?? 'Design Services for Every Space and Stage.';
@@ -66,10 +66,8 @@ const schemas = [
 
 <BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
   {/* ------- 1. Hero --------------------------------------------------------- */}
-  {/* scriptAccent script-emphasizes one word in the headline (default "reveal"
-      from "...a full room reveal"). Sanity-editable so Staci can change the
-      headline + the accent word together. Falls back gracefully if she clears
-      it or changes the headline so the word no longer appears. */}
+  {/* scriptAccent script-emphasizes one word in the headline.
+      Sanity-editable so the editor can change the headline and accent word together. */}
   <Hero
     eyebrow={heroEyebrow}
     headline={heroHeadline}
@@ -77,7 +75,7 @@ const schemas = [
     backgroundImage={page?.heroImage}
     headingId="services-hero-heading"
     size="short"
-    scriptAccent={page?.heroScriptAccent ?? 'reveal'}
+    scriptAccent={page?.heroScriptAccent}
   />
 
   {/* ------- 2. Services list ----------------------------------------------- */}

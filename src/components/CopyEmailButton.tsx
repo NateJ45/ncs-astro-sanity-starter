@@ -1,6 +1,6 @@
 // Safe to edit by hand
 // Email widget. The primary click target is a mailto: link that opens the
-// visitor's mail client with a draft to Staci. A small adjacent icon button
+// visitor's mail client with a draft to the studio. A small adjacent icon button
 // copies the address to the clipboard for visitors who'd rather paste.
 //
 // Component name kept as CopyEmailButton for now so all import sites stay

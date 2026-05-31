@@ -75,7 +75,7 @@ export default function CalendlyInline({
         <div className="rounded-md overflow-hidden border border-border-soft bg-card">
           <iframe
             src={toEmbedUrl(url)}
-            title="Schedule a discovery call with Reid Design"
+            title="Schedule a discovery call"
             className="block w-full"
             style={{ height: 'min(75vh, 720px)', minHeight: '480px' }}
             loading="lazy"

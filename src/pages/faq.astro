@@ -1,6 +1,6 @@
 ---
 // Safe to edit by hand for copy + structure changes.
-// FAQ page. Every question Staci has ever fielded, grouped by category in the order
+// FAQ page. All common questions, grouped by category in the order
 // set by faqPage.categoryOrder. Visitors who get this far are pre-qualifying themselves.
 //
 // Sections:
@@ -25,8 +25,8 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title       = page?.seoTitle       ?? 'Frequently Asked Questions · Reid Design';
-const description = page?.seoDescription ?? 'Pricing, process, logistics, and service area — everything visitors ask before reaching out to Reid Design.';
+const title       = page?.seoTitle       ?? `Frequently Asked Questions · ${site.name}`;
+const description = page?.seoDescription ?? 'Pricing, process, logistics, and service area — everything visitors ask before reaching out.';
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'Common Questions.';
 const heroHeadline = page?.heroHeadline ?? 'Everything You Want to Know.';

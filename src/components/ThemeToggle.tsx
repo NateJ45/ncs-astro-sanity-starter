@@ -1,6 +1,6 @@
 // Foundation, edit with care
 // Three-state theme toggle: light → dark → system. Persists to
-// localStorage["reid-design-theme"]. Anti-FOUC script in BaseLayout
+// localStorage (key from site.themeStorageKey). Anti-FOUC script in BaseLayout
 // applies the resolved class on initial paint; this component only
 // handles cycling and runtime re-application.
 

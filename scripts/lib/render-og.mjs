@@ -3,7 +3,7 @@
 // generate-og-pages.mjs (one PNG per page singleton). Uses sharp's native
 // text rendering (Pango) so we don't depend on opentype.js or satori.
 //
-// Pango falls back to a system serif if Cormorant Garamond isn't installed
+// Pango falls back to a system serif if Libre Baskerville isn't installed
 // on the build machine. Close enough for a social-preview thumbnail; the
 // brand wordmark + colors carry the recognition.
 
@@ -14,12 +14,12 @@ import sharp from 'sharp';
 const DEFAULTS = {
   width: 1200,
   height: 630,
-  bg: '#FAF8F5',          // Soft Linen
-  primary: '#9C7661',     // Warm Bronze
-  primaryDark: '#7A5D4C', // Bronze Dark
-  accent: '#3D3D3D',      // Charcoal
-  taupe: '#B8A99A',       // Warm Taupe
-  fontDisplay: 'Cormorant Garamond, Garamond, Times New Roman, serif',
+  bg: '#FBFBFA',          // Paper
+  primary: '#586577',     // Slate
+  primaryDark: '#3E4A57', // Slate Dark
+  accent: '#2A2D31',      // Ink
+  taupe: '#8E9DAD',       // Slate Mid
+  fontDisplay: 'Libre Baskerville, Georgia, Cambria, Times New Roman, serif',
 };
 
 async function renderText(text, fontSize, color, font, weight = 'normal') {

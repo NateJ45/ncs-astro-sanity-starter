@@ -75,9 +75,9 @@ const first = slides[0];
         // Tear down any timer from a previous page first. The tab and its
         // document-level listeners persist across Astro View Transitions, so
         // re-wiring without this would stack intervals on detached slides.
-        if (window.__reidHeroSlideshowTimer) {
-          clearInterval(window.__reidHeroSlideshowTimer);
-          window.__reidHeroSlideshowTimer = null;
+        if (window.__heroSlideshowTimer) {
+          clearInterval(window.__heroSlideshowTimer);
+          window.__heroSlideshowTimer = null;
         }
         var box = document.querySelector('[data-hero-slideshow]');
         if (!box) return;
@@ -89,7 +89,7 @@ const first = slides[0];
 
         var current = 0;
         var STEP_MS = 4500; // 3s hold + 1.5s cross-fade
-        window.__reidHeroSlideshowTimer = setInterval(function () {
+        window.__heroSlideshowTimer = setInterval(function () {
           if (document.hidden) return; // pause while the tab is hidden
           slides[current].classList.remove('is-active');
           current = (current + 1) % slides.length;
@@ -97,10 +97,9 @@ const first = slides[0];
         }, STEP_MS);
       }
       initHeroSlideshow();
-      // Register the navigation re-init once (mirrors Hero.astro's
-      // window.__reidHeroBound guard) so the listener never stacks.
-      if (!window.__reidHeroSlideshowBound) {
-        window.__reidHeroSlideshowBound = true;
+      // Register the navigation re-init once so the listener never stacks.
+      if (!window.__heroSlideshowBound) {
+        window.__heroSlideshowBound = true;
         document.addEventListener('astro:page-load', initHeroSlideshow);
       }
     })();

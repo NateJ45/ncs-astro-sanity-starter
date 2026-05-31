@@ -18,6 +18,14 @@ interface SiteSettings {
   serviceAreas?: string[];
   socialInstagram?: string;
   socialFacebook?: string;
+  /** Studio city name — set in Sanity siteSettings or update the default in schemas.ts */
+  city?: string;
+  /** Studio region/state abbreviation */
+  region?: string;
+  /** Studio latitude — update to your studio's coordinates */
+  lat?: number;
+  /** Studio longitude — update to your studio's coordinates */
+  lon?: number;
 }
 
 interface Service {
@@ -51,17 +59,17 @@ export function localBusinessSchema(settings: SiteSettings | null | undefined): 
     email: s.email ?? undefined,
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'Plainfield',
-      addressRegion: 'IN',
+      addressLocality: s.city ?? 'Your City',
+      addressRegion: s.region ?? 'Your State',
       addressCountry: 'US',
     },
-    // Approximate Plainfield, IN center. Update if Staci has a precise studio address.
+    // Update geo coordinates to your studio's actual location.
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: 39.7042,
-      longitude: -86.3994,
+      latitude: s.lat ?? 0,
+      longitude: s.lon ?? 0,
     },
-    areaServed: (s.serviceAreas ?? ['Plainfield', 'Indianapolis']).map((city) => ({
+    areaServed: (s.serviceAreas ?? ['Your City']).map((city) => ({
       '@type': 'City',
       name: city,
     })),

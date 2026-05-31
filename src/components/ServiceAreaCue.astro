@@ -1,17 +1,17 @@
 ---
 // Safe to edit by hand
-// "Plainfield-first" service area cue. Sits between the Services grid and the
+// Service area cue. Sits between the Services grid and the
 // Final CTA on the home page. Two render modes:
 //
-//   1) `cities` array passed → confident typographic row, Plainfield in bronze,
-//      the rest in Warm Taupe. This is the high-end editorial treatment.
+//   1) `cities` array passed → confident typographic row, first city in primary,
+//      the rest in secondary. This is the high-end editorial treatment.
 //   2) Only `text` passed → quieter italic fallback (legacy behavior).
 //
 // The cities mode signals "local studio" much more strongly than a single
 // sentence. It also gives Google another local-SEO anchor on the home page.
 
 interface Props {
-  /** Optional fallback line ("Serving Plainfield, Indianapolis, and the surrounding suburbs.") */
+  /** Optional fallback line (e.g. "Serving Your City and the surrounding area.") */
   text?: string;
   /** Preferred: ordered array of service-area city names. First entry rendered in bronze. */
   cities?: string[];
@@ -22,7 +22,7 @@ interface Props {
 const { text, cities, eyebrow = 'Service area' } = Astro.props as Props;
 
 const cityList = Array.isArray(cities) ? cities.filter(Boolean) : [];
-const cue = text ?? 'Serving Plainfield, Indianapolis, and the surrounding suburbs.';
+const cue = text ?? 'Serving your city and the surrounding area.';
 ---
 
 <div class="bg-muted border-y border-border-soft">
@@ -32,7 +32,7 @@ const cue = text ?? 'Serving Plainfield, Indianapolis, and the surrounding subur
         <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-m">{eyebrow}</p>
         <p
           class="font-display text-h3 leading-snug flex flex-wrap items-baseline justify-center gap-x-s gap-y-xs"
-          aria-label={`Reid Design serves ${cityList.join(', ')}`}
+          aria-label={`Service area: ${cityList.join(', ')}`}
         >
           {cityList.map((city, i) => (
             <>

@@ -9,11 +9,11 @@
 //   3. Location + Project type (both required) — paired row
 //   4. Budget range + Timeline (both required) — paired row
 //   5. Tell us about the space (required, textarea)
-//   6. How did you hear about Reid Design? (optional, dropdown) — marketing intel
+//   6. How did you hear about us? (optional, dropdown) — marketing intel
 //
 // Why these fields and not more: every additional field costs conversion.
 // These four added fields (location, budget, timeline, source) cover what
-// Staci genuinely needs to scope a project and prep for the first call —
+// the studio needs to scope a project and prep for the first call —
 // service-area + travel-fee bucket, ballpark tier, urgency, and a lightweight
 // lead-source signal for marketing decisions later.
 //
@@ -54,24 +54,15 @@ const TYPE_PARAM_MAP: Record<string, string> = {
   'quiz':         "Not sure yet, let's chat",
 };
 
-// Service-area cities, ordered Plainfield-first per brand positioning. "Other"
-// catches anyone outside the standard area — Staci can decide whether to travel.
+// Service-area cities — replace with your actual service area before launch.
 const LOCATION_OPTIONS = [
-  'Plainfield',
-  'Indianapolis',
-  'Carmel',
-  'Fishers',
-  'Westfield',
-  'Zionsville',
-  'Noblesville',
-  'Other (Greater Indianapolis)',
+  'My City',
+  'Nearby City',
   'Outside the area',
 ] as const;
 
-// Budget brackets sized to Reid Design's actual price points: $150 consultation
-// at the low end through whole-home projects at the high end. The "Not sure"
-// option keeps the form approachable — many homeowners genuinely don't know
-// what room design costs and the question shouldn't gate them out.
+// Budget brackets — adjust to your studio's actual price points before launch.
+// The "Not sure yet" option keeps the form approachable.
 const BUDGET_OPTIONS = [
   'Under $2K (just a consultation or quick advice)',
   '$2K – $10K (a single room or two)',
@@ -90,7 +81,7 @@ const TIMELINE_OPTIONS = [
   "Flexible, I'm just exploring",
 ] as const;
 
-// Lead-source options. Optional field; helps Staci understand where good leads
+// Lead-source options. Optional field; helps understand where good leads
 // come from over time without forcing the question.
 const SOURCE_OPTIONS = [
   'Google search',
@@ -236,8 +227,8 @@ export default function ContactForm({
     else if (!/.+@.+\..+/.test(d.email)) errs.email = 'That email address looks off.';
     if (!d.location) errs.location = "Pick the closest area — even if it's 'outside.'";
     if (!d.projectType) errs.projectType = 'Pick the closest match — we can sort the rest later.';
-    if (!d.budget) errs.budget = 'A rough range helps Staci suggest the right tier.';
-    if (!d.timeline) errs.timeline = 'A timeline helps Staci know if she can take this on.';
+    if (!d.budget) errs.budget = 'A rough range helps us suggest the right tier.';
+    if (!d.timeline) errs.timeline = 'A timeline helps us know if we can take this on.';
     if (!d.message.trim()) errs.message = 'A sentence or two helps us prep.';
     return errs;
   }
@@ -266,7 +257,7 @@ export default function ContactForm({
     if (!ACCESS_KEY) {
       setStatus('error');
       setErrorMessage(
-        "The form isn't connected yet (missing Web3Forms key). Please email owner@example.com directly."
+        "The form isn't connected yet (missing Web3Forms key). Please email " + site.name + " directly."
       );
       return;
     }
@@ -278,10 +269,9 @@ export default function ContactForm({
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
           access_key: ACCESS_KEY,
-          // Subject line front-loads project type + location so Staci can
-          // triage from her inbox before opening the email.
+          // Subject line front-loads project type + location for easy inbox triage.
           subject: `Inquiry: ${draft.projectType} in ${draft.location} (${draft.name})`,
-          from_name: 'Reid Design LLC website',
+          from_name: `${site.name} website`,
           name: draft.name,
           email: draft.email,
           phone: draft.phone || undefined,
@@ -291,19 +281,19 @@ export default function ContactForm({
           timeline: draft.timeline,
           message: draft.message,
           // Lead source is optional; omit from the payload when blank so it
-          // doesn't add a "Source: " line to Staci's email for no reason.
+          // doesn't add a "Source: " line to the notification email for no reason.
           source: draft.source || undefined,
           // Web3Forms autoresponder fields. When these are set, Web3Forms
           // sends a confirmation email to the visitor in addition to the
-          // notification email to Staci. The reply-to_email key is
+          // notification email to the studio. The reply-to_email key is
           // documented at https://docs.web3forms.com/#autoresponder.
           // The autoresponder must be enabled in the Web3Forms dashboard
           // for this project's access key.
           replyto: draft.email,
           autoresponse: true,
-          autoresponse_from: 'Reid Design LLC <noreply@reiddesignllc.com>',
-          autoresponse_subject: 'Got your note. Staci will be in touch soon.',
-          autoresponse_message: `Hi ${draft.name},\n\nThank you for reaching out! Staci reads every inquiry personally and will get back to you within a couple of business days.\n\nIf your project is time-sensitive, just mention that in your reply to this email and she'll prioritize accordingly.\n\nReid Design LLC\nreiddesignllc.com`,
+          autoresponse_from: `${site.name} <noreply@${site.domain}>`,
+          autoresponse_subject: `Got your note. We'll be in touch soon.`,
+          autoresponse_message: `Hi ${draft.name},\n\nThank you for reaching out! We read every inquiry personally and will get back to you within a couple of business days.\n\nIf your project is time-sensitive, just mention that in your reply to this email and we'll prioritize accordingly.\n\n${site.name}\n${site.domain}`,
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -315,13 +305,13 @@ export default function ContactForm({
         setStatus('error');
         setErrorMessage(
           json.message ||
-            "Couldn't send right now. Try again in a minute, or email owner@example.com directly."
+            "Couldn't send right now. Try again in a minute, or contact us directly."
         );
       }
     } catch {
       setStatus('error');
       setErrorMessage(
-        "Couldn't send right now. Check your connection, or email owner@example.com directly."
+        "Couldn't send right now. Check your connection, or contact us directly."
       );
     }
   }
@@ -335,7 +325,7 @@ export default function ContactForm({
       >
         <h3 className="font-display text-h3 text-foreground">Thanks, your note's on its way.</h3>
         <p className="mt-s text-foreground/80">
-          Staci reads everything personally and gets back within a couple of business days.
+          We read everything personally and get back within a couple of business days.
           If your project's time-sensitive, mention that when you reply.
         </p>
       </div>
@@ -416,8 +406,8 @@ export default function ContactForm({
         </div>
       </div>
 
-      {/* Location + project type — paired row. Location is asked first so Staci
-          can mentally bucket the lead before reading the rest. */}
+      {/* Location + project type — paired row. Location is asked first so the
+          studio can mentally bucket the lead before reading the rest. */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-m">
         <div>
           <label htmlFor="location" className="block text-sm font-semibold text-foreground mb-1">
@@ -442,7 +432,7 @@ export default function ContactForm({
             <p id="location-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">{errors.location}</p>
           ) : (
             <p id="location-hint" className="mt-xs text-sm text-muted-foreground">
-              Reid Design works across Plainfield + Greater Indianapolis.
+              Pick the closest match to your project location.
             </p>
           )}
         </div>
@@ -496,7 +486,7 @@ export default function ContactForm({
             <p id="budget-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">{errors.budget}</p>
           ) : (
             <p id="budget-hint" className="mt-xs text-sm text-muted-foreground">
-              No judgment — this helps Staci suggest the right tier.
+              No judgment — this helps us suggest the right tier.
             </p>
           )}
         </div>
@@ -551,7 +541,7 @@ export default function ContactForm({
           longer to fill out. */}
       <div>
         <label htmlFor="source" className="block text-sm font-semibold text-foreground mb-1">
-          How did you hear about Reid Design? <span className="text-muted-foreground font-normal">(optional)</span>
+          How did you hear about us? <span className="text-muted-foreground font-normal">(optional)</span>
         </label>
         <select
           id="source"
@@ -576,7 +566,7 @@ export default function ContactForm({
       </button>
 
       <p className="text-xs text-muted-foreground">
-        We never sign you up for anything. Staci reads every note personally.
+        We never sign you up for anything. We read every note personally.
       </p>
     </form>
   );
