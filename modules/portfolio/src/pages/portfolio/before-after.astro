@@ -25,8 +25,8 @@ const [projects, siteSettings] = await Promise.all([
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.portfolio) return Astro.redirect('/');
 
-const title       = 'Before & After · Reid Design Portfolio';
-const description = 'Side-by-side before and after reveals from Reid Design projects across Plainfield and Indianapolis.';
+const title       = 'Before &amp; After';
+const description = 'Side-by-side before and after reveals from recent projects. Drag the slider to see the transformation.';
 
 const schemas = [
   breadcrumbSchema([

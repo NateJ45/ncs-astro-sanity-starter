@@ -24,11 +24,11 @@ const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.portfolio) return Astro.redirect('/');
 
 const title       = page?.seoTitle       ?? 'Portfolio';
-const description = page?.seoDescription ?? 'A look at recent Reid Design projects across Plainfield and the Indianapolis area.';
+const description = page?.seoDescription ?? 'A look at recent work. Each project starts with a conversation about what the space needs to do.';
 
-const heroEyebrow  = page?.heroEyebrow  ?? 'Recent work';
-const heroHeadline = page?.heroHeadline ?? 'Projects across Plainfield and Indianapolis.';
-const heroSubhead  = page?.heroSubhead  ?? 'A look at how rooms come together. Each project starts with a conversation about how the space needs to function, then works back from there.';
+const heroEyebrow  = page?.heroEyebrow  ?? 'Selected work';
+const heroHeadline = page?.heroHeadline ?? 'A look at recent work.';
+const heroSubhead  = page?.heroSubhead  ?? 'Each project starts with a conversation about what the space needs to do, then works back from there.';
 
 const schemas = [
   breadcrumbSchema([
@@ -65,15 +65,11 @@ const styleOptions = [
   ).values(),
 ];
 
-// Portfolio index now backed by the portfolioPage singleton. The fallback
-// asset _ref preserves the previous hero image for any environment where the
-// singleton hasn't been populated yet — defensive only; the patch script
-// backfills the field on launch.
-const fallbackHeroImage = {
-  asset: { _ref: 'image-95cf8e9cffed47a11f9f74386dc1659d3b45ffba-4736x4280-jpg' },
-  alt: 'Reid Design kitchen with island and woven counter stools.',
-};
-const heroBackground = page?.heroImage ?? fallbackHeroImage;
+// Portfolio index backed by the portfolioPage singleton. When no hero image
+// has been set yet, fall back gracefully to an empty object so the Hero
+// component renders without crashing. Add a real image via seed.mjs or
+// directly in the Studio.
+const heroBackground = page?.heroImage ?? null;
 ---
 
 <BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
@@ -84,7 +80,7 @@ const heroBackground = page?.heroImage ?? fallbackHeroImage;
     backgroundImage={heroBackground}
     headingId="portfolio-hero-heading"
     size="short"
-    scriptAccent={page?.heroScriptAccent ?? 'Plainfield'}
+    scriptAccent={page?.heroScriptAccent}
   />
 
   {hasProjects ? (
@@ -146,11 +142,11 @@ const heroBackground = page?.heroImage ?? fallbackHeroImage;
       <div class="rounded-md border border-border bg-muted p-section-md text-center">
         <h2 class="font-display text-h3 text-foreground">Case studies are on the way.</h2>
         <p class="mt-s text-foreground/80 max-w-prose mx-auto">
-          The first projects under Reid Design LLC are wrapping up now, with full write-ups
-          coming shortly. In the meantime, you can read about
-          <a href="/process" class="text-link underline underline-offset-2 hover:text-primary"> how Reid Design works</a>
+          The first projects are wrapping up now, with full write-ups coming shortly.
+          In the meantime, you can read about
+          <a href="/process" class="text-link underline underline-offset-2 hover:text-primary"> how we work</a>
           or
-          <a href="/contact" class="text-link underline underline-offset-2 hover:text-primary"> start a conversation about your space</a>.
+          <a href="/contact" class="text-link underline underline-offset-2 hover:text-primary"> start a conversation about your project</a>.
         </p>
       </div>
     </section>

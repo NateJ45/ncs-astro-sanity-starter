@@ -64,7 +64,7 @@ if (!project) {
 // SEO overrides win when set; fall back to title + briefSummary so existing
 // projects keep working without a content update.
 const title = project.metaTitle ?? `${project.title} — ${project.location}`;
-const description = project.metaDescription ?? project.briefSummary ?? 'A Reid Design project case study.';
+const description = project.metaDescription ?? project.briefSummary ?? 'A project case study.';
 const heroOg = project.heroImage?.asset
   ? urlFor(project.heroImage).width(1200).height(630).fit('crop').quality(80).format('webp').url()
   : undefined;

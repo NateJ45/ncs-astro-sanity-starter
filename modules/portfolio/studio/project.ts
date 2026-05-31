@@ -1,5 +1,5 @@
 // Case studies. Launch with 1–2; grows over time.
-// Project-story narrative, not room-type categorization.
+// Project-story narrative, filterable by room type and design style.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
 import { orderRankField } from '@sanity/orderable-document-list';
@@ -13,11 +13,11 @@ export const project = defineType({
       name: 'title',
       title: 'Project title',
       type: 'string',
-      description: 'Example: "Fishers ranch refresh".',
+      description: 'Example: "Riverside Studio Refresh".',
       options: {
         canvasApp: {
           purpose:
-            'Case study title. Place-named, NOT client-named. Examples: "The Plainfield Bungalow", "Cedar Lane Living Room", "Fishers Ranch Refresh". Voice: warm, specific. The place gives the project identity without naming the homeowner.',
+            'Case study title. Place- or project-named, not client-named. Examples: "Riverside Studio", "Oak Lane Kitchen", "The Midtown Loft". Voice: warm and specific. A place name gives the project identity without naming the client.',
         },
       },
       validation: (Rule) => Rule.required(),
@@ -34,11 +34,11 @@ export const project = defineType({
       name: 'metaTitle',
       title: 'SEO title (optional)',
       type: 'string',
-      description: 'Browser tab and Google result title. Aim for 50 to 60 characters. Front-load location and room type. Leave blank to use the project title.',
+      description: 'Browser tab and Google result title. Aim for 50 to 60 characters. Front-load location and project type. Leave blank to use the project title.',
       options: {
         canvasApp: {
           purpose:
-            'Optional per-project SEO title override. 50-60 chars. Front-load location + room type for local search ("Plainfield Kitchen Refresh" beats "Beautiful Modern Kitchen Project").',
+            'Optional per-project SEO title override. 50-60 chars. Front-load location + project type for local search ("Riverside Kitchen Refresh" beats "Beautiful Modern Kitchen Project").',
         },
       },
       validation: (Rule) => Rule.max(60).warning('Titles longer than about 60 characters get cut off in Google search results.'),
@@ -52,7 +52,7 @@ export const project = defineType({
       options: {
         canvasApp: {
           purpose:
-            'Optional per-project SEO description. 150-160 chars. Written for a human about to click, not a search engine. Specific (location + room type + transformation) beats generic.',
+            'Optional per-project SEO description. 150-160 chars. Written for a human about to click, not a search engine. Specific (location + project type + outcome) beats generic.',
         },
       },
       validation: (Rule) => Rule.max(160).warning('Descriptions longer than about 160 characters get cut off in Google search results.'),
@@ -61,7 +61,7 @@ export const project = defineType({
       name: 'location',
       title: 'Location',
       type: 'string',
-      description: 'Example: "Fishers, IN".',
+      description: 'Example: "Chicago, IL".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -209,11 +209,11 @@ export const project = defineType({
       name: 'briefLine',
       title: 'The brief (one sentence)',
       type: 'string',
-      description: 'What the client came in with. Example: "Beautiful reno but the family room felt unfinished."',
+      description: 'What the client came in with. Example: "The space had good bones but no clear focal point."',
       options: {
         canvasApp: {
           purpose:
-            'One sentence stating the design problem the homeowner brought in. Voice: smart friend describing a situation. Plain English. Examples: "Beautiful reno but the family room felt unfinished." / "Open-concept kitchen with great bones but everything floated."',
+            'One sentence stating the design problem the client brought in. Voice: smart friend describing a situation. Plain English. Examples: "The space had good bones but no clear focal point." / "Open-concept floor plan with great light but everything floated."',
         },
       },
       validation: (Rule) => Rule.required().max(160),
@@ -222,11 +222,11 @@ export const project = defineType({
       name: 'designCall',
       title: 'The call (one sentence)',
       type: 'string',
-      description: 'Staci\'s design move in response. Example: "Edit, don\'t add. Source one vintage piece. Anchor the seating."',
+      description: 'The design move in response. Example: "Edit, don\'t add. Source one anchor piece. Let the room breathe."',
       options: {
         canvasApp: {
           purpose:
-            'One sentence stating the design decision in response to the brief. First-person Staci voice OK. The "show the thinking, not the credentials" rule made visible. Examples: "Edit, don\'t add. Source one vintage piece. Anchor the seating." / "Move the sofa off the wall. Re-light from a single warm source."',
+            'One sentence stating the design decision in response to the brief. The "show the thinking, not the credentials" rule made visible. Examples: "Edit, don\'t add. Source one anchor piece. Let the room breathe." / "Move the sofa off the wall. Re-light from a single warm source."',
         },
       },
       validation: (Rule) => Rule.required().max(160),
@@ -239,7 +239,7 @@ export const project = defineType({
       options: {
         canvasApp: {
           purpose:
-            'Long-form case study narrative. Open with one warm paragraph in Staci\'s voice (the client\'s situation, the brief, the approach), then walk through the design thinking. Voice: warm, plain-spoken, confident about money, slightly informal. Show the reasoning ("I started with the paint sample because the wall color sets what every other choice has to answer to"), not credentials. Stop when done. Banned: transformative, curated, elevated, tailored, sanctuary, investment in your space. No em-dashes.',
+            'Long-form case study narrative. Open with one warm paragraph (the situation, the brief, the approach), then walk through the design thinking. Voice: warm, plain-spoken, confident, slightly informal. Show the reasoning ("I started with the paint because the wall color sets what every other choice has to answer to"), not credentials. Stop when done. Banned: transformative, curated, elevated, tailored, sanctuary. No em-dashes.',
         },
       },
       of: [

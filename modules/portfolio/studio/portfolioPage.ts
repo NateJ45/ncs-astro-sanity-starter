@@ -1,6 +1,7 @@
 // Portfolio index page singleton. Drives the hero copy + background image
 // on /portfolio. The project grid itself is auto-populated from project
 // documents (ordered via the orderable-document-list plugin).
+// Replace the initialValue strings below with copy that suits the studio.
 
 import { defineType, defineField } from 'sanity';
 
@@ -49,14 +50,14 @@ export const portfolioPage = defineType({
       title: 'Hero eyebrow',
       type: 'string',
       group: 'hero',
-      initialValue: 'Recent work',
+      initialValue: 'Selected work',
     }),
     defineField({
       name: 'heroHeadline',
       title: 'Hero headline',
       type: 'string',
       group: 'hero',
-      initialValue: 'Projects across Plainfield and Indianapolis.',
+      initialValue: 'A look at recent work.',
     }),
     defineField({
       name: 'heroSubhead',
@@ -65,7 +66,7 @@ export const portfolioPage = defineType({
       rows: 2,
       group: 'hero',
       initialValue:
-        'A look at how rooms come together. Each project starts with a conversation about how the space needs to function, then works back from there.',
+        'Each project starts with a conversation about what the space needs to do, then works back from there.',
     }),
     defineField({
       name: 'heroImage',
