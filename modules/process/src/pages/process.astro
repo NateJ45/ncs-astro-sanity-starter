@@ -1,7 +1,7 @@
 ---
 // Safe to edit by hand for copy + structure changes.
-// Process page. The "show, don't tell" page — walks visitors through the four steps so
-// they know what hiring Staci actually feels like before they fill out the form.
+// Process page. The "show, don't tell" page — walks visitors through the studio's steps so
+// they know what working together actually feels like before they fill out the form.
 //
 // Sections:
 //   1. Hero (text-only)
@@ -28,8 +28,8 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title       = page?.seoTitle       ?? 'The Process · Reid Design';
-const description = page?.seoDescription ?? "From first call to final reveal — here's exactly how working with Reid Design unfolds.";
+const title       = page?.seoTitle       ?? `The Process · ${site.name}`;
+const description = page?.seoDescription ?? "From first call to final reveal -- here's exactly how working together unfolds.";
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'The Process.';
 const heroHeadline = page?.heroHeadline ?? 'From First Call to Final Reveal.';

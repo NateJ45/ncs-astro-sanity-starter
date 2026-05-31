@@ -1,5 +1,5 @@
-// Numbered steps in Staci's process. Currently 4: Consultation, Design Plan,
-// Shopping + Selections, Styling + Reveal. Used on Process page and homepage preview.
+// Numbered steps in the studio's process. Used on the Process page and homepage preview.
+// Add as many steps as the project needs; drag to reorder in Studio.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
 import { orderRankField } from '@sanity/orderable-document-list';
