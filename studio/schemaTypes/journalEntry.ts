@@ -129,7 +129,7 @@ export const journalEntry = defineType({
       options: {
         canvasApp: {
           purpose:
-            'Long-form blog post body. Voice: warm, plain-spoken, slightly informal, confident about money — like a smart friend, not a brochure. Show specific design thinking, not credentials. Stop when done; don\'t tack on summary sentences. Banned vocabulary: transformative, curated experience, investment in your space, elevated living, tailored solutions, ever-evolving, in the realm of, navigate (as a verb), leverage, robust, seamless, meticulous, tapestry, testament to. Audience: Plainfield and Greater Indianapolis-area homeowners with budget for design help but not luxury tier. "A 1970s ranch in Fishers" beats "modern home." No em-dashes; use commas or restructure.',
+            'Long-form blog post body. Voice: warm, plain-spoken, slightly informal — like a smart friend, not a brochure. Show specific thinking, not credentials. Stop when done; don\'t tack on summary sentences. Banned vocabulary: transformative, curated experience, elevated living, tailored solutions, ever-evolving, in the realm of, navigate (as a verb), leverage, robust, seamless, meticulous, tapestry, testament to. Audience: people with budget for professional help but not the luxury tier. Be specific over general. No em-dashes; use commas or restructure.',
         },
       },
       validation: (Rule) => Rule.required().min(1),

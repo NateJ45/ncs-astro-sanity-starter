@@ -90,7 +90,7 @@ export const contactPage = defineType({
       type: 'array',
       group: 'form',
       description:
-        'Cities shown in the "Location" dropdown. Plainfield-first per brand positioning. Leave blank to use the built-in defaults (Plainfield, Indianapolis, Carmel, Fishers, Westfield, Zionsville, Noblesville, Other Greater Indianapolis, Outside the area).',
+        'Cities shown in the "Location" dropdown. List in priority order. Leave blank to use the built-in defaults.',
       of: [defineArrayMember({ type: 'string' })],
     }),
     defineField({

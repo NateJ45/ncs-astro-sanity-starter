@@ -1,5 +1,5 @@
 // BrandKit.tsx — Panel 3 of the Start Here handbook.
-// Staci's quick-reference card for colors and fonts, built for copying into Canva.
+// Quick-reference card for the studio brand colors and fonts, built for copying into Canva.
 // Renders color swatches inline using a small Box with a backgroundColor style.
 // Static content — no data fetching.
 // Safe to edit by hand.
@@ -30,52 +30,47 @@ interface FontEntry {
 
 const colorGroups: ColorGroup[] = [
   {
-    label: 'Action and links',
+    label: 'Primary and links',
     colors: [
-      { name: 'Warm Bronze', hex: '#9C7661', note: 'Buttons, primary CTAs, links, and the thin bronze stripe that runs across the top of every card on the site.' },
-      { name: 'Bronze Dark', hex: '#7A5D4C', note: 'Button hover state. Also used for link text in body copy where the lighter bronze would be hard to read.' },
+      { name: 'Slate', hex: '#586577', note: 'Buttons, primary CTAs, links, and accent elements throughout the site.' },
+      { name: 'Slate Dark', hex: '#434E5C', note: 'Button hover state. Also used for link text in body copy.' },
     ],
   },
   {
     label: 'Text',
     colors: [
-      { name: 'Charcoal', hex: '#3D3D3D', note: 'Primary text color for headings and body copy on light backgrounds.' },
-      { name: 'Charcoal Dark', hex: '#2A2A2A', note: 'Footer background and occasional dark section panels.' },
+      { name: 'Ink', hex: '#2A2D31', note: 'Primary text color for headings and body copy on light backgrounds.' },
+      { name: 'Ink Dark', hex: '#1E2024', note: 'Footer background and occasional dark section panels.' },
     ],
   },
   {
     label: 'Surfaces',
     colors: [
-      { name: 'Soft Linen', hex: '#FAF8F5', note: 'The main page background. Almost white, with a warm undertone.' },
-      { name: 'Cream', hex: '#F5F0EB', note: 'Alternating section background. Slightly warmer than Soft Linen.' },
+      { name: 'Paper', hex: '#FBFBFA', note: 'The main page background. A clean near-white.' },
+      { name: 'Soft Paper', hex: '#F3F4F2', note: 'Alternating section background. Slightly cooler than Paper.' },
       { name: 'White', hex: '#FFFFFF', note: 'Text overlaid on dark or photographic surfaces. Hero text, button labels.' },
     ],
   },
   {
     label: 'Accents and lines',
     colors: [
-      { name: 'Warm Taupe', hex: '#B8A99A', note: 'Borders, dividers, and subtle section lines.' },
-      { name: 'Soft Sage', hex: '#A8B5A0', note: 'Used sparingly for process step icons and occasional tag accents.' },
-      { name: 'Light Gray', hex: '#E8E4E0', note: 'Input field underlines and the faintest dividers.' },
+      { name: 'Cool Gray', hex: '#AAB0B8', note: 'Borders, dividers, and eyebrow labels.' },
+      { name: 'Muted Sage', hex: '#9DB0A6', note: 'Used sparingly for process step icons and occasional tag accents.' },
+      { name: 'Faint Divider', hex: '#E6E7E5', note: 'Input field underlines and the lightest dividers.' },
     ],
   },
 ];
 
 const fonts: FontEntry[] = [
   {
-    name: 'Cormorant Garamond',
-    role: 'Headings',
-    note: 'The elegant serif used for all headings (H1 through H6). It gives the site its editorial, considered feel. Use it for headlines in Canva designs.',
+    name: 'Libre Baskerville',
+    role: 'Headings (display)',
+    note: 'The serif used for all headings (H1 through H6). It gives the site its editorial, considered feel. Use it for headlines in Canva designs.',
   },
   {
-    name: 'Source Sans 3',
+    name: 'Inter',
     role: 'Body text, buttons, labels',
     note: 'The clean, readable sans-serif used for all body copy, button labels, and small UI text. Reliable and legible at any size.',
-  },
-  {
-    name: 'Pinyon Script',
-    role: 'One accent word per heading (use sparingly)',
-    note: 'The handwritten script font used for a single accent word in some headings. One word only — overuse makes it look fussy. Great for a signature-style flourish in Canva social graphics.',
   },
 ];
 
@@ -137,7 +132,7 @@ export default function BrandKit() {
           </Heading>
           <Box marginTop={3}>
             <Text muted size={1}>
-              Colors and fonts for Reid Design LLC. Built so you can copy values directly
+              Colors and fonts for Studio Starter. Built so you can copy values directly
               into Canva when you need to make a social graphic or marketing material.
             </Text>
           </Box>
@@ -201,13 +196,13 @@ export default function BrandKit() {
               brand fonts.
             </Text>
             <Text size={1}>
-              The quick reference: Cormorant Garamond for headings, Source Sans 3 for body
-              text and labels, Warm Bronze (#9C7661) for buttons and accents, Charcoal
-              (#3D3D3D) for text, Soft Linen (#FAF8F5) for backgrounds.
+              The quick reference: Libre Baskerville for headings, Inter for body text and
+              labels, Slate (#586577) for buttons and accents, Ink (#2A2D31) for text,
+              Paper (#FBFBFA) for backgrounds.
             </Text>
             <Text size={1}>
-              When in doubt, Bronze + Charcoal + Soft Linen is the full Reid Design palette
-              in three colors.
+              When in doubt, Slate + Ink + Paper is the full Studio Starter palette in
+              three colors.
             </Text>
           </Stack>
         </Card>

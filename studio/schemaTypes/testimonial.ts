@@ -52,7 +52,7 @@ export const testimonial = defineType({
       name: 'location',
       title: 'Location (optional)',
       type: 'string',
-      description: 'Where they live, if relevant. Example: "Plainfield, IN" or "Fishers".',
+      description: 'Where they live, if relevant. Example: "Chicago, IL" or "the suburbs".',
     }),
     defineField({
       name: 'photo',

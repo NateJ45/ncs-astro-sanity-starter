@@ -79,8 +79,8 @@ if (!entry) {
 }
 
 // Meta
-const title = entry.seoTitle ?? `${entry.title} · Reid Design Journal`;
-const description = entry.seoDescription ?? entry.excerpt ?? 'A note from Reid Design.';
+const title = entry.seoTitle ?? `${entry.title} · Studio Journal`;
+const description = entry.seoDescription ?? entry.excerpt ?? 'A note from the studio.';
 const coverOg = entry.coverImage?.asset
   ? urlFor(entry.coverImage).width(1200).height(630).fit('crop').quality(80).format('webp').url()
   : undefined;
@@ -181,7 +181,7 @@ const schemas = [
         column otherwise. `lg:justify-center` centers the pair within the
         section so empty space splits evenly. The article column is sized
         at minmax(0, 48rem) which matches the previous max-w-3xl reading
-        width Staci's posts were written for. */}
+        width the posts were written for. */}
     <div
       class:list={[
         'mx-auto max-w-content px-m py-section-lg grid grid-cols-1 gap-section-md lg:justify-center',
@@ -266,7 +266,7 @@ const schemas = [
   {/* ------- 6. Final CTA -------------------------------------------------- */}
   <FinalCta
     headline="Working on a project of your own?"
-    subhead="Reid Design takes on a small handful of projects at a time. Get in touch and let's see if we're a fit."
+    subhead="The studio takes on a small handful of projects at a time. Get in touch and let's see if we're a fit."
     fallbackCtaLabel="Start a Conversation"
     backgroundImage={journalPage?.finalCtaBackgroundImage}
   />

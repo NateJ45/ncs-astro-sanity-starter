@@ -1,8 +1,9 @@
 // Foundation, edit with care
-// Reid Design Sanity Studio configuration. Replace PUBLIC_SANITY_PROJECT_ID
-// in .env with the real ID from manage.sanity.io after running `sanity init`
-// (or after creating the project manually). Studio reads it via the cli
-// config — see sanity.cli.ts for runtime overrides.
+// Sanity Studio configuration for the ncs-astro-sanity-starter template.
+// Replace SANITY_STUDIO_PROJECT_ID in studio/.env with the real ID from
+// manage.sanity.io after running `sanity init` (or after creating the project
+// manually). Studio reads it via the cli config — see sanity.cli.ts for
+// runtime overrides.
 
 import { defineConfig, buildLegacyTheme } from 'sanity';
 import { structureTool } from 'sanity/structure';
@@ -19,53 +20,52 @@ import { documentBadges } from './components/documentBadges';
 // Brand theme for the Studio UI. Uses Sanity's legacy theme builder which
 // maps a handful of CSS custom properties to the Studio's full internal design
 // system (it derives the complete light + dark palette from these inputs).
-// Bronze primary (#9C7661) — update to match your brand's primary action color.
+// Slate primary (#586577) — update to match your brand's primary action color.
 //
-// The three "foundation" values do the heavy lifting: a warm near-black, a warm
-// white, and a warm taupe gray-base tint every neutral surface, border, and
-// muted label toward the site's linen-and-charcoal feel instead of Sanity's
-// stock cool gray. The state colors keep inline validation and the custom
-// document badges visually consistent (same amber for every warning).
-const reidThemeProps = {
-  // Foundation — warm neutrals everything else derives from.
-  '--black': '#2b2926',
-  '--white': '#fffdfa',
-  '--gray-base': '#6e6760',
+// The three "foundation" values do the heavy lifting: a near-black, a near-white,
+// and a gray-base tint every neutral surface, border, and muted label toward the
+// site's Paper-and-Ink feel instead of Sanity's stock cool gray. The state colors
+// keep inline validation and the custom document badges visually consistent.
+const studioThemeProps = {
+  // Foundation — neutrals everything else derives from.
+  '--black': '#2A2D31',   // Ink
+  '--white': '#FBFBFA',   // Paper
+  '--gray-base': '#586577', // Slate
 
   // Brand accent.
-  '--brand-primary': '#9C7661',
+  '--brand-primary': '#586577',
   '--brand-primary--inverted': '#ffffff',
-  '--focus-color': '#9C7661',
+  '--focus-color': '#586577',
 
-  // Warm linen surfaces for inputs and components.
-  '--input-bg': '#faf8f5',
-  '--component-bg': '#faf8f5',
-  '--component-text-color': '#3d3d3d',
+  // Paper surfaces for inputs and components.
+  '--input-bg': '#F3F4F2',
+  '--component-bg': '#F3F4F2',
+  '--component-text-color': '#2A2D31',
 
   // Buttons.
-  '--default-button-color': '#9C7661',
-  '--default-button-primary-color': '#9C7661',
+  '--default-button-color': '#586577',
+  '--default-button-primary-color': '#586577',
   '--default-button-success-color': '#43a85e',
   '--default-button-warning-color': '#d99a3f',
   '--default-button-danger-color': '#e34141',
 
-  // Validation + status states (warm amber warning matches the badges).
+  // Validation + status states.
   '--state-success-color': '#43a85e',
   '--state-warning-color': '#d99a3f',
   '--state-danger-color': '#e34141',
 
   // Top navigation bar.
-  '--main-navigation-color': '#3d3d3d',
-  '--main-navigation-color--inverted': '#faf8f5',
+  '--main-navigation-color': '#2A2D31',
+  '--main-navigation-color--inverted': '#FBFBFA',
 };
 
 // Assign the props to a const before passing them so TypeScript skips
 // excess-property checking. The object keeps a couple of legacy `--*--inverted`
 // CSS-variable keys (notably --brand-primary--inverted, which sets white text on
-// the bronze primary button) that predate, and aren't included in, Sanity's
-// current LegacyThemeProps type. Passing a variable leaves the runtime object
+// the primary button) that predate, and aren't included in, Sanity's current
+// LegacyThemeProps type. Passing a variable leaves the runtime object
 // byte-identical while keeping `tsc --noEmit` clean. Don't inline this back.
-const reidTheme = buildLegacyTheme(reidThemeProps);
+const studioTheme = buildLegacyTheme(studioThemeProps);
 
 // Re-export so structure.ts can attach the iframe view to every singleton.
 export { Iframe };
@@ -125,8 +125,8 @@ export default defineConfig({
   projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'placeholder-project-id',
   dataset: process.env.SANITY_STUDIO_DATASET || 'production',
 
-  // Brand theme — bronze primary color + warm linen background.
-  theme: reidTheme,
+  // Brand theme — Slate primary + Paper background.
+  theme: studioTheme,
 
   // Studio chrome overrides. Logo replaces the default Sanity wordmark.
   studio: {
@@ -185,7 +185,7 @@ export default defineConfig({
     // Much better than the inline image picker for "what's in our library".
     media(),
     // Vision (GROQ query runner) is a developer tool, not an editor tool.
-    // Gate it to local dev so it doesn't clutter Staci's deployed Studio.
+    // Gate it to local dev so it doesn't clutter the deployed Studio.
     ...(process.env.NODE_ENV !== 'production' ? [visionTool()] : []),
   ],
 

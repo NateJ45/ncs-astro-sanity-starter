@@ -1,7 +1,7 @@
 // Foundation, edit with care.
 //
 // Custom document status badges. They render at the top of the editor next to
-// the Published/Draft pill and give Staci an at-a-glance read on a document's
+// the Published/Draft pill and give the editor an at-a-glance read on a document's
 // state without opening it or hunting through fields:
 //
 //   - "Featured"      — a project or post pinned to a prominent spot

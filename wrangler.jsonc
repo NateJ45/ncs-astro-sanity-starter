@@ -1,5 +1,5 @@
 {
-  // Cloudflare Workers configuration for Reid Design.
+  // Cloudflare Workers configuration for this project.
   // Cloudflare merged Pages into Workers in early 2026; Workers is the path forward.
   "compatibility_date": "2026-05-26",
   "compatibility_flags": ["global_fetch_strictly_public"],

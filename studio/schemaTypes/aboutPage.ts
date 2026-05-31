@@ -190,7 +190,7 @@ export const aboutPage = defineType({
       title: 'Favorite local spots',
       type: 'array',
       group: 'personal',
-      description: 'Go-to places around Plainfield and Indy. Name plus an optional short note.',
+      description: 'Go-to local spots. Name plus an optional short note.',
       of: [
         defineArrayMember({
           type: 'object',

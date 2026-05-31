@@ -168,7 +168,7 @@ export const homePage = defineType({
       description:
         'Conversion-oriented paragraph under the headline. Tell visitors what a click reveals — the brief, the design thinking, the result — so the section sells the case-study depth, not just the photos.',
       initialValue:
-        'A look at recent projects across Plainfield and the Indianapolis suburbs. Each one starts with a conversation about how the space actually needs to function, then the design follows from there. Open any project to see the brief, the design call, and exactly how the room came together.',
+        'A look at recent projects. Each one starts with a conversation about how the space actually needs to function, then the design follows from there. Open any project to see the brief, the design call, and exactly how the room came together.',
     }),
     defineField({
       name: 'featuredWorkCta',
@@ -298,7 +298,7 @@ export const homePage = defineType({
       title: 'Service area cue line',
       type: 'string',
       group: 'final',
-      description: 'Example: "Serving Plainfield, Indianapolis, and the surrounding suburbs."',
+      description: 'Example: "Serving the greater metro area and surrounding region."',
     }),
     defineField({ name: 'finalCtaEyebrow', title: 'Final CTA eyebrow', type: 'string', group: 'final', initialValue: 'Ready to Begin?' }),
     defineField({ name: 'finalCtaHeadline', title: 'Final CTA headline', type: 'string', group: 'final', initialValue: 'Ready to Love Your Space?' }),

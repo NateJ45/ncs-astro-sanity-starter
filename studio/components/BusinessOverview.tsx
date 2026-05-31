@@ -1,5 +1,5 @@
 // BusinessOverview.tsx — Panel 2 of the Start Here handbook.
-// Staci's single source of truth: live data from Sanity (services + site settings)
+// Single source of truth for the editor: live data from Sanity (services + site settings)
 // alongside static reference info about the business, ideal client, and voice.
 // Safe to edit by hand.
 

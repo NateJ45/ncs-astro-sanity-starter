@@ -133,7 +133,7 @@ export const servicesPage = defineType({
           title: 'Description',
           type: 'text',
           rows: 3,
-          description: 'Lead paragraph about the Plainfield-anchored area.',
+          description: 'Lead paragraph about the primary service area.',
         }),
       ],
     }),

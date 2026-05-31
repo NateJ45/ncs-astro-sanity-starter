@@ -58,7 +58,7 @@ export const siteSettings = defineType({
       name: 'serviceAreas',
       title: 'Service areas',
       type: 'array',
-      description: 'Cities and neighborhoods you serve, in display order. Plainfield should be first.',
+      description: 'Cities and neighborhoods you serve, in display order. Put your primary market first.',
       of: [defineArrayMember({ type: 'string' })],
       validation: (Rule) => Rule.required().min(1),
     }),

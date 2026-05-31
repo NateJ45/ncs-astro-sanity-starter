@@ -2,8 +2,8 @@
 //
 // Global form input wrapper that shows a live character counter beneath any
 // single-line or multi-line text field that declares a maximum length. The
-// counter helps Staci stay inside SEO limits (title 60, description 160) while
-// she types, instead of only finding out after she's already over.
+// counter helps the editor stay inside SEO limits (title 60, description 160) while
+// typing, instead of only finding out after they are already over.
 //
 // It's registered once at the config level (form.components.input in
 // sanity.config.ts), so it wraps EVERY input in the Studio. To stay safe it
