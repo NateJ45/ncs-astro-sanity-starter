@@ -9,7 +9,7 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://reiddesignllc.com',
+  site: 'https://example.com',
   output: 'static',
   // `imageService: 'compile'` tells @astrojs/cloudflare to process images
   // with Sharp at build time and ship plain static files — no Cloudflare

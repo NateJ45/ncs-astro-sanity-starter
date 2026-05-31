@@ -8,11 +8,11 @@ export default defineCliConfig({
     projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'placeholder-project-id',
     dataset: process.env.SANITY_STUDIO_DATASET || 'production',
   },
-  // The studio is published at reid-design.sanity.studio after `npm run studio:deploy`.
-  studioHost: 'reid-design',
+  // Update studioHost to your desired Sanity Studio subdomain (e.g. 'my-project').
+  // The studio will be published at <studioHost>.sanity.studio after `npm run studio:deploy`.
+  studioHost: 'my-studio',
   deployment: {
     autoUpdates: true,
-    appId: 'm91iomqo15juf2gkwn2v68wj',
   },
   // Typegen reads the extracted schema and writes types into the Astro project's src/lib/.
   // Schema is extracted via `sanity schema extract`; types generated via `sanity typegen generate`.

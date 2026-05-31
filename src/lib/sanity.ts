@@ -18,6 +18,14 @@
 //   If SANITY_API_READ_TOKEN is missing, the client still constructs and queries
 //   work for whatever the API surfaces anonymously. Useful for local-dev sanity
 //   checks before the token's been wired into Cloudflare's env vars.
+//
+// Graceful empty-state:
+//   When PUBLIC_SANITY_PROJECT_ID is absent or set to the placeholder string
+//   "your-project-id", sanityFetch() short-circuits and returns the provided
+//   fallback without making any network call. This lets `npm run build` succeed
+//   on a fresh clone with no Sanity project configured — pages render their
+//   existing empty-state fallbacks. The populated case (real project ID set)
+//   works exactly as before.
 
 import { createClient, type SanityClient } from '@sanity/client';
 import { createImageUrlBuilder } from '@sanity/image-url';
@@ -28,6 +36,11 @@ const dataset = import.meta.env.PUBLIC_SANITY_DATASET ?? 'production';
 const apiVersion = import.meta.env.PUBLIC_SANITY_API_VERSION ?? '2026-05-01';
 const readToken = import.meta.env.SANITY_API_READ_TOKEN as string | undefined;
 
+/** Returns true when no real Sanity project has been configured. */
+const PLACEHOLDER_IDS = new Set(['', 'your-project-id', 'placeholder']);
+export const isSanityUnconfigured =
+  !projectId || PLACEHOLDER_IDS.has(projectId.trim());
+
 // Warnings below are scoped to server-only (build + SSR pass) so they don't
 // leak into the browser console. The Sanity client module gets imported by
 // React components (PortableText, ProjectGallery, etc) for the `urlFor`
@@ -35,16 +48,16 @@ const readToken = import.meta.env.SANITY_API_READ_TOKEN as string | undefined;
 // guard, every browser session would see the readToken warning, even though
 // the token is irrelevant in the browser (it's a server-only env var).
 if (import.meta.env.SSR) {
-  if (!projectId) {
-    // Surface a clear build-time error rather than letting requests fail at runtime.
-    // The site still scaffold-builds without env vars set, but any page that calls
-    // a query will hit this guard.
+  if (isSanityUnconfigured) {
+    // Soft warning — build still succeeds; pages render empty-state fallbacks.
+    // Set PUBLIC_SANITY_PROJECT_ID in .env (or Cloudflare → Workers → Variables)
+    // to connect a real Sanity project and populate content.
     console.warn(
-      '[sanity] PUBLIC_SANITY_PROJECT_ID is not set. Sanity queries will fail until it is configured in .env and Cloudflare → Workers → Variables.',
+      '[sanity] PUBLIC_SANITY_PROJECT_ID is not set. Build will succeed with empty content (empty-state fallbacks). Configure it in .env to connect a Sanity project.',
     );
   }
 
-  if (!readToken) {
+  if (!isSanityUnconfigured && !readToken) {
     // Soft warning — pages still render via fallback copy when the token is missing,
     // but collections (services, testimonials, etc.) won't populate.
     console.warn(
@@ -54,7 +67,7 @@ if (import.meta.env.SSR) {
 }
 
 export const client: SanityClient = createClient({
-  projectId: projectId ?? 'placeholder',
+  projectId: projectId || 'unconfigured',
   dataset,
   apiVersion,
   // CDN is incompatible with token-based reads (Sanity rejects token + useCdn:true).
@@ -64,6 +77,33 @@ export const client: SanityClient = createClient({
   perspective: 'published',
   ...(readToken ? { token: readToken } : {}),
 });
+
+/**
+ * Guarded fetch wrapper — the single chokepoint for all Sanity data queries.
+ *
+ * When Sanity is unconfigured (PUBLIC_SANITY_PROJECT_ID absent or placeholder),
+ * returns `fallback` immediately without any network call so the build succeeds
+ * with empty-state content. When configured, forwards to `client.fetch` and
+ * catches any network error, logging a warning and returning `fallback` rather
+ * than crashing the build.
+ *
+ * All query helpers in queries.ts route through this function.
+ */
+export async function sanityFetch<T>(
+  query: string,
+  params: Record<string, unknown> = {},
+  fallback: T,
+): Promise<T> {
+  if (isSanityUnconfigured) {
+    return fallback;
+  }
+  try {
+    return await client.fetch<T>(query, params);
+  } catch (err) {
+    console.warn('[sanity] fetch error (returning empty fallback):', err);
+    return fallback;
+  }
+}
 
 const builder = createImageUrlBuilder({
   projectId: projectId ?? 'placeholder',

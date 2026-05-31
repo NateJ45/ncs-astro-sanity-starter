@@ -3,7 +3,7 @@
   // Cloudflare merged Pages into Workers in early 2026; Workers is the path forward.
   "compatibility_date": "2026-05-26",
   "compatibility_flags": ["global_fetch_strictly_public"],
-  "name": "reid-design-site",
+  "name": "ncs-astro-sanity-starter",
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     "directory": "./dist",

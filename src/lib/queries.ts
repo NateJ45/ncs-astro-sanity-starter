@@ -6,7 +6,7 @@
 // Types: until `sanity typegen generate` runs, return types are `any`.
 // Run `npm run typegen` after schema changes to regenerate src/lib/sanity.types.ts.
 
-import { client } from './sanity';
+import { sanityFetch } from './sanity';
 
 // Common Portable Text + image projection shorthand
 const IMAGE_PROJECTION = `{
@@ -23,7 +23,7 @@ const CTA_PROJECTION = `{
 // ---- Site settings (used in BaseLayout / Header / Footer) -----------------
 
 export async function getSiteSettings() {
-  return client.fetch(`*[_type == "siteSettings"][0]{
+  return sanityFetch(`*[_type == "siteSettings"][0]{
     title,
     tagline,
     email,
@@ -52,13 +52,13 @@ export async function getSiteSettings() {
       showStyleQuiz,
       showBudgetCalculator
     }
-  }`);
+  }`, {}, null);
 }
 
 // ---- Home page ------------------------------------------------------------
 
 export async function getHomePage() {
-  return client.fetch(`*[_type == "homePage"][0]{
+  return sanityFetch(`*[_type == "homePage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -127,13 +127,13 @@ export async function getHomePage() {
     finalCtaSubhead,
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     finalCta${CTA_PROJECTION}
-  }`);
+  }`, {}, null);
 }
 
 // ---- About page -----------------------------------------------------------
 
 export async function getAboutPage() {
-  return client.fetch(`*[_type == "aboutPage"][0]{
+  return sanityFetch(`*[_type == "aboutPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -159,13 +159,13 @@ export async function getAboutPage() {
     finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     finalCta${CTA_PROJECTION}
-  }`);
+  }`, {}, null);
 }
 
 // ---- Services page --------------------------------------------------------
 
 export async function getServicesPage() {
-  return client.fetch(`*[_type == "servicesPage"][0]{
+  return sanityFetch(`*[_type == "servicesPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -184,13 +184,13 @@ export async function getServicesPage() {
     finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     finalCta${CTA_PROJECTION}
-  }`);
+  }`, {}, null);
 }
 
 // ---- FAQ page -------------------------------------------------------------
 
 export async function getFaqPage() {
-  return client.fetch(`*[_type == "faqPage"][0]{
+  return sanityFetch(`*[_type == "faqPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -205,13 +205,13 @@ export async function getFaqPage() {
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     finalCta${CTA_PROJECTION},
     secondaryCta${CTA_PROJECTION}
-  }`);
+  }`, {}, null);
 }
 
 // ---- Contact page ---------------------------------------------------------
 
 export async function getContactPage() {
-  return client.fetch(`*[_type == "contactPage"][0]{
+  return sanityFetch(`*[_type == "contactPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -233,13 +233,13 @@ export async function getContactPage() {
     schedulingLink,
     schedulingLinkLabel,
     availabilityNote
-  }`);
+  }`, {}, null);
 }
 
 // ---- 404 page -------------------------------------------------------------
 
 export async function getNotFoundPage() {
-  return client.fetch(`*[_type == "notFoundPage"][0]{
+  return sanityFetch(`*[_type == "notFoundPage"][0]{
     seoTitle,
     seoDescription,
     eyebrow,
@@ -249,7 +249,7 @@ export async function getNotFoundPage() {
     primaryCtaLabel, primaryCtaHref,
     secondaryCtaLabel, secondaryCtaHref,
     tertiaryCtaLabel, tertiaryCtaHref
-  }`);
+  }`, {}, null);
 }
 
 // ---- Projects (used by Footer.astro for Latest Projects column) -----------
@@ -271,10 +271,10 @@ export interface CoreProjectCard {
 }
 
 export async function getAllProjects(): Promise<CoreProjectCard[]> {
-  return client.fetch(`*[_type == "project"] | order(orderRank asc, coalesce(displayOrder, 999) asc, publishedAt desc){
+  return sanityFetch(`*[_type == "project"] | order(orderRank asc, coalesce(displayOrder, 999) asc, publishedAt desc){
     _id, title, slug, location, year, roomType, designStyle, briefSummary,
     heroImage${IMAGE_PROJECTION}
-  }`);
+  }`, {}, []);
 }
 
 // ---- Journal --------------------------------------------------------------
@@ -292,7 +292,7 @@ const JOURNAL_CARD_PROJECTION = `{
 }`;
 
 export async function getJournalPage() {
-  return client.fetch(`*[_type == "journalPage"][0]{
+  return sanityFetch(`*[_type == "journalPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -303,19 +303,19 @@ export async function getJournalPage() {
     finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     finalCta${CTA_PROJECTION}
-  }`);
+  }`, {}, null);
 }
 
 export async function getAllJournalEntries() {
   // Featured first, then newest first. Excerpt + cover only (no body).
-  return client.fetch(`*[_type == "journalEntry"] | order(featured desc, publishedAt desc) ${JOURNAL_CARD_PROJECTION}`);
+  return sanityFetch(`*[_type == "journalEntry"] | order(featured desc, publishedAt desc) ${JOURNAL_CARD_PROJECTION}`, {}, []);
 }
 
 export async function getAllJournalCategories() {
-  return client.fetch(`*[_type == "journalCategory"] | order(title asc){
+  return sanityFetch(`*[_type == "journalCategory"] | order(title asc){
     _id, title, slug, description,
     "postCount": count(*[_type == "journalEntry" && references(^._id)])
-  }`);
+  }`, {}, []);
 }
 
 export async function getJournalEntryBySlug(slug: string) {
@@ -323,7 +323,7 @@ export async function getJournalEntryBySlug(slug: string) {
   // resolved + alt fallback at the GROQ layer so the renderer doesn't have to
   // chase asset refs for every block. Image gallery items + beforeAfter pairs
   // + sourceCard images + inline images all get the same treatment.
-  return client.fetch(
+  return sanityFetch(
     `*[_type == "journalEntry" && slug.current == $slug][0]{
       _id, title, slug, excerpt, author, publishedAt, updatedAt, featured,
       seoTitle, seoDescription,
@@ -356,13 +356,16 @@ export async function getJournalEntryBySlug(slug: string) {
       )
     }`,
     { slug },
+    null,
   );
 }
 
 // Static path generation for /journal/[slug]. Returns just the slugs.
 export async function getAllJournalSlugs(): Promise<string[]> {
-  const list: Array<{ slug: { current: string } }> = await client.fetch(
+  const list: Array<{ slug: { current: string } }> = await sanityFetch(
     `*[_type == "journalEntry" && defined(slug.current)]{ slug }`,
+    {},
+    [],
   );
   return list.map((e) => e.slug?.current).filter(Boolean);
 }
@@ -370,7 +373,7 @@ export async function getAllJournalSlugs(): Promise<string[]> {
 // ---- Privacy page ---------------------------------------------------------
 
 export async function getPrivacyPage() {
-  return client.fetch(`*[_type == "privacyPage"][0]{
+  return sanityFetch(`*[_type == "privacyPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -379,7 +382,7 @@ export async function getPrivacyPage() {
     heroScriptAccent,
     lastUpdated,
     body
-  }`);
+  }`, {}, null);
 }
 
 // ---- Press items (used by core: about.astro + index.astro PressStrip) ----
@@ -398,10 +401,10 @@ export interface CorePressItem {
 
 // Press items ordered by orderRank for the PressStrip on the home + about pages.
 export async function getPressItems(): Promise<CorePressItem[]> {
-  return client.fetch(`*[_type == "pressItem"] | order(orderRank asc){
+  return sanityFetch(`*[_type == "pressItem"] | order(orderRank asc){
     _id, outlet,
     logo${IMAGE_PROJECTION},
     quote, url, date, orderRank
-  }`);
+  }`, {}, []);
 }
 

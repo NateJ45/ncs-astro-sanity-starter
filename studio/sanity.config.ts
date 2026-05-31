@@ -19,7 +19,7 @@ import { documentBadges } from './components/documentBadges';
 // Brand theme for the Studio UI. Uses Sanity's legacy theme builder which
 // maps a handful of CSS custom properties to the Studio's full internal design
 // system (it derives the complete light + dark palette from these inputs).
-// Bronze primary (#9C7661) matches reiddesignllc.com's primary action color.
+// Bronze primary (#9C7661) — update to match your brand's primary action color.
 //
 // The three "foundation" values do the heavy lifting: a warm near-black, a warm
 // white, and a warm taupe gray-base tint every neutral surface, border, and
@@ -69,7 +69,8 @@ const reidTheme = buildLegacyTheme(reidThemeProps);
 
 // Re-export so structure.ts can attach the iframe view to every singleton.
 export { Iframe };
-export const SITE_URL_FOR_PREVIEW = 'https://reid-design-site.nathanjnixon86.workers.dev';
+// Set this to your deployed Workers URL (e.g. 'https://my-project.workers.dev') after deploy.
+export const SITE_URL_FOR_PREVIEW = process.env.SANITY_STUDIO_PREVIEW_URL || 'http://localhost:4321';
 
 // Map doc _type → live-site path. Singletons get a fixed path; slug-based
 // docs build the path from the doc's slug. Returns null for types that have
@@ -115,11 +116,12 @@ export function urlForDoc(schemaType: string, doc: any): string | null {
 }
 
 export default defineConfig({
-  name: 'reid-design',
-  // Short title shown in the browser tab when editing.
-  title: 'Reid Design',
+  name: 'my-studio',
+  // Short title shown in the browser tab when editing. Update to match your project.
+  title: 'My Studio',
 
-  // Replace these after `sanity init` (or set via env at build time).
+  // Set SANITY_STUDIO_PROJECT_ID and SANITY_STUDIO_DATASET in studio/.env
+  // (or as env vars) after creating your Sanity project at sanity.io/manage.
   projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'placeholder-project-id',
   dataset: process.env.SANITY_STUDIO_DATASET || 'production',
 
