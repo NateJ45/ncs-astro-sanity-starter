@@ -105,6 +105,34 @@ orderableDocumentListDeskItem({
 Copy-Item -Recurse -Force modules/shop/src/* src/
 ```
 
+### Step 4b -- Add query functions to `src/lib/queries.ts`
+
+The shop page imports `getShopPage` from `@/lib/queries`. Add it before the press section:
+
+```ts
+// ---- Shop module ------------------------------------------------------------
+
+export async function getShopPage() {
+  return sanityFetch(`*[_type == "shopPage"][0]{
+    seoTitle, seoDescription,
+    seoImage${IMAGE_PROJECTION},
+    heroEyebrow, heroHeadline, heroSubhead,
+    heroImage${IMAGE_PROJECTION},
+    heroScriptAccent,
+    enabled,
+    disclosure,
+    intro,
+    "collections": collections[]->{
+      _id, title, description,
+      "items": *[_type == "shopItem" && collection._ref == ^._id] | order(orderRank asc){
+        _id, name, vendor, note, affiliateUrl,
+        image${IMAGE_PROJECTION}
+      }
+    }
+  }`, {}, null);
+}
+```
+
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
 
 Locate the `NAV_ITEMS` array (around line 112). Add the shop link, wrapped in

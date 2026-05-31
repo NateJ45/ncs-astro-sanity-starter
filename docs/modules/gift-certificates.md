@@ -69,6 +69,29 @@ singletonWithPreview(S, 'giftPage', 'Gift Certificates Page', CreditCardIcon),
 Copy-Item -Recurse -Force modules/gift-certificates/src/* src/
 ```
 
+### Step 4b -- Add query functions to `src/lib/queries.ts`
+
+The gift certificates page imports `getGiftPage` from `@/lib/queries`. Add it before the press section:
+
+```ts
+// ---- Gift Certificates module -----------------------------------------------
+
+export async function getGiftPage() {
+  return sanityFetch(`*[_type == "giftPage"][0]{
+    seoTitle, seoDescription,
+    seoImage${IMAGE_PROJECTION},
+    heroEyebrow, heroHeadline, heroSubhead,
+    heroImage${IMAGE_PROJECTION},
+    heroScriptAccent,
+    intro,
+    certificateOptions[]{title, amount, blurb},
+    howItWorksSteps[]{step, title, body},
+    finePrint,
+    ctaLabel
+  }`, {}, null);
+}
+```
+
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
 
 Locate the `NAV_ITEMS` array (around line 112). Add the gift certificates link wrapped in the `sectionVisibility` conditional:

@@ -92,6 +92,25 @@ orderableDocumentListDeskItem({
 Copy-Item -Recurse -Force modules/press/src/* src/
 ```
 
+### Step 4b -- Add query functions to `src/lib/queries.ts`
+
+The press page imports `getPressPage` from `@/lib/queries`. (`getPressItems` is already in the core starter.) Add `getPressPage` before the existing press items section:
+
+```ts
+// ---- Press module (page singleton) -----------------------------------------
+
+export async function getPressPage() {
+  return sanityFetch(`*[_type == "pressPage"][0]{
+    seoTitle, seoDescription,
+    seoImage${IMAGE_PROJECTION},
+    heroEyebrow, heroHeadline, heroSubhead,
+    heroImage${IMAGE_PROJECTION},
+    heroScriptAccent,
+    intro
+  }`, {}, null);
+}
+```
+
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
 
 Locate the `NAV_ITEMS` array (around line 112). Add the press link wrapped in the `sectionVisibility` conditional:

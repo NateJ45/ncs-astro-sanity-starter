@@ -69,6 +69,32 @@ singletonWithPreview(S, 'eDesignPage', 'E-Design Page', DesktopIcon),
 Copy-Item -Recurse -Force modules/e-design/src/* src/
 ```
 
+### Step 4b -- Add query functions to `src/lib/queries.ts`
+
+The e-design page imports `getEDesignPage` from `@/lib/queries`. Add it before the press section:
+
+```ts
+// ---- E-Design module --------------------------------------------------------
+
+export async function getEDesignPage() {
+  return sanityFetch(`*[_type == "eDesignPage"][0]{
+    seoTitle, seoDescription,
+    seoImage${IMAGE_PROJECTION},
+    heroEyebrow, heroHeadline, heroSubhead,
+    heroImage${IMAGE_PROJECTION},
+    heroScriptAccent,
+    intro,
+    howItWorksSteps[]{step, title, body},
+    deliverables,
+    pricingTiers[]{name, price, description, features, isFeatured, ctaLabel},
+    "faqs": faqRefs[]->{question, answer, category},
+    finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
+    finalCtaBackgroundImage${IMAGE_PROJECTION},
+    finalCta${CTA_PROJECTION}
+  }`, {}, null);
+}
+```
+
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
 
 Locate the `NAV_ITEMS` array (around line 112). Add the e-design link wrapped in the `sectionVisibility` conditional:

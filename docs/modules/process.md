@@ -92,6 +92,34 @@ orderableDocumentListDeskItem({
 Copy-Item -Recurse -Force modules/process/src/* src/
 ```
 
+### Step 4b -- Add query functions to `src/lib/queries.ts`
+
+The process page imports `getProcessPage` from `@/lib/queries`. Add it before the press section:
+
+```ts
+// ---- Process module ---------------------------------------------------------
+
+export async function getProcessPage() {
+  return sanityFetch(`*[_type == "processPage"][0]{
+    seoTitle, seoDescription,
+    seoImage${IMAGE_PROJECTION},
+    heroEyebrow, heroHeadline, heroSubhead,
+    heroImage${IMAGE_PROJECTION},
+    heroScriptAccent,
+    faqSectionEyebrow, faqSectionHeadline,
+    finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
+    finalCtaBackgroundImage${IMAGE_PROJECTION},
+    finalCta${CTA_PROJECTION},
+    "processSteps": *[_type == "processStep"] | order(orderRank asc, stepNumber asc){
+      stepNumber, title, timeEstimate, shortDescription, description, features, tierNote
+    },
+    "faqs": *[_type == "faqItem" && alsoShowOnProcessPage == true] | order(displayOrder asc){
+      question, answer, category, displayOrder
+    }
+  }`, {}, null);
+}
+```
+
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
 
 Locate the `NAV_ITEMS` array (around line 112). Add the process link after the Services entry:

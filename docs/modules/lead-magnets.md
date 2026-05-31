@@ -68,6 +68,44 @@ orderableDocumentListDeskItem({
 Copy-Item -Recurse -Force modules/lead-magnets/src/* src/
 ```
 
+### Step 4b -- Add query functions to `src/lib/queries.ts`
+
+The guides pages import `getLeadMagnets`, `getLeadMagnet`, and `getAllLeadMagnetSlugs` from `@/lib/queries`. Add them before the press section:
+
+```ts
+// ---- Lead Magnets module ----------------------------------------------------
+
+export async function getLeadMagnets() {
+  return sanityFetch(`*[_type == "leadMagnet" && published == true] | order(orderRank asc){
+    _id, title, "slug": slug.current, summary,
+    coverImage${IMAGE_PROJECTION}
+  }`, {}, []);
+}
+
+export async function getLeadMagnet(slug: string) {
+  return sanityFetch(
+    `*[_type == "leadMagnet" && slug.current == $slug][0]{
+      _id, title, slug, summary,
+      seoTitle, seoDescription,
+      coverImage${IMAGE_PROJECTION},
+      file{ asset->{ url } },
+      gateHeading, gateBlurb, buttonLabel, successMessage, espTag
+    }`,
+    { slug },
+    null,
+  );
+}
+
+export async function getAllLeadMagnetSlugs(): Promise<string[]> {
+  const list: Array<{ slug: { current: string } }> = await sanityFetch(
+    `*[_type == "leadMagnet" && published == true && defined(slug.current)]{ slug }`,
+    {},
+    [],
+  );
+  return list.map((m) => m.slug?.current).filter(Boolean);
+}
+```
+
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
 
 Locate the `NAV_ITEMS` array (around line 112). Add the guides link, wrapped

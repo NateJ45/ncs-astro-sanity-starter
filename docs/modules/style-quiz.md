@@ -17,6 +17,21 @@ considering the module live.
 Copy-Item modules/style-quiz/studio/*.ts studio/schemaTypes/
 ```
 
+> **Dependency:** The `styleQuiz` schema has a `routing.guideRef` field that
+> references the `leadMagnet` type. If the `lead-magnets` module is **not**
+> enabled, you must still copy its schema file so the Sanity schema extract
+> does not fail:
+>
+> ```powershell
+> Copy-Item modules/lead-magnets/studio/leadMagnet.ts studio/schemaTypes/
+> ```
+>
+> Then register it in `studio/schemaTypes/index.ts` (import + add to the array)
+> and add `'leadMagnet'` to `ORDERABLE_TYPES` in `studio/structure.ts`.
+> The `leadMagnet` type will be hidden from the desk (it floats into
+> `HIDDEN_FROM_DEFAULT` via `ORDERABLE_TYPES`) but the schema will resolve.
+> If `lead-magnets` is already enabled, no extra step is needed.
+
 ### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
 
 Add one import line and one array entry. Follow the existing grouping comments:
@@ -64,6 +79,37 @@ singletonWithPreview(S, 'styleQuiz', 'Style Quiz', SearchIcon),
 
 ```powershell
 Copy-Item -Recurse -Force modules/style-quiz/src/* src/
+```
+
+### Step 4b -- Add query functions to `src/lib/queries.ts`
+
+The quiz page imports `getStyleQuiz` from `@/lib/queries`. Add it before the press section:
+
+```ts
+// ---- Style Quiz module ------------------------------------------------------
+
+export async function getStyleQuiz() {
+  return sanityFetch(`*[_type == "styleQuiz"][0]{
+    seoTitle, seoDescription,
+    heroEyebrow, heroHeadline, heroSubhead,
+    heroScriptAccent,
+    questions[]{
+      _key, question, answers[]{_key, label, value, image${IMAGE_PROJECTION}}
+    },
+    qualifierQuestions[]{
+      _key, question, field, answers[]{_key, label, value}
+    },
+    archetypes[]{
+      _key, id, name, description,
+      images[]${IMAGE_PROJECTION},
+      ctaLabel, ctaHref,
+      secondaryCtaLabel, secondaryCtaHref
+    },
+    emailGateMode,
+    emailGateHeading, emailGateBlurb, emailGateButtonLabel,
+    emailGateSkipLabel
+  }`, {}, null);
+}
 ```
 
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
