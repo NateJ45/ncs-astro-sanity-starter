@@ -1,6 +1,6 @@
 ---
 // Safe to edit by hand for copy + structure changes.
-// Shop My Favorites page. Affiliate product links organized into collections.
+// Shop page. Affiliate product links organized into collections.
 //
 // FTC COMPLIANCE — non-negotiable, do not move or downplay:
 //   The affiliate disclosure text (shopPage.disclosure) is rendered in a
@@ -35,17 +35,17 @@ const [page, siteSettings] = await Promise.all([
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.shop) return Astro.redirect('/');
 
-const title       = page?.seoTitle       ?? 'Shop My Favorites · Reid Design';
-const description = page?.seoDescription ?? 'Staci\'s hand-picked home decor and furniture finds. Affiliate links, and she only shares things she would actually use.';
+const title       = page?.seoTitle       ?? 'Shop Favorites · Studio Starter';
+const description = page?.seoDescription ?? 'Hand-picked items the studio recommends. Some links are affiliate links.';
 
-const heroEyebrow  = page?.heroEyebrow  ?? 'Shop My Favorites.';
-const heroHeadline = page?.heroHeadline ?? 'Things Worth Having in Your Home.';
+const heroEyebrow  = page?.heroEyebrow  ?? 'Shop Favorites.';
+const heroHeadline = page?.heroHeadline ?? 'Things Worth Having.';
 const heroSubhead  = page?.heroSubhead  ?? '';
 
 // FTC disclosure: use Sanity content when present; always have a fallback so
 // the legal requirement is met even before the doc is published.
 const FTC_DISCLOSURE_FALLBACK =
-  "Some links on this page are affiliate links. If you purchase through a link, I may earn a small commission, at no extra cost to you. I only share things I would use or genuinely recommend.";
+  "Some links below are affiliate links. If you buy through them the studio may earn a small commission at no extra cost to you. We only share things we would genuinely recommend.";
 const disclosure = page?.disclosure ?? FTC_DISCLOSURE_FALLBACK;
 
 const collections = page?.collections ?? [];
@@ -83,7 +83,7 @@ const schemas = [
         <SectionHeading
           eyebrow="Coming Soon."
           headline="The shop is being refreshed."
-          subhead="Staci is curating a fresh set of favorites. Check back soon."
+          subhead="A fresh set of favorites is being curated. Check back soon."
           headingId="shop-disabled-heading"
           align="center"
           class="mx-auto"
@@ -137,8 +137,8 @@ const schemas = [
           <div class="mx-auto max-w-content px-m pt-section-md">
             <div class="max-w-2xl mx-auto text-center">
               <SectionHeading
-                eyebrow="Staci's Picks."
-                headline="Things She Actually Uses."
+                eyebrow="Studio Picks."
+                headline="Things We Actually Use."
                 headingId="shop-intro-heading"
                 align="center"
                 class="mx-auto"
@@ -161,7 +161,7 @@ const schemas = [
             <SectionHeading
               eyebrow="Coming Soon."
               headline="Picks are on the way."
-              subhead="Staci is putting together her favorites. Check back soon."
+              subhead="The studio is putting together its favorites. Check back soon."
               headingId="shop-empty-heading"
               align="center"
               class="mx-auto"

@@ -1,5 +1,5 @@
-// Shop collection groupings for the Shop My Favorites page.
-// Each collection is a named section (e.g. "Living Room Picks", "Paint Favorites")
+// Shop collection groupings for the shop page.
+// Each collection is a named section (e.g. "Workspace Picks", "Lighting Favorites")
 // that groups related shop items together.
 // Safe to edit by hand.
 
@@ -10,14 +10,14 @@ export const shopCollection = defineType({
   name: 'shopCollection',
   title: 'Shop Collection',
   type: 'document',
-  // Config / structural — not prose Staci writes, so exclude from Canvas.
+  // Config / structural — not editor prose, so exclude from Canvas.
   options: { canvasApp: { exclude: true } },
   fields: [
     defineField({
       name: 'title',
       title: 'Collection title',
       type: 'string',
-      description: 'Section heading shown on the /shop page. Example: "Living Room Picks" or "Paint Colors I Return to".',
+      description: 'Section heading shown on the /shop page. Example: "Workspace Picks" or "Everyday Carry".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({

@@ -1,4 +1,4 @@
-// Shop My Favorites page singleton. Controls the /shop page intro, FTC disclosure,
+// Shop page singleton. Controls the /shop page intro, FTC affiliate disclosure,
 // and which collections surface. One instance only; singleton enforcement in sanity.config.ts.
 // Safe to edit by hand.
 
@@ -89,7 +89,7 @@ export const shopPage = defineType({
       type: 'text',
       rows: 3,
       group: 'content',
-      description: 'Optional paragraph shown below the hero. Explain what the shop is and how Staci selects items.',
+      description: 'Optional paragraph shown below the hero. Explain what the shop is and how items are selected.',
     }),
     defineField({
       name: 'disclosure',
@@ -97,7 +97,7 @@ export const shopPage = defineType({
       type: 'text',
       rows: 3,
       group: 'content',
-      description: 'Required FTC affiliate disclosure. Shown prominently near the top of the page, above the first collection. Example: "Some links on this page are affiliate links. I earn a small commission if you purchase — at no extra cost to you. I only link things I\'d use or recommend."',
+      description: 'Required FTC affiliate disclosure. Shown prominently near the top of the page, above the first collection. Example: "Some links below are affiliate links. If you buy through them the studio may earn a small commission at no extra cost to you."',
       validation: (Rule) => Rule.required(),
     }),
     defineField({

@@ -10,14 +10,14 @@ export const shopItem = defineType({
   name: 'shopItem',
   title: 'Shop Item',
   type: 'document',
-  // Config / structural — not prose Staci writes, so exclude from Canvas.
+  // Config / structural — not editor prose, so exclude from Canvas.
   options: { canvasApp: { exclude: true } },
   fields: [
     defineField({
       name: 'title',
       title: 'Product name',
       type: 'string',
-      description: 'Name of the product. Example: "West Elm Rug — Heathered Basketweave, 8x10".',
+      description: 'Name of the product. Example: "Adjustable Desk Lamp" or "Ceramic Pour-Over Kit".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -31,7 +31,7 @@ export const shopItem = defineType({
           name: 'alt',
           title: 'Alt text',
           type: 'string',
-          description: 'Describe the product. Example: "Cream and gray woven rug with basketweave texture."',
+          description: 'Describe the product. Example: "Matte black adjustable arm lamp on a round weighted base."',
           validation: (R) => R.required(),
         }),
       ],
@@ -41,7 +41,7 @@ export const shopItem = defineType({
       name: 'vendor',
       title: 'Vendor / retailer',
       type: 'string',
-      description: 'Where the product is sold. Example: "West Elm" or "Amazon". Shown on the card.',
+      description: 'Where the product is sold. Example: "Amazon" or "Made In". Shown on the card.',
     }),
     defineField({
       name: 'affiliateUrl',
@@ -52,10 +52,10 @@ export const shopItem = defineType({
     }),
     defineField({
       name: 'note',
-      title: 'Staci note (optional)',
+      title: 'Studio note (optional)',
       type: 'text',
       rows: 2,
-      description: 'Optional short note from Staci about why she likes or recommends this item. Shown on the card.',
+      description: 'Optional short note about why this item is recommended. Shown on the card.',
     }),
     defineField({
       name: 'collection',
