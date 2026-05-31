@@ -6,20 +6,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-/* Cormorant Garamond — display serif. Only 400 + 600 are actually used:
-   400 for plain headlines, 600 for emphasized headlines. The 500 weight
-   was loaded but never selected anywhere, costing ~30 KB on every page
-   for no visual change. Drop it. Variable + latin subsets are pulled in
-   automatically by @fontsource. */
-@import "@fontsource/cormorant-garamond/400.css";
-@import "@fontsource/cormorant-garamond/600.css";
-@import "@fontsource-variable/source-sans-3";
-/* Pinyon Script — calligraphic single-weight script used for ONE accent
-   word per hero. Loaded after the primary fonts and with font-display:
-   swap (the @fontsource default) so it never blocks first paint. If a
-   hero has no scriptAccent, the file is fetched but doesn't render
-   anything — small price for the option. */
-@import "@fontsource/pinyon-script/400.css";
+@import "@fontsource/libre-baskerville/400.css";
+@import "@fontsource/libre-baskerville/700.css";
+@import "@fontsource-variable/inter";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -41,10 +30,10 @@
   --color-white-pure:   #FFFFFF;
 
   /* Fonts */
-  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  --font-body:    "Source Sans 3 Variable", "Helvetica Neue", system-ui, sans-serif;
+  --font-display: "Libre Baskerville", Georgia, "Times New Roman", serif;
+  --font-body:    "Inter Variable", system-ui, -apple-system, sans-serif;
   --font-mono:    ui-monospace, "SF Mono", Consolas, monospace;
-  --font-script:  "Pinyon Script", "Snell Roundhand", "Apple Chancery", cursive;
+  --font-script:  "Snell Roundhand", "Apple Chancery", cursive;
 
   /* Fluid heading sizes */
   --text-h6: 1rem;
@@ -174,13 +163,13 @@
   letter-spacing: var(--tracking-eyebrow);
 }
 
-/* Script accent — for ONE word per hero, paired with Cormorant. Pinyon
-   Script has a much smaller x-height than Cormorant, so we scale up to
-   ~1.25em to match visual weight and shift the baseline a touch so the
-   accent word sits in the same optical line as the rest of the headline.
-   `.font-script` swaps the font; the size + leading + baseline tweaks
-   live here so a single class swap produces the editorial signature
-   look without per-use fiddling. */
+/* Script accent (OPT-IN) — no script font is loaded by default; the accent
+   falls back to a system cursive (Snell Roundhand / Apple Chancery / cursive).
+   To enable an editorial script accent for a project: (1) add a @fontsource
+   import for your chosen calligraphic face (e.g. @fontsource/pinyon-script/400.css),
+   and (2) update --font-script in the @theme block to name that face first.
+   The size, leading, and baseline tweaks below remain the same regardless of
+   which typeface is loaded. */
 @utility font-script {
   font-family: var(--font-script);
   font-weight: 400;
@@ -615,7 +604,7 @@
   font-weight: 400;
 }
 
-/* ---- Blockquote -- 3px bronze left border, Cormorant italic. Replaces the
+/* ---- Blockquote -- 3px left border, display serif italic. Replaces the
    inline Tailwind classes previously on <blockquote> in JournalPortableText. ---- */
 .prose-blockquote {
   border-left: 3px solid var(--primary);
