@@ -35,7 +35,7 @@ const [page, siteSettings] = await Promise.all([
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.eDesign) return Astro.redirect('/');
 
-const title       = page?.seoTitle       ?? 'E-Design · Online Interior Design · Reid Design';
+const title       = page?.seoTitle       ?? 'E-Design · Online Interior Design';
 const description = page?.seoDescription ?? 'Professional interior design delivered remotely. Flat-fee pricing, digital mood boards, and a complete room plan, no travel required.';
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'Online Design.';
@@ -67,8 +67,8 @@ const CONTACT_HREF = '/contact?type=e-design';
   />
 
   {/* ======= COMING-SOON STATE ================================================
-      When Staci hasn't published the eDesignPage document yet, we render a
-      minimal holding page rather than a blank / broken page. The page still
+      When the eDesignPage document has not been published yet, we render a
+      minimal holding page rather than a blank / broken page. The page stays
       live in the nav so Google keeps crawling it; the copy sets expectations
       without making a false promise. */}
   {!page ? (
@@ -273,10 +273,10 @@ const CONTACT_HREF = '/contact?type=e-design';
   )}
 
   {/* ------- 7. Final CTA ---------------------------------------------------- */}
-  {/* The dark FinalCta panel closes the page. When the eDesignPage doc hasn't
+  {/* The dark FinalCta panel closes the page. When the eDesignPage doc has not
       been published yet, we render a fallback dark band that matches the same
       visual pattern (bronze stripe, Charcoal Dark bg, centered text + CTA).
-      Once Staci publishes the doc, the Sanity-driven copy takes over. */}
+      Once the doc is published, the Sanity-driven copy takes over. */}
   {page?.finalCta ? (
     <FinalCta
       eyebrow={page.finalCtaEyebrow}

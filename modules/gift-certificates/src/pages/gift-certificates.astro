@@ -31,8 +31,8 @@ const [page, siteSettings] = await Promise.all([
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.giftCertificates) return Astro.redirect('/');
 
-const title       = page?.seoTitle       ?? 'Gift Certificates · Reid Design';
-const description = page?.seoDescription ?? 'Give the gift of a beautifully designed room. Reid Design gift certificates available for in-home consultations and design packages.';
+const title       = page?.seoTitle       ?? 'Gift Certificates · Studio Starter';
+const description = page?.seoDescription ?? 'Give the gift of a beautifully designed room. Gift certificates available for consultations and design packages.';
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'Give the Gift of Good Design.';
 const heroHeadline = page?.heroHeadline ?? 'Gift Certificates for the Home They Deserve.';

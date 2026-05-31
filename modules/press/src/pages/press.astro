@@ -30,11 +30,11 @@ if (!visible.press) return Astro.redirect('/');
 
 const pressArr: any[] = Array.isArray(pressItems) ? pressItems : [];
 
-const title       = page?.seoTitle       ?? 'Press · Reid Design';
-const description = page?.seoDescription ?? 'Reid Design in the media: features, mentions, and coverage from publications across Indiana.';
+const title       = page?.seoTitle       ?? 'Press · Studio Starter';
+const description = page?.seoDescription ?? 'In the media: features, mentions, and coverage from publications.';
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'In the Press.';
-const heroHeadline = page?.heroHeadline ?? "Where Reid Design's work has been featured.";
+const heroHeadline = page?.heroHeadline ?? 'Where our work has been featured.';
 const heroSubhead  = page?.heroSubhead  ?? '';
 
 const schemas = [
@@ -111,7 +111,7 @@ function formatDate(d?: string): string {
                 </div>
 
                 {/* Pull quote from the article — in italics so it reads as
-                    quoted material, not Staci's own copy. */}
+                    quoted material, not the studio's own copy. */}
                 {item.quote && (
                   <blockquote class="mt-s font-display text-lg italic text-foreground/80 leading-relaxed border-l-2 border-primary pl-m">
                     {item.quote}

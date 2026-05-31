@@ -9,7 +9,7 @@ export const pressItem = defineType({
   name: 'pressItem',
   title: 'Press Item',
   type: 'document',
-  // Config / structural — not prose Staci writes, so exclude from Canvas.
+  // Config / structural — not editorial prose, so exclude from Canvas.
   options: { canvasApp: { exclude: true } },
   fields: [
     defineField({

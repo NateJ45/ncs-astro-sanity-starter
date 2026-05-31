@@ -9,7 +9,7 @@ export const pressPage = defineType({
   name: 'pressPage',
   title: 'Press Page',
   type: 'document',
-  // Configuration, not prose Staci writes — exclude from Canvas.
+  // Configuration, not editorial prose — exclude from Canvas.
   options: { canvasApp: { exclude: true } },
   groups: [
     { name: 'seo', title: 'SEO' },
