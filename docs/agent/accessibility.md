@@ -23,29 +23,28 @@ Target: WCAG 2.1 AA in both light and dark modes. Aim for 100 Lighthouse Accessi
 - Icon-only buttons and links require `aria-label`. SVG icons carry no accessible name on their own; the label lives on the wrapper.
 - Hover and focus states must not be color-only. Pair color changes with underline, motion, or icon swap.
 - Stick to native interactive elements (`<button>`, `<a>`, `<details>`, `<summary>`) whenever possible.
-- The before/after slider needs keyboard support: arrow keys move the divider, the handle is focusable, and the focus indicator is visible.
+- The before/after slider (if the portfolio module is active) needs keyboard support: arrow keys move the divider, the handle is focusable, and the focus indicator is visible.
 
 **Color tokens by responsibility** (definitions and contrast math in `globals.css`):
-- `--primary` (Warm Bronze): buttons, focus rings, CTA backgrounds at large size, **brand-stripe rhythm**. Paired with white foreground.
-- `--primary-dark` (Bronze Dark): hover state on bronze CTAs only — use `--link` for theme-aware always-on text.
-- `--link`: theme-aware bronze (Bronze Dark in light, lifted Bronze in dark). Use for inline links, anchor-style body text, ServiceCard prices, ProcessStep numerals, any always-on text that needs to read in both modes.
-- `--accent` (theme-aware via shadcn mapping): hover surfaces only — NOT body text. Light-mode value bumped to `#ECE5DB` (Warm Cream Dark, slightly darker than `--muted`) so `hover:bg-accent` on the header eyebrow strip is actually visible (when `--accent` matched `--muted`, hovers were invisible).
-- `--foreground` (Charcoal in light, Cream in dark): headings and body text.
-- `--secondary` (Warm Taupe): borders, dividers, decorative ornaments. **NOT eyebrow labels** — those use `text-foreground/65` (see Eyebrow contrast lesson above).
+- `--primary` (Slate/Ink): buttons, focus rings, CTA backgrounds at large size, brand-stripe rhythm. Paired with white or Paper foreground.
+- `--link`: theme-aware accent for inline links, anchor-style body text, price numerals, step numerals, any always-on text that needs to read in both modes.
+- `--accent` (theme-aware): hover surfaces only -- NOT body text. Light-mode value must be visibly darker than `--muted` so hover states are actually visible.
+- `--foreground` (Ink in light, Paper in dark): headings and body text.
+- `--secondary`: borders, dividers, decorative ornaments. NOT eyebrow labels (those use `text-foreground/65`).
 
-**Motion.** `globals.css` disables animations and transitions globally under `prefers-reduced-motion: reduce`, and Lenis smooth scroll becomes a no-op. The before/after slider falls back to a tap-to-toggle behavior. View Transitions become instant cross-fades. New animations inherit this; no per-component handling needed.
+**Motion.** `globals.css` disables animations and transitions globally under `prefers-reduced-motion: reduce`, and Lenis smooth scroll becomes a no-op. The before/after slider (if active) falls back to a tap-to-toggle behavior. View Transitions become instant cross-fades. New animations inherit this; no per-component handling needed.
 
-**Language and metadata.** `<html lang="en">` and the document `title` and `description` come from `BaseLayout`. Pass `title` and `description` through every page that uses the layout. The contactPage Calendly embed needs an `aria-label` on its iframe.
+**Language and metadata.** `<html lang="en">` and the document `title` and `description` come from `BaseLayout`. Pass `title` and `description` through every page that uses the layout. Any Calendly embed needs an `aria-label` on its iframe.
 
 ### Touch targets and tap spacing
 
-All interactive elements get at least a 44×44px hit area on mobile (WCAG 2.5.5 AAA, and table stakes on touch screens). For icon-only buttons, that means generous padding even if the icon glyph is 20px. For inline links in body copy, ensure adequate line-height so adjacent links aren't fat-finger collisions.
+All interactive elements get at least a 44x44 px hit area on mobile (WCAG 2.5.5 AAA, and table stakes on touch screens). For icon-only buttons, that means generous padding even if the icon glyph is 20 px. For inline links in body copy, ensure adequate line-height so adjacent links aren't fat-finger collisions.
 
-Adjacent independent controls (two side-by-side icon buttons, two stacked nav links) get at least 8px of clear space between them. The shadcn primitives generally handle this; verify any custom button or link adheres.
+Adjacent independent controls (two side-by-side icon buttons, two stacked nav links) get at least 8 px of clear space between them. The shadcn primitives generally handle this; verify any custom button or link adheres.
 
 ### Focus traps in modals and drawers
 
-The mobile nav uses shadcn Sheet (Radix Dialog under the hood) and gets focus trap for free. Same applies to any shadcn Dialog. Don't roll your own modal. If you build a custom overlay, you OWE: focus moves into the overlay on open, Tab cycles within the overlay, Escape closes, focus returns to the trigger on close. Test with keyboard before merging.
+The mobile nav uses shadcn Sheet (Radix Dialog under the hood) and gets focus trap for free. Same applies to any shadcn Dialog. Don't roll your own modal. If you build a custom overlay, you owe: focus moves into the overlay on open, Tab cycles within the overlay, Escape closes, focus returns to the trigger on close. Test with keyboard before merging.
 
 ### Screen reader pass
 
@@ -55,7 +54,7 @@ Lighthouse catches missing alt text and contrast but doesn't catch:
 - Form fields where the visible label is far from the input in the DOM
 - Live regions that announce too often (every keystroke) or not at all (silent state changes)
 
-Before launch and after any structural change, do one screen-reader pass with NVDA (Windows, free at nvaccess.org) or VoiceOver (Mac, built-in, Cmd+F5 to toggle). Close your eyes, move through the page with only the keyboard, listen. If you can complete: landing → understanding what Reid Design does → submitting the contact form, the page works. If you stumble, find the friction.
+Before launch and after any structural change, do one screen-reader pass with NVDA (Windows, free at nvaccess.org) or VoiceOver (Mac, built-in, Cmd+F5 to toggle). Close your eyes, move through the page with only the keyboard, listen. If you can complete: landing, understanding what the business does, and submitting the contact form, the page works. If you stumble, find the friction.
 
 ### Form error UX
 
@@ -69,9 +68,9 @@ When the contact form fails validation or submission:
 ### Animation discipline
 
 The site uses motion for hero entrances, View Transitions, and component micro-interactions. Discipline:
-- **Durations:** 150–300ms for state changes (hover, focus), 400–600ms for content reveals, never longer than 800ms for a single animation. Long animations feel laggy.
+- **Durations:** 150-300ms for state changes (hover, focus), 400-600ms for content reveals, never longer than 800ms for a single animation. Long animations feel laggy.
 - **Easing:** `ease-out` for entrances, `ease-in` for exits. Avoid spring physics for primary content at large scales (disorienting).
-- **What to animate:** opacity, transform (translate/scale). NOT layout properties (width, height, top) — expensive and janky.
+- **What to animate:** opacity, transform (translate/scale). NOT layout properties (width, height, top) -- expensive and janky.
 - **Reduced motion:** the global stylesheet kills animations and transitions under `prefers-reduced-motion: reduce`, and Lenis becomes a no-op. New components inherit this; verify by toggling the OS setting and reloading.
 - **Don't animate to grab attention.** If users need to look at something, the design should pull the eye structurally, not by wiggling.
 

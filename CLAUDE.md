@@ -224,6 +224,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Page + section architecture, nav, visibility toggles | `docs/agent/page-architecture.md` |
 | Brand colors + theme system (light/dark discipline) | `docs/agent/theme-and-color.md` |
 | Polish layer (brand stripe, card-lift, scroll, Lenis, script accents) | `docs/agent/polish-layer.md` |
+| Animation layer (Lenis, motion, scroll-reveal, script accent) | `docs/agent/animation.md` |
 | Typography + spacing tokens | `docs/agent/design-tokens.md` |
 | Component catalog + long-read layout | `docs/agent/components.md` |
 | Error + empty states | `docs/agent/error-states.md` |
@@ -233,11 +234,10 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Performance budgets + Lighthouse | `docs/agent/performance.md` |
 | Content data + Sanity integration | `docs/agent/sanity.md` |
 | Deployment + env vars + rebuild model | `docs/agent/deployment.md` |
-| Pre-launch setup checklist | `docs/agent/setup-checklist.md` |
 | Editor-driven vs hardcoded | `docs/agent/editor-vs-hardcoded.md` |
 | Change history | `docs/agent/changelog.md` |
-| New-project setup (forthcoming) | `docs/bootstrap/NEW-PROJECT.md` |
-| Module docs (forthcoming) | `docs/modules/<module-name>.md` |
+| New-project setup runbook + pre-launch checklist (forthcoming) | `docs/bootstrap/NEW-PROJECT.md`, `docs/bootstrap/setup-checklist.md` |
+| Per-module enable guides (forthcoming) | `docs/modules/<module-name>.md` |
 
 ---
 
