@@ -1,70 +1,45 @@
-# Reid Design LLC — Site
+# ncs-astro-sanity-starter
 
-Astro + Sanity + Cloudflare Workers marketing site for Reid Design LLC, a Plainfield, Indiana interior design studio run by Staci Perkins.
+A reusable starter for building small-business marketing sites on Astro + Sanity + Cloudflare Workers. The infrastructure is already standing: theme system, SEO, animation/polish layer, forms plumbing, image handling, a typed Sanity layer, and an in-Studio editor guide. A new project pours in two things, its business info and its design, and the rest is in place.
 
-Full architecture reference: `CLAUDE.md`. Operational playbook: `OPERATIONS.md`. Migration planning docs: `migration-docs/`.
+Provenance: forked and genericized from a finished client build.
 
 ---
 
 ## Stack
 
 - **Astro 6** (static output) + TypeScript strict mode
-- **Sanity v5** headless CMS (schemas in `studio/schemaTypes/`, Studio at `studio.reiddesignllc.com`)
+- **Sanity v5** headless CMS (core schemas in `studio/schemaTypes/`)
 - **Tailwind 4** via `@tailwindcss/vite` (brand tokens in `src/styles/globals.css`, no `tailwind.config`)
-- **React 19** islands for interactive components (nav drawer, contact form, quiz, calculator, galleries)
-- **Cloudflare Workers** for hosting via `wrangler deploy`; GitHub pushes to `main` auto-deploy via Cloudflare's CI
+- **React 19** islands for interactivity; Astro components for everything static
+- **shadcn/ui** primitives (`src/components/ui/`)
+- **Cloudflare Workers** for hosting via `wrangler deploy`
 
 ---
 
-## Pages
+## Core routes
+
+The starter ships a lean core. Additional surfaces come from opt-in modules (see below).
 
 | Route | Description |
 |---|---|
 | `/` | Home |
-| `/about` | About Staci |
-| `/process` | How it works |
-| `/services` | Service tiers and pricing |
+| `/about` | About |
+| `/services` | Services |
 | `/faq` | FAQ grouped by category |
-| `/contact` | Contact form + Calendly embed |
-| `/portfolio` | Project grid with Room x Style filter chips |
-| `/portfolio/[slug]` | Project detail (before/after slider, gallery, TOC, featured-in-journal) |
-| `/portfolio/before-after` | All projects with before/after pairs |
-| `/journal` | Blog/journal index |
+| `/contact` | Contact form + scheduling embed |
+| `/journal` | Journal/blog index |
 | `/journal/[slug]` | Journal post detail |
-| `/e-design` | Productized E-Design offering |
-| `/shop` | Affiliate "Shop My Favorites" (FTC disclosure) |
-| `/gift-certificates` | Gift certificate info |
-| `/quiz` | Multi-step style archetype quiz |
-| `/calculator` | Budget estimate calculator |
-| `/resources` | Resources hub (links to tools, guides, FAQ, journal) |
-| `/guides` | Lead-magnet index |
-| `/guides/[slug]` | Lead-magnet landing + gated download |
-| `/press` | Press coverage + logo strip |
 | `/privacy` | Privacy policy |
 | `/404` | Custom 404 |
 
+The home, about, and footer include Featured Work, Process, and Press sections that stay hidden until their module is enabled and has content (graceful degradation).
+
 ---
 
-## Features
+## Modules (opt-in, staged under `modules/`, OFF by default)
 
-- All content editable in Sanity Studio by Staci, including an editable in-Studio "Start Here" guide and business notes (`studioGuide` + `studioNotes` singletons; Brand Kit stays code-driven)
-- Grouped dropdown nav: Services (Services, E-Design, Process, Gift Certificates) and Resources (Style Quiz, Cost Calculator, Guides, FAQ, Journal)
-- Email capture: newsletter signup, lead-magnet gated downloads, style quiz email gate, budget calculator optional email
-- Contact form via Web3Forms with autoresponder, post-inquiry roadmap, Calendly embed
-- Affiliate shop with FTC disclosure
-- Press strip ("As Seen In") on home, about, and press pages
-- Before/after slider on project pages and `/portfolio/before-after`
-- Full-viewport home hero with a soft pulsing scroll cue
-- Phone number and availability status surfaced site-wide from Sanity (tap-to-call in the header, footer, mobile menu, and contact page)
-- Project pages auto-surface journal posts that reference them ("Featured in the journal")
-- About page "off the clock" personal section (currently reading/listening, rapid-fire Q&A, favorite local spots, beyond design), each module self-hiding when empty
-- Style quiz with archetype results and service recommendations
-- Budget calculator with room/scope/add-on estimate ranges
-- Pinyon Script section-heading accents, editor-controlled via Sanity
-- Three-state dark/light/system theme toggle (no FOUC)
-- Cloudflare Web Analytics (cookieless, no consent banner needed)
-- `robots.txt` (allow-all + sitemap) and `llms.txt` (AI crawler index) in `public/`
-- `@astrojs/sitemap` auto-generates sitemap for all routes
+`portfolio`, `process`, `newsletter`, `lead-magnets`, `style-quiz`, `budget-calculator`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`. Each is self-contained (schema + pages + islands + seed). Per-module enable guides land in `docs/modules/` (authored in a later phase). `portfolio` + `process` together are the informal creative-studio pair.
 
 ---
 
@@ -72,30 +47,33 @@ Full architecture reference: `CLAUDE.md`. Operational playbook: `OPERATIONS.md`.
 
 ```bash
 npm install
+npm --prefix studio install
 npm run dev          # Astro dev server at localhost:4321
 npm run studio:dev   # Sanity Studio at localhost:3333
 ```
 
-Copy `.env.example` to `.env` and fill in Sanity + Web3Forms + Cloudflare values.
+The build works with no Sanity project configured: `src/lib/sanity.ts`'s `sanityFetch` wrapper returns empty results when `PUBLIC_SANITY_PROJECT_ID` is unset, so pages render their empty-state fallbacks. Copy `.env.example` to `.env` and set the Sanity values to connect a project.
+
+---
+
+## Re-skinning a new project (the design seam)
+
+Editing this short list rebrands the whole site:
+
+- `src/styles/globals.css` — the `@theme` palette tokens and `:root`/`.dark` (and `--tint-rgb`)
+- fonts — the `@fontsource` imports + the `--font-*` tokens (default: Libre Baskerville + Inter; the script accent is opt-in)
+- `src/data/site.ts` — identity constants
+- logo / favicon / OG inputs, then `npm run og`
+
+The full step-by-step adoption runbook lands at `docs/bootstrap/NEW-PROJECT.md` (authored in a later phase).
 
 ---
 
 ## Deploy
-
-Auto-deploy: push to `main`. Cloudflare builds and deploys in ~1-2 minutes.
-
-Manual deploy:
 
 ```bash
 npm run build
 npm run deploy   # = wrangler deploy
 ```
 
-After any Sanity schema change, also run:
-
-```bash
-npm run typegen        # regenerate src/lib/sanity.types.ts
-npm run studio:deploy  # push updated schema to hosted Studio
-```
-
-See `OPERATIONS.md` for the full playbook including the before-DNS-cutover checklist.
+After any Sanity schema change, also run `npm run typegen` then `npm run studio:deploy`. See `CLAUDE.md` for the conventions and the gotchas that bite, and `OPERATIONS.md` for the tactical playbook.

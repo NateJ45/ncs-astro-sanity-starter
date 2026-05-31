@@ -121,9 +121,9 @@ function singletonWithPreview(
 
 export const deskStructure = (S: StructureBuilder, context: StructureResolverContext) =>
   S.list()
-    .title('Reid Design')
+    .title('Studio Starter')
     .items([
-      // Start Here — three-panel handbook for Staci. First item so it is always visible.
+      // Start Here — three-panel handbook for the editor. First item so it is always visible.
       // Panel 1: how the Studio works and step-by-step how-tos (static).
       // Panel 2: live business overview (services + site settings fetched from Sanity).
       // Panel 3: brand kit — colors + fonts for Canva (static).
@@ -238,7 +238,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
 
       S.divider(),
 
-      // Journal — its own section so Staci can find posts + categories at a glance
+      // Journal — its own section so the editor can find posts + categories at a glance
       S.listItem()
         .title('Journal')
         .icon(BookIcon)
