@@ -57,7 +57,7 @@ export const notFoundPage = defineType({
       title: 'Photo',
       type: 'image',
       group: 'content',
-      description: 'Image shown to the right of the text (stacks above on mobile). On-brand vignette grounds the page as Reid Design.',
+      description: 'Image shown to the right of the text (stacks above on mobile). On-brand vignette that grounds the page in the studio identity.',
       options: { hotspot: true },
       fields: [
         defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),

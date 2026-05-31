@@ -76,9 +76,9 @@ const googleBusinessUrl = siteSettings?.googleBusinessUrl;
 const reviewsNote       = siteSettings?.reviewsNote;
 
 // Section copy fallbacks (lock the home page in even before all Sanity copy lands).
-const meetStaciEyebrow  = page?.meetStaciEyebrow  ?? "The Designer.";
-const meetStaciHeadline = page?.meetStaciHeadline ?? "Hi, I’m [Your Name].";
-const meetStaciContent  = page?.meetStaciContent  ?? null;
+const meetFounderEyebrow  = page?.meetFounderEyebrow  ?? "The Designer.";
+const meetFounderHeadline = page?.meetFounderHeadline ?? "Hi, I’m [Your Name].";
+const meetFounderContent  = page?.meetFounderContent  ?? null;
 
 const processPreviewEyebrow  = page?.processPreviewEyebrow  ?? 'How It Works.';
 const processPreviewHeadline = page?.processPreviewHeadline ?? 'A clear path from first conversation to final reveal.';
@@ -142,10 +142,10 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
   {/* ------- 2. Meet the Designer -------------------------------------------- */}
   <section
     class="bg-background"
-    aria-labelledby="meet-staci-heading"
+    aria-labelledby="meet-founder-heading"
   >
     <div data-reveal class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-2 gap-l md:gap-section-md items-center">
-      {page?.meetStaciPhoto?.asset ? (
+      {page?.meetFounderPhoto?.asset ? (
         <div class="order-1 md:order-1">
           {/* width=800 caps the responsive ladder at 800w — the column
               never exceeds ~648 px (45vw of a 1440 px viewport) and
@@ -153,7 +153,7 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
               900 px cap was triggering Lighthouse's "image larger than
               displayed" warning by ~112 KB on the designer photo. */}
           <SanityImage
-            source={page.meetStaciPhoto}
+            source={page.meetFounderPhoto}
             width={800}
             sizes="(min-width: 768px) 45vw, 100vw"
             quality={75}
@@ -165,13 +165,13 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
       )}
 
       <div class="order-2 md:order-2">
-        <p class="text-xs uppercase tracking-[0.22em] text-foreground/80 mb-s">{meetStaciEyebrow}</p>
-        <h2 id="meet-staci-heading" class="font-display text-h2 text-foreground">
-          {meetStaciHeadline}
+        <p class="text-xs uppercase tracking-[0.22em] text-foreground/80 mb-s">{meetFounderEyebrow}</p>
+        <h2 id="meet-founder-heading" class="font-display text-h2 text-foreground">
+          {meetFounderHeadline}
         </h2>
-        {meetStaciContent ? (
+        {meetFounderContent ? (
           <PortableText
-            value={meetStaciContent}
+            value={meetFounderContent}
             className="mt-m text-foreground/85 text-lg leading-relaxed"
           />
         ) : (
@@ -182,7 +182,7 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
         )}
         <div class="mt-l flex justify-center md:justify-start">
           <CtaLink
-            cta={page?.meetStaciCta}
+            cta={page?.meetFounderCta}
             variant="secondary"
             fallbackHref="/about"
             fallbackLabel="Get to Know Me"

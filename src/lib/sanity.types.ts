@@ -864,7 +864,7 @@ export type AboutPage = {
     _type: "block";
     _key: string;
   }>;
-  staciPhoto?: {
+  founderPhoto?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
@@ -872,7 +872,7 @@ export type AboutPage = {
     alt?: string;
     _type: "image";
   };
-  staciAttribution?: string;
+  founderAttribution?: string;
   backgroundLine?: string;
   serviceAreaMention?: string;
   philosophyEyebrow?: string;
@@ -975,7 +975,7 @@ export type HomePage = {
   heroSecondaryCta?: CtaBlock;
   heroRotatingWords?: Array<string>;
   heroScriptAccent?: string;
-  meetStaciPhoto?: {
+  meetFounderPhoto?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
     hotspot?: SanityImageHotspot;
@@ -983,9 +983,9 @@ export type HomePage = {
     alt?: string;
     _type: "image";
   };
-  meetStaciEyebrow?: string;
-  meetStaciHeadline?: string;
-  meetStaciContent?: Array<{
+  meetFounderEyebrow?: string;
+  meetFounderHeadline?: string;
+  meetFounderContent?: Array<{
     children?: Array<{
       marks?: Array<string>;
       text?: string;
@@ -999,7 +999,7 @@ export type HomePage = {
     _type: "block";
     _key: string;
   }>;
-  meetStaciCta?: CtaBlock;
+  meetFounderCta?: CtaBlock;
   featuredWorkEyebrow?: string;
   featuredWorkHeadline?: string;
   featuredWorkSubhead?: string;

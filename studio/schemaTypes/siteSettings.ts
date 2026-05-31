@@ -22,7 +22,7 @@ export const siteSettings = defineType({
       title: 'Site title',
       type: 'string',
       description: 'Used in the browser tab and search results.',
-      initialValue: 'Reid Design LLC',
+      initialValue: 'Studio Name',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -203,7 +203,7 @@ export const siteSettings = defineType({
       title: 'Google Business Profile URL',
       type: 'url',
       description:
-        'Link to the Reid Design Google Business listing. When set, a "Read more on Google" link appears in the testimonials section.',
+        'Link to the studio\'s Google Business listing. When set, a "Read more on Google" link appears in the testimonials section.',
     }),
     defineField({
       name: 'reviewsNote',
@@ -217,7 +217,7 @@ export const siteSettings = defineType({
     // Controls which optional sections appear on the live site.
     // IMPORTANT: an unset field (undefined/null) counts as VISIBLE — only an
     // explicit `false` hides a section. This means the existing live site is
-    // completely unaffected until Staci intentionally turns something off.
+    // completely unaffected until an editor intentionally turns something off.
     defineField({
       name: 'sectionVisibility',
       title: 'Section visibility',

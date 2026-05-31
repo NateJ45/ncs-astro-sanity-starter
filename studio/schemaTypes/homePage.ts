@@ -1,4 +1,4 @@
-// Home page singleton. Content for hero, Meet Staci, process preview,
+// Home page singleton. Content for hero, Meet the Founder, process preview,
 // testimonials, services grid, service-area cue, and final CTA.
 // Services and process steps auto-populate from their collections.
 
@@ -13,7 +13,7 @@ export const homePage = defineType({
   groups: [
     { name: 'seo', title: 'SEO' },
     { name: 'hero', title: 'Hero' },
-    { name: 'meetStaci', title: 'Meet Staci' },
+    { name: 'meetFounder', title: 'Meet the Founder' },
     { name: 'featuredWork', title: 'Featured Work' },
     { name: 'featuredJournal', title: 'Featured Journal' },
     { name: 'process', title: 'Process preview' },
@@ -110,24 +110,24 @@ export const homePage = defineType({
         'A single word from the headline to render in handwritten Pinyon Script for editorial flourish. Must match the word exactly (case-sensitive). The first occurrence wins. Leave blank to skip. Note: when "rotating words" is also set, the rotation wins and this is ignored.',
     }),
 
-    // Meet Staci
+    // Meet the Founder
     defineField({
-      name: 'meetStaciPhoto',
-      title: 'Staci photo',
+      name: 'meetFounderPhoto',
+      title: 'Founder photo',
       type: 'image',
-      group: 'meetStaci',
+      group: 'meetFounder',
       options: { hotspot: true },
       fields: [
         defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),
       ],
     }),
-    defineField({ name: 'meetStaciEyebrow', title: 'Eyebrow', type: 'string', group: 'meetStaci', initialValue: 'Meet Staci.' }),
-    defineField({ name: 'meetStaciHeadline', title: 'Headline', type: 'string', group: 'meetStaci' }),
+    defineField({ name: 'meetFounderEyebrow', title: 'Eyebrow', type: 'string', group: 'meetFounder', initialValue: 'Meet the Founder.' }),
+    defineField({ name: 'meetFounderHeadline', title: 'Headline', type: 'string', group: 'meetFounder' }),
     defineField({
-      name: 'meetStaciContent',
+      name: 'meetFounderContent',
       title: 'Intro content',
       type: 'array',
-      group: 'meetStaci',
+      group: 'meetFounder',
       of: [
         defineArrayMember({
           type: 'block',
@@ -142,7 +142,7 @@ export const homePage = defineType({
         }),
       ],
     }),
-    defineField({ name: 'meetStaciCta', title: '"Get to Know Me" CTA', type: 'ctaBlock', group: 'meetStaci' }),
+    defineField({ name: 'meetFounderCta', title: '"Learn About the Founder" CTA', type: 'ctaBlock', group: 'meetFounder' }),
 
     // Featured Work (auto-populates with featured-then-newest projects from the Project collection)
     defineField({
@@ -199,7 +199,7 @@ export const homePage = defineType({
       rows: 3,
       group: 'featuredJournal',
       description:
-        'Conversion-oriented paragraph under the headline. Hint at the kinds of posts Staci writes — project walkthroughs, source roundups, design moves — so the section reads as the thinking behind every consultation, not just a blog.',
+        'Conversion-oriented paragraph under the headline. Hint at the kinds of posts the founder writes — project walkthroughs, source roundups, design moves — so the section reads as the thinking behind every consultation, not just a blog.',
       initialValue:
         'Posts on the design moves that change a room, source roundups behind specific projects, and the occasional honest note about what I would do differently. The thinking that informs every consultation.',
     }),
@@ -268,11 +268,11 @@ export const homePage = defineType({
       title: 'Attribution line',
       type: 'string',
       group: 'testimonials',
-      description: 'Optional line under the testimonials grid. Example: "From Reid Design\'s Facebook recommendations."',
+      description: 'Optional line under the testimonials grid. Example: "From the studio\'s Facebook recommendations."',
     }),
 
     // Services grid
-    defineField({ name: 'servicesGridEyebrow', title: 'Eyebrow', type: 'string', group: 'services', initialValue: 'Reid Design.' }),
+    defineField({ name: 'servicesGridEyebrow', title: 'Eyebrow', type: 'string', group: 'services', initialValue: 'The Studio.' }),
     defineField({ name: 'servicesGridHeadline', title: 'Headline', type: 'string', group: 'services' }),
     defineField({
       name: 'servicesGridScriptAccent',

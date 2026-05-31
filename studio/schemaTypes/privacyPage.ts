@@ -1,5 +1,5 @@
 // Privacy policy page singleton. Route: /privacy.
-// Portable Text body + last-updated date, editable by Staci.
+// Portable Text body + last-updated date, editable by the site editor.
 // One instance only; singleton enforcement in sanity.config.ts.
 // Safe to edit by hand.
 
@@ -9,7 +9,7 @@ export const privacyPage = defineType({
   name: 'privacyPage',
   title: 'Privacy Policy Page',
   type: 'document',
-  // Configuration, not prose Staci writes — exclude from Canvas.
+  // Configuration, not prose the editor writes — exclude from Canvas.
   options: { canvasApp: { exclude: true } },
   groups: [
     { name: 'seo', title: 'SEO' },
@@ -53,7 +53,7 @@ export const privacyPage = defineType({
       title: 'Hero eyebrow',
       type: 'string',
       group: 'hero',
-      initialValue: 'Reid Design LLC.',
+      initialValue: 'Studio Name.',
     }),
     defineField({
       name: 'heroHeadline',

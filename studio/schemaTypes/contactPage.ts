@@ -170,7 +170,7 @@ export const contactPage = defineType({
               name: 'title',
               title: 'Step title',
               type: 'string',
-              description: 'Short heading for this step. Example: "Staci reviews your inquiry within 48 hours."',
+              description: 'Short heading for this step. Example: "We review your inquiry within 48 hours."',
               validation: (Rule) => Rule.required(),
             }),
             defineField({

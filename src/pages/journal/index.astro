@@ -36,8 +36,8 @@ const [page, entries, categories, siteSettings] = await Promise.all([
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.journal) return Astro.redirect('/');
 
-const title       = page?.seoTitle       ?? 'Journal · Reid Design';
-const description = page?.seoDescription ?? 'Notes from a Plainfield interior designer — project walkthroughs, style thinking, and the occasional opinion.';
+const title       = page?.seoTitle       ?? 'Journal · Studio Starter';
+const description = page?.seoDescription ?? 'Notes from the studio — project walkthroughs, style thinking, and the occasional opinion.';
 
 const heroEyebrow  = page?.heroEyebrow  ?? 'The Journal.';
 const heroHeadline = page?.heroHeadline ?? 'Notes from the studio.';

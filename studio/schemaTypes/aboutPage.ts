@@ -71,7 +71,7 @@ export const aboutPage = defineType({
     }),
 
     defineField({ name: 'storyEyebrow', title: 'Story eyebrow', type: 'string', group: 'story', initialValue: 'My Story.' }),
-    defineField({ name: 'storyHeadline', title: 'Story headline', type: 'string', group: 'story', initialValue: 'Why I Started Reid Design.' }),
+    defineField({ name: 'storyHeadline', title: 'Story headline', type: 'string', group: 'story', initialValue: 'Why I Started This Studio.' }),
     defineField({
       name: 'storyContent',
       title: 'Story content',
@@ -92,8 +92,8 @@ export const aboutPage = defineType({
       ],
     }),
     defineField({
-      name: 'staciPhoto',
-      title: 'Staci portrait',
+      name: 'founderPhoto',
+      title: 'Founder portrait',
       type: 'image',
       group: 'story',
       options: { hotspot: true },
@@ -102,11 +102,11 @@ export const aboutPage = defineType({
       ],
     }),
     defineField({
-      name: 'staciAttribution',
+      name: 'founderAttribution',
       title: 'Attribution',
       type: 'string',
       group: 'story',
-      initialValue: 'Staci Perkins · Founder, Reid Design LLC.',
+      initialValue: 'Your Name · Founder, Studio Name',
     }),
     defineField({
       name: 'backgroundLine',

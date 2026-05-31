@@ -81,9 +81,9 @@ const schemas = [
   >
     <div class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-[1fr_1.2fr] gap-l md:gap-section-md items-start">
       <div class="md:sticky md:top-section-lg">
-        {page?.staciPhoto?.asset ? (
+        {page?.founderPhoto?.asset ? (
           <SanityImage
-            source={page.staciPhoto}
+            source={page.founderPhoto}
             width={900}
             sizes="(min-width: 768px) 40vw, 100vw"
             quality={75}
@@ -92,9 +92,9 @@ const schemas = [
         ) : (
           <div class="aspect-[4/5] bg-muted rounded-md" aria-hidden="true"></div>
         )}
-        {page?.staciAttribution && (
+        {page?.founderAttribution && (
           <p class="mt-s text-xs uppercase tracking-widest text-foreground/80">
-            {page.staciAttribution}
+            {page.founderAttribution}
           </p>
         )}
       </div>

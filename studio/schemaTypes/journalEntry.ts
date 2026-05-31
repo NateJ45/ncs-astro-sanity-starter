@@ -1,4 +1,4 @@
-// Journal/blog post. Designed to handle every kind of post Staci might write:
+// Journal/blog post. Designed to handle every kind of post the founder might write:
 // project walkthroughs, style guides, behind-the-scenes, source roundups,
 // process explainers, opinion pieces, announcements. The body field accepts
 // rich Portable Text plus seven custom inline blocks (pullQuote, beforeAfter,
@@ -6,7 +6,7 @@
 // JournalPortableText renderer styles to brand.
 //
 // Editor experience: groups split fields into Meta / Content / SEO / Related so
-// the form isn't a wall. The body field is the only one Staci touches for the
+// the form isn't a wall. The body field is the only one the editor touches for the
 // actual post copy; everything else is metadata.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
@@ -90,9 +90,9 @@ export const journalEntry = defineType({
       name: 'author',
       title: 'Author',
       type: 'string',
-      description: 'Byline. Defaults to Staci. Change if a guest writes a post.',
+      description: 'Byline. Defaults to the founder. Change if a guest writes a post.',
       group: 'meta',
-      initialValue: 'Staci Perkins',
+      initialValue: 'Your Name',
     }),
     defineField({
       name: 'publishedAt',
