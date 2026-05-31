@@ -10,7 +10,7 @@
 
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains
-  Content-Security-Policy: frame-ancestors 'self' https://reid-design.sanity.studio https://*.sanity.studio https://www.sanity.io https://*.sanity.io http://localhost:3333 http://localhost:3334
+  Content-Security-Policy: frame-ancestors 'self' https://your-project.sanity.studio https://*.sanity.studio https://www.sanity.io https://*.sanity.io http://localhost:3333 http://localhost:3334
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Cross-Origin-Opener-Policy: same-origin

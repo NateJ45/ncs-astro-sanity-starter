@@ -1,29 +1,29 @@
-# Reid Design LLC
+# Studio Starter
 
-> Reid Design LLC is a residential interior design studio in Plainfield, Indiana, run by Staci Perkins. It serves homeowners in Plainfield, Indianapolis, and the surrounding suburbs (Carmel, Fishers, Westfield, Zionsville, Noblesville) with warm, livable, mid-market design. Services run from a $150 in-home consultation up to full room design, styling, shopping and sourcing, and online E-Design. Pricing is shown openly on the site.
+> Studio Starter is a starter site built on Astro + Sanity. It serves as a neutral template for building content-managed websites with Astro, Sanity CMS, and Cloudflare Workers. Replace this description with your own business details.
 
 ## Key pages
-- [Services and pricing](https://reiddesignllc.com/services/): Every service tier and what it costs
-- [Process](https://reiddesignllc.com/process/): How a project works from first call to final reveal
-- [Portfolio](https://reiddesignllc.com/portfolio/): Recent room projects across the Indianapolis suburbs
-- [E-Design](https://reiddesignllc.com/e-design/): Online room design delivered digitally, for clients anywhere
-- [About](https://reiddesignllc.com/about/): Staci Perkins's story and design philosophy
-- [FAQ](https://reiddesignllc.com/faq/): Common questions about working together
-- [Contact](https://reiddesignllc.com/contact/): How to book a consultation
-- [Gift certificates](https://reiddesignllc.com/gift-certificates/): Give Reid Design's help as a gift
+- [Services and pricing](https://example.com/services/): Every service tier and what it costs
+- [Process](https://example.com/process/): How a project works from first call to final reveal
+- [Portfolio](https://example.com/portfolio/): Recent projects
+- [E-Design](https://example.com/e-design/): Online offering delivered digitally, for clients anywhere
+- [About](https://example.com/about/): The studio's story and philosophy
+- [FAQ](https://example.com/faq/): Common questions about working together
+- [Contact](https://example.com/contact/): How to book a consultation
+- [Gift certificates](https://example.com/gift-certificates/): Give the studio's help as a gift
 
 ## Tools and resources
-- [Style quiz](https://reiddesignllc.com/quiz/): A short quiz that suggests a design direction
-- [Budget calculator](https://reiddesignllc.com/calculator/): A rough furnishing-budget range for a room
-- [Free guides](https://reiddesignllc.com/guides/): Downloadable design guides
-- [Resources](https://reiddesignllc.com/resources/): Tools and recommendations Staci shares with clients
-- [Journal](https://reiddesignllc.com/journal/): Articles on design decisions and real project sources
-- [Shop my favorites](https://reiddesignllc.com/shop/): Pieces and sources Staci recommends
-- [Press](https://reiddesignllc.com/press/): Where Reid Design has been featured
+- [Style quiz](https://example.com/quiz/): A short quiz that suggests a direction
+- [Budget calculator](https://example.com/calculator/): A rough budget range for a project
+- [Free guides](https://example.com/guides/): Downloadable guides
+- [Resources](https://example.com/resources/): Tools and recommendations
+- [Journal](https://example.com/journal/): Articles and project notes
+- [Shop my favorites](https://example.com/shop/): Recommended pieces and sources
+- [Press](https://example.com/press/): Where the studio has been featured
 
 ## Contact
-- Email: owner@example.com
-- Location: Plainfield, Indiana, serving Greater Indianapolis
+- Email: hello@example.com
+- Location: Your City
 
 ## Optional
-- [Privacy policy](https://reiddesignllc.com/privacy/): How the site handles your information
+- [Privacy policy](https://example.com/privacy/): How the site handles your information
