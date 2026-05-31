@@ -267,38 +267,40 @@ const featuredJournalEntries  = page?.featuredJournalEntries  ?? [];
   )}
 
   {/* ------- 5. How It Works (process preview) ------------------------------- */}
-  <section
-    class="bg-muted"
-    aria-labelledby="process-preview-heading"
-  >
-    <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
-      <SectionHeading
-        eyebrow={processPreviewEyebrow}
-        headline={processPreviewHeadline}
-        subhead={processPreviewSubhead}
-        headingId="process-preview-heading"
-        align="center"
-        class="mx-auto"
-      />
+  {/* Section suppresses entirely when no processStep documents exist, so the
+      home page degrades gracefully before the process module is seeded. */}
+  {processSteps.length > 0 && (
+    <section
+      class="bg-muted"
+      aria-labelledby="process-preview-heading"
+    >
+      <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
+        <SectionHeading
+          eyebrow={processPreviewEyebrow}
+          headline={processPreviewHeadline}
+          subhead={processPreviewSubhead}
+          headingId="process-preview-heading"
+          align="center"
+          class="mx-auto"
+        />
 
-      {processSteps.length > 0 && (
         <div class="mt-section-lg grid grid-cols-1 md:grid-cols-2 gap-section-md">
           {processSteps.slice(0, 4).map((step: any, i: number, arr) => (
             <ProcessStep step={step} variant="preview" isLast={i === arr.length - 1} />
           ))}
         </div>
-      )}
 
-      <div class="mt-section-lg flex justify-center">
-        <CtaLink
-          cta={page?.processPreviewCta}
-          variant="secondary"
-          fallbackHref="/process"
-          fallbackLabel="See the Full Process"
-        />
+        <div class="mt-section-lg flex justify-center">
+          <CtaLink
+            cta={page?.processPreviewCta}
+            variant="secondary"
+            fallbackHref="/process"
+            fallbackLabel="See the Full Process"
+          />
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  )}
 
   {/* ------- 6. How Reid Design Can Help (services grid + pricing) ---------- */}
   {/* bg-background (not muted) so the cadence alternates cleanly now that

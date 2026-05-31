@@ -31,7 +31,7 @@ import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
 import { Mail, Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
 import NewsletterSignup from '@/components/NewsletterSignup';
-import { getAllProjects } from '@/lib/queries';
+import { getAllProjects, type CoreProjectCard } from '@/lib/queries';
 import logoLightAsset from '@/assets/logo-light.png';
 import logoDarkAsset from '@/assets/logo-dark.png';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
@@ -105,7 +105,7 @@ const siteCreditUrl = siteSettings?.footerCreditUrl;
 
 // Pull the three most recent projects for the Latest Projects column.
 // Falls back to an empty array when Sanity isn't reachable (build won't fail).
-const allProjects: any[] = (await getAllProjects().catch(() => [])) ?? [];
+const allProjects: CoreProjectCard[] = (await getAllProjects().catch(() => [])) ?? [];
 const latestProjects = allProjects.slice(0, 3);
 ---
 
@@ -199,7 +199,7 @@ const latestProjects = allProjects.slice(0, 3);
         </p>
         {latestProjects.length > 0 ? (
           <ul class="text-sm space-y-2 list-none p-0">
-            {latestProjects.map((p: any) => (
+            {latestProjects.map((p) => (
               <li>
                 <a
                   href={`/portfolio/${p.slug?.current ?? ''}`}

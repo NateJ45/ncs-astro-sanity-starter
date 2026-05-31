@@ -254,7 +254,23 @@ export async function getNotFoundPage() {
 
 // ---- Projects (used by Footer.astro for Latest Projects column) -----------
 
-export async function getAllProjects() {
+/** Minimal project shape used by core surfaces (footer "Latest Projects" column,
+ *  home Featured Work section). Fields mirror the GROQ projection below.
+ *  Defined locally so core typechecks whether or not the portfolio module is enabled. */
+export interface CoreProjectCard {
+  _id: string;
+  title?: string;
+  slug?: { current?: string };
+  location?: string;
+  year?: number;
+  roomType?: string;
+  designStyle?: string;
+  briefSummary?: string;
+  featured?: boolean;
+  heroImage?: any;
+}
+
+export async function getAllProjects(): Promise<CoreProjectCard[]> {
   return client.fetch(`*[_type == "project"] | order(orderRank asc, coalesce(displayOrder, 999) asc, publishedAt desc){
     _id, title, slug, location, year, roomType, designStyle, briefSummary,
     heroImage${IMAGE_PROJECTION}
@@ -368,8 +384,20 @@ export async function getPrivacyPage() {
 
 // ---- Press items (used by core: about.astro + index.astro PressStrip) ----
 
+/** Minimal press item shape used by the core PressStrip component.
+ *  Defined locally so core typechecks whether or not the press module is enabled. */
+export interface CorePressItem {
+  _id: string;
+  outlet?: string;
+  logo?: any;
+  quote?: string;
+  url?: string;
+  date?: string;
+  orderRank?: string;
+}
+
 // Press items ordered by orderRank for the PressStrip on the home + about pages.
-export async function getPressItems() {
+export async function getPressItems(): Promise<CorePressItem[]> {
   return client.fetch(`*[_type == "pressItem"] | order(orderRank asc){
     _id, outlet,
     logo${IMAGE_PROJECTION},
