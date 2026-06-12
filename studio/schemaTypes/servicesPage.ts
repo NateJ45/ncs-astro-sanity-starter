@@ -1,11 +1,11 @@
-// Services page singleton. Embeds builderRealtorSection and serviceAreaSection.
+// Services page singleton. Embeds serviceAreaSection.
 // Services list auto-populates from service collection.
 //
-// Structured content fields (hero*, servicesList*, builderRealtorSection,
-// serviceAreaSection, finalCta*, note) are hidden and readOnly for rollback
-// safety. The pageBuilder array is the primary editing surface going forward.
+// Structured content fields (hero*, servicesList*, serviceAreaSection,
+// finalCta*, note) are hidden and readOnly for rollback safety.
+// The pageBuilder array is the primary editing surface going forward.
 
-import { defineType, defineField, defineArrayMember } from 'sanity';
+import { defineType, defineField } from 'sanity';
 import { SERVICES_SECTION_TYPES } from './richSections';
 
 export const servicesPage = defineType({
@@ -19,7 +19,6 @@ export const servicesPage = defineType({
     { name: 'seo', title: 'SEO' },
     { name: 'hero', title: 'Hero' },
     { name: 'list', title: 'Services list' },
-    { name: 'builders', title: 'Builders & Realtors' },
     { name: 'area', title: 'Service area' },
     { name: 'final', title: 'Final CTA' },
   ],
@@ -106,42 +105,6 @@ export const servicesPage = defineType({
     defineField({ name: 'servicesListEyebrow', title: 'Services list eyebrow', type: 'string', group: 'list', hidden: true, readOnly: true, initialValue: 'The Tiers.' }),
     defineField({ name: 'servicesListHeadline', title: 'Services list headline', type: 'string', group: 'list', hidden: true, readOnly: true }),
     defineField({ name: 'servicesListSubhead', title: 'Services list subhead', type: 'text', rows: 2, group: 'list', hidden: true, readOnly: true }),
-
-    // Builders & Realtors section (legacy — hidden for rollback safety)
-    defineField({
-      name: 'builderRealtorSection',
-      title: 'Builder & Realtor section',
-      type: 'object',
-      group: 'builders',
-      hidden: true,
-      readOnly: true,
-      fields: [
-        defineField({ name: 'eyebrow', title: 'Eyebrow', type: 'string', initialValue: 'For Professionals.' }),
-        defineField({ name: 'headline', title: 'Headline', type: 'string', initialValue: 'Builder & Realtor Partnerships.' }),
-        defineField({
-          name: 'description',
-          title: 'Invitation copy',
-          type: 'array',
-          of: [
-            defineArrayMember({
-              type: 'block',
-              styles: [{ title: 'Paragraph', value: 'normal' }],
-              marks: {
-                decorators: [
-                  { title: 'Bold', value: 'strong' },
-                  { title: 'Italic', value: 'em' },
-                ],
-                annotations: [],
-              },
-            }),
-          ],
-        }),
-        defineField({ name: 'forBuildersText', title: 'For builders', type: 'text', rows: 3 }),
-        defineField({ name: 'forRealtorsText', title: 'For realtors', type: 'text', rows: 3 }),
-        defineField({ name: 'forContractorsText', title: 'For contractors', type: 'text', rows: 3 }),
-        defineField({ name: 'cta', title: 'CTA', type: 'ctaBlock' }),
-      ],
-    }),
 
     // Service area section (legacy — hidden for rollback safety)
     defineField({

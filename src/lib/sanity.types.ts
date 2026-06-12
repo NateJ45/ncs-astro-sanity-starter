@@ -1228,28 +1228,6 @@ export type ServicesPage = {
   servicesListEyebrow?: string;
   servicesListHeadline?: string;
   servicesListSubhead?: string;
-  builderRealtorSection?: {
-    eyebrow?: string;
-    headline?: string;
-    description?: Array<{
-      children?: Array<{
-        marks?: Array<string>;
-        text?: string;
-        _type: "span";
-        _key: string;
-      }>;
-      style?: "normal";
-      listItem?: "bullet" | "number";
-      markDefs?: null;
-      level?: number;
-      _type: "block";
-      _key: string;
-    }>;
-    forBuildersText?: string;
-    forRealtorsText?: string;
-    forContractorsText?: string;
-    cta?: CtaBlock;
-  };
   serviceAreaSection?: {
     eyebrow?: string;
     headline?: string;
