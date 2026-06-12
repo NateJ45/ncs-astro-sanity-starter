@@ -4,7 +4,8 @@
 // Renders an empty state when no projects exist yet (launch state).
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getAllProjects, getPortfolioPage, getSiteSettings } from '@/lib/queries';
+import { getAllProjects, getSiteSettings } from '@/lib/queries';
+import { getPortfolioPage } from '@/lib/portfolioQueries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
@@ -12,6 +13,7 @@ import Hero from '@/components/Hero.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
 import PortfolioFilterChips from '@/components/PortfolioFilterChips';
 import PortfolioCursor from '@/components/PortfolioCursor';
+import SectionRenderer from '@/components/SectionRenderer.astro';
 
 const [projects, page, siteSettings] = await Promise.all([
   getAllProjects().catch(() => []),
@@ -150,5 +152,12 @@ const heroBackground = page?.heroImage ?? null;
         </p>
       </div>
     </section>
+  )}
+
+  {page?.additionalSections?.length > 0 && (
+    <SectionRenderer
+      idPrefix="portfolio-extra"
+      sections={page.additionalSections}
+    />
   )}
 </BaseLayout>
