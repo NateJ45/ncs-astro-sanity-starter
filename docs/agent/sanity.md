@@ -28,23 +28,55 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 
 **Core schema set (always present in the starter):**
 
-**Settings and globals (1):**
-- `siteSettings` (singleton) — email, phone, social links, service areas, availability status, footer tagline. Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
+**Settings and globals:**
+- `siteSettings` (singleton) — email, phone, social links, footer tagline, newsletter settings, section visibility flags. Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
+- `businessInfo` (singleton) — service areas, travel fee tiers, availability status, studio city/state, and geo coordinates. Split from `siteSettings` so identity fields stay in one place and operational business facts in another. `getSiteSettings()` merges both documents and returns them under a single flat interface — no component changes needed.
+
+**Page builder schemas:**
+- `sections.ts` — the 9 general block types (`heroSection`, `richTextSection`, `imageTextSection`, `gallerySection`, `quoteSection`, `statSection`, `ctaBandSection`, `videoSection`, `spacerSection`), plus `SECTION_TYPES` (the `of` array for any `pageBuilder` field) and `additionalSectionsField` (the append zone).
+- `richSections.ts` — 8 rich section types generalized from core-page patterns (`founderSection`, `servicesGridSection`, `testimonialsSection`, `storySection`, `valuesSection`, `processSection`, `serviceAreaSection`, `guaranteeSection`), plus per-page curated lists (`HOME_SECTION_TYPES`, `ABOUT_SECTION_TYPES`, `SERVICES_SECTION_TYPES`, `PROCESS_SECTION_TYPES`).
+- `page.ts` — the custom page document type. Multi-instance, non-singleton. Has `title`, `slug` (with reserved-slug validation), `pageBuilder` (using `SECTION_TYPES`), nav placement fields (`addToMainNav`, `navGroup`, `navLabel`, `addToFooter`), and SEO fields. Routed by `src/pages/[slug].astro`.
+
+**Core page singletons (section-driven):**
+- `homePage`, `aboutPage`, `servicesPage`, `processPage` — each has a `pageBuilder` array field using its page-specific section type list, plus SEO fields. Renders from `src/data/defaultSections.ts` when `pageBuilder` is empty.
+- `faqPage`, `contactPage`, `journalPage` + `journalEntry` + `journalCategory`, `privacyPage`, `notFoundPage` — these pages keep their own structured fields (they are not fully section-driven).
+- `studioGuide`, `studioNotes`, `studioPlaybook` — in-Studio editor handbook singletons (protected, Canvas-excluded, plain text throughout).
 
 **Reusable collections:**
 - `service` — service offerings displayed on the Services page and optionally on the home page. Optional `featuredImage` renders a visual on each pricing card; `ServiceCard.astro` falls back gracefully when absent.
 - `testimonial` — quotes with attribution, source, date. Optional `photo` (circular avatar) and `relatedProject` reference (when set, both `TestimonialCard.astro` and `FeaturedTestimonial.astro` render a link to the related case study).
+- `processStep` — individual process step documents, auto-populated by `processSection`.
 - `faqItem` — FAQ questions grouped by category, displayed on the FAQ page.
-- `philosophyPoint` — value statements on the About page. Visible numbers (01/02/03) are assigned by render position, not by a stored order field.
+- `philosophyPoint` — value statements, auto-populated by `valuesSection`. Visible numbers (01/02/03) are assigned by render position, not by a stored order field.
 - `ctaBlock` — reusable object type (label + linkType + target) embedded in other schemas.
 
-**Page singletons:**
-- `homePage`, `aboutPage`, `servicesPage`, `faqPage`, `contactPage`, `journalPage` + `journalEntry` + `journalCategory`, `privacyPage`, `notFoundPage`
-- `studioGuide`, `studioNotes`, `studioPlaybook` — the in-Studio editor handbook singletons (protected, Canvas-excluded, plain text throughout)
+All `*Page` singletons have `seoTitle` and `seoDescription` fields.
 
-All page singletons have `seoTitle` and `seoDescription` fields. Every `*Page` singleton also accepts a `heroImage` with alt text and optional caption.
+**Module schemas** for opt-in surfaces (portfolio, shop, quiz, calculator, etc.) are documented under `docs/modules/`. Module query files are co-located at `modules/<name>/src/lib/<name>Queries.ts` — copy this file alongside the other module files when enabling a module. Do not add module schemas to the core `studio/schemaTypes/` without enabling the corresponding module.
 
-**Module schemas** for opt-in surfaces (portfolio, process, shop, quiz, calculator, etc.) are documented under `docs/modules/`. Do not add module schemas to the core `studio/schemaTypes/` without enabling the corresponding module.
+### GROQ helpers and custom-page queries
+
+All GROQ queries live in `src/lib/queries.ts`. Key helpers:
+
+**`sectionsProjection(field)`** — a reusable GROQ fragment that resolves nested images and `ctaBlock` references inside section arrays. The `field` parameter defaults to `'pageBuilder'` but also accepts `'additionalSections'`. Any query that fetches a `pageBuilder` or `additionalSections` field wraps it with this helper:
+
+```groq
+// Inline example
+pageBuilder[]{
+  ...,
+  _type == "heroSection" => { ..., backgroundImage{ ..., asset-> }, primaryCta{ ..., internalLink->{ _type, "slug": slug.current } } },
+  // ... and so on for all block types with nested refs
+}
+```
+
+Rich section types that auto-populate from collections (`servicesGridSection`, `testimonialsSection`, `valuesSection`, `processSection`, `serviceAreaSection`, `guaranteeSection`) resolve those collections inside `sectionsProjection()` at query time — no separate queries needed.
+
+**Custom page queries:**
+- `getPage(slug)` — fetches one published `page` document by slug, with its `pageBuilder` array fully resolved via `sectionsProjection()`.
+- `getAllPageSlugs()` — returns an array of slug strings for all published `page` documents. Used by `getStaticPaths` in `[slug].astro`.
+- `getNavPages()` — returns pages with `addToMainNav == true` or `addToFooter == true`. Used by `Header.astro` and `Footer.astro` to inject custom pages alongside the built-in nav links.
+
+**Module queries are co-located.** Each module's GROQ functions live in `modules/<name>/src/lib/<name>Queries.ts`. Copy this file into `src/lib/` when enabling the module; do not hand-paste query functions into core `queries.ts`.
 
 ### The deploy rule (read this first)
 

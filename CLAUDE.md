@@ -245,6 +245,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Stack detail + astro.config landmines | `docs/agent/stack-and-config.md` |
 | Page + section architecture, nav, visibility toggles | `docs/agent/page-architecture.md` |
 | Brand colors + theme system (light/dark discipline) | `docs/agent/theme-and-color.md` |
+| Brand reskin system (config schema, apply-brand, /reskin skill) | `docs/brand/brand-system.md` |
 | Polish layer (brand stripe, card-lift, scroll, Lenis, script accents) | `docs/agent/polish-layer.md` |
 | Animation layer (Lenis, motion, scroll-reveal, script accent) | `docs/agent/animation.md` |
 | Typography + spacing tokens | `docs/agent/design-tokens.md` |

@@ -6,6 +6,82 @@ If you are a future Claude session and you can only read one doc, read `CLAUDE.m
 
 ---
 
+## Reskin (apply a new brand identity)
+
+The primary path for adapting this starter to a new client is the `/reskin` skill. It interviews you for brand inputs, writes `brand/brand.config.json`, runs `npm run apply-brand`, checks contrast, and screenshots the result.
+
+**Quick start with the skill:**
+1. Open a Claude session in this repo and type `/reskin`.
+2. The skill interviews you for business name, domain, tagline, palette, and fonts.
+3. It fills `brand/brand.config.json` and runs `npm run apply-brand`.
+
+**Font packages first.** `apply-brand` cannot install font packages. If you are changing fonts, install the `@fontsource` packages before running `apply-brand` or the build will fail:
+
+```bash
+npm install @fontsource/your-display-font @fontsource-variable/your-body-font
+```
+
+**Manual path (no skill session):**
+1. Edit `brand/brand.config.json` with your brand values.
+2. Install any new font packages (see above).
+3. Run `npm run apply-brand` — deterministically rewrites `globals.css` tokens, `src/data/site.ts`, Studio theme props, and OG generator inputs, then regenerates `public/og-default.png`.
+4. Run `npm run build` to verify nothing broke.
+
+The shipped `brand/brand.config.json` encodes the neutral starter defaults, so `npm run apply-brand` on a fresh clone is a no-op. The OG image is non-deterministic (node-canvas rendering) and re-running produces a visually identical but byte-different file.
+
+Full reference for the brand config shape, what `apply-brand` rewrites, and the `/reskin` skill's 8-step flow: `docs/brand/brand-system.md`.
+
+---
+
+## Enabling a module
+
+Modules live under `modules/<name>/` and are off by default. Enabling one is a copy-and-register operation:
+
+1. **Copy the module folder into the core dirs:**
+   - `modules/<name>/studio/*` into `studio/schemaTypes/` (schema files)
+   - `modules/<name>/src/pages/*` into `src/pages/` (route files)
+   - `modules/<name>/src/components/*` into `src/components/` (components)
+   - The co-located query file `modules/<name>/src/lib/<name>Queries.ts` into `src/lib/` (GROQ queries)
+
+2. **Register the schema** in `studio/schemaTypes/index.ts` and add the type to `studio/structure.ts`.
+
+3. **Wire navigation** — add the route to `Header.astro`'s `NAV_ITEMS` and to the footer links.
+
+4. **Flip the visibility toggle** in Sanity Studio → Site Settings → Section visibility to enable the module's sections on the live site.
+
+The co-located query file pattern means no hand-pasting of query functions into core `queries.ts`. Per-module guides are in `docs/modules/`.
+
+After enabling, run `npm run typegen`, then `npm run studio:deploy` to push the new schemas to the hosted Studio.
+
+---
+
+## Editing page content (section-driven pages)
+
+The four core pages (home, about, services, process) and any custom `page` document render from a `pageBuilder` array in Sanity Studio. Editors add, reorder, and remove blocks without touching code.
+
+**On a fresh clone with no Sanity project configured:** the site renders from code-defined defaults in `src/data/defaultSections.ts`. These defaults look like a real site, not blank pages.
+
+**Once a Sanity project is connected:** seed the pages with `npm run seed`, then edit sections in Studio → the relevant page singleton → the "Sections" tab.
+
+**Available block types:** the nine general blocks (heroSection, richTextSection, imageTextSection, gallerySection, quoteSection, statSection, ctaBandSection, videoSection, spacerSection) plus the page-specific rich blocks (founderSection, servicesGridSection, testimonialsSection on Home; storySection, valuesSection on About; servicesGridSection, serviceAreaSection, guaranteeSection on Services; processSection on Process).
+
+Blocks carry no background color field. `SectionRenderer` owns the alternating surface cadence automatically.
+
+---
+
+## Schema-change procedure
+
+Any change to `studio/schemaTypes/` must follow this sequence before committing:
+
+1. Edit the schema file in `studio/schemaTypes/`.
+2. `npm run typegen` — regenerates `src/lib/sanity.types.ts`.
+3. `npm run build` — verifies the site builds with the updated types.
+4. `npm --prefix studio run build` — verifies the Studio builds with the updated schemas.
+5. Commit the schema file AND the regenerated `src/lib/sanity.types.ts` together.
+6. `npm run studio:deploy` — pushes the updated schema to the hosted Studio. Skip this and the live Studio will show "unknown fields" next to a "Remove field" prompt. **Never click "Remove field"** — it deletes that field's data across every document, and it cannot be undone without a dataset restore.
+
+---
+
 ## Deploy
 
 The site is `output: 'static'` + `@astrojs/cloudflare` adapter. Two paths:
@@ -127,20 +203,9 @@ npm run studio:deploy
 
 Run this after any change in `studio/schemaTypes/`, `studio/structure.ts`, or `studio/sanity.config.ts` — otherwise the hosted Studio doesn't see the new schema fields.
 
-Always run `npm run typegen` after schema changes so `src/lib/sanity.types.ts` is fresh, then commit.
+Always run `npm run typegen` after schema changes so `src/lib/sanity.types.ts` is fresh, then commit both files together.
 
-### Critical: run studio:deploy after every schema change
-
-If you add or rename a field in a schema file and forget to run `npm run studio:deploy`, the hosted Studio will show "unknown fields" warnings next to the new data, and editors will see a prompt offering to "Remove field." **Do NOT click "Remove field" in Studio.** That action deletes the actual Sanity document data for every document that has that field populated. It cannot be undone without a dataset restore.
-
-The correct sequence after any schema edit:
-
-1. Edit the schema file in `studio/schemaTypes/`.
-2. `npm run typegen` to regenerate `src/lib/sanity.types.ts`.
-3. `npm run studio:deploy` to push the schema update to the hosted Studio.
-4. Commit + push.
-
-The site build can run any time after step 1. The Studio deploy (step 3) is what clears the "unknown fields" warning.
+For the complete schema-change sequence including the Studio build verify step, see the "Schema-change procedure" section above.
 
 ---
 
@@ -162,9 +227,11 @@ Core routes that ship with the starter:
 
 | Path | Notes |
 |---|---|
-| `/` | Home |
-| `/about` | About |
-| `/services` | Services listing |
+| `/` | Home — section-driven via `pageBuilder` + `SectionRenderer` |
+| `/about` | About — section-driven |
+| `/services` | Services — section-driven |
+| `/process` | Process — section-driven |
+| `/[slug]` | Custom pages created in the Studio; reserved slugs filtered in `getStaticPaths` |
 | `/faq` | FAQ grouped by category |
 | `/contact` | Contact form + Calendly + post-inquiry roadmap |
 | `/journal` | Journal/blog index |
@@ -181,12 +248,13 @@ Additional routes are added by opt-in modules under `modules/`. See `docs/module
 
 The items below apply to any project built on this starter. Replace the angle-bracketed placeholders with project-specific values.
 
-**Wire identity:**
-- [ ] `src/data/site.ts` — set real `name`, `domain`, `url`, `storageKeyPrefix`, `themeStorageKey`, `brandColors`
-- [ ] `src/styles/globals.css` — replace placeholder palette tokens and font imports with the project's brand
-- [ ] Replace logo files in `src/assets/` with the real logo variants; regenerate with `node scripts/generate-logo-variants.mjs`
-- [ ] Regenerate `public/og-default.png` via `npm run og` after updating brand inputs in `scripts/generate-og-default.mjs`
+**Wire identity (preferred: run /reskin or apply-brand):**
+- [ ] Fill in `brand/brand.config.json` with the client's name, domain, tagline, palette, and font choices
+- [ ] Install font packages first (`npm install @fontsource/...`) if changing from the defaults
+- [ ] Run `npm run apply-brand` to cascade the brand config to `globals.css`, `site.ts`, Studio theme, and the OG image
+- [ ] Place real logo files at the paths set in `brand/brand.config.json` → `logoPaths` (the script does not copy files)
 - [ ] Replace `public/favicon.svg` with the project's favicon
+- [ ] See `docs/brand/brand-system.md` for full detail on the reskin system
 
 **Wire Sanity:**
 - [ ] Create Sanity project; set `PUBLIC_SANITY_PROJECT_ID`, `PUBLIC_SANITY_DATASET` in `.env` and Cloudflare → Workers → Variables
@@ -326,12 +394,15 @@ The PNGs land in `src/assets/` (NOT `public/`) so Astro's `<Image>` / `getImage(
 ### Add a new field to a page singleton
 
 1. Edit `studio/schemaTypes/<page>.ts` — add `defineField(...)`.
-2. `npm run typegen` (runs schema-extract + sanity typegen).
-3. Add the field to the GROQ projection in `src/lib/queries.ts`.
-4. Use the field in the corresponding Astro page with a sensible fallback.
+2. `npm run typegen` (regenerates `src/lib/sanity.types.ts`).
+3. Add the field to the GROQ projection in `src/lib/queries.ts` (for non-section fields) or to `sectionsProjection()` if it is inside a section block.
+4. Use the field in the corresponding Astro page or section component with a sensible fallback.
 5. Write a backfill script in `scripts/` to set the value on the existing production doc (use `setIfMissing` so future editor changes aren't clobbered).
-6. `npm run studio:deploy` to push the new field to the hosted Studio.
-7. Commit + push.
+6. `npm --prefix studio run build` to confirm the Studio builds clean.
+7. `npm run studio:deploy` to push the new field to the hosted Studio.
+8. Commit the schema file and the regenerated `src/lib/sanity.types.ts` together, then push.
+
+See the full schema-change procedure above (in the "Schema-change procedure" section) for the complete order of operations.
 
 ---
 
