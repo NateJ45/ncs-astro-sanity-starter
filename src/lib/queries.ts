@@ -239,7 +239,7 @@ export async function getServicesPage() {
       cta${CTA_PROJECTION}
     },
     serviceAreaSection,
-    "travelFees": *[_type == "siteSettings"][0].travelFees,
+    "travelFees": *[_type == "businessInfo"][0].travelFees,
     finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     finalCta${CTA_PROJECTION}
