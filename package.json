@@ -16,6 +16,7 @@
     "typegen": "npm --prefix studio run typegen",
     "og": "node scripts/generate-og-default.mjs",
     "og:pages": "node scripts/generate-og-pages.mjs",
+    "apply-brand": "node scripts/apply-brand.mjs",
     "llms:full": "node scripts/generate-llms-full.mjs",
     "studio:dev": "npm --prefix studio run dev",
     "studio:deploy": "npm --prefix studio run deploy",
