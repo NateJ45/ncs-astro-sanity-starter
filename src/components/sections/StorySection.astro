@@ -1,0 +1,80 @@
+---
+// Foundation, edit with care
+// Long-form narrative block: sticky portrait left, prose right.
+// CONTENT type — receives surface assignment from SectionRenderer.
+import SectionHeading from '@/components/SectionHeading.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import PortableText from '@/components/PortableText';
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  content?: any;
+  portrait?: any;
+  attribution?: string;
+  credentialLine?: string;
+  serviceAreaLine?: string;
+  surface?: 'background' | 'muted' | null;
+  headingId?: string;
+}
+
+const {
+  eyebrow = 'My Story.',
+  headline = 'Why I Started This Studio.',
+  content,
+  portrait,
+  attribution,
+  credentialLine,
+  serviceAreaLine,
+  surface = 'background',
+  headingId = 'story-section-heading',
+} = Astro.props as Props;
+
+const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+---
+
+<section class={bg} aria-labelledby={headingId}>
+  <div class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-[1fr_1.2fr] gap-l md:gap-section-md items-start">
+    <div class="md:sticky md:top-section-lg">
+      {portrait?.asset ? (
+        <SanityImage
+          source={portrait}
+          width={900}
+          sizes="(min-width: 768px) 40vw, 100vw"
+          quality={75}
+          class="w-full h-auto rounded-md"
+        />
+      ) : (
+        <div class="aspect-[4/5] bg-muted rounded-md" aria-hidden="true"></div>
+      )}
+      {attribution && (
+        <p class="mt-s text-xs uppercase tracking-widest text-foreground/80">{attribution}</p>
+      )}
+    </div>
+
+    <div>
+      <SectionHeading eyebrow={eyebrow} headline={headline} headingId={headingId} />
+
+      {content && (
+        <PortableText value={content} className="mt-l text-foreground/85 text-lg leading-relaxed" />
+      )}
+
+      {(credentialLine || serviceAreaLine) && (
+        <div class="mt-section-md pt-l border-t border-border-soft space-y-m text-foreground/80">
+          {credentialLine && (
+            <p>
+              <span class="block text-xs uppercase tracking-widest text-foreground/80 mb-xs">Background</span>
+              {credentialLine}
+            </p>
+          )}
+          {serviceAreaLine && (
+            <p>
+              <span class="block text-xs uppercase tracking-widest text-foreground/80 mb-xs">Service area</span>
+              {serviceAreaLine}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+</section>

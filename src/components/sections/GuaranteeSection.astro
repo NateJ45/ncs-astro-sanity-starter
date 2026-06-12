@@ -1,0 +1,30 @@
+---
+// Foundation, edit with care
+// Trust / guarantee statement rendered as a styled callout band.
+// CONTENT type — receives surface assignment from SectionRenderer.
+// text: inline text from the schema block. siteSettingsText: fallback from siteSettings.
+interface Props {
+  text?: string;
+  siteSettingsText?: string;
+  surface?: 'background' | 'muted' | null;
+}
+
+const {
+  text,
+  siteSettingsText,
+  surface = 'background',
+} = Astro.props as Props;
+
+const display = text || siteSettingsText;
+const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+---
+
+{display && (
+  <section class={bg} aria-label="Satisfaction guarantee">
+    <div class="mx-auto max-w-content px-m py-l">
+      <p class="text-center text-foreground/80 text-sm border border-border-soft rounded-md py-m px-l bg-muted">
+        {display}
+      </p>
+    </div>
+  </section>
+)}

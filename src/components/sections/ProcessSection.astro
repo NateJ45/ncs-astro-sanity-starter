@@ -1,0 +1,69 @@
+---
+// Foundation, edit with care
+// Process steps section. Two variants: 'full' (all steps, large cards,
+// bg-background) and 'preview' (first 4 steps, 2-col grid, bg-muted, CTA link).
+// Steps are resolved from the processStep collection at query time.
+// SELF_CONTAINED — manages its own surface.
+import SectionHeading from '@/components/SectionHeading.astro';
+import ProcessStep from '@/components/ProcessStep.astro';
+import CtaLink from '@/components/CtaLink.astro';
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  steps?: any[];
+  variant?: 'full' | 'preview';
+  cta?: any;
+  headingId?: string;
+}
+
+const {
+  eyebrow = 'How It Works.',
+  headline = 'A clear process, start to finish.',
+  subhead,
+  steps = [],
+  variant = 'preview',
+  cta,
+  headingId = 'process-section-heading',
+} = Astro.props as Props;
+
+const isFull = variant === 'full';
+const bg = isFull ? 'bg-background' : 'bg-muted';
+---
+
+{steps.length > 0 && (
+  <section class={bg} aria-labelledby={isFull ? undefined : headingId} aria-label={isFull ? 'Process step by step' : undefined}>
+    <div class={`mx-auto max-w-content px-m py-section-lg${isFull ? ' space-y-section-lg' : ''}`} data-reveal>
+      {!isFull && (
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          subhead={subhead}
+          headingId={headingId}
+          align="center"
+          class="mx-auto"
+        />
+      )}
+
+      {isFull ? (
+        steps.map((step: any, i: number) => (
+          <div class={i > 0 ? 'pt-section-lg border-t border-border-soft' : ''}>
+            <ProcessStep step={step} variant="full" isLast={i === steps.length - 1} />
+          </div>
+        ))
+      ) : (
+        <>
+          <div class="mt-section-lg grid grid-cols-1 md:grid-cols-2 gap-section-md">
+            {steps.slice(0, 4).map((step: any, i: number, arr: any[]) => (
+              <ProcessStep step={step} variant="preview" isLast={i === arr.length - 1} />
+            ))}
+          </div>
+          <div class="mt-section-lg flex justify-center">
+            <CtaLink cta={cta} variant="secondary" fallbackHref="/process" fallbackLabel="See the Full Process" />
+          </div>
+        </>
+      )}
+    </div>
+  </section>
+)}

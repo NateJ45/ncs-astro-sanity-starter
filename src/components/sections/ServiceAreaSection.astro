@@ -1,0 +1,62 @@
+---
+// Foundation, edit with care
+// Service area section: heading + description left, optional travel fee table right.
+// CONTENT type — receives surface assignment from SectionRenderer.
+// travelFees are resolved from businessInfo at query time when showTravelFees is true.
+import SectionHeading from '@/components/SectionHeading.astro';
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  description?: string;
+  travelFees?: { distanceLabel: string; fee: string }[];
+  showTravelFees?: boolean;
+  surface?: 'background' | 'muted' | null;
+  headingId?: string;
+}
+
+const {
+  eyebrow = 'Service Area.',
+  headline,
+  description,
+  travelFees = [],
+  showTravelFees = true,
+  surface = 'background',
+  headingId = 'service-area-section-heading',
+} = Astro.props as Props;
+
+const show = !!headline || (showTravelFees && travelFees.length > 0);
+const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+const fees = showTravelFees ? travelFees : [];
+---
+
+{show && (
+  <section id="service-area" class={`${bg} scroll-mt-24`} aria-labelledby={headingId}>
+    <div class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-2 gap-l md:gap-section-md items-start">
+      <div>
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline ?? 'Where We Work.'}
+          headingId={headingId}
+        />
+        {description && (
+          <p class="mt-m text-foreground/85 text-lg leading-relaxed">{description}</p>
+        )}
+      </div>
+
+      {fees.length > 0 && (
+        <div class="bg-muted p-l rounded-md">
+          <p class="text-xs uppercase tracking-widest text-foreground/80 mb-m">Travel fee tiers</p>
+          <dl class="divide-y divide-border-soft">
+            {fees.map((tier) => (
+              <div class="flex items-baseline justify-between py-s gap-m">
+                <dt class="text-foreground/85">{tier.distanceLabel}</dt>
+                <dd class="font-mono text-sm font-semibold text-link whitespace-nowrap">{tier.fee}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+    </div>
+  </section>
+)}

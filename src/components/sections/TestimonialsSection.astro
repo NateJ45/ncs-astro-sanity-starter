@@ -1,0 +1,65 @@
+---
+// Foundation, edit with care
+// Testimonial grid with an optional featured pull-quote above.
+// Manages its own surface-warm bg-background (SELF_CONTAINED — no surface prop).
+// featuredQuote and testimonialsToShow are resolved at query time.
+import SectionHeading from '@/components/SectionHeading.astro';
+import FeaturedTestimonial from '@/components/FeaturedTestimonial.astro';
+import TestimonialGrid from '@/components/TestimonialGrid.astro';
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  scriptAccent?: string;
+  subhead?: string;
+  attribution?: string;
+  featuredQuote?: any;
+  testimonialsToShow?: any[];
+  headingId?: string;
+}
+
+const {
+  eyebrow = 'Kind Words.',
+  headline = 'Words from real clients.',
+  scriptAccent,
+  subhead,
+  attribution,
+  featuredQuote,
+  testimonialsToShow = [],
+  headingId = 'testimonials-section-heading',
+} = Astro.props as Props;
+---
+
+{(featuredQuote || testimonialsToShow.length > 0) && (
+  <section class="surface-warm bg-background" aria-labelledby={headingId}>
+    <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow={eyebrow}
+        headline={headline}
+        subhead={subhead}
+        headingId={headingId}
+        align="center"
+        class="mx-auto"
+        scriptAccent={scriptAccent}
+      />
+
+      {featuredQuote && (
+        <div class="mt-section-lg">
+          <FeaturedTestimonial testimonial={featuredQuote} />
+        </div>
+      )}
+
+      {testimonialsToShow.length > 0 && (
+        <div class="mt-section-lg">
+          <TestimonialGrid testimonials={testimonialsToShow} limit={6} />
+        </div>
+      )}
+
+      {attribution && (
+        <p class="mt-section-md text-center text-sm text-muted-foreground italic">
+          {attribution}
+        </p>
+      )}
+    </div>
+  </section>
+)}
