@@ -52,7 +52,7 @@ export const businessInfo = defineType({
       name: 'serviceAreas',
       title: 'Service areas',
       type: 'array',
-      description: 'Cities and neighborhoods you serve, in display order. Plainfield should be first. This list shows up on the site and tells search engines where you work.',
+      description: 'Cities and neighborhoods you serve, in display order. Put your home-base city first. This list shows up on the site and tells search engines where you work.',
       of: [defineArrayMember({ type: 'string' })],
       validation: (Rule) => Rule.required().min(1),
     }),
