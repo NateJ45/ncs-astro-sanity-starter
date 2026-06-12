@@ -1,0 +1,234 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Donations (donate) page. Links out to an external donation processor.
+// No payment processing happens on this page.
+//
+// Sections:
+//   1. Hero
+//   2. Mission copy (Portable Text)
+//   3. Impact stats row
+//   4. Prominent donate CTA (links to external processor)
+//   5. FAQ accordion (if faqRefs are set)
+//   6. Closing dark CTA panel
+//
+// Graceful coming-soon state when the donationsPage Sanity doc is absent.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getDonationsPage } from '@/lib/donationsQueries';
+import { getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import FaqAccordion from '@/components/FaqAccordion';
+import PortableText from '@/components/PortableText';
+
+const [page, siteSettings] = await Promise.all([
+  getDonationsPage().catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.donations) return Astro.redirect('/');
+
+const title       = page?.seoTitle       ?? 'Donate · Studio Starter';
+const description = page?.seoDescription ?? 'Support our mission. Your contribution makes a difference.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'Make a Difference.';
+const heroHeadline = page?.heroHeadline ?? 'Support Our Work';
+const heroSubhead  = page?.heroSubhead  ?? '';
+
+const donateUrl   = page?.donateUrl   ?? null;
+const ctaLabel    = page?.donateCtaLabel ?? 'Donate Now';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home',   url: site.url },
+    { name: 'Donate', url: `${site.url}/donate` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    headingId="donate-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent ?? undefined}
+  />
+
+  {/* ======= COMING-SOON STATE ================================================ */}
+  {!page ? (
+    <section class="bg-background" aria-labelledby="donate-coming-soon">
+      <div class="mx-auto max-w-content px-m py-section-lg text-center">
+        <SectionHeading
+          eyebrow="Coming Soon."
+          headline="Donation details are on the way."
+          subhead="We are setting up our donation page. Check back soon."
+          headingId="donate-coming-soon"
+          align="center"
+          class="mx-auto"
+        />
+        <div class="mt-l flex justify-center">
+          <a
+            href="/contact"
+            class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-accent-dark transition-colors"
+          >
+            Get in touch
+          </a>
+        </div>
+      </div>
+    </section>
+  ) : (
+    <>
+      {/* ------- 2. Mission copy --------------------------------------------- */}
+      {page.mission && page.mission.length > 0 && (
+        <section class="bg-background" aria-labelledby="donate-mission-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <div class="max-w-3xl mx-auto">
+              <SectionHeading
+                eyebrow="Our Mission."
+                headline="What Your Support Makes Possible"
+                headingId="donate-mission-heading"
+              />
+              <div class="mt-l">
+                <PortableText
+                  value={page.mission}
+                  className="text-foreground/85 text-lg leading-relaxed"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 3. Impact stats row ----------------------------------------- */}
+      {page.impactStats && page.impactStats.length > 0 && (
+        <section class="surface-warm bg-muted" aria-labelledby="donate-impact-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <SectionHeading
+              eyebrow="The Impact."
+              headline="By the Numbers"
+              headingId="donate-impact-heading"
+              align="center"
+              class="mx-auto"
+            />
+            <div class="mt-l grid grid-cols-2 md:grid-cols-4 gap-l">
+              {page.impactStats.map((stat: { _key: string; value: string; label: string }) => (
+                <div class="flex flex-col items-center text-center gap-xs p-l bg-card border border-border-soft rounded-md">
+                  <span class="font-display text-3xl font-semibold text-primary leading-none">
+                    {stat.value}
+                  </span>
+                  <span class="text-xs uppercase tracking-eyebrow text-foreground/70">
+                    {stat.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 4. Prominent donate CTA ------------------------------------- */}
+      <section class="bg-background" aria-labelledby="donate-cta-heading">
+        <div class="mx-auto max-w-content px-m py-section-lg">
+          <div class="max-w-2xl mx-auto text-center">
+            <SectionHeading
+              eyebrow="Every Contribution Counts."
+              headline="Ready to Give?"
+              headingId="donate-cta-heading"
+              align="center"
+              class="mx-auto"
+            />
+            <p class="mt-m text-foreground/80 text-lg leading-relaxed">
+              Your donation goes directly toward our work.
+              {donateUrl ? ' Click the button below to give securely through our payment partner.' : ' Donation processing is being set up. Check back soon.'}
+            </p>
+            {donateUrl ? (
+              <div class="mt-l flex justify-center">
+                <a
+                  href={donateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="press-tactile inline-flex items-center justify-center min-h-[44px] px-xl py-s text-sm font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-accent-dark transition-colors"
+                >
+                  {ctaLabel} <span aria-hidden="true" class="ml-xs">↗</span>
+                </a>
+              </div>
+            ) : (
+              <div class="mt-l flex justify-center">
+                <a
+                  href="/contact"
+                  class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-accent-dark transition-colors"
+                >
+                  Get in touch
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ------- 5. FAQ references ------------------------------------------- */}
+      {page.faqRefs && page.faqRefs.length > 0 && (
+        <section class="surface-warm bg-muted" aria-labelledby="donate-faq-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <div class="max-w-3xl mx-auto">
+              <SectionHeading
+                eyebrow="Common Questions."
+                headline="Giving FAQ"
+                headingId="donate-faq-heading"
+              />
+              <div class="mt-l">
+                <FaqAccordion
+                  client:visible
+                  faqs={page.faqRefs}
+                  idPrefix="donate-faq"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+    </>
+  )}
+
+  {/* ------- 6. Closing dark CTA panel --------------------------------------- */}
+  <section class="bg-accent-dark text-bg" aria-labelledby="donate-closing-cta">
+    <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+    <div class="mx-auto max-w-content px-m py-section-lg text-center">
+      <p class="text-xs uppercase tracking-[0.22em] text-bg/75">
+        {page?.finalCtaEyebrow ?? 'Make a Difference.'}
+      </p>
+      <div class="mt-s mb-m h-px w-12 bg-bg/40 mx-auto" aria-hidden="true"></div>
+      <h2 id="donate-closing-cta" class="font-display text-h1 leading-tight text-bg">
+        {page?.finalCtaHeadline ?? 'Your Support Matters.'}
+      </h2>
+      {page?.finalCtaSubhead && (
+        <p class="mt-m text-lg text-bg/85 max-w-2xl mx-auto">
+          {page.finalCtaSubhead}
+        </p>
+      )}
+      {donateUrl && (
+        <div class="mt-l flex justify-center">
+          <a
+            href={donateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-primary transition-colors"
+          >
+            {page?.finalCtaButtonLabel ?? ctaLabel} <span aria-hidden="true" class="ml-xs">↗</span>
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

@@ -160,7 +160,7 @@ export default function BudgetCalculator({ config }: Props) {
               htmlFor={`${uid}-room`}
               className="block text-sm font-semibold text-foreground mb-xs"
             >
-              What kind of room?
+              What size is this project?
             </label>
             <select
               id={`${uid}-room`}
@@ -180,7 +180,7 @@ export default function BudgetCalculator({ config }: Props) {
           <div className="mb-l">
             <fieldset>
               <legend className="block text-sm font-semibold text-foreground mb-xs">
-                How much of the room are you redesigning?
+                What level of engagement are you looking for?
               </legend>
               <div className="space-y-s">
                 {scopeOptions.map((opt, i) => (

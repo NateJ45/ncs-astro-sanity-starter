@@ -1,0 +1,252 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Events page. Upcoming events sort ascending; past events collapse
+// under a <details> element so the page stays focused on what is coming up.
+//
+// Sections:
+//   1. Hero
+//   2. Upcoming events list (sorted by startDate ascending)
+//   3. Past events (collapsed <details>, sorted most-recent-first)
+//
+// Graceful coming-soon state when no event documents exist at all.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getEventsPage, getUpcomingEvents, getPastEvents } from '@/lib/eventQueries';
+import { getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import PortableText from '@/components/PortableText';
+
+const [page, upcoming, past, siteSettings] = await Promise.all([
+  getEventsPage().catch(() => null),
+  getUpcomingEvents().catch(() => []),
+  getPastEvents().catch(() => []),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.events) return Astro.redirect('/');
+
+const upcomingArr: any[] = Array.isArray(upcoming) ? upcoming : [];
+const pastArr: any[]     = Array.isArray(past)     ? past     : [];
+const hasAny = upcomingArr.length > 0 || pastArr.length > 0;
+
+const title       = page?.seoTitle       ?? 'Events · Studio Starter';
+const description = page?.seoDescription ?? 'Upcoming workshops, open houses, and other events.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'What\'s On.';
+const heroHeadline = page?.heroHeadline ?? 'Events';
+const heroSubhead  = page?.heroSubhead  ?? '';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home',   url: site.url },
+    { name: 'Events', url: `${site.url}/events` },
+  ]),
+];
+
+// Format a datetime string for display.
+function formatDateTime(dt?: string): string {
+  if (!dt) return '';
+  const d = new Date(dt);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString('en-US', {
+    weekday: 'long',
+    month:   'long',
+    day:     'numeric',
+    year:    'numeric',
+    hour:    'numeric',
+    minute:  '2-digit',
+  });
+}
+
+function formatDateShort(dt?: string): string {
+  if (!dt) return '';
+  const d = new Date(dt);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    headingId="events-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent ?? undefined}
+  />
+
+  {/* ======= COMING-SOON STATE ================================================ */}
+  {!hasAny ? (
+    <section class="bg-background" aria-labelledby="events-coming-soon">
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <div class="rounded-md border border-border bg-muted p-section-md text-center">
+          <SectionHeading
+            eyebrow="Coming Soon."
+            headline="Events are on the way."
+            subhead="Check back soon for upcoming workshops, open houses, and other events."
+            headingId="events-coming-soon"
+            align="center"
+            class="mx-auto"
+          />
+          <div class="mt-l flex justify-center">
+            <a
+              href="/contact"
+              class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-accent-dark transition-colors"
+            >
+              Get in touch
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  ) : (
+    <>
+      {/* ------- 2. Upcoming events ------------------------------------------ */}
+      <section class="bg-background" aria-labelledby="events-upcoming-heading">
+        <div class="mx-auto max-w-content px-m py-section-lg">
+          <SectionHeading
+            eyebrow="Coming Up."
+            headline="Upcoming Events"
+            headingId="events-upcoming-heading"
+          />
+
+          {upcomingArr.length === 0 ? (
+            <div class="mt-l rounded-md border border-border bg-muted p-l text-center">
+              <p class="text-foreground/80">No upcoming events at the moment. Check back soon.</p>
+            </div>
+          ) : (
+            <div class="mt-section-lg space-y-l">
+              {upcomingArr.map((ev: any) => (
+                <article
+                  class="card-lift flex flex-col md:flex-row bg-card border border-border-soft rounded-md overflow-hidden shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]"
+                  aria-labelledby={`event-${ev._id}`}
+                >
+                  {/* Brand stripe */}
+                  <div class="h-0.5 md:h-auto md:w-0.5 bg-primary shrink-0" aria-hidden="true"></div>
+
+                  {/* Optional event image */}
+                  {ev.image && (
+                    <div class="md:w-56 md:shrink-0 overflow-hidden bg-muted">
+                      <SanityImage
+                        image={ev.image}
+                        alt={ev.image.alt ?? ev.title ?? ''}
+                        width={224}
+                        height={160}
+                        class="w-full h-40 md:h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  {/* Card body */}
+                  <div class="flex flex-col flex-1 p-l gap-s">
+                    <header>
+                      <h3
+                        id={`event-${ev._id}`}
+                        class="font-display text-h3 text-foreground leading-tight"
+                      >
+                        {ev.title ?? 'Event'}
+                      </h3>
+
+                      {/* Date and time */}
+                      <p class="mt-xs text-sm text-foreground/80">
+                        <time datetime={ev.startDate}>{formatDateTime(ev.startDate)}</time>
+                        {ev.endDate && (
+                          <> &ndash; <time datetime={ev.endDate}>{formatDateTime(ev.endDate)}</time></>
+                        )}
+                      </p>
+
+                      {/* Location */}
+                      {ev.location && (
+                        <p class="mt-xs text-xs uppercase tracking-eyebrow text-foreground/70">
+                          {ev.location}
+                        </p>
+                      )}
+                    </header>
+
+                    {/* Description */}
+                    {ev.description && ev.description.length > 0 && (
+                      <div class="text-sm text-foreground/80 leading-relaxed">
+                        <PortableText value={ev.description} />
+                      </div>
+                    )}
+
+                    {/* Registration CTA */}
+                    {ev.registrationUrl && (
+                      <div class="mt-auto pt-m">
+                        <a
+                          href={ev.registrationUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-accent-dark transition-colors"
+                        >
+                          Register <span aria-hidden="true" class="ml-xs">↗</span>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ------- 3. Past events (collapsed) ---------------------------------- */}
+      {pastArr.length > 0 && (
+        <section class="bg-muted" aria-labelledby="events-past-heading">
+          <div class="mx-auto max-w-content px-m py-section-md">
+            <details class="group">
+              <summary
+                class="flex items-center justify-between cursor-pointer list-none py-s"
+                aria-label="Toggle past events list"
+              >
+                <h2 id="events-past-heading" class="font-display text-h3 text-foreground">
+                  Past Events
+                </h2>
+                <span class="text-foreground/60 text-sm uppercase tracking-eyebrow group-open:rotate-180 transition-transform" aria-hidden="true">
+                  +
+                </span>
+              </summary>
+
+              <div class="mt-l space-y-m pb-section-md">
+                {pastArr.map((ev: any) => (
+                  <article
+                    class="flex flex-col sm:flex-row gap-m bg-card border border-border-soft rounded-md p-l"
+                    aria-labelledby={`past-event-${ev._id}`}
+                  >
+                    <div class="shrink-0 text-xs uppercase tracking-eyebrow text-foreground/60 sm:w-32 sm:text-right">
+                      <time datetime={ev.startDate}>{formatDateShort(ev.startDate)}</time>
+                    </div>
+                    <div class="flex-1">
+                      <h3
+                        id={`past-event-${ev._id}`}
+                        class="font-display text-base text-foreground leading-tight"
+                      >
+                        {ev.title ?? 'Event'}
+                      </h3>
+                      {ev.location && (
+                        <p class="mt-xs text-xs text-foreground/60">{ev.location}</p>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </details>
+          </div>
+        </section>
+      )}
+    </>
+  )}
+</BaseLayout>

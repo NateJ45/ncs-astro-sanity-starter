@@ -1,14 +1,14 @@
-// Co-located query functions for the e-design module.
+// Co-located query functions for the virtual-services module.
 // Copy this file to src/lib/ when enabling the module (Step 4).
 // The @/ alias resolves once the file is in src/lib/.
 
 import { sanityFetch } from '@/lib/sanity';
 import { IMAGE_PROJECTION, CTA_PROJECTION } from '@/lib/queries';
 
-// ---- E-Design module ---------------------------------------------------------
+// ---- Virtual Services module -------------------------------------------------
 
-export async function getEDesignPage() {
-  return sanityFetch(`*[_type == "eDesignPage"][0]{
+export async function getVirtualServicesPage() {
+  return sanityFetch(`*[_type == "virtualServicesPage"][0]{
     seoTitle, seoDescription,
     seoImage${IMAGE_PROJECTION},
     heroEyebrow, heroHeadline, heroSubhead,

@@ -2,7 +2,7 @@
  * modules/budget-calculator/seed.mjs
  *
  * Idempotent seeder for the budget-calculator module. Creates one
- * `budgetCalculator` singleton with 3 room types, 3 scope levels,
+ * `budgetCalculator` singleton with 3 project sizes, 3 scope levels,
  * and 3 add-ons.
  *
  * Requirements:
@@ -24,8 +24,8 @@
  *   Total low  = room.baseLow  + scope.addLow  + sum of selected addon.low
  *   Total high = room.baseHigh + scope.addHigh + sum of selected addon.high
  *
- * The seed data is internally consistent: base ranges are set by room
- * type (larger rooms cost more), scope adds a percentage-like uplift,
+ * The seed data is internally consistent: base ranges are set by project
+ * size (larger projects cost more), scope adds a percentage-like uplift,
  * and add-ons are optional extras that each add a reasonable fixed range.
  */
 
@@ -60,13 +60,16 @@ const client = createClient({
 // budgetCalculator singleton
 // ---------------------------------------------------------------------------
 //
-// Rooms: 3 common room types, sized low to high by typical project complexity.
-// Scope: 3 levels from a light refresh (no add) to a full redesign (+$2,500–$5,000).
-// Add-ons: 3 optional extras, each with a straightforward cost range.
+// Project sizes: 3 generic sizes from small to large.
+// Scope: 3 levels from a light engagement to a comprehensive one.
+// Add-ons: 3 optional extras with generic names.
 //
-// Example combined range (living room + full redesign + window treatments):
+// Example combined range (medium project + full scope + Add-on A):
 //   Low:  $6,000 + $2,500 + $500  = $9,000
 //   High: $12,000 + $5,000 + $2,000 = $19,000
+//
+// Replace all labels and price ranges with client-specific values
+// in the Studio before publishing.
 
 const budgetCalculator = {
   _id: 'budgetCalculator',
@@ -74,30 +77,30 @@ const budgetCalculator = {
 
   // Intro
   introEyebrow: 'Plan your project',
-  introHeadline: 'What does a design project cost?',
-  introSubhead: 'Use this as a starting point, not a firm quote. Every space is different, and a consultation is the only way to get specifics.',
+  introHeadline: 'What does a project like this cost?',
+  introSubhead: 'Use this as a starting point, not a firm quote. Every project is different, and a consultation is the only way to get specifics.',
   heroScriptAccent: '',
 
-  // Rooms
+  // Project sizes (using the 'rooms' field -- replace labels with your project-size vocabulary)
   rooms: [
     {
       _type: 'room',
       _key: 'room1',
-      label: 'Single room (bedroom, office, or dining room)',
+      label: 'Small project (replace with your smallest scope label)',
       baseLow: 3000,
       baseHigh: 7000,
     },
     {
       _type: 'room',
       _key: 'room2',
-      label: 'Living room or primary bedroom',
+      label: 'Medium project (replace with your mid-range scope label)',
       baseLow: 6000,
       baseHigh: 12000,
     },
     {
       _type: 'room',
       _key: 'room3',
-      label: 'Open-plan living and dining area',
+      label: 'Large project (replace with your largest scope label)',
       baseLow: 10000,
       baseHigh: 20000,
     },
@@ -108,54 +111,54 @@ const budgetCalculator = {
     {
       _type: 'scopeOption',
       _key: 'scope1',
-      label: 'Light refresh (new accessories, art, and textiles)',
+      label: 'Light engagement (replace with your lightest scope description)',
       addLow: 0,
       addHigh: 0,
     },
     {
       _type: 'scopeOption',
       _key: 'scope2',
-      label: 'Partial redesign (some new furniture, updated palette)',
+      label: 'Standard engagement (replace with your standard scope description)',
       addLow: 1000,
       addHigh: 2500,
     },
     {
       _type: 'scopeOption',
       _key: 'scope3',
-      label: 'Full redesign (furniture, finishes, layout, and accessories)',
+      label: 'Comprehensive engagement (replace with your full scope description)',
       addLow: 2500,
       addHigh: 5000,
     },
   ],
 
-  // Add-ons (optional extras)
+  // Add-ons (optional extras -- replace with your actual optional service items)
   addOns: [
     {
       _type: 'addOn',
       _key: 'addon1',
-      label: 'Window treatments',
+      label: 'Add-on A (replace with your first optional service)',
       low: 500,
       high: 2000,
     },
     {
       _type: 'addOn',
       _key: 'addon2',
-      label: 'Lighting updates',
+      label: 'Add-on B (replace with your second optional service)',
       low: 300,
       high: 1500,
     },
     {
       _type: 'addOn',
       _key: 'addon3',
-      label: 'Art selection and placement',
+      label: 'Add-on C (replace with your third optional service)',
       low: 200,
       high: 1000,
     },
   ],
 
   // Result copy and CTA
-  resultCopy: 'Based on what you described, a project like this typically runs {{low}} to {{high}}. That said, every home is different.',
-  disclaimer: 'This is a rough estimate to help you plan, not a quote. Actual cost depends on your space, finish level, and shopping budget. A consultation will give you specifics.',
+  resultCopy: 'Based on what you described, a project like this typically runs {{low}} to {{high}}. That said, every project is different.',
+  disclaimer: 'This is a rough estimate to help you plan, not a quote. Actual cost depends on your specific needs, scope, and timeline. A consultation will give you specifics.',
   ctaLabel: 'Book a consultation',
   consultPriceNote: '',
 };
@@ -173,15 +176,16 @@ async function seed() {
 
   console.log('Done. Created or replaced:');
   console.log('  budgetCalculator (singleton)');
-  console.log('  Rooms: 3 (single room, living room, open-plan)');
-  console.log('  Scope options: 3 (light refresh, partial redesign, full redesign)');
-  console.log('  Add-ons: 3 (window treatments, lighting, art)');
+  console.log('  Project sizes: 3 (small, medium, large -- placeholder labels)');
+  console.log('  Scope options: 3 (light, standard, comprehensive -- placeholder labels)');
+  console.log('  Add-ons: 3 (Add-on A, B, C -- placeholder labels)');
   console.log('');
   console.log('Next steps:');
-  console.log('  1. Update the room labels and base cost ranges in the Studio (Rooms tab).');
-  console.log('  2. Adjust scope uplift amounts to match real pricing (Scope options tab).');
-  console.log('  3. Add or remove add-ons as needed (Add-ons tab).');
+  console.log('  1. Replace project size labels and base cost ranges in the Studio (Rooms tab).');
+  console.log('  2. Replace scope option labels and uplift amounts (Scope options tab).');
+  console.log('  3. Replace add-on labels and cost ranges (Add-ons tab).');
   console.log('  4. Optionally add a hero image and script-accent word (Intro tab).');
+  console.log('  5. Update result copy and disclaimer to match the client voice (Result copy + CTA tab).');
 }
 
 seed().catch((err) => {

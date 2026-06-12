@@ -1,0 +1,187 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Team page. Displays all team members as a responsive grid ordered by
+// displayOrder (then name). No per-member detail pages by default; see the
+// enable doc for instructions on adding them as a custom extension.
+//
+// Sections:
+//   1. Hero
+//   2. Optional intro copy (Portable Text)
+//   3. Member grid (headshot + name + role + bio + email + social links)
+//
+// Graceful coming-soon state when no teamMember documents exist.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getTeamPage, getTeamMembers } from '@/lib/teamQueries';
+import { getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import PortableText from '@/components/PortableText';
+
+const [page, members, siteSettings] = await Promise.all([
+  getTeamPage().catch(() => null),
+  getTeamMembers().catch(() => []),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.team) return Astro.redirect('/');
+
+const membersArr: any[] = Array.isArray(members) ? members : [];
+
+const title       = page?.seoTitle       ?? 'Team · Studio Starter';
+const description = page?.seoDescription ?? 'Meet the people behind the work.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'The People.';
+const heroHeadline = page?.heroHeadline ?? 'Meet the Team';
+const heroSubhead  = page?.heroSubhead  ?? '';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Team', url: `${site.url}/team` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    headingId="team-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent ?? undefined}
+  />
+
+  {/* ------- 2. Optional intro copy ----------------------------------------- */}
+  {page?.intro && page.intro.length > 0 && (
+    <section class="bg-background" aria-label="Team introduction">
+      <div class="mx-auto max-w-3xl px-m pt-section-md pb-0">
+        <PortableText
+          value={page.intro}
+          className="text-foreground/85 text-lg leading-relaxed"
+        />
+      </div>
+    </section>
+  )}
+
+  {/* ------- 3. Member grid or coming-soon ----------------------------------- */}
+  {membersArr.length === 0 ? (
+    <section class="bg-background" aria-labelledby="team-coming-soon">
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <div class="rounded-md border border-border bg-muted p-section-md text-center">
+          <SectionHeading
+            eyebrow="Coming Soon."
+            headline="Team profiles are on the way."
+            subhead="In the meantime, reach out and we will be happy to introduce ourselves."
+            headingId="team-coming-soon"
+            align="center"
+            class="mx-auto"
+          />
+          <div class="mt-l flex justify-center">
+            <a
+              href="/contact"
+              class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-accent-dark transition-colors"
+            >
+              Get in touch
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  ) : (
+    <section class="bg-background" aria-labelledby="team-grid-heading">
+      <h2 id="team-grid-heading" class="sr-only">Team members</h2>
+
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-l">
+          {membersArr.map((member: any) => (
+            <article
+              class="card-lift flex flex-col bg-card text-card-foreground border border-border-soft rounded-md overflow-hidden shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]"
+              aria-labelledby={`member-${member._id}`}
+            >
+              {/* Brand stripe */}
+              <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+
+              {/* Headshot */}
+              {member.headshot ? (
+                <div class="aspect-square overflow-hidden bg-muted">
+                  <SanityImage
+                    image={member.headshot}
+                    alt={member.headshot.alt ?? member.name ?? ''}
+                    width={480}
+                    height={480}
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div class="aspect-square bg-muted flex items-center justify-center" aria-hidden="true">
+                  <span class="font-display text-4xl text-foreground/30">
+                    {(member.name ?? '?').charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+
+              {/* Card body */}
+              <div class="flex flex-col flex-1 p-l">
+                <h3
+                  id={`member-${member._id}`}
+                  class="font-display text-h3 text-foreground leading-tight"
+                >
+                  {member.name ?? 'Team Member'}
+                </h3>
+
+                {member.role && (
+                  <p class="mt-xs text-xs uppercase tracking-eyebrow text-foreground/70">
+                    {member.role}
+                  </p>
+                )}
+
+                {member.bio && member.bio.length > 0 && (
+                  <div class="mt-m text-sm text-foreground/80 leading-relaxed">
+                    <PortableText value={member.bio} />
+                  </div>
+                )}
+
+                {/* Email and social links */}
+                {(member.email || (member.socialLinks && member.socialLinks.length > 0)) && (
+                  <div class="mt-l pt-m border-t border-border-soft flex flex-wrap gap-m items-center">
+                    {member.email && (
+                      <a
+                        href={`mailto:${member.email}`}
+                        class="text-xs font-semibold uppercase tracking-eyebrow text-link hover:text-primary-dark transition-colors"
+                      >
+                        Email
+                      </a>
+                    )}
+                    {member.socialLinks && member.socialLinks.map((link: { _key: string; label: string; url: string }) => (
+                      <a
+                        key={link._key}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-xs font-semibold uppercase tracking-eyebrow text-link hover:text-primary-dark transition-colors"
+                      >
+                        {link.label} <span aria-hidden="true">↗</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
