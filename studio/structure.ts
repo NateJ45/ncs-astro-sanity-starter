@@ -27,6 +27,7 @@ import {
   InfoOutlineIcon,
   EnvelopeIcon,
   DocumentTextIcon,
+  DocumentsIcon,
   StarIcon,
   HeartIcon,
   ThListIcon,
@@ -34,10 +35,12 @@ import {
   TagIcon,
   BookIcon,
   LockIcon,
+  PinIcon,
   PresentationIcon,
   ThumbsUpIcon,
   ColorWheelIcon,
   RocketIcon,
+  OlistIcon,
 } from '@sanity/icons';
 import StudioGuide from './components/StudioGuide';
 import BusinessOverview from './components/BusinessOverview';
@@ -46,10 +49,12 @@ import StudioPlaybook from './components/StudioPlaybook';
 
 const SINGLETON_TYPES = [
   'siteSettings',
+  'businessInfo',
   // Core pages
   'homePage',
   'aboutPage',
   'servicesPage',
+  'processPage',
   'faqPage',
   'contactPage',
   'journalPage',
@@ -63,6 +68,7 @@ const SINGLETON_TYPES = [
 const ORDERABLE_TYPES = [
   'service',
   'philosophyPoint',
+  'processStep',
 ] as const;
 
 const HIDDEN_FROM_DEFAULT = new Set<string>([
@@ -72,9 +78,12 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'faqItem',
   'journalEntry',
   'journalCategory',
+  'page', // custom pages, placed explicitly under "Pages"
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
   'media.tag',
+  // processStep is placed explicitly under Content → Process Steps
+  'processStep',
 ]);
 
 /**
@@ -195,6 +204,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               singletonWithPreview(S, 'homePage', 'Home', HomeIcon),
               singletonWithPreview(S, 'aboutPage', 'About', UserIcon),
               singletonWithPreview(S, 'servicesPage', 'Services', PackageIcon),
+              singletonWithPreview(S, 'processPage', 'Process', OlistIcon),
               singletonWithPreview(S, 'faqPage', 'FAQ', HelpCircleIcon),
               singletonWithPreview(S, 'contactPage', 'Contact', EnvelopeIcon),
               singletonWithPreview(S, 'journalPage', 'Journal (index page)', BookIcon),
@@ -203,6 +213,12 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               S.divider(),
 
               singletonWithPreview(S, 'privacyPage', 'Privacy Policy Page', LockIcon),
+
+              S.divider(),
+
+              // Custom pages: editors build these themselves from the section library.
+              // Multi-instance (not a singleton), so it is a normal document list.
+              S.documentTypeListItem('page').title('Custom pages (build your own)').icon(DocumentsIcon),
             ]),
         ),
 
@@ -217,6 +233,12 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
           S.list()
             .title('Content')
             .items([
+              // Business info: service areas, travel fees, availability, geo.
+              // Moved here from Site Settings so Settings is identity + infrastructure only.
+              singletonWithPreview(S, 'businessInfo', 'Business info', PinIcon),
+
+              S.divider(),
+
               orderableDocumentListDeskItem({
                 type: 'service',
                 title: 'Services',
@@ -228,6 +250,13 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 type: 'philosophyPoint',
                 title: 'Philosophy Values',
                 icon: HeartIcon,
+                S,
+                context,
+              }),
+              orderableDocumentListDeskItem({
+                type: 'processStep',
+                title: 'Process Steps',
+                icon: OlistIcon,
                 S,
                 context,
               }),

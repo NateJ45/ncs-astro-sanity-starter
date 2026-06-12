@@ -2,6 +2,7 @@
 // Order doesn't affect runtime; alphabetical here for readability.
 
 import { aboutPage } from './aboutPage';
+import { businessInfo } from './businessInfo';
 import { contactPage } from './contactPage';
 import { ctaBlock } from './ctaBlock';
 import { faqItem } from './faqItem';
@@ -10,9 +11,14 @@ import { homePage } from './homePage';
 import { journalCategory } from './journalCategory';
 import { journalEntry } from './journalEntry';
 import { journalPage } from './journalPage';
+import { page } from './page';
+import { pageSectionSchemas } from './sections';
+import { richSectionSchemas } from './richSections';
 import { notFoundPage } from './notFoundPage';
 import { philosophyPoint } from './philosophyPoint';
 import { privacyPage } from './privacyPage';
+import { processPage } from './processPage';
+import { processStep } from './processStep';
 import { service } from './service';
 import { servicesPage } from './servicesPage';
 import { siteSettings } from './siteSettings';
@@ -24,12 +30,18 @@ import { testimonial } from './testimonial';
 export const schemaTypes = [
   // Object types (embedded) first so they're defined before docs that reference them
   ctaBlock,
+  // Page-builder section blocks (objects). Registered before the documents
+  // whose pageBuilder arrays reference them.
+  ...pageSectionSchemas,
+  ...richSectionSchemas,
 
   // Singletons
   siteSettings,
+  businessInfo, // Content-side singleton: service areas, travel fees, availability, geo
   homePage,
   aboutPage,
   servicesPage,
+  processPage,
   faqPage,
   contactPage,
   journalPage,
@@ -45,6 +57,9 @@ export const schemaTypes = [
   faqItem,
   philosophyPoint,
   service,
+  processStep,
   journalCategory,
   journalEntry,
+  // Custom pages built from the section library (multi-instance, not a singleton)
+  page,
 ];

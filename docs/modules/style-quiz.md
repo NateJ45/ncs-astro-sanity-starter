@@ -81,35 +81,13 @@ singletonWithPreview(S, 'styleQuiz', 'Style Quiz', SearchIcon),
 Copy-Item -Recurse -Force modules/style-quiz/src/* src/
 ```
 
-### Step 4b -- Add query functions to `src/lib/queries.ts`
+### Step 4b -- Copy the co-located query file
 
-The quiz page imports `getStyleQuiz` from `@/lib/queries`. Add it before the press section:
+The quiz page imports `getStyleQuiz` from `@/lib/styleQuizQueries`. Copy the
+co-located query file alongside the pages and components:
 
-```ts
-// ---- Style Quiz module ------------------------------------------------------
-
-export async function getStyleQuiz() {
-  return sanityFetch(`*[_type == "styleQuiz"][0]{
-    seoTitle, seoDescription,
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroScriptAccent,
-    questions[]{
-      _key, question, answers[]{_key, label, value, image${IMAGE_PROJECTION}}
-    },
-    qualifierQuestions[]{
-      _key, question, field, answers[]{_key, label, value}
-    },
-    archetypes[]{
-      _key, id, name, description,
-      images[]${IMAGE_PROJECTION},
-      ctaLabel, ctaHref,
-      secondaryCtaLabel, secondaryCtaHref
-    },
-    emailGateMode,
-    emailGateHeading, emailGateBlurb, emailGateButtonLabel,
-    emailGateSkipLabel
-  }`, {}, null);
-}
+```powershell
+Copy-Item modules/style-quiz/src/lib/styleQuizQueries.ts src/lib/
 ```
 
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`

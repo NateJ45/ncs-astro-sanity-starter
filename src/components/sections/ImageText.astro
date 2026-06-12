@@ -1,0 +1,65 @@
+---
+// Page-builder block: image and text side by side. Image side is
+// editor-controlled; surface comes from SectionRenderer. Safe to edit by hand.
+import SanityImage from '@/components/SanityImage.astro';
+import PortableText from '@/components/PortableText';
+import CtaLink from '@/components/CtaLink.astro';
+
+interface Props {
+  image?: any;
+  imageSide?: 'left' | 'right';
+  eyebrow?: string;
+  heading?: string;
+  body?: any;
+  cta?: any;
+  surface?: 'background' | 'muted';
+  headingId: string;
+}
+
+const {
+  image,
+  imageSide = 'left',
+  eyebrow,
+  heading,
+  body,
+  cta,
+  surface = 'background',
+  headingId,
+} = Astro.props as Props;
+
+const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+const imageFirst = imageSide === 'left';
+const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebrow ? 'mt-m' : ''}`;
+---
+
+<section class={bg} aria-labelledby={heading ? headingId : undefined}>
+  <div
+    class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-2 gap-l md:gap-section-md items-center"
+    data-reveal
+  >
+    <div class:list={[imageFirst ? 'md:order-1' : 'md:order-2']}>
+      {image?.asset ? (
+        <SanityImage
+          source={image}
+          width={800}
+          sizes="(min-width: 768px) 45vw, 100vw"
+          quality={75}
+          class="w-full h-auto rounded-md"
+        />
+      ) : (
+        <div class="aspect-[4/5] bg-muted rounded-md" aria-hidden="true"></div>
+      )}
+    </div>
+
+    <div class:list={[imageFirst ? 'md:order-2' : 'md:order-1']}>
+      {eyebrow && <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">{eyebrow}</p>}
+      {heading && <h2 id={headingId} class="font-display text-h2 text-foreground">{heading}</h2>}
+      {body && <PortableText value={body} className={bodyClass} />}
+      {cta?.label && (
+        <div class="mt-l">
+          <CtaLink cta={cta} variant="secondary" />
+        </div>
+      )}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,63 @@
+---
+// Page-builder block: a responsive YouTube or Vimeo embed. Parses the share
+// link into an embed URL; renders nothing if the link isn't recognized.
+// Surface comes from SectionRenderer. Safe to edit by hand.
+import SectionHeading from '@/components/SectionHeading.astro';
+
+interface Props {
+  url?: string;
+  heading?: string;
+  caption?: string;
+  surface?: 'background' | 'muted';
+  headingId: string;
+}
+
+const { url, heading, caption, surface = 'background', headingId } = Astro.props as Props;
+const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+
+function embedUrl(u?: string): string | null {
+  if (!u) return null;
+  try {
+    const parsed = new URL(u);
+    const host = parsed.hostname.replace(/^www\./, '');
+    if (host === 'youtu.be') return `https://www.youtube.com/embed/${parsed.pathname.slice(1)}`;
+    if (host.endsWith('youtube.com')) {
+      const v = parsed.searchParams.get('v');
+      if (v) return `https://www.youtube.com/embed/${v}`;
+      if (parsed.pathname.startsWith('/embed/')) return u;
+    }
+    if (host.endsWith('vimeo.com')) {
+      const id = parsed.pathname.split('/').filter(Boolean).pop();
+      if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
+    }
+  } catch {
+    /* malformed URL falls through to null */
+  }
+  return null;
+}
+
+const src = embedUrl(url);
+---
+
+{src && (
+  <section class={bg} aria-labelledby={heading ? headingId : undefined}>
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      {heading && (
+        <SectionHeading headline={heading} headingId={headingId} align="center" class="mx-auto" />
+      )}
+      <div class:list={['mx-auto max-w-4xl', heading && 'mt-section-md']}>
+        <div class="relative w-full overflow-hidden rounded-md" style="aspect-ratio: 16 / 9;">
+          <iframe
+            src={src}
+            title={heading || caption || 'Video'}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            class="absolute inset-0 w-full h-full border-0"
+          ></iframe>
+        </div>
+        {caption && <p class="mt-s text-center text-sm text-muted-foreground italic">{caption}</p>}
+      </div>
+    </div>
+  </section>
+)}

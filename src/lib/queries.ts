@@ -9,18 +9,102 @@
 import { sanityFetch } from './sanity';
 
 // Common Portable Text + image projection shorthand
-const IMAGE_PROJECTION = `{
+export const IMAGE_PROJECTION = `{
   ...,
   asset->,
   "alt": coalesce(alt, asset->altText, "")
 }`;
 
-const CTA_PROJECTION = `{
+export const CTA_PROJECTION = `{
   ...,
   internalLink->{ _type, "slug": slug.current }
 }`;
 
+// Page-builder array projection. Spreads each block, then resolves the nested
+// images and ctaBlocks inside the block types that carry them, so SectionRenderer
+// gets ready-to-use data. Block types without images/ctas (text, quote, stats,
+// video, spacer) pass through on the leading `...`.
+//
+// Parameterized by field name so it serves both `pageBuilder` (custom pages)
+// and `additionalSections` (the flexible append zone on core pages).
+export function sectionsProjection(field = 'pageBuilder'): string {
+  return `${field}[]{
+    ...,
+    _type == "heroSection" => {
+      ...,
+      backgroundImage${IMAGE_PROJECTION},
+      primaryCta${CTA_PROJECTION},
+      secondaryCta${CTA_PROJECTION}
+    },
+    _type == "ctaBandSection" => {
+      ...,
+      backgroundImage${IMAGE_PROJECTION},
+      cta${CTA_PROJECTION}
+    },
+    _type == "imageTextSection" => {
+      ...,
+      image${IMAGE_PROJECTION},
+      cta${CTA_PROJECTION}
+    },
+    _type == "gallerySection" => {
+      ...,
+      images[]${IMAGE_PROJECTION}
+    },
+    _type == "founderSection" => {
+      ...,
+      portrait${IMAGE_PROJECTION},
+      cta${CTA_PROJECTION}
+    },
+    _type == "storySection" => {
+      ...,
+      portrait${IMAGE_PROJECTION}
+    },
+    _type == "servicesGridSection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "services": *[_type == "service"] | order(orderRank asc, displayOrder asc)
+    },
+    _type == "testimonialsSection" => {
+      ...,
+      "featuredQuote": featuredQuote->{
+        ...,
+        "relatedProject": relatedProject->{ title, "slug": slug.current }
+      },
+      "testimonialsToShow": testimonialsToShow[]->{
+        ...,
+        "relatedProject": relatedProject->{ title, "slug": slug.current }
+      }
+    },
+    _type == "valuesSection" => {
+      ...,
+      "points": *[_type == "philosophyPoint"] | order(orderRank asc, displayOrder asc){
+        title, description, displayOrder
+      }
+    },
+    _type == "processSection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "steps": *[_type == "processStep"] | order(orderRank asc, stepNumber asc){
+        stepNumber, title, timeEstimate, shortDescription, features, tierNote
+      }
+    },
+    _type == "serviceAreaSection" => {
+      ...,
+      "travelFees": *[_type == "businessInfo"][0].travelFees
+    },
+    _type == "guaranteeSection" => {
+      ...,
+      "siteSettingsText": *[_type == "siteSettings"][0].satisfactionGuarantee
+    }
+  }`;
+}
+
 // ---- Site settings (used in BaseLayout / Header / Footer) -----------------
+// availabilityStatus, serviceAreas, travelFees, city, state, serviceRegion,
+// geoLat, and geoLng moved to the businessInfo singleton. Pulled in here under
+// the same flat field names so Header / Footer / pages that read
+// siteSettings.serviceAreas etc. keep working with no change; only the source
+// document changed.
 
 export async function getSiteSettings() {
   return sanityFetch(`*[_type == "siteSettings"][0]{
@@ -28,9 +112,14 @@ export async function getSiteSettings() {
     tagline,
     email,
     phone,
-    availabilityStatus,
-    serviceAreas,
-    travelFees,
+    "availabilityStatus": *[_type == "businessInfo"][0].availabilityStatus,
+    "serviceAreas": *[_type == "businessInfo"][0].serviceAreas,
+    "travelFees": *[_type == "businessInfo"][0].travelFees,
+    "geoLat": *[_type == "businessInfo"][0].geoLat,
+    "geoLng": *[_type == "businessInfo"][0].geoLng,
+    "city": *[_type == "businessInfo"][0].city,
+    "state": *[_type == "businessInfo"][0].state,
+    "serviceRegion": *[_type == "businessInfo"][0].serviceRegion,
     socialInstagram,
     socialFacebook,
     seoImage${IMAGE_PROJECTION},
@@ -55,6 +144,22 @@ export async function getSiteSettings() {
   }`, {}, null);
 }
 
+// ---- Business info (service areas, travel, availability, geo) -------------
+// Most consumers read these through getSiteSettings (flat names), but pages
+// or blocks that need businessInfo directly can use this.
+export async function getBusinessInfo() {
+  return sanityFetch(`*[_type == "businessInfo"][0]{
+    city,
+    state,
+    serviceRegion,
+    serviceAreas,
+    travelFees,
+    availabilityStatus,
+    geoLat,
+    geoLng
+  }`, {}, null);
+}
+
 // ---- Home page ------------------------------------------------------------
 
 export async function getHomePage() {
@@ -62,71 +167,7 @@ export async function getHomePage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    heroEyebrow,
-    heroHeadline,
-    heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroImages[]${IMAGE_PROJECTION},
-    heroPrimaryCta${CTA_PROJECTION},
-    heroSecondaryCta${CTA_PROJECTION},
-    heroRotatingWords,
-    heroScriptAccent,
-    meetFounderPhoto${IMAGE_PROJECTION},
-    meetFounderEyebrow,
-    meetFounderHeadline,
-    meetFounderContent,
-    meetFounderCta${CTA_PROJECTION},
-    featuredWorkEyebrow,
-    featuredWorkHeadline,
-    featuredWorkSubhead,
-    featuredWorkCta${CTA_PROJECTION},
-    featuredJournalEyebrow,
-    featuredJournalHeadline,
-    featuredJournalSubhead,
-    featuredJournalCta${CTA_PROJECTION},
-    processPreviewEyebrow,
-    processPreviewHeadline,
-    processPreviewSubhead,
-    processPreviewCta${CTA_PROJECTION},
-    testimonialsEyebrow,
-    testimonialsHeadline,
-    testimonialsScriptAccent,
-    testimonialsSubhead,
-    testimonialsAttribution,
-    "featuredTestimonial": featuredTestimonial->{
-      ...,
-      "relatedProject": relatedProject->{ title, "slug": slug.current }
-    },
-    "testimonialsToShow": testimonialsToShow[]->{
-      ...,
-      "relatedProject": relatedProject->{ title, "slug": slug.current }
-    },
-    servicesGridEyebrow,
-    servicesGridHeadline,
-    servicesGridScriptAccent,
-    servicesGridSubhead,
-    servicesGridCta${CTA_PROJECTION},
-    servicesGridFootnote,
-    "services": *[_type == "service" && showOnHomepage == true] | order(orderRank asc, displayOrder asc),
-    "processSteps": *[_type == "processStep"] | order(orderRank asc, stepNumber asc){
-      stepNumber, title, timeEstimate, shortDescription, features, tierNote
-    },
-    "featuredProjects": *[_type == "project"] | order(featured desc, publishedAt desc)[0..3]{
-      _id, title, slug, location, year, roomType, designStyle, briefSummary, featured,
-      heroImage${IMAGE_PROJECTION}
-    },
-    "featuredJournalEntries": *[_type == "journalEntry"] | order(featured desc, publishedAt desc)[0..3]{
-      _id, title, slug, excerpt, publishedAt, featured,
-      coverImage${IMAGE_PROJECTION},
-      "categories": categories[]->{ _id, title, slug, description }
-    },
-    serviceAreaCue,
-    finalCtaEyebrow,
-    finalCtaHeadline,
-    finalCtaScriptAccent,
-    finalCtaSubhead,
-    finalCtaBackgroundImage${IMAGE_PROJECTION},
-    finalCta${CTA_PROJECTION}
+    ${sectionsProjection('pageBuilder')}
   }`, {}, null);
 }
 
@@ -137,28 +178,7 @@ export async function getAboutPage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    storyEyebrow, storyHeadline, storyContent,
-    founderPhoto${IMAGE_PROJECTION},
-    founderAttribution,
-    backgroundLine,
-    serviceAreaMention,
-    philosophyEyebrow, philosophyHeadline,
-    "philosophyPoints": *[_type == "philosophyPoint"] | order(orderRank asc, displayOrder asc){
-      title, description, displayOrder
-    },
-    personalEyebrow, personalHeadline, personalIntro,
-    currentlyList[]{label, value},
-    rapidFire[]{prompt, answer},
-    localSpots[]{name, note},
-    beyondDesign,
-    candidPhoto${IMAGE_PROJECTION},
-    stats[]{number, suffix, label},
-    finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
-    finalCtaBackgroundImage${IMAGE_PROJECTION},
-    finalCta${CTA_PROJECTION}
+    ${sectionsProjection('pageBuilder')}
   }`, {}, null);
 }
 
@@ -169,21 +189,25 @@ export async function getServicesPage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    stickyCtaLabel,
-    servicesListEyebrow, servicesListHeadline, servicesListSubhead,
-    "services": *[_type == "service"] | order(orderRank asc, displayOrder asc),
-    builderRealtorSection{
-      ...,
-      cta${CTA_PROJECTION}
-    },
-    serviceAreaSection,
-    "travelFees": *[_type == "siteSettings"][0].travelFees,
-    finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
-    finalCtaBackgroundImage${IMAGE_PROJECTION},
-    finalCta${CTA_PROJECTION}
+    ${sectionsProjection('pageBuilder')}
+  }`, {}, null);
+}
+
+// Minimal service list for JSON-LD on the services page.
+export async function getServiceListForSchema() {
+  return sanityFetch(`*[_type == "service"] | order(orderRank asc, displayOrder asc){
+    _id, name, slug, shortDescription, price, priceNumeric
+  }`, {}, []);
+}
+
+// ---- Process page -----------------------------------------------------------
+
+export async function getProcessPage() {
+  return sanityFetch(`*[_type == "processPage"][0]{
+    seoTitle,
+    seoDescription,
+    seoImage${IMAGE_PROJECTION},
+    ${sectionsProjection('pageBuilder')}
   }`, {}, null);
 }
 
@@ -405,6 +429,46 @@ export async function getPressItems(): Promise<CorePressItem[]> {
     _id, outlet,
     logo${IMAGE_PROJECTION},
     quote, url, date, orderRank
+  }`, {}, []);
+}
+
+// ---- Custom pages (page builder) ------------------------------------------
+
+// One published custom page by slug, with its section array fully resolved.
+export async function getPage(slug: string) {
+  return sanityFetch(
+    `*[_type == "page" && slug.current == $slug][0]{
+      title,
+      "slug": slug.current,
+      seoTitle, seoDescription,
+      seoImage${IMAGE_PROJECTION},
+      ${sectionsProjection('pageBuilder')}
+    }`,
+    { slug },
+    null,
+  );
+}
+
+// Slugs of every published custom page, for getStaticPaths in [slug].astro.
+export async function getAllPageSlugs(): Promise<string[]> {
+  const list: Array<{ slug: string }> = await sanityFetch(
+    `*[_type == "page" && defined(slug.current)]{ "slug": slug.current }`,
+    {},
+    [],
+  );
+  return list.map((p) => p.slug).filter(Boolean);
+}
+
+// Custom pages flagged to appear in the main nav and/or footer. Header.astro
+// and Footer.astro can inject these alongside the built-in links.
+export async function getNavPages() {
+  return sanityFetch(`*[_type == "page" && defined(slug.current) && (addToMainNav == true || addToFooter == true)]{
+    title,
+    "slug": slug.current,
+    navLabel,
+    addToMainNav,
+    navGroup,
+    addToFooter
   }`, {}, []);
 }
 

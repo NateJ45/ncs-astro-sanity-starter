@@ -1,58 +1,26 @@
 ---
 // Safe to edit by hand for copy + structure changes.
-// About page. Tells the designer's story so visitors feel they're hiring a person, not a brand.
-//
-// Sections:
-//   1. Hero (text-only)
-//   2. Story (designer portrait + intro story PortableText + attribution + background line + service area mention)
-//   3. Philosophy (3+ philosophyPoint documents in a responsive grid)
-//   4. Final CTA
-//
-// Per CLAUDE.md: the page is fully editable through the aboutPage singleton plus the
-// philosophyPoint collection. Order in the grid follows philosophyPoint.displayOrder.
+// About page — section-driven via pageBuilder.
+// Edit sections and order in Sanity Studio under the About Page document.
+// When pageBuilder is empty (no Sanity project or unseeded), DEFAULT_ABOUT_SECTIONS
+// renders so the page is never blank.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getAboutPage, getSiteSettings, getPressItems } from '@/lib/queries';
-import { getSectionVisibility } from '@/lib/sectionVisibility';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import { getAboutPage, getSiteSettings } from '@/lib/queries';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
+import { DEFAULT_ABOUT_SECTIONS } from '@/data/defaultSections';
 
-import Hero from '@/components/Hero.astro';
-import SectionHeading from '@/components/SectionHeading.astro';
-import SanityImage from '@/components/SanityImage.astro';
-import PortableText from '@/components/PortableText';
-import FinalCta from '@/components/FinalCta.astro';
-import PressStrip from '@/components/PressStrip.astro';
-import AboutPersonal from '@/components/AboutPersonal.astro';
-import StatsRow from '@/components/StatsRow.astro';
-
-const [page, siteSettings, pressItems] = await Promise.all([
+const [page, siteSettings] = await Promise.all([
   getAboutPage().catch(() => null),
   getSiteSettings().catch(() => null),
-  getPressItems().catch(() => []),
 ]);
-
-const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 
 const title       = page?.seoTitle       ?? `About · ${site.name}`;
 const description = page?.seoDescription ?? `Meet the designer behind ${site.name}.`;
 
-const heroEyebrow  = page?.heroEyebrow  ?? 'The Designer.';
-const heroHeadline = page?.heroHeadline ?? 'People Hire People.';
-const heroSubhead  = page?.heroSubhead  ?? "Here's who you'd be working with.";
-
-const storyEyebrow  = page?.storyEyebrow  ?? 'My Story.';
-const storyHeadline = page?.storyHeadline ?? 'Why I Started This Studio.';
-
-const philosophyEyebrow  = page?.philosophyEyebrow  ?? 'How I Work.';
-const philosophyHeadline = page?.philosophyHeadline ?? 'A philosophy that puts your home first.';
-
-const philosophyPoints = page?.philosophyPoints ?? [];
-const stats = (page?.stats ?? [])
-  .filter((s): s is { number: number; suffix?: string | undefined; label: string; _type: 'statItem'; _key: string } =>
-    typeof s.number === 'number' && typeof s.label === 'string'
-  )
-  .map(({ number, suffix, label }) => ({ number, suffix, label }));
+const sections = page?.pageBuilder?.length ? page.pageBuilder : DEFAULT_ABOUT_SECTIONS;
 
 const schemas = [
   breadcrumbSchema([
@@ -63,136 +31,5 @@ const schemas = [
 ---
 
 <BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
-  {/* ------- 1. Hero --------------------------------------------------------- */}
-  <Hero
-    eyebrow={heroEyebrow}
-    headline={heroHeadline}
-    subhead={heroSubhead}
-    backgroundImage={page?.heroImage}
-    headingId="about-hero-heading"
-    size="short"
-    scriptAccent={page?.heroScriptAccent}
-  />
-
-  {/* ------- 2. Story -------------------------------------------------------- */}
-  <section
-    class="bg-background"
-    aria-labelledby="about-story-heading"
-  >
-    <div class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-[1fr_1.2fr] gap-l md:gap-section-md items-start">
-      <div class="md:sticky md:top-section-lg">
-        {page?.founderPhoto?.asset ? (
-          <SanityImage
-            source={page.founderPhoto}
-            width={900}
-            sizes="(min-width: 768px) 40vw, 100vw"
-            quality={75}
-            class="w-full h-auto rounded-md"
-          />
-        ) : (
-          <div class="aspect-[4/5] bg-muted rounded-md" aria-hidden="true"></div>
-        )}
-        {page?.founderAttribution && (
-          <p class="mt-s text-xs uppercase tracking-widest text-foreground/80">
-            {page.founderAttribution}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <SectionHeading
-          eyebrow={storyEyebrow}
-          headline={storyHeadline}
-          headingId="about-story-heading"
-        />
-
-        {page?.storyContent && (
-          <PortableText
-            value={page.storyContent}
-            className="mt-l text-foreground/85 text-lg leading-relaxed"
-          />
-        )}
-
-        {(page?.backgroundLine || page?.serviceAreaMention) && (
-          <div class="mt-section-md pt-l border-t border-border-soft space-y-m text-foreground/80">
-            {page?.backgroundLine && (
-              <p>
-                <span class="block text-xs uppercase tracking-widest text-foreground/80 mb-xs">Background</span>
-                {page.backgroundLine}
-              </p>
-            )}
-            {page?.serviceAreaMention && (
-              <p>
-                <span class="block text-xs uppercase tracking-widest text-foreground/80 mb-xs">Service area</span>
-                {page.serviceAreaMention}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  </section>
-
-  {/* ------- 3. Philosophy --------------------------------------------------- */}
-  {philosophyPoints.length > 0 && (
-    <section
-      class="bg-muted"
-      aria-labelledby="about-philosophy-heading"
-    >
-      <div class="mx-auto max-w-content px-m py-section-lg">
-        <SectionHeading
-          eyebrow={philosophyEyebrow}
-          headline={philosophyHeadline}
-          headingId="about-philosophy-heading"
-          align="center"
-          class="mx-auto"
-        />
-
-        <div class="mt-section-lg grid grid-cols-1 md:grid-cols-3 gap-l" data-stagger-grid>
-          {philosophyPoints.map((point: any, idx: number) => (
-            <article class="bg-card p-l rounded-md border border-border-soft">
-              <p
-                class="font-display text-h2 text-link/85 leading-none mb-s"
-                aria-hidden="true"
-              >
-                {String(idx + 1).padStart(2, '0')}
-              </p>
-              <h3 class="font-display text-h3 text-foreground">{point.title}</h3>
-              <p class="mt-s text-foreground/85 leading-relaxed">{point.description}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
-  {/* ------- 3b. Personal ("Off the clock") ------------------------------- */}
-  <AboutPersonal
-    eyebrow={page?.personalEyebrow}
-    headline={page?.personalHeadline}
-    intro={page?.personalIntro}
-    currentlyList={page?.currentlyList}
-    rapidFire={page?.rapidFire}
-    localSpots={page?.localSpots}
-    beyondDesign={page?.beyondDesign}
-    candidPhoto={page?.candidPhoto}
-  />
-
-  {/* ------- 4. Press strip (as seen in) ------------------------------------- */}
-  {/* Sits between the philosophy grid and the final CTA. Suppresses itself
-      when the pressItem collection is empty, and also when press is off. */}
-  {visible.press && <PressStrip items={pressItems} />}
-
-  {/* ------- 5. Stat counters ------------------------------------------------ */}
-  <StatsRow stats={stats} />
-
-  {/* ------- 6. Final CTA ---------------------------------------------------- */}
-  <FinalCta
-    eyebrow={page?.finalCtaEyebrow}
-    headline={page?.finalCtaHeadline}
-    subhead={page?.finalCtaSubhead}
-    cta={page?.finalCta}
-    scriptAccent={page?.finalCtaScriptAccent}
-    backgroundImage={page?.finalCtaBackgroundImage}
-  />
+  <SectionRenderer {sections} idPrefix="about" />
 </BaseLayout>

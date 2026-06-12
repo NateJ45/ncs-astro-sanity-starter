@@ -1,0 +1,52 @@
+---
+// Foundation, edit with care
+// Numbered card grid of values or philosophy principles.
+// Points are resolved from the philosophyPoint collection at query time.
+// SELF_CONTAINED — manages its own bg-muted surface.
+import SectionHeading from '@/components/SectionHeading.astro';
+
+interface PhilosophyPoint {
+  title?: string;
+  description?: string;
+}
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  points?: PhilosophyPoint[];
+  headingId?: string;
+}
+
+const {
+  eyebrow = 'How We Work.',
+  headline = 'Principles that guide every project.',
+  points = [],
+  headingId = 'values-section-heading',
+} = Astro.props as Props;
+---
+
+{points.length > 0 && (
+  <section class="bg-muted" aria-labelledby={headingId}>
+    <div class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow={eyebrow}
+        headline={headline}
+        headingId={headingId}
+        align="center"
+        class="mx-auto"
+      />
+
+      <div class="mt-section-lg grid grid-cols-1 md:grid-cols-3 gap-l" data-stagger-grid>
+        {points.map((point, idx) => (
+          <article class="bg-card p-l rounded-md border border-border-soft">
+            <p class="font-display text-h2 text-link/85 leading-none mb-s" aria-hidden="true">
+              {String(idx + 1).padStart(2, '0')}
+            </p>
+            <h3 class="font-display text-h3 text-foreground">{point.title}</h3>
+            <p class="mt-s text-foreground/85 leading-relaxed">{point.description}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

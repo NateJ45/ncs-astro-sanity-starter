@@ -1,6 +1,6 @@
 # ncs-astro-sanity-starter
 
-A reusable starter for building small-business marketing sites on Astro + Sanity + Cloudflare Workers. The infrastructure is already standing: theme system, SEO, animation/polish layer, forms plumbing, image handling, a typed Sanity layer, and an in-Studio editor guide. A new project pours in two things -- its business info and its design -- and the rest is in place.
+A reusable starter for building small-business marketing sites on Astro + Sanity + Cloudflare Workers. This is a **page-builder-first** starter: the core pages (home, about, services, process) render from Sanity `pageBuilder` arrays via a shared `SectionRenderer`, and any page created in the Studio gets its own `/[slug]` route automatically. The infrastructure is already standing: theme system, SEO, animation/polish layer, forms plumbing, image handling, a typed Sanity layer, an in-Studio editor guide, and a one-command brand reskin flow. A new project pours in two things -- its brand identity and its content -- and the rest is in place.
 
 Provenance: forked and genericized from a finished client build.
 
@@ -45,9 +45,11 @@ The starter ships a lean core. Additional surfaces come from opt-in modules (see
 
 | Route | Description |
 |---|---|
-| `/` | Home |
-| `/about` | About |
-| `/services` | Services |
+| `/` | Home -- section-driven via `pageBuilder` + `SectionRenderer` |
+| `/about` | About -- section-driven via `pageBuilder` + `SectionRenderer` |
+| `/services` | Services -- section-driven via `pageBuilder` + `SectionRenderer` |
+| `/process` | Process -- section-driven via `pageBuilder` + `SectionRenderer` |
+| `/[slug]` | Custom pages created in the Studio (reserved slugs filtered out) |
 | `/faq` | FAQ grouped by category |
 | `/contact` | Contact form + scheduling embed |
 | `/journal` | Journal/blog index |
@@ -55,13 +57,13 @@ The starter ships a lean core. Additional surfaces come from opt-in modules (see
 | `/privacy` | Privacy policy |
 | `/404` | Custom 404 |
 
-The home, about, and footer include Featured Work, Process, and Press sections that stay hidden until their module is enabled and has content (graceful degradation).
+The section-driven pages fall back to code-defined defaults in `src/data/defaultSections.ts` when no Sanity project is connected, so a fresh clone always renders non-blank content.
 
 ---
 
 ## Modules (opt-in, staged under `modules/`, OFF by default)
 
-`portfolio`, `process`, `newsletter`, `lead-magnets`, `style-quiz`, `budget-calculator`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`. Each is self-contained (schema + pages + islands + seed). Per-module enable guides are in `docs/modules/`. `portfolio` + `process` together are the informal creative-studio preset.
+`portfolio`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`, `lead-magnets`, `style-quiz`, `budget-calculator`. Each module ships built but disabled, and includes a co-located query file at `modules/<name>/src/lib/<name>Queries.ts` -- no hand-pasting into core `queries.ts` required. Enabling a module is copy-a-folder: copy it into the source tree, register the schema, and toggle on in `siteSettings.sectionVisibility`. Per-module enable guides are in `docs/modules/`.
 
 ---
 
@@ -78,14 +80,17 @@ The build works with no Sanity project configured: `src/lib/sanity.ts`'s `sanity
 
 ---
 
-## Re-skinning a new project (the design seam)
+## Reskinning a new project
 
-Editing this short list rebrands the whole site:
+`brand/brand.config.json` is the single source of truth: identity, palette (brand tokens + shadcn light/dark semantic tokens), fonts, and logo paths. Edit it, then run:
 
-- `src/styles/globals.css` -- the `@theme` palette tokens and `:root`/`.dark` (and `--tint-rgb`)
-- fonts -- the `@fontsource` imports + the `--font-*` tokens (default: Libre Baskerville + Inter; the script accent is opt-in)
-- `src/data/site.ts` -- identity constants
-- logo / favicon / OG inputs, then `npm run og`
+```bash
+npm install @fontsource/your-chosen-fonts   # install fonts first; apply-brand does not install packages
+npm run apply-brand                          # rewrites globals.css, site.ts, Studio theme, OG image
+npm run build                                # verify nothing broke
+```
+
+For a full rebrand from scratch (interview, font install, apply, WCAG AA contrast check, copy retone) use the `/reskin` skill at `.claude/skills/reskin/SKILL.md`. It orchestrates the full sequence end to end.
 
 The step-by-step adoption runbook is at `docs/bootstrap/NEW-PROJECT.md`.
 

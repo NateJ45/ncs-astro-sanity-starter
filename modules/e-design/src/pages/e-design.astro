@@ -15,7 +15,8 @@
 // Graceful coming-soon state when the eDesignPage Sanity doc is absent.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getEDesignPage, getSiteSettings } from '@/lib/queries';
+import { getEDesignPage } from '@/lib/eDesignQueries';
+import { getSiteSettings } from '@/lib/queries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';

@@ -1,8 +1,14 @@
 // Home page singleton. Content for hero, Meet the Founder, process preview,
 // testimonials, services grid, service-area cue, and final CTA.
 // Services and process steps auto-populate from their collections.
+//
+// Structured content fields (hero*, meetFounder*, services*, etc.) are hidden
+// and readOnly for rollback safety. The pageBuilder array is the primary editing
+// surface going forward. Do NOT delete the hidden fields — GROQ still returns
+// them so any existing routes that relied on them continue to work until converted.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
+import { HOME_SECTION_TYPES } from './richSections';
 
 export const homePage = defineType({
   name: 'homePage',
@@ -11,6 +17,7 @@ export const homePage = defineType({
   // Marketing copy is locked and structural — edit fields directly in Studio, not Canvas.
   options: { canvasApp: { exclude: true } },
   groups: [
+    { name: 'pageBuilder', title: 'Page layout' },
     { name: 'seo', title: 'SEO' },
     { name: 'hero', title: 'Hero' },
     { name: 'meetFounder', title: 'Meet the Founder' },
@@ -22,6 +29,17 @@ export const homePage = defineType({
     { name: 'final', title: 'Service area + final CTA' },
   ],
   fields: [
+    // Page builder (primary editing surface — section-driven)
+    defineField({
+      name: 'pageBuilder',
+      title: 'Page layout',
+      type: 'array',
+      group: 'pageBuilder',
+      description:
+        "Sections on this page. Drag to reorder, remove a section to hide it, or add a new block from the library. Edit each section's content by clicking into it.",
+      of: HOME_SECTION_TYPES,
+    }),
+
     // SEO
     defineField({
       name: 'seoTitle',
@@ -52,22 +70,25 @@ export const homePage = defineType({
       ],
     }),
 
-    // Hero
-    defineField({ name: 'heroEyebrow', title: 'Hero eyebrow', type: 'string', group: 'hero' }),
+    // Hero (legacy structured fields — hidden for rollback safety; GROQ still returns them)
+    defineField({ name: 'heroEyebrow', title: 'Hero eyebrow', type: 'string', group: 'hero', hidden: true, readOnly: true }),
     defineField({
       name: 'heroHeadline',
       title: 'Hero headline',
       type: 'string',
       group: 'hero',
+      hidden: true,
+      readOnly: true,
       validation: (Rule) => Rule.required(),
     }),
-    defineField({ name: 'heroSubhead', title: 'Hero subhead', type: 'text', rows: 3, group: 'hero' }),
+    defineField({ name: 'heroSubhead', title: 'Hero subhead', type: 'text', rows: 3, group: 'hero', hidden: true, readOnly: true }),
     defineField({
       name: 'heroImage',
       title: 'Hero image (legacy)',
       type: 'image',
       group: 'hero',
       hidden: true,
+      readOnly: true,
       options: { hotspot: true },
       fields: [
         defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),
@@ -78,6 +99,8 @@ export const homePage = defineType({
       title: 'Hero images',
       type: 'array',
       group: 'hero',
+      hidden: true,
+      readOnly: true,
       description:
         'The home hero. Add one photo for a single static hero. Add two or more for a slow cross-fading slideshow with a subtle zoom. Drag to set the order they appear in.',
       of: [
@@ -90,13 +113,15 @@ export const homePage = defineType({
         }),
       ],
     }),
-    defineField({ name: 'heroPrimaryCta', title: 'Primary CTA', type: 'ctaBlock', group: 'hero' }),
-    defineField({ name: 'heroSecondaryCta', title: 'Secondary CTA', type: 'ctaBlock', group: 'hero' }),
+    defineField({ name: 'heroPrimaryCta', title: 'Primary CTA', type: 'ctaBlock', group: 'hero', hidden: true, readOnly: true }),
+    defineField({ name: 'heroSecondaryCta', title: 'Secondary CTA', type: 'ctaBlock', group: 'hero', hidden: true, readOnly: true }),
     defineField({
       name: 'heroRotatingWords',
       title: 'Rotating first-word swap (optional)',
       type: 'array',
       group: 'hero',
+      hidden: true,
+      readOnly: true,
       description:
         'On the first visit per session, the FIRST word of the headline cycles through this list once before locking back to the original. Leave empty (or with fewer than 2 alternates) to skip the effect. Example: ["Lived-in", "Considered", "Quiet"]. Honors prefers-reduced-motion.',
       of: [defineArrayMember({ type: 'string' })],
@@ -106,28 +131,34 @@ export const homePage = defineType({
       title: 'Script-font accent word (optional)',
       type: 'string',
       group: 'hero',
+      hidden: true,
+      readOnly: true,
       description:
         'A single word from the headline to render in handwritten Pinyon Script for editorial flourish. Must match the word exactly (case-sensitive). The first occurrence wins. Leave blank to skip. Note: when "rotating words" is also set, the rotation wins and this is ignored.',
     }),
 
-    // Meet the Founder
+    // Meet the Founder (legacy — hidden for rollback safety)
     defineField({
       name: 'meetFounderPhoto',
       title: 'Founder photo',
       type: 'image',
       group: 'meetFounder',
+      hidden: true,
+      readOnly: true,
       options: { hotspot: true },
       fields: [
         defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),
       ],
     }),
-    defineField({ name: 'meetFounderEyebrow', title: 'Eyebrow', type: 'string', group: 'meetFounder', initialValue: 'Meet the Founder.' }),
-    defineField({ name: 'meetFounderHeadline', title: 'Headline', type: 'string', group: 'meetFounder' }),
+    defineField({ name: 'meetFounderEyebrow', title: 'Eyebrow', type: 'string', group: 'meetFounder', hidden: true, readOnly: true, initialValue: 'Meet the Founder.' }),
+    defineField({ name: 'meetFounderHeadline', title: 'Headline', type: 'string', group: 'meetFounder', hidden: true, readOnly: true }),
     defineField({
       name: 'meetFounderContent',
       title: 'Intro content',
       type: 'array',
       group: 'meetFounder',
+      hidden: true,
+      readOnly: true,
       of: [
         defineArrayMember({
           type: 'block',
@@ -142,14 +173,16 @@ export const homePage = defineType({
         }),
       ],
     }),
-    defineField({ name: 'meetFounderCta', title: '"Learn About the Founder" CTA', type: 'ctaBlock', group: 'meetFounder' }),
+    defineField({ name: 'meetFounderCta', title: '"Learn About the Founder" CTA', type: 'ctaBlock', group: 'meetFounder', hidden: true, readOnly: true }),
 
-    // Featured Work (auto-populates with featured-then-newest projects from the Project collection)
+    // Featured Work (legacy — hidden for rollback safety)
     defineField({
       name: 'featuredWorkEyebrow',
       title: 'Eyebrow',
       type: 'string',
       group: 'featuredWork',
+      hidden: true,
+      readOnly: true,
       initialValue: 'Recent Work.',
     }),
     defineField({
@@ -157,6 +190,8 @@ export const homePage = defineType({
       title: 'Headline',
       type: 'string',
       group: 'featuredWork',
+      hidden: true,
+      readOnly: true,
       initialValue: 'Rooms that feel finished.',
     }),
     defineField({
@@ -165,6 +200,8 @@ export const homePage = defineType({
       type: 'text',
       rows: 3,
       group: 'featuredWork',
+      hidden: true,
+      readOnly: true,
       description:
         'Conversion-oriented paragraph under the headline. Tell visitors what a click reveals — the brief, the design thinking, the result — so the section sells the case-study depth, not just the photos.',
       initialValue:
@@ -175,14 +212,18 @@ export const homePage = defineType({
       title: '"See all work" CTA',
       type: 'ctaBlock',
       group: 'featuredWork',
+      hidden: true,
+      readOnly: true,
     }),
 
-    // Featured Journal (auto-populates with featured-then-newest journal entries)
+    // Featured Journal (legacy — hidden for rollback safety)
     defineField({
       name: 'featuredJournalEyebrow',
       title: 'Eyebrow',
       type: 'string',
       group: 'featuredJournal',
+      hidden: true,
+      readOnly: true,
       initialValue: 'From the Journal.',
     }),
     defineField({
@@ -190,6 +231,8 @@ export const homePage = defineType({
       title: 'Headline',
       type: 'string',
       group: 'featuredJournal',
+      hidden: true,
+      readOnly: true,
       initialValue: 'How I think about design.',
     }),
     defineField({
@@ -198,6 +241,8 @@ export const homePage = defineType({
       type: 'text',
       rows: 3,
       group: 'featuredJournal',
+      hidden: true,
+      readOnly: true,
       description:
         'Conversion-oriented paragraph under the headline. Hint at the kinds of posts the founder writes — project walkthroughs, source roundups, design moves — so the section reads as the thinking behind every consultation, not just a blog.',
       initialValue:
@@ -208,25 +253,29 @@ export const homePage = defineType({
       title: '"Read more" CTA',
       type: 'ctaBlock',
       group: 'featuredJournal',
+      hidden: true,
+      readOnly: true,
     }),
 
-    // Process preview
-    defineField({ name: 'processPreviewEyebrow', title: 'Eyebrow', type: 'string', group: 'process', initialValue: 'How It Works.' }),
-    defineField({ name: 'processPreviewHeadline', title: 'Headline', type: 'string', group: 'process' }),
+    // Process preview (legacy — hidden for rollback safety)
+    defineField({ name: 'processPreviewEyebrow', title: 'Eyebrow', type: 'string', group: 'process', hidden: true, readOnly: true, initialValue: 'How It Works.' }),
+    defineField({ name: 'processPreviewHeadline', title: 'Headline', type: 'string', group: 'process', hidden: true, readOnly: true }),
     defineField({
       name: 'processPreviewSubhead',
       title: 'Subhead',
       type: 'text',
       rows: 2,
       group: 'process',
+      hidden: true,
+      readOnly: true,
       description:
         'Reassuring line under the headline. Lower the friction of reaching out — emphasize clarity, no pressure, knowing what comes next.',
       initialValue:
         'No guesswork and no pressure. From our first conversation to the day everything comes together, you will always know exactly where things stand and what happens next.',
     }),
-    defineField({ name: 'processPreviewCta', title: 'Link to full Process page', type: 'ctaBlock', group: 'process' }),
+    defineField({ name: 'processPreviewCta', title: 'Link to full Process page', type: 'ctaBlock', group: 'process', hidden: true, readOnly: true }),
 
-    // Testimonials
+    // Testimonials (legacy — hidden for rollback safety)
     defineField({
       name: 'featuredTestimonial',
       title: 'Featured testimonial',
@@ -234,14 +283,18 @@ export const homePage = defineType({
       to: [{ type: 'testimonial' }],
       description: 'The large pull-quote at the top of the testimonial section.',
       group: 'testimonials',
+      hidden: true,
+      readOnly: true,
     }),
-    defineField({ name: 'testimonialsEyebrow', title: 'Eyebrow', type: 'string', group: 'testimonials', initialValue: 'Kind Words.' }),
-    defineField({ name: 'testimonialsHeadline', title: 'Headline', type: 'string', group: 'testimonials', initialValue: 'Words from real homes.' }),
+    defineField({ name: 'testimonialsEyebrow', title: 'Eyebrow', type: 'string', group: 'testimonials', hidden: true, readOnly: true, initialValue: 'Kind Words.' }),
+    defineField({ name: 'testimonialsHeadline', title: 'Headline', type: 'string', group: 'testimonials', hidden: true, readOnly: true, initialValue: 'Words from real homes.' }),
     defineField({
       name: 'testimonialsScriptAccent',
       title: 'Testimonials heading script accent (optional)',
       type: 'string',
       group: 'testimonials',
+      hidden: true,
+      readOnly: true,
       description:
         'Optional. One word or short phrase from the headline to render in handwritten Pinyon Script. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
@@ -251,6 +304,8 @@ export const homePage = defineType({
       type: 'text',
       rows: 2,
       group: 'testimonials',
+      hidden: true,
+      readOnly: true,
       description:
         'Warm line under the headline that frames the testimonials below. Focus on what clients value — how it felt to work together, how the space lives day to day.',
       initialValue:
@@ -261,6 +316,8 @@ export const homePage = defineType({
       title: 'Testimonials in grid (in order)',
       type: 'array',
       group: 'testimonials',
+      hidden: true,
+      readOnly: true,
       of: [defineArrayMember({ type: 'reference', to: [{ type: 'testimonial' }] })],
     }),
     defineField({
@@ -268,55 +325,67 @@ export const homePage = defineType({
       title: 'Attribution line',
       type: 'string',
       group: 'testimonials',
+      hidden: true,
+      readOnly: true,
       description: 'Optional line under the testimonials grid. Example: "From the studio\'s Facebook recommendations."',
     }),
 
-    // Services grid
-    defineField({ name: 'servicesGridEyebrow', title: 'Eyebrow', type: 'string', group: 'services', initialValue: 'The Studio.' }),
-    defineField({ name: 'servicesGridHeadline', title: 'Headline', type: 'string', group: 'services' }),
+    // Services grid (legacy — hidden for rollback safety)
+    defineField({ name: 'servicesGridEyebrow', title: 'Eyebrow', type: 'string', group: 'services', hidden: true, readOnly: true, initialValue: 'The Studio.' }),
+    defineField({ name: 'servicesGridHeadline', title: 'Headline', type: 'string', group: 'services', hidden: true, readOnly: true }),
     defineField({
       name: 'servicesGridScriptAccent',
       title: 'Services heading script accent (optional)',
       type: 'string',
       group: 'services',
+      hidden: true,
+      readOnly: true,
       description:
         'Optional. One word or short phrase from the headline to render in handwritten Pinyon Script. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
-    defineField({ name: 'servicesGridSubhead', title: 'Subhead', type: 'text', rows: 2, group: 'services' }),
-    defineField({ name: 'servicesGridCta', title: 'Services grid CTA', type: 'ctaBlock', group: 'services' }),
+    defineField({ name: 'servicesGridSubhead', title: 'Subhead', type: 'text', rows: 2, group: 'services', hidden: true, readOnly: true }),
+    defineField({ name: 'servicesGridCta', title: 'Services grid CTA', type: 'ctaBlock', group: 'services', hidden: true, readOnly: true }),
     defineField({
       name: 'servicesGridFootnote',
       title: 'Footnote',
       type: 'string',
       group: 'services',
+      hidden: true,
+      readOnly: true,
       description: 'Small-print line under the services grid. Example: "Final pricing is always discussed before any work begins."',
     }),
 
-    // Service area cue + final CTA
+    // Service area cue + final CTA (legacy — hidden for rollback safety)
     defineField({
       name: 'serviceAreaCue',
       title: 'Service area cue line',
       type: 'string',
       group: 'final',
+      hidden: true,
+      readOnly: true,
       description: 'Example: "Serving the greater metro area and surrounding region."',
     }),
-    defineField({ name: 'finalCtaEyebrow', title: 'Final CTA eyebrow', type: 'string', group: 'final', initialValue: 'Ready to Begin?' }),
-    defineField({ name: 'finalCtaHeadline', title: 'Final CTA headline', type: 'string', group: 'final', initialValue: 'Ready to Love Your Space?' }),
+    defineField({ name: 'finalCtaEyebrow', title: 'Final CTA eyebrow', type: 'string', group: 'final', hidden: true, readOnly: true, initialValue: 'Ready to Begin?' }),
+    defineField({ name: 'finalCtaHeadline', title: 'Final CTA headline', type: 'string', group: 'final', hidden: true, readOnly: true, initialValue: 'Ready to Love Your Space?' }),
     defineField({
       name: 'finalCtaScriptAccent',
       title: 'Final CTA heading script accent (optional)',
       type: 'string',
       group: 'final',
+      hidden: true,
+      readOnly: true,
       description:
         'Optional. One word or short phrase from the headline to render in handwritten Pinyon Script. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
-    defineField({ name: 'finalCtaSubhead', title: 'Final CTA subhead', type: 'text', rows: 2, group: 'final', initialValue: "Let's start with a conversation." }),
-    defineField({ name: 'finalCta', title: 'Final CTA button', type: 'ctaBlock', group: 'final' }),
+    defineField({ name: 'finalCtaSubhead', title: 'Final CTA subhead', type: 'text', rows: 2, group: 'final', hidden: true, readOnly: true, initialValue: "Let's start with a conversation." }),
+    defineField({ name: 'finalCta', title: 'Final CTA button', type: 'ctaBlock', group: 'final', hidden: true, readOnly: true }),
     defineField({
       name: 'finalCtaBackgroundImage',
       title: 'Final CTA background image (optional)',
       type: 'image',
       group: 'final',
+      hidden: true,
+      readOnly: true,
       options: { hotspot: true },
       description:
         'Optional. A photo behind the closing call-to-action. The site automatically darkens it so the headline and button stay readable. Leave empty to keep the solid charcoal panel.',

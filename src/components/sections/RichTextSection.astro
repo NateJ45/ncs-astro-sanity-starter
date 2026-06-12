@@ -1,0 +1,52 @@
+---
+// Page-builder block: a text section (optional heading + rich body).
+// Surface (background / muted) is assigned by SectionRenderer so the page
+// cadence stays correct no matter the order. Safe to edit by hand.
+import SectionHeading from '@/components/SectionHeading.astro';
+import PortableText from '@/components/PortableText';
+
+interface Props {
+  eyebrow?: string;
+  heading?: string;
+  scriptAccent?: string;
+  body?: any;
+  width?: 'normal' | 'narrow';
+  align?: 'left' | 'center';
+  surface?: 'background' | 'muted';
+  headingId: string;
+}
+
+const {
+  eyebrow,
+  heading,
+  scriptAccent,
+  body,
+  width = 'normal',
+  align = 'left',
+  surface = 'background',
+  headingId,
+} = Astro.props as Props;
+
+const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+const widthClass = width === 'narrow' ? 'max-w-prose' : 'max-w-content';
+const alignClass = align === 'center' ? 'text-center' : '';
+const proseClass = ['text-foreground/85 text-lg leading-relaxed', heading ? 'mt-l' : '', alignClass]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<section class={bg} aria-labelledby={heading ? headingId : undefined}>
+  <div class:list={['mx-auto px-m py-section-lg', widthClass]} data-reveal>
+    {heading && (
+      <SectionHeading
+        eyebrow={eyebrow}
+        headline={heading}
+        headingId={headingId}
+        align={align}
+        scriptAccent={scriptAccent}
+        class={align === 'center' ? 'mx-auto' : ''}
+      />
+    )}
+    {body && <PortableText value={body} className={proseClass} />}
+  </div>
+</section>

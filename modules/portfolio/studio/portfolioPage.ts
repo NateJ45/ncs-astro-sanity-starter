@@ -2,8 +2,13 @@
 // on /portfolio. The project grid itself is auto-populated from project
 // documents (ordered via the orderable-document-list plugin).
 // Replace the initialValue strings below with copy that suits the studio.
+//
+// After copying this file to studio/schemaTypes/ (Step 1), the import below
+// resolves from the same directory:
+// import { additionalSectionsField } from './sections';
 
 import { defineType, defineField } from 'sanity';
+import { additionalSectionsField } from './sections';
 
 export const portfolioPage = defineType({
   name: 'portfolioPage',
@@ -14,6 +19,7 @@ export const portfolioPage = defineType({
   groups: [
     { name: 'seo', title: 'SEO' },
     { name: 'hero', title: 'Hero' },
+    { name: 'extra', title: 'Extra sections' },
   ],
   fields: [
     defineField({
@@ -88,6 +94,8 @@ export const portfolioPage = defineType({
       description:
         'A single word from the headline to render in handwritten Pinyon Script. Must match exactly (case-sensitive). Leave blank to skip.',
     }),
+
+    additionalSectionsField,
   ],
   preview: { prepare: () => ({ title: 'Portfolio Page' }) },
 });

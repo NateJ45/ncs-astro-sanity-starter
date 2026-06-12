@@ -92,69 +92,19 @@ orderableDocumentListDeskItem({
 Copy-Item -Recurse -Force modules/portfolio/src/* src/
 ```
 
-### Step 4b -- Add query functions to `src/lib/queries.ts`
+### Step 4b -- Copy the co-located query file
 
-The portfolio pages import `getPortfolioPage`, `getProjectBySlug`, and `getProjectsWithBeforeAfter` from `@/lib/queries`. These are not in the core starter; add them before the press section in `src/lib/queries.ts`.
+The portfolio pages import `getPortfolioPage`, `getProjectBySlug`, and
+`getProjectsWithBeforeAfter` from `@/lib/portfolioQueries`. Copy the
+co-located query file alongside the pages and components:
+
+```powershell
+Copy-Item modules/portfolio/src/lib/portfolioQueries.ts src/lib/
+```
 
 **Note:** `getAllProjects` (used by the portfolio index and the `[slug]` page's
-`getStaticPaths`) is already in the core starter -- do NOT add it again.
-Only add the three functions shown below:
-
-```ts
-// ---- Portfolio module -------------------------------------------------------
-
-export async function getPortfolioPage() {
-  return sanityFetch(`*[_type == "portfolioPage"][0]{
-    seoTitle, seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent
-  }`, {}, null);
-}
-
-export async function getProjectsWithBeforeAfter() {
-  return sanityFetch(`*[_type == "project" && count(beforeAfters[defined(beforeImage.asset) && defined(afterImage.asset)]) > 0]
-    | order(orderRank asc, coalesce(displayOrder, 999) asc, publishedAt desc){
-    _id, title, slug, location, roomType,
-    "beforeAfters": beforeAfters[]{
-      beforeImage${IMAGE_PROJECTION},
-      afterImage${IMAGE_PROJECTION},
-      caption
-    }
-  }`, {}, []);
-}
-
-export async function getProjectBySlug(slug: string) {
-  return sanityFetch(
-    `*[_type == "project" && slug.current == $slug][0]{
-      _id, title, slug, location, year, roomType, designStyle,
-      briefSummary, briefLine, designCall,
-      metaTitle, metaDescription,
-      stickyCtaLabel,
-      heroImage${IMAGE_PROJECTION},
-      gallery[]${IMAGE_PROJECTION},
-      beforeAfters[]{
-        beforeImage${IMAGE_PROJECTION},
-        afterImage${IMAGE_PROJECTION},
-        caption
-      },
-      introStory[]{
-        ...,
-        _type == "image" => ${IMAGE_PROJECTION}
-      },
-      "servicesUsed": servicesUsed[]->{ _id, name, slug },
-      "relatedTestimonial": relatedTestimonial->{ quote, attribution },
-      "relatedJournalEntries": *[_type == "journalEntry" && references(^._id)] | order(publishedAt desc)[0..2]{
-        _id, title, slug, excerpt, publishedAt, coverImage${IMAGE_PROJECTION},
-        "categories": categories[]->{ _id, title, slug }
-      }
-    }`,
-    { slug },
-    null,
-  );
-}
-```
+`getStaticPaths`) is already in the core starter in `src/lib/queries.ts` --
+do NOT add it again. Only `portfolioQueries.ts` needs to be copied.
 
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
 

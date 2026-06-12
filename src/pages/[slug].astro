@@ -1,0 +1,55 @@
+---
+// Custom pages built in the page builder. Generates one static page per
+// published `page` document at /<slug>. Built-in routes (about.astro, etc.) are
+// explicit files and take precedence. The schema blocks reserved slugs; the
+// filter below is a second guard so a custom page can never shadow a real route.
+//
+// IMPORTANT: RESERVED must be defined INSIDE getStaticPaths. Astro's static
+// build runs getStaticPaths in an isolated scope. A module-level import of
+// the set from reservedSlugs.ts is NOT visible to the runtime at path-generation
+// time due to Astro's static-build isolation. This is a known Astro gotcha
+// documented in CLAUDE.md.
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import { getPage, getAllPageSlugs, getSiteSettings } from '@/lib/queries';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+export async function getStaticPaths() {
+  // Defined inside getStaticPaths: mirrors the page schema's reserved list so
+  // a custom page can never shadow a built-in route. Keep in sync with
+  // src/lib/reservedSlugs.ts (same set, duplicated by Astro isolation necessity).
+  const RESERVED = new Set([
+    'about', 'services', 'process', 'portfolio', 'faq', 'contact', 'journal',
+    'e-design', 'shop', 'gift-certificates', 'quiz', 'calculator', 'resources',
+    'guides', 'press', 'privacy', '404', 'sitemap-index.xml', 'og', '_astro',
+  ]);
+  const slugs = await getAllPageSlugs().catch(() => [] as string[]);
+  return slugs
+    .filter((slug) => !RESERVED.has(slug))
+    .map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const [pageDoc, siteSettings] = await Promise.all([
+  getPage(slug as string).catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+if (!pageDoc) return Astro.redirect('/404');
+
+const title = (pageDoc as any).seoTitle ?? (pageDoc as any).title ?? site.name;
+const description = (pageDoc as any).seoDescription ?? '';
+const seoImage = (pageDoc as any).seoImage ?? undefined;
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: (pageDoc as any).title ?? 'Page', url: `${site.url}/${slug}` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={seoImage}>
+  <SectionRenderer sections={(pageDoc as any).pageBuilder} idPrefix="page" />
+</BaseLayout>

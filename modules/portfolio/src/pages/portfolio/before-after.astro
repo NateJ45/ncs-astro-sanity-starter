@@ -8,7 +8,8 @@
 // Graceful empty state when no projects have pairs yet.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getProjectsWithBeforeAfter, getSiteSettings } from '@/lib/queries';
+import { getSiteSettings } from '@/lib/queries';
+import { getProjectsWithBeforeAfter } from '@/lib/portfolioQueries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';

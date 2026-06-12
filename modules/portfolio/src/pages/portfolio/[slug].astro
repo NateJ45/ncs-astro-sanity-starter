@@ -5,7 +5,8 @@
 // related testimonial, services used, next/previous navigation, sticky TOC.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getAllProjects, getProjectBySlug, getSiteSettings } from '@/lib/queries';
+import { getAllProjects, getSiteSettings } from '@/lib/queries';
+import { getProjectBySlug } from '@/lib/portfolioQueries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema, projectSchema } from '@/lib/schemas';
 import { extractHeadings } from '@/lib/portable-text-headings';

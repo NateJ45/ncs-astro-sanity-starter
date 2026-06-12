@@ -167,20 +167,54 @@ if (import.meta.env.SSR) {
 
 ---
 
-## Design seam: how to re-skin this starter
+## Two-layer token system
 
-Changing the visual identity of a project built on this starter requires touching exactly four areas. Everything else (components, layout, spacing, animation) inherits from these.
+`globals.css` has two distinct token layers, and understanding them helps when reskinning.
+
+**Layer 1: `@theme` brand palette tokens (Tailwind 4)**
+
+Declared in the `@theme` block. These are the raw brand values — named colors, raw hex values, and font stacks. They map to Tailwind utility classes directly (`bg-primary` → `--color-primary`).
+
+The key tokens (from `brand/brand.config.json → palette.theme`):
+- `--color-primary`, `--color-primary-dark` — brand color and its hover variant
+- `--color-accent`, `--color-accent-dark` — headings and primary text
+- `--color-bg`, `--color-bg-soft`, `--color-border-soft` — surface and border values
+- `--color-secondary`, `--color-tertiary` — supporting palette values
+
+**Layer 2: shadcn `:root` / `.dark` semantic tokens**
+
+Declared in `:root` and `.dark`. These are the semantic tokens shadcn components consume. They are set from `brand/brand.config.json → palette.light` (for `:root`) and `palette.dark` (for `.dark`).
+
+Key semantic tokens: `--background`, `--foreground`, `--primary`, `--primary-foreground`, `--muted`, `--muted-foreground`, `--card`, `--card-foreground`, `--accent`, `--accent-foreground`, `--border`, `--ring`, `--link`, and the full `--sidebar-*` set.
+
+The `--tint-rgb` token (also in both `:root` and `.dark`) holds the brand tint as a bare RGB triplet. The polish layer uses it to compose tinted overlays at arbitrary opacity without duplicating the hex. Update it when reskinning so `surface-warm`, `img-tint`, and the paper-grain tint pick up the new hue automatically.
+
+---
+
+## Reskinning
+
+**The right way to reskin is via `brand/brand.config.json` + `npm run apply-brand`.** Do not hand-edit `globals.css` tokens or `site.ts` for a reskin — the script owns those regions and will overwrite hand edits on the next run. Edit the config, run the script.
+
+Full reference for the config shape, what the script rewrites, and the `/reskin` skill's guided flow: `docs/brand/brand-system.md`.
+
+If you do need to hand-edit the token files (for a one-off tweak that is not a full reskin), be aware that `apply-brand` targets comment-delimited regions in `globals.css`. Changes outside those delimiters are preserved; changes inside those delimiters will be overwritten on the next `apply-brand` run.
+
+---
+
+## Design seam reference (what apply-brand rewrites)
+
+For reference, the four areas `apply-brand` touches. Described here so you know which files are in play; see `docs/brand/brand-system.md` for the full config schema.
 
 1. **`src/styles/globals.css` -- `@theme` block and `:root` / `.dark`**
-   Replace the Slate/Ink/Paper hex values and `--tint-rgb` triplets with your palette. Update the shadcn semantic overrides in `:root` and `.dark` so `bg-primary`, `text-foreground`, `bg-background`, etc. resolve to your colors. Keep the token structure; only change the values.
+   Rewrites the `@theme` color and font token declarations, the `:root` semantic token overrides, and the `.dark` semantic token overrides. Targets comment-delimited regions; does not touch anything outside them.
 
 2. **Font imports and `--font-*` tokens**
-   Replace the `@fontsource/libre-baskerville` and `@fontsource-variable/inter` imports at the top of `globals.css` with your chosen typefaces. Update `--font-display` and `--font-body` in the `@theme` block to match. To enable the optional script accent, add a `@fontsource` import for a script font and point `--font-script` at it (see `animation.md`).
+   Rewrites the `@fontsource` import lines and the `--font-display`, `--font-body`, `--font-script` tokens. Font packages must be installed before running `apply-brand` — see `docs/brand/brand-system.md`.
 
 3. **`src/data/site.ts`**
-   Update the brand name, domain, tagline, social URLs, and any other hardcoded identity strings the build needs at compile time.
+   Rewrites `name`, `domain`, `tagline`, and `brandColors`.
 
-4. **Logo, favicon, and OG inputs**
-   Drop your `logo-light.*` and `logo-dark.*` files into `src/assets/` (or wherever `BaseLayout.astro` imports them from). Replace the favicon in `public/`. Re-run `npm run og` if you want updated default OG images.
+4. **Studio theme + OG generator**
+   Rewrites the Studio theme props in `studio/sanity.config.ts` and the OG generator inputs, then regenerates `public/og-default.png`.
 
-No other files need to change for a basic re-skin. The `--tint-rgb` token propagates your hue through all the polish-layer overlays automatically.
+No other files need to change for a brand swap. The `--tint-rgb` token propagates your hue through all the polish-layer overlays automatically.

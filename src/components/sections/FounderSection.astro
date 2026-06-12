@@ -1,0 +1,59 @@
+---
+// Foundation, edit with care
+// Two-column founder bio block. Portrait left, prose right.
+// Manages its own bg-background surface (SELF_CONTAINED — no surface prop).
+import SanityImage from '@/components/SanityImage.astro';
+import PortableText from '@/components/PortableText';
+import CtaLink from '@/components/CtaLink.astro';
+
+interface Props {
+  portrait?: any;
+  eyebrow?: string;
+  headline?: string;
+  content?: any;
+  cta?: any;
+  headingId?: string;
+}
+
+const {
+  portrait,
+  eyebrow = 'Meet the Founder.',
+  headline = 'Good design starts with a real conversation.',
+  content = null,
+  cta,
+  headingId = 'founder-section-heading',
+} = Astro.props as Props;
+---
+
+<section class="bg-background" aria-labelledby={headingId}>
+  <div data-reveal class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-2 gap-l md:gap-section-md items-center">
+    {portrait?.asset ? (
+      <div class="order-1 md:order-1">
+        <SanityImage
+          source={portrait}
+          width={800}
+          sizes="(min-width: 768px) 45vw, 100vw"
+          quality={75}
+          class="w-full h-auto rounded-md"
+        />
+      </div>
+    ) : (
+      <div class="order-1 md:order-1 aspect-[4/5] bg-muted rounded-md" aria-hidden="true"></div>
+    )}
+
+    <div class="order-2 md:order-2">
+      <p class="text-xs uppercase tracking-[0.22em] text-foreground/80 mb-s">{eyebrow}</p>
+      <h2 id={headingId} class="font-display text-h2 text-foreground">{headline}</h2>
+      {content ? (
+        <PortableText value={content} className="mt-m text-foreground/85 text-lg leading-relaxed" />
+      ) : (
+        <p class="mt-m text-foreground/85 text-lg leading-relaxed">
+          Add your founder intro in Sanity Studio under the Founder Bio section.
+        </p>
+      )}
+      <div class="mt-l flex justify-center md:justify-start">
+        <CtaLink cta={cta} variant="secondary" fallbackHref="/about" fallbackLabel="Learn More" />
+      </div>
+    </div>
+  </div>
+</section>

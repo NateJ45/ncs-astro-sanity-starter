@@ -68,42 +68,12 @@ orderableDocumentListDeskItem({
 Copy-Item -Recurse -Force modules/lead-magnets/src/* src/
 ```
 
-### Step 4b -- Add query functions to `src/lib/queries.ts`
+### Step 4b -- Copy the co-located query file
 
-The guides pages import `getLeadMagnets`, `getLeadMagnet`, and `getAllLeadMagnetSlugs` from `@/lib/queries`. Add them before the press section:
+The guides pages import `getLeadMagnets`, `getLeadMagnet`, and `getAllLeadMagnetSlugs` from `@/lib/leadMagnetsQueries`. Copy the co-located query file alongside the pages and components:
 
-```ts
-// ---- Lead Magnets module ----------------------------------------------------
-
-export async function getLeadMagnets() {
-  return sanityFetch(`*[_type == "leadMagnet" && published == true] | order(orderRank asc){
-    _id, title, "slug": slug.current, summary,
-    coverImage${IMAGE_PROJECTION}
-  }`, {}, []);
-}
-
-export async function getLeadMagnet(slug: string) {
-  return sanityFetch(
-    `*[_type == "leadMagnet" && slug.current == $slug][0]{
-      _id, title, slug, summary,
-      seoTitle, seoDescription,
-      coverImage${IMAGE_PROJECTION},
-      file{ asset->{ url } },
-      gateHeading, gateBlurb, buttonLabel, successMessage, espTag
-    }`,
-    { slug },
-    null,
-  );
-}
-
-export async function getAllLeadMagnetSlugs(): Promise<string[]> {
-  const list: Array<{ slug: { current: string } }> = await sanityFetch(
-    `*[_type == "leadMagnet" && published == true && defined(slug.current)]{ slug }`,
-    {},
-    [],
-  );
-  return list.map((m) => m.slug?.current).filter(Boolean);
-}
+```powershell
+Copy-Item modules/lead-magnets/src/lib/leadMagnetsQueries.ts src/lib/
 ```
 
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`

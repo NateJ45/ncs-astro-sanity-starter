@@ -16,9 +16,29 @@ modules/<name>/
   src/
     pages/           # .astro route files this module adds to the site
     components/      # React islands (.tsx) and .astro components this module owns
+    lib/
+      <name>Queries.ts  # co-located GROQ query functions for this module
   seed.mjs           # idempotent neutral placeholder-content seeder
   README.md          # one paragraph: what it is, what core deps it relies on
 ```
+
+### Co-located query file (`src/lib/<name>Queries.ts`)
+
+Each module keeps its own GROQ query functions in a `src/lib/<name>Queries.ts`
+file that lives alongside the module's pages and components. This file is copied
+into the project's `src/lib/` during Step 4b of the enable process:
+
+```powershell
+Copy-Item modules/<name>/src/lib/<name>Queries.ts src/lib/
+```
+
+The query file imports `sanityFetch` from `@/lib/sanity` and any shared
+projection constants (`IMAGE_PROJECTION`, `CTA_PROJECTION`, `sectionsProjection`)
+from `@/lib/queries`. The `@/` alias resolves once the file is in `src/lib/`.
+
+Module pages import their query functions from `@/lib/<name>Queries` (not from
+`@/lib/queries`). Core queries that modules share (such as `getSiteSettings` or
+`getPressItems`) remain in `@/lib/queries` and are imported from there directly.
 
 ### Ownership rule
 

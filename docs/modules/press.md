@@ -92,23 +92,12 @@ orderableDocumentListDeskItem({
 Copy-Item -Recurse -Force modules/press/src/* src/
 ```
 
-### Step 4b -- Add query functions to `src/lib/queries.ts`
+### Step 4b -- Copy the co-located query file
 
-The press page imports `getPressPage` from `@/lib/queries`. (`getPressItems` is already in the core starter.) Add `getPressPage` before the existing press items section:
+The press page imports `getPressPage` from `@/lib/pressQueries` and `getPressItems` from `@/lib/queries` (two separate imports). `getPressItems` is already in the core starter -- do NOT add it again. Copy only the co-located query file:
 
-```ts
-// ---- Press module (page singleton) -----------------------------------------
-
-export async function getPressPage() {
-  return sanityFetch(`*[_type == "pressPage"][0]{
-    seoTitle, seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    intro
-  }`, {}, null);
-}
+```powershell
+Copy-Item modules/press/src/lib/pressQueries.ts src/lib/
 ```
 
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`

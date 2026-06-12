@@ -17,7 +17,8 @@
 //   5. Empty state / coming-soon state when no content or page is disabled
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getShopPage, getSiteSettings } from '@/lib/queries';
+import { getShopPage } from '@/lib/shopQueries';
+import { getSiteSettings } from '@/lib/queries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';

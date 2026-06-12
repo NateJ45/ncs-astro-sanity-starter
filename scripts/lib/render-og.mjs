@@ -16,9 +16,9 @@ const DEFAULTS = {
   height: 630,
   bg: '#FBFBFA',          // Paper
   primary: '#586577',     // Slate
-  primaryDark: '#3E4A57', // Slate Dark
+  primaryDark: '#434E5C', // Slate Dark
   accent: '#2A2D31',      // Ink
-  taupe: '#8E9DAD',       // Slate Mid
+  taupe: '#AAB0B8',       // Cool Gray
   fontDisplay: 'Libre Baskerville, Georgia, Cambria, Times New Roman, serif',
 };
 

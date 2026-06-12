@@ -69,27 +69,12 @@ singletonWithPreview(S, 'giftPage', 'Gift Certificates Page', CreditCardIcon),
 Copy-Item -Recurse -Force modules/gift-certificates/src/* src/
 ```
 
-### Step 4b -- Add query functions to `src/lib/queries.ts`
+### Step 4b -- Copy the co-located query file
 
-The gift certificates page imports `getGiftPage` from `@/lib/queries`. Add it before the press section:
+The gift certificates page imports `getGiftPage` from `@/lib/giftCertificatesQueries`. Copy the co-located query file alongside the pages and components:
 
-```ts
-// ---- Gift Certificates module -----------------------------------------------
-
-export async function getGiftPage() {
-  return sanityFetch(`*[_type == "giftPage"][0]{
-    seoTitle, seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    intro,
-    certificateOptions[]{title, amount, blurb},
-    howItWorksSteps[]{step, title, body},
-    finePrint,
-    ctaLabel
-  }`, {}, null);
-}
+```powershell
+Copy-Item modules/gift-certificates/src/lib/giftCertificatesQueries.ts src/lib/
 ```
 
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`

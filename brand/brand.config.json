@@ -1,0 +1,121 @@
+{
+  "name": "Studio Starter",
+  "domain": "example.com",
+  "tagline": "Your tagline goes here.",
+  "contact": {
+    "email": "",
+    "phone": "",
+    "address": ""
+  },
+  "palette": {
+    "theme": {
+      "--color-primary":      "#586577",
+      "--color-primary-dark": "#434E5C",
+      "--color-accent":       "#2A2D31",
+      "--color-accent-dark":  "#1E2024",
+      "--color-secondary":    "#AAB0B8",
+      "--color-tertiary":     "#9DB0A6",
+      "--color-bg":           "#FBFBFA",
+      "--color-bg-soft":      "#F3F4F2",
+      "--color-border-soft":  "#E6E7E5",
+      "--color-white-pure":   "#FFFFFF"
+    },
+    "light": {
+      "--background":                 "#FBFBFA",
+      "--foreground":                 "#2A2D31",
+      "--card":                       "#FFFFFF",
+      "--card-foreground":            "#2A2D31",
+      "--popover":                    "#FFFFFF",
+      "--popover-foreground":         "#2A2D31",
+      "--primary":                    "#586577",
+      "--primary-foreground":         "#FFFFFF",
+      "--secondary":                  "#AAB0B8",
+      "--secondary-foreground":       "#2A2D31",
+      "--muted":                      "#F3F4F2",
+      "--muted-foreground":           "#5F6469",
+      "--accent":                     "#E8E9E7",
+      "--accent-foreground":          "#2A2D31",
+      "--border":                     "#E6E7E5",
+      "--input":                      "#E6E7E5",
+      "--ring":                       "#586577",
+      "--link":                       "#434E5C",
+      "--sidebar":                    "#FBFBFA",
+      "--sidebar-foreground":         "#2A2D31",
+      "--sidebar-primary":            "#586577",
+      "--sidebar-primary-foreground": "#FFFFFF",
+      "--sidebar-accent":             "#F3F4F2",
+      "--sidebar-accent-foreground":  "#2A2D31",
+      "--sidebar-border":             "#E6E7E5",
+      "--sidebar-ring":               "#586577",
+      "--tint-rgb":                   "88, 101, 119"
+    },
+    "dark": {
+      "--background":                 "#17191C",
+      "--foreground":                 "#F2F3F2",
+      "--card":                       "#202327",
+      "--card-foreground":            "#F2F3F2",
+      "--popover":                    "#202327",
+      "--popover-foreground":         "#F2F3F2",
+      "--primary":                    "#8A96A6",
+      "--primary-foreground":         "#17191C",
+      "--secondary":                  "#5A6068",
+      "--secondary-foreground":       "#F2F3F2",
+      "--muted":                      "#202327",
+      "--muted-foreground":           "#AAB0B8",
+      "--accent":                     "#2C3036",
+      "--accent-foreground":          "#F2F3F2",
+      "--border":                     "oklch(1 0 0 / 12%)",
+      "--input":                      "oklch(1 0 0 / 15%)",
+      "--ring":                       "#8A96A6",
+      "--link":                       "#8A96A6",
+      "--sidebar":                    "#202327",
+      "--sidebar-foreground":         "#F2F3F2",
+      "--sidebar-primary":            "#8A96A6",
+      "--sidebar-primary-foreground": "#17191C",
+      "--sidebar-accent":             "#2C3036",
+      "--sidebar-accent-foreground":  "#F2F3F2",
+      "--sidebar-border":             "oklch(1 0 0 / 12%)",
+      "--sidebar-ring":               "#8A96A6",
+      "--tint-rgb":                   "138, 150, 166"
+    }
+  },
+  "fonts": {
+    "display": {
+      "familyValue": "\"Libre Baskerville\", Georgia, \"Times New Roman\", serif",
+      "ogFontStack": "Libre Baskerville, Georgia, Cambria, Times New Roman, serif",
+      "imports": [
+        "@fontsource/libre-baskerville/400.css",
+        "@fontsource/libre-baskerville/700.css"
+      ]
+    },
+    "body": {
+      "familyValue": "\"Inter Variable\", system-ui, -apple-system, sans-serif",
+      "ogFontStack": "Inter, system-ui, sans-serif",
+      "imports": [
+        "@fontsource-variable/inter"
+      ]
+    },
+    "script": null
+  },
+  "logoPaths": {
+    "light": "src/assets/logo-light.svg",
+    "dark":  "src/assets/logo-dark.svg"
+  },
+  "studio": {
+    "themeProps": {
+      "--black":                          "#2A2D31",
+      "--white":                          "#FBFBFA",
+      "--gray-base":                      "#586577",
+      "--brand-primary":                  "#586577",
+      "--brand-primary--inverted":        "#ffffff",
+      "--focus-color":                    "#586577",
+      "--input-bg":                       "#F3F4F2",
+      "--component-bg":                   "#F3F4F2",
+      "--component-text-color":           "#2A2D31",
+      "--default-button-color":           "#586577",
+      "--default-button-primary-color":   "#586577",
+      "--main-navigation-color":          "#2A2D31",
+      "--main-navigation-color--inverted":"#FBFBFA"
+    }
+  }
+}

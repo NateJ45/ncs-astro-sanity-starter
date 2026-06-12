@@ -1,6 +1,6 @@
 # Page architecture
 
-> Core page and section architecture, nav structure, and the section-visibility toggle system.
+> Core page and section architecture, nav structure, the page-builder system, and the section-visibility toggle system.
 
 ## Page architecture
 
@@ -10,45 +10,104 @@ The starter ships these routes (always on, not toggleable):
 
 | Path | Source | Notes |
 |---|---|---|
-| `/` | `src/pages/index.astro` | Home page singleton from Sanity |
-| `/about` | `src/pages/about.astro` | About page singleton |
-| `/services` | `src/pages/services.astro` | Services page + service collection |
-| `/faq` | `src/pages/faq.astro` | FAQ page + faqItem collection |
+| `/` | `src/pages/index.astro` | Home — section-driven via `pageBuilder` + `SectionRenderer` |
+| `/about` | `src/pages/about.astro` | About — section-driven |
+| `/services` | `src/pages/services.astro` | Services — section-driven |
+| `/process` | `src/pages/process.astro` | Process — section-driven |
+| `/[slug]` | `src/pages/[slug].astro` | Custom pages created in the Studio; reserved slugs are filtered inside `getStaticPaths` |
+| `/faq` | `src/pages/faq.astro` | FAQ page + faqItem collection grouped by category |
 | `/contact` | `src/pages/contact.astro` | Contact page + Web3Forms form + Calendly embed |
 | `/journal` | `src/pages/journal/index.astro` | Post grid with category chips |
 | `/journal/[slug]` | `src/pages/journal/[slug].astro` | Post detail: reading progress + header + cover + body + related |
 | `/privacy` | `src/pages/privacy.astro` | Privacy policy from singleton |
 | `/404` | `src/pages/404.astro` | Custom 404 |
 
-Additional routes come from opt-in modules staged under `modules/` (off by default). Each module is documented under `docs/modules/`. Current available modules: `portfolio`, `process`, `newsletter`, `lead-magnets`, `style-quiz`, `budget-calculator`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`.
+Additional routes come from opt-in modules staged under `modules/` (off by default). Each module is documented under `docs/modules/`. Current available modules: `portfolio`, `process`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`, `guides`, `style-quiz`, `budget-calculator`.
 
-### Page structure
+---
 
-Each page is a Sanity singleton document plus auto-populated content from reusable collections (services, testimonials, FAQs, philosophy points). The structure of each page is fixed in code; the content within each section is editable in Sanity.
+## Page builder
 
-**Home page section order (in render order):**
-1. Hero (headline, CTAs, optional background image or slideshow)
-2. About intro (photo, intro copy, CTA to About)
-3. Featured Journal (auto-populated from `featured: true` journal entries, then by publish date)
-4. Services (pricing cards)
-5. Testimonials (featured quote + grid)
-6. FAQ preview (optional)
-7. Final CTA (full-bleed)
-8. Footer
+### How section-driven pages work
 
-The order is a starting point; restructure it with a conversion reason. If a section's content isn't ready yet, build a placeholder block in the right slot rather than removing the section -- it is easier to fill a slot than to re-plumb one later.
+The four core pages (home, about, services, process) and every custom `page` document render from a `pageBuilder` array: an ordered list of typed blocks the editor builds in Sanity Studio. No code change is needed to reorder sections, add a new one, or remove one. The code handles layout; the editor handles content.
 
-**Background cadence**: sections alternate `bg-background` / `bg-muted` so no two adjacent sections share a surface. `SectionDivider` bridges the one unavoidable same-surface seam on the home page. If you reorder sections, re-check the cadence.
+**Default fallback.** `src/data/defaultSections.ts` holds code-defined default section arrays for each core page. When `PUBLIC_SANITY_PROJECT_ID` is absent (fresh clone) or a page's `pageBuilder` array is empty, the route renders from these defaults. The site always renders non-blank content.
 
-**About page (in render order):**
-1. Hero
-2. Story
-3. Philosophy cards
-4. Final CTA
+### Block library (`studio/schemaTypes/sections.ts`)
 
-**Journal detail (`/journal/[slug]`) structure:** see the Long-read layout section in `docs/agent/components.md`.
+`SECTION_TYPES` (exported from `sections.ts`) is the single source of truth for the nine general block types available on every page builder:
 
-### Section visibility
+| `_type` | Description |
+|---|---|
+| `heroSection` | Full-width headline block, optional background photo, primary and secondary CTAs |
+| `richTextSection` | Portable Text with heading, prose, optional alignment and width controls |
+| `imageTextSection` | Side-by-side image and text, configurable image side |
+| `gallerySection` | Image grid with optional lightbox, configurable column count |
+| `quoteSection` | Pull quote with attribution and optional context line |
+| `statSection` | Row of up to 4 labeled numbers (auto-counted up animation) |
+| `ctaBandSection` | Full-width call-to-action band, optional background photo |
+| `videoSection` | YouTube or Vimeo embed with optional heading and caption |
+| `spacerSection` | Explicit vertical gap — ornament, line, or invisible space |
+
+Blocks deliberately carry no `backgroundColor` field. Background assignment is `SectionRenderer`'s responsibility.
+
+### Rich section types (`studio/schemaTypes/richSections.ts`)
+
+Eight additional types for the core pages. These are richer blocks that auto-populate from Sanity collections (services, testimonials, process steps, philosophy points):
+
+| `_type` | Description |
+|---|---|
+| `founderSection` | Two-column bio: portrait, headline, prose, optional CTA |
+| `servicesGridSection` | Services grid, auto-populated from the `service` collection; two layout variants (grid or full list) |
+| `testimonialsSection` | Featured pull-quote + testimonial grid, references `testimonial` docs |
+| `storySection` | Long-form narrative: sticky portrait, story prose, attribution and credential lines |
+| `valuesSection` | Numbered values/philosophy card grid, auto-populated from `philosophyPoint` docs |
+| `processSection` | Ordered process steps, auto-populated from `processStep` docs; preview (4-step) or full variant |
+| `serviceAreaSection` | Service area prose + optional travel fee table pulled from `businessInfo` |
+| `guaranteeSection` | Trust/guarantee statement — editor text or falls back to `siteSettings.satisfactionGuarantee` |
+
+**Per-page curated lists.** Each core page exposes only the block types that make sense on it. These are defined at the bottom of `richSections.ts`:
+
+- `HOME_SECTION_TYPES` — all 9 general + `founderSection`, `servicesGridSection`, `testimonialsSection`, `processSection`
+- `ABOUT_SECTION_TYPES` — all 9 general + `storySection`, `valuesSection`
+- `SERVICES_SECTION_TYPES` — all 9 general + `servicesGridSection`, `serviceAreaSection`, `guaranteeSection`
+- `PROCESS_SECTION_TYPES` — all 9 general + `processSection`
+
+Custom `page` documents expose `SECTION_TYPES` (the nine general blocks only).
+
+### `SectionRenderer.astro`
+
+`src/components/SectionRenderer.astro` is the page-builder runtime. It receives the resolved section array from the GROQ query and:
+
+1. Classifies each block as **self-contained** (`heroSection`, `ctaBandSection`, `statSection`, `spacerSection`, `founderSection`, `servicesGridSection`, `testimonialsSection`, `valuesSection`, `processSection`) or **content** (the rest).
+2. Assigns alternating `surface` / `surface-muted` classes to content blocks in sequence, skipping self-contained blocks in the count.
+3. Inserts `SectionDivider.astro` between adjacent content blocks of differing surfaces automatically.
+4. Delegates rendering to individual section components in `src/components/sections/`.
+
+The cadence logic is in `src/lib/sectionCadence.ts` (unit-tested). Blocks have no color field and never call `SectionDivider` directly. This means an editor can reorder sections in Studio without ever producing a background collision or a missing divider.
+
+### `additionalSectionsField`
+
+`additionalSectionsField` (defined in `sections.ts`) is a secondary `pageBuilder`-style array that appends to the bottom of a page's rendered output. Any page schema can include it as an append zone for supplementary content (a CTA band, a testimonial quote) without requiring a fully structured bottom section in the main builder. Empty means no change.
+
+---
+
+## Custom pages
+
+### `page` document type (`studio/schemaTypes/page.ts`)
+
+A multi-instance (non-singleton) document type editors use to create new pages from the block library without touching code. Fields: `title`, `slug`, `pageBuilder` (array of general section blocks), `addToMainNav`, `navGroup`, `navLabel`, `addToFooter`, and SEO fields.
+
+**Reserved-slug guard.** The slug field's validation rule checks the value against the list in `page.ts` (which mirrors `src/lib/reservedSlugs.ts`) and returns a validation error if the editor tries to use a slug that belongs to a built-in route. This guard runs inside Sanity Studio before the document can be published.
+
+**Route.** `src/pages/[slug].astro` handles all custom pages. `getStaticPaths` fetches all published `page` documents and filters out reserved slugs. The filter must live **inside** `getStaticPaths` — an Astro static-build isolation requirement. The reserved list is in `src/lib/reservedSlugs.ts`.
+
+**Nav wiring.** Pages with `addToMainNav: true` are fetched via `getNavPages()` and injected into `Header.astro` and `Footer.astro` alongside the built-in links.
+
+---
+
+## Section visibility
 
 Optional sections of the site can be turned on or off without touching code. The system is designed so the live site is completely unchanged until a toggle is explicitly set to off.
 
@@ -59,21 +118,22 @@ Optional sections of the site can be turned on or off without touching code. The
 **What "off" does.** When a toggle is off, the section disappears everywhere simultaneously:
 - Removed from the desktop nav and mobile drawer
 - Removed from the footer link columns
-- Removed from the homepage: Featured Journal block (journal), PressStrip (press if module is active)
 - The section's own index page redirects home via `return Astro.redirect('/')` at the top of the page
 - Dynamic detail routes return an empty array from `getStaticPaths()` so they build zero pages and 404
 
-**What stays on always.** Home, About, Services, FAQ, Contact, Journal, Privacy, and 404 are not gated by visibility toggles. They are always built and always accessible.
+**What stays on always.** Home, About, Services, Process, FAQ, Contact, Journal, Privacy, and 404 are not gated by visibility toggles. They are always built and always accessible.
 
 **Draft safety.** Turning a section off does not delete or unpublish any content in Sanity. Drafts and published documents are untouched. Turning it back on makes everything reappear after the next rebuild.
 
-### Header nav
+---
+
+## Header nav
 
 Header nav uses a grouped structure: flat links and optional dropdown groups, left to right. The exact items depend on which modules are active.
 
 The desktop nav is **server-rendered** in `Header.astro` as Astro/SSR markup: flat items are real `<a>` tags, dropdown groups are native `<details>`/`<summary>` disclosures with the child links as real `<a>` tags inside. Everything is present in the server HTML at build time, so search-engine crawlers see every internal link and there is no flash-of-missing-nav (or CLS) before any JS runs. A small progressive-enhancement `<script>` at the bottom of `Header.astro` layers on open-on-hover, close-on-outside-click, close-on-Escape, and close-on-navigation (re-bound on `astro:page-load`, document-level listeners guarded by a `window.__headerNavBound` flag so they don't stack across View Transitions). The nav is fully functional with JS disabled.
 
-**Do NOT regress the desktop nav to a client-only island.** An earlier pattern hydrated a `NavDropdowns.tsx` React island with `client:only="react"`, which left the ENTIRE desktop nav out of the server HTML -- bad for SEO and CLS. If a future change reintroduces a Radix dropdown island here, keep the flat links and the group structure SSR'd and use the island only for the open/close interaction.
+**Do NOT regress the desktop nav to a client-only island.** An earlier pattern hydrated a `NavDropdowns.tsx` React island with `client:only="react"`, which left the ENTIRE desktop nav out of the server HTML — bad for SEO and CLS. If a future change reintroduces a Radix dropdown island here, keep the flat links and the group structure SSR'd and use the island only for the open/close interaction.
 
 The `<summary>` triggers carry `.nav-underline` and get `aria-current="page"` (which locks the underline wide) when one of their children is the active route, matching the flat-link pattern.
 

@@ -15,14 +15,14 @@ export const site = {
   // Mirrored here for any script that needs them outside CSS (OG generator, structured data, etc.).
   brandColors: {
     primary: "#586577",       // Slate
-    primaryDark: "#3E4A57",   // Slate Dark
+    primaryDark: "#434E5C",   // Slate Dark
     accent: "#2A2D31",        // Ink
-    accentDark: "#1A1D20",    // Ink Dark
-    secondary: "#8E9DAD",     // Slate Mid
-    tertiary: "#A8B5C2",      // Slate Light
+    accentDark: "#1E2024",    // Ink Dark
+    secondary: "#AAB0B8",     // Cool Gray
+    tertiary: "#9DB0A6",      // Muted Sage
     bg: "#FBFBFA",            // Paper
-    bgSoft: "#F4F4F2",        // Paper Soft
-    border: "#E2E4E6",        // Border Gray
+    bgSoft: "#F3F4F2",        // Soft Paper
+    border: "#E6E7E5",        // Faint dividers
   },
 
   // Static asset paths under public/

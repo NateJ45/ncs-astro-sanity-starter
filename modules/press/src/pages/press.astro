@@ -9,7 +9,8 @@
 // before the full article-by-article list.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getPressPage, getPressItems, getSiteSettings } from '@/lib/queries';
+import { getPressPage } from '@/lib/pressQueries';
+import { getPressItems, getSiteSettings } from '@/lib/queries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';

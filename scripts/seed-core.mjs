@@ -220,6 +220,83 @@ docs.push({
   finalCtaHeadline: 'Ready to Love Your Space?',
   finalCtaSubhead: "Let's start with a conversation. Fill out the form and we'll be in touch within two business days.",
   finalCta: cta('Start a Conversation', '/contact'),
+
+  // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
+  // NOTE: This content mirrors DEFAULT_HOME_SECTIONS in src/data/defaultSections.ts.
+  // The seed uses rich section types (founderSection, testimonialsSection, etc.)
+  // that require Sanity collection data; the route fallback uses simpler inline
+  // sections (heroSection, richTextSection, etc.) that render without a dataset.
+  // If you update copy here, update defaultSections.ts in parallel.
+  pageBuilder: [
+    {
+      _type: 'heroSection',
+      _key: key(),
+      eyebrow: 'Welcome.',
+      headline: 'Design That Feels Like You.',
+      subhead: 'We help people create spaces that work as hard as they do and feel good to come home to.',
+      size: 'tall',
+      primaryCta: cta('Start a Conversation', '/contact'),
+      secondaryCta: cta('See Our Work', '/portfolio'),
+    },
+    {
+      _type: 'founderSection',
+      _key: key(),
+      eyebrow: 'Meet the Founder.',
+      headline: 'Good design starts with a real conversation.',
+      content: [
+        pt('Every project starts the same way: a conversation about how you actually use your space, not just how you want it to look.'),
+        pt('Replace this placeholder with your own story. Tell visitors who you are, what drives your work, and why they should trust you with their home.'),
+      ],
+      cta: cta('Learn More About the Studio', '/about'),
+    },
+    {
+      _type: 'testimonialsSection',
+      _key: key(),
+      eyebrow: 'Kind Words.',
+      headline: 'Words from real clients.',
+      subhead: 'The part that matters most: how it felt to work together.',
+      testimonialsToShow: [
+        { _type: 'reference', _key: key(), _ref: 'testimonial-1' },
+        { _type: 'reference', _key: key(), _ref: 'testimonial-2' },
+        { _type: 'reference', _key: key(), _ref: 'testimonial-3' },
+      ],
+    },
+    {
+      _type: 'processSection',
+      _key: key(),
+      eyebrow: 'How It Works.',
+      headline: 'A clear process, start to finish.',
+      subhead: 'No guesswork and no pressure. You will always know exactly where things stand.',
+      variant: 'preview',
+      cta: cta('See the Full Process', '/process'),
+    },
+    {
+      _type: 'servicesGridSection',
+      _key: key(),
+      eyebrow: 'The Studio.',
+      headline: 'Design Services for Every Space.',
+      subhead: 'Whether you need a fresh set of eyes or a full room overhaul, there is a tier for you.',
+      cta: cta('See All Services', '/services'),
+      footnote: 'Final pricing is always discussed before any work begins.',
+      variant: 'grid',
+    },
+    {
+      _type: 'serviceAreaSection',
+      _key: key(),
+      eyebrow: 'Service Area.',
+      headline: 'Where We Work.',
+      description: 'We serve the greater metro area and surrounding region. Travel fees for out-of-area projects are always quoted upfront.',
+      showTravelFees: true,
+    },
+    {
+      _type: 'ctaBandSection',
+      _key: key(),
+      eyebrow: 'Ready to Begin?',
+      headline: 'Ready to Love Your Space?',
+      subhead: "Let's start with a conversation.",
+      cta: cta('Start a Conversation', '/contact'),
+    },
+  ],
 });
 
 // ── 3. aboutPage (singleton) ──────────────────────────────────────────────
@@ -284,14 +361,63 @@ docs.push({
   finalCtaHeadline: 'Ready to Start?',
   finalCtaSubhead: 'Send a message and we will be back in touch within two business days.',
   finalCta: cta('Get in Touch', '/contact'),
+
+  // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
+  // NOTE: Mirrors DEFAULT_ABOUT_SECTIONS in src/data/defaultSections.ts.
+  // The seed uses richer section types (storySection, valuesSection) that need
+  // Sanity collections; the route fallback uses simpler inline types.
+  // Keep copy in sync between here and defaultSections.ts when updating.
+  pageBuilder: [
+    {
+      _type: 'heroSection',
+      _key: key(),
+      eyebrow: 'The Designer.',
+      headline: 'People Hire People.',
+      subhead: "Here's who you'd be working with.",
+      size: 'short',
+    },
+    {
+      _type: 'storySection',
+      _key: key(),
+      eyebrow: 'My Story.',
+      headline: 'Why I Started This Studio.',
+      content: [
+        pt('Replace this with your real origin story. Tell visitors what led you to design, what you noticed was missing, and what you set out to do differently.'),
+      ],
+      attribution: 'Your Name, Founder',
+      credentialLine: 'Your credentials or training in one plain sentence.',
+      serviceAreaLine: 'Based in Your City, serving the surrounding region.',
+    },
+    {
+      _type: 'valuesSection',
+      _key: key(),
+      eyebrow: 'How We Work.',
+      headline: 'Three principles that guide every project.',
+    },
+    {
+      _type: 'statSection',
+      _key: key(),
+      stats: [
+        { _type: 'statItem', _key: key(), number: 5, suffix: '+', label: 'Years in Business' },
+        { _type: 'statItem', _key: key(), number: 50, suffix: '+', label: 'Projects Completed' },
+        { _type: 'statItem', _key: key(), number: 100, suffix: '%', label: 'Client Satisfaction' },
+      ],
+    },
+    {
+      _type: 'ctaBandSection',
+      _key: key(),
+      eyebrow: "Let's Work Together.",
+      headline: 'Ready to Start?',
+      subhead: 'Send a message and we will be back in touch within two business days.',
+      cta: cta('Get in Touch', '/contact'),
+    },
+  ],
 });
 
 // ── 4. servicesPage (singleton) ──────────────────────────────────────────
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
 //         heroImage?, heroScriptAccent?, stickyCtaLabel?,
 //         servicesListEyebrow, servicesListHeadline, servicesListSubhead,
-//         builderRealtorSection{eyebrow, headline, description, forBuildersText,
-//           forRealtorsText, forContractorsText, cta},
 //         serviceAreaSection{eyebrow, headline, description},
 //         finalCtaEyebrow, finalCtaHeadline, finalCtaSubhead, finalCta
 
@@ -309,18 +435,6 @@ docs.push({
   servicesListHeadline: 'Find the right fit.',
   servicesListSubhead: 'Each service is priced to match the scope. Everything is discussed before any work begins.',
 
-  builderRealtorSection: {
-    eyebrow: 'For Professionals.',
-    headline: 'Builder and Realtor Partnerships.',
-    description: [
-      pt('We work with builders, realtors, and contractors who want a reliable design partner for model homes, listing prep, and new construction.')
-    ],
-    forBuildersText: 'Model home furnishing, finish selection, and design coordination for new builds.',
-    forRealtorsText: 'Listing prep, staging guidance, and buyer consultations to help homes sell faster.',
-    forContractorsText: 'Material and finish selection support for renovation projects.',
-    cta: cta('Get in Touch', '/contact'),
-  },
-
   serviceAreaSection: {
     eyebrow: 'Service Area.',
     headline: 'Based Locally, Available Regionally.',
@@ -331,6 +445,48 @@ docs.push({
   finalCtaHeadline: 'Not sure which service is right?',
   finalCtaSubhead: 'Send a message with a few details about your space. We will point you toward the best fit, no pressure.',
   finalCta: cta('Start a Conversation', '/contact'),
+
+  // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
+  // NOTE: Mirrors DEFAULT_SERVICES_SECTIONS in src/data/defaultSections.ts.
+  // Keep copy in sync between here and defaultSections.ts when updating.
+  pageBuilder: [
+    {
+      _type: 'heroSection',
+      _key: key(),
+      eyebrow: 'What We Offer.',
+      headline: 'Design Services for Every Space and Stage.',
+      subhead: 'Whether you need a fresh perspective or want to hand the whole project over, there is a service for you.',
+      size: 'short',
+    },
+    {
+      _type: 'servicesGridSection',
+      _key: key(),
+      eyebrow: 'The Tiers.',
+      headline: 'Find the right fit.',
+      subhead: 'Each service is priced to match the scope. Everything is discussed before any work begins.',
+      variant: 'list',
+    },
+    {
+      _type: 'serviceAreaSection',
+      _key: key(),
+      eyebrow: 'Service Area.',
+      headline: 'Based Locally, Available Regionally.',
+      description: 'We serve the greater metro area and surrounding region. Travel fees are quoted upfront.',
+      showTravelFees: true,
+    },
+    {
+      _type: 'guaranteeSection',
+      _key: key(),
+    },
+    {
+      _type: 'ctaBandSection',
+      _key: key(),
+      eyebrow: "Let's Talk.",
+      headline: 'Not sure which service is right?',
+      subhead: 'Send a message with a few details about your space. We will point you toward the best fit.',
+      cta: cta('Start a Conversation', '/contact'),
+    },
+  ],
 });
 
 // ── 5. service docs (3 collection items) ─────────────────────────────────
@@ -407,7 +563,107 @@ docs.push({
   ],
 });
 
-// ── 6. faqPage (singleton) ───────────────────────────────────────────────
+// ── 6. processPage (singleton) ───────────────────────────────────────────
+// NOTE: pageBuilder mirrors DEFAULT_PROCESS_SECTIONS in src/data/defaultSections.ts.
+// Keep copy in sync when updating.
+
+docs.push({
+  _id: 'processPage',
+  _type: 'processPage',
+  seoTitle: 'Our Process - Studio Starter Interior Design',
+  seoDescription: 'From the first conversation to the final reveal, here is exactly how our process works.',
+
+  pageBuilder: [
+    {
+      _type: 'heroSection',
+      _key: key(),
+      eyebrow: 'The Process.',
+      headline: 'From First Call to Final Reveal.',
+      subhead: 'A clear, pressure-free process from the first inquiry through installation day.',
+      size: 'short',
+    },
+    {
+      _type: 'processSection',
+      _key: key(),
+      variant: 'full',
+    },
+    {
+      _type: 'ctaBandSection',
+      _key: key(),
+      eyebrow: 'Ready to Begin?',
+      headline: 'Start the Conversation.',
+      subhead: 'Fill out the contact form with a few details about your space.',
+      cta: cta('Get in Touch', '/contact'),
+    },
+  ],
+});
+
+// ── 7. processStep docs (4 steps) ────────────────────────────────────────
+// Idempotent: createOrReplace with deterministic _id values.
+// Steps auto-populate into any processSection via sectionsProjection().
+
+docs.push({
+  _id: 'process-step-1',
+  _type: 'processStep',
+  stepNumber: 1,
+  title: 'Initial Inquiry',
+  timeEstimate: '2 business days',
+  shortDescription: 'Fill out the contact form with a few details about your project. We review every inquiry personally and reply within two business days.',
+  features: [
+    'Tell us about your space',
+    'Share your goals and timeline',
+    'We respond personally, no automated sequences',
+  ],
+  orderRank: 'a0',
+});
+
+docs.push({
+  _id: 'process-step-2',
+  _type: 'processStep',
+  stepNumber: 2,
+  title: 'Discovery Call',
+  timeEstimate: '20 minutes',
+  shortDescription: 'A short call to talk through your project, figure out which service is the best fit, and answer any questions before we start.',
+  features: [
+    'Review your goals and budget',
+    'Determine the right service tier',
+    'No pressure, just a conversation',
+  ],
+  orderRank: 'a1',
+});
+
+docs.push({
+  _id: 'process-step-3',
+  _type: 'processStep',
+  stepNumber: 3,
+  title: 'Design & Sourcing',
+  timeEstimate: '2 to 3 weeks',
+  shortDescription: 'We build your concept, source every piece, and hand you a complete plan you can act on.',
+  features: [
+    'In-home session to assess the space',
+    'Concept board with color story',
+    'Full sourcing list with links and pricing',
+    'Furniture layout to scale',
+  ],
+  orderRank: 'a2',
+});
+
+docs.push({
+  _id: 'process-step-4',
+  _type: 'processStep',
+  stepNumber: 4,
+  title: 'Installation & Reveal',
+  timeEstimate: 'One day',
+  shortDescription: 'We coordinate delivery, direct placement, and add the final styling details. You walk in at the end of the day to a finished room.',
+  features: [
+    'Delivery and placement coordination',
+    'Final styling',
+    'Walkthrough and care notes',
+  ],
+  orderRank: 'a3',
+});
+
+// ── 9. faqPage (singleton) ───────────────────────────────────────────────
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
 //         heroImage?, heroScriptAccent?, categoryOrder,
 //         finalCtaEyebrow, finalCtaHeadline, finalCtaSubhead, finalCta,
@@ -431,7 +687,7 @@ docs.push({
   finalCta: cta('Send a Message', '/contact'),
 });
 
-// ── 7. faqItem docs (4 items) ────────────────────────────────────────────
+// ── 10. faqItem docs (4 items) ───────────────────────────────────────────
 // Required fields: question, answer (Portable Text), category, displayOrder
 // Optional: alsoShowOnProcessPage
 
@@ -485,7 +741,7 @@ docs.push({
   alsoShowOnProcessPage: false,
 });
 
-// ── 8. contactPage (singleton) ───────────────────────────────────────────
+// ── 11. contactPage (singleton) ──────────────────────────────────────────
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
 //         heroImage?, heroScriptAccent?, formIntroNote?, formProjectTypeOptions,
 //         formLocationOptions, formBudgetOptions, formTimelineOptions,
@@ -573,7 +829,7 @@ docs.push({
   schedulingLinkLabel: 'Schedule a 20-minute discovery call.',
 });
 
-// ── 9. testimonial docs (3 items) ────────────────────────────────────────
+// ── 12. testimonial docs (3 items) ───────────────────────────────────────
 // Required fields: quote, attribution, date, source
 // Optional: location, photo, featured, sourceType, reviewUrl
 
@@ -612,7 +868,7 @@ docs.push({
   featured: false,
 });
 
-// ── 10. philosophyPoint docs (3 items) ───────────────────────────────────
+// ── 13. philosophyPoint docs (3 items) ───────────────────────────────────
 // Required fields: title, description
 // Optional: displayOrder, orderRank (managed by plugin, omit here)
 
@@ -640,7 +896,7 @@ docs.push({
   displayOrder: 3,
 });
 
-// ── 11. journalCategory docs (2 items) ───────────────────────────────────
+// ── 14. journalCategory docs (2 items) ───────────────────────────────────
 // Required fields: title, slug{_type,current}
 // Optional: description
 
@@ -660,7 +916,7 @@ docs.push({
   description: 'Opinions, observations, and practical advice from the studio.',
 });
 
-// ── 12. journalPage (singleton) ──────────────────────────────────────────
+// ── 15. journalPage (singleton) ──────────────────────────────────────────
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
 //         heroImage?, heroScriptAccent?, stickyCtaLabel?,
 //         finalCtaHeadline, finalCtaSubhead, finalCta
@@ -681,7 +937,7 @@ docs.push({
   finalCta: cta('Start a Conversation', '/contact'),
 });
 
-// ── 13. journalEntry docs (2 items) ──────────────────────────────────────
+// ── 16. journalEntry docs (2 items) ──────────────────────────────────────
 // Required fields: title, slug, excerpt, publishedAt, body (min 1 block)
 // Optional: coverImage, categories (refs), author, featured, updatedAt,
 //           seoTitle, seoDescription, relatedPosts
@@ -732,7 +988,7 @@ docs.push({
   ],
 });
 
-// ── 14. notFoundPage (singleton) ─────────────────────────────────────────
+// ── 17. notFoundPage (singleton) ─────────────────────────────────────────
 // Fields: seoTitle, seoDescription, eyebrow, headline, body, heroImage?,
 //         primaryCtaLabel, primaryCtaHref, secondaryCtaLabel,
 //         secondaryCtaHref, tertiaryCtaLabel, tertiaryCtaHref
@@ -755,7 +1011,7 @@ docs.push({
   tertiaryCtaHref: '/contact',
 });
 
-// ── 15. privacyPage (singleton) ──────────────────────────────────────────
+// ── 18. privacyPage (singleton) ──────────────────────────────────────────
 // Required fields: heroHeadline, lastUpdated, body (Portable Text)
 // Optional: seoTitle, seoDescription, heroEyebrow, heroSubhead
 
@@ -799,7 +1055,7 @@ docs.push({
   ],
 });
 
-// ── 16. studioGuide (singleton) ──────────────────────────────────────────
+// ── 19. studioGuide (singleton) ──────────────────────────────────────────
 // Fields: guideTitle, guideIntro, studioMap [{area, description}],
 //         howTos [{title, steps[]}], tips [{heading, tone, body}]
 
@@ -938,7 +1194,7 @@ docs.push({
   ],
 });
 
-// ── 17. studioNotes (singleton) ──────────────────────────────────────────
+// ── 20. studioNotes (singleton) ──────────────────────────────────────────
 // Fields: businessSummary, idealClient, voiceSummary, wordsToAvoid
 
 docs.push({
@@ -960,7 +1216,7 @@ docs.push({
   ],
 });
 
-// ── 18. studioPlaybook (singleton) ───────────────────────────────────────
+// ── 21. studioPlaybook (singleton) ───────────────────────────────────────
 // Fields: title, intro, guides [{title, summary, sections [{heading, tone,
 //         body, bullets, links}]}]
 

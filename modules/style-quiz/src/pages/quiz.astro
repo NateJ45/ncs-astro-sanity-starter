@@ -8,7 +8,8 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
 import StyleQuiz from '@/components/StyleQuiz';
-import { getStyleQuiz, getSiteSettings } from '@/lib/queries';
+import { getSiteSettings } from '@/lib/queries';
+import { getStyleQuiz } from '@/lib/styleQuizQueries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { urlFor } from '@/lib/sanity';

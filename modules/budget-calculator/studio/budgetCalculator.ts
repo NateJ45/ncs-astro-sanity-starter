@@ -23,6 +23,23 @@ export const budgetCalculator = defineType({
   fields: [
     // ── SEO ────────────────────────────────────────────────────────────────
     defineField({
+      name: 'seoTitle',
+      title: 'SEO title',
+      type: 'string',
+      group: 'seo',
+      description: 'Browser tab and Google result title. Aim for 50 to 60 characters.',
+      validation: (Rule) => Rule.max(60).warning('Titles longer than about 60 characters get cut off in Google search results.'),
+    }),
+    defineField({
+      name: 'seoDescription',
+      title: 'SEO description',
+      type: 'text',
+      rows: 3,
+      group: 'seo',
+      description: 'The sentence under the title in Google results. Aim for 150 to 160 characters.',
+      validation: (Rule) => Rule.max(160).warning('Descriptions longer than about 160 characters get cut off in Google search results.'),
+    }),
+    defineField({
       name: 'seoImage',
       title: 'Social share image (this page)',
       type: 'image',
