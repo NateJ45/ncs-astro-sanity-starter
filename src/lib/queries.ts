@@ -28,9 +28,14 @@ export async function getSiteSettings() {
     tagline,
     email,
     phone,
-    availabilityStatus,
-    serviceAreas,
-    travelFees,
+    "availabilityStatus": *[_type == "businessInfo"][0].availabilityStatus,
+    "serviceAreas": *[_type == "businessInfo"][0].serviceAreas,
+    "travelFees": *[_type == "businessInfo"][0].travelFees,
+    "geoLat": *[_type == "businessInfo"][0].geoLat,
+    "geoLng": *[_type == "businessInfo"][0].geoLng,
+    "city": *[_type == "businessInfo"][0].city,
+    "state": *[_type == "businessInfo"][0].state,
+    "serviceRegion": *[_type == "businessInfo"][0].serviceRegion,
     socialInstagram,
     socialFacebook,
     seoImage${IMAGE_PROJECTION},
@@ -52,6 +57,22 @@ export async function getSiteSettings() {
       showStyleQuiz,
       showBudgetCalculator
     }
+  }`, {}, null);
+}
+
+// ---- Business info (service areas, travel, availability, geo) -------------
+// Most consumers read these through getSiteSettings (flat names), but pages
+// or blocks that need businessInfo directly can use this.
+export async function getBusinessInfo() {
+  return sanityFetch(`*[_type == "businessInfo"][0]{
+    city,
+    state,
+    serviceRegion,
+    serviceAreas,
+    travelFees,
+    availabilityStatus,
+    geoLat,
+    geoLng
   }`, {}, null);
 }
 

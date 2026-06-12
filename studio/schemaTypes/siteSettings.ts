@@ -53,6 +53,8 @@ export const siteSettings = defineType({
       description:
         'Short status next to the green dot on the Contact page. Examples: "Accepting new clients" / "Booking for Fall 2026" / "Currently booked, accepting waitlist".',
       validation: (Rule) => Rule.required().max(80),
+      hidden: true,
+      readOnly: true,
     }),
     defineField({
       name: 'serviceAreas',
@@ -61,6 +63,8 @@ export const siteSettings = defineType({
       description: 'Cities and neighborhoods you serve, in display order. Put your primary market first.',
       of: [defineArrayMember({ type: 'string' })],
       validation: (Rule) => Rule.required().min(1),
+      hidden: true,
+      readOnly: true,
     }),
     defineField({
       name: 'travelFees',
@@ -93,6 +97,8 @@ export const siteSettings = defineType({
         }),
       ],
       validation: (Rule) => Rule.required().min(1),
+      hidden: true,
+      readOnly: true,
     }),
     defineField({
       name: 'socialInstagram',
