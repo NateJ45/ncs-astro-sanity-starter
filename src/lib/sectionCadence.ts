@@ -51,8 +51,8 @@ export interface SectionBlock {
   [key: string]: unknown;
 }
 
-export interface ClassifiedRow {
-  block: SectionBlock;
+export interface ClassifiedRow<T extends SectionBlock = SectionBlock> {
+  block: T;
   /** Assigned surface for content blocks; null for self-contained blocks. */
   surface: 'background' | 'muted' | null;
   /** Whether a SectionDivider should be inserted BEFORE this row. */
@@ -65,16 +65,21 @@ export interface ClassifiedRow {
  * Classify an array of section blocks into rows with surface assignments and
  * divider insertion markers.
  *
+ * Generic over T so callers can pass a typed block union and receive
+ * ClassifiedRow<T> back — enabling narrowing in templates without index sigs.
+ * Minimal stub objects (e.g. `{ _type: 'heroSection' }`) still satisfy the
+ * `T extends { _type: string }` constraint, so existing tests compile unchanged.
+ *
  * @param sections  Raw section array from Sanity (may contain nulls — filtered out).
  * @param idPrefix  Prefix for generated heading ids (default: 'section').
  */
-export function classifySections(
+export function classifySections<T extends { _type: string }>(
   sections: unknown[],
   idPrefix = 'section',
-): ClassifiedRow[] {
+): ClassifiedRow<T & SectionBlock>[] {
   const list = (sections ?? []).filter(
     (s): s is SectionBlock => !!s && typeof s === 'object' && '_type' in s,
-  ) as SectionBlock[];
+  ) as (T & SectionBlock)[];
 
   // If the page opens with a text hero (no backgroundImage asset), start the
   // content cadence on muted so the first section contrasts.
@@ -86,7 +91,7 @@ export function classifySections(
   let contentIdx = opensWithTextHero ? 1 : 0;
   let prevContentSurface: 'background' | 'muted' | null = null;
 
-  return list.map((block, i) => {
+  return list.map((block, i): ClassifiedRow<T & SectionBlock> => {
     let surface: 'background' | 'muted' | null = null;
 
     if (CONTENT_TYPES.has(block._type)) {

@@ -28,6 +28,7 @@ import ProcessSection from '@/components/sections/ProcessSection.astro';
 import ServiceAreaSection from '@/components/sections/ServiceAreaSection.astro';
 import GuaranteeSection from '@/components/sections/GuaranteeSection.astro';
 import { classifySections } from '@/lib/sectionCadence';
+import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
 
 interface Props {
   sections?: unknown[];
@@ -36,7 +37,7 @@ interface Props {
 }
 
 const { sections = [], idPrefix = 'section' } = Astro.props as Props;
-const rows = classifySections(sections, idPrefix);
+const rows = classifySections<PageBuilderBlock>(sections as PageBuilderBlock[], idPrefix);
 ---
 
 {rows.map(({ block: s, surface, insertDividerBefore, headingId }) => (
@@ -45,31 +46,31 @@ const rows = classifySections(sections, idPrefix);
 
     {s._type === 'heroSection' ? (
       <Hero
-        eyebrow={s.eyebrow as string | undefined}
-        headline={(s.headline as string) ?? ''}
-        subhead={s.subhead as string | undefined}
-        backgroundImage={s.backgroundImage as any}
-        primaryCta={s.primaryCta as any}
-        secondaryCta={s.secondaryCta as any}
-        scriptAccent={s.scriptAccent as string | undefined}
-        size={(s.size as 'tall' | 'short') ?? 'short'}
+        eyebrow={s.eyebrow}
+        headline={s.headline ?? ''}
+        subhead={s.subhead}
+        backgroundImage={s.backgroundImage}
+        primaryCta={s.primaryCta}
+        secondaryCta={s.secondaryCta}
+        scriptAccent={s.scriptAccent}
+        size={s.size ?? 'short'}
         headingId={headingId}
       />
     ) : s._type === 'ctaBandSection' ? (
       <FinalCta
-        eyebrow={s.eyebrow as string | undefined}
-        headline={s.headline as string | undefined}
-        subhead={s.subhead as string | undefined}
-        cta={s.cta as any}
-        scriptAccent={s.scriptAccent as string | undefined}
-        backgroundImage={s.backgroundImage as any}
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        subhead={s.subhead}
+        cta={s.cta}
+        scriptAccent={s.scriptAccent}
+        backgroundImage={s.backgroundImage}
         headingId={headingId}
       />
     ) : s._type === 'statSection' ? (
       <StatsRow
-        stats={((s.stats ?? []) as any[]).filter(
-          (x: any) => typeof x?.number === 'number',
-        )}
+        stats={(s.stats ?? []).filter(
+          (x) => typeof x?.number === 'number',
+        ) as { number: number; suffix?: string; label: string }[]}
       />
     ) : s._type === 'spacerSection' ? (
       s.variant === 'space' ? (
@@ -85,124 +86,124 @@ const rows = classifySections(sections, idPrefix);
       )
     ) : s._type === 'richTextSection' ? (
       <RichTextSection
-        eyebrow={s.eyebrow as string | undefined}
-        heading={s.heading as string | undefined}
-        scriptAccent={s.scriptAccent as string | undefined}
-        body={s.body as any}
-        width={s.width as 'normal' | 'narrow' | undefined}
-        align={s.align as 'left' | 'center' | undefined}
+        eyebrow={s.eyebrow}
+        heading={s.heading}
+        scriptAccent={s.scriptAccent}
+        body={s.body}
+        width={s.width}
+        align={s.align}
         surface={surface ?? 'background'}
         headingId={headingId}
       />
     ) : s._type === 'imageTextSection' ? (
       <ImageText
-        image={s.image as any}
-        imageSide={s.imageSide as 'left' | 'right' | undefined}
-        eyebrow={s.eyebrow as string | undefined}
-        heading={s.heading as string | undefined}
-        body={s.body as any}
-        cta={s.cta as any}
+        image={s.image}
+        imageSide={s.imageSide}
+        eyebrow={s.eyebrow}
+        heading={s.heading}
+        body={s.body}
+        cta={s.cta}
         surface={surface ?? 'background'}
         headingId={headingId}
       />
     ) : s._type === 'gallerySection' ? (
       <GalleryGrid
-        heading={s.heading as string | undefined}
-        images={s.images as any[]}
-        columns={s.columns as number | undefined}
+        heading={s.heading}
+        images={s.images}
+        columns={s.columns}
         surface={surface ?? 'background'}
         headingId={headingId}
       />
     ) : s._type === 'quoteSection' ? (
       <QuoteBlock
-        quote={s.quote as string | undefined}
-        attribution={s.attribution as string | undefined}
-        detail={s.detail as string | undefined}
+        quote={s.quote}
+        attribution={s.attribution}
+        detail={s.detail}
         surface={surface ?? 'background'}
       />
     ) : s._type === 'videoSection' ? (
       <VideoEmbed
-        url={s.url as string | undefined}
-        heading={s.heading as string | undefined}
-        caption={s.caption as string | undefined}
+        url={s.url}
+        heading={s.heading}
+        caption={s.caption}
         surface={surface ?? 'background'}
         headingId={headingId}
       />
     ) : s._type === 'founderSection' ? (
       <FounderSection
-        portrait={s.portrait as any}
-        eyebrow={s.eyebrow as string | undefined}
-        headline={s.headline as string | undefined}
-        content={s.content as any}
-        cta={s.cta as any}
+        portrait={s.portrait}
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        content={s.content}
+        cta={s.cta}
         headingId={headingId}
       />
     ) : s._type === 'servicesGridSection' ? (
       <ServicesGridSection
-        eyebrow={s.eyebrow as string | undefined}
-        headline={s.headline as string | undefined}
-        scriptAccent={s.scriptAccent as string | undefined}
-        subhead={s.subhead as string | undefined}
-        services={(s.services as any[]) ?? []}
-        cta={s.cta as any}
-        footnote={s.footnote as string | undefined}
-        variant={(s.variant as 'grid' | 'list') ?? 'grid'}
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        scriptAccent={s.scriptAccent}
+        subhead={s.subhead}
+        services={s.services ?? []}
+        cta={s.cta}
+        footnote={s.footnote}
+        variant={s.variant ?? 'grid'}
         headingId={headingId}
       />
     ) : s._type === 'testimonialsSection' ? (
       <TestimonialsSection
-        eyebrow={s.eyebrow as string | undefined}
-        headline={s.headline as string | undefined}
-        scriptAccent={s.scriptAccent as string | undefined}
-        subhead={s.subhead as string | undefined}
-        featuredQuote={s.featuredQuote as any}
-        testimonialsToShow={(s.testimonialsToShow as any[]) ?? []}
-        attribution={s.attribution as string | undefined}
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        scriptAccent={s.scriptAccent}
+        subhead={s.subhead}
+        featuredQuote={s.featuredQuote}
+        testimonialsToShow={s.testimonialsToShow ?? []}
+        attribution={s.attribution}
         headingId={headingId}
       />
     ) : s._type === 'storySection' ? (
       <StorySection
-        eyebrow={s.eyebrow as string | undefined}
-        headline={s.headline as string | undefined}
-        content={s.content as any}
-        portrait={s.portrait as any}
-        attribution={s.attribution as string | undefined}
-        credentialLine={s.credentialLine as string | undefined}
-        serviceAreaLine={s.serviceAreaLine as string | undefined}
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        content={s.content}
+        portrait={s.portrait}
+        attribution={s.attribution}
+        credentialLine={s.credentialLine}
+        serviceAreaLine={s.serviceAreaLine}
         surface={surface ?? 'background'}
         headingId={headingId}
       />
     ) : s._type === 'valuesSection' ? (
       <ValuesSection
-        eyebrow={s.eyebrow as string | undefined}
-        headline={s.headline as string | undefined}
-        points={(s.points as any[]) ?? []}
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        points={s.points ?? []}
         headingId={headingId}
       />
     ) : s._type === 'processSection' ? (
       <ProcessSection
-        eyebrow={s.eyebrow as string | undefined}
-        headline={s.headline as string | undefined}
-        subhead={s.subhead as string | undefined}
-        steps={(s.steps as any[]) ?? []}
-        variant={(s.variant as 'full' | 'preview') ?? 'preview'}
-        cta={s.cta as any}
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        subhead={s.subhead}
+        steps={s.steps ?? []}
+        variant={s.variant ?? 'preview'}
+        cta={s.cta}
         headingId={headingId}
       />
     ) : s._type === 'serviceAreaSection' ? (
       <ServiceAreaSection
-        eyebrow={s.eyebrow as string | undefined}
-        headline={s.headline as string | undefined}
-        description={s.description as string | undefined}
-        travelFees={(s.travelFees as any[]) ?? []}
-        showTravelFees={(s.showTravelFees as boolean) ?? true}
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        description={s.description}
+        travelFees={s.travelFees ?? []}
+        showTravelFees={s.showTravelFees ?? true}
         surface={surface ?? 'background'}
         headingId={headingId}
       />
     ) : s._type === 'guaranteeSection' ? (
       <GuaranteeSection
-        text={s.text as string | undefined}
-        siteSettingsText={s.siteSettingsText as string | undefined}
+        text={s.text}
+        siteSettingsText={s.siteSettingsText}
         surface={surface ?? 'background'}
       />
     ) : (
