@@ -1,0 +1,75 @@
+---
+// Safe to edit by hand
+// Page-builder block: a row or grid of client/partner/press logos.
+// Grayscale presentation using opacity utilities that stay correct in both
+// light and dark mode — no CSS filter hacks.
+//
+// SELF_CONTAINED — manages its own bg-background surface (no surface prop).
+import SanityImage from '@/components/SanityImage.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+
+interface Logo {
+  asset?: { _ref?: string; _id?: string; url?: string };
+  alt?: string;
+}
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  logos?: Logo[];
+  layout?: 'row' | 'grid';
+  headingId?: string;
+}
+
+const {
+  eyebrow,
+  headline,
+  logos = [],
+  layout = 'row',
+  headingId = 'logo-strip-heading',
+} = Astro.props as Props;
+
+const validLogos = logos.filter((l) => l?.asset);
+const hasHeading = !!(eyebrow || headline);
+
+// Row: single flex row that scrolls horizontally on narrow screens.
+// Grid: wraps across rows (2-3 per row on small, 4-6 per row on large).
+const containerClass =
+  layout === 'grid'
+    ? 'flex flex-wrap justify-center gap-x-l gap-y-m'
+    : 'flex flex-row flex-nowrap overflow-x-auto gap-x-l items-center justify-center';
+---
+
+{validLogos.length > 0 && (
+  <section
+    class="bg-background"
+    aria-labelledby={hasHeading ? headingId : undefined}
+    aria-label={!hasHeading ? 'Partner logos' : undefined}
+  >
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      {hasHeading && (
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          headingId={headingId}
+          align="center"
+          class="mx-auto"
+        />
+      )}
+
+      <div class:list={[containerClass, hasHeading && 'mt-section-md']}>
+        {validLogos.map((logo) => (
+          <div class="shrink-0 flex items-center opacity-70 hover:opacity-100 transition-opacity duration-200 grayscale hover:grayscale-0">
+            <SanityImage
+              source={logo}
+              width={160}
+              sizes="160px"
+              quality={80}
+              class="h-10 w-auto object-contain"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

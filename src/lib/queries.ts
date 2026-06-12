@@ -95,6 +95,24 @@ export function sectionsProjection(field = 'pageBuilder'): string {
     _type == "guaranteeSection" => {
       ...,
       "siteSettingsText": *[_type == "siteSettings"][0].satisfactionGuarantee
+    },
+    _type == "faqSection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "items": items[]->{
+        _id, _type, question, answer, category, displayOrder
+      }
+    },
+    _type == "logoStripSection" => {
+      ...,
+      logos[]${IMAGE_PROJECTION}
+    },
+    _type == "teamSection" => {
+      ...,
+      members[]{
+        ...,
+        photo${IMAGE_PROJECTION}
+      }
     }
   }`;
 }

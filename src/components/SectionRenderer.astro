@@ -27,6 +27,10 @@ import ValuesSection from '@/components/sections/ValuesSection.astro';
 import ProcessSection from '@/components/sections/ProcessSection.astro';
 import ServiceAreaSection from '@/components/sections/ServiceAreaSection.astro';
 import GuaranteeSection from '@/components/sections/GuaranteeSection.astro';
+import FaqSection from '@/components/sections/FaqSection.astro';
+import LogoStrip from '@/components/sections/LogoStrip.astro';
+import TeamGrid from '@/components/sections/TeamGrid.astro';
+import EmbedSection from '@/components/sections/EmbedSection.astro';
 import { classifySections } from '@/lib/sectionCadence';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
 
@@ -205,6 +209,41 @@ const rows = classifySections<PageBuilderBlock>(sections as PageBuilderBlock[], 
         text={s.text}
         siteSettingsText={s.siteSettingsText}
         surface={surface ?? 'background'}
+      />
+    ) : s._type === 'faqSection' ? (
+      <FaqSection
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        subhead={s.subhead}
+        items={s.items ?? []}
+        cta={s.cta}
+        headingId={headingId}
+      />
+    ) : s._type === 'logoStripSection' ? (
+      <LogoStrip
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        logos={s.logos ?? []}
+        layout={s.layout ?? 'row'}
+        headingId={headingId}
+      />
+    ) : s._type === 'teamSection' ? (
+      <TeamGrid
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        subhead={s.subhead}
+        members={s.members ?? []}
+        headingId={headingId}
+      />
+    ) : s._type === 'embedSection' ? (
+      <EmbedSection
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        subhead={s.subhead}
+        embedUrl={s.embedUrl}
+        embedCode={s.embedCode}
+        heightHint={s.heightHint ?? 'medium'}
+        headingId={headingId}
       />
     ) : (
       // Unknown block type: render nothing, log in dev.

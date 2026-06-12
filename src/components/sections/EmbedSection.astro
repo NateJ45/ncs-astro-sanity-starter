@@ -1,0 +1,91 @@
+---
+// Safe to edit by hand
+// Page-builder block: sandboxed iframe embed.
+// Accepts either a URL (Calendly, Cal.com, Tally, Google Forms, etc.) or a raw
+// iframe code snippet for providers that supply their own HTML.
+//
+// TRUST MODEL: embedCode is rendered via set:html and has the same trust level
+// as any other CMS content — only paste code from providers you trust.
+// The /faq and /contact page editors are trusted contributors.
+//
+// SELF_CONTAINED — manages its own bg-background surface (no surface prop).
+import SectionHeading from '@/components/SectionHeading.astro';
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  embedUrl?: string;
+  embedCode?: string;
+  heightHint?: 'short' | 'medium' | 'tall';
+  headingId?: string;
+}
+
+const {
+  eyebrow,
+  headline,
+  subhead,
+  embedUrl,
+  embedCode,
+  heightHint = 'medium',
+  headingId = 'embed-section-heading',
+} = Astro.props as Props;
+
+const hasContent = !!(embedUrl || embedCode);
+const hasHeading = !!(eyebrow || headline);
+
+// Map height hint to sensible min-height values.
+const minHeightClass =
+  heightHint === 'short'
+    ? 'min-h-[400px]'
+    : heightHint === 'tall'
+    ? 'min-h-[900px]'
+    : 'min-h-[640px]';
+
+// Sandbox policy: allow forms + scripts for widgets like Tally, Calendly, Cal.
+// allow-same-origin is required for Calendly to post messages to parent window.
+const sandbox = 'allow-scripts allow-forms allow-same-origin allow-popups';
+const iframeTitle = headline || eyebrow || 'Embedded content';
+---
+
+{hasContent && (
+  <section
+    class="bg-background"
+    aria-labelledby={hasHeading ? headingId : undefined}
+    aria-label={!hasHeading ? 'Embedded content' : undefined}
+  >
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      {hasHeading && (
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          subhead={subhead}
+          headingId={headingId}
+          align="center"
+          class="mx-auto"
+        />
+      )}
+
+      <div class:list={['w-full', minHeightClass, hasHeading && 'mt-section-md']}>
+        {embedUrl ? (
+          /* URL-based embed — fully sandboxed iframe */
+          <iframe
+            src={embedUrl}
+            title={iframeTitle}
+            sandbox={sandbox}
+            loading="lazy"
+            class:list={['w-full border-0', minHeightClass]}
+            allowfullscreen
+          />
+        ) : embedCode ? (
+          /* Raw code embed — editor-pasted, same trust level as CMS content.
+             Rendered inside a containing div so it inherits our layout width. */
+          <div
+            class:list={['w-full', minHeightClass]}
+            set:html={embedCode}
+          />
+        ) : null}
+      </div>
+    </div>
+  </section>
+)}

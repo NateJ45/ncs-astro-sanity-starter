@@ -33,6 +33,9 @@ import type {
   ProcessSection as _ProcessSection,
   ServiceAreaSection as _ServiceAreaSection,
   GuaranteeSection as _GuaranteeSection,
+  // U7 new blocks — hand-authored below since typegen has not run yet
+  // FaqSection, LogoStripSection, TeamSection, EmbedSection — not imported from
+  // sanity.types yet; their projected types are fully defined below.
 } from './sanity.types';
 
 // ---------------------------------------------------------------------------
@@ -228,6 +231,93 @@ export type ProjectedGuaranteeSection = { _key: string } & _GuaranteeSection & {
 };
 
 // ---------------------------------------------------------------------------
+// U7 new blocks — hand-authored projected types (typegen will regenerate
+// sanity.types.ts after this unit lands; at that point the orchestrator should
+// verify these align with the generated shapes and update the imports above).
+// ---------------------------------------------------------------------------
+
+/** A dereffed faqItem projected inside faqSection.items. */
+export interface ProjectedFaqItem {
+  _id?: string;
+  _type?: string;
+  question?: string;
+  answer?: any;
+  category?: string;
+  displayOrder?: number;
+}
+
+/**
+ * faqSection — references faqItem documents, dereffed at query time.
+ * SELF_CONTAINED (no surface prop).
+ * NOTE: does not emit FAQPage JSON-LD (Google penalises duplicate markup).
+ */
+export interface ProjectedFaqSection {
+  _type: 'faqSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  /** faqItem refs resolved to { question, answer, category, displayOrder }. */
+  items?: ProjectedFaqItem[];
+  cta?: ProjectedCtaBlock | null;
+}
+
+/** A single logo image inside logoStripSection, after asset-> projection. */
+export interface ProjectedLogoStripLogo extends ProjectedImage {}
+
+/**
+ * logoStripSection — grayscale logo row or grid.
+ * SELF_CONTAINED (no surface prop).
+ */
+export interface ProjectedLogoStripSection {
+  _type: 'logoStripSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  logos?: ProjectedLogoStripLogo[];
+  layout?: 'row' | 'grid';
+}
+
+/** A single team member inline object inside teamSection. */
+export interface ProjectedTeamMember {
+  _key?: string;
+  name?: string;
+  role?: string;
+  photo?: ProjectedImage | null;
+  bio?: string;
+  socialLinks?: Array<{ _key?: string; label?: string; url?: string }>;
+}
+
+/**
+ * teamSection — inline team member grid (no teamMember collection dependency).
+ * SELF_CONTAINED (no surface prop).
+ * A future modules/team module will own a full teamMember collection.
+ */
+export interface ProjectedTeamSection {
+  _type: 'teamSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  members?: ProjectedTeamMember[];
+}
+
+/**
+ * embedSection — sandboxed iframe, URL or raw code variant.
+ * SELF_CONTAINED (no surface prop).
+ */
+export interface ProjectedEmbedSection {
+  _type: 'embedSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  embedUrl?: string;
+  embedCode?: string;
+  heightHint?: 'short' | 'medium' | 'tall';
+}
+
+// ---------------------------------------------------------------------------
 // Discriminated union
 // ---------------------------------------------------------------------------
 
@@ -248,4 +338,9 @@ export type PageBuilderBlock =
   | ProjectedValuesSection
   | ProjectedProcessSection
   | ProjectedServiceAreaSection
-  | ProjectedGuaranteeSection;
+  | ProjectedGuaranteeSection
+  // U7 new blocks
+  | ProjectedFaqSection
+  | ProjectedLogoStripSection
+  | ProjectedTeamSection
+  | ProjectedEmbedSection;

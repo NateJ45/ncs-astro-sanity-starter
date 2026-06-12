@@ -166,3 +166,45 @@ test('divider inserted between storySection and serviceAreaSection (different su
   ]);
   assert.deepEqual(dividers(rows), [false, true]);
 });
+
+// ── U7: new page-builder blocks — all SELF_CONTAINED ─────────────────────
+
+test('faqSection is SELF_CONTAINED (null surface)', () => {
+  const rows = classifySections([block('faqSection')]);
+  assert.equal(rows[0].surface, null, 'faqSection should have null surface');
+});
+
+test('logoStripSection is SELF_CONTAINED (null surface)', () => {
+  const rows = classifySections([block('logoStripSection')]);
+  assert.equal(rows[0].surface, null, 'logoStripSection should have null surface');
+});
+
+test('teamSection is SELF_CONTAINED (null surface)', () => {
+  const rows = classifySections([block('teamSection')]);
+  assert.equal(rows[0].surface, null, 'teamSection should have null surface');
+});
+
+test('embedSection is SELF_CONTAINED (null surface)', () => {
+  const rows = classifySections([block('embedSection')]);
+  assert.equal(rows[0].surface, null, 'embedSection should have null surface');
+});
+
+test('U7 blocks do not advance the content cadence counter', () => {
+  const rows = classifySections([
+    block('storySection'),    // background (idx 0)
+    block('faqSection'),      // null — no advance
+    block('logoStripSection'),// null — no advance
+    block('teamSection'),     // null — no advance
+    block('embedSection'),    // null — no advance
+    block('storySection'),    // muted (idx 1)
+  ]);
+  assert.deepEqual(surfaces(rows), ['background', null, null, null, null, 'muted']);
+});
+
+test('all 4 U7 types appear in SELF_CONTAINED_TYPES and not CONTENT_TYPES', () => {
+  const u7 = ['faqSection', 'logoStripSection', 'teamSection', 'embedSection'];
+  for (const type of u7) {
+    assert.ok(SELF_CONTAINED_TYPES.has(type), `${type} must be in SELF_CONTAINED_TYPES`);
+    assert.ok(!CONTENT_TYPES.has(type), `${type} must not be in CONTENT_TYPES`);
+  }
+});

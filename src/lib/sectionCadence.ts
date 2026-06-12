@@ -31,6 +31,11 @@ export const SELF_CONTAINED_TYPES = new Set([
   'testimonialsSection',
   'valuesSection',
   'processSection',
+  // U7 new blocks — all four are SELF_CONTAINED (manage their own surface)
+  'faqSection',
+  'logoStripSection',
+  'teamSection',
+  'embedSection',
 ]);
 
 /** _type strings for blocks that receive alternating surface assignment. */

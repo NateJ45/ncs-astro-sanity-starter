@@ -24,6 +24,8 @@ import {
   OlistIcon,
   PinIcon,
   CheckmarkCircleIcon,
+  UsersIcon,
+  HelpCircleIcon,
 } from '@sanity/icons';
 import { SECTION_TYPES } from './sections';
 
@@ -391,6 +393,110 @@ export const guaranteeSection = defineType({
   },
 });
 
+// ── 9. faqSection ─────────────────────────────────────────────────────────--
+// Inline FAQ accordion. References existing faqItem documents so editors pick
+// from the curated collection rather than entering duplicate copy.
+// SELF_CONTAINED — manages its own bg-background surface.
+//
+// NOTE: the dedicated /faq page emits FAQPage JSON-LD for Google rich results.
+// This inline block deliberately does NOT re-emit that schema — Google penalises
+// duplicate FAQPage markup on the same domain. The accordion renders without it.
+export const faqSection = defineType({
+  name: 'faqSection',
+  title: 'FAQ accordion (inline)',
+  type: 'object',
+  icon: HelpCircleIcon,
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
+    defineField({
+      name: 'items',
+      title: 'Questions to show',
+      type: 'array',
+      description: 'Pick 3 to 6 questions. Fewer is better for inline blocks.',
+      validation: (R) => R.max(8),
+      of: [defineArrayMember({ type: 'reference', to: [{ type: 'faqItem' }] })],
+    }),
+    defineField({ name: 'cta', title: 'Link button (optional)', type: 'ctaBlock' }),
+  ],
+  preview: {
+    select: { title: 'headline', items: 'items' },
+    prepare: ({ title, items }) => ({
+      title: title || 'FAQ accordion',
+      subtitle: `FAQ${Array.isArray(items) ? ` (${items.length} items)` : ''}`,
+    }),
+  },
+});
+
+// ── 10. teamSection ─────────────────────────────────────────────────────────
+// Inline team member grid. Members are stored as inline objects rather than
+// references to a teamMember collection. This keeps the core starter
+// collection-free. A future modules/team module will own a full teamMember
+// collection with richer fields; when that module ships, pages can migrate
+// from this inline approach to the reference approach.
+// SELF_CONTAINED — manages its own bg-background surface.
+export const teamSection = defineType({
+  name: 'teamSection',
+  title: 'Team grid',
+  type: 'object',
+  icon: UsersIcon,
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
+    defineField({
+      name: 'members',
+      title: 'Team members',
+      type: 'array',
+      validation: (R) => R.min(1).max(12),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'teamMember',
+          fields: [
+            defineField({ name: 'name', title: 'Name', type: 'string', validation: (R) => R.required() }),
+            defineField({ name: 'role', title: 'Role or title (optional)', type: 'string' }),
+            imageWithAlt('photo', 'Photo (optional)'),
+            defineField({ name: 'bio', title: 'Short bio (optional)', type: 'text', rows: 2 }),
+            defineField({
+              name: 'socialLinks',
+              title: 'Social links (optional)',
+              type: 'array',
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  name: 'socialLink',
+                  fields: [
+                    defineField({ name: 'label', title: 'Label', type: 'string', description: 'Examples: LinkedIn, Instagram, Website.', validation: (R) => R.required() }),
+                    defineField({ name: 'url', title: 'URL', type: 'url', validation: (R) => R.required().uri({ scheme: ['http', 'https'] }) }),
+                  ],
+                  preview: { select: { title: 'label', subtitle: 'url' } },
+                }),
+              ],
+            }),
+          ],
+          preview: {
+            select: { title: 'name', subtitle: 'role', media: 'photo' },
+            prepare: ({ title, subtitle, media }) => ({
+              title: title || 'Team member',
+              subtitle: subtitle || '',
+              media,
+            }),
+          },
+        }),
+      ],
+    }),
+  ],
+  preview: {
+    select: { title: 'headline', members: 'members' },
+    prepare: ({ title, members }) => ({
+      title: title || 'Team grid',
+      subtitle: `Team${Array.isArray(members) ? ` (${members.length})` : ''}`,
+    }),
+  },
+});
+
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 export const richSectionSchemas = [
@@ -402,24 +508,35 @@ export const richSectionSchemas = [
   processSection,
   serviceAreaSection,
   guaranteeSection,
+  faqSection,
+  teamSection,
 ];
 
 export const RICH_SECTION_TYPES = richSectionSchemas.map((s) => ({ type: s.name }));
 
-// Per-page curated lists. Each is SECTION_TYPES (9 general) plus the rich
+// Per-page curated lists. Each is SECTION_TYPES (11 general) plus the rich
 // types that make sense on that page. Editors only see relevant blocks.
+// U7 additions:
+//   faqSection     -> HOME, ABOUT, SERVICES (inline FAQ on any marketing page)
+//   logoStripSection -> all pages (already in SECTION_TYPES via pageSectionSchemas)
+//   embedSection   -> all pages (already in SECTION_TYPES via pageSectionSchemas)
+//   teamSection    -> HOME, ABOUT
 export const HOME_SECTION_TYPES = [
   ...SECTION_TYPES,
   { type: 'founderSection' },
   { type: 'servicesGridSection' },
   { type: 'testimonialsSection' },
   { type: 'processSection' },
+  { type: 'faqSection' },
+  { type: 'teamSection' },
 ];
 
 export const ABOUT_SECTION_TYPES = [
   ...SECTION_TYPES,
   { type: 'storySection' },
   { type: 'valuesSection' },
+  { type: 'faqSection' },
+  { type: 'teamSection' },
 ];
 
 export const SERVICES_SECTION_TYPES = [
@@ -427,9 +544,11 @@ export const SERVICES_SECTION_TYPES = [
   { type: 'servicesGridSection' },
   { type: 'serviceAreaSection' },
   { type: 'guaranteeSection' },
+  { type: 'faqSection' },
 ];
 
 export const PROCESS_SECTION_TYPES = [
   ...SECTION_TYPES,
   { type: 'processSection' },
+  { type: 'faqSection' },
 ];

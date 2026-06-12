@@ -1,0 +1,76 @@
+---
+// Safe to edit by hand
+// Page-builder block: inline FAQ accordion. References existing faqItem documents
+// resolved at query time via sectionsProjection. Reuses the FaqAccordion React
+// island from src/components/FaqAccordion.tsx.
+//
+// SELF_CONTAINED — manages its own bg-background surface (no surface prop).
+//
+// JSON-LD: this block deliberately does NOT emit FAQPage structured data.
+// The dedicated /faq page owns FAQPage JSON-LD. Emitting it here too would
+// create duplicate FAQPage markup, which Google penalises in rich results.
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import FaqAccordion from '@/components/FaqAccordion';
+
+interface FaqItem {
+  _id?: string;
+  question?: string;
+  answer?: any;
+  category?: string;
+  displayOrder?: number;
+}
+
+interface Props {
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  items?: FaqItem[];
+  cta?: any;
+  headingId?: string;
+}
+
+const {
+  eyebrow,
+  headline = 'Common Questions.',
+  subhead,
+  items = [],
+  cta,
+  headingId = 'faq-section-heading',
+} = Astro.props as Props;
+
+const validItems = items.filter((i) => i?.question);
+---
+
+{validItems.length > 0 && (
+  <section
+    class="bg-background"
+    aria-labelledby={headline ? headingId : undefined}
+    aria-label={!headline ? 'Frequently asked questions' : undefined}
+  >
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      <SectionHeading
+        eyebrow={eyebrow}
+        headline={headline}
+        subhead={subhead}
+        headingId={headingId}
+        align="center"
+        class="mx-auto"
+      />
+
+      <div class="mt-section-lg max-w-3xl mx-auto">
+        <FaqAccordion
+          client:visible
+          faqs={validItems}
+          idPrefix={headingId}
+        />
+      </div>
+
+      {cta?.label && (
+        <div class="mt-section-lg flex justify-center">
+          <CtaLink cta={cta} variant="secondary" fallbackHref="/faq" fallbackLabel="See All Questions" />
+        </div>
+      )}
+    </div>
+  </section>
+)}
