@@ -143,15 +143,23 @@ function rewriteGlobalsCss(config) {
     ];
     const newImportBlock = allImports.map(imp => `@import "${imp}";`).join('\n');
 
-    // Match the existing @fontsource import block (2 or more consecutive lines)
-    const importBlockPattern = /(@import "@fontsource[^"]*";[\r\n]+){2,}/;
+    // Match the existing @fontsource import block: each import line followed by
+    // a line ending. Uses a named group to capture the blank line(s) that follow
+    // the block so we can restore them and keep the file structure intact.
+    // Pattern: 2+ consecutive @fontsource import lines, then the trailing newline(s).
+    const importBlockPattern = /((?:@import "@fontsource[^"]*";\r?\n){2,})(\r?\n)?/;
     if (!importBlockPattern.test(result)) {
       throw new Error(
         `apply-brand: @fontsource import block not found in ${filePath}\n` +
         `  Expected 2+ consecutive @import "@fontsource..." lines.`
       );
     }
-    result = result.replace(importBlockPattern, newImportBlock + '\n');
+    result = result.replace(importBlockPattern, (match, block, trailingBlank) => {
+      // Preserve the line ending style from the original file
+      const eol = block.includes('\r\n') ? '\r\n' : '\n';
+      const rebuildBlock = allImports.map(imp => `@import "${imp}";`).join(eol);
+      return rebuildBlock + eol + (trailingBlank || '');
+    });
 
     // Step 4 — :root semantic tokens
     // Extract the :root { ... } block and apply substitutions within it
@@ -204,52 +212,52 @@ function rewriteSiteTs(config) {
         pattern: /(  domain:\s*")((?:[^"\\]|\\.)*)(")/,
         replacement: `$1${config.domain}$3`,
       },
-      // brandColors — keyed entries with 4-space indent
+      // brandColors — each key has 4-space indent; match just the quoted value
+      // after the key name, leaving comma + comment intact via look-ahead.
       {
         label: 'brandColors.primary',
-        pattern: /(    primary:\s*")((?:[^"\\]|\\.)*)(")(\s*\/\/[^\n]*\n)/,
-        replacement: `$1${config.palette.theme['--color-primary']}$3$4`,
+        pattern: /(    primary:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
+        replacement: `$1${config.palette.theme['--color-primary']}$3`,
       },
       {
         label: 'brandColors.primaryDark',
-        pattern: /(    primaryDark:\s*")((?:[^"\\]|\\.)*)(")(\s*\/\/[^\n]*\n)/,
-        replacement: `$1${config.palette.theme['--color-primary-dark']}$3$4`,
+        pattern: /(    primaryDark:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
+        replacement: `$1${config.palette.theme['--color-primary-dark']}$3`,
       },
       {
         label: 'brandColors.accent',
-        pattern: /(    accent:\s*")((?:[^"\\]|\\.)*)(")(\s*\/\/[^\n]*\n)/,
-        replacement: `$1${config.palette.theme['--color-accent']}$3$4`,
+        pattern: /(    accent:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
+        replacement: `$1${config.palette.theme['--color-accent']}$3`,
       },
       {
         label: 'brandColors.accentDark',
-        pattern: /(    accentDark:\s*")((?:[^"\\]|\\.)*)(")(\s*\/\/[^\n]*\n)/,
-        replacement: `$1${config.palette.theme['--color-accent-dark']}$3$4`,
+        pattern: /(    accentDark:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
+        replacement: `$1${config.palette.theme['--color-accent-dark']}$3`,
       },
       {
         label: 'brandColors.secondary',
-        pattern: /(    secondary:\s*")((?:[^"\\]|\\.)*)(")(\s*\/\/[^\n]*\n)/,
-        replacement: `$1${config.palette.theme['--color-secondary']}$3$4`,
+        pattern: /(    secondary:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
+        replacement: `$1${config.palette.theme['--color-secondary']}$3`,
       },
       {
         label: 'brandColors.tertiary',
-        pattern: /(    tertiary:\s*")((?:[^"\\]|\\.)*)(")(\s*\/\/[^\n]*\n)/,
-        replacement: `$1${config.palette.theme['--color-tertiary']}$3$4`,
+        pattern: /(    tertiary:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
+        replacement: `$1${config.palette.theme['--color-tertiary']}$3`,
       },
       {
         label: 'brandColors.bg',
-        pattern: /(    bg:\s*")((?:[^"\\]|\\.)*)(")(\s*\/\/[^\n]*\n)/,
-        replacement: `$1${config.palette.theme['--color-bg']}$3$4`,
+        pattern: /(    bg:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
+        replacement: `$1${config.palette.theme['--color-bg']}$3`,
       },
       {
         label: 'brandColors.bgSoft',
-        pattern: /(    bgSoft:\s*")((?:[^"\\]|\\.)*)(")(\s*\/\/[^\n]*\n)/,
-        replacement: `$1${config.palette.theme['--color-bg-soft']}$3$4`,
+        pattern: /(    bgSoft:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
+        replacement: `$1${config.palette.theme['--color-bg-soft']}$3`,
       },
       {
         label: 'brandColors.border',
-        // border is the last key — no trailing comment or newline after it, just comma or closing brace
-        pattern: /(    border:\s*")((?:[^"\\]|\\.)*)(")(\s*\/\/[^\n]*)/,
-        replacement: `$1${config.palette.theme['--color-border-soft']}$3$4`,
+        pattern: /(    border:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
+        replacement: `$1${config.palette.theme['--color-border-soft']}$3`,
       },
     ];
     return applySubstitutions(text, subs, filePath);
@@ -359,9 +367,14 @@ function rewriteOgPages(config) {
 
 function runOg() {
   console.log('[apply-brand] running npm run og ...');
-  const result = spawnSync('npm', ['run', 'og'], {
+  // On Windows, npm is a .cmd wrapper; on POSIX it's a bare executable.
+  // Pass the full static command string (no user input) via shell: true
+  // so npm resolves on all platforms. Passing as a single string (not an
+  // array + shell) avoids Node's DEP0190 deprecation warning about shell-
+  // escaped arg arrays.
+  const result = spawnSync('npm run og', {
     stdio: 'inherit',
-    shell: false,
+    shell: true,
     cwd: root,
   });
   if (result.status !== 0) {
