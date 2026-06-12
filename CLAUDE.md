@@ -255,6 +255,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Animation layer (Lenis, motion, scroll-reveal, script accent) | `docs/agent/animation.md` |
 | Typography + spacing tokens | `docs/agent/design-tokens.md` |
 | Component catalog + long-read layout | `docs/agent/components.md` |
+| Component sourcing (shadcn, Starwind, Magic UI, PrimeReact, copy-paste sources, token-remap cheat sheet) | `docs/agent/component-sources.md` |
 | Error + empty states | `docs/agent/error-states.md` |
 | Image handling | `docs/agent/images.md` |
 | Accessibility | `docs/agent/accessibility.md` |

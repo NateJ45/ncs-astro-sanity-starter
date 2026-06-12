@@ -112,7 +112,19 @@
               "type": "string",
               "description": "Bare RGB triplet without rgb() wrapper (e.g. '88, 101, 119').",
               "pattern": "^\\d{1,3},\\s*\\d{1,3},\\s*\\d{1,3}$"
-            }
+            },
+
+            "--primary-accent":   { "type": "string", "minLength": 1, "description": "Starwind: darker/lighter primary for hover states." },
+            "--secondary-accent": { "type": "string", "minLength": 1, "description": "Starwind: dark/light active secondary." },
+            "--info":             { "type": "string", "minLength": 1, "description": "Starwind: informational surface color." },
+            "--info-foreground":  { "type": "string", "minLength": 1, "description": "Starwind: text on info surfaces." },
+            "--success":          { "type": "string", "minLength": 1, "description": "Starwind: success surface color." },
+            "--success-foreground": { "type": "string", "minLength": 1, "description": "Starwind: text on success surfaces." },
+            "--warning":          { "type": "string", "minLength": 1, "description": "Starwind: warning surface color." },
+            "--warning-foreground": { "type": "string", "minLength": 1, "description": "Starwind: text on warning surfaces." },
+            "--error":            { "type": "string", "minLength": 1, "description": "Starwind: error surface color (may use oklch)." },
+            "--error-foreground": { "type": "string", "minLength": 1, "description": "Starwind: text on error surfaces." },
+            "--outline":          { "type": "string", "minLength": 1, "description": "Starwind: focus outline ring color." }
           }
         },
         "dark": {

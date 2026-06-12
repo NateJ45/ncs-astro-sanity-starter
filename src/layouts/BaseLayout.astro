@@ -19,6 +19,10 @@ import Footer from '@/components/Footer.astro';
 import BackToTop from '@/components/BackToTop';
 import { Toaster } from '@/components/ui/sonner';
 import '@/styles/globals.css';
+// Starwind UI CSS — accordion keyframes + @theme inline for new semantic tokens.
+// Imported AFTER globals.css so the brand :root declarations in globals.css win
+// the cascade over starwind.css's fallback :root defaults.
+import '@/styles/starwind.css';
 
 interface Props {
   title: string;
