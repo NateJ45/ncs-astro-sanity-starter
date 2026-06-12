@@ -13,6 +13,7 @@ import { journalEntry } from './journalEntry';
 import { journalPage } from './journalPage';
 import { page } from './page';
 import { pageSectionSchemas } from './sections';
+import { richSectionSchemas } from './richSections';
 import { notFoundPage } from './notFoundPage';
 import { philosophyPoint } from './philosophyPoint';
 import { privacyPage } from './privacyPage';
@@ -30,6 +31,7 @@ export const schemaTypes = [
   // Page-builder section blocks (objects). Registered before the documents
   // whose pageBuilder arrays reference them.
   ...pageSectionSchemas,
+  ...richSectionSchemas,
 
   // Singletons
   siteSettings,

@@ -425,33 +425,26 @@ export type SiteSettings = {
   satisfactionGuarantee?: string;
 };
 
-export type SpacerSection = {
-  _type: "spacerSection";
-  variant?: "ornament" | "line" | "space";
+export type GuaranteeSection = {
+  _type: "guaranteeSection";
+  text?: string;
 };
 
-export type VideoSection = {
-  _type: "videoSection";
-  url?: string;
-  heading?: string;
-  caption?: string;
-};
-
-export type CtaBandSection = {
-  _type: "ctaBandSection";
+export type ServiceAreaSection = {
+  _type: "serviceAreaSection";
   eyebrow?: string;
   headline?: string;
-  scriptAccent?: string;
+  description?: string;
+  showTravelFees?: boolean;
+};
+
+export type ProcessSection = {
+  _type: "processSection";
+  eyebrow?: string;
+  headline?: string;
   subhead?: string;
+  variant?: "preview" | "full";
   cta?: CtaBlock;
-  backgroundImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
 };
 
 export type HomePageReference = {
@@ -519,6 +512,142 @@ export type CtaBlock = {
   emailAddress?: string;
   phoneNumber?: string;
   openInNewTab?: boolean;
+};
+
+export type ValuesSection = {
+  _type: "valuesSection";
+  eyebrow?: string;
+  headline?: string;
+};
+
+export type StorySection = {
+  _type: "storySection";
+  eyebrow?: string;
+  headline?: string;
+  content?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h2" | "h3" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  portrait?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  attribution?: string;
+  credentialLine?: string;
+  serviceAreaLine?: string;
+};
+
+export type TestimonialReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "testimonial";
+};
+
+export type TestimonialsSection = {
+  _type: "testimonialsSection";
+  eyebrow?: string;
+  headline?: string;
+  scriptAccent?: string;
+  subhead?: string;
+  featuredQuote?: TestimonialReference;
+  testimonialsToShow?: Array<
+    {
+      _key: string;
+    } & TestimonialReference
+  >;
+  attribution?: string;
+};
+
+export type ServicesGridSection = {
+  _type: "servicesGridSection";
+  eyebrow?: string;
+  headline?: string;
+  scriptAccent?: string;
+  subhead?: string;
+  cta?: CtaBlock;
+  footnote?: string;
+  variant?: "grid" | "list";
+};
+
+export type FounderSection = {
+  _type: "founderSection";
+  portrait?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  eyebrow?: string;
+  headline?: string;
+  content?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h2" | "h3" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  cta?: CtaBlock;
+};
+
+export type SpacerSection = {
+  _type: "spacerSection";
+  variant?: "ornament" | "line" | "space";
+};
+
+export type VideoSection = {
+  _type: "videoSection";
+  url?: string;
+  heading?: string;
+  caption?: string;
+};
+
+export type CtaBandSection = {
+  _type: "ctaBandSection";
+  eyebrow?: string;
+  headline?: string;
+  scriptAccent?: string;
+  subhead?: string;
+  cta?: CtaBlock;
+  backgroundImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
 };
 
 export type StatSection = {
@@ -1146,13 +1275,6 @@ export type AboutPage = {
   };
 };
 
-export type TestimonialReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "testimonial";
-};
-
 export type HomePage = {
   _id: string;
   _type: "homePage";
@@ -1409,9 +1531,9 @@ export type AllSanitySchemaTypes =
   | NotFoundPage
   | BusinessInfo
   | SiteSettings
-  | SpacerSection
-  | VideoSection
-  | CtaBandSection
+  | GuaranteeSection
+  | ServiceAreaSection
+  | ProcessSection
   | HomePageReference
   | AboutPageReference
   | ServicesPageReference
@@ -1420,6 +1542,15 @@ export type AllSanitySchemaTypes =
   | JournalPageReference
   | JournalEntryReference
   | CtaBlock
+  | ValuesSection
+  | StorySection
+  | TestimonialReference
+  | TestimonialsSection
+  | ServicesGridSection
+  | FounderSection
+  | SpacerSection
+  | VideoSection
+  | CtaBandSection
   | StatSection
   | QuoteSection
   | GallerySection
@@ -1433,7 +1564,6 @@ export type AllSanitySchemaTypes =
   | FaqPage
   | ServicesPage
   | AboutPage
-  | TestimonialReference
   | HomePage
   | Testimonial
   | MediaTag
