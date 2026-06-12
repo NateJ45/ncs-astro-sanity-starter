@@ -96,3 +96,73 @@ test('unknown _type gets null surface (treated as unknown, not content)', () => 
   const rows = classifySections([block('unknownBlock')]);
   assert.equal(rows[0].surface, null);
 });
+
+// ── Phase B: rich section type classification ─────────────────────────────
+
+test('rich SELF_CONTAINED types get null surface', () => {
+  const richSelf = [
+    'founderSection',
+    'servicesGridSection',
+    'testimonialsSection',
+    'valuesSection',
+    'processSection',
+  ];
+  for (const type of richSelf) {
+    const rows = classifySections([block(type)]);
+    assert.equal(rows[0].surface, null, `${type} should have null surface`);
+  }
+});
+
+test('rich CONTENT types get alternating surface', () => {
+  const richContent = ['storySection', 'serviceAreaSection', 'guaranteeSection'];
+  for (const type of richContent) {
+    const rows = classifySections([block(type)]);
+    assert.equal(rows[0].surface, 'background', `${type} should get background on first`);
+  }
+});
+
+test('rich content types advance the cadence counter', () => {
+  const rows = classifySections([
+    block('storySection'),       // background (idx 0)
+    block('serviceAreaSection'), // muted (idx 1)
+    block('guaranteeSection'),   // background (idx 2)
+  ]);
+  assert.deepEqual(surfaces(rows), ['background', 'muted', 'background']);
+});
+
+test('rich self-contained types do not advance the cadence counter', () => {
+  const rows = classifySections([
+    block('storySection'),       // background (idx 0)
+    block('founderSection'),     // null (self-contained, no advance)
+    block('serviceAreaSection'), // muted (idx 1)
+  ]);
+  assert.deepEqual(surfaces(rows), ['background', null, 'muted']);
+});
+
+test('all 8 new rich types appear in SELF_CONTAINED_TYPES or CONTENT_TYPES', () => {
+  const all8 = [
+    'founderSection', 'servicesGridSection', 'testimonialsSection',
+    'storySection', 'valuesSection', 'processSection',
+    'serviceAreaSection', 'guaranteeSection',
+  ];
+  for (const type of all8) {
+    const inSelf = SELF_CONTAINED_TYPES.has(type);
+    const inContent = CONTENT_TYPES.has(type);
+    assert.ok(
+      inSelf || inContent,
+      `${type} must be classified in SELF_CONTAINED_TYPES or CONTENT_TYPES`,
+    );
+    assert.ok(
+      !(inSelf && inContent),
+      `${type} cannot be in both sets`,
+    );
+  }
+});
+
+test('divider inserted between storySection and serviceAreaSection (different surfaces)', () => {
+  const rows = classifySections([
+    block('storySection'),       // background
+    block('serviceAreaSection'), // muted -> divider before
+  ]);
+  assert.deepEqual(dividers(rows), [false, true]);
+});
