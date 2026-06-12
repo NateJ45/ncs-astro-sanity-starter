@@ -19,6 +19,14 @@ import ImageText from '@/components/sections/ImageText.astro';
 import GalleryGrid from '@/components/sections/GalleryGrid.astro';
 import QuoteBlock from '@/components/sections/QuoteBlock.astro';
 import VideoEmbed from '@/components/sections/VideoEmbed.astro';
+import FounderSection from '@/components/sections/FounderSection.astro';
+import ServicesGridSection from '@/components/sections/ServicesGridSection.astro';
+import TestimonialsSection from '@/components/sections/TestimonialsSection.astro';
+import StorySection from '@/components/sections/StorySection.astro';
+import ValuesSection from '@/components/sections/ValuesSection.astro';
+import ProcessSection from '@/components/sections/ProcessSection.astro';
+import ServiceAreaSection from '@/components/sections/ServiceAreaSection.astro';
+import GuaranteeSection from '@/components/sections/GuaranteeSection.astro';
 import { classifySections } from '@/lib/sectionCadence';
 
 interface Props {
@@ -119,6 +127,83 @@ const rows = classifySections(sections, idPrefix);
         caption={s.caption as string | undefined}
         surface={surface ?? 'background'}
         headingId={headingId}
+      />
+    ) : s._type === 'founderSection' ? (
+      <FounderSection
+        portrait={s.portrait as any}
+        eyebrow={s.eyebrow as string | undefined}
+        headline={s.headline as string | undefined}
+        content={s.content as any}
+        cta={s.cta as any}
+        headingId={headingId}
+      />
+    ) : s._type === 'servicesGridSection' ? (
+      <ServicesGridSection
+        eyebrow={s.eyebrow as string | undefined}
+        headline={s.headline as string | undefined}
+        scriptAccent={s.scriptAccent as string | undefined}
+        subhead={s.subhead as string | undefined}
+        services={(s.services as any[]) ?? []}
+        cta={s.cta as any}
+        footnote={s.footnote as string | undefined}
+        variant={(s.variant as 'grid' | 'list') ?? 'grid'}
+        headingId={headingId}
+      />
+    ) : s._type === 'testimonialsSection' ? (
+      <TestimonialsSection
+        eyebrow={s.eyebrow as string | undefined}
+        headline={s.headline as string | undefined}
+        scriptAccent={s.scriptAccent as string | undefined}
+        subhead={s.subhead as string | undefined}
+        featuredQuote={s.featuredQuote as any}
+        testimonialsToShow={(s.testimonialsToShow as any[]) ?? []}
+        attribution={s.attribution as string | undefined}
+        headingId={headingId}
+      />
+    ) : s._type === 'storySection' ? (
+      <StorySection
+        eyebrow={s.eyebrow as string | undefined}
+        headline={s.headline as string | undefined}
+        content={s.content as any}
+        portrait={s.portrait as any}
+        attribution={s.attribution as string | undefined}
+        credentialLine={s.credentialLine as string | undefined}
+        serviceAreaLine={s.serviceAreaLine as string | undefined}
+        surface={surface ?? 'background'}
+        headingId={headingId}
+      />
+    ) : s._type === 'valuesSection' ? (
+      <ValuesSection
+        eyebrow={s.eyebrow as string | undefined}
+        headline={s.headline as string | undefined}
+        points={(s.points as any[]) ?? []}
+        headingId={headingId}
+      />
+    ) : s._type === 'processSection' ? (
+      <ProcessSection
+        eyebrow={s.eyebrow as string | undefined}
+        headline={s.headline as string | undefined}
+        subhead={s.subhead as string | undefined}
+        steps={(s.steps as any[]) ?? []}
+        variant={(s.variant as 'full' | 'preview') ?? 'preview'}
+        cta={s.cta as any}
+        headingId={headingId}
+      />
+    ) : s._type === 'serviceAreaSection' ? (
+      <ServiceAreaSection
+        eyebrow={s.eyebrow as string | undefined}
+        headline={s.headline as string | undefined}
+        description={s.description as string | undefined}
+        travelFees={(s.travelFees as any[]) ?? []}
+        showTravelFees={(s.showTravelFees as boolean) ?? true}
+        surface={surface ?? 'background'}
+        headingId={headingId}
+      />
+    ) : s._type === 'guaranteeSection' ? (
+      <GuaranteeSection
+        text={s.text as string | undefined}
+        siteSettingsText={s.siteSettingsText as string | undefined}
+        surface={surface ?? 'background'}
       />
     ) : (
       // Unknown block type: render nothing, log in dev.
