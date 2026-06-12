@@ -31,7 +31,11 @@ const colClass =
 ---
 
 {pics.length > 0 && (
-  <section class={bg} aria-labelledby={heading ? headingId : undefined}>
+  <section
+    class={bg}
+    aria-labelledby={heading ? headingId : undefined}
+    aria-label={!heading ? 'Photo gallery' : undefined}
+  >
     <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
       {heading && (
         <SectionHeading headline={heading} headingId={headingId} align="center" class="mx-auto" />

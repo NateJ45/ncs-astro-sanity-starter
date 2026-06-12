@@ -194,7 +194,7 @@ const schemas = [
 
       <div>
         <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Studio location</p>
-        <ServiceAreaMap height={280} />
+        <ServiceAreaMap height={280} lat={siteSettings?.geoLat} lng={siteSettings?.geoLng} />
       </div>
     </aside>
   </section>

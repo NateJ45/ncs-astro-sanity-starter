@@ -8,6 +8,8 @@ export const site = {
   studio: "Studio Starter",
   domain: "example.com",
   url: "https://example.com",
+  // BCP 47 language tag for the <html lang> attribute. Change if the site is not in English.
+  lang: "en",
   storageKeyPrefix: "studio-starter",
   themeStorageKey: "studio-starter-theme",
 

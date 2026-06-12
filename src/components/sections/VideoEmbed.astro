@@ -40,7 +40,11 @@ const src = embedUrl(url);
 ---
 
 {src && (
-  <section class={bg} aria-labelledby={heading ? headingId : undefined}>
+  <section
+    class={bg}
+    aria-labelledby={heading ? headingId : undefined}
+    aria-label={!heading ? 'Video' : undefined}
+  >
     <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
       {heading && (
         <SectionHeading headline={heading} headingId={headingId} align="center" class="mx-auto" />
@@ -51,7 +55,7 @@ const src = embedUrl(url);
             src={src}
             title={heading || caption || 'Video'}
             loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowfullscreen
             class="absolute inset-0 w-full h-full border-0"
           ></iframe>

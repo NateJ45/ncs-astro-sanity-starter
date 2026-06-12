@@ -101,24 +101,25 @@ for (const page of SINGLETONS) {
 
 // ---- Dynamic collections → /og/<prefix>-<slug>.png ----------------------
 // Mirrors BaseLayout: /journal/my-post → journal-my-post.png, etc.
-// Add an entry here for each dynamic collection your project defines.
-// Example (uncomment and adapt when you have a journal or case-study schema):
-//
-// const COLLECTIONS = [
-//   {
-//     prefix: 'journal',
-//     query: `*[_type=="journalEntry" && defined(slug.current)]{ "slug": slug.current, seoTitle, title }`,
-//     pick: (d) => d.seoTitle || d.title,
-//   },
-// ];
-//
-// for (const col of COLLECTIONS) {
-//   const docs = await client.fetch(col.query).catch(() => []);
-//   for (const d of docs) {
-//     const tagline = col.pick(d);
-//     if (!d.slug || !tagline) continue;
-//     await render(`${col.prefix}-${d.slug}`, tagline);
-//   }
-// }
+// Each module that defines a dynamic collection should add its own entry here.
+// Field names are verified against studio/schemaTypes/<type>.ts before enabling.
+// journalEntry: slug (slug type, value at slug.current), seoTitle and title (both string).
+
+const COLLECTIONS = [
+  {
+    prefix: 'journal',
+    query: `*[_type=="journalEntry" && defined(slug.current)]{ "slug": slug.current, seoTitle, title }`,
+    pick: (d) => d.seoTitle || d.title,
+  },
+];
+
+for (const col of COLLECTIONS) {
+  const docs = await client.fetch(col.query).catch(() => []);
+  for (const d of docs) {
+    const tagline = col.pick(d);
+    if (!d.slug || !tagline) continue;
+    await render(`${col.prefix}-${d.slug}`, tagline);
+  }
+}
 
 console.log(`\nDone. ${count} OG images written to ${outDir}`);

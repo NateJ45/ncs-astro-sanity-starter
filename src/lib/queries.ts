@@ -106,12 +106,19 @@ export function sectionsProjection(field = 'pageBuilder'): string {
 // siteSettings.serviceAreas etc. keep working with no change; only the source
 // document changed.
 
+// Module-level memoized promise. The first call triggers the actual Sanity
+// fetch; every subsequent call (across all pages in the same build process)
+// returns the same promise, collapsing 11+ per-page calls to one request.
+let _siteSettingsPromise: Promise<any> | null = null;
+
 export async function getSiteSettings() {
-  return sanityFetch(`*[_type == "siteSettings"][0]{
+  if (_siteSettingsPromise) return _siteSettingsPromise;
+  _siteSettingsPromise = sanityFetch(`*[_type == "siteSettings"][0]{
     title,
     tagline,
     email,
     phone,
+    businessType,
     "availabilityStatus": *[_type == "businessInfo"][0].availabilityStatus,
     "serviceAreas": *[_type == "businessInfo"][0].serviceAreas,
     "travelFees": *[_type == "businessInfo"][0].travelFees,
@@ -142,6 +149,7 @@ export async function getSiteSettings() {
       showBudgetCalculator
     }
   }`, {}, null);
+  return _siteSettingsPromise;
 }
 
 // ---- Business info (service areas, travel, availability, geo) -------------

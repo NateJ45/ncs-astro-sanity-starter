@@ -111,6 +111,31 @@ export const siteSettings = defineType({
       type: 'url',
     }),
     defineField({
+      name: 'businessType',
+      title: 'Business type',
+      type: 'string',
+      description:
+        'The schema.org business category search engines use to understand what your business does. Pick the closest match. This feeds the structured data (JSON-LD) on every page, which helps Google show your listing correctly in Maps, search cards, and rich results.',
+      options: {
+        list: [
+          { title: 'Local Business (generic)',          value: 'LocalBusiness' },
+          { title: 'Professional Service',              value: 'ProfessionalService' },
+          { title: 'Home and Construction Business',    value: 'HomeAndConstructionBusiness' },
+          { title: 'Legal Service',                     value: 'LegalService' },
+          { title: 'Medical Business',                  value: 'MedicalBusiness' },
+          { title: 'Health and Beauty Business',        value: 'HealthAndBeautyBusiness' },
+          { title: 'Food Establishment',                value: 'FoodEstablishment' },
+          { title: 'Store',                             value: 'Store' },
+          { title: 'Real Estate Agent',                 value: 'RealEstateAgent' },
+          { title: 'Travel Agency',                     value: 'TravelAgency' },
+          { title: 'Educational Organization',          value: 'EducationalOrganization' },
+          { title: 'NGO',                               value: 'NGO' },
+        ],
+        layout: 'dropdown',
+      },
+      initialValue: 'LocalBusiness',
+    }),
+    defineField({
       name: 'seoImage',
       title: 'Default social share image',
       type: 'image',

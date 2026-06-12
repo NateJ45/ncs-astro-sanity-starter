@@ -15,88 +15,6 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
-export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
-};
-
-export type Page = {
-  _id: string;
-  _type: "page";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  slug?: Slug;
-  pageBuilder?: Array<
-    | ({
-        _key: string;
-      } & HeroSection)
-    | ({
-        _key: string;
-      } & RichTextSection)
-    | ({
-        _key: string;
-      } & ImageTextSection)
-    | ({
-        _key: string;
-      } & GallerySection)
-    | ({
-        _key: string;
-      } & QuoteSection)
-    | ({
-        _key: string;
-      } & StatSection)
-    | ({
-        _key: string;
-      } & CtaBandSection)
-    | ({
-        _key: string;
-      } & VideoSection)
-    | ({
-        _key: string;
-      } & SpacerSection)
-  >;
-  addToMainNav?: boolean;
-  navGroup?: "top" | "services" | "resources";
-  navLabel?: string;
-  addToFooter?: boolean;
-  seoTitle?: string;
-  seoDescription?: string;
-  seoImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top?: number;
-  bottom?: number;
-  left?: number;
-  right?: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x?: number;
-  y?: number;
-  height?: number;
-  width?: number;
-};
-
-export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
-};
-
 export type JournalCategory = {
   _id: string;
   _type: "journalCategory";
@@ -106,6 +24,12 @@ export type JournalCategory = {
   title?: string;
   slug?: Slug;
   description?: string;
+};
+
+export type Slug = {
+  _type: "slug";
+  current?: string;
+  source?: string;
 };
 
 export type ProcessStep = {
@@ -121,6 +45,13 @@ export type ProcessStep = {
   features?: Array<string>;
   tierNote?: string;
   orderRank?: string;
+};
+
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
 };
 
 export type Service = {
@@ -162,6 +93,22 @@ export type Service = {
   showOnHomepage?: boolean;
   ctaLabel?: string;
   orderRank?: string;
+};
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x?: number;
+  y?: number;
+  height?: number;
+  width?: number;
 };
 
 export type PhilosophyPoint = {
@@ -361,56 +308,6 @@ export type NotFoundPage = {
   tertiaryCtaHref?: string;
 };
 
-export type ProcessPage = {
-  _id: string;
-  _type: "processPage";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  pageBuilder?: Array<
-    | ({
-        _key: string;
-      } & HeroSection)
-    | ({
-        _key: string;
-      } & RichTextSection)
-    | ({
-        _key: string;
-      } & ImageTextSection)
-    | ({
-        _key: string;
-      } & GallerySection)
-    | ({
-        _key: string;
-      } & QuoteSection)
-    | ({
-        _key: string;
-      } & StatSection)
-    | ({
-        _key: string;
-      } & CtaBandSection)
-    | ({
-        _key: string;
-      } & VideoSection)
-    | ({
-        _key: string;
-      } & SpacerSection)
-    | ({
-        _key: string;
-      } & ProcessSection)
-  >;
-  seoTitle?: string;
-  seoDescription?: string;
-  seoImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: "image";
-  };
-};
-
 export type BusinessInfo = {
   _id: string;
   _type: "businessInfo";
@@ -452,6 +349,19 @@ export type SiteSettings = {
   }>;
   socialInstagram?: string;
   socialFacebook?: string;
+  businessType?:
+    | "LocalBusiness"
+    | "ProfessionalService"
+    | "HomeAndConstructionBusiness"
+    | "LegalService"
+    | "MedicalBusiness"
+    | "HealthAndBeautyBusiness"
+    | "FoodEstablishment"
+    | "Store"
+    | "RealEstateAgent"
+    | "TravelAgency"
+    | "EducationalOrganization"
+    | "NGO";
   seoImage?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -784,6 +694,13 @@ export type ServicesPageReference = {
   [internalGroqTypeReferenceTo]?: "servicesPage";
 };
 
+export type ProcessPageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "processPage";
+};
+
 export type FaqPageReference = {
   _ref: string;
   _type: "reference";
@@ -812,6 +729,13 @@ export type JournalEntryReference = {
   [internalGroqTypeReferenceTo]?: "journalEntry";
 };
 
+export type PageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "page";
+};
+
 export type CtaBlock = {
   _type: "ctaBlock";
   label?: string;
@@ -820,14 +744,69 @@ export type CtaBlock = {
     | HomePageReference
     | AboutPageReference
     | ServicesPageReference
+    | ProcessPageReference
     | FaqPageReference
     | ContactPageReference
     | JournalPageReference
-    | JournalEntryReference;
+    | JournalEntryReference
+    | PageReference;
   externalUrl?: string;
   emailAddress?: string;
   phoneNumber?: string;
   openInNewTab?: boolean;
+};
+
+export type Page = {
+  _id: string;
+  _type: "page";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+  >;
+  addToMainNav?: boolean;
+  navGroup?: "top" | "services" | "resources";
+  navLabel?: string;
+  addToFooter?: boolean;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
 };
 
 export type JournalCategoryReference = {
@@ -1156,6 +1135,56 @@ export type FaqPage = {
   };
   secondaryCta?: CtaBlock;
   note?: string;
+};
+
+export type ProcessPage = {
+  _id: string;
+  _type: "processPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & ProcessSection)
+  >;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
 };
 
 export type ServicesPage = {
@@ -1672,14 +1701,13 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | JournalCategory
+  | Slug
+  | ProcessStep
   | SanityImageAssetReference
-  | Page
+  | Service
   | SanityImageCrop
   | SanityImageHotspot
-  | Slug
-  | JournalCategory
-  | ProcessStep
-  | Service
   | PhilosophyPoint
   | FaqItem
   | StudioPlaybook
@@ -1687,7 +1715,6 @@ export type AllSanitySchemaTypes =
   | StudioGuide
   | PrivacyPage
   | NotFoundPage
-  | ProcessPage
   | BusinessInfo
   | SiteSettings
   | GuaranteeSection
@@ -1711,16 +1738,20 @@ export type AllSanitySchemaTypes =
   | HomePageReference
   | AboutPageReference
   | ServicesPageReference
+  | ProcessPageReference
   | FaqPageReference
   | ContactPageReference
   | JournalPageReference
   | JournalEntryReference
+  | PageReference
   | CtaBlock
+  | Page
   | JournalCategoryReference
   | JournalEntry
   | JournalPage
   | ContactPage
   | FaqPage
+  | ProcessPage
   | ServicesPage
   | AboutPage
   | HomePage
