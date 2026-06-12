@@ -49,6 +49,52 @@ export function sectionsProjection(field = 'pageBuilder'): string {
     _type == "gallerySection" => {
       ...,
       images[]${IMAGE_PROJECTION}
+    },
+    _type == "founderSection" => {
+      ...,
+      portrait${IMAGE_PROJECTION},
+      cta${CTA_PROJECTION}
+    },
+    _type == "storySection" => {
+      ...,
+      portrait${IMAGE_PROJECTION}
+    },
+    _type == "servicesGridSection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "services": *[_type == "service"] | order(orderRank asc, displayOrder asc)
+    },
+    _type == "testimonialsSection" => {
+      ...,
+      "featuredQuote": featuredQuote->{
+        ...,
+        "relatedProject": relatedProject->{ title, "slug": slug.current }
+      },
+      "testimonialsToShow": testimonialsToShow[]->{
+        ...,
+        "relatedProject": relatedProject->{ title, "slug": slug.current }
+      }
+    },
+    _type == "valuesSection" => {
+      ...,
+      "points": *[_type == "philosophyPoint"] | order(orderRank asc, displayOrder asc){
+        title, description, displayOrder
+      }
+    },
+    _type == "processSection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "steps": *[_type == "processStep"] | order(orderRank asc, stepNumber asc){
+        stepNumber, title, timeEstimate, shortDescription, features, tierNote
+      }
+    },
+    _type == "serviceAreaSection" => {
+      ...,
+      "travelFees": *[_type == "businessInfo"][0].travelFees
+    },
+    _type == "guaranteeSection" => {
+      ...,
+      "siteSettingsText": *[_type == "siteSettings"][0].satisfactionGuarantee
     }
   }`;
 }
