@@ -78,27 +78,12 @@ singletonWithPreview(S, 'resourcesPage', 'Resources Page', BulbOutlineIcon),
 Copy-Item -Recurse -Force modules/resources/src/* src/
 ```
 
-### Step 4b -- Add query functions to `src/lib/queries.ts`
+### Step 4b -- Copy the co-located query file
 
-The resources page imports `getResourcesPage` from `@/lib/queries`. Add it before the press section:
+The resources page imports `getResourcesPage` from `@/lib/resourcesQueries`. Copy the co-located query file alongside the pages and components:
 
-```ts
-// ---- Resources module -------------------------------------------------------
-
-export async function getResourcesPage() {
-  return sanityFetch(`*[_type == "resourcesPage"][0]{
-    seoTitle, seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    intro,
-    cards[]{
-      title, blurb, link,
-      icon${IMAGE_PROJECTION}
-    }
-  }`, {}, null);
-}
+```powershell
+Copy-Item modules/resources/src/lib/resourcesQueries.ts src/lib/
 ```
 
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`

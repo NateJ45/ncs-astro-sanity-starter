@@ -69,30 +69,12 @@ singletonWithPreview(S, 'eDesignPage', 'E-Design Page', DesktopIcon),
 Copy-Item -Recurse -Force modules/e-design/src/* src/
 ```
 
-### Step 4b -- Add query functions to `src/lib/queries.ts`
+### Step 4b -- Copy the co-located query file
 
-The e-design page imports `getEDesignPage` from `@/lib/queries`. Add it before the press section:
+The e-design page imports `getEDesignPage` from `@/lib/eDesignQueries`. Copy the co-located query file alongside the pages and components:
 
-```ts
-// ---- E-Design module --------------------------------------------------------
-
-export async function getEDesignPage() {
-  return sanityFetch(`*[_type == "eDesignPage"][0]{
-    seoTitle, seoDescription,
-    seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    intro,
-    howItWorksSteps[]{step, title, body},
-    deliverables,
-    pricingTiers[]{name, price, description, features, isFeatured, ctaLabel},
-    "faqs": faqRefs[]->{question, answer, category},
-    finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
-    finalCtaBackgroundImage${IMAGE_PROJECTION},
-    finalCta${CTA_PROJECTION}
-  }`, {}, null);
-}
+```powershell
+Copy-Item modules/e-design/src/lib/eDesignQueries.ts src/lib/
 ```
 
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
