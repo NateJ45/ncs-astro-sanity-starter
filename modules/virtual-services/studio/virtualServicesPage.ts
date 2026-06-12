@@ -78,7 +78,7 @@ export const virtualServicesPage = defineType({
       title: 'Script-font accent word (optional)',
       type: 'string',
       group: 'hero',
-      description: 'A single word from the headline to render in Pinyon Script. Must match exactly. Leave blank to skip.',
+      description: 'A single word from the headline to render in the script accent font. Must match exactly. Leave blank to skip.',
     }),
 
     // Intro
@@ -183,7 +183,7 @@ export const virtualServicesPage = defineType({
       type: 'string',
       group: 'final',
       description:
-        'Optional. One word or short phrase from the headline to render in Pinyon Script. Must match the headline text exactly (case-sensitive). Leave blank to skip.',
+        'Optional. One word or short phrase from the headline to render in the script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip.',
     }),
     defineField({ name: 'finalCtaSubhead', title: 'Final CTA subhead', type: 'text', rows: 2, group: 'final' }),
     defineField({ name: 'finalCta', title: 'Final CTA button', type: 'ctaBlock', group: 'final' }),

@@ -77,7 +77,7 @@ export const donationsPage = defineType({
       title: 'Script-font accent word (optional)',
       type: 'string',
       group: 'hero',
-      description: 'A single word from the headline to render in Pinyon Script. Must match exactly. Leave blank to skip.',
+      description: 'A single word from the headline to render in the script accent font. Must match exactly. Leave blank to skip.',
     }),
 
     // Mission
@@ -181,7 +181,7 @@ export const donationsPage = defineType({
       title: 'Closing CTA heading script accent (optional)',
       type: 'string',
       group: 'final',
-      description: 'Optional. One word or short phrase from the headline to render in Pinyon Script. Must match the headline text exactly. Leave blank to skip.',
+      description: 'Optional. One word or short phrase from the headline to render in the script accent font. Must match the headline text exactly. Leave blank to skip.',
     }),
     defineField({ name: 'finalCtaSubhead', title: 'Closing CTA subhead', type: 'text', rows: 2, group: 'final' }),
     defineField({

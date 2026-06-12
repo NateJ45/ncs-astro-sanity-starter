@@ -74,7 +74,7 @@ export const teamPage = defineType({
       title: 'Script-font accent word (optional)',
       type: 'string',
       group: 'hero',
-      description: 'A single word from the headline to render in Pinyon Script. Must match exactly. Leave blank to skip.',
+      description: 'A single word from the headline to render in the script accent font. Must match exactly. Leave blank to skip.',
     }),
 
     // Content

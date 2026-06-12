@@ -87,7 +87,7 @@ export const budgetCalculator = defineType({
       title: 'Script-font accent word (optional)',
       type: 'string',
       group: 'intro',
-      description: 'A single word from the headline to render in Pinyon Script. Must match exactly. Leave blank to skip.',
+      description: 'A single word from the headline to render in the script accent font. Must match exactly. Leave blank to skip.',
     }),
 
     // ── Rooms ──────────────────────────────────────────────────────────────
