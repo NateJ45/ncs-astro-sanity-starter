@@ -94,80 +94,63 @@ in the Cloudflare dashboard.
 
 ---
 
-## Step 4 -- Nail the design (the seam)
+## Step 4 -- Apply the brand identity
 
-The starter ships a neutral Slate/Ink/Paper palette. Re-skinning requires
-changing only these files. See `docs/agent/theme-and-color.md` for the full
-token map and `docs/agent/design-tokens.md` for typography and spacing tokens.
+The fastest path is the `/reskin` skill (if you are working inside Claude Code):
 
-**a) Palette tokens in `src/styles/globals.css`**
+```
+/reskin
+```
 
-Edit the `@theme` block: replace the `--color-primary`, `--color-ink`,
-`--color-paper`, and all other palette hex values with the client's brand
-colors.
+The skill interviews you for brand inputs, writes `brand/brand.config.json`,
+runs `npm run apply-brand`, checks WCAG AA contrast, and reports what still
+needs a human (logos, photography, voice review).
 
-Then update `--tint-rgb` in both `:root` and `.dark` to the bare RGB triplet
-of the new primary color (e.g. `88, 101, 119`). This token drives all the
-polish-layer overlays (`surface-warm`, `img-tint`, paper-grain).
+### Manual path (if not using Claude Code)
 
-Also update the shadcn semantic overrides in `:root` and `.dark` so
-`bg-primary`, `text-foreground`, `bg-background`, etc. resolve to the new
-palette. Keep the token structure; only change the values.
+Fill in `brand/brand.config.json` at the repo root. The file ships pre-filled
+with the neutral Slate/Ink/Paper defaults. Change only what differs from the
+defaults. Then run:
 
-**b) Fonts**
+```powershell
+npm run apply-brand
+```
 
-The default typefaces are Libre Baskerville (display) and Inter (body).
-To swap them:
+This rewrites `src/styles/globals.css` (`@theme` tokens, `:root`, `.dark`, font
+imports), `src/data/site.ts` (`name`, `domain`, `brandColors`),
+`studio/sanity.config.ts` (`studioThemeProps`), and the OG generator inputs,
+then regenerates `public/og-default.png`.
 
-1. Remove the existing `@fontsource` imports at the top of `globals.css`
-   (there are three lines to remove):
-   ```css
-   @import "@fontsource/libre-baskerville/400.css";
-   @import "@fontsource/libre-baskerville/700.css";
-   @import "@fontsource-variable/inter";
-   ```
-2. Install your chosen font package, then add its import(s) in place:
-   ```powershell
-   npm install @fontsource/playfair-display
-   ```
-   Then in `globals.css`, add the import (regular `@fontsource` packages use
-   a weight path; `@fontsource-variable` packages import the package root):
-   ```css
-   @import "@fontsource/playfair-display/400.css";
-   @import "@fontsource/playfair-display/700.css";
-   ```
-3. Update `--font-display` and `--font-body` in the `@theme` block to match.
+After `apply-brand`, verify with:
 
-The script accent is opt-in and OFF by default. To enable it:
-1. Install a `@fontsource` calligraphic package (e.g.
-   `npm install @fontsource/great-vibes` then
-   `@import "@fontsource/great-vibes/400.css"` in `globals.css`).
-2. Update `--font-script` in the `@theme` block to name that face first.
-   Components using the `font-script` utility will then render the accent.
+```powershell
+git diff
+npm run build
+```
 
-**c) Mirror brand colors in `src/data/site.ts`**
+**Font packages:** If you change `fonts.display` or `fonts.body` to a new family,
+install the matching `@fontsource` package BEFORE running `apply-brand`:
 
-Update the `brandColors` object to match what you set in `globals.css`. These
-values are used by the OG generator and any scripts that need colors outside CSS.
+```powershell
+npm install @fontsource/<family>
+```
 
-**d) Logo, favicon, and OG image**
+Then set `fonts.display.imports` (or `fonts.body.imports`) in
+`brand/brand.config.json` to the installed CSS import paths.
 
-1. Drop `logo-light.*` and `logo-dark.*` into `src/assets/` (the Header and
-   Footer import them via Astro's `getImage()`).
-2. Replace `public/favicon.svg`.
-3. Edit the inputs block in `scripts/generate-og-default.mjs` (brand colors,
-   tagline, wordmark).
-4. Regenerate the default OG image:
-   ```powershell
-   npm run og
-   ```
-5. Generate per-page OG variants (also generates logo variants used in email
-   signatures and social profiles):
-   ```powershell
-   npm run og:pages
-   ```
+**Logo files:** Drop `logo-light.*` and `logo-dark.*` into `src/assets/`. The
+Header and Footer import them via Astro's `Image` component.
 
-Commit `public/og-default.png` -- it is a real asset served to visitors.
+**Favicon:** Replace `public/favicon.svg`.
+
+**Per-page OG images:** Once Sanity is configured and `.env` is set, run:
+
+```powershell
+npm run og:pages
+```
+
+See `docs/agent/theme-and-color.md` for the full token map if you need to make
+manual token adjustments beyond what `apply-brand` covers.
 
 ---
 
