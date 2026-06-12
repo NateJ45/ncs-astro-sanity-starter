@@ -132,8 +132,8 @@ export const service = defineType({
       name: 'ctaLabel',
       title: 'CTA label',
       type: 'string',
-      description: 'Text on the button for this service.',
-      initialValue: 'Start a Conversation',
+      description:
+        'Text on the button for this service. Examples: "Book a Call", "Get a Quote", "Learn More", "See Packages". Leave blank to inherit the site default.',
     }),
     // Hidden field managed by the orderable-document-list plugin. Required
     // even when no one's reordered anything yet — the plugin validates the

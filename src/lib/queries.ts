@@ -100,7 +100,9 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       cta${CTA_PROJECTION},
       "items": items[]->{
-        _id, _type, question, answer, category, displayOrder
+        _id, _type, question, answer,
+        "category": coalesce(categoryRef->title, category),
+        displayOrder
       }
     },
     _type == "logoStripSection" => {
@@ -147,6 +149,11 @@ export async function getSiteSettings() {
     "serviceRegion": *[_type == "businessInfo"][0].serviceRegion,
     socialInstagram,
     socialFacebook,
+    socialLinks[]{
+      platform,
+      url,
+      label
+    },
     seoImage${IMAGE_PROJECTION},
     footerCredit,
     footerCreditUrl,
@@ -175,6 +182,7 @@ export async function getSiteSettings() {
 // or blocks that need businessInfo directly can use this.
 export async function getBusinessInfo() {
   return sanityFetch(`*[_type == "businessInfo"][0]{
+    businessModel,
     city,
     state,
     serviceRegion,
@@ -182,7 +190,13 @@ export async function getBusinessInfo() {
     travelFees,
     availabilityStatus,
     geoLat,
-    geoLng
+    geoLng,
+    additionalLocations[]{
+      city,
+      state,
+      geoLat,
+      geoLng
+    }
   }`, {}, null);
 }
 
@@ -249,7 +263,9 @@ export async function getFaqPage() {
     heroScriptAccent,
     categoryOrder,
     "faqs": *[_type == "faqItem"] | order(category asc, displayOrder asc){
-      question, answer, category, displayOrder
+      question, answer,
+      "category": coalesce(categoryRef->title, category),
+      displayOrder
     },
     finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
     finalCtaBackgroundImage${IMAGE_PROJECTION},

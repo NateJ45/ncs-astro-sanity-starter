@@ -11,6 +11,12 @@ import { site } from '@/data/site';
 
 // ---------- Types (loose — Sanity provides the actual document shapes) ----
 
+interface SocialLink {
+  platform?: string;
+  url?: string;
+  label?: string;
+}
+
 interface SiteSettings {
   title?: string;
   email?: string;
@@ -18,6 +24,8 @@ interface SiteSettings {
   serviceAreas?: string[];
   socialInstagram?: string;
   socialFacebook?: string;
+  /** New flexible social links array (U8). When present, merged with legacy fields in sameAs. */
+  socialLinks?: SocialLink[] | null;
   businessType?: string;
   /** Studio city name — set in Sanity businessInfo or update via apply-brand */
   city?: string;
@@ -59,7 +67,16 @@ export function localBusinessSchema(settings: SiteSettings | null | undefined): 
     image: `${site.url}${site.assets.ogDefault}`,
     email: s.email ?? undefined,
     priceRange: '$$',
-    sameAs: [s.socialInstagram, s.socialFacebook].filter(Boolean),
+    // Merge legacy fields + socialLinks urls, deduplicating by url string.
+    sameAs: Array.from(
+      new Set(
+        [
+          s.socialInstagram,
+          s.socialFacebook,
+          ...(s.socialLinks ?? []).map((l) => l.url),
+        ].filter((u): u is string => Boolean(u)),
+      ),
+    ),
   };
 
   // Omit address entirely when city/state are absent or still placeholder defaults.

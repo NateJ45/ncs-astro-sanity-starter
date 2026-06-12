@@ -1,5 +1,8 @@
 // Individual FAQ. Grouped by category on the FAQ page and selectively
 // included on the Process page via `alsoShowOnProcessPage`.
+// U8: categoryRef (reference to faqCategory document) replaces the legacy
+// hardcoded category string. The frontend coalesces categoryRef->title with
+// the legacy category string so existing data renders without migration.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
 
@@ -64,11 +67,15 @@ export const faqItem = defineType({
       ],
       validation: (Rule) => Rule.required(),
     }),
+    // LEGACY — superseded by categoryRef below.
+    // Kept hidden + readOnly so existing FAQ items continue to validate.
+    // The frontend coalesces categoryRef->title with this field as the fallback.
+    // Do not delete; seed data and migrated items still carry these strings.
     defineField({
       name: 'category',
-      title: 'Category',
+      title: 'Category (legacy)',
       type: 'string',
-      description: 'Which group this question belongs in on the FAQ page.',
+      description: 'Legacy hardcoded category. Use categoryRef for new items.',
       options: {
         list: [
           { title: 'Pricing & Cost', value: 'Pricing & Cost' },
@@ -78,7 +85,17 @@ export const faqItem = defineType({
           { title: 'Getting Started', value: 'Getting Started' },
         ],
       },
-      validation: (Rule) => Rule.required(),
+      hidden: true,
+      readOnly: true,
+    }),
+    // New: reference to a faqCategory document. Optional — existing items that
+    // only carry the legacy category string still display correctly via coalesce.
+    defineField({
+      name: 'categoryRef',
+      title: 'Category',
+      type: 'reference',
+      to: [{ type: 'faqCategory' }],
+      description: 'Which group this question belongs in. Pick from the FAQ Categories list. If left blank, the legacy category value is used instead.',
     }),
     defineField({
       name: 'displayOrder',
@@ -97,10 +114,15 @@ export const faqItem = defineType({
     }),
   ],
   preview: {
-    select: { question: 'question', category: 'category', displayOrder: 'displayOrder' },
-    prepare: ({ question, category, displayOrder }) => ({
+    select: {
+      question: 'question',
+      category: 'category',
+      categoryRefTitle: 'categoryRef.title',
+      displayOrder: 'displayOrder',
+    },
+    prepare: ({ question, category, categoryRefTitle, displayOrder }) => ({
       title: question ?? '(no question)',
-      subtitle: `${category ?? '?'} · #${displayOrder ?? '?'}`,
+      subtitle: `${categoryRefTitle ?? category ?? '?'} · #${displayOrder ?? '?'}`,
     }),
   },
   orderings: [

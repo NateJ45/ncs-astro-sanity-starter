@@ -132,6 +132,13 @@ export type PhilosophyPoint = {
   orderRank?: string;
 };
 
+export type FaqCategoryReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'faqCategory';
+};
+
 export type FaqItem = {
   _id: string;
   _type: 'faqItem';
@@ -159,8 +166,20 @@ export type FaqItem = {
     _key: string;
   }>;
   category?: 'Pricing & Cost' | 'The Process' | 'Logistics' | 'Service Area' | 'Getting Started';
+  categoryRef?: FaqCategoryReference;
   displayOrder?: number;
   alsoShowOnProcessPage?: boolean;
+};
+
+export type FaqCategory = {
+  _id: string;
+  _type: 'faqCategory';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  displayOrder?: number;
 };
 
 export type StudioPlaybook = {
@@ -318,6 +337,7 @@ export type BusinessInfo = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  businessModel?: 'in-person' | 'remote' | 'hybrid';
   city?: string;
   state?: string;
   serviceRegion?: string;
@@ -331,6 +351,14 @@ export type BusinessInfo = {
   availabilityStatus?: string;
   geoLat?: number;
   geoLng?: number;
+  additionalLocations?: Array<{
+    city?: string;
+    state?: string;
+    geoLat?: number;
+    geoLng?: number;
+    _type: 'additionalLocation';
+    _key: string;
+  }>;
 };
 
 export type SiteSettings = {
@@ -353,6 +381,22 @@ export type SiteSettings = {
   }>;
   socialInstagram?: string;
   socialFacebook?: string;
+  socialLinks?: Array<{
+    platform?:
+      | 'Instagram'
+      | 'Facebook'
+      | 'LinkedIn'
+      | 'Pinterest'
+      | 'YouTube'
+      | 'TikTok'
+      | 'X'
+      | 'Houzz'
+      | 'Other';
+    url?: string;
+    label?: string;
+    _type: 'socialLink';
+    _key: string;
+  }>;
   businessType?:
     | 'LocalBusiness'
     | 'ProfessionalService'
@@ -1829,7 +1873,9 @@ export type AllSanitySchemaTypes =
   | SanityImageCrop
   | SanityImageHotspot
   | PhilosophyPoint
+  | FaqCategoryReference
   | FaqItem
+  | FaqCategory
   | StudioPlaybook
   | StudioNotes
   | StudioGuide
