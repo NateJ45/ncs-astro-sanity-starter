@@ -1,0 +1,204 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BrandConfig",
+  "description": "Schema for brand/brand.config.json — validated by apply-brand.mjs at load time.",
+  "type": "object",
+  "required": ["name", "domain", "tagline", "palette", "fonts", "studio"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Business display name."
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Production domain without protocol (e.g. example.com)."
+    },
+    "tagline": {
+      "type": "string",
+      "description": "One-line positioning statement."
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email":   { "type": "string" },
+        "phone":   { "type": "string" },
+        "address": { "type": "string" }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "required": ["theme", "light", "dark"],
+      "properties": {
+        "theme": {
+          "type": "object",
+          "required": [
+            "--color-primary",
+            "--color-primary-dark",
+            "--color-accent",
+            "--color-accent-dark",
+            "--color-secondary",
+            "--color-tertiary",
+            "--color-bg",
+            "--color-bg-soft",
+            "--color-border-soft",
+            "--color-white-pure"
+          ],
+          "properties": {
+            "--color-primary":      { "$ref": "#/definitions/hex" },
+            "--color-primary-dark": { "$ref": "#/definitions/hex" },
+            "--color-accent":       { "$ref": "#/definitions/hex" },
+            "--color-accent-dark":  { "$ref": "#/definitions/hex" },
+            "--color-secondary":    { "$ref": "#/definitions/hex" },
+            "--color-tertiary":     { "$ref": "#/definitions/hex" },
+            "--color-bg":           { "$ref": "#/definitions/hex" },
+            "--color-bg-soft":      { "$ref": "#/definitions/hex" },
+            "--color-border-soft":  { "$ref": "#/definitions/hex" },
+            "--color-white-pure":   { "$ref": "#/definitions/hex" }
+          }
+        },
+        "light": {
+          "type": "object",
+          "required": [
+            "--background",
+            "--foreground",
+            "--card",
+            "--card-foreground",
+            "--popover",
+            "--popover-foreground",
+            "--primary",
+            "--primary-foreground",
+            "--secondary",
+            "--secondary-foreground",
+            "--muted",
+            "--muted-foreground",
+            "--accent",
+            "--accent-foreground",
+            "--border",
+            "--input",
+            "--ring",
+            "--link",
+            "--tint-rgb"
+          ],
+          "properties": {
+            "--background":                 { "$ref": "#/definitions/hex" },
+            "--foreground":                 { "$ref": "#/definitions/hex" },
+            "--card":                       { "$ref": "#/definitions/hex" },
+            "--card-foreground":            { "$ref": "#/definitions/hex" },
+            "--popover":                    { "$ref": "#/definitions/hex" },
+            "--popover-foreground":         { "$ref": "#/definitions/hex" },
+            "--primary":                    { "$ref": "#/definitions/hex" },
+            "--primary-foreground":         { "$ref": "#/definitions/hex" },
+            "--secondary":                  { "$ref": "#/definitions/hex" },
+            "--secondary-foreground":       { "$ref": "#/definitions/hex" },
+            "--muted":                      { "$ref": "#/definitions/hex" },
+            "--muted-foreground":           { "$ref": "#/definitions/hex" },
+            "--accent":                     { "$ref": "#/definitions/hex" },
+            "--accent-foreground":          { "$ref": "#/definitions/hex" },
+            "--border":                     { "$ref": "#/definitions/hex" },
+            "--input":                      { "$ref": "#/definitions/hex" },
+            "--ring":                       { "$ref": "#/definitions/hex" },
+            "--link":                       { "$ref": "#/definitions/hex" },
+            "--sidebar":                    { "$ref": "#/definitions/hex" },
+            "--sidebar-foreground":         { "$ref": "#/definitions/hex" },
+            "--sidebar-primary":            { "$ref": "#/definitions/hex" },
+            "--sidebar-primary-foreground": { "$ref": "#/definitions/hex" },
+            "--sidebar-accent":             { "$ref": "#/definitions/hex" },
+            "--sidebar-accent-foreground":  { "$ref": "#/definitions/hex" },
+            "--sidebar-border":             { "$ref": "#/definitions/hex" },
+            "--sidebar-ring":               { "$ref": "#/definitions/hex" },
+            "--tint-rgb": {
+              "type": "string",
+              "description": "Bare RGB triplet without rgb() wrapper (e.g. '88, 101, 119').",
+              "pattern": "^\\d{1,3},\\s*\\d{1,3},\\s*\\d{1,3}$"
+            }
+          }
+        },
+        "dark": {
+          "type": "object",
+          "required": ["--background", "--foreground", "--tint-rgb"],
+          "description": "Dark mode semantic tokens. Most values are hex; --border, --input, --sidebar-border may use oklch() for alpha-composited values.",
+          "properties": {
+            "--background":  { "type": "string", "minLength": 1 },
+            "--foreground":  { "type": "string", "minLength": 1 },
+            "--tint-rgb": {
+              "type": "string",
+              "description": "Bare RGB triplet without rgb() wrapper (e.g. '138, 150, 166').",
+              "pattern": "^\\d{1,3},\\s*\\d{1,3},\\s*\\d{1,3}$"
+            }
+          }
+        }
+      }
+    },
+    "fonts": {
+      "type": "object",
+      "required": ["display", "body", "script"],
+      "properties": {
+        "display": { "$ref": "#/definitions/fontEntry" },
+        "body":    { "$ref": "#/definitions/fontEntry" },
+        "script":  {
+          "type": ["object", "null"],
+          "description": "Script/calligraphic accent font. null = disabled (default).",
+          "properties": {
+            "familyValue": { "type": "string", "minLength": 1 },
+            "imports":     { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "radius": {
+      "type": "string",
+      "description": "Border-radius personality token (e.g. '0.5rem', '0.25rem', '1rem'). Drives --radius in globals.css.",
+      "pattern": "^[0-9]+(\\.[0-9]+)?(rem|px|em)$"
+    },
+    "workerName": {
+      "type": ["string", "null"],
+      "description": "Cloudflare Worker name. When set (non-null) and domain != example.com, apply-brand rewrites the 'name' field in wrangler.jsonc. null = leave wrangler.jsonc untouched."
+    },
+    "logoPaths": {
+      "type": "object",
+      "properties": {
+        "light": { "type": "string" },
+        "dark":  { "type": "string" }
+      }
+    },
+    "studio": {
+      "type": "object",
+      "required": ["themeProps"],
+      "properties": {
+        "themeProps": {
+          "type": "object",
+          "description": "CSS custom properties for the Sanity Studio legacy theme."
+        }
+      }
+    }
+  },
+  "definitions": {
+    "hex": {
+      "type": "string",
+      "description": "6-digit hex color with leading #.",
+      "pattern": "^#[0-9A-Fa-f]{6}$"
+    },
+    "fontEntry": {
+      "type": "object",
+      "required": ["familyValue", "imports"],
+      "properties": {
+        "familyValue": {
+          "type": "string",
+          "minLength": 1,
+          "description": "CSS font-family value for use in a stylesheet."
+        },
+        "ogFontStack": {
+          "type": "string",
+          "description": "Font stack string for the OG image generator (node-canvas)."
+        },
+        "imports": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "@fontsource import paths to write into globals.css."
+        }
+      }
+    }
+  }
+}

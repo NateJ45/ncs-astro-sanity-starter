@@ -3,15 +3,45 @@
 // Content editors update their fields through Sanity instead — see studio/ and src/lib/queries.ts.
 // Replace these placeholders with your project's real values before launch.
 
+/** Slugify a display name for use in localStorage key prefixes.
+ *  "Studio Starter" -> "studio-starter"
+ *  "My Client & Co." -> "my-client-co"
+ *  Keeps apply-brand from ever needing to rewrite these fields — they stay
+ *  in sync automatically whenever `name` is updated.
+ */
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+// apply-brand rewrites the two quoted strings on `name:` and `domain:` below.
+// All derived fields (studio, storageKeyPrefix, themeStorageKey) are computed
+// from `name` at module load time — they are never rewritten by the script and
+// can never go stale across reskins.
+const _name   = "Studio Starter";
+const _domain = "example.com";
+const _slug   = slugify(_name);
+
 export const site = {
-  name: "Studio Starter",
-  studio: "Studio Starter",
-  domain: "example.com",
-  url: "https://example.com",
+  name:   _name,
+  domain: _domain,
+  url: `https://${_domain}`,
   // BCP 47 language tag for the <html lang> attribute. Change if the site is not in English.
   lang: "en",
-  storageKeyPrefix: "studio-starter",
-  themeStorageKey: "studio-starter-theme",
+
+  /** Short display name alias — same as name, kept for any consumer that
+   *  accessed the old `site.studio` property. */
+  studio: _name,
+
+  /** localStorage key prefix derived from name — e.g. "studio-starter".
+   *  Never needs to be touched by apply-brand; updates automatically. */
+  storageKeyPrefix: _slug,
+
+  /** localStorage key for theme preference — e.g. "studio-starter-theme".
+   *  Never needs to be touched by apply-brand; updates automatically. */
+  themeStorageKey: _slug + '-theme',
 
   // Brand colors are also declared in src/styles/globals.css.
   // Mirrored here for any script that needs them outside CSS (OG generator, structured data, etc.).
@@ -40,6 +70,6 @@ export const site = {
 
   // Public repo URL (used in footer credit if shown)
   repo: "",
-} as const;
+};
 
 export type Site = typeof site;

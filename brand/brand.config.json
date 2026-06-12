@@ -97,6 +97,10 @@
     },
     "script": null
   },
+  "radius": "0.5rem",
+
+  "workerName": null,
+
   "logoPaths": {
     "light": "src/assets/logo-light.svg",
     "dark":  "src/assets/logo-dark.svg"

@@ -28,6 +28,7 @@ The brand-defining tokens are:
 - `palette.theme["--color-bg"]` -- the page background
 - `palette.theme["--color-accent"]` -- headings and body text
 - The corresponding `:root` semantic tokens in `palette.light` and `palette.dark`
+- `radius` -- border-radius personality (`"0.5rem"` default = balanced; `"0.25rem"` = sharp/editorial; `"1rem"` = friendly/rounded)
 
 For any missing or placeholder field, interview the user (see Step 2), OR infer a
 coherent palette and font pairing from a described vibe and present it for approval
@@ -42,9 +43,12 @@ Ask for brand inputs. Collect them in this order, one group at a time:
 **Identity**
 
 1. Business name (replaces "Studio Starter" everywhere it appears).
-2. Domain (replaces "example.com").
+2. Domain (replaces "example.com"). Also sets the `site:` URL in `astro.config.mjs`
+   when domain is not "example.com".
 3. Tagline (replaces "Your tagline goes here.").
 4. Contact info: email, phone, address. These are optional; leave blank if not provided.
+5. Cloudflare Worker name (`workerName` key -- optional). When set, `apply-brand`
+   rewrites the `"name"` field in `wrangler.jsonc`. Leave `null` to skip that file.
 
 **Palette**
 
@@ -64,19 +68,26 @@ b. **Describe a vibe.** Examples: "warm terracotta and cream", "deep navy and go
 
 c. **Keep the neutral default.** Skip palette changes entirely.
 
+**Roundness**
+
+6. Radius (`radius` key -- optional). The `--radius` token drives the entire border-radius
+   scale. Options: `"0.25rem"` (sharp/editorial), `"0.5rem"` (default -- balanced),
+   `"0.75rem"` (softened), `"1rem"` (rounded/friendly). Custom values like `"6px"` are
+   also valid. Leave at default if unsure.
+
 **Fonts**
 
-5. Display font (default: Libre Baskerville). Ask if they want to change it.
+7. Display font (default: Libre Baskerville). Ask if they want to change it.
    If yes: collect the font family name. Confirm a `@fontsource` or `@fontsource-variable`
    package exists for it -- see Step 3 before writing.
-6. Body font (default: Inter Variable). Same process.
-7. Script accent font: opt-in, off by default (`null` in config). Only collect if requested.
+8. Body font (default: Inter Variable). Same process.
+9. Script accent font: opt-in, off by default (`null` in config). Only collect if requested.
 
 **Logo paths**
 
-8. Path to `logo-light` file and `logo-dark` file (relative to repo root, under `src/assets/`).
-   Note that `apply-brand` does not copy files. The user must place the files at those paths
-   before running `npm run build`.
+10. Path to `logo-light` file and `logo-dark` file (relative to repo root, under `src/assets/`).
+    Note that `apply-brand` does not copy files. The user must place the files at those paths
+    before running `npm run build`.
 
 ---
 
@@ -115,25 +126,39 @@ by `apply-brand`.
 
 ---
 
-## Step 4 -- Write brand/brand.config.json and run apply-brand
+## Step 4 -- Write brand/brand.config.json, validate, and run apply-brand
 
 Update only the fields the user provided. Do not change fields left at default unless
 the user explicitly asked to change them. Write the complete, valid JSON to
 `brand/brand.config.json`.
 
-Then run:
+Before running the real write, do a pre-flight validation and dry run:
+
+```
+npm run apply-brand -- --check
+```
+
+This validates `brand/brand.config.json` against `brand/brand.config.schema.json`
+(hex color format, tint-rgb triplet format, required keys) and dry-runs every
+substitution pattern against its target file. It prints which files WOULD update
+and exits 0 on success, 1 on any validation or pattern failure. Nothing is written.
+Fix any errors reported before continuing.
+
+Then run the real apply:
 
 ```
 npm run apply-brand
 ```
 
 This rewrites:
-- `src/styles/globals.css` -- `@theme` palette tokens, font tokens, `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens
-- `src/data/site.ts` -- `name`, `domain`, `brandColors`
+- `src/styles/globals.css` -- `@theme` palette tokens, font tokens, `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string
+- `src/data/site.ts` -- `name`, `domain`, `brandColors` (derived fields `storageKeyPrefix`, `themeStorageKey`, `studio` are computed automatically -- never stale)
 - `studio/sanity.config.ts` -- `studioThemeProps`
 - `scripts/generate-og-default.mjs` -- `wordmark`, `tagline`
 - `scripts/lib/render-og.mjs` -- `DEFAULTS` object colors and font stack
 - `scripts/generate-og-pages.mjs` -- `WORDMARK` fallback string
+- `wrangler.jsonc` -- `"name"` field (only when `workerName` is non-null in config)
+- `astro.config.mjs` -- `site:` URL (only when `domain` is not "example.com")
 - `public/og-default.png` -- regenerated from the new inputs
 
 If `apply-brand` succeeds, report the log lines (which files changed vs. "no changes").
@@ -258,3 +283,6 @@ yet connected to Sanity.
 
 **Studio theme:** The Sanity Studio theme was updated by `apply-brand`, but the Studio must
 be redeployed before editors see the new colors. Run `npm run studio:deploy` when ready.
+
+**Worker name:** If `workerName` was set and `wrangler.jsonc` was rewritten, confirm that
+the Worker name is unique in the Cloudflare account before deploying.
