@@ -134,7 +134,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'A single word from the headline to render in handwritten Pinyon Script for editorial flourish. Must match the word exactly (case-sensitive). The first occurrence wins. Leave blank to skip. Note: when "rotating words" is also set, the rotation wins and this is ignored.',
+        'A single word from the headline to render in the handwritten script accent font for editorial flourish. Must match the word exactly (case-sensitive). The first occurrence wins. Leave blank to skip. Note: when "rotating words" is also set, the rotation wins and this is ignored.',
     }),
 
     // Meet the Founder (legacy — hidden for rollback safety)
@@ -296,7 +296,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Optional. One word or short phrase from the headline to render in handwritten Pinyon Script. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({
       name: 'testimonialsSubhead',
@@ -341,7 +341,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Optional. One word or short phrase from the headline to render in handwritten Pinyon Script. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({ name: 'servicesGridSubhead', title: 'Subhead', type: 'text', rows: 2, group: 'services', hidden: true, readOnly: true }),
     defineField({ name: 'servicesGridCta', title: 'Services grid CTA', type: 'ctaBlock', group: 'services', hidden: true, readOnly: true }),
@@ -375,7 +375,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Optional. One word or short phrase from the headline to render in handwritten Pinyon Script. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({ name: 'finalCtaSubhead', title: 'Final CTA subhead', type: 'text', rows: 2, group: 'final', hidden: true, readOnly: true, initialValue: "Let's start with a conversation." }),
     defineField({ name: 'finalCta', title: 'Final CTA button', type: 'ctaBlock', group: 'final', hidden: true, readOnly: true }),

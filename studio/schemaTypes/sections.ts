@@ -23,6 +23,8 @@ import {
   RemoveIcon,
   PlayIcon,
   ThLargeIcon,
+  EarthGlobeIcon,
+  CodeBlockIcon,
 } from '@sanity/icons';
 
 // Shared image field with required alt text (accessibility + SEO).
@@ -338,6 +340,125 @@ export const spacerSection = defineType({
   preview: { prepare: () => ({ title: 'Spacer / divider' }) },
 });
 
+// ── 10. Logo strip ──────────────────────────────────────────────────────────
+// A row or grid of client/partner logos. SELF_CONTAINED — manages its own surface.
+export const logoStripSection = defineType({
+  name: 'logoStripSection',
+  title: 'Logo strip (trusted by / as seen in)',
+  type: 'object',
+  icon: EarthGlobeIcon,
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string', description: 'Examples: "Trusted by" or "As seen in".' }),
+    defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
+    defineField({
+      name: 'logos',
+      title: 'Logos',
+      type: 'array',
+      validation: (R) => R.min(2).max(12),
+      description: 'Add between 2 and 12 logos. Each needs an alt text for screen readers.',
+      of: [
+        defineArrayMember({
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            defineField({
+              name: 'alt',
+              title: 'Alt text',
+              type: 'string',
+              description: 'Company or outlet name, for screen readers and search engines.',
+              validation: (R) => R.required(),
+            }),
+          ],
+        }),
+      ],
+    }),
+    defineField({
+      name: 'layout',
+      title: 'Layout',
+      type: 'string',
+      initialValue: 'row',
+      options: {
+        list: [
+          { title: 'Row (single line, scrollable on small screens)', value: 'row' },
+          { title: 'Grid (wraps across rows)', value: 'grid' },
+        ],
+        layout: 'radio',
+      },
+    }),
+  ],
+  preview: {
+    select: { logos: 'logos', eyebrow: 'eyebrow', headline: 'headline' },
+    prepare: ({ logos, eyebrow, headline }) => ({
+      title: headline || eyebrow || 'Logo strip',
+      subtitle: `Logo strip${Array.isArray(logos) ? ` (${logos.length})` : ''}`,
+      media: Array.isArray(logos) && logos[0] ? logos[0] : EarthGlobeIcon,
+    }),
+  },
+});
+
+// ── 11. Embed section ───────────────────────────────────────────────────────
+// Sandboxed iframe embed. Accepts either a URL (Calendly, Cal.com, Tally, etc.)
+// or raw embed code from a trusted provider. SELF_CONTAINED — manages its own surface.
+//
+// SECURITY NOTE: embedCode is rendered as-is on the live site. Only paste code
+// from providers you trust. The same trust model applies here as for any content
+// in the CMS.
+export const embedSection = defineType({
+  name: 'embedSection',
+  title: 'Embed (form, scheduler, or widget)',
+  type: 'object',
+  icon: CodeBlockIcon,
+  description: 'Only paste embed code from providers you trust. It renders as-is on the live site.',
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
+    defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
+    defineField({
+      name: 'embedUrl',
+      title: 'Embed URL',
+      type: 'url',
+      description: 'Use for providers that embed via URL: Calendly, Cal.com, Tally, Google Forms. Paste the full URL.',
+      validation: (R) => R.uri({ scheme: ['http', 'https'] }),
+    }),
+    defineField({
+      name: 'embedCode',
+      title: 'Embed code (raw iframe)',
+      type: 'text',
+      rows: 4,
+      description: 'Use for providers that give a raw iframe snippet. Only paste from providers you trust.',
+      validation: (R) =>
+        R.custom((value, context) => {
+          const doc = context.document as Record<string, unknown> | undefined;
+          if (value && doc?.embedUrl) {
+            return 'Fill in either Embed URL or Embed code, not both.';
+          }
+          return true;
+        }),
+    }),
+    defineField({
+      name: 'heightHint',
+      title: 'Height',
+      type: 'string',
+      initialValue: 'medium',
+      options: {
+        list: [
+          { title: 'Short (around 400px)', value: 'short' },
+          { title: 'Medium (around 640px)', value: 'medium' },
+          { title: 'Tall (around 900px)', value: 'tall' },
+        ],
+        layout: 'radio',
+      },
+    }),
+  ],
+  preview: {
+    select: { title: 'headline', eyebrow: 'eyebrow', url: 'embedUrl' },
+    prepare: ({ title, eyebrow, url }) => ({
+      title: title || eyebrow || 'Embed',
+      subtitle: url ? `Embed: ${url.slice(0, 50)}` : 'Embed (code snippet)',
+    }),
+  },
+});
+
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 // All section schema objects, to register in the schema index.
@@ -351,6 +472,8 @@ export const pageSectionSchemas = [
   ctaBandSection,
   videoSection,
   spacerSection,
+  logoStripSection,
+  embedSection,
 ];
 
 // The list a pageBuilder array uses for `of`. Single source of truth so every

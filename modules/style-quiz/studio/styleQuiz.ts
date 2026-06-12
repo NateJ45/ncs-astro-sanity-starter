@@ -58,7 +58,7 @@ export const styleQuiz = defineType({
       title: 'Headline',
       type: 'string',
       group: 'intro',
-      initialValue: 'What is your design style?',
+      initialValue: 'Find Your Fit',
       validation: (Rule) => Rule.required(),
     }),
     defineField({

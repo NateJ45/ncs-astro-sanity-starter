@@ -27,7 +27,16 @@
 
 import { getImage } from 'astro:assets';
 import { site } from '@/data/site';
-import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
+import {
+  IconBrandInstagram,
+  IconBrandFacebook,
+  IconBrandLinkedin,
+  IconBrandPinterest,
+  IconBrandYoutube,
+  IconBrandTiktok,
+  IconBrandX,
+  IconLink,
+} from '@tabler/icons-react';
 import { Mail, Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
 import NewsletterSignup from '@/components/NewsletterSignup';
@@ -59,6 +68,12 @@ interface NewsletterConfig {
   audienceId?: string | null;
 }
 
+interface SocialLink {
+  platform?: string;
+  url?: string;
+  label?: string;
+}
+
 interface Props {
   siteSettings?: {
     title?: string;
@@ -66,6 +81,7 @@ interface Props {
     phone?: string;
     socialInstagram?: string;
     socialFacebook?: string;
+    socialLinks?: SocialLink[] | null;
     serviceAreas?: string[];
     tagline?: string;
     footerCredit?: string;
@@ -94,8 +110,34 @@ const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 const brandName = siteSettings?.title ?? site.name;
 const email = siteSettings?.email ?? '';
 const phone = siteSettings?.phone ?? '';
+
+// Social links: prefer the new socialLinks array; fall back to the legacy
+// socialInstagram / socialFacebook fields so existing datasets keep working.
+const rawSocialLinks = siteSettings?.socialLinks ?? [];
 const ig = siteSettings?.socialInstagram ?? '';
 const fb = siteSettings?.socialFacebook ?? '';
+const socialLinksToRender: SocialLink[] =
+  rawSocialLinks.length > 0
+    ? rawSocialLinks.filter((l) => l?.url)
+    : [
+        ...(ig ? [{ platform: 'Instagram', url: ig }] : []),
+        ...(fb ? [{ platform: 'Facebook', url: fb }] : []),
+      ];
+
+// Map platform name to a Tabler icon component.
+function socialIcon(platform: string | undefined) {
+  switch (platform) {
+    case 'Instagram':  return IconBrandInstagram;
+    case 'Facebook':   return IconBrandFacebook;
+    case 'LinkedIn':   return IconBrandLinkedin;
+    case 'Pinterest':  return IconBrandPinterest;
+    case 'YouTube':    return IconBrandYoutube;
+    case 'TikTok':     return IconBrandTiktok;
+    case 'X':          return IconBrandX;
+    // Tabler has no Houzz brand icon; the generic link icon covers it.
+    default:           return IconLink;
+  }
+}
 // Copyright auto-updates every build via new Date(). The "Site by..." line
 // (siteCredit + siteCreditUrl) is a SEPARATE concept that sits next to the
 // auto-year copyright in the thin bottom bar.
@@ -250,34 +292,25 @@ const latestProjects = allProjects.slice(0, 3);
       <p class="mt-s text-sm text-foreground/75">
         {site.name}
       </p>
-      {(ig || fb) && (
+      {socialLinksToRender.length > 0 && (
         <ul class="mt-m flex justify-center md:justify-start gap-s text-sm list-none p-0">
-          {ig && (
-            <li>
-              <a
-                href={ig}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-primary-dark hover:border-primary-dark hover:text-white transition-colors"
-              >
-                <IconBrandInstagram size={20} stroke={1.5} />
-              </a>
-            </li>
-          )}
-          {fb && (
-            <li>
-              <a
-                href={fb}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-primary-dark hover:border-primary-dark hover:text-white transition-colors"
-              >
-                <IconBrandFacebook size={20} stroke={1.5} />
-              </a>
-            </li>
-          )}
+          {socialLinksToRender.map((link) => {
+            const Icon = socialIcon(link.platform);
+            const ariaLabel = link.label ?? link.platform ?? 'Social link';
+            return (
+              <li>
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={ariaLabel}
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground hover:bg-primary-dark hover:border-primary-dark hover:text-white transition-colors"
+                >
+                  <Icon size={20} stroke={1.5} />
+                </a>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

@@ -22,7 +22,7 @@ The starter ships these routes (always on, not toggleable):
 | `/privacy` | `src/pages/privacy.astro` | Privacy policy from singleton |
 | `/404` | `src/pages/404.astro` | Custom 404 |
 
-Additional routes come from opt-in modules staged under `modules/` (off by default). Each module is documented under `docs/modules/`. Current available modules: `portfolio`, `process`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`, `guides`, `style-quiz`, `budget-calculator`.
+Additional routes come from opt-in modules staged under `modules/` (off by default). Each module is documented under `docs/modules/`. There are 13 opt-in modules: `portfolio`, `shop`, `virtual-services`, `gift-certificates`, `press`, `resources`, `lead-magnets`, `newsletter`, `style-quiz`, `budget-calculator`, `events`, `donations`, `team`. Key routes they add: `/virtual-services` (was `/e-design`), `/events`, `/donate`, `/team`. (The `process` route is always-on core, not a module.)
 
 ---
 
@@ -36,51 +36,55 @@ The four core pages (home, about, services, process) and every custom `page` doc
 
 ### Block library (`studio/schemaTypes/sections.ts`)
 
-`SECTION_TYPES` (exported from `sections.ts`) is the single source of truth for the nine general block types available on every page builder:
+`SECTION_TYPES` (exported from `sections.ts`) is the single source of truth for the eleven general block types available on every page builder:
 
-| `_type` | Description |
-|---|---|
-| `heroSection` | Full-width headline block, optional background photo, primary and secondary CTAs |
-| `richTextSection` | Portable Text with heading, prose, optional alignment and width controls |
-| `imageTextSection` | Side-by-side image and text, configurable image side |
-| `gallerySection` | Image grid with optional lightbox, configurable column count |
-| `quoteSection` | Pull quote with attribution and optional context line |
-| `statSection` | Row of up to 4 labeled numbers (auto-counted up animation) |
-| `ctaBandSection` | Full-width call-to-action band, optional background photo |
-| `videoSection` | YouTube or Vimeo embed with optional heading and caption |
-| `spacerSection` | Explicit vertical gap — ornament, line, or invisible space |
+| `_type` | Cadence | Description |
+|---|---|---|
+| `heroSection` | SELF_CONTAINED | Full-width headline block, optional background photo, primary and secondary CTAs |
+| `richTextSection` | CONTENT | Portable Text with heading, prose, optional alignment and width controls |
+| `imageTextSection` | CONTENT | Side-by-side image and text, configurable image side |
+| `gallerySection` | CONTENT | Image grid with optional lightbox, configurable column count |
+| `quoteSection` | CONTENT | Pull quote with attribution and optional context line |
+| `statSection` | SELF_CONTAINED | Row of up to 4 labeled numbers (auto-counted up animation) |
+| `ctaBandSection` | SELF_CONTAINED | Full-width call-to-action band, optional background photo |
+| `videoSection` | CONTENT | YouTube or Vimeo embed with optional heading and caption |
+| `spacerSection` | SELF_CONTAINED | Explicit vertical gap -- ornament, line, or invisible space |
+| `logoStripSection` | SELF_CONTAINED | Row or grid of client/partner logos with optional eyebrow and headline |
+| `embedSection` | SELF_CONTAINED | Sandboxed iframe embed: Calendly, Cal.com, Tally, or raw trusted embed code |
 
 Blocks deliberately carry no `backgroundColor` field. Background assignment is `SectionRenderer`'s responsibility.
 
 ### Rich section types (`studio/schemaTypes/richSections.ts`)
 
-Eight additional types for the core pages. These are richer blocks that auto-populate from Sanity collections (services, testimonials, process steps, philosophy points):
+Ten additional types for the core pages. These are richer blocks that auto-populate from Sanity collections (services, testimonials, process steps, philosophy points) or use structured inline data:
 
-| `_type` | Description |
-|---|---|
-| `founderSection` | Two-column bio: portrait, headline, prose, optional CTA |
-| `servicesGridSection` | Services grid, auto-populated from the `service` collection; two layout variants (grid or full list) |
-| `testimonialsSection` | Featured pull-quote + testimonial grid, references `testimonial` docs |
-| `storySection` | Long-form narrative: sticky portrait, story prose, attribution and credential lines |
-| `valuesSection` | Numbered values/philosophy card grid, auto-populated from `philosophyPoint` docs |
-| `processSection` | Ordered process steps, auto-populated from `processStep` docs; preview (4-step) or full variant |
-| `serviceAreaSection` | Service area prose + optional travel fee table pulled from `businessInfo` |
-| `guaranteeSection` | Trust/guarantee statement — editor text or falls back to `siteSettings.satisfactionGuarantee` |
+| `_type` | Cadence | Description |
+|---|---|---|
+| `founderSection` | SELF_CONTAINED | Two-column bio: portrait, headline, prose, optional CTA |
+| `servicesGridSection` | SELF_CONTAINED | Services grid, auto-populated from the `service` collection; two layout variants (grid or full list) |
+| `testimonialsSection` | SELF_CONTAINED | Featured pull-quote + testimonial grid, references `testimonial` docs |
+| `storySection` | CONTENT | Long-form narrative: sticky portrait, story prose, attribution and credential lines |
+| `valuesSection` | SELF_CONTAINED | Numbered values/philosophy card grid, auto-populated from `philosophyPoint` docs |
+| `processSection` | SELF_CONTAINED | Ordered process steps, auto-populated from `processStep` docs; preview (4-step) or full variant |
+| `serviceAreaSection` | CONTENT | Service area prose + optional travel fee table pulled from `businessInfo` |
+| `guaranteeSection` | CONTENT | Trust/guarantee statement -- editor text or falls back to `siteSettings.satisfactionGuarantee` |
+| `faqSection` | SELF_CONTAINED | Inline FAQ accordion; references `faqItem` docs. Does not re-emit FAQPage JSON-LD (the dedicated /faq page owns that) |
+| `teamSection` | SELF_CONTAINED | Team member grid with inline member objects (name, role, photo, bio, social links) |
 
 **Per-page curated lists.** Each core page exposes only the block types that make sense on it. These are defined at the bottom of `richSections.ts`:
 
-- `HOME_SECTION_TYPES` — all 9 general + `founderSection`, `servicesGridSection`, `testimonialsSection`, `processSection`
-- `ABOUT_SECTION_TYPES` — all 9 general + `storySection`, `valuesSection`
-- `SERVICES_SECTION_TYPES` — all 9 general + `servicesGridSection`, `serviceAreaSection`, `guaranteeSection`
-- `PROCESS_SECTION_TYPES` — all 9 general + `processSection`
+- `HOME_SECTION_TYPES` -- all 11 general + `founderSection`, `servicesGridSection`, `testimonialsSection`, `processSection`, `faqSection`, `teamSection`
+- `ABOUT_SECTION_TYPES` -- all 11 general + `storySection`, `valuesSection`, `faqSection`, `teamSection`
+- `SERVICES_SECTION_TYPES` -- all 11 general + `servicesGridSection`, `serviceAreaSection`, `guaranteeSection`, `faqSection`
+- `PROCESS_SECTION_TYPES` -- all 11 general + `processSection`, `faqSection`
 
-Custom `page` documents expose `SECTION_TYPES` (the nine general blocks only).
+Custom `page` documents expose `SECTION_TYPES` (the eleven general blocks only).
 
 ### `SectionRenderer.astro`
 
 `src/components/SectionRenderer.astro` is the page-builder runtime. It receives the resolved section array from the GROQ query and:
 
-1. Classifies each block as **self-contained** (`heroSection`, `ctaBandSection`, `statSection`, `spacerSection`, `founderSection`, `servicesGridSection`, `testimonialsSection`, `valuesSection`, `processSection`) or **content** (the rest).
+1. Classifies each block as **self-contained** (`heroSection`, `ctaBandSection`, `statSection`, `spacerSection`, `logoStripSection`, `embedSection`, `founderSection`, `servicesGridSection`, `testimonialsSection`, `valuesSection`, `processSection`, `faqSection`, `teamSection`) or **content** (the rest).
 2. Assigns alternating `surface` / `surface-muted` classes to content blocks in sequence, skipping self-contained blocks in the count.
 3. Inserts `SectionDivider.astro` between adjacent content blocks of differing surfaces automatically.
 4. Delegates rendering to individual section components in `src/components/sections/`.

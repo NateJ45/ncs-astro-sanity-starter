@@ -1,0 +1,49 @@
+/* Starwind UI — supplementary CSS. Foundation, edit with care.
+   This file is imported AFTER globals.css in BaseLayout.astro.
+   globals.css owns :root / .dark semantic tokens and the @custom-variant dark rule.
+   This file adds ONLY:
+     1. Accordion keyframes (used by Starwind accordion JS)
+     2. @theme inline mappings for the NEW Starwind-only tokens not in globals.css
+        (--info, --success, --warning, --error, --primary-accent, --secondary-accent
+         and their foreground pairs, plus --outline)
+   The :root / .dark blocks for those new tokens live in globals.css so apply-brand
+   can rewrite them. The duplicate tailwindcss / tw-animate-css / @custom-variant
+   declarations from starwind init have been removed to avoid cascade fights. */
+
+@theme {
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--starwind-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--starwind-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+@theme inline {
+  /* Starwind-specific semantic tokens — map to the :root vars declared in globals.css. */
+  --color-primary-accent: var(--primary-accent);
+  --color-secondary-accent: var(--secondary-accent);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-outline: var(--outline);
+}

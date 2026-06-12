@@ -10,7 +10,7 @@
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
-import PortableText from '@/components/PortableText';
+import PortableTextStatic from '@/components/PortableTextStatic.astro';
 import { getPrivacyPage, getSiteSettings } from '@/lib/queries';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
@@ -69,8 +69,7 @@ const hasSanityBody = Boolean(page?.body);
       )}
 
       {hasSanityBody ? (
-        <PortableText
-          client:visible
+        <PortableTextStatic
           value={page!.body}
           className="prose-friendly"
         />

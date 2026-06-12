@@ -11,6 +11,12 @@ import { site } from '@/data/site';
 
 // ---------- Types (loose — Sanity provides the actual document shapes) ----
 
+interface SocialLink {
+  platform?: string;
+  url?: string;
+  label?: string;
+}
+
 interface SiteSettings {
   title?: string;
   email?: string;
@@ -18,14 +24,17 @@ interface SiteSettings {
   serviceAreas?: string[];
   socialInstagram?: string;
   socialFacebook?: string;
-  /** Studio city name — set in Sanity siteSettings or update the default in schemas.ts */
+  /** New flexible social links array (U8). When present, merged with legacy fields in sameAs. */
+  socialLinks?: SocialLink[] | null;
+  businessType?: string;
+  /** Studio city name — set in Sanity businessInfo or update via apply-brand */
   city?: string;
   /** Studio region/state abbreviation */
-  region?: string;
-  /** Studio latitude — update to your studio's coordinates */
-  lat?: number;
-  /** Studio longitude — update to your studio's coordinates */
-  lon?: number;
+  state?: string;
+  /** Studio latitude from businessInfo */
+  geoLat?: number;
+  /** Studio longitude from businessInfo */
+  geoLng?: number;
 }
 
 interface Service {
@@ -51,31 +60,53 @@ export function localBusinessSchema(settings: SiteSettings | null | undefined): 
   const s = settings ?? {};
   const schema: Record<string, any> = {
     '@context': 'https://schema.org',
-    '@type': 'InteriorDesigner',
+    '@type': s.businessType ?? 'LocalBusiness',
     '@id': `${site.url}/#business`,
     name: s.title ?? site.name,
     url: site.url,
     image: `${site.url}${site.assets.ogDefault}`,
     email: s.email ?? undefined,
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: s.city ?? 'Your City',
-      addressRegion: s.region ?? 'Your State',
-      addressCountry: 'US',
-    },
-    // Update geo coordinates to your studio's actual location.
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: s.lat ?? 0,
-      longitude: s.lon ?? 0,
-    },
-    areaServed: (s.serviceAreas ?? ['Your City']).map((city) => ({
-      '@type': 'City',
-      name: city,
-    })),
     priceRange: '$$',
-    sameAs: [s.socialInstagram, s.socialFacebook].filter(Boolean),
+    // Merge legacy fields + socialLinks urls, deduplicating by url string.
+    sameAs: Array.from(
+      new Set(
+        [
+          s.socialInstagram,
+          s.socialFacebook,
+          ...(s.socialLinks ?? []).map((l) => l.url),
+        ].filter((u): u is string => Boolean(u)),
+      ),
+    ),
   };
+
+  // Omit address entirely when city/state are absent or still placeholder defaults.
+  const PLACEHOLDER_CITY = 'Your City';
+  const hasCity = s.city && s.city !== PLACEHOLDER_CITY;
+  const hasState = s.state && s.state !== 'Your State' && s.state !== 'XX';
+  if (hasCity || hasState) {
+    schema.address = {
+      '@type': 'PostalAddress',
+      ...(hasCity  ? { addressLocality: s.city }  : {}),
+      ...(hasState ? { addressRegion:   s.state } : {}),
+      addressCountry: 'US',
+    };
+  }
+
+  // Omit GeoCoordinates unless both lat and lng are present and non-zero.
+  if (s.geoLat && s.geoLng) {
+    schema.geo = {
+      '@type': 'GeoCoordinates',
+      latitude:  s.geoLat,
+      longitude: s.geoLng,
+    };
+  }
+
+  // Omit areaServed when the only entry is the placeholder default.
+  const areas = (s.serviceAreas ?? []).filter((a) => a && a !== PLACEHOLDER_CITY);
+  if (areas.length > 0) {
+    schema.areaServed = areas.map((city) => ({ '@type': 'City', name: city }));
+  }
+
   if (s.phone) schema.telephone = s.phone;
   return JSON.stringify(schema);
 }

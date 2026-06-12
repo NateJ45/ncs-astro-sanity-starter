@@ -20,7 +20,7 @@ export const site = {
 } as const;
 ```
 
-Replace all placeholder values in `site.ts` before launch. The domain feeds the canonical URL, OG tags, and the sitemap reference in `robots.txt`.
+Replace all placeholder values in `site.ts` before launch. The domain feeds the canonical URL, OG tags, and the sitemap reference in the generated `robots.txt` (rendered at build time by `src/pages/robots.txt.ts`).
 
 ### Sanity — all editable content
 
@@ -29,13 +29,13 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 **Core schema set (always present in the starter):**
 
 **Settings and globals:**
-- `siteSettings` (singleton) — email, phone, social links, footer tagline, newsletter settings, section visibility flags. Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
-- `businessInfo` (singleton) — service areas, travel fee tiers, availability status, studio city/state, and geo coordinates. Split from `siteSettings` so identity fields stay in one place and operational business facts in another. `getSiteSettings()` merges both documents and returns them under a single flat interface — no component changes needed.
+- `siteSettings` (singleton) -- email, phone, footer tagline, newsletter settings, section visibility flags, `businessType` (schema.org LocalBusiness subtype; drives the JSON-LD `@type` field -- defaults to `LocalBusiness` if unset), and `socialLinks` (structured array of platform + URL pairs, supersedes legacy flat social-URL fields). Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
+- `businessInfo` (singleton) -- service areas, travel fee tiers, availability status, studio city/state, geo coordinates, `businessModel` (`'in-person'` or `'remote'`; controls which location/travel fields show in the Studio), and `additionalLocations` (array for multi-location businesses). Split from `siteSettings` so identity fields stay in one place and operational business facts in another. `getSiteSettings()` merges both documents and returns them under a single flat interface -- no component changes needed.
 
 **Page builder schemas:**
-- `sections.ts` — the 9 general block types (`heroSection`, `richTextSection`, `imageTextSection`, `gallerySection`, `quoteSection`, `statSection`, `ctaBandSection`, `videoSection`, `spacerSection`), plus `SECTION_TYPES` (the `of` array for any `pageBuilder` field) and `additionalSectionsField` (the append zone).
-- `richSections.ts` — 8 rich section types generalized from core-page patterns (`founderSection`, `servicesGridSection`, `testimonialsSection`, `storySection`, `valuesSection`, `processSection`, `serviceAreaSection`, `guaranteeSection`), plus per-page curated lists (`HOME_SECTION_TYPES`, `ABOUT_SECTION_TYPES`, `SERVICES_SECTION_TYPES`, `PROCESS_SECTION_TYPES`).
-- `page.ts` — the custom page document type. Multi-instance, non-singleton. Has `title`, `slug` (with reserved-slug validation), `pageBuilder` (using `SECTION_TYPES`), nav placement fields (`addToMainNav`, `navGroup`, `navLabel`, `addToFooter`), and SEO fields. Routed by `src/pages/[slug].astro`.
+- `sections.ts` -- the 11 general block types (`heroSection`, `richTextSection`, `imageTextSection`, `gallerySection`, `quoteSection`, `statSection`, `ctaBandSection`, `videoSection`, `spacerSection`, `logoStripSection`, `embedSection`), plus `SECTION_TYPES` (the `of` array for any `pageBuilder` field) and `additionalSectionsField` (the append zone).
+- `richSections.ts` -- 10 rich section types (`founderSection`, `servicesGridSection`, `testimonialsSection`, `storySection`, `valuesSection`, `processSection`, `serviceAreaSection`, `guaranteeSection`, `faqSection`, `teamSection`), plus per-page curated lists (`HOME_SECTION_TYPES`, `ABOUT_SECTION_TYPES`, `SERVICES_SECTION_TYPES`, `PROCESS_SECTION_TYPES`).
+- `page.ts` -- the custom page document type. Multi-instance, non-singleton. Has `title`, `slug` (with reserved-slug validation), `pageBuilder` (using `SECTION_TYPES`), nav placement fields (`addToMainNav`, `navGroup`, `navLabel`, `addToFooter`), and SEO fields. Routed by `src/pages/[slug].astro`.
 
 **Core page singletons (section-driven):**
 - `homePage`, `aboutPage`, `servicesPage`, `processPage` — each has a `pageBuilder` array field using its page-specific section type list, plus SEO fields. Renders from `src/data/defaultSections.ts` when `pageBuilder` is empty.
@@ -46,7 +46,8 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 - `service` — service offerings displayed on the Services page and optionally on the home page. Optional `featuredImage` renders a visual on each pricing card; `ServiceCard.astro` falls back gracefully when absent.
 - `testimonial` — quotes with attribution, source, date. Optional `photo` (circular avatar) and `relatedProject` reference (when set, both `TestimonialCard.astro` and `FeaturedTestimonial.astro` render a link to the related case study).
 - `processStep` — individual process step documents, auto-populated by `processSection`.
-- `faqItem` — FAQ questions grouped by category, displayed on the FAQ page.
+- `faqCategory` — FAQ category documents. `faqItem` has a `categoryRef` field (reference to `faqCategory`) that supersedes the legacy hardcoded `category` string; the frontend coalesces `categoryRef.title` with the legacy field for backwards compatibility.
+- `faqItem` — FAQ questions. Each has a `categoryRef` (reference to `faqCategory`; preferred) and a legacy `category` string field for existing items. Displayed on the FAQ page grouped by category.
 - `philosophyPoint` — value statements, auto-populated by `valuesSection`. Visible numbers (01/02/03) are assigned by render position, not by a stored order field.
 - `ctaBlock` — reusable object type (label + linkType + target) embedded in other schemas.
 

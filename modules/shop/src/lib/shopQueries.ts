@@ -18,9 +18,9 @@ export async function getShopPage() {
     disclosure,
     intro,
     "collections": collections[]->{
-      _id, title, description,
+      _id, title, blurb,
       "items": *[_type == "shopItem" && collection._ref == ^._id] | order(orderRank asc){
-        _id, name, vendor, note, affiliateUrl,
+        _id, title, vendor, note, affiliateUrl,
         image${IMAGE_PROJECTION}
       }
     }

@@ -74,6 +74,10 @@ function resolveHref(c?: CtaBlock | null): string {
       if (t === 'journalEntry' && c.internalLink?.slug) {
         return `/journal/${c.internalLink.slug}`;
       }
+      // Custom pages (type 'page') route via /[slug].astro.
+      if (t === 'page' && c.internalLink?.slug) {
+        return `/${c.internalLink.slug}`;
+      }
       return TYPE_TO_PATH[t] ?? fallbackHref;
     }
     case 'external':

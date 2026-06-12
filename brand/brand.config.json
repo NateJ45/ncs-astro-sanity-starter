@@ -47,7 +47,19 @@
       "--sidebar-accent-foreground":  "#2A2D31",
       "--sidebar-border":             "#E6E7E5",
       "--sidebar-ring":               "#586577",
-      "--tint-rgb":                   "88, 101, 119"
+      "--tint-rgb":                   "88, 101, 119",
+
+      "--primary-accent":             "#434E5C",
+      "--secondary-accent":           "#2A2D31",
+      "--info":                       "#93C5FD",
+      "--info-foreground":            "#1E3A5F",
+      "--success":                    "#86EFAC",
+      "--success-foreground":         "#14532D",
+      "--warning":                    "#FDE68A",
+      "--warning-foreground":         "#713F12",
+      "--error":                      "oklch(0.577 0.245 27.325)",
+      "--error-foreground":           "#FFFFFF",
+      "--outline":                    "#586577"
     },
     "dark": {
       "--background":                 "#17191C",
@@ -76,7 +88,19 @@
       "--sidebar-accent-foreground":  "#F2F3F2",
       "--sidebar-border":             "oklch(1 0 0 / 12%)",
       "--sidebar-ring":               "#8A96A6",
-      "--tint-rgb":                   "138, 150, 166"
+      "--tint-rgb":                   "138, 150, 166",
+
+      "--primary-accent":             "#8A96A6",
+      "--secondary-accent":           "#F2F3F2",
+      "--info":                       "#93C5FD",
+      "--info-foreground":            "#1E3A5F",
+      "--success":                    "#86EFAC",
+      "--success-foreground":         "#14532D",
+      "--warning":                    "#FDE68A",
+      "--warning-foreground":         "#713F12",
+      "--error":                      "oklch(0.704 0.191 22.216)",
+      "--error-foreground":           "#FFFFFF",
+      "--outline":                    "#8A96A6"
     }
   },
   "fonts": {
@@ -97,6 +121,10 @@
     },
     "script": null
   },
+  "radius": "0.5rem",
+
+  "workerName": null,
+
   "logoPaths": {
     "light": "src/assets/logo-light.svg",
     "dark":  "src/assets/logo-dark.svg"

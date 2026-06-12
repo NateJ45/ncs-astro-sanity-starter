@@ -20,11 +20,15 @@
  * present and the archetype result card omits the image grid. Add real photos
  * via the Studio.
  *
+ * All archetype names, question prompts, and qualifier options are neutral
+ * placeholders. Replace them with copy specific to the client's audience
+ * and service offering before publishing.
+ *
  * Archetype slugs referenced in `archetypeWeights` MUST match the slugs
  * defined in the `archetypes` array below. The three archetypes used here are:
- *   - "clean-modern"
- *   - "warm-traditional"
- *   - "relaxed-eclectic"
+ *   - "archetype-a"
+ *   - "archetype-b"
+ *   - "archetype-c"
  *
  * Each question's answers collectively cover all three archetypes so that
  * every possible combination of answers produces a meaningful winner.
@@ -62,62 +66,62 @@ const client = createClient({
 // ---------------------------------------------------------------------------
 //
 // Three archetypes with slugs that answer weights reference:
-//   clean-modern      -- prefers order, minimal surfaces, calm palettes
-//   warm-traditional  -- prefers comfort, layered textiles, rich tones
-//   relaxed-eclectic  -- prefers personality, mix of eras, pattern and texture
+//   archetype-a  -- replace with client-specific archetype name and description
+//   archetype-b  -- replace with client-specific archetype name and description
+//   archetype-c  -- replace with client-specific archetype name and description
 //
-// Four questions, each with four answers that each add weight to one archetype.
-// Every archetype gets at least one strong-weight answer per question so that
-// consistent pickers always score a clear winner.
+// Four questions, each with three to four answers that each add weight to one
+// archetype. Every archetype gets at least one strong-weight answer per
+// question so that consistent pickers always score a clear winner.
 
 const styleQuiz = {
   _id: 'styleQuiz',
   _type: 'styleQuiz',
 
   // Intro
-  introEyebrow: 'Discover your style',
-  introHeadline: 'What is your design style?',
-  introSubhead: 'Answer four quick questions and find out which aesthetic fits the way you actually live.',
+  introEyebrow: 'Discover your fit',
+  introHeadline: 'Find Your Fit',
+  introSubhead: 'Answer four quick questions and find out which approach fits you best. Replace this with copy specific to your service and audience.',
 
   // Questions
   questions: [
     {
       _type: 'quizQuestion',
       _key: 'q1',
-      prompt: 'When you walk into a well-designed room, what do you notice first?',
-      helpText: 'Go with your first instinct.',
+      prompt: 'Question 1: Replace with your first question prompt.',
+      helpText: 'Add an optional clarifying note here, or remove this field.',
       answers: [
         {
           _type: 'quizAnswer',
           _key: 'q1a1',
-          label: 'Clean lines and open space',
+          label: 'Answer leaning toward Archetype A',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q1a1w1', archetypeSlug: 'clean-modern', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q1a1w1', archetypeSlug: 'archetype-a', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q1a2',
-          label: 'Rich colors and layered textures',
+          label: 'Answer leaning toward Archetype B',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q1a2w1', archetypeSlug: 'warm-traditional', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q1a2w1', archetypeSlug: 'archetype-b', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q1a3',
-          label: 'An unexpected mix of pieces that somehow works',
+          label: 'Answer leaning toward Archetype C',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q1a3w1', archetypeSlug: 'relaxed-eclectic', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q1a3w1', archetypeSlug: 'archetype-c', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q1a4',
-          label: 'Natural light and a sense of calm',
+          label: 'Mixed answer (A and B)',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q1a4w1', archetypeSlug: 'clean-modern', weight: 2 },
-            { _type: 'archetypeWeight', _key: 'q1a4w2', archetypeSlug: 'warm-traditional', weight: 1 },
+            { _type: 'archetypeWeight', _key: 'q1a4w1', archetypeSlug: 'archetype-a', weight: 2 },
+            { _type: 'archetypeWeight', _key: 'q1a4w2', archetypeSlug: 'archetype-b', weight: 1 },
           ],
         },
       ],
@@ -125,39 +129,39 @@ const styleQuiz = {
     {
       _type: 'quizQuestion',
       _key: 'q2',
-      prompt: 'Which living room description fits you best?',
+      prompt: 'Question 2: Replace with your second question prompt.',
       answers: [
         {
           _type: 'quizAnswer',
           _key: 'q2a1',
-          label: 'Minimal furniture, neutral palette, every surface clear',
+          label: 'Answer leaning toward Archetype A',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q2a1w1', archetypeSlug: 'clean-modern', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q2a1w1', archetypeSlug: 'archetype-a', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q2a2',
-          label: 'Plush sofa, throw pillows, curtains that puddle on the floor',
+          label: 'Answer leaning toward Archetype B',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q2a2w1', archetypeSlug: 'warm-traditional', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q2a2w1', archetypeSlug: 'archetype-b', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q2a3',
-          label: 'Vintage sideboard, bold rug, gallery wall with a mix of frames',
+          label: 'Answer leaning toward Archetype C',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q2a3w1', archetypeSlug: 'relaxed-eclectic', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q2a3w1', archetypeSlug: 'archetype-c', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q2a4',
-          label: 'A few well-chosen pieces, one statement chair, nothing extra',
+          label: 'Mixed answer (A and C)',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q2a4w1', archetypeSlug: 'clean-modern', weight: 2 },
-            { _type: 'archetypeWeight', _key: 'q2a4w2', archetypeSlug: 'relaxed-eclectic', weight: 1 },
+            { _type: 'archetypeWeight', _key: 'q2a4w1', archetypeSlug: 'archetype-a', weight: 2 },
+            { _type: 'archetypeWeight', _key: 'q2a4w2', archetypeSlug: 'archetype-c', weight: 1 },
           ],
         },
       ],
@@ -165,39 +169,39 @@ const styleQuiz = {
     {
       _type: 'quizQuestion',
       _key: 'q3',
-      prompt: 'You are choosing a sofa. Which one do you keep coming back to?',
+      prompt: 'Question 3: Replace with your third question prompt.',
       answers: [
         {
           _type: 'quizAnswer',
           _key: 'q3a1',
-          label: 'Low profile, tight back, solid upholstery in a quiet tone',
+          label: 'Answer leaning toward Archetype A',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q3a1w1', archetypeSlug: 'clean-modern', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q3a1w1', archetypeSlug: 'archetype-a', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q3a2',
-          label: 'Deep cushions, rolled arms, a fabric with a little texture',
+          label: 'Answer leaning toward Archetype B',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q3a2w1', archetypeSlug: 'warm-traditional', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q3a2w1', archetypeSlug: 'archetype-b', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q3a3',
-          label: 'Velvet in an unexpected color, maybe with fringe or a bold leg',
+          label: 'Answer leaning toward Archetype C',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q3a3w1', archetypeSlug: 'relaxed-eclectic', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q3a3w1', archetypeSlug: 'archetype-c', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q3a4',
-          label: 'A classic shape you can reupholster when you get tired of it',
+          label: 'Mixed answer (B and C)',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q3a4w1', archetypeSlug: 'warm-traditional', weight: 2 },
-            { _type: 'archetypeWeight', _key: 'q3a4w2', archetypeSlug: 'relaxed-eclectic', weight: 1 },
+            { _type: 'archetypeWeight', _key: 'q3a4w1', archetypeSlug: 'archetype-b', weight: 2 },
+            { _type: 'archetypeWeight', _key: 'q3a4w2', archetypeSlug: 'archetype-c', weight: 1 },
           ],
         },
       ],
@@ -205,46 +209,46 @@ const styleQuiz = {
     {
       _type: 'quizQuestion',
       _key: 'q4',
-      prompt: 'Which phrase best describes your relationship with stuff?',
+      prompt: 'Question 4: Replace with your fourth question prompt.',
       answers: [
         {
           _type: 'quizAnswer',
           _key: 'q4a1',
-          label: "If it doesn't earn its place, it goes",
+          label: 'Answer leaning toward Archetype A',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q4a1w1', archetypeSlug: 'clean-modern', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q4a1w1', archetypeSlug: 'archetype-a', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q4a2',
-          label: 'I keep things that have meaning, and arrange them with care',
+          label: 'Answer leaning toward Archetype B',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q4a2w1', archetypeSlug: 'warm-traditional', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q4a2w1', archetypeSlug: 'archetype-b', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q4a3',
-          label: 'I collect things I love and figure out where they fit later',
+          label: 'Answer leaning toward Archetype C',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q4a3w1', archetypeSlug: 'relaxed-eclectic', weight: 3 },
+            { _type: 'archetypeWeight', _key: 'q4a3w1', archetypeSlug: 'archetype-c', weight: 3 },
           ],
         },
         {
           _type: 'quizAnswer',
           _key: 'q4a4',
-          label: 'I want fewer pieces but the ones I have should be really good',
+          label: 'Mixed answer (A and B)',
           archetypeWeights: [
-            { _type: 'archetypeWeight', _key: 'q4a4w1', archetypeSlug: 'clean-modern', weight: 2 },
-            { _type: 'archetypeWeight', _key: 'q4a4w2', archetypeSlug: 'warm-traditional', weight: 1 },
+            { _type: 'archetypeWeight', _key: 'q4a4w1', archetypeSlug: 'archetype-a', weight: 2 },
+            { _type: 'archetypeWeight', _key: 'q4a4w2', archetypeSlug: 'archetype-b', weight: 1 },
           ],
         },
       ],
     },
   ],
 
-  // Qualifier questions (intent detection — shown after image questions)
+  // Qualifier questions (intent detection -- shown after image questions)
   qualifiers: [
     {
       _type: 'qualifier',
@@ -263,21 +267,21 @@ const styleQuiz = {
       prompt: 'What is your rough budget for this project?',
       type: 'budget',
       options: [
-        { _type: 'qualifierOption', _key: 'qual2o1', label: 'Under $5,000', value: 'under-5k' },
-        { _type: 'qualifierOption', _key: 'qual2o2', label: '$5,000 to $15,000', value: '5k-15k' },
-        { _type: 'qualifierOption', _key: 'qual2o3', label: 'Over $15,000', value: 'over-15k' },
+        { _type: 'qualifierOption', _key: 'qual2o1', label: 'Smaller budget (replace with your range)', value: 'budget-low' },
+        { _type: 'qualifierOption', _key: 'qual2o2', label: 'Mid-range budget (replace with your range)', value: 'budget-mid' },
+        { _type: 'qualifierOption', _key: 'qual2o3', label: 'Larger budget (replace with your range)', value: 'budget-high' },
         { _type: 'qualifierOption', _key: 'qual2o4', label: 'Not sure yet', value: 'unsure' },
       ],
     },
   ],
 
-  // Archetypes — slugs MUST match archetypeSlug values used in answers above
+  // Archetypes -- slugs MUST match archetypeSlug values used in answers above
   archetypes: [
     {
       _type: 'archetype',
       _key: 'arch1',
-      name: 'Clean Modern',
-      slug: { _type: 'slug', current: 'clean-modern' },
+      name: 'Archetype A',
+      slug: { _type: 'slug', current: 'archetype-a' },
       description: [
         {
           _type: 'block',
@@ -287,7 +291,7 @@ const styleQuiz = {
             {
               _type: 'span',
               _key: 'arch1s1',
-              text: 'You are drawn to rooms that feel deliberate and calm. Every piece has a reason to be there, the palette stays quiet, and the whole space just breathes. Replace this description with your own words before publishing.',
+              text: 'Replace this with the description for Archetype A. Two to three sentences shown on the result screen. Write in a warm, direct voice that makes the quiz taker feel understood.',
               marks: [],
             },
           ],
@@ -299,8 +303,8 @@ const styleQuiz = {
     {
       _type: 'archetype',
       _key: 'arch2',
-      name: 'Warm Traditional',
-      slug: { _type: 'slug', current: 'warm-traditional' },
+      name: 'Archetype B',
+      slug: { _type: 'slug', current: 'archetype-b' },
       description: [
         {
           _type: 'block',
@@ -310,7 +314,7 @@ const styleQuiz = {
             {
               _type: 'span',
               _key: 'arch2s1',
-              text: 'You want a home that feels like a place to land, with layers that get better over time. Good fabrics, furniture that has a story, and colors that feel warm even on gray days. Replace this description with your own words before publishing.',
+              text: 'Replace this with the description for Archetype B. Two to three sentences shown on the result screen. Write in a warm, direct voice that makes the quiz taker feel understood.',
               marks: [],
             },
           ],
@@ -322,8 +326,8 @@ const styleQuiz = {
     {
       _type: 'archetype',
       _key: 'arch3',
-      name: 'Relaxed Eclectic',
-      slug: { _type: 'slug', current: 'relaxed-eclectic' },
+      name: 'Archetype C',
+      slug: { _type: 'slug', current: 'archetype-c' },
       description: [
         {
           _type: 'block',
@@ -333,7 +337,7 @@ const styleQuiz = {
             {
               _type: 'span',
               _key: 'arch3s1',
-              text: 'Your space reflects who you are, not a single trend. You mix eras, collect things you love, and are not afraid of pattern or an odd color. Replace this description with your own words before publishing.',
+              text: 'Replace this with the description for Archetype C. Two to three sentences shown on the result screen. Write in a warm, direct voice that makes the quiz taker feel understood.',
               marks: [],
             },
           ],
@@ -347,10 +351,10 @@ const styleQuiz = {
   // Email gate
   gate: {
     mode: 'optional',
-    heading: 'Your style result is ready.',
-    blurb: 'Drop your email in and we will send your full result with tips for your style.',
+    heading: 'Your result is ready.',
+    blurb: 'Drop your email in and we will send your full result with tailored next steps.',
     consentNote: 'No spam, ever.',
-    espTag: 'style-quiz',
+    espTag: 'quiz',
   },
 
   // Routing
@@ -374,15 +378,17 @@ async function seed() {
 
   console.log('Done. Created or replaced:');
   console.log('  styleQuiz (singleton)');
-  console.log('  Questions: 4');
-  console.log('  Archetypes: 3 (clean-modern, warm-traditional, relaxed-eclectic)');
+  console.log('  Questions: 4 (neutral placeholders)');
+  console.log('  Archetypes: 3 (archetype-a, archetype-b, archetype-c)');
   console.log('  Qualifiers: 2 (timeline, budget)');
   console.log('');
   console.log('Next steps:');
-  console.log('  1. Add answer images via the Studio (Questions tab).');
-  console.log('  2. Add archetype images via the Studio (Archetypes tab).');
-  console.log('  3. Update archetype descriptions to match the studio voice.');
-  console.log('  4. Review qualifier options and routing rules (Routing + CTAs tab).');
+  console.log('  1. Replace archetype names and descriptions in Studio (Archetypes tab).');
+  console.log('  2. Replace question prompts and answer labels (Questions tab).');
+  console.log('  3. Add answer images via the Studio (Questions tab).');
+  console.log('  4. Add archetype images via the Studio (Archetypes tab).');
+  console.log('  5. Update qualifier options and budget ranges to match real pricing (Qualifiers tab).');
+  console.log('  6. Review routing rules (Routing + CTAs tab).');
 }
 
 seed().catch((err) => {

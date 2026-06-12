@@ -232,6 +232,21 @@
     --sidebar-ring: #586577;
 
     --tint-rgb: 88, 101, 119;
+
+    /* Starwind UI extra semantic tokens — not in shadcn's default set.
+       Values are harmonized to the existing neutral palette so the starter
+       renders sensibly out of the box. apply-brand rewrites these. */
+    --primary-accent: #434E5C;        /* darker shade of --primary for hover states */
+    --secondary-accent: #2A2D31;      /* dark ink — active/pressed secondary */
+    --info: #93C5FD;                  /* soft blue, harmonized with slate primary */
+    --info-foreground: #1E3A5F;       /* deep blue for text on info surfaces */
+    --success: #86EFAC;               /* soft green */
+    --success-foreground: #14532D;    /* deep green for text on success surfaces */
+    --warning: #FDE68A;               /* soft amber */
+    --warning-foreground: #713F12;    /* deep amber for text on warning surfaces */
+    --error: oklch(0.577 0.245 27.325); /* matches --destructive */
+    --error-foreground: #FFFFFF;
+    --outline: #586577;               /* matches --ring */
 }
 
 /* ---------- Dark mode --------------------------------------------------
@@ -279,6 +294,19 @@
     --sidebar-ring: #8A96A6;
 
     --tint-rgb: 138, 150, 166;
+
+    /* Starwind UI extra semantic tokens — dark mode variants. */
+    --primary-accent: #8A96A6;        /* lifted primary for dark hover states */
+    --secondary-accent: #F2F3F2;      /* near-white for dark active secondary */
+    --info: #93C5FD;                  /* same soft blue works on dark surfaces */
+    --info-foreground: #1E3A5F;
+    --success: #86EFAC;
+    --success-foreground: #14532D;
+    --warning: #FDE68A;
+    --warning-foreground: #713F12;
+    --error: oklch(0.704 0.191 22.216); /* matches dark --destructive */
+    --error-foreground: #FFFFFF;
+    --outline: #8A96A6;               /* matches dark --ring */
 }
 
 /* ---------- Base resets and defaults ---------------------------------- */

@@ -11,7 +11,7 @@
 //
 // Script accent:
 //   - scriptAccent?: optional single word/phrase from the headline to render
-//     in Pinyon Script via the `.font-script` utility. The first occurrence is
+//     in the script accent font via the `.font-script` utility. The first occurrence is
 //     wrapped. Falls back to plain rendering when undefined, empty, or not
 //     found — so no existing heading is affected unless the prop is explicitly
 //     passed with a matching string.
@@ -30,7 +30,7 @@ interface Props {
   tone?: 'default' | 'inverse';
   /**
    * Optional single word/phrase from the headline to render in handwritten
-   * Pinyon Script. Must match the headline text exactly (case-sensitive).
+   * the script accent font. Must match the headline text exactly (case-sensitive).
    * Leave undefined or blank to skip. Use sparingly — one accent per heading.
    */
   scriptAccent?: string;

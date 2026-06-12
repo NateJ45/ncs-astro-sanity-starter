@@ -3,13 +3,26 @@
 // OpenStreetMap iframe. No API key, no JS, no tracker. The iframe is
 // keyboard-focusable; aria-label describes what the visitor sees for screen readers.
 //
-// To recenter or rezoom, update bbox and marker coords to your studio location.
+// Pass lat/lng from siteSettings (geoLat/geoLng) to center the map on the
+// studio's actual location. When omitted, the component falls back to the
+// hardcoded Indianapolis-area defaults below.
+// To recenter or rezoom, update the hardcoded defaults to your studio location.
 // Get a new bbox from openstreetmap.org/export.
+
+// Bbox delta spread derived from the original hardcoded Indianapolis bbox:
+// minLon=-86.85, maxLon=-85.95 => lonSpread=0.90 (half=0.45)
+// minLat=39.55,  maxLat=39.95  => latSpread=0.40 (half=0.20)
+const HALF_LON = 0.45;
+const HALF_LAT = 0.20;
 
 interface Props {
   /** Override the visible bbox. Format: minLon,minLat,maxLon,maxLat */
   bbox?: string;
-  /** Marker position. Update to your studio's coordinates. */
+  /** Marker latitude from siteSettings.geoLat. Derives bbox when bbox is not provided. */
+  lat?: number;
+  /** Marker longitude from siteSettings.geoLng. Derives bbox when bbox is not provided. */
+  lng?: number;
+  /** Marker position (legacy explicit override). */
   markerLat?: number;
   markerLon?: number;
   /** Iframe height in pixels (width is always 100%). */
@@ -18,12 +31,27 @@ interface Props {
 }
 
 const {
-  bbox = '-86.85,39.55,-85.95,39.95', // Update to your studio's service area
-  markerLat = 39.7042,                // Update to your studio's latitude
-  markerLon = -86.3994,               // Update to your studio's longitude
+  bbox: bboxProp,
+  lat,
+  lng,
+  markerLat: markerLatProp,
+  markerLon: markerLonProp,
   height = 360,
   class: className,
 } = Astro.props as Props;
+
+// Resolve marker position: explicit markerLat/markerLon override > lat/lng props > hardcoded defaults.
+const markerLat = markerLatProp ?? lat  ?? 39.7042;
+const markerLon = markerLonProp ?? lng  ?? -86.3994;
+
+// Derive bbox from marker coords using the same delta spread as the original hardcoded values.
+// Explicit bbox prop always wins; otherwise build from marker coords.
+const bbox = bboxProp ?? [
+  (markerLon - HALF_LON).toFixed(4),
+  (markerLat - HALF_LAT).toFixed(4),
+  (markerLon + HALF_LON).toFixed(4),
+  (markerLat + HALF_LAT).toFixed(4),
+].join(',');
 
 const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${markerLat},${markerLon}`;
 const link = `https://www.openstreetmap.org/?mlat=${markerLat}&mlon=${markerLon}#map=10/${markerLat}/${markerLon}`;

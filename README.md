@@ -54,6 +54,8 @@ The starter ships a lean core. Additional surfaces come from opt-in modules (see
 | `/contact` | Contact form + scheduling embed |
 | `/journal` | Journal/blog index |
 | `/journal/[slug]` | Journal post detail |
+| `/journal/rss.xml` | Journal RSS feed |
+| `/robots.txt` | Generated from `src/pages/robots.txt.ts` (reads production URL from `site.ts`) |
 | `/privacy` | Privacy policy |
 | `/404` | Custom 404 |
 
@@ -63,7 +65,7 @@ The section-driven pages fall back to code-defined defaults in `src/data/default
 
 ## Modules (opt-in, staged under `modules/`, OFF by default)
 
-`portfolio`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`, `lead-magnets`, `style-quiz`, `budget-calculator`. Each module ships built but disabled, and includes a co-located query file at `modules/<name>/src/lib/<name>Queries.ts` -- no hand-pasting into core `queries.ts` required. Enabling a module is copy-a-folder: copy it into the source tree, register the schema, and toggle on in `siteSettings.sectionVisibility`. Per-module enable guides are in `docs/modules/`.
+There are 13 opt-in modules: `portfolio`, `shop`, `virtual-services`, `gift-certificates`, `press`, `resources`, `lead-magnets`, `newsletter`, `style-quiz`, `budget-calculator`, `events`, `donations`, `team`. Each module ships built but disabled. Most include a co-located query file at `modules/<name>/src/lib/<name>Queries.ts` -- no hand-pasting into core `queries.ts` required (the `newsletter` module has no dedicated route or query file; it is a README-only embed component). Enabling a module is copy-a-folder: copy it into the source tree, register the schema, and toggle on in `siteSettings.sectionVisibility`. Per-module enable guides are in `docs/modules/`.
 
 ---
 
@@ -103,4 +105,6 @@ npm run build
 npm run deploy   # = wrangler deploy
 ```
 
-After any Sanity schema change, also run `npm run typegen` then `npm run studio:deploy`. See `CLAUDE.md` for the conventions and the gotchas that bite.
+After any Sanity schema change, run `npm run typegen` first, then `npm run build` (or use `npm run build:full` to run both in one step). Also run `npm run studio:deploy` to push updated schemas to the hosted Studio. See `CLAUDE.md` for the conventions and the gotchas that bite.
+
+Run `npm run check` to execute the full local gate in one command (typegen, site build, Studio build, all tests). This mirrors the CI check that runs on every push and PR.

@@ -14,28 +14,14 @@
 
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readFileSync } from 'node:fs';
 import { createClient } from '@sanity/client';
 import { renderOg } from './lib/render-og.mjs';
+import { loadEnv } from './lib/loadEnv.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
-// ---- Read env (.env or process.env) -------------------------------------
-
-function loadEnv() {
-  const env = { ...process.env };
-  try {
-    const raw = readFileSync(resolve(root, '.env'), 'utf-8');
-    for (const line of raw.split('\n')) {
-      const m = line.match(/^([A-Z0-9_]+)\s*=\s*(.*)$/);
-      if (m && !env[m[1]]) env[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
-    }
-  } catch { /* .env optional */ }
-  return env;
-}
-
-const env = loadEnv();
+const env = loadEnv(root);
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = env.PUBLIC_SANITY_DATASET ?? 'production';
 const apiVersion = env.PUBLIC_SANITY_API_VERSION ?? '2026-05-01';
@@ -101,24 +87,25 @@ for (const page of SINGLETONS) {
 
 // ---- Dynamic collections → /og/<prefix>-<slug>.png ----------------------
 // Mirrors BaseLayout: /journal/my-post → journal-my-post.png, etc.
-// Add an entry here for each dynamic collection your project defines.
-// Example (uncomment and adapt when you have a journal or case-study schema):
-//
-// const COLLECTIONS = [
-//   {
-//     prefix: 'journal',
-//     query: `*[_type=="journalEntry" && defined(slug.current)]{ "slug": slug.current, seoTitle, title }`,
-//     pick: (d) => d.seoTitle || d.title,
-//   },
-// ];
-//
-// for (const col of COLLECTIONS) {
-//   const docs = await client.fetch(col.query).catch(() => []);
-//   for (const d of docs) {
-//     const tagline = col.pick(d);
-//     if (!d.slug || !tagline) continue;
-//     await render(`${col.prefix}-${d.slug}`, tagline);
-//   }
-// }
+// Each module that defines a dynamic collection should add its own entry here.
+// Field names are verified against studio/schemaTypes/<type>.ts before enabling.
+// journalEntry: slug (slug type, value at slug.current), seoTitle and title (both string).
+
+const COLLECTIONS = [
+  {
+    prefix: 'journal',
+    query: `*[_type=="journalEntry" && defined(slug.current)]{ "slug": slug.current, seoTitle, title }`,
+    pick: (d) => d.seoTitle || d.title,
+  },
+];
+
+for (const col of COLLECTIONS) {
+  const docs = await client.fetch(col.query).catch(() => []);
+  for (const d of docs) {
+    const tagline = col.pick(d);
+    if (!d.slug || !tagline) continue;
+    await render(`${col.prefix}-${d.slug}`, tagline);
+  }
+}
 
 console.log(`\nDone. ${count} OG images written to ${outDir}`);

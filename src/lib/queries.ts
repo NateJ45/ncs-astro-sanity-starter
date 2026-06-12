@@ -95,6 +95,26 @@ export function sectionsProjection(field = 'pageBuilder'): string {
     _type == "guaranteeSection" => {
       ...,
       "siteSettingsText": *[_type == "siteSettings"][0].satisfactionGuarantee
+    },
+    _type == "faqSection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "items": items[]->{
+        _id, _type, question, answer,
+        "category": coalesce(categoryRef->title, category),
+        displayOrder
+      }
+    },
+    _type == "logoStripSection" => {
+      ...,
+      logos[]${IMAGE_PROJECTION}
+    },
+    _type == "teamSection" => {
+      ...,
+      members[]{
+        ...,
+        photo${IMAGE_PROJECTION}
+      }
     }
   }`;
 }
@@ -106,12 +126,19 @@ export function sectionsProjection(field = 'pageBuilder'): string {
 // siteSettings.serviceAreas etc. keep working with no change; only the source
 // document changed.
 
+// Module-level memoized promise. The first call triggers the actual Sanity
+// fetch; every subsequent call (across all pages in the same build process)
+// returns the same promise, collapsing 11+ per-page calls to one request.
+let _siteSettingsPromise: Promise<any> | null = null;
+
 export async function getSiteSettings() {
-  return sanityFetch(`*[_type == "siteSettings"][0]{
+  if (_siteSettingsPromise) return _siteSettingsPromise;
+  _siteSettingsPromise = sanityFetch(`*[_type == "siteSettings"][0]{
     title,
     tagline,
     email,
     phone,
+    businessType,
     "availabilityStatus": *[_type == "businessInfo"][0].availabilityStatus,
     "serviceAreas": *[_type == "businessInfo"][0].serviceAreas,
     "travelFees": *[_type == "businessInfo"][0].travelFees,
@@ -122,6 +149,11 @@ export async function getSiteSettings() {
     "serviceRegion": *[_type == "businessInfo"][0].serviceRegion,
     socialInstagram,
     socialFacebook,
+    socialLinks[]{
+      platform,
+      url,
+      label
+    },
     seoImage${IMAGE_PROJECTION},
     footerCredit,
     footerCreditUrl,
@@ -142,6 +174,7 @@ export async function getSiteSettings() {
       showBudgetCalculator
     }
   }`, {}, null);
+  return _siteSettingsPromise;
 }
 
 // ---- Business info (service areas, travel, availability, geo) -------------
@@ -149,6 +182,7 @@ export async function getSiteSettings() {
 // or blocks that need businessInfo directly can use this.
 export async function getBusinessInfo() {
   return sanityFetch(`*[_type == "businessInfo"][0]{
+    businessModel,
     city,
     state,
     serviceRegion,
@@ -156,7 +190,13 @@ export async function getBusinessInfo() {
     travelFees,
     availabilityStatus,
     geoLat,
-    geoLng
+    geoLng,
+    additionalLocations[]{
+      city,
+      state,
+      geoLat,
+      geoLng
+    }
   }`, {}, null);
 }
 
@@ -223,7 +263,9 @@ export async function getFaqPage() {
     heroScriptAccent,
     categoryOrder,
     "faqs": *[_type == "faqItem"] | order(category asc, displayOrder asc){
-      question, answer, category, displayOrder
+      question, answer,
+      "category": coalesce(categoryRef->title, category),
+      displayOrder
     },
     finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
     finalCtaBackgroundImage${IMAGE_PROJECTION},

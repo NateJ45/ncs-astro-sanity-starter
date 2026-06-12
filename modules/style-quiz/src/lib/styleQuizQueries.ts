@@ -10,22 +10,30 @@ import { IMAGE_PROJECTION } from '@/lib/queries';
 export async function getStyleQuiz() {
   return sanityFetch(`*[_type == "styleQuiz"][0]{
     seoTitle, seoDescription,
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroScriptAccent,
+    seoImage${IMAGE_PROJECTION},
+    introEyebrow, introHeadline, introSubhead,
+    introImage${IMAGE_PROJECTION},
     questions[]{
-      _key, question, answers[]{_key, label, value, image${IMAGE_PROJECTION}}
+      _key, prompt, helpText,
+      answers[]{
+        _key, label,
+        image${IMAGE_PROJECTION},
+        archetypeWeights[]{_key, archetypeSlug, weight}
+      }
     },
-    qualifierQuestions[]{
-      _key, question, field, answers[]{_key, label, value}
+    qualifiers[]{
+      _key, prompt, type,
+      options[]{_key, label, value}
     },
     archetypes[]{
-      _key, id, name, description,
+      _key, name,
+      "slug": slug.current,
+      description,
       images[]${IMAGE_PROJECTION},
-      ctaLabel, ctaHref,
-      secondaryCtaLabel, secondaryCtaHref
+      recommendedServiceRef->{ _id, name, "slug": slug.current },
+      resultCtaLabel
     },
-    emailGateMode,
-    emailGateHeading, emailGateBlurb, emailGateButtonLabel,
-    emailGateSkipLabel
+    gate{ mode, heading, blurb, consentNote, espTag },
+    routing{ highIntentRule, bookCtaLabel, guideCtaLabel, guideRef->{ "slug": slug.current } }
   }`, {}, null);
 }

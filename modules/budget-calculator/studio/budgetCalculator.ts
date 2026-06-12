@@ -61,7 +61,7 @@ export const budgetCalculator = defineType({
       title: 'Headline',
       type: 'string',
       group: 'intro',
-      initialValue: 'What does a design project cost?',
+      initialValue: 'What does a project like this cost?',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -87,24 +87,24 @@ export const budgetCalculator = defineType({
       title: 'Script-font accent word (optional)',
       type: 'string',
       group: 'intro',
-      description: 'A single word from the headline to render in Pinyon Script. Must match exactly. Leave blank to skip.',
+      description: 'A single word from the headline to render in the script accent font. Must match exactly. Leave blank to skip.',
     }),
 
     // ── Rooms ──────────────────────────────────────────────────────────────
     defineField({
       name: 'rooms',
-      title: 'Room types',
+      title: 'Project sizes',
       type: 'array',
       group: 'rooms',
-      description: 'Room options shown in the first dropdown. Each has a base cost range.',
+      description: 'Project size or type options shown in the first dropdown. Each has a base cost range. Replace the default labels with size descriptors or project types that match the client\'s services.',
       of: [
         defineArrayMember({
           type: 'object',
           name: 'room',
           fields: [
-            defineField({ name: 'label', title: 'Room label', type: 'string', description: 'Example: "Living room" or "Primary bedroom".', validation: (Rule) => Rule.required() }),
-            defineField({ name: 'baseLow', title: 'Base cost — low ($)', type: 'number', description: 'Low end of the estimated base cost range for this room type.', validation: (Rule) => Rule.required().min(0) }),
-            defineField({ name: 'baseHigh', title: 'Base cost — high ($)', type: 'number', description: 'High end of the estimated base cost range for this room type.', validation: (Rule) => Rule.required().min(0) }),
+            defineField({ name: 'label', title: 'Project size label', type: 'string', description: 'Example: "Small project" or "Large engagement".', validation: (Rule) => Rule.required() }),
+            defineField({ name: 'baseLow', title: 'Base cost — low ($)', type: 'number', description: 'Low end of the estimated base cost range for this project size.', validation: (Rule) => Rule.required().min(0) }),
+            defineField({ name: 'baseHigh', title: 'Base cost — high ($)', type: 'number', description: 'High end of the estimated base cost range for this project size.', validation: (Rule) => Rule.required().min(0) }),
           ],
           preview: {
             select: { label: 'label', baseLow: 'baseLow', baseHigh: 'baseHigh' },
@@ -181,7 +181,7 @@ export const budgetCalculator = defineType({
       rows: 3,
       group: 'output',
       description: 'Text shown above the estimate range. Use {{low}} and {{high}} as placeholders for the computed numbers. Example: "Based on your choices, a project like this typically runs {{low}} to {{high}}."',
-      initialValue: 'Based on what you described, a project like this typically runs {{low}} to {{high}}. That said, every home is different.',
+      initialValue: 'Based on what you described, a project like this typically runs {{low}} to {{high}}. That said, every project is different.',
     }),
     defineField({
       name: 'disclaimer',
@@ -190,7 +190,7 @@ export const budgetCalculator = defineType({
       rows: 2,
       group: 'output',
       description: 'Small-print note under the estimate. Remind visitors this is a rough guide, not a firm quote.',
-      initialValue: 'This is a rough estimate to help you plan — not a quote. Actual cost depends on your space, finish level, and shopping budget. A consultation will give you specifics.',
+      initialValue: 'This is a rough estimate to help you plan, not a quote. Actual cost depends on your specific needs, scope, and timeline. A consultation will give you specifics.',
     }),
     defineField({
       name: 'ctaLabel',

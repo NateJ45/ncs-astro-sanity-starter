@@ -1,0 +1,303 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Virtual Services landing page. Productised offering for remote / online clients.
+//
+// Sections:
+//   1. Hero (image or text)
+//   2. Intro copy (Portable Text)
+//   3. How It Works -- numbered steps
+//   4. What's Included -- bullet list
+//   5. Pricing Tiers -- ServiceCard-style columns
+//   6. FAQ references -- FaqAccordion (flat, no category grouping)
+//   7. Final CTA
+//
+// Primary CTA always routes to /contact?type=virtual-services.
+// Graceful coming-soon state when the virtualServicesPage Sanity doc is absent.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getVirtualServicesPage } from '@/lib/virtualServicesQueries';
+import { getSiteSettings } from '@/lib/queries';
+import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+
+import Hero from '@/components/Hero.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import FaqAccordion from '@/components/FaqAccordion';
+import FinalCta from '@/components/FinalCta.astro';
+import PortableText from '@/components/PortableText';
+
+const [page, siteSettings] = await Promise.all([
+  getVirtualServicesPage().catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+// Section visibility guard.
+const visible = getSectionVisibility(siteSettings?.sectionVisibility);
+if (!visible.virtualServices) return Astro.redirect('/');
+
+const title       = page?.seoTitle       ?? 'Virtual Services · Online Services';
+const description = page?.seoDescription ?? 'Professional services delivered remotely. Flat-fee pricing and a complete deliverable package, no travel required.';
+
+const heroEyebrow  = page?.heroEyebrow  ?? 'Online Services.';
+const heroHeadline = page?.heroHeadline ?? 'Great Work, No Matter Where You Are.';
+const heroSubhead  = page?.heroSubhead  ?? '';
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home',             url: site.url },
+    { name: 'Virtual Services', url: `${site.url}/virtual-services` },
+  ]),
+];
+
+// Contact CTA href: always preselects the virtual services option in the form.
+const CONTACT_HREF = '/contact?type=virtual-services';
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+
+  {/* ------- 1. Hero --------------------------------------------------------- */}
+  <Hero
+    eyebrow={heroEyebrow}
+    headline={heroHeadline}
+    subhead={heroSubhead}
+    backgroundImage={page?.heroImage}
+    headingId="vs-hero-heading"
+    size="short"
+    scriptAccent={page?.heroScriptAccent ?? undefined}
+  />
+
+  {/* ======= COMING-SOON STATE ================================================
+      When the virtualServicesPage document has not been published yet, we render
+      a minimal holding page rather than a blank / broken page. */}
+  {!page ? (
+    <section class="bg-background" aria-labelledby="vs-coming-soon">
+      <div class="mx-auto max-w-content px-m py-section-lg text-center max-w-2xl">
+        <SectionHeading
+          eyebrow="Coming Soon."
+          headline="Virtual service details are on the way."
+          subhead="We are pulling together the full overview. In the meantime, reach out and we will walk you through the remote service process directly."
+          headingId="vs-coming-soon"
+          align="center"
+          class="mx-auto"
+        />
+        <div class="mt-l flex justify-center">
+          <a
+            href={CONTACT_HREF}
+            class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-accent-dark transition-colors"
+          >
+            Inquire about Virtual Services
+          </a>
+        </div>
+      </div>
+    </section>
+  ) : (
+    <>
+      {/* ------- 2. Intro copy ----------------------------------------------- */}
+      {page.intro && page.intro.length > 0 && (
+        <section class="bg-background" aria-labelledby="vs-intro-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <div class="max-w-3xl mx-auto">
+              <SectionHeading
+                eyebrow="The Offering."
+                headline="What Are Virtual Services?"
+                headingId="vs-intro-heading"
+              />
+              <div class="mt-l">
+                <PortableText
+                  value={page.intro}
+                  className="text-foreground/85 text-lg leading-relaxed"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 3. How It Works --------------------------------------------- */}
+      {page.howItWorks && page.howItWorks.length > 0 && (
+        <section class="surface-warm bg-muted" aria-labelledby="vs-how-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <SectionHeading
+              eyebrow="The Process."
+              headline="How It Works."
+              headingId="vs-how-heading"
+              align="center"
+              class="mx-auto"
+            />
+
+            <ol class="mt-section-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-l list-none p-0">
+              {page.howItWorks.map((step: { stepNumber: number; title: string; body?: string }) => (
+                <li class="card-lift relative flex flex-col bg-card text-card-foreground border border-border-soft rounded-md overflow-hidden shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]">
+                  {/* Brand-stripe signature */}
+                  <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+                  <div class="p-l flex flex-col gap-s">
+                    <span
+                      class="font-mono text-4xl font-bold text-tertiary/60 leading-none"
+                      aria-hidden="true"
+                    >
+                      {String(step.stepNumber).padStart(2, '0')}
+                    </span>
+                    <h3 class="font-display text-h3 text-foreground">{step.title}</h3>
+                    {step.body && (
+                      <p class="text-foreground/80 text-base leading-relaxed">{step.body}</p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 4. What's Included ------------------------------------------ */}
+      {page.whatsIncluded && page.whatsIncluded.length > 0 && (
+        <section class="bg-background" aria-labelledby="vs-included-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <div class="max-w-3xl mx-auto">
+              <SectionHeading
+                eyebrow="The Deliverables."
+                headline="What's Included."
+                headingId="vs-included-heading"
+              />
+              <ul class="mt-l grid grid-cols-1 sm:grid-cols-2 gap-y-m gap-x-l list-none p-0">
+                {page.whatsIncluded.map((item: string) => (
+                  <li class="flex items-start gap-s">
+                    <span
+                      class="mt-1.5 inline-block w-1.5 h-1.5 rounded-full bg-tertiary shrink-0"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="text-foreground/85">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 5. Pricing Tiers -------------------------------------------- */}
+      {page.tiers && page.tiers.length > 0 && (
+        <section class="surface-warm bg-muted" aria-labelledby="vs-tiers-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <SectionHeading
+              eyebrow="The Tiers."
+              headline="Choose the Right Package."
+              headingId="vs-tiers-heading"
+              align="center"
+              class="mx-auto"
+            />
+
+            <div class="mt-section-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-l">
+              {page.tiers.map((tier: {
+                name: string;
+                price: string;
+                features: string[];
+                bestFor?: string;
+                ctaLabel?: string;
+              }) => (
+                <article class="card-lift group relative flex flex-col h-full bg-card text-card-foreground border border-border-soft rounded-md overflow-hidden transition-colors hover:border-primary/40 shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]">
+                  <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+                  <div class="flex flex-col flex-1 p-l">
+                    <header>
+                      <h3 class="font-display text-h3 text-foreground">{tier.name}</h3>
+                      <p class="mt-xs text-sm font-mono uppercase tracking-eyebrow text-link">
+                        {tier.price}
+                      </p>
+                    </header>
+
+                    {tier.features && tier.features.length > 0 && (
+                      <ul class="mt-m space-y-1.5 text-sm text-foreground">
+                        {tier.features.map((feature: string) => (
+                          <li class="flex items-start gap-s">
+                            <span
+                              class="mt-1.5 inline-block w-1.5 h-1.5 rounded-full bg-tertiary shrink-0"
+                              aria-hidden="true"
+                            ></span>
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {tier.bestFor && (
+                      <div class="mt-m pt-m border-t border-border-soft">
+                        <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-xs">Best for</p>
+                        <p class="text-sm text-foreground/80 italic">{tier.bestFor}</p>
+                      </div>
+                    )}
+
+                    <div class="mt-l pt-m flex-1 flex items-end">
+                      <a
+                        href={CONTACT_HREF}
+                        class="inline-flex items-center min-h-[44px] py-s text-xs font-semibold uppercase tracking-eyebrow text-link hover:text-primary-dark transition-colors"
+                      >
+                        {tier.ctaLabel ?? 'Inquire about Virtual Services'} <span aria-hidden="true" class="ml-xs">→</span>
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ------- 6. FAQ references ------------------------------------------- */}
+      {page.faqRefs && page.faqRefs.length > 0 && (
+        <section class="bg-background" aria-labelledby="vs-faq-heading">
+          <div class="mx-auto max-w-content px-m py-section-lg">
+            <div class="max-w-3xl mx-auto">
+              <SectionHeading
+                eyebrow="Common Questions."
+                headline="Virtual Services FAQ."
+                headingId="vs-faq-heading"
+              />
+              <div class="mt-l">
+                <FaqAccordion
+                  client:visible
+                  faqs={page.faqRefs}
+                  idPrefix="vs-faq"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+    </>
+  )}
+
+  {/* ------- 7. Final CTA ---------------------------------------------------- */}
+  {page?.finalCta ? (
+    <FinalCta
+      eyebrow={page.finalCtaEyebrow}
+      headline={page.finalCtaHeadline}
+      subhead={page.finalCtaSubhead}
+      cta={page.finalCta}
+      scriptAccent={page.finalCtaScriptAccent}
+      backgroundImage={page.finalCtaBackgroundImage}
+    />
+  ) : (
+    <section class="bg-accent-dark text-bg" aria-labelledby="vs-final-cta">
+      <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+      <div class="mx-auto max-w-content px-m py-section-lg text-center">
+        <p class="text-xs uppercase tracking-[0.22em] text-bg/75">Ready to Start?</p>
+        <div class="mt-s mb-m h-px w-12 bg-bg/40 mx-auto" aria-hidden="true"></div>
+        <h2 id="vs-final-cta" class="font-display text-h1 leading-tight text-bg">
+          Great Results, From Wherever You Are.
+        </h2>
+        <p class="mt-m text-lg text-bg/85 max-w-2xl mx-auto">
+          Reach out and we will walk through what virtual services look like for your project.
+        </p>
+        <div class="mt-l flex justify-center">
+          <a
+            href={CONTACT_HREF}
+            class="press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm bg-primary-dark text-white hover:bg-primary transition-colors"
+          >
+            Inquire about Virtual Services
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>

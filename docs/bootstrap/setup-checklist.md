@@ -79,8 +79,9 @@ off or explicitly deferred with a reason.
 
 ## Crawlers and discoverability
 
-- [ ] `public/robots.txt` references the correct sitemap URL (the production
-      domain, not `example.com`)
+- [ ] `src/data/site.ts` `url` is set to the production domain (`https://example.com`);
+      `robots.txt` is generated from this value at build time by `src/pages/robots.txt.ts`
+      and will reference the correct sitemap URL automatically
 - [ ] `public/llms.txt` updated if major pages changed or new modules added
       (AI/LLM crawler index)
 - [ ] Sitemap generates correctly after build (visit `/sitemap-index.xml` on

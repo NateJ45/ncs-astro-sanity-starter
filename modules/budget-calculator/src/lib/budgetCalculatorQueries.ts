@@ -10,13 +10,13 @@ import { IMAGE_PROJECTION } from '@/lib/queries';
 export async function getBudgetCalculator() {
   return sanityFetch(`*[_type == "budgetCalculator"][0]{
     seoTitle, seoDescription,
-    heroEyebrow, heroHeadline, heroSubhead,
+    introEyebrow, introHeadline, introSubhead,
     heroScriptAccent,
-    rooms[]{_key, label, baseMin, baseMax},
-    scopes[]{_key, label, multiplier},
-    addOns[]{_key, label, min, max},
-    resultHeading, resultSubhead,
-    emailCtaLabel, emailCtaHeading,
-    ctaLabel, ctaHref
+    heroImage${IMAGE_PROJECTION},
+    rooms[]{_key, label, baseLow, baseHigh},
+    scopeOptions[]{_key, label, addLow, addHigh},
+    addOns[]{_key, label, low, high},
+    resultCopy, disclaimer,
+    ctaLabel, consultPriceNote
   }`, {}, null);
 }

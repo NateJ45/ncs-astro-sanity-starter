@@ -65,7 +65,7 @@ export const faqPage = defineType({
       type: 'string',
       group: 'hero',
       description:
-        'A single word from the headline to render in handwritten Pinyon Script. Must match exactly (case-sensitive). Leave blank to skip.',
+        'A single word from the headline to render in the handwritten script accent font. Must match exactly (case-sensitive). Leave blank to skip.',
     }),
 
     defineField({
@@ -86,7 +86,7 @@ export const faqPage = defineType({
       type: 'string',
       group: 'final',
       description:
-        'Optional. One word or short phrase from the headline to render in handwritten Pinyon Script. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({ name: 'finalCtaSubhead', title: 'Final CTA subhead', type: 'text', rows: 2, group: 'final' }),
     defineField({ name: 'finalCta', title: 'Final CTA button (primary)', type: 'ctaBlock', group: 'final' }),

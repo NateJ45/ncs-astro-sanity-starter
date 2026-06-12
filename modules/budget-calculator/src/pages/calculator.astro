@@ -41,8 +41,8 @@ const hasValidCalc =
 // Hero fields fall back to sensible defaults so the page looks intentional
 // even before the Studio doc is filled out.
 const heroEyebrow  = calc?.introEyebrow  ?? 'Plan your project';
-const heroHeadline = calc?.introHeadline ?? 'What does a design project cost?';
-const heroSubhead  = calc?.introSubhead  ?? 'Use this as a starting point, not a firm quote. Every space is different, and a consultation is the only way to get specifics.';
+const heroHeadline = calc?.introHeadline ?? 'What does a project like this cost?';
+const heroSubhead  = calc?.introSubhead  ?? 'Use this as a starting point, not a firm quote. Every project is different, and a consultation is the only way to get specifics.';
 
 // Typed config object passed to the island. Keeps the island free of any
 // Sanity-client import and avoids shipping the URL builder to the browser.
@@ -79,10 +79,10 @@ if (hasValidCalc) {
       : [],
     resultCopy:
       calc.resultCopy ??
-      'Based on what you described, a project like this typically runs {{low}} to {{high}}. That said, every home is different.',
+      'Based on what you described, a project like this typically runs {{low}} to {{high}}. That said, every project is different.',
     disclaimer:
       calc.disclaimer ??
-      'This is a rough estimate to help you plan, not a quote. Actual cost depends on your space, finish level, and shopping budget.',
+      'This is a rough estimate to help you plan, not a quote. Actual cost depends on your specific needs, scope, and timeline.',
     ctaLabel: calc.ctaLabel ?? 'Book a consultation',
     consultPriceNote: calc.consultPriceNote ?? '',
   };

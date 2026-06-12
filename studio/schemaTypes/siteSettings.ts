@@ -100,15 +100,108 @@ export const siteSettings = defineType({
       hidden: true,
       readOnly: true,
     }),
+    // LEGACY — superseded by socialLinks array below.
+    // Kept hidden + readOnly so existing data continues to validate.
+    // Do not delete; use socialLinks for new and updated entries.
     defineField({
       name: 'socialInstagram',
-      title: 'Instagram URL',
+      title: 'Instagram URL (legacy)',
       type: 'url',
+      hidden: true,
+      readOnly: true,
     }),
     defineField({
       name: 'socialFacebook',
-      title: 'Facebook URL',
+      title: 'Facebook URL (legacy)',
       type: 'url',
+      hidden: true,
+      readOnly: true,
+    }),
+
+    // New flexible social links array. Supports any platform.
+    // When this array has entries the Footer renders from it instead of the
+    // legacy socialInstagram / socialFacebook fields above.
+    defineField({
+      name: 'socialLinks',
+      title: 'Social links',
+      type: 'array',
+      group: 'social',
+      description:
+        'Add one entry per platform. The footer renders these in order. Leave empty to fall back to the legacy Instagram/Facebook fields (for existing sites).',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'socialLink',
+          fields: [
+            defineField({
+              name: 'platform',
+              title: 'Platform',
+              type: 'string',
+              description: 'The social network or directory.',
+              options: {
+                list: [
+                  { title: 'Instagram', value: 'Instagram' },
+                  { title: 'Facebook', value: 'Facebook' },
+                  { title: 'LinkedIn', value: 'LinkedIn' },
+                  { title: 'Pinterest', value: 'Pinterest' },
+                  { title: 'YouTube', value: 'YouTube' },
+                  { title: 'TikTok', value: 'TikTok' },
+                  { title: 'X (Twitter)', value: 'X' },
+                  { title: 'Houzz', value: 'Houzz' },
+                  { title: 'Other', value: 'Other' },
+                ],
+                layout: 'dropdown',
+              },
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'url',
+              title: 'URL',
+              type: 'url',
+              description: 'Full URL including https://.',
+              validation: (Rule) => Rule.required().uri({ scheme: ['http', 'https'] }),
+            }),
+            defineField({
+              name: 'label',
+              title: 'Label (optional)',
+              type: 'string',
+              description: 'Custom label for "Other" platforms. Used as the aria-label on the icon button.',
+            }),
+          ],
+          preview: {
+            select: { platform: 'platform', url: 'url', label: 'label' },
+            prepare: ({ platform, url, label }) => ({
+              title: label ? `${platform}: ${label}` : (platform ?? 'Social link'),
+              subtitle: url ?? '',
+            }),
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'businessType',
+      title: 'Business type',
+      type: 'string',
+      description:
+        'The schema.org business category search engines use to understand what your business does. Pick the closest match. This feeds the structured data (JSON-LD) on every page, which helps Google show your listing correctly in Maps, search cards, and rich results.',
+      options: {
+        list: [
+          { title: 'Local Business (generic)',          value: 'LocalBusiness' },
+          { title: 'Professional Service',              value: 'ProfessionalService' },
+          { title: 'Home and Construction Business',    value: 'HomeAndConstructionBusiness' },
+          { title: 'Legal Service',                     value: 'LegalService' },
+          { title: 'Medical Business',                  value: 'MedicalBusiness' },
+          { title: 'Health and Beauty Business',        value: 'HealthAndBeautyBusiness' },
+          { title: 'Food Establishment',                value: 'FoodEstablishment' },
+          { title: 'Store',                             value: 'Store' },
+          { title: 'Real Estate Agent',                 value: 'RealEstateAgent' },
+          { title: 'Travel Agency',                     value: 'TravelAgency' },
+          { title: 'Educational Organization',          value: 'EducationalOrganization' },
+          { title: 'NGO',                               value: 'NGO' },
+        ],
+        layout: 'dropdown',
+      },
+      initialValue: 'LocalBusiness',
     }),
     defineField({
       name: 'seoImage',

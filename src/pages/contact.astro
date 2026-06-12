@@ -8,7 +8,7 @@ import { breadcrumbSchema } from '@/lib/schemas';
 import { telHref } from '@/lib/phone';
 import { site } from '@/data/site';
 import Hero from '@/components/Hero.astro';
-import PortableText from '@/components/PortableText';
+import PortableTextStatic from '@/components/PortableTextStatic.astro';
 import ContactForm from '@/components/ContactForm';
 import CopyEmailButton from '@/components/CopyEmailButton';
 import CalendlyInline from '@/components/CalendlyInline';
@@ -130,7 +130,7 @@ const schemas = [
           {page.whatToExpectHeadline && (
             <h2 class="font-display text-h3 text-foreground">{page.whatToExpectHeadline}</h2>
           )}
-          <PortableText client:visible value={page.whatToExpectContent} className="mt-s text-foreground/90" />
+          <PortableTextStatic value={page.whatToExpectContent} className="mt-s text-foreground/90" />
         </div>
       )}
     </div>
@@ -194,7 +194,7 @@ const schemas = [
 
       <div>
         <p class="text-xs uppercase tracking-widest text-foreground/80 mb-xs">Studio location</p>
-        <ServiceAreaMap height={280} />
+        <ServiceAreaMap height={280} lat={siteSettings?.geoLat} lng={siteSettings?.geoLng} />
       </div>
     </aside>
   </section>

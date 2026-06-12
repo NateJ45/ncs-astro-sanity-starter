@@ -1,0 +1,174 @@
+---
+// Safe to edit by hand
+// Server-side static Portable Text renderer. Converts simple Portable Text block
+// arrays to HTML at build time with zero client-side JavaScript. Handles the
+// node types used in privacy.astro and contact.astro:
+//   - normal, h2, h3 block styles
+//   - bullet and numbered lists
+//   - strong, em, and link marks (external links get rel="noopener")
+//
+// Visual classes mirror PortableText.tsx so output is visually identical.
+// Does NOT handle inlineImage, pullQuote, or other journal-specific custom types.
+// Use PortableText.tsx (React island) for content with those blocks.
+
+interface Span {
+  _type: 'span';
+  _key: string;
+  text?: string;
+  marks?: string[];
+}
+
+interface MarkDef {
+  _key: string;
+  _type: string;
+  href?: string;
+  openInNewTab?: boolean;
+}
+
+interface Block {
+  _type: 'block';
+  _key: string;
+  style?: string;
+  listItem?: 'bullet' | 'number';
+  level?: number;
+  children?: Span[];
+  markDefs?: MarkDef[];
+}
+
+interface Props {
+  value?: Block[] | null;
+  className?: string;
+}
+
+const { value, className } = Astro.props;
+
+if (!value || value.length === 0) {
+  return;
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderSpans(spans: Span[] | undefined, markDefs: MarkDef[] | undefined): string {
+  if (!spans) return '';
+  const defsMap = new Map<string, MarkDef>(
+    (markDefs ?? []).map((d) => [d._key, d]),
+  );
+
+  return spans.map((span) => {
+    const text = escapeHtml(span.text ?? '');
+    if (!span.marks || span.marks.length === 0) return text;
+
+    // Apply marks innermost-first (last in array = innermost wrapper)
+    let result = text;
+    const reversed = [...span.marks].reverse();
+    for (const mark of reversed) {
+      if (mark === 'strong') {
+        result = `<strong class="font-semibold">${result}</strong>`;
+      } else if (mark === 'em') {
+        result = `<em class="italic">${result}</em>`;
+      } else {
+        // Reference mark — look up in markDefs
+        const def = defsMap.get(mark);
+        if (def?._type === 'link') {
+          const href = escapeHtml(def.href ?? '#');
+          const isExternal = /^https?:\/\//.test(def.href ?? '');
+          const newTab = def.openInNewTab || isExternal;
+          const extras = newTab
+            ? ` target="_blank" rel="noopener noreferrer"`
+            : '';
+          result = `<a href="${href}" class="text-link underline underline-offset-2 hover:text-primary transition-colors"${extras}>${result}</a>`;
+        }
+      }
+    }
+    return result;
+  }).join('');
+}
+
+// ---------------------------------------------------------------------------
+// Block grouping (list items need to be wrapped in <ul>/<ol>)
+// ---------------------------------------------------------------------------
+
+type RenderedItem =
+  | { kind: 'html'; html: string }
+  | { kind: 'listItem'; listType: 'bullet' | 'number'; html: string };
+
+const items: RenderedItem[] = value.map((block) => {
+  if (block._type !== 'block') {
+    // Non-block types (inlineImage, etc.) are silently skipped in the static renderer.
+    return { kind: 'html', html: '' };
+  }
+
+  const inner = renderSpans(block.children, block.markDefs);
+
+  if (block.listItem === 'bullet' || block.listItem === 'number') {
+    return {
+      kind: 'listItem',
+      listType: block.listItem,
+      html: `<li class="text-foreground">${inner}</li>`,
+    };
+  }
+
+  const style = block.style ?? 'normal';
+  let html: string;
+  if (style === 'h2') {
+    html = `<h2 class="mt-section-md mb-m font-display text-h2 text-foreground scroll-mt-24">${inner}</h2>`;
+  } else if (style === 'h3') {
+    html = `<h3 class="mt-l mb-s font-display text-h3 text-foreground scroll-mt-24">${inner}</h3>`;
+  } else if (style === 'h4') {
+    html = `<h4 class="mt-m mb-s font-display text-h4 text-foreground scroll-mt-24">${inner}</h4>`;
+  } else if (style === 'blockquote') {
+    html = `<blockquote class="my-l border-l-4 border-primary pl-m italic text-foreground/90">${inner}</blockquote>`;
+  } else {
+    // normal (and any unrecognised style)
+    html = `<p class="my-m text-foreground">${inner}</p>`;
+  }
+  return { kind: 'html', html };
+});
+
+// Merge consecutive list items of the same type into a single list element.
+const segments: { html: string }[] = [];
+let i = 0;
+while (i < items.length) {
+  const item = items[i];
+  if (item.kind === 'listItem') {
+    const listType = item.listType;
+    const tag = listType === 'bullet' ? 'ul' : 'ol';
+    const cls =
+      listType === 'bullet'
+        ? 'my-m list-disc pl-l space-y-1 text-foreground'
+        : 'my-m list-decimal pl-l space-y-1 text-foreground';
+    let inner = item.html;
+    i += 1;
+    while (i < items.length) {
+      const next = items[i];
+      if (next.kind === 'listItem' && next.listType === listType) {
+        inner += next.html;
+        i += 1;
+      } else {
+        break;
+      }
+    }
+    segments.push({ html: `<${tag} class="${cls}">${inner}</${tag}>` });
+  } else {
+    segments.push({ html: item.html });
+    i += 1;
+  }
+}
+
+const rendered = segments.map((s) => s.html).join('');
+---
+
+{value && value.length > 0 && (
+  <div class={className} set:html={rendered} />
+)}

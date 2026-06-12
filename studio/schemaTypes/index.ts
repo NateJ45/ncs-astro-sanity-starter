@@ -5,6 +5,7 @@ import { aboutPage } from './aboutPage';
 import { businessInfo } from './businessInfo';
 import { contactPage } from './contactPage';
 import { ctaBlock } from './ctaBlock';
+import { faqCategory } from './faqCategory';
 import { faqItem } from './faqItem';
 import { faqPage } from './faqPage';
 import { homePage } from './homePage';
@@ -54,6 +55,7 @@ export const schemaTypes = [
 
   // Reusable content collections
   testimonial,
+  faqCategory,
   faqItem,
   philosophyPoint,
   service,

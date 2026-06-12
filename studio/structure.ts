@@ -76,6 +76,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...ORDERABLE_TYPES,
   'testimonial',
   'faqItem',
+  'faqCategory',
   'journalEntry',
   'journalCategory',
   'page', // custom pages, placed explicitly under "Pages"
@@ -261,6 +262,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 context,
               }),
               S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon),
+              S.documentTypeListItem('faqCategory').title('FAQ Categories').icon(TagIcon),
               S.documentTypeListItem('faqItem').title('FAQ Items').icon(HelpCircleIcon),
             ]),
         ),

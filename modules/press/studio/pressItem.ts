@@ -16,7 +16,7 @@ export const pressItem = defineType({
       name: 'outlet',
       title: 'Outlet name',
       type: 'string',
-      description: 'Publication or media outlet name. Example: "Houzz" or "Indianapolis Star".',
+      description: 'Publication or media outlet name. Example: "Houzz" or "The Local Business Journal".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({

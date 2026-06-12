@@ -15,7 +15,7 @@ Pinned versions reflect what's known to work together as of May 2026. Bump delib
 - Motion (formerly Framer Motion), Astro View Transitions, Lenis smooth scroll (respecting `prefers-reduced-motion`).
 - sharp for image processing. Sanity handles its own image transformation pipeline for content images; sharp is for any locally-bundled assets (logo, OG image generator).
 - opentype.js (dev-only) for the OG image generator at `scripts/generate-og-default.mjs`.
-- `@astrojs/rss` reserved for `/rss.xml` (not wired at launch by default).
+- `@astrojs/rss` wired at `/journal/rss.xml` via `src/pages/journal/rss.xml.ts`.
 - `@astrojs/sitemap` for `sitemap-index.xml` (production sitemap).
 - Three-state dark/light/system theme system: `ThemeToggle.tsx` React island plus an anti-FOUC bootstrap script in BaseLayout, persisted to `localStorage["theme"]`. The site is light-primary; dark mode is supported for visitor preference but not the primary read of the brand.
 - `src/data/site.ts` as the single source of truth for hardcoded site identity (brand name, domain, asset paths, social URL strings the build needs at compile time). Editor-controlled content goes through Sanity.
@@ -35,7 +35,9 @@ A few `astro.config.mjs` levers that look tempting but break things -- left docu
 
 ### Build order: typegen before build
 
-Run `npm run typegen` before `npm run build` whenever schemas change. The TypeScript types generated from Sanity schemas are consumed by page-level GROQ queries; a stale type file causes `astro check` and `tsc` to surface type errors that disappear once types are regenerated. The `npm run build` script in `package.json` chains these: `typegen && astro check && astro build`. Do not remove the typegen step from the chain.
+`npm run build` runs `astro build` only. It does NOT chain typegen.
+
+After any schema change, run `npm run typegen` first, then `npm run build`. The TypeScript types generated from Sanity schemas are consumed by page-level GROQ queries; a stale type file causes `astro check` and `tsc` to surface type errors that disappear once types are regenerated. Use `npm run build:full` (`npm run typegen && astro build`) to run both in one step.
 
 ### Sitemap `/404` filter
 
