@@ -32,7 +32,7 @@ export const journalEntry = defineType({
       options: {
         canvasApp: {
           purpose:
-            'Blog post headline, under 70 chars. Voice: warm, plain-spoken, specific. "A 1970s ranch in Fishers" beats "modern home." Banned: transformative, curated, elevated, tailored, ultimate, top tips.',
+            'Blog post headline, under 70 chars. Voice: warm, plain-spoken, specific. Prefer concrete details over vague category labels.',
         },
       },
       validation: (Rule) => Rule.required().max(120),
@@ -56,7 +56,7 @@ export const journalEntry = defineType({
       options: {
         canvasApp: {
           purpose:
-            'One or two sentences shown on the journal card AND as the SEO description (~160 chars). Voice: warm, plain-spoken, slightly informal. Specific beats generic. Banned: transformative, curated, elevated, tailored, investment in your space.',
+            'One or two sentences shown on the journal card AND as the SEO description (~160 chars). Voice: warm, plain-spoken, slightly informal. Specific beats generic.',
         },
       },
       validation: (Rule) => Rule.required().max(220),
@@ -129,7 +129,7 @@ export const journalEntry = defineType({
       options: {
         canvasApp: {
           purpose:
-            'Long-form blog post body. Voice: warm, plain-spoken, slightly informal — like a smart friend, not a brochure. Show specific thinking, not credentials. Stop when done; don\'t tack on summary sentences. Banned vocabulary: transformative, curated experience, elevated living, tailored solutions, ever-evolving, in the realm of, navigate (as a verb), leverage, robust, seamless, meticulous, tapestry, testament to. Audience: people with budget for professional help but not the luxury tier. Be specific over general. No em-dashes; use commas or restructure.',
+            'Long-form blog post body. Voice: warm, plain-spoken, slightly informal — like a knowledgeable friend, not a brochure. Show specific thinking. Stop when done; don\'t tack on summary sentences. Be specific over general.',
         },
       },
       validation: (Rule) => Rule.required().min(1),
@@ -341,8 +341,8 @@ export const journalEntry = defineType({
               name: 'label',
               title: 'Label',
               type: 'string',
-              description: 'Short eyebrow on the callout. Examples: "Designer\'s note", "Worth knowing", "Common mistake".',
-              initialValue: "Designer's note",
+              description: 'Short eyebrow on the callout. Examples: "Worth knowing", "Pro tip", "Common mistake".',
+              initialValue: 'Worth knowing',
               validation: (Rule) => Rule.required().max(40),
             }),
             defineField({
