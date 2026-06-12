@@ -40,6 +40,7 @@ import {
   ThumbsUpIcon,
   ColorWheelIcon,
   RocketIcon,
+  OlistIcon,
 } from '@sanity/icons';
 import StudioGuide from './components/StudioGuide';
 import BusinessOverview from './components/BusinessOverview';
@@ -53,6 +54,7 @@ const SINGLETON_TYPES = [
   'homePage',
   'aboutPage',
   'servicesPage',
+  'processPage',
   'faqPage',
   'contactPage',
   'journalPage',
@@ -66,6 +68,7 @@ const SINGLETON_TYPES = [
 const ORDERABLE_TYPES = [
   'service',
   'philosophyPoint',
+  'processStep',
 ] as const;
 
 const HIDDEN_FROM_DEFAULT = new Set<string>([
@@ -79,6 +82,8 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
   'media.tag',
+  // processStep is placed explicitly under Content → Process Steps
+  'processStep',
 ]);
 
 /**
@@ -199,6 +204,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               singletonWithPreview(S, 'homePage', 'Home', HomeIcon),
               singletonWithPreview(S, 'aboutPage', 'About', UserIcon),
               singletonWithPreview(S, 'servicesPage', 'Services', PackageIcon),
+              singletonWithPreview(S, 'processPage', 'Process', OlistIcon),
               singletonWithPreview(S, 'faqPage', 'FAQ', HelpCircleIcon),
               singletonWithPreview(S, 'contactPage', 'Contact', EnvelopeIcon),
               singletonWithPreview(S, 'journalPage', 'Journal (index page)', BookIcon),
@@ -244,6 +250,13 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 type: 'philosophyPoint',
                 title: 'Philosophy Values',
                 icon: HeartIcon,
+                S,
+                context,
+              }),
+              orderableDocumentListDeskItem({
+                type: 'processStep',
+                title: 'Process Steps',
+                icon: OlistIcon,
                 S,
                 context,
               }),
