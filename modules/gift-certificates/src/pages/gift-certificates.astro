@@ -14,7 +14,8 @@
 // Graceful coming-soon state when the giftPage Sanity doc is absent.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getGiftPage, getSiteSettings } from '@/lib/queries';
+import { getGiftPage } from '@/lib/giftCertificatesQueries';
+import { getSiteSettings } from '@/lib/queries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';

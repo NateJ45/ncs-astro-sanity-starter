@@ -10,7 +10,8 @@
 // the individual /guides/[slug] page. The index uses generic fallbacks here.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getLeadMagnets, getSiteSettings } from '@/lib/queries';
+import { getLeadMagnets } from '@/lib/leadMagnetsQueries';
+import { getSiteSettings } from '@/lib/queries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';

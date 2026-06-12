@@ -15,7 +15,8 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
 import SanityImage from '@/components/SanityImage.astro';
-import { getResourcesPage, getSiteSettings } from '@/lib/queries';
+import { getResourcesPage } from '@/lib/resourcesQueries';
+import { getSiteSettings } from '@/lib/queries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';

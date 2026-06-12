@@ -13,7 +13,8 @@
 //   - FinalCta closes the page
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getLeadMagnet, getAllLeadMagnetSlugs, getSiteSettings } from '@/lib/queries';
+import { getLeadMagnet, getAllLeadMagnetSlugs } from '@/lib/leadMagnetsQueries';
+import { getSiteSettings } from '@/lib/queries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
