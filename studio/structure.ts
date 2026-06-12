@@ -27,6 +27,7 @@ import {
   InfoOutlineIcon,
   EnvelopeIcon,
   DocumentTextIcon,
+  DocumentsIcon,
   StarIcon,
   HeartIcon,
   ThListIcon,
@@ -34,6 +35,7 @@ import {
   TagIcon,
   BookIcon,
   LockIcon,
+  PinIcon,
   PresentationIcon,
   ThumbsUpIcon,
   ColorWheelIcon,
@@ -46,6 +48,7 @@ import StudioPlaybook from './components/StudioPlaybook';
 
 const SINGLETON_TYPES = [
   'siteSettings',
+  'businessInfo',
   // Core pages
   'homePage',
   'aboutPage',
@@ -72,6 +75,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'faqItem',
   'journalEntry',
   'journalCategory',
+  'page', // custom pages, placed explicitly under "Pages"
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
   'media.tag',
@@ -203,6 +207,12 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               S.divider(),
 
               singletonWithPreview(S, 'privacyPage', 'Privacy Policy Page', LockIcon),
+
+              S.divider(),
+
+              // Custom pages: editors build these themselves from the section library.
+              // Multi-instance (not a singleton), so it is a normal document list.
+              S.documentTypeListItem('page').title('Custom pages (build your own)').icon(DocumentsIcon),
             ]),
         ),
 
@@ -217,6 +227,12 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
           S.list()
             .title('Content')
             .items([
+              // Business info: service areas, travel fees, availability, geo.
+              // Moved here from Site Settings so Settings is identity + infrastructure only.
+              singletonWithPreview(S, 'businessInfo', 'Business info', PinIcon),
+
+              S.divider(),
+
               orderableDocumentListDeskItem({
                 type: 'service',
                 title: 'Services',
