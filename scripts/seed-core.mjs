@@ -418,8 +418,6 @@ docs.push({
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
 //         heroImage?, heroScriptAccent?, stickyCtaLabel?,
 //         servicesListEyebrow, servicesListHeadline, servicesListSubhead,
-//         builderRealtorSection{eyebrow, headline, description, forBuildersText,
-//           forRealtorsText, forContractorsText, cta},
 //         serviceAreaSection{eyebrow, headline, description},
 //         finalCtaEyebrow, finalCtaHeadline, finalCtaSubhead, finalCta
 
@@ -436,18 +434,6 @@ docs.push({
   servicesListEyebrow: 'The Tiers.',
   servicesListHeadline: 'Find the right fit.',
   servicesListSubhead: 'Each service is priced to match the scope. Everything is discussed before any work begins.',
-
-  builderRealtorSection: {
-    eyebrow: 'For Professionals.',
-    headline: 'Builder and Realtor Partnerships.',
-    description: [
-      pt('We work with builders, realtors, and contractors who want a reliable design partner for model homes, listing prep, and new construction.')
-    ],
-    forBuildersText: 'Model home furnishing, finish selection, and design coordination for new builds.',
-    forRealtorsText: 'Listing prep, staging guidance, and buyer consultations to help homes sell faster.',
-    forContractorsText: 'Material and finish selection support for renovation projects.',
-    cta: cta('Get in Touch', '/contact'),
-  },
 
   serviceAreaSection: {
     eyebrow: 'Service Area.',
