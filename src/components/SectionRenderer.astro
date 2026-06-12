@@ -1,0 +1,128 @@
+---
+// Foundation, edit with care
+// Renders a page-builder section array. Maps each block _type to its component
+// and OWNS the alternating background cadence for content blocks, so reordering
+// can never break the page rhythm (that is why blocks have no color field).
+// Self-contained blocks (hero, CTA band, stats, spacer) manage their own surface.
+//
+// Cadence logic lives in src/lib/sectionCadence.ts and is unit-tested separately.
+// This file is thin template glue: it imports classified rows and delegates.
+//
+// The GROQ query that loads `sections` must project images with imageProjection
+// and ctaBlocks with ctaProjection (see sectionsProjection() in queries.ts).
+import Hero from '@/components/Hero.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import StatsRow from '@/components/StatsRow.astro';
+import SectionDivider from '@/components/SectionDivider.astro';
+import RichTextSection from '@/components/sections/RichTextSection.astro';
+import ImageText from '@/components/sections/ImageText.astro';
+import GalleryGrid from '@/components/sections/GalleryGrid.astro';
+import QuoteBlock from '@/components/sections/QuoteBlock.astro';
+import VideoEmbed from '@/components/sections/VideoEmbed.astro';
+import { classifySections } from '@/lib/sectionCadence';
+
+interface Props {
+  sections?: unknown[];
+  /** Prefix for generated heading ids, so two renderers on a page do not collide. */
+  idPrefix?: string;
+}
+
+const { sections = [], idPrefix = 'section' } = Astro.props as Props;
+const rows = classifySections(sections, idPrefix);
+---
+
+{rows.map(({ block: s, surface, insertDividerBefore, headingId }) => (
+  <>
+    {insertDividerBefore && <SectionDivider />}
+
+    {s._type === 'heroSection' ? (
+      <Hero
+        eyebrow={s.eyebrow as string | undefined}
+        headline={(s.headline as string) ?? ''}
+        subhead={s.subhead as string | undefined}
+        backgroundImage={s.backgroundImage as any}
+        primaryCta={s.primaryCta as any}
+        secondaryCta={s.secondaryCta as any}
+        scriptAccent={s.scriptAccent as string | undefined}
+        size={(s.size as 'tall' | 'short') ?? 'short'}
+        headingId={headingId}
+      />
+    ) : s._type === 'ctaBandSection' ? (
+      <FinalCta
+        eyebrow={s.eyebrow as string | undefined}
+        headline={s.headline as string | undefined}
+        subhead={s.subhead as string | undefined}
+        cta={s.cta as any}
+        scriptAccent={s.scriptAccent as string | undefined}
+        backgroundImage={s.backgroundImage as any}
+        headingId={headingId}
+      />
+    ) : s._type === 'statSection' ? (
+      <StatsRow
+        stats={((s.stats ?? []) as any[]).filter(
+          (x: any) => typeof x?.number === 'number',
+        )}
+      />
+    ) : s._type === 'spacerSection' ? (
+      s.variant === 'space' ? (
+        <div class="py-section-md" aria-hidden="true"></div>
+      ) : (
+        <SectionDivider
+          variant={
+            s.variant === 'line' ? 'line'
+            : s.variant === 'dots' ? 'dots'
+            : 'ornament'
+          }
+        />
+      )
+    ) : s._type === 'richTextSection' ? (
+      <RichTextSection
+        eyebrow={s.eyebrow as string | undefined}
+        heading={s.heading as string | undefined}
+        scriptAccent={s.scriptAccent as string | undefined}
+        body={s.body as any}
+        width={s.width as 'normal' | 'narrow' | undefined}
+        align={s.align as 'left' | 'center' | undefined}
+        surface={surface ?? 'background'}
+        headingId={headingId}
+      />
+    ) : s._type === 'imageTextSection' ? (
+      <ImageText
+        image={s.image as any}
+        imageSide={s.imageSide as 'left' | 'right' | undefined}
+        eyebrow={s.eyebrow as string | undefined}
+        heading={s.heading as string | undefined}
+        body={s.body as any}
+        cta={s.cta as any}
+        surface={surface ?? 'background'}
+        headingId={headingId}
+      />
+    ) : s._type === 'gallerySection' ? (
+      <GalleryGrid
+        heading={s.heading as string | undefined}
+        images={s.images as any[]}
+        columns={s.columns as number | undefined}
+        surface={surface ?? 'background'}
+        headingId={headingId}
+      />
+    ) : s._type === 'quoteSection' ? (
+      <QuoteBlock
+        quote={s.quote as string | undefined}
+        attribution={s.attribution as string | undefined}
+        detail={s.detail as string | undefined}
+        surface={surface ?? 'background'}
+      />
+    ) : s._type === 'videoSection' ? (
+      <VideoEmbed
+        url={s.url as string | undefined}
+        heading={s.heading as string | undefined}
+        caption={s.caption as string | undefined}
+        surface={surface ?? 'background'}
+        headingId={headingId}
+      />
+    ) : (
+      // Unknown block type: render nothing, log in dev.
+      import.meta.env.DEV && console.warn(`[SectionRenderer] Unknown block type: "${s._type}". Add a mapping in SectionRenderer.astro.`)
+    )}
+  </>
+))}
