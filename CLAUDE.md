@@ -64,7 +64,8 @@ Standalone scripts:
 - `npm run og` to re-run `scripts/generate-og-default.mjs` and regenerate `public/og-default.png` (after changing brand colors, tagline, or the wordmark in the script's inputs block).
 - `npm run apply-brand` to deterministically rewrite `globals.css` tokens, `src/data/site.ts`, Studio theme inputs, font imports, and the OG image based on `brand/brand.config.json`. Idempotent -- safe to re-run.
 - `npm run seed` runs `scripts/seed-core.mjs`. It creates or replaces the core singletons (`siteSettings`, `homePage`, `aboutPage`, `servicesPage`, `processPage`, `faqPage`, `contactPage`, `journalPage`, `privacyPage`, `notFoundPage`, `studioGuide`, `studioNotes`, `studioPlaybook`) and seed collection docs (services, processSteps, testimonials, philosophyPoints, journalCategories, journalEntries, faqItems). Requires `PUBLIC_SANITY_PROJECT_ID` and `SANITY_API_WRITE_TOKEN` in `.env`. Idempotent: uses `createOrReplace` with deterministic `_id` values so re-running is safe.
-- `npm test` to run the 22 unit tests (node --test) covering `sectionCadence` and `reservedSlugs`.
+- `npm test` to run the 79 unit tests (node --test) across 6 files in `src/lib/` covering `sectionCadence`, `reservedSlugs`, `scriptAccent`, `slugify`, `sectionVisibility`, and `utils`.
+- `npm run check` to run the full local gate in one command: `typegen`, site build, Studio build, and all tests. This is the canonical pre-commit verification command. CI runs the same gate on every push and PR.
 - `npm run studio:dev` to start the Sanity Studio locally for content editing.
 - `npm run studio:deploy` to deploy the Sanity Studio to its hosted URL. **Run this after every schema change.** If you skip it, the hosted Studio shows "unknown fields" warnings next to data in new fields, and the editor sees a prompt to "Remove field." Do NOT click "Remove field" in Studio: it deletes the Sanity document data for every document with that field populated, and it cannot be undone without a dataset restore. The correct sequence is: edit schema, `npm run typegen`, `npm run studio:deploy`, commit.
 
@@ -107,7 +108,7 @@ Core routes that ship with the starter (always on, not toggleable):
 
 The section-driven pages (home/about/services/process) render whichever `pageBuilder` array Sanity provides. If the array is absent (fresh clone, no Sanity project), the route falls back to code-defined defaults in `src/data/defaultSections.ts`, so the site is never blank.
 
-Additional routes come from opt-in modules staged under `modules/` (OFF by default). Each module is documented under `docs/modules/`. There are 10 modules: `portfolio`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`, `lead-magnets`, `newsletter`, `style-quiz`, `budget-calculator`.
+Additional routes come from opt-in modules staged under `modules/` (OFF by default). Each module is documented under `docs/modules/`. There are 13 modules: `portfolio`, `shop`, `virtual-services`, `gift-certificates`, `press`, `resources`, `lead-magnets`, `newsletter`, `style-quiz`, `budget-calculator`, `events`, `donations`, `team`.
 
 ---
 
@@ -137,7 +138,7 @@ These are the files where a project maintainer can make changes without risk of 
 ## Foundation, edit with care (route through a planned session)
 
 - `src/styles/globals.css` -- the full file beyond the design seam tokens: shadcn `:root` / `.dark` overrides, **polish-layer utilities** (`.card-lift`, `.press-tactile`, `.nav-underline`, `.site-header`, `.reading-progress`, `.surface-warm`, `[data-reveal]`), base resets, paper-grain `body::before`, print stylesheet
-- `studio/schemaTypes/*.ts` -- Sanity schemas. Changing fields can break existing content. See gotcha #1 above. Key new schemas: `studio/schemaTypes/sections.ts` (9 general block types + `SECTION_TYPES` + `additionalSectionsField`), `studio/schemaTypes/richSections.ts` (8 rich section types + per-page curated lists), `studio/schemaTypes/businessInfo.ts` (service areas, travel, availability, geo -- split from siteSettings; merged back by `getSiteSettings()`), `studio/schemaTypes/page.ts` (custom page document type).
+- `studio/schemaTypes/*.ts` -- Sanity schemas. Changing fields can break existing content. See gotcha #1 above. Key schemas: `studio/schemaTypes/sections.ts` (11 general block types + `SECTION_TYPES` + `additionalSectionsField`), `studio/schemaTypes/richSections.ts` (10 rich section types + per-page curated lists), `studio/schemaTypes/businessInfo.ts` (service areas, travel, availability, geo, `businessModel`, `additionalLocations` -- split from siteSettings; merged back by `getSiteSettings()`), `studio/schemaTypes/siteSettings.ts` (`businessType`, `socialLinks` array), `studio/schemaTypes/faqCategory.ts` (faqCategory document type), `studio/schemaTypes/faqItem.ts` (`categoryRef` field), `studio/schemaTypes/page.ts` (custom page document type).
 - `src/lib/sanity.ts` -- Sanity client, `sanityFetch` wrapper, `urlFor`, `parseSanityAssetDimensions`. The `isSanityUnconfigured` guard and graceful-fallback behavior are load-bearing for fresh-clone builds.
 - `src/lib/queries.ts`, `src/lib/sanity.types.ts` -- GROQ queries and generated types. Includes `sectionsProjection()`, `getPage`, `getAllPageSlugs`, `getNavPages`.
 - `src/lib/sectionCadence.ts` -- logic that maps section index to surface variant (the alternating-bg cadence). `SectionRenderer` calls this; blocks have no color field. Unit-tested in `src/lib/sectionCadence.test.ts`.
