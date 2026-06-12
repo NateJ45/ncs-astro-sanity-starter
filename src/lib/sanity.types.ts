@@ -108,6 +108,21 @@ export type JournalCategory = {
   description?: string;
 };
 
+export type ProcessStep = {
+  _id: string;
+  _type: "processStep";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  stepNumber?: number;
+  title?: string;
+  timeEstimate?: string;
+  shortDescription?: string;
+  features?: Array<string>;
+  tierNote?: string;
+  orderRank?: string;
+};
+
 export type Service = {
   _id: string;
   _type: "service";
@@ -346,6 +361,56 @@ export type NotFoundPage = {
   tertiaryCtaHref?: string;
 };
 
+export type ProcessPage = {
+  _id: string;
+  _type: "processPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & ProcessSection)
+  >;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+};
+
 export type BusinessInfo = {
   _id: string;
   _type: "businessInfo";
@@ -445,73 +510,6 @@ export type ProcessSection = {
   subhead?: string;
   variant?: "preview" | "full";
   cta?: CtaBlock;
-};
-
-export type HomePageReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "homePage";
-};
-
-export type AboutPageReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "aboutPage";
-};
-
-export type ServicesPageReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "servicesPage";
-};
-
-export type FaqPageReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "faqPage";
-};
-
-export type ContactPageReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "contactPage";
-};
-
-export type JournalPageReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "journalPage";
-};
-
-export type JournalEntryReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "journalEntry";
-};
-
-export type CtaBlock = {
-  _type: "ctaBlock";
-  label?: string;
-  linkType?: "internal" | "external" | "email" | "phone";
-  internalLink?:
-    | HomePageReference
-    | AboutPageReference
-    | ServicesPageReference
-    | FaqPageReference
-    | ContactPageReference
-    | JournalPageReference
-    | JournalEntryReference;
-  externalUrl?: string;
-  emailAddress?: string;
-  phoneNumber?: string;
-  openInNewTab?: boolean;
 };
 
 export type ValuesSection = {
@@ -763,6 +761,73 @@ export type HeroSection = {
   primaryCta?: CtaBlock;
   secondaryCta?: CtaBlock;
   size?: "tall" | "short";
+};
+
+export type HomePageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "homePage";
+};
+
+export type AboutPageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "aboutPage";
+};
+
+export type ServicesPageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "servicesPage";
+};
+
+export type FaqPageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "faqPage";
+};
+
+export type ContactPageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "contactPage";
+};
+
+export type JournalPageReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "journalPage";
+};
+
+export type JournalEntryReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "journalEntry";
+};
+
+export type CtaBlock = {
+  _type: "ctaBlock";
+  label?: string;
+  linkType?: "internal" | "external" | "email" | "phone";
+  internalLink?:
+    | HomePageReference
+    | AboutPageReference
+    | ServicesPageReference
+    | FaqPageReference
+    | ContactPageReference
+    | JournalPageReference
+    | JournalEntryReference;
+  externalUrl?: string;
+  emailAddress?: string;
+  phoneNumber?: string;
+  openInNewTab?: boolean;
 };
 
 export type JournalCategoryReference = {
@@ -1099,6 +1164,44 @@ export type ServicesPage = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & ServicesGridSection)
+    | ({
+        _key: string;
+      } & ServiceAreaSection)
+    | ({
+        _key: string;
+      } & GuaranteeSection)
+  >;
   seoTitle?: string;
   seoDescription?: string;
   seoImage?: {
@@ -1173,6 +1276,41 @@ export type AboutPage = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & StorySection)
+    | ({
+        _key: string;
+      } & ValuesSection)
+  >;
   seoTitle?: string;
   seoDescription?: string;
   seoImage?: {
@@ -1281,6 +1419,47 @@ export type HomePage = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & FounderSection)
+    | ({
+        _key: string;
+      } & ServicesGridSection)
+    | ({
+        _key: string;
+      } & TestimonialsSection)
+    | ({
+        _key: string;
+      } & ProcessSection)
+  >;
   seoTitle?: string;
   seoDescription?: string;
   seoImage?: {
@@ -1521,6 +1700,7 @@ export type AllSanitySchemaTypes =
   | SanityImageHotspot
   | Slug
   | JournalCategory
+  | ProcessStep
   | Service
   | PhilosophyPoint
   | FaqItem
@@ -1529,19 +1709,12 @@ export type AllSanitySchemaTypes =
   | StudioGuide
   | PrivacyPage
   | NotFoundPage
+  | ProcessPage
   | BusinessInfo
   | SiteSettings
   | GuaranteeSection
   | ServiceAreaSection
   | ProcessSection
-  | HomePageReference
-  | AboutPageReference
-  | ServicesPageReference
-  | FaqPageReference
-  | ContactPageReference
-  | JournalPageReference
-  | JournalEntryReference
-  | CtaBlock
   | ValuesSection
   | StorySection
   | TestimonialReference
@@ -1557,6 +1730,14 @@ export type AllSanitySchemaTypes =
   | ImageTextSection
   | RichTextSection
   | HeroSection
+  | HomePageReference
+  | AboutPageReference
+  | ServicesPageReference
+  | FaqPageReference
+  | ContactPageReference
+  | JournalPageReference
+  | JournalEntryReference
+  | CtaBlock
   | JournalCategoryReference
   | JournalEntry
   | JournalPage

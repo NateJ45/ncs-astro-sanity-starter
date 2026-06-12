@@ -1,6 +1,11 @@
 // About page singleton. Philosophy values auto-populate from philosophyPoint collection.
+//
+// Structured content fields (hero*, story*, philosophy*, personal*, stats, final*)
+// are hidden and readOnly for rollback safety. The pageBuilder array is the
+// primary editing surface going forward.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
+import { ABOUT_SECTION_TYPES } from './richSections';
 
 export const aboutPage = defineType({
   name: 'aboutPage',
@@ -9,6 +14,7 @@ export const aboutPage = defineType({
   // Marketing copy is locked and structural — edit fields directly in Studio, not Canvas.
   options: { canvasApp: { exclude: true } },
   groups: [
+    { name: 'pageBuilder', title: 'Page layout' },
     { name: 'seo', title: 'SEO' },
     { name: 'hero', title: 'Hero' },
     { name: 'story', title: 'Story' },
@@ -18,6 +24,17 @@ export const aboutPage = defineType({
     { name: 'final', title: 'Final CTA' },
   ],
   fields: [
+    // Page builder (primary editing surface — section-driven)
+    defineField({
+      name: 'pageBuilder',
+      title: 'Page layout',
+      type: 'array',
+      group: 'pageBuilder',
+      description:
+        "Sections on this page. Drag to reorder, remove a section to hide it, or add a new block from the library. Edit each section's content by clicking into it.",
+      of: ABOUT_SECTION_TYPES,
+    }),
+
     defineField({
       name: 'seoTitle',
       title: 'SEO title',
@@ -47,14 +64,17 @@ export const aboutPage = defineType({
       ],
     }),
 
-    defineField({ name: 'heroEyebrow', title: 'Hero eyebrow', type: 'string', group: 'hero', initialValue: 'The Designer.' }),
-    defineField({ name: 'heroHeadline', title: 'Hero headline', type: 'string', group: 'hero', initialValue: 'People Hire People.' }),
-    defineField({ name: 'heroSubhead', title: 'Hero subhead', type: 'text', rows: 2, group: 'hero', initialValue: "Here's who you'd be working with." }),
+    // Hero (legacy structured fields — hidden for rollback safety)
+    defineField({ name: 'heroEyebrow', title: 'Hero eyebrow', type: 'string', group: 'hero', hidden: true, readOnly: true, initialValue: 'The Designer.' }),
+    defineField({ name: 'heroHeadline', title: 'Hero headline', type: 'string', group: 'hero', hidden: true, readOnly: true, initialValue: 'People Hire People.' }),
+    defineField({ name: 'heroSubhead', title: 'Hero subhead', type: 'text', rows: 2, group: 'hero', hidden: true, readOnly: true, initialValue: "Here's who you'd be working with." }),
     defineField({
       name: 'heroImage',
       title: 'Hero background image',
       type: 'image',
       group: 'hero',
+      hidden: true,
+      readOnly: true,
       description: 'Full-bleed photo behind the hero text. Pick a landscape shot; the page applies a dark gradient over the bottom for readability.',
       options: { hotspot: true },
       fields: [
@@ -66,17 +86,22 @@ export const aboutPage = defineType({
       title: 'Script-font accent word (optional)',
       type: 'string',
       group: 'hero',
+      hidden: true,
+      readOnly: true,
       description:
         'A single word from the headline to render in handwritten Pinyon Script. Must match exactly (case-sensitive). Leave blank to skip.',
     }),
 
-    defineField({ name: 'storyEyebrow', title: 'Story eyebrow', type: 'string', group: 'story', initialValue: 'My Story.' }),
-    defineField({ name: 'storyHeadline', title: 'Story headline', type: 'string', group: 'story', initialValue: 'Why I Started This Studio.' }),
+    // Story (legacy — hidden for rollback safety)
+    defineField({ name: 'storyEyebrow', title: 'Story eyebrow', type: 'string', group: 'story', hidden: true, readOnly: true, initialValue: 'My Story.' }),
+    defineField({ name: 'storyHeadline', title: 'Story headline', type: 'string', group: 'story', hidden: true, readOnly: true, initialValue: 'Why I Started This Studio.' }),
     defineField({
       name: 'storyContent',
       title: 'Story content',
       type: 'array',
       group: 'story',
+      hidden: true,
+      readOnly: true,
       of: [
         defineArrayMember({
           type: 'block',
@@ -96,6 +121,8 @@ export const aboutPage = defineType({
       title: 'Founder portrait',
       type: 'image',
       group: 'story',
+      hidden: true,
+      readOnly: true,
       options: { hotspot: true },
       fields: [
         defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),
@@ -106,6 +133,8 @@ export const aboutPage = defineType({
       title: 'Attribution',
       type: 'string',
       group: 'story',
+      hidden: true,
+      readOnly: true,
       initialValue: 'Your Name · Founder, Studio Name',
     }),
     defineField({
@@ -114,6 +143,8 @@ export const aboutPage = defineType({
       type: 'text',
       rows: 2,
       group: 'story',
+      hidden: true,
+      readOnly: true,
       description: "Single sentence with real credentials. Must be accurate, not aspirational.",
     }),
     defineField({
@@ -121,17 +152,23 @@ export const aboutPage = defineType({
       title: 'Service area mention',
       type: 'string',
       group: 'story',
+      hidden: true,
+      readOnly: true,
       description: 'Single line mentioning service area on About.',
     }),
 
-    defineField({ name: 'philosophyEyebrow', title: 'Philosophy eyebrow', type: 'string', group: 'philosophy' }),
-    defineField({ name: 'philosophyHeadline', title: 'Philosophy headline', type: 'string', group: 'philosophy' }),
+    // Philosophy (legacy — hidden for rollback safety)
+    defineField({ name: 'philosophyEyebrow', title: 'Philosophy eyebrow', type: 'string', group: 'philosophy', hidden: true, readOnly: true }),
+    defineField({ name: 'philosophyHeadline', title: 'Philosophy headline', type: 'string', group: 'philosophy', hidden: true, readOnly: true }),
 
+    // Personal (legacy — hidden for rollback safety)
     defineField({
       name: 'personalEyebrow',
       title: 'Personal section eyebrow',
       type: 'string',
       group: 'personal',
+      hidden: true,
+      readOnly: true,
       initialValue: 'Off the Clock.',
     }),
     defineField({
@@ -139,6 +176,8 @@ export const aboutPage = defineType({
       title: 'Personal section headline',
       type: 'string',
       group: 'personal',
+      hidden: true,
+      readOnly: true,
       initialValue: 'A little more about me.',
     }),
     defineField({
@@ -147,6 +186,8 @@ export const aboutPage = defineType({
       type: 'text',
       rows: 2,
       group: 'personal',
+      hidden: true,
+      readOnly: true,
       description: 'One friendly sentence under the headline. Optional.',
     }),
     defineField({
@@ -154,6 +195,8 @@ export const aboutPage = defineType({
       title: 'Currently',
       type: 'array',
       group: 'personal',
+      hidden: true,
+      readOnly: true,
       description: 'A short "what I am into right now" list. Refresh it anytime. Example label "Reading", value "the book title".',
       of: [
         defineArrayMember({
@@ -172,6 +215,8 @@ export const aboutPage = defineType({
       title: 'Rapid fire',
       type: 'array',
       group: 'personal',
+      hidden: true,
+      readOnly: true,
       description: 'Short prompt-and-answer pairs. Example prompt "Coffee order", answer "Oat latte, extra hot".',
       of: [
         defineArrayMember({
@@ -190,6 +235,8 @@ export const aboutPage = defineType({
       title: 'Favorite local spots',
       type: 'array',
       group: 'personal',
+      hidden: true,
+      readOnly: true,
       description: 'Go-to local spots. Name plus an optional short note.',
       of: [
         defineArrayMember({
@@ -209,6 +256,8 @@ export const aboutPage = defineType({
       type: 'text',
       rows: 4,
       group: 'personal',
+      hidden: true,
+      readOnly: true,
       description: 'A short, casual paragraph or two about life outside work: family, the dogs, hobbies. Write the way you talk.',
     }),
     defineField({
@@ -216,6 +265,8 @@ export const aboutPage = defineType({
       title: 'Candid photo (optional)',
       type: 'image',
       group: 'personal',
+      hidden: true,
+      readOnly: true,
       description: 'A relaxed, non-portrait photo. Skip the polished headshot here; warmth beats polish.',
       options: { hotspot: true },
       fields: [
@@ -223,11 +274,14 @@ export const aboutPage = defineType({
       ],
     }),
 
+    // Stats (legacy — hidden for rollback safety)
     defineField({
       name: 'stats',
       title: 'Stats',
       type: 'array',
       group: 'stats',
+      hidden: true,
+      readOnly: true,
       description: 'Up to 4 numbers displayed as large display figures on the About page. Leave empty to hide the section.',
       of: [
         defineArrayMember({
@@ -252,23 +306,28 @@ export const aboutPage = defineType({
       validation: (Rule) => Rule.max(4),
     }),
 
-    defineField({ name: 'finalCtaEyebrow', title: 'Final CTA eyebrow', type: 'string', group: 'final', initialValue: "Let's Work Together." }),
-    defineField({ name: 'finalCtaHeadline', title: 'Final CTA headline', type: 'string', group: 'final', initialValue: 'Ready to Start?' }),
+    // Final CTA (legacy — hidden for rollback safety)
+    defineField({ name: 'finalCtaEyebrow', title: 'Final CTA eyebrow', type: 'string', group: 'final', hidden: true, readOnly: true, initialValue: "Let's Work Together." }),
+    defineField({ name: 'finalCtaHeadline', title: 'Final CTA headline', type: 'string', group: 'final', hidden: true, readOnly: true, initialValue: 'Ready to Start?' }),
     defineField({
       name: 'finalCtaScriptAccent',
       title: 'Final CTA heading script accent (optional)',
       type: 'string',
       group: 'final',
+      hidden: true,
+      readOnly: true,
       description:
         'Optional. One word or short phrase from the headline to render in handwritten Pinyon Script. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
-    defineField({ name: 'finalCtaSubhead', title: 'Final CTA subhead', type: 'text', rows: 2, group: 'final' }),
-    defineField({ name: 'finalCta', title: 'Final CTA button', type: 'ctaBlock', group: 'final' }),
+    defineField({ name: 'finalCtaSubhead', title: 'Final CTA subhead', type: 'text', rows: 2, group: 'final', hidden: true, readOnly: true }),
+    defineField({ name: 'finalCta', title: 'Final CTA button', type: 'ctaBlock', group: 'final', hidden: true, readOnly: true }),
     defineField({
       name: 'finalCtaBackgroundImage',
       title: 'Final CTA background image (optional)',
       type: 'image',
       group: 'final',
+      hidden: true,
+      readOnly: true,
       options: { hotspot: true },
       description:
         'Optional. A photo behind the closing call-to-action. The site automatically darkens it so the headline and button stay readable. Leave empty to keep the solid charcoal panel.',
