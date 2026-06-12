@@ -10,6 +10,17 @@ section before touching anything in the "Foundation" list.
 
 ---
 
+## Prerequisites
+
+Before you start, make sure you have:
+
+- **Node 22.12+** (`node --version`). The starter requires Node 22.12 or later.
+- **A GitHub repository** for the new project. Create it at github.com before cloning.
+- **A Cloudflare account** at [dash.cloudflare.com](https://dash.cloudflare.com). The Workers free tier is enough for most projects.
+- **A unique Worker name** in mind. The `name` field in `wrangler.jsonc` must be globally unique across all Cloudflare accounts. Choose a name you control before starting -- it becomes your `<name>.<account>.workers.dev` subdomain.
+
+---
+
 ## Step 1 -- Clone the template and install dependencies
 
 ```powershell
@@ -260,23 +271,38 @@ See `CLAUDE.md` Visual verification workflow for the full checklist.
 npm run deploy
 ```
 
-This runs `npm run build` (which runs `typegen` then `astro build`) followed by
-`wrangler deploy`. On first deploy you may be prompted to log in to Cloudflare.
+`npm run deploy` runs `npm run build` (`astro build` only) followed by
+`wrangler deploy`. It does NOT run typegen. If you changed any schemas since
+the last typegen run, run `npm run typegen` first. On first deploy you may be
+prompted to log in to Cloudflare.
 
-**b) Wire the publish webhook**
+**b) Wire environment variables in Cloudflare**
 
-In Cloudflare:
-- Go to Workers & Pages -> your Worker -> Settings -> Variables
-- Add the same env vars from `.env` as Secret bindings (especially
-  `SANITY_API_READ_TOKEN`; the `PUBLIC_*` vars can be plain)
+Go to Workers & Pages -> your Worker -> Settings -> Variables. Add the same
+env vars from `.env` as Secret bindings (especially `SANITY_API_READ_TOKEN`;
+the `PUBLIC_*` vars can be plain).
 
-In Sanity:
-- Go to manage.sanity.io -> your project -> API -> GROQ-powered Webhooks
-- Create a webhook that triggers a Cloudflare Workers deploy on document
-  publish events. This ensures a Sanity edit goes live after the next rebuild.
-  See `docs/agent/deployment.md` for the webhook payload and filter details.
+**c) Wire the Sanity -> Cloudflare publish webhook**
 
-**c) Pre-launch checklist**
+The site is fully prerendered, so a Sanity content edit only goes live after a
+rebuild. Wire a deploy hook so editors don't need a developer for every content
+change. Full authoritative steps are in `docs/agent/deployment.md`; summary:
+
+1. **Create the Cloudflare deploy hook** at Cloudflare dashboard -> Workers &
+   Pages -> your Worker -> Settings -> Build hooks (or Triggers -> Deploy hooks,
+   depending on the UI version). Name it `Sanity content publish`, branch
+   `main`. Copy the generated URL.
+
+2. **Create the Sanity webhook** at manage.sanity.io -> your project -> API ->
+   GROQ-powered Webhooks. Name it `Rebuild live site`, dataset `production`,
+   trigger on Create + Update + Delete, HTTP method POST, paste the Cloudflare
+   deploy hook URL. Apply the deny-list GROQ filter (see `docs/agent/deployment.md`
+   for the exact filter string).
+
+3. **Test:** publish a field change in Sanity Studio and watch the Cloudflare
+   Deployments tab. A new build should kick off within about 10 seconds.
+
+**d) Pre-launch checklist**
 
 Run through `docs/bootstrap/setup-checklist.md` before DNS cutover.
 

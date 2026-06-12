@@ -22,7 +22,7 @@ The starter ships these routes (always on, not toggleable):
 | `/privacy` | `src/pages/privacy.astro` | Privacy policy from singleton |
 | `/404` | `src/pages/404.astro` | Custom 404 |
 
-Additional routes come from opt-in modules staged under `modules/` (off by default). Each module is documented under `docs/modules/`. Current available modules: `portfolio`, `process`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`, `guides`, `style-quiz`, `budget-calculator`.
+Additional routes come from opt-in modules staged under `modules/` (off by default). Each module is documented under `docs/modules/`. There are 10 opt-in modules: `portfolio`, `shop`, `e-design`, `gift-certificates`, `press`, `resources`, `lead-magnets`, `newsletter`, `style-quiz`, `budget-calculator`. (The `process` route is always-on core, not a module.)
 
 ---
 

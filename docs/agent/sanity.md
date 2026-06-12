@@ -20,7 +20,7 @@ export const site = {
 } as const;
 ```
 
-Replace all placeholder values in `site.ts` before launch. The domain feeds the canonical URL, OG tags, and the sitemap reference in `robots.txt`.
+Replace all placeholder values in `site.ts` before launch. The domain feeds the canonical URL, OG tags, and the sitemap reference in the generated `robots.txt` (rendered at build time by `src/pages/robots.txt.ts`).
 
 ### Sanity — all editable content
 
@@ -29,7 +29,7 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 **Core schema set (always present in the starter):**
 
 **Settings and globals:**
-- `siteSettings` (singleton) — email, phone, social links, footer tagline, newsletter settings, section visibility flags. Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
+- `siteSettings` (singleton) — email, phone, social links, footer tagline, newsletter settings, section visibility flags, and `businessType` (schema.org LocalBusiness subtype; drives the JSON-LD `@type` field -- defaults to `LocalBusiness` if unset). Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
 - `businessInfo` (singleton) — service areas, travel fee tiers, availability status, studio city/state, and geo coordinates. Split from `siteSettings` so identity fields stay in one place and operational business facts in another. `getSiteSettings()` merges both documents and returns them under a single flat interface — no component changes needed.
 
 **Page builder schemas:**

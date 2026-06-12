@@ -1,6 +1,6 @@
 # Module Library
 
-All 11 opt-in modules are listed below. Each module is OFF by default in the
+All 10 opt-in modules are listed below. Each module is OFF by default in the
 starter. Enable only the ones a given client needs by following the steps in
 the module's enable doc.
 
@@ -14,9 +14,9 @@ For the shared folder-shape contract and the verify loop, see
 These combinations cover the most common project types and work well together
 out of the box.
 
-**Creative-studio pair:** enable `portfolio` + `process` for a design, photo,
-or architecture studio. Together they give visitors a browsable project gallery
-and a transparent look at how you work.
+**Creative-studio:** enable `portfolio` for a design, photo, or architecture
+studio. It adds a browsable project gallery. The `/process` route is part of
+the core starter (always on) and needs no module to enable.
 
 **Capture preset:** `newsletter` + `lead-magnets` + `resources` (optionally add
 `style-quiz` and/or `budget-calculator`) for a lead-generation site. The three
@@ -30,7 +30,6 @@ optional additions offer interactive qualification tools.
 | Module | Description | Route(s) | Enable doc |
 |--------|-------------|----------|------------|
 | [portfolio](#portfolio) | Browsable project gallery with category filtering and before/after comparisons | `/portfolio`, `/portfolio/[slug]`, `/portfolio/before-after` | [docs/modules/portfolio.md](portfolio.md) |
-| [process](#process) | Step-by-step "how I work" page driven by orderable processStep documents | `/process` | [docs/modules/process.md](process.md) |
 | [newsletter](#newsletter) | Global email signup widget (no dedicated route; embedded in other pages or the footer) | none | [docs/modules/newsletter.md](newsletter.md) |
 | [lead-magnets](#lead-magnets) | Downloadable guides library with gated-download forms | `/guides`, `/guides/[slug]` | [docs/modules/lead-magnets.md](lead-magnets.md) |
 | [style-quiz](#style-quiz) | Interactive style-preference quiz that qualifies leads | `/quiz` | [docs/modules/style-quiz.md](style-quiz.md) |
@@ -54,17 +53,6 @@ and four components (`PortfolioCursor`, `PortfolioFilterChips`, `ProjectGallery`
 `ProjectMetaBand`).
 
 Routes: `/portfolio` (index), `/portfolio/[slug]` (detail), `/portfolio/before-after`
-
----
-
-### process
-
-Adds a "how I work" page composed of draggable process steps managed in Studio.
-Steps use the orderable-document-list plugin so editors control display order
-without touching code. Introduces two schemas (`processPage` singleton,
-`processStep` orderable collection).
-
-Route: `/process`
 
 ---
 

@@ -57,14 +57,16 @@ Test every schema with Google's Rich Results Test (https://search.google.com/tes
 
 `@astrojs/sitemap` generates `sitemap-index.xml` + `sitemap-0.xml` automatically from every prerendered page on `astro build`. The default `<priority>` and `<changefreq>` values are fine for a marketing site of this size.
 
-`public/robots.txt` ships with the build. Update the Sitemap URL to the actual production domain:
+`robots.txt` is generated at build time by `src/pages/robots.txt.ts`. It reads the production URL from `src/data/site.ts` and writes:
 
 ```
 User-agent: *
 Allow: /
 
-Sitemap: https://example.com/sitemap-index.xml
+Sitemap: <site.url>/sitemap-index.xml
 ```
+
+There is no static `public/robots.txt`. The generated endpoint ensures the sitemap URL is always the correct production domain as long as `site.ts` `url` is set correctly -- no manual file editing needed.
 
 `public/llms.txt` also ships -- an AI/LLM crawler index of the site for tools that follow the emerging llms.txt convention. Keep it updated if major pages are added or removed.
 
@@ -87,7 +89,7 @@ See the [Image guidelines for editors](images.md#image-guidelines-for-editors) s
 
 - [ ] Every page has unique `seoTitle` and `seoDescription` in Sanity
 - [ ] `og-default.png` regenerated with the actual project brand inputs
-- [ ] `robots.txt` Sitemap URL updated to the production domain
+- [ ] `src/data/site.ts` `url` set to the production domain (robots.txt is generated from this automatically)
 - [ ] `llms.txt` updated for the actual page set
 - [ ] LocalBusiness JSON-LD validates in Google Rich Results Test
 - [ ] FAQPage JSON-LD validates (if `/faq` is included)
