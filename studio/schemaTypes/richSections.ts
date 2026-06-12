@@ -1,8 +1,8 @@
 // Foundation, edit with care
 // Rich section block library — the 8 generalized section types that power the
-// four core pages (home, about, services, process). Each type is a genericized
-// port of a bespoke Reid Design component; all Reid-specific copy, names, and
-// domain vocabulary have been stripped.
+// four core pages (home, about, services, process). Each type is a generalized
+// section rendered through a site component, with no client-specific copy,
+// names, or domain vocabulary baked in.
 //
 // Per-page curated lists (HOME_SECTION_TYPES, ABOUT_SECTION_TYPES, etc.) each
 // equal the general SECTION_TYPES plus the rich types that belong on that page.
