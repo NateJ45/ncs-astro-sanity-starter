@@ -15,8 +15,8 @@ export async function getGiftPage() {
     heroImage${IMAGE_PROJECTION},
     heroScriptAccent,
     intro,
-    certificateOptions[]{title, amount, blurb},
-    howItWorksSteps[]{step, title, body},
+    options[]{_key, label, amount, blurb},
+    howItWorks[]{_key, stepNumber, title, body},
     finePrint,
     ctaLabel
   }`, {}, null);
