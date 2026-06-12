@@ -15,6 +15,88 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
+export type SanityImageAssetReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
+};
+
+export type Page = {
+  _id: string;
+  _type: "page";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+  >;
+  addToMainNav?: boolean;
+  navGroup?: "top" | "services" | "resources";
+  navLabel?: string;
+  addToFooter?: boolean;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+};
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x?: number;
+  y?: number;
+  height?: number;
+  width?: number;
+};
+
+export type Slug = {
+  _type: "slug";
+  current?: string;
+  source?: string;
+};
+
 export type JournalCategory = {
   _id: string;
   _type: "journalCategory";
@@ -24,19 +106,6 @@ export type JournalCategory = {
   title?: string;
   slug?: Slug;
   description?: string;
-};
-
-export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
-};
-
-export type SanityImageAssetReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
 };
 
 export type Service = {
@@ -78,22 +147,6 @@ export type Service = {
   showOnHomepage?: boolean;
   ctaLabel?: string;
   orderRank?: string;
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top?: number;
-  bottom?: number;
-  left?: number;
-  right?: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x?: number;
-  y?: number;
-  height?: number;
-  width?: number;
 };
 
 export type PhilosophyPoint = {
@@ -293,6 +346,27 @@ export type NotFoundPage = {
   tertiaryCtaHref?: string;
 };
 
+export type BusinessInfo = {
+  _id: string;
+  _type: "businessInfo";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  city?: string;
+  state?: string;
+  serviceRegion?: string;
+  serviceAreas?: Array<string>;
+  travelFees?: Array<{
+    distanceLabel?: string;
+    fee?: string;
+    _type: "travelFeeTier";
+    _key: string;
+  }>;
+  availabilityStatus?: string;
+  geoLat?: number;
+  geoLng?: number;
+};
+
 export type SiteSettings = {
   _id: string;
   _type: "siteSettings";
@@ -349,6 +423,35 @@ export type SiteSettings = {
     showBudgetCalculator?: boolean;
   };
   satisfactionGuarantee?: string;
+};
+
+export type SpacerSection = {
+  _type: "spacerSection";
+  variant?: "ornament" | "line" | "space";
+};
+
+export type VideoSection = {
+  _type: "videoSection";
+  url?: string;
+  heading?: string;
+  caption?: string;
+};
+
+export type CtaBandSection = {
+  _type: "ctaBandSection";
+  eyebrow?: string;
+  headline?: string;
+  scriptAccent?: string;
+  subhead?: string;
+  cta?: CtaBlock;
+  backgroundImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
 };
 
 export type HomePageReference = {
@@ -416,6 +519,121 @@ export type CtaBlock = {
   emailAddress?: string;
   phoneNumber?: string;
   openInNewTab?: boolean;
+};
+
+export type StatSection = {
+  _type: "statSection";
+  heading?: string;
+  stats?: Array<{
+    number?: number;
+    suffix?: string;
+    label?: string;
+    _type: "statItem";
+    _key: string;
+  }>;
+};
+
+export type QuoteSection = {
+  _type: "quoteSection";
+  quote?: string;
+  attribution?: string;
+  detail?: string;
+};
+
+export type GallerySection = {
+  _type: "gallerySection";
+  heading?: string;
+  images?: Array<{
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    caption?: string;
+    _type: "image";
+    _key: string;
+  }>;
+  columns?: 2 | 3 | 4;
+};
+
+export type ImageTextSection = {
+  _type: "imageTextSection";
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  imageSide?: "left" | "right";
+  eyebrow?: string;
+  heading?: string;
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h2" | "h3" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  cta?: CtaBlock;
+};
+
+export type RichTextSection = {
+  _type: "richTextSection";
+  eyebrow?: string;
+  heading?: string;
+  scriptAccent?: string;
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h2" | "h3" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  width?: "normal" | "narrow";
+  align?: "left" | "center";
+};
+
+export type HeroSection = {
+  _type: "heroSection";
+  eyebrow?: string;
+  headline?: string;
+  scriptAccent?: string;
+  subhead?: string;
+  backgroundImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  };
+  primaryCta?: CtaBlock;
+  secondaryCta?: CtaBlock;
+  size?: "tall" | "short";
 };
 
 export type JournalCategoryReference = {
@@ -1175,12 +1393,13 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
-  | JournalCategory
-  | Slug
   | SanityImageAssetReference
-  | Service
+  | Page
   | SanityImageCrop
   | SanityImageHotspot
+  | Slug
+  | JournalCategory
+  | Service
   | PhilosophyPoint
   | FaqItem
   | StudioPlaybook
@@ -1188,7 +1407,11 @@ export type AllSanitySchemaTypes =
   | StudioGuide
   | PrivacyPage
   | NotFoundPage
+  | BusinessInfo
   | SiteSettings
+  | SpacerSection
+  | VideoSection
+  | CtaBandSection
   | HomePageReference
   | AboutPageReference
   | ServicesPageReference
@@ -1197,6 +1420,12 @@ export type AllSanitySchemaTypes =
   | JournalPageReference
   | JournalEntryReference
   | CtaBlock
+  | StatSection
+  | QuoteSection
+  | GallerySection
+  | ImageTextSection
+  | RichTextSection
+  | HeroSection
   | JournalCategoryReference
   | JournalEntry
   | JournalPage
