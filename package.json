@@ -20,7 +20,8 @@
     "studio:dev": "npm --prefix studio run dev",
     "studio:deploy": "npm --prefix studio run deploy",
     "studio:import": "node scripts/import-content.mjs",
-    "seed": "node scripts/seed-core.mjs"
+    "seed": "node scripts/seed-core.mjs",
+    "test": "node --experimental-strip-types --test src/lib/*.test.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "13.5.5",
