@@ -66,26 +66,13 @@ singletonWithPreview(S, 'budgetCalculator', 'Budget Calculator', BillIcon),
 Copy-Item -Recurse -Force modules/budget-calculator/src/* src/
 ```
 
-### Step 4b -- Add query functions to `src/lib/queries.ts`
+### Step 4b -- Copy the co-located query file
 
-The calculator page imports `getBudgetCalculator` from `@/lib/queries`. Add it before the press section:
+The calculator page imports `getBudgetCalculator` from `@/lib/budgetCalculatorQueries`. Copy the
+co-located query file alongside the pages and components:
 
-```ts
-// ---- Budget Calculator module -----------------------------------------------
-
-export async function getBudgetCalculator() {
-  return sanityFetch(`*[_type == "budgetCalculator"][0]{
-    seoTitle, seoDescription,
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroScriptAccent,
-    rooms[]{_key, label, baseMin, baseMax},
-    scopes[]{_key, label, multiplier},
-    addOns[]{_key, label, min, max},
-    resultHeading, resultSubhead,
-    emailCtaLabel, emailCtaHeading,
-    ctaLabel, ctaHref
-  }`, {}, null);
-}
+```powershell
+Copy-Item modules/budget-calculator/src/lib/budgetCalculatorQueries.ts src/lib/
 ```
 
 ### Step 5 -- Add the nav entry in `src/components/Header.astro`
