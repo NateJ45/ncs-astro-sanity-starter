@@ -9,18 +9,56 @@
 import { sanityFetch } from './sanity';
 
 // Common Portable Text + image projection shorthand
-const IMAGE_PROJECTION = `{
+export const IMAGE_PROJECTION = `{
   ...,
   asset->,
   "alt": coalesce(alt, asset->altText, "")
 }`;
 
-const CTA_PROJECTION = `{
+export const CTA_PROJECTION = `{
   ...,
   internalLink->{ _type, "slug": slug.current }
 }`;
 
+// Page-builder array projection. Spreads each block, then resolves the nested
+// images and ctaBlocks inside the block types that carry them, so SectionRenderer
+// gets ready-to-use data. Block types without images/ctas (text, quote, stats,
+// video, spacer) pass through on the leading `...`.
+//
+// Parameterized by field name so it serves both `pageBuilder` (custom pages)
+// and `additionalSections` (the flexible append zone on core pages).
+export function sectionsProjection(field = 'pageBuilder'): string {
+  return `${field}[]{
+    ...,
+    _type == "heroSection" => {
+      ...,
+      backgroundImage${IMAGE_PROJECTION},
+      primaryCta${CTA_PROJECTION},
+      secondaryCta${CTA_PROJECTION}
+    },
+    _type == "ctaBandSection" => {
+      ...,
+      backgroundImage${IMAGE_PROJECTION},
+      cta${CTA_PROJECTION}
+    },
+    _type == "imageTextSection" => {
+      ...,
+      image${IMAGE_PROJECTION},
+      cta${CTA_PROJECTION}
+    },
+    _type == "gallerySection" => {
+      ...,
+      images[]${IMAGE_PROJECTION}
+    }
+  }`;
+}
+
 // ---- Site settings (used in BaseLayout / Header / Footer) -----------------
+// availabilityStatus, serviceAreas, travelFees, city, state, serviceRegion,
+// geoLat, and geoLng moved to the businessInfo singleton. Pulled in here under
+// the same flat field names so Header / Footer / pages that read
+// siteSettings.serviceAreas etc. keep working with no change; only the source
+// document changed.
 
 export async function getSiteSettings() {
   return sanityFetch(`*[_type == "siteSettings"][0]{
@@ -426,6 +464,46 @@ export async function getPressItems(): Promise<CorePressItem[]> {
     _id, outlet,
     logo${IMAGE_PROJECTION},
     quote, url, date, orderRank
+  }`, {}, []);
+}
+
+// ---- Custom pages (page builder) ------------------------------------------
+
+// One published custom page by slug, with its section array fully resolved.
+export async function getPage(slug: string) {
+  return sanityFetch(
+    `*[_type == "page" && slug.current == $slug][0]{
+      title,
+      "slug": slug.current,
+      seoTitle, seoDescription,
+      seoImage${IMAGE_PROJECTION},
+      ${sectionsProjection('pageBuilder')}
+    }`,
+    { slug },
+    null,
+  );
+}
+
+// Slugs of every published custom page, for getStaticPaths in [slug].astro.
+export async function getAllPageSlugs(): Promise<string[]> {
+  const list: Array<{ slug: string }> = await sanityFetch(
+    `*[_type == "page" && defined(slug.current)]{ "slug": slug.current }`,
+    {},
+    [],
+  );
+  return list.map((p) => p.slug).filter(Boolean);
+}
+
+// Custom pages flagged to appear in the main nav and/or footer. Header.astro
+// and Footer.astro can inject these alongside the built-in links.
+export async function getNavPages() {
+  return sanityFetch(`*[_type == "page" && defined(slug.current) && (addToMainNav == true || addToFooter == true)]{
+    title,
+    "slug": slug.current,
+    navLabel,
+    addToMainNav,
+    navGroup,
+    addToFooter
   }`, {}, []);
 }
 
