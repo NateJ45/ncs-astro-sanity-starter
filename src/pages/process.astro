@@ -1,0 +1,35 @@
+---
+// Safe to edit by hand for copy + structure changes.
+// Process page — section-driven via pageBuilder.
+// Edit sections and order in Sanity Studio under the Process Page document.
+// When pageBuilder is empty (no Sanity project or unseeded), DEFAULT_PROCESS_SECTIONS
+// renders so the page is never blank.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import { getProcessPage, getSiteSettings } from '@/lib/queries';
+import { breadcrumbSchema } from '@/lib/schemas';
+import { site } from '@/data/site';
+import { DEFAULT_PROCESS_SECTIONS } from '@/data/defaultSections';
+
+const [page, siteSettings] = await Promise.all([
+  getProcessPage().catch(() => null),
+  getSiteSettings().catch(() => null),
+]);
+
+const title       = page?.seoTitle       ?? `Our Process · ${site.name}`;
+const description = page?.seoDescription ?? 'How we work, from first call to final reveal.';
+
+const sections = page?.pageBuilder?.length ? page.pageBuilder : DEFAULT_PROCESS_SECTIONS;
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Home', url: site.url },
+    { name: 'Process', url: `${site.url}/process` },
+  ]),
+];
+---
+
+<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={page?.seoImage}>
+  <SectionRenderer {sections} idPrefix="process" />
+</BaseLayout>

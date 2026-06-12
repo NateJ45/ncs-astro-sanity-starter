@@ -167,71 +167,7 @@ export async function getHomePage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    heroEyebrow,
-    heroHeadline,
-    heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroImages[]${IMAGE_PROJECTION},
-    heroPrimaryCta${CTA_PROJECTION},
-    heroSecondaryCta${CTA_PROJECTION},
-    heroRotatingWords,
-    heroScriptAccent,
-    meetFounderPhoto${IMAGE_PROJECTION},
-    meetFounderEyebrow,
-    meetFounderHeadline,
-    meetFounderContent,
-    meetFounderCta${CTA_PROJECTION},
-    featuredWorkEyebrow,
-    featuredWorkHeadline,
-    featuredWorkSubhead,
-    featuredWorkCta${CTA_PROJECTION},
-    featuredJournalEyebrow,
-    featuredJournalHeadline,
-    featuredJournalSubhead,
-    featuredJournalCta${CTA_PROJECTION},
-    processPreviewEyebrow,
-    processPreviewHeadline,
-    processPreviewSubhead,
-    processPreviewCta${CTA_PROJECTION},
-    testimonialsEyebrow,
-    testimonialsHeadline,
-    testimonialsScriptAccent,
-    testimonialsSubhead,
-    testimonialsAttribution,
-    "featuredTestimonial": featuredTestimonial->{
-      ...,
-      "relatedProject": relatedProject->{ title, "slug": slug.current }
-    },
-    "testimonialsToShow": testimonialsToShow[]->{
-      ...,
-      "relatedProject": relatedProject->{ title, "slug": slug.current }
-    },
-    servicesGridEyebrow,
-    servicesGridHeadline,
-    servicesGridScriptAccent,
-    servicesGridSubhead,
-    servicesGridCta${CTA_PROJECTION},
-    servicesGridFootnote,
-    "services": *[_type == "service" && showOnHomepage == true] | order(orderRank asc, displayOrder asc),
-    "processSteps": *[_type == "processStep"] | order(orderRank asc, stepNumber asc){
-      stepNumber, title, timeEstimate, shortDescription, features, tierNote
-    },
-    "featuredProjects": *[_type == "project"] | order(featured desc, publishedAt desc)[0..3]{
-      _id, title, slug, location, year, roomType, designStyle, briefSummary, featured,
-      heroImage${IMAGE_PROJECTION}
-    },
-    "featuredJournalEntries": *[_type == "journalEntry"] | order(featured desc, publishedAt desc)[0..3]{
-      _id, title, slug, excerpt, publishedAt, featured,
-      coverImage${IMAGE_PROJECTION},
-      "categories": categories[]->{ _id, title, slug, description }
-    },
-    serviceAreaCue,
-    finalCtaEyebrow,
-    finalCtaHeadline,
-    finalCtaScriptAccent,
-    finalCtaSubhead,
-    finalCtaBackgroundImage${IMAGE_PROJECTION},
-    finalCta${CTA_PROJECTION}
+    ${sectionsProjection('pageBuilder')}
   }`, {}, null);
 }
 
@@ -242,28 +178,7 @@ export async function getAboutPage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    storyEyebrow, storyHeadline, storyContent,
-    founderPhoto${IMAGE_PROJECTION},
-    founderAttribution,
-    backgroundLine,
-    serviceAreaMention,
-    philosophyEyebrow, philosophyHeadline,
-    "philosophyPoints": *[_type == "philosophyPoint"] | order(orderRank asc, displayOrder asc){
-      title, description, displayOrder
-    },
-    personalEyebrow, personalHeadline, personalIntro,
-    currentlyList[]{label, value},
-    rapidFire[]{prompt, answer},
-    localSpots[]{name, note},
-    beyondDesign,
-    candidPhoto${IMAGE_PROJECTION},
-    stats[]{number, suffix, label},
-    finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
-    finalCtaBackgroundImage${IMAGE_PROJECTION},
-    finalCta${CTA_PROJECTION}
+    ${sectionsProjection('pageBuilder')}
   }`, {}, null);
 }
 
@@ -274,21 +189,25 @@ export async function getServicesPage() {
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
-    heroEyebrow, heroHeadline, heroSubhead,
-    heroImage${IMAGE_PROJECTION},
-    heroScriptAccent,
-    stickyCtaLabel,
-    servicesListEyebrow, servicesListHeadline, servicesListSubhead,
-    "services": *[_type == "service"] | order(orderRank asc, displayOrder asc),
-    builderRealtorSection{
-      ...,
-      cta${CTA_PROJECTION}
-    },
-    serviceAreaSection,
-    "travelFees": *[_type == "businessInfo"][0].travelFees,
-    finalCtaEyebrow, finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
-    finalCtaBackgroundImage${IMAGE_PROJECTION},
-    finalCta${CTA_PROJECTION}
+    ${sectionsProjection('pageBuilder')}
+  }`, {}, null);
+}
+
+// Minimal service list for JSON-LD on the services page.
+export async function getServiceListForSchema() {
+  return sanityFetch(`*[_type == "service"] | order(orderRank asc, displayOrder asc){
+    _id, name, slug, shortDescription, price, priceNumeric
+  }`, {}, []);
+}
+
+// ---- Process page -----------------------------------------------------------
+
+export async function getProcessPage() {
+  return sanityFetch(`*[_type == "processPage"][0]{
+    seoTitle,
+    seoDescription,
+    seoImage${IMAGE_PROJECTION},
+    ${sectionsProjection('pageBuilder')}
   }`, {}, null);
 }
 
