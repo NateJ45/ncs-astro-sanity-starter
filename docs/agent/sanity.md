@@ -55,6 +55,26 @@ All `*Page` singletons have `seoTitle` and `seoDescription` fields.
 
 **Module schemas** for opt-in surfaces (portfolio, shop, quiz, calculator, etc.) are documented under `docs/modules/`. Module query files are co-located at `modules/<name>/src/lib/<name>Queries.ts` — copy this file alongside the other module files when enabling a module. Do not add module schemas to the core `studio/schemaTypes/` without enabling the corresponding module.
 
+**`definePageSingleton` factory (`studio/schemaTypes/_pageSingleton.ts`):**
+A reusable helper that builds a standard page-singleton document type. All page singletons share the same outer shape (hero fields, a `pageBuilder` array, SEO fields), and this factory produces that shape without repeating it. The function signature is:
+
+```ts
+definePageSingleton(name, title, defaults?, extra?)
+// Example:
+export const teamPage = definePageSingleton(
+  'teamPage',
+  'Team',
+  { heroEyebrow: 'Our team', heroHeadline: 'The people behind the work' },
+);
+```
+
+After creating a new singleton with the factory, register it in three places:
+1. `studio/schemaTypes/index.ts` (add to the `schemaTypes` array)
+2. `studio/structure.ts` (add to `SINGLETON_TYPES` and add a `singletonWithPreview` list item under Pages)
+3. Run `npm run typegen` and `npm run studio:deploy`
+
+**Do NOT retroactively refactor existing singletons** onto this factory. Each existing singleton has hand-authored field variations (extra groups, page-specific fields). The factory is for new singletons only.
+
 ### GROQ helpers and custom-page queries
 
 All GROQ queries live in `src/lib/queries.ts`. Key helpers:

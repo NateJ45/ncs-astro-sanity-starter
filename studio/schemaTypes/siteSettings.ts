@@ -2,6 +2,7 @@
 // One instance only; singleton enforcement happens in sanity.config.ts.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
+import { LinkIcon, ChevronDownIcon, ListIcon } from '@sanity/icons';
 
 export const siteSettings = defineType({
   name: 'siteSettings',
@@ -11,6 +12,7 @@ export const siteSettings = defineType({
   options: { canvasApp: { exclude: true } },
   groups: [
     { name: 'identity', title: 'Identity & contact' },
+    { name: 'navigation', title: 'Navigation (menus)' },
     { name: 'visibility', title: 'Section visibility' },
     { name: 'social', title: 'Social & footer' },
     { name: 'newsletter', title: 'Newsletter' },
@@ -46,6 +48,153 @@ export const siteSettings = defineType({
       type: 'string',
       description: 'Public phone number, if you want one shown. Leave blank to hide.',
     }),
+    // ── Navigation ────────────────────────────────────────────────────────────
+    // Optional editor-managed nav menus. When empty the header and footer render
+    // their built-in defaults (see Header.astro and Footer.astro). As soon as
+    // you add items here they REPLACE the corresponding built-in menu, so include
+    // every link you want to appear.
+    //
+    // ADDITIVE and fallback-first: the code paths that read these fields always
+    // check for non-empty before consuming them. A fresh clone or a site that
+    // has never touched these fields behaves byte-identically to before.
+    defineField({
+      name: 'navItems',
+      title: 'Top menu links (optional)',
+      type: 'array',
+      group: 'navigation',
+      description:
+        'The links in the website header. Drag to reorder. Add a "Link" for a single page, or a "Dropdown" to group several links under one label. Leave empty to use the built-in default menu. Once you add items here, they replace the whole menu, so include every link you want.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'navLink',
+          title: 'Link',
+          icon: LinkIcon,
+          fields: [
+            defineField({
+              name: 'label',
+              title: 'Label',
+              type: 'string',
+              description: 'What visitors see, e.g. "Services".',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'href',
+              title: 'Address',
+              type: 'string',
+              description: 'A page on this site like /services, or a full URL like https://example.com.',
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
+          preview: { select: { title: 'label', subtitle: 'href' } },
+        }),
+        defineArrayMember({
+          type: 'object',
+          name: 'navGroup',
+          title: 'Dropdown',
+          icon: ChevronDownIcon,
+          fields: [
+            defineField({
+              name: 'label',
+              title: 'Menu label',
+              type: 'string',
+              description: 'The dropdown heading, e.g. "About".',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'links',
+              title: 'Menu links',
+              type: 'array',
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  name: 'navSubLink',
+                  title: 'Link',
+                  icon: LinkIcon,
+                  fields: [
+                    defineField({ name: 'label', title: 'Label', type: 'string', validation: (Rule) => Rule.required() }),
+                    defineField({
+                      name: 'href',
+                      title: 'Address',
+                      type: 'string',
+                      description: 'A page on this site like /process, or a full URL.',
+                      validation: (Rule) => Rule.required(),
+                    }),
+                  ],
+                  preview: { select: { title: 'label', subtitle: 'href' } },
+                }),
+              ],
+              validation: (Rule) => Rule.required().min(1),
+            }),
+          ],
+          preview: {
+            select: { title: 'label', links: 'links' },
+            prepare: ({ title, links }) => ({
+              title: title ?? '(no label)',
+              subtitle: `Dropdown: ${Array.isArray(links) ? links.length : 0} link(s)`,
+            }),
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'footerColumns',
+      title: 'Footer link columns (optional)',
+      type: 'array',
+      group: 'navigation',
+      description:
+        'The titled link columns in the footer. Leave empty to use the built-in default columns. The "Get in touch" column (email, phone, socials) always shows automatically. Aim for three or four columns so the footer grid stays balanced.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'footerColumn',
+          title: 'Column',
+          icon: ListIcon,
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Column heading',
+              type: 'string',
+              description: 'The small heading above the links, e.g. "Services".',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'links',
+              title: 'Links',
+              type: 'array',
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  name: 'footerLink',
+                  title: 'Link',
+                  icon: LinkIcon,
+                  fields: [
+                    defineField({ name: 'label', title: 'Label', type: 'string', validation: (Rule) => Rule.required() }),
+                    defineField({
+                      name: 'href',
+                      title: 'Address',
+                      type: 'string',
+                      description: 'A page on this site like /contact, or a full URL.',
+                      validation: (Rule) => Rule.required(),
+                    }),
+                  ],
+                  preview: { select: { title: 'label', subtitle: 'href' } },
+                }),
+              ],
+              validation: (Rule) => Rule.required().min(1),
+            }),
+          ],
+          preview: {
+            select: { title: 'title', links: 'links' },
+            prepare: ({ title, links }) => ({
+              title: title ?? '(no heading)',
+              subtitle: `Column: ${Array.isArray(links) ? links.length : 0} link(s)`,
+            }),
+          },
+        }),
+      ],
+    }),
+
     defineField({
       name: 'availabilityStatus',
       title: 'Availability status',

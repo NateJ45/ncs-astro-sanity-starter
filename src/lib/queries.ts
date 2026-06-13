@@ -115,6 +115,30 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         ...,
         photo${IMAGE_PROJECTION}
       }
+    },
+    // dynamicListSection: items fetched inline via a GROQ select() per source,
+    // each normalised to a flat items array so the component handles one shape.
+    _type == "dynamicListSection" => {
+      ...,
+      cta${CTA_PROJECTION},
+      "items": select(
+        source == "journal" => *[_type == "journalEntry"] | order(publishedAt desc)[0...limit]{
+          _id, "title": title, "meta": publishedAt, "summary": excerpt,
+          "href": "/journal/" + slug.current,
+          "coverImage": coverImage${IMAGE_PROJECTION}
+        },
+        source == "services" => *[_type == "service"] | order(orderRank asc, displayOrder asc)[0...limit]{
+          _id, "title": name, "meta": price, "summary": shortDescription,
+          "href": "/services#" + slug.current
+        },
+        source == "testimonials" => *[_type == "testimonial"] | order(_createdAt desc)[0...limit]{
+          _id, "title": attribution, "meta": detail, "summary": quote, "href": null
+        },
+        source == "faqs" => *[_type == "faqItem"] | order(displayOrder asc, _createdAt asc)[0...limit]{
+          _id, "title": question, "summary": null, "meta": coalesce(categoryRef->title, category), "href": null,
+          "answer": answer
+        }
+      )
     }
   }`;
 }
@@ -161,6 +185,17 @@ export async function getSiteSettings() {
     googleBusinessUrl,
     reviewsNote,
     satisfactionGuarantee,
+    // Optional editor-managed menus. Empty arrays mean "use the built-in defaults."
+    navItems[]{
+      _type,
+      label,
+      href,
+      links[]{ label, href }
+    },
+    footerColumns[]{
+      title,
+      links[]{ label, href }
+    },
     sectionVisibility{
       showPortfolio,
       showJournal,
@@ -198,6 +233,29 @@ export async function getBusinessInfo() {
       geoLng
     }
   }`, {}, null);
+}
+
+// ---- Announcement banner --------------------------------------------------
+// Fetches the single active announcement: enabled, started (or no startDate),
+// not yet ended (or no endDate). Urgency ordering: urgent first, then highlight,
+// then info; ties broken by soonest endDate so the most time-sensitive shows.
+//
+// "now" is evaluated at BUILD TIME (static site). A banner appears or disappears
+// after the next rebuild. Use a scheduled Cloudflare deploy hook for auto-expiry.
+//
+// Returns null when no announcement is active (graceful absence: no banner renders).
+export async function getActiveAnnouncement() {
+  const now = new Date().toISOString();
+  return sanityFetch(
+    `*[_type == "announcement" && enabled == true
+      && (!defined(startDate) || startDate <= $now)
+      && (!defined(endDate) || endDate >= $now)]
+      | order(select(style == "urgent" => 0, style == "highlight" => 1, 2) asc, endDate asc)[0]{
+        message, style, link
+      }`,
+    { now },
+    null,
+  );
 }
 
 // ---- Home page ------------------------------------------------------------

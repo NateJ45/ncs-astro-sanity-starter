@@ -1358,6 +1358,20 @@ docs.push({
   ],
 });
 
+// ── Announcement banner example ───────────────────────────────────────────
+// A single disabled example announcement so the collection is not empty after
+// seeding. The editor can duplicate this, set a message and date window, then
+// enable it. Disabled by default so it does not appear on the live site.
+docs.push({
+  _id: 'announcement-example',
+  _type: 'announcement',
+  internalTitle: 'Example announcement (disabled)',
+  message: 'Welcome to our new website. Reach out any time if you have questions.',
+  style: 'info',
+  link: { label: 'Contact us', url: '/contact' },
+  enabled: false,
+});
+
 // ── Seed all documents ────────────────────────────────────────────────────
 
 async function seed() {

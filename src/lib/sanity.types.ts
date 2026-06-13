@@ -182,6 +182,24 @@ export type FaqCategory = {
   displayOrder?: number;
 };
 
+export type Announcement = {
+  _id: string;
+  _type: 'announcement';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  internalTitle?: string;
+  message?: string;
+  style?: 'info' | 'highlight' | 'urgent';
+  link?: {
+    label?: string;
+    url?: string;
+  };
+  startDate?: string;
+  endDate?: string;
+  enabled?: boolean;
+};
+
 export type StudioPlaybook = {
   _id: string;
   _type: 'studioPlaybook';
@@ -371,6 +389,36 @@ export type SiteSettings = {
   tagline?: string;
   email?: string;
   phone?: string;
+  navItems?: Array<
+    | {
+        label?: string;
+        href?: string;
+        _type: 'navLink';
+        _key: string;
+      }
+    | {
+        label?: string;
+        links?: Array<{
+          label?: string;
+          href?: string;
+          _type: 'navSubLink';
+          _key: string;
+        }>;
+        _type: 'navGroup';
+        _key: string;
+      }
+  >;
+  footerColumns?: Array<{
+    title?: string;
+    links?: Array<{
+      label?: string;
+      href?: string;
+      _type: 'footerLink';
+      _key: string;
+    }>;
+    _type: 'footerColumn';
+    _key: string;
+  }>;
   availabilityStatus?: string;
   serviceAreas?: Array<string>;
   travelFees?: Array<{
@@ -446,6 +494,16 @@ export type SiteSettings = {
     showBudgetCalculator?: boolean;
   };
   satisfactionGuarantee?: string;
+};
+
+export type DynamicListSection = {
+  _type: 'dynamicListSection';
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  source?: 'journal' | 'services' | 'testimonials' | 'faqs';
+  limit?: number;
+  cta?: CtaBlock;
 };
 
 export type TeamSection = {
@@ -1468,6 +1526,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & TeamSection)
+    | ({
+        _key: string;
+      } & DynamicListSection)
   >;
   seoTitle?: string;
   seoDescription?: string;
@@ -1629,6 +1690,9 @@ export type HomePage = {
     | ({
         _key: string;
       } & TeamSection)
+    | ({
+        _key: string;
+      } & DynamicListSection)
   >;
   seoTitle?: string;
   seoDescription?: string;
@@ -1876,6 +1940,7 @@ export type AllSanitySchemaTypes =
   | FaqCategoryReference
   | FaqItem
   | FaqCategory
+  | Announcement
   | StudioPlaybook
   | StudioNotes
   | StudioGuide
@@ -1883,6 +1948,7 @@ export type AllSanitySchemaTypes =
   | NotFoundPage
   | BusinessInfo
   | SiteSettings
+  | DynamicListSection
   | TeamSection
   | FaqItemReference
   | FaqSection

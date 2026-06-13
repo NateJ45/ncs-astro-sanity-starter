@@ -19,6 +19,7 @@ import type { StructureBuilder, StructureResolverContext } from 'sanity/structur
 import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list';
 import { Iframe, urlForDoc } from './sanity.config';
 import {
+  BellIcon,
   CogIcon,
   HomeIcon,
   UserIcon,
@@ -74,6 +75,7 @@ const ORDERABLE_TYPES = [
 const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...SINGLETON_TYPES,
   ...ORDERABLE_TYPES,
+  'announcement', // placed explicitly under Content → Announcements
   'testimonial',
   'faqItem',
   'faqCategory',
@@ -264,6 +266,14 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon),
               S.documentTypeListItem('faqCategory').title('FAQ Categories').icon(TagIcon),
               S.documentTypeListItem('faqItem').title('FAQ Items').icon(HelpCircleIcon),
+
+              S.divider(),
+
+              // Announcement banners: queued notices that appear above the header.
+              // Each one has a date window (startDate / endDate) and an on/off toggle.
+              // The active announcement is picked at build time; a rebuild is required
+              // for the banner to appear or disappear on the live site.
+              S.documentTypeListItem('announcement').title('Announcements').icon(BellIcon),
             ]),
         ),
 

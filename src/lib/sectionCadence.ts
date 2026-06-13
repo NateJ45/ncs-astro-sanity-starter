@@ -36,6 +36,8 @@ export const SELF_CONTAINED_TYPES = new Set([
   'logoStripSection',
   'teamSection',
   'embedSection',
+  // Church-reverse-port: dynamic list section manages its own surface
+  'dynamicListSection',
 ]);
 
 /** _type strings for blocks that receive alternating surface assignment. */

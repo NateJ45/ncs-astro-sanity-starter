@@ -208,3 +208,24 @@ test('all 4 U7 types appear in SELF_CONTAINED_TYPES and not CONTENT_TYPES', () =
     assert.ok(!CONTENT_TYPES.has(type), `${type} must not be in CONTENT_TYPES`);
   }
 });
+
+// ── Church-reverse-port: dynamicListSection ───────────────────────────────
+
+test('dynamicListSection is SELF_CONTAINED (null surface)', () => {
+  const rows = classifySections([block('dynamicListSection')]);
+  assert.equal(rows[0].surface, null, 'dynamicListSection should have null surface');
+});
+
+test('dynamicListSection does not advance the content cadence counter', () => {
+  const rows = classifySections([
+    block('storySection'),       // background (idx 0)
+    block('dynamicListSection'), // null — self-contained, no advance
+    block('serviceAreaSection'), // muted (idx 1)
+  ]);
+  assert.deepEqual(surfaces(rows), ['background', null, 'muted']);
+});
+
+test('dynamicListSection appears in SELF_CONTAINED_TYPES and not CONTENT_TYPES', () => {
+  assert.ok(SELF_CONTAINED_TYPES.has('dynamicListSection'), 'dynamicListSection must be in SELF_CONTAINED_TYPES');
+  assert.ok(!CONTENT_TYPES.has('dynamicListSection'), 'dynamicListSection must not be in CONTENT_TYPES');
+});

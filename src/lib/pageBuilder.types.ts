@@ -318,6 +318,48 @@ export interface ProjectedEmbedSection {
 }
 
 // ---------------------------------------------------------------------------
+// Church-reverse-port: dynamicListSection
+// ---------------------------------------------------------------------------
+
+/**
+ * A single item inside dynamicListSection.items after the per-source GROQ
+ * subquery. All sources normalise to the same shape so the component is
+ * source-agnostic. `href` is null for sources that have no detail page
+ * (testimonials, faqs).
+ */
+export interface ProjectedDynamicListItem {
+  _id?: string;
+  title?: string;
+  meta?: string | null;
+  summary?: string | null;
+  href?: string | null;
+  coverImage?: ProjectedImage | null;
+  /** FAQ answer (present only when source == "faqs"). */
+  answer?: any;
+}
+
+/**
+ * dynamicListSection — auto-pulls the latest items from a core collection.
+ * SELF_CONTAINED (no surface prop).
+ * Source-specific behaviour:
+ *   journal      -> latest journalEntry cards (title, excerpt, publishedAt, coverImage)
+ *   services     -> all services ordered by orderRank (name, price, shortDescription)
+ *   testimonials -> latest testimonials (attribution, detail, quote)
+ *   faqs         -> faqItems ordered by displayOrder (question, answer, category)
+ */
+export interface ProjectedDynamicListSection {
+  _type: 'dynamicListSection';
+  _key: string;
+  eyebrow?: string;
+  headline?: string;
+  subhead?: string;
+  source?: 'journal' | 'services' | 'testimonials' | 'faqs';
+  limit?: number;
+  items?: ProjectedDynamicListItem[];
+  cta?: ProjectedCtaBlock | null;
+}
+
+// ---------------------------------------------------------------------------
 // Discriminated union
 // ---------------------------------------------------------------------------
 
@@ -343,4 +385,6 @@ export type PageBuilderBlock =
   | ProjectedFaqSection
   | ProjectedLogoStripSection
   | ProjectedTeamSection
-  | ProjectedEmbedSection;
+  | ProjectedEmbedSection
+  // Church-reverse-port
+  | ProjectedDynamicListSection;

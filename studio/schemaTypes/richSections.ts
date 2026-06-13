@@ -26,6 +26,7 @@ import {
   CheckmarkCircleIcon,
   UsersIcon,
   HelpCircleIcon,
+  SyncIcon,
 } from '@sanity/icons';
 import { SECTION_TYPES } from './sections';
 
@@ -497,6 +498,72 @@ export const teamSection = defineType({
   },
 });
 
+// ── 11. dynamicListSection ────────────────────────────────────────────────────
+// Pulls the latest items from a core collection automatically. No manual
+// curation required: the editor picks the source and a limit, and the section
+// self-fills at build time. Great for keeping a home page or about page fresh
+// without touching code.
+//
+// Supported sources and what they surface:
+//   journal      - Latest journal entries (newest first, up to `limit`).
+//   services     - All services (ordered by orderRank). Good for a compact
+//                  "what we do" overview block on a secondary page.
+//   testimonials - Recent testimonials (newest first). Renders as a card row.
+//   faqs         - FAQ items ordered by displayOrder. Renders as a mini
+//                  accordion (no duplicate FAQPage JSON-LD — the /faq page owns
+//                  that schema; this block deliberately omits it).
+//
+// IMPORTANT: This section is SELF_CONTAINED (manages its own surface via
+// sectionCadence.ts). Blocks carry NO backgroundColor field — that rule is
+// unconditional.
+//
+// Build-time note: items are fetched via GROQ subqueries inside sectionsProjection().
+// The section renders the pre-fetched array; no client-side fetching occurs.
+export const dynamicListSection = defineType({
+  name: 'dynamicListSection',
+  title: 'Auto list (latest content)',
+  type: 'object',
+  icon: SyncIcon,
+  description: 'Pulls the latest items from a collection automatically. Stays fresh on every rebuild without manual curation.',
+  fields: [
+    defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
+    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
+    defineField({
+      name: 'source',
+      title: 'Show items from',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Journal (latest posts)', value: 'journal' },
+          { title: 'Services (all services)', value: 'services' },
+          { title: 'Testimonials (latest)', value: 'testimonials' },
+          { title: 'FAQs (by display order)', value: 'faqs' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'journal',
+      validation: (R) => R.required(),
+    }),
+    defineField({
+      name: 'limit',
+      title: 'How many to show',
+      type: 'number',
+      initialValue: 6,
+      validation: (R) => R.required().min(3).max(12),
+      description: 'Between 3 and 12 items. The section shows this many in a card grid.',
+    }),
+    defineField({ name: 'cta', title: 'Link button (optional)', type: 'ctaBlock' }),
+  ],
+  preview: {
+    select: { title: 'headline', source: 'source', limit: 'limit' },
+    prepare: ({ title, source, limit }) => ({
+      title: title || 'Auto list',
+      subtitle: `Auto list: ${source ?? ''}${limit ? ` (up to ${limit})` : ''}`,
+    }),
+  },
+});
+
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 export const richSectionSchemas = [
@@ -510,6 +577,7 @@ export const richSectionSchemas = [
   guaranteeSection,
   faqSection,
   teamSection,
+  dynamicListSection,
 ];
 
 export const RICH_SECTION_TYPES = richSectionSchemas.map((s) => ({ type: s.name }));
@@ -517,10 +585,12 @@ export const RICH_SECTION_TYPES = richSectionSchemas.map((s) => ({ type: s.name 
 // Per-page curated lists. Each is SECTION_TYPES (11 general) plus the rich
 // types that make sense on that page. Editors only see relevant blocks.
 // U7 additions:
-//   faqSection     -> HOME, ABOUT, SERVICES (inline FAQ on any marketing page)
-//   logoStripSection -> all pages (already in SECTION_TYPES via pageSectionSchemas)
-//   embedSection   -> all pages (already in SECTION_TYPES via pageSectionSchemas)
-//   teamSection    -> HOME, ABOUT
+//   faqSection        -> HOME, ABOUT, SERVICES (inline FAQ on any marketing page)
+//   logoStripSection  -> all pages (already in SECTION_TYPES via pageSectionSchemas)
+//   embedSection      -> all pages (already in SECTION_TYPES via pageSectionSchemas)
+//   teamSection       -> HOME, ABOUT
+// Church-reverse-port additions:
+//   dynamicListSection -> HOME, ABOUT (auto-pull latest content; generic small-biz sources)
 export const HOME_SECTION_TYPES = [
   ...SECTION_TYPES,
   { type: 'founderSection' },
@@ -529,6 +599,7 @@ export const HOME_SECTION_TYPES = [
   { type: 'processSection' },
   { type: 'faqSection' },
   { type: 'teamSection' },
+  { type: 'dynamicListSection' },
 ];
 
 export const ABOUT_SECTION_TYPES = [
@@ -537,6 +608,7 @@ export const ABOUT_SECTION_TYPES = [
   { type: 'valuesSection' },
   { type: 'faqSection' },
   { type: 'teamSection' },
+  { type: 'dynamicListSection' },
 ];
 
 export const SERVICES_SECTION_TYPES = [

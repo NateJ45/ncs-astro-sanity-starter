@@ -2,6 +2,7 @@
 // Order doesn't affect runtime; alphabetical here for readability.
 
 import { aboutPage } from './aboutPage';
+import { announcement } from './announcement';
 import { businessInfo } from './businessInfo';
 import { contactPage } from './contactPage';
 import { ctaBlock } from './ctaBlock';
@@ -54,6 +55,7 @@ export const schemaTypes = [
   studioPlaybook,
 
   // Reusable content collections
+  announcement, // site-wide banner collection (enabled + date-windowed)
   testimonial,
   faqCategory,
   faqItem,

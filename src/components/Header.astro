@@ -48,6 +48,14 @@ interface Props {
     socialInstagram?: string;
     socialFacebook?: string;
     availabilityStatus?: string;
+    /** Optional editor-managed top-menu items from Sanity siteSettings.navItems.
+     *  When non-empty, replaces the built-in FALLBACK_NAV_ITEMS below. */
+    navItems?: Array<{
+      _type?: string;
+      label?: string;
+      href?: string;
+      links?: Array<{ label?: string; href?: string }>;
+    }> | null;
     sectionVisibility?: {
       showPortfolio?: boolean | null;
       showJournal?: boolean | null;
@@ -109,12 +117,52 @@ const fb = siteSettings?.socialFacebook ?? '';
 // /quiz, /calculator, /guides, /press, /resources) are opt-in via modules/
 // and are NOT linked from the core nav.
 
-const NAV_ITEMS = [
+// FALLBACK_NAV_ITEMS: used when siteSettings.navItems is empty or absent.
+// This is the default built-in menu for a fresh clone.
+const FALLBACK_NAV_ITEMS = [
   { kind: 'flat' as const, label: 'About',    href: '/about' },
   { kind: 'flat' as const, label: 'Services', href: '/services' },
   { kind: 'flat' as const, label: 'FAQ',      href: '/faq' },
   ...(visible.journal ? [{ kind: 'flat' as const, label: 'Journal', href: '/journal' }] : []),
 ];
+
+// When the editor has defined navItems in Sanity siteSettings, prefer them
+// over the built-in defaults. Empty array = "use built-in defaults." This is
+// additive: a fresh clone with no navItems configured is byte-identical to the
+// old behavior.
+//
+// Sanity navItems can be flat links (_type: 'navLink') or dropdown groups
+// (_type: 'navGroup'). We normalise both into the same { kind, label, href?,
+// items? } shape that the template markup below already handles.
+type SanityNavItem = {
+  _type?: string;
+  label?: string;
+  href?: string;
+  links?: Array<{ label?: string; href?: string }>;
+};
+
+function normaliseSanityNav(items: SanityNavItem[]): typeof FALLBACK_NAV_ITEMS {
+  return items
+    .filter((item) => item.label)
+    .map((item) => {
+      if (item._type === 'navGroup' && Array.isArray(item.links) && item.links.length > 0) {
+        return {
+          kind: 'dropdown' as const,
+          label: item.label ?? '',
+          items: item.links
+            .filter((l) => l.label && l.href)
+            .map((l) => ({ label: l.label ?? '', href: l.href ?? '#' })),
+        };
+      }
+      return { kind: 'flat' as const, label: item.label ?? '', href: item.href ?? '#' };
+    });
+}
+
+const rawSanityNav = siteSettings?.navItems;
+const NAV_ITEMS: typeof FALLBACK_NAV_ITEMS =
+  Array.isArray(rawSanityNav) && rawSanityNav.length > 0
+    ? normaliseSanityNav(rawSanityNav as SanityNavItem[])
+    : FALLBACK_NAV_ITEMS;
 
 // Flatten NAV_ITEMS into the shape MobileNav expects (a list of NavLink[]
 // with optional sub-items for the groups). MobileNav already handles both

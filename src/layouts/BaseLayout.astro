@@ -14,6 +14,7 @@ import { ClientRouter } from 'astro:transitions';
 import { site } from '@/data/site';
 import { urlFor } from '@/lib/sanity';
 import { localBusinessSchema } from '@/lib/schemas';
+import { getActiveAnnouncement } from '@/lib/queries';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import BackToTop from '@/components/BackToTop';
@@ -101,6 +102,25 @@ const allSchemas = siteSettings ? [localBusinessSchema(siteSettings), ...schemas
 
 // Cloudflare Web Analytics token — only render the beacon when present.
 const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+
+// Optional site-wide announcement banner (Announcement collection in Sanity).
+// Fetched here once so every page gets it without each page running its own
+// query. Returns null when no active announcement exists (graceful absence).
+// Evaluated at BUILD TIME — banner changes require a rebuild.
+const announcement = await getActiveAnnouncement().catch(() => null);
+const showAnnouncement = !!(announcement?.message);
+
+// Map announcement style -> semantic Tailwind token classes.
+// Uses only existing semantic tokens (no new custom tokens introduced).
+//   info      -> muted surface (calm, informational)
+//   highlight -> primary surface (brand accent, promotions / good news)
+//   urgent    -> destructive surface (red, closures / warnings)
+const ANNOUNCEMENT_STYLES: Record<string, { wrapper: string; link: string }> = {
+  info:      { wrapper: 'bg-muted text-foreground',                        link: 'font-semibold underline underline-offset-2 hover:opacity-70 transition-opacity' },
+  highlight: { wrapper: 'bg-primary text-primary-foreground',              link: 'font-semibold underline underline-offset-2 hover:opacity-70 transition-opacity' },
+  urgent:    { wrapper: 'bg-destructive text-destructive-foreground',      link: 'font-semibold underline underline-offset-2 hover:opacity-70 transition-opacity' },
+};
+const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? ANNOUNCEMENT_STYLES.info;
 ---
 
 <!doctype html>
@@ -220,6 +240,29 @@ const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
   </head>
   <body class="min-h-screen flex flex-col">
     <a href="#main" class="skip-link">Skip to main content</a>
+
+    {/* Optional announcement banner. Renders above the header when an active
+        announcement exists in Sanity. Scrolls away with the page content.
+        No dismiss button by design -- static sites rebuild to remove a banner,
+        and a dismiss button would require client-side JS + localStorage state.
+        Style driven by announcement.style -> semantic token classes only. */}
+    {showAnnouncement && (
+      <div
+        class:list={[announcementStyle.wrapper, 'text-center text-sm px-m py-2 border-b border-black/10']}
+        role="region"
+        aria-label="Site announcement"
+      >
+        <span>{announcement!.message}</span>
+        {announcement?.link?.url && announcement?.link?.label && (
+          <a
+            href={announcement.link.url}
+            class:list={['ml-2', announcementStyle.link]}
+          >
+            {announcement.link.label}
+          </a>
+        )}
+      </div>
+    )}
 
     <Header siteSettings={siteSettings} />
 

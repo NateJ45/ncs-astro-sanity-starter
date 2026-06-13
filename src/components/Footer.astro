@@ -74,6 +74,11 @@ interface SocialLink {
   label?: string;
 }
 
+interface FooterColumn {
+  title?: string;
+  links?: Array<{ label?: string; href?: string }>;
+}
+
 interface Props {
   siteSettings?: {
     title?: string;
@@ -87,6 +92,10 @@ interface Props {
     footerCredit?: string;
     footerCreditUrl?: string;
     newsletter?: NewsletterConfig | null;
+    /** Optional editor-managed footer link columns from Sanity siteSettings.footerColumns.
+     *  When non-empty, replaces the built-in Studio / Work / Free tools columns.
+     *  The "Get in touch" column always renders automatically at the end. */
+    footerColumns?: FooterColumn[] | null;
     sectionVisibility?: {
       showPortfolio?: boolean | null;
       showJournal?: boolean | null;
@@ -100,6 +109,15 @@ interface Props {
       showBudgetCalculator?: boolean | null;
     } | null;
   } | null;
+}
+
+// Normalise Sanity footerColumns into the FooterColumn shape.
+// The field lives at siteSettings.footerColumns (projected by getSiteSettings).
+function normaliseSanityFooterColumns(
+  cols: FooterColumn[] | null | undefined,
+): FooterColumn[] {
+  if (!Array.isArray(cols) || cols.length === 0) return [];
+  return cols.filter((c) => c.title && Array.isArray(c.links) && c.links.length > 0);
 }
 
 const { siteSettings } = Astro.props as Props;
@@ -145,6 +163,12 @@ const currentYear = new Date().getFullYear();
 const siteCredit = siteSettings?.footerCredit;
 const siteCreditUrl = siteSettings?.footerCreditUrl;
 
+// Optional editor-managed footer columns. When non-empty, these replace the
+// built-in Studio / Work / Free tools columns. "Get in touch" always renders
+// as the last column regardless. Additive: empty = built-in defaults.
+const sanityFooterColumns = normaliseSanityFooterColumns(siteSettings?.footerColumns);
+const useCustomFooterColumns = sanityFooterColumns.length > 0;
+
 // Pull the three most recent projects for the Latest Projects column.
 // Falls back to an empty array when Sanity isn't reachable (build won't fail).
 const allProjects: CoreProjectCard[] = (await getAllProjects().catch(() => [])) ?? [];
@@ -170,68 +194,99 @@ const latestProjects = allProjects.slice(0, 3);
   )}
 
   {/* Five-column link grid. Single centered column on mobile, five columns
-       at md+ (left-aligned). The fifth column carries contact details. */}
+       at md+ (left-aligned). The fifth column carries contact details.
+       When siteSettings.footerColumns is non-empty, the custom Sanity columns
+       replace the built-in Studio / Work / Free tools columns. The Latest
+       Projects column and Get in touch column always render. */}
   <div class="mx-auto max-w-content px-m pt-l pb-m grid gap-l grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 text-center md:text-left">
-    {/* STUDIO */}
-    <nav aria-labelledby="footer-studio">
-      <p id="footer-studio" class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">
-        Studio
-      </p>
-      <ul class="text-sm space-y-2 list-none p-0">
-        <li><a href="/about" class="text-foreground/85 hover:text-link transition-colors">About</a></li>
-        <li><a href="/process" class="text-foreground/85 hover:text-link transition-colors">Process</a></li>
-        <li><a href="/services" class="text-foreground/85 hover:text-link transition-colors">Services &amp; Pricing</a></li>
-        <li><a href="/faq" class="text-foreground/85 hover:text-link transition-colors">FAQ</a></li>
-        {visible.press && (
-          <li><a href="/press" class="text-foreground/85 hover:text-link transition-colors">Press</a></li>
-        )}
-      </ul>
-    </nav>
 
-    {/* WORK */}
-    <nav aria-labelledby="footer-work">
-      <p id="footer-work" class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">
-        Work
-      </p>
-      <ul class="text-sm space-y-2 list-none p-0">
-        {visible.portfolio && (
-          <li><a href="/portfolio" class="text-foreground/85 hover:text-link transition-colors">Portfolio</a></li>
-        )}
-        {visible.portfolio && (
-          <li><a href="/portfolio/before-after" class="text-foreground/85 hover:text-link transition-colors">Before &amp; After</a></li>
-        )}
-        {visible.journal && (
-          <li><a href="/journal" class="text-foreground/85 hover:text-link transition-colors">Journal</a></li>
-        )}
-        {visible.shop && (
-          <li><a href="/shop" class="text-foreground/85 hover:text-link transition-colors">Shop</a></li>
-        )}
-        {visible.giftCertificates && (
-          <li><a href="/gift-certificates" class="text-foreground/85 hover:text-link transition-colors">Gift Certificates</a></li>
-        )}
-      </ul>
-    </nav>
+    {/* --- Editor-managed columns (from Sanity siteSettings.footerColumns) --- */}
+    {useCustomFooterColumns ? (
+      sanityFooterColumns.map((col, colIdx) => (
+        <nav aria-labelledby={`footer-custom-${colIdx}`}>
+          <p
+            id={`footer-custom-${colIdx}`}
+            class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s"
+          >
+            {col.title}
+          </p>
+          <ul class="text-sm space-y-2 list-none p-0">
+            {(col.links ?? []).map((link) => (
+              <li>
+                <a href={link.href ?? '#'} class="text-foreground/85 hover:text-link transition-colors">
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))
+    ) : (
+      <>
+        {/* --- Built-in columns (default when footerColumns is empty) --- */}
 
-    {/* FREE TOOLS & GUIDES */}
-    <nav aria-labelledby="footer-tools">
-      <p id="footer-tools" class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">
-        Free tools &amp; guides
-      </p>
-      <ul class="text-sm space-y-2 list-none p-0">
-        {visible.styleQuiz && (
-          <li><a href="/quiz" class="text-foreground/85 hover:text-link transition-colors">Style Quiz</a></li>
-        )}
-        {visible.budgetCalculator && (
-          <li><a href="/calculator" class="text-foreground/85 hover:text-link transition-colors">Cost Calculator</a></li>
-        )}
-        {visible.guides && (
-          <li><a href="/guides" class="text-foreground/85 hover:text-link transition-colors">Guides</a></li>
-        )}
-        {visible.resources && (
-          <li><a href="/resources" class="text-foreground/85 hover:text-link transition-colors">Resources</a></li>
-        )}
-      </ul>
-    </nav>
+        {/* STUDIO */}
+        <nav aria-labelledby="footer-studio">
+          <p id="footer-studio" class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">
+            Studio
+          </p>
+          <ul class="text-sm space-y-2 list-none p-0">
+            <li><a href="/about" class="text-foreground/85 hover:text-link transition-colors">About</a></li>
+            <li><a href="/process" class="text-foreground/85 hover:text-link transition-colors">Process</a></li>
+            <li><a href="/services" class="text-foreground/85 hover:text-link transition-colors">Services &amp; Pricing</a></li>
+            <li><a href="/faq" class="text-foreground/85 hover:text-link transition-colors">FAQ</a></li>
+            {visible.press && (
+              <li><a href="/press" class="text-foreground/85 hover:text-link transition-colors">Press</a></li>
+            )}
+          </ul>
+        </nav>
+
+        {/* WORK */}
+        <nav aria-labelledby="footer-work">
+          <p id="footer-work" class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">
+            Work
+          </p>
+          <ul class="text-sm space-y-2 list-none p-0">
+            {visible.portfolio && (
+              <li><a href="/portfolio" class="text-foreground/85 hover:text-link transition-colors">Portfolio</a></li>
+            )}
+            {visible.portfolio && (
+              <li><a href="/portfolio/before-after" class="text-foreground/85 hover:text-link transition-colors">Before &amp; After</a></li>
+            )}
+            {visible.journal && (
+              <li><a href="/journal" class="text-foreground/85 hover:text-link transition-colors">Journal</a></li>
+            )}
+            {visible.shop && (
+              <li><a href="/shop" class="text-foreground/85 hover:text-link transition-colors">Shop</a></li>
+            )}
+            {visible.giftCertificates && (
+              <li><a href="/gift-certificates" class="text-foreground/85 hover:text-link transition-colors">Gift Certificates</a></li>
+            )}
+          </ul>
+        </nav>
+
+        {/* FREE TOOLS & GUIDES */}
+        <nav aria-labelledby="footer-tools">
+          <p id="footer-tools" class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">
+            Free tools &amp; guides
+          </p>
+          <ul class="text-sm space-y-2 list-none p-0">
+            {visible.styleQuiz && (
+              <li><a href="/quiz" class="text-foreground/85 hover:text-link transition-colors">Style Quiz</a></li>
+            )}
+            {visible.budgetCalculator && (
+              <li><a href="/calculator" class="text-foreground/85 hover:text-link transition-colors">Cost Calculator</a></li>
+            )}
+            {visible.guides && (
+              <li><a href="/guides" class="text-foreground/85 hover:text-link transition-colors">Guides</a></li>
+            )}
+            {visible.resources && (
+              <li><a href="/resources" class="text-foreground/85 hover:text-link transition-colors">Resources</a></li>
+            )}
+          </ul>
+        </nav>
+      </>
+    )}
 
     {/* LATEST PROJECTS — only when portfolio is visible. */}
     {visible.portfolio ? (

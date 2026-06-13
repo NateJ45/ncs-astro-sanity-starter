@@ -31,6 +31,7 @@ import FaqSection from '@/components/sections/FaqSection.astro';
 import LogoStrip from '@/components/sections/LogoStrip.astro';
 import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
+import DynamicList from '@/components/sections/DynamicList.astro';
 import { classifySections } from '@/lib/sectionCadence';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
 
@@ -243,6 +244,16 @@ const rows = classifySections<PageBuilderBlock>(sections as PageBuilderBlock[], 
         embedUrl={s.embedUrl}
         embedCode={s.embedCode}
         heightHint={s.heightHint ?? 'medium'}
+        headingId={headingId}
+      />
+    ) : s._type === 'dynamicListSection' ? (
+      <DynamicList
+        eyebrow={s.eyebrow}
+        headline={s.headline}
+        subhead={s.subhead}
+        source={s.source}
+        items={s.items ?? []}
+        cta={s.cta}
         headingId={headingId}
       />
     ) : (

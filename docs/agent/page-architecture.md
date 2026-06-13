@@ -146,3 +146,13 @@ The `<summary>` triggers carry `.nav-underline` and get `aria-current="page"` (w
 **The `NAV_ITEMS` definition.** Each item is `{ kind: 'flat' }` or `{ kind: 'dropdown', items: [...] }`, defined once in `Header.astro` and shared with `MobileNav.tsx` so desktop + mobile stay in sync.
 
 **Availability indicator.** The mobile header carries an availability status pill (pulsing dot + short label, links to `/contact`). Renders only when `siteSettings.availabilityStatus` is set.
+
+### Sanity-driven nav (additive, fallback-first)
+
+`siteSettings.navItems` and `siteSettings.footerColumns` are optional Sanity fields that let an editor override the built-in nav without touching code.
+
+**Header nav:** When `siteSettings.navItems` is a non-empty array, `Header.astro` uses it instead of `FALLBACK_NAV_ITEMS`. The built-in links (About, Services, FAQ, Journal) are the fallback for any site that has never set this field. Sanity items support two shapes: `navLink` (flat, `{ _type: 'navLink', label, href }`) and `navGroup` (dropdown, `{ _type: 'navGroup', label, links: [{ label, href }] }`). The `normaliseSanityNav()` helper in `Header.astro` converts both to the internal `{ kind: 'flat' | 'dropdown', ... }` format.
+
+**Footer columns:** When `siteSettings.footerColumns` is a non-empty array, `Footer.astro` renders those columns instead of the built-in Studio / Work / Free tools columns. "Get in touch" and "Latest Projects" always render (the latter only when the portfolio module is visible). The `normaliseSanityFooterColumns()` helper in `Footer.astro` filters out columns with no title or no links.
+
+**Additive guarantee:** Both fields default to empty in a fresh dataset. An existing clone that has never touched these fields is byte-identical to before. Only non-empty values change the nav. Do not set a `required` validation on these fields.
