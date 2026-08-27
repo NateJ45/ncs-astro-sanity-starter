@@ -68,6 +68,7 @@ is installing it as of the date on the card.
 | 13 | react/react-dom exact pin | no | yes | no | no | no | no | no | no |
 | 14 | wrangler legacy_env pin | no | yes | no | no | no | no | no | no |
 | 15 | PENDING.md / TESTING.md docs registry | yes | yes | partial | yes | yes | yes | yes | yes |
+| 16 | Quarterly slop sweep | no | no | no | no | no | no | no | no |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -503,6 +504,31 @@ that needs to be *checked* belongs here; something that needs to be *understood 
 sequence* belongs there.
 
 ---
+
+## Card 16: Quarterly slop sweep (2026-08-28)
+
+**What:** a scheduled REDUCTION pass per site, because the per-commit gates
+catch regressions but nothing schedules cleanup: an app keeps working while
+its code and docs quietly degrade, then one simple feature request breaks
+everything (the failure mode that bit presacademy's README/CLAUDE.md drift in
+June 2026).
+
+**The sweep, roughly one session per site:**
+1. Run the /simplify and code-review passes over recent hot spots.
+2. Dead-weight grep: unused deps (`npm ls` orphans, imports nothing
+   references), dead components, stale scripts without RAN/DO-NOT-RUN headers.
+3. Doc-drift check: CLAUDE.md commands/routes vs reality, PENDING.md pruning,
+   guide steps vs the actual Studio.
+4. Re-run sync-check and the site's full gates; log findings as gotchas or
+   PORTS cards when they generalize.
+
+**Cadence:** quarterly per actively-maintained site; on-demand before any big
+planned change on a dormant one. Tick the matrix cell with the sweep DATE
+rather than "yes" so staleness is visible.
+
+**Provenance:** distilled from community experience (the "AI slop is very
+real / the app keeps working while the code gets worse" lesson) and our own
+June drift incident.
 
 ## Sync sessions
 
