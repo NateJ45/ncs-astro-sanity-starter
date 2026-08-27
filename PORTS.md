@@ -53,21 +53,21 @@ is installing it as of the date on the card.
 
 | # | Card | wcp | presacademy | starter | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | with-workerd build wrapper | no | yes | yes | no | no | no | no | no |
-| 2 | free-dist prebuild unlock | no | yes | yes | no | no | no | no | no |
-| 3 | page-parity harness | yes | yes | yes | no | no | no | no | no |
-| 4 | sanity-lib seed/patch plumbing | partial | yes | yes | no | no | no | no | no |
-| 5 | stale-types CI guard | yes | yes | yes | no | no | no | no | no |
-| 6 | Nightly Sanity backup workflow | yes | yes | no | no | no | no | no | no |
-| 7 | Uptime workflow | yes | yes | no | no | no | no | no | no |
-| 8 | Playwright + axe + reflow suite | yes | yes | no | partial | no | no | no | no |
-| 9 | contrast.ts + theme-token gate | partial | yes | yes | no | no | no | no | no |
+| 1 | with-workerd build wrapper | yes | yes | yes | yes | yes | yes | yes | yes |
+| 2 | free-dist prebuild unlock | yes | yes | yes | yes | yes | yes | yes | yes |
+| 3 | page-parity harness | yes | yes | yes | yes | yes | yes | yes | yes |
+| 4 | sanity-lib seed/patch plumbing | partial | yes | yes | yes | yes | yes | yes | n/a |
+| 5 | stale-types CI guard | yes | yes | yes | yes | yes | yes | yes | n/a |
+| 6 | Nightly Sanity backup workflow | yes | yes | no | yes | yes | yes | template | n/a |
+| 7 | Uptime workflow | yes | yes | no | yes | yes | yes | template | yes |
+| 8 | Playwright + axe + reflow suite | yes | yes | no | yes | no | no | no | no |
+| 9 | contrast.ts + theme-token gate | partial | yes | yes | yes | yes | yes | yes | yes |
 | 10 | Embedded-studio live-preview stack | yes | yes | no | no | no | no | no | no |
-| 11 | Preview click interceptor | yes | no | no | no | no | no | no | no |
+| 11 | Preview click interceptor | yes | yes | no | no | no | no | no | no |
 | 12 | Parity-gated page-builder conversion | partial | yes | partial | no | no | no | no | no |
 | 13 | react/react-dom exact pin | no | yes | no | no | no | no | no | no |
 | 14 | wrangler legacy_env pin | no | yes | no | no | no | no | no | no |
-| 15 | PENDING.md / TESTING.md docs registry | yes | partial | partial | no | no | no | no | no |
+| 15 | PENDING.md / TESTING.md docs registry | yes | yes | partial | yes | yes | yes | yes | yes |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -542,3 +542,24 @@ backup and uptime workflows; those four cells read "yes" until it lands.
   Playwright webServer builds with fake tracker ids, so compare only
   against a plain build). The workflow-level working-directory default
   breaks no-checkout gate jobs; scope defaults to the export job.
+
+  Family-wide sweep completed 2026-08-27/28: every repo had its first
+  sync session (reid, mas-monograms, 2ndpreschicago, church-starter,
+  nixoncreativestudio, plus presacademy's marker session). Adaptation
+  notes earned along the way, now part of the cards' lore:
+  - reid's Playwright CI job must build with REAL Sanity ids (its
+    hidden-route stubs derive from live sectionVisibility data); the
+    suite passed 140/140 and gates for real.
+  - Multi-hop origins (nixoncreativestudio: apex 301 -> www 307 ->
+    slash) need curl -sSL in uptime; single-hop sites pin literal 200s
+    on trailing-slash paths.
+  - Templates gate backup on a SANITY_PROJECT_ID variable instead of a
+    hardcoded id, schedules commented for forks (church-starter).
+  - mas-monograms' new stale-types guard caught a REAL stale-types bug
+    on its first run (studioGuide video fields).
+  - Cutover watch: secondpreschicago.org AND reiddesignllc.com still
+    serve from Squarespace; their SITE_URL variables wait for DNS.
+  - loadEnv.mjs is now PORTABLE-marked here (this commit). The five
+    downstream Sanity repos carry the unmarked copy; each pulls the
+    marked version forward at its next session (church-starter's
+    PENDING documents why marking downstream-first is wrong).

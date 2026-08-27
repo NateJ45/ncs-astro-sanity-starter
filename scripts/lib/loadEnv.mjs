@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // scripts/lib/loadEnv.mjs
 //
 // Shared .env loader for Node scripts.
