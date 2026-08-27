@@ -2,6 +2,14 @@
 
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
+> **Scope note (2026-08-27).** This file stays **narrative**: what changed here, in
+> sequence, in prose. The **machine-checkable** record of what is shared across the site
+> family now lives in `PORTS.md` at the repo root: an applied-to matrix (improvement by
+> repo), one dated port card per improvement, and `scripts/sync-check.mjs` to prove a
+> site's canonical copies have not drifted. Something that needs to be *checked* belongs
+> in PORTS.md; something that needs to be *understood in sequence* belongs here. Entries
+> below may reference a card number.
+
 *2026-05-30 — Forked from the Reid Design build; genericized to the ncs-astro-sanity-starter (core foundation + opt-in module library + bootstrap docs). Future projects start their own history from this entry.*
 
 ---
@@ -32,3 +40,30 @@
 **D -- Brand reskin system.** `brand/brand.config.json` is the single source of truth (identity + palette + fonts + logo paths). `npm run apply-brand` (`scripts/apply-brand.mjs`) deterministically and idempotently rewrites `globals.css` tokens, `src/data/site.ts`, `studio/sanity.config.ts`, OG inputs, and font imports, then regenerates the OG image. The `/reskin` Claude skill (`.claude/skills/reskin/SKILL.md`) orchestrates the full rebrand: interview, font package install, apply-brand, WCAG AA contrast check, visual check via defaultSections, copy retone, and human checklist.
 
 **Verification baseline after this upgrade:** `npm run build`, `npm run typegen`, `npm test` (22 node --test unit tests for sectionCadence + reservedSlugs), `npm --prefix studio run build`. Live Playwright screenshots and actual seed runs require a connected Sanity project.*
+
+---
+
+*2026-08-27: This starter becomes the library of record for the site family.*
+
+Six canonical files were installed at their natural paths, each carrying a first-line
+`PORTABLE:` marker naming this repo as the library of record: `scripts/with-workerd.mjs`
+(Windows workerd wrapper, a no-op until the Astro 7 / adapter 14 upgrade),
+`scripts/free-dist.mjs` (releases a stale dev server's handle on `dist/`, genericized so
+a copy needs no edit in any repo), `scripts/page-parity.mjs` (rendered-HTML parity
+harness, parameterized to auto-detect `dist/client` versus `dist` and to auto-discover
+its routes), `scripts/lib/sanity-lib.mjs` (seed/patch plumbing: dry-run-by-default apply
+gate, Portable Text builders, idempotent asset uploader, reconciled onto the existing
+`scripts/lib/loadEnv.mjs` rather than carrying a second env parser), `src/lib/contrast.ts`
+(WCAG contrast math), and the new `scripts/sync-check.mjs` (the drift check itself).
+
+`src/lib/theme-tokens.test.ts` applies contrast.ts to this repo's own `@theme` palette,
+so a reskin that pushes body text under 4.5:1 fails `npm test` instead of shipping.
+`.github/workflows/ci.yml` gained the stale-types guard: CI regenerates the Sanity types
+and fails if the committed `src/lib/sanity.types.ts` differs. New npm scripts: `parity`,
+`sync-check`, `free-dist`. Parity baselines for the nine built routes are committed in
+`scripts/.parity/`, proven by a build, capture, rebuild, compare cycle at 9/9 PASS.
+
+`PORTS.md` was created with fifteen port cards and the applied-to matrix. See the
+[Library of record](../../CLAUDE.md) section of CLAUDE.md for the working rules, above
+all the docs-in-sync clause: an improvement that generalizes gets a card in the same
+commit that generalizes it.

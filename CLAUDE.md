@@ -2,7 +2,7 @@
 
 This is the always-loaded reference for the `ncs-astro-sanity-starter` codebase: the conventions and landmines an agent needs on every task. Deep detail for specific areas (theme, components, SEO, performance, Sanity, deployment) lives under `docs/agent/` and is read on demand. The topic index at the bottom is the map.
 
-Companion tactical runbook: `OPERATIONS.md`. New-project setup entry point: `docs/bootstrap/NEW-PROJECT.md` (authored in a later phase — that runbook is the intended start for any team adapting this starter for a new client).
+Companion tactical runbook: `OPERATIONS.md`. New-project setup entry point: `docs/bootstrap/NEW-PROJECT.md` (authored in a later phase — that runbook is the intended start for any team adapting this starter for a new client). Cross-repo shared-improvement registry: `PORTS.md` (see [Library of record](#library-of-record-portsmd-and-sync-check) below).
 
 ---
 
@@ -64,7 +64,10 @@ Standalone scripts:
 - `npm run og` to re-run `scripts/generate-og-default.mjs` and regenerate `public/og-default.png` (after changing brand colors, tagline, or the wordmark in the script's inputs block).
 - `npm run apply-brand` to deterministically rewrite `globals.css` tokens, `src/data/site.ts`, Studio theme inputs, font imports, and the OG image based on `brand/brand.config.json`. Idempotent -- safe to re-run.
 - `npm run seed` runs `scripts/seed-core.mjs`. It creates or replaces the core singletons (`siteSettings`, `homePage`, `aboutPage`, `servicesPage`, `processPage`, `faqPage`, `contactPage`, `journalPage`, `privacyPage`, `notFoundPage`, `studioGuide`, `studioNotes`, `studioPlaybook`) and seed collection docs (services, processSteps, testimonials, philosophyPoints, journalCategories, journalEntries, faqItems). Requires `PUBLIC_SANITY_PROJECT_ID` and `SANITY_API_WRITE_TOKEN` in `.env`. Idempotent: uses `createOrReplace` with deterministic `_id` values so re-running is safe.
-- `npm test` to run the 79 unit tests (node --test) across 6 files in `src/lib/` covering `sectionCadence`, `reservedSlugs`, `scriptAccent`, `slugify`, `sectionVisibility`, and `utils`.
+- `npm test` to run the 94 unit tests (node --test) across 7 files in `src/lib/` covering `sectionCadence`, `reservedSlugs`, `scriptAccent`, `slugify`, `sectionVisibility`, `utils`, and `theme-tokens` (the contrast gate over the `@theme` palette, added 2026-08-27).
+- `npm run parity list | capture | compare [page]` runs `scripts/page-parity.mjs`, the rendered-HTML parity harness. It never builds: build first, then capture or compare. Routes are auto-discovered from the build output and baselines live in `scripts/.parity/` (committed). Use it on any change that is meant to be render-neutral. See PORTS.md card 3.
+- `npm run sync-check [site-repo]` diffs another repo's PORTABLE-marked canonical files against this starter's copies. See the [Library of record](#library-of-record-portsmd-and-sync-check) section.
+- `npm run free-dist` kills a stale `wrangler dev` / `astro preview` still holding a handle on `dist/` (the cryptic `EPERM ... dist\client` on the next build). Windows only; no-ops elsewhere. Not wired as a `prebuild` hook here, so run it by hand when a build fails that way.
 - `npm run check` to run the full local gate in one command: `typegen`, site build, Studio build, and all tests. This is the canonical pre-commit verification command. CI runs the same gate on every push and PR.
 - `npm run studio:dev` to start the Sanity Studio locally for content editing.
 - `npm run studio:deploy` to deploy the Sanity Studio to its hosted URL. **Run this after every schema change.** If you skip it, the hosted Studio shows "unknown fields" warnings next to data in new fields, and the editor sees a prompt to "Remove field." Do NOT click "Remove field" in Studio: it deletes the Sanity document data for every document with that field populated, and it cannot be undone without a dataset restore. The correct sequence is: edit schema, `npm run typegen`, `npm run studio:deploy`, commit.
@@ -152,6 +155,7 @@ These are the files where a project maintainer can make changes without risk of 
 - Astro wrappers: `SanityImage.astro`, `StructuredData.astro` (if present), `SectionHeading.astro`, `SectionDivider.astro`, `ServiceAreaCue.astro`, `ReadingProgress.astro`, `ProcessStepIllustration.astro`, `Hero.astro`, `HeroBackground.astro`, `FinalCta.astro`, `CtaLink.astro`, `StatsRow.astro`, `FeaturedWork.astro`, `FeaturedJournal.astro`, `PressStrip.astro`; section components in `src/components/sections/`
 - `scripts/apply-brand.mjs` -- the brand reskin script. Reads `brand/brand.config.json` and rewrites globals.css, site.ts, Studio config, and regenerates the OG image. Idempotent.
 - `scripts/generate-og-default.mjs`, `scripts/generate-og-pages.mjs`, `scripts/generate-llms-full.mjs`, `scripts/generate-logo-variants.mjs`, `scripts/optimize-logo-files.mjs`, `scripts/import-content.mjs` -- reusable generator and import scripts
+- `scripts/with-workerd.mjs`, `scripts/free-dist.mjs`, `scripts/page-parity.mjs`, `scripts/sync-check.mjs`, `scripts/lib/sanity-lib.mjs`, `src/lib/contrast.ts` -- **canonical copies owned by this repo on behalf of the whole site family.** Each carries a `PORTABLE:` first-line marker. Editing one changes the family's copy, so make general changes only and note them on the matching PORTS.md card. Site-specific behavior does not belong in a marked file.
 - `astro.config.mjs`, `wrangler.jsonc`, `package.json`, `tsconfig.json`, `components.json`
 - `public/_headers` (security response headers shipped with the deploy)
 - `src/pages/robots.txt.ts` (generated endpoint; reads the production URL from `src/data/site.ts` and emits allow-all + correct sitemap reference at build time -- do not create a static `public/robots.txt`)
@@ -238,6 +242,45 @@ Banned vocabulary: "transformative," "curated experience," "investment in your s
 
 ---
 
+## Library of record: PORTS.md and sync-check
+
+Added 2026-08-27. This repo is not only a starting point for new projects, it is the
+**library of record** for improvements shared across the site family (wcp, presacademy,
+reid-design-site, mas-monograms, 2ndpreschicago, ncs-church-starter, nixoncreativestudio).
+When a fix stops being about one client and becomes a technique, its canonical copy lives
+here.
+
+- **`PORTS.md`** (repo root) is the registry: a short intro, an applied-to matrix (one row
+  per shared improvement, one column per repo), then one dated **port card** per
+  improvement covering what it is, the bug that produced it, where the canonical copy
+  lives, and what has to be adapted per site. Read it before porting anything between
+  repos, and before assuming a technique is new.
+- **Docs-in-sync clause:** an improvement that generalizes gets a card **in the same
+  commit that generalizes it**. Same for the matrix when a repo's status changes. A card
+  written a week later is written from memory, and the reason a technique exists is the
+  part that decays fastest.
+- **Canonical files carry a first-line marker** reading `PORTABLE: canonical copy`
+  followed by "ncs-astro-sanity-starter is the library of record for this file", in that
+  file's comment syntax. Six files carry it today: `scripts/with-workerd.mjs`,
+  `scripts/free-dist.mjs`, `scripts/page-parity.mjs`, `scripts/sync-check.mjs`,
+  `scripts/lib/sanity-lib.mjs`, `src/lib/contrast.ts`.
+- **`npm run sync-check [site-repo]`** walks a repo, finds the marked files, and diffs
+  each against this starter's copy of the same path: `SAME` / `DRIFT` /
+  `MISSING-IN-STARTER`, exit 1 on drift. Line endings are normalized; everything else is
+  byte-exact. Point it at the starter with `NCS_STARTER_DIR`, or let it find a sibling
+  `ncs-astro-sanity-starter`. It is dependency-free so it runs in any repo in the family.
+  Run with no argument from here for a self-check (everything must be `SAME`).
+- **If you change a marked file, you are changing the family's copy.** Either the change
+  is general (make it here, note it on the card, and the next sync session pushes it out)
+  or it is site-specific (then it does not belong in a marked file at all).
+
+Related tooling installed alongside: `npm run parity` (the rendered-HTML parity harness,
+baselines committed in `scripts/.parity/`), `npm run free-dist` (Windows dist-lock
+rescue), and the stale-types guard in `.github/workflows/ci.yml`. Cards 1 through 15 in
+PORTS.md explain each.
+
+---
+
 ## Topic index
 
 Read these on demand. They are NOT auto-loaded, and they are referenced as plain paths so they stay lazy. Open with the Read tool when a task touches the area.
@@ -265,7 +308,8 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Content data + Sanity integration | `docs/agent/sanity.md` |
 | Deployment + env vars + rebuild model | `docs/agent/deployment.md` |
 | Editor-driven vs hardcoded | `docs/agent/editor-vs-hardcoded.md` |
-| Change history | `docs/agent/changelog.md` |
+| Cross-repo shared improvements (port cards + applied-to matrix + drift check) | `PORTS.md` |
+| Change history (prose ledger; the checkable matrix lives in PORTS.md) | `docs/agent/changelog.md` |
 | New-project setup runbook + pre-launch checklist (forthcoming) | `docs/bootstrap/NEW-PROJECT.md`, `docs/bootstrap/setup-checklist.md` |
 | Per-module enable guides (forthcoming) | `docs/modules/<module-name>.md` |
 

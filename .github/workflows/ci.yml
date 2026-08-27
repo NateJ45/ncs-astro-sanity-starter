@@ -26,6 +26,21 @@ jobs:
       - name: Generate Sanity types
         run: npm run typegen
 
+      - name: Fail if committed Sanity types are stale
+        # Added 2026-08-27 (ported from presacademy; see PORTS.md).
+        # `npm run build` does NOT run typegen, so src/lib/sanity.types.ts is
+        # committed by hand after every schema change. If regenerating it in the
+        # step above produces a diff, the commit was stale (exactly the bug that
+        # shipped from presacademy on 2026-06-14: types describing a schema that
+        # no longer existed, with a green build). Catch it here, not in
+        # production.
+        run: |
+          if ! git diff --quiet -- src/lib/sanity.types.ts; then
+            echo "::error::src/lib/sanity.types.ts is out of date. Run 'npm run typegen' and commit the result."
+            git --no-pager diff -- src/lib/sanity.types.ts
+            exit 1
+          fi
+
       - name: Build Astro
         run: npm run build
 

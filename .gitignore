@@ -22,6 +22,8 @@ pnpm-debug.log*
 
 # generated artifacts
 tmp/
+# sanity-lib.mjs asset-id cache (keeps seed uploads idempotent; machine-local)
+scripts/.asset-map.json
 studio/schema.json
 studio/dist/
 
