@@ -69,6 +69,7 @@ is installing it as of the date on the card.
 | 14 | wrangler legacy_env pin | no | yes | no | no | no | no | no | no |
 | 15 | PENDING.md / TESTING.md docs registry | yes | yes | partial | yes | yes | yes | yes | yes |
 | 16 | Quarterly slop sweep | no | no | no | no | no | no | no | no |
+| 17 | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | in progress | no | no | no | no | no | n/a |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -530,6 +531,30 @@ rather than "yes" so staleness is visible.
 real / the app keeps working while the code gets worse" lesson) and our own
 June drift incident.
 
+## Card 17: In-canvas section controls (2026-08-28)
+
+**What:** Squarespace-style editing inside the Presentation preview: each
+rendered section carries a `data-sanity` attribute (createDataAttribute ->
+`flexibleSections[_key=="..."]` on a REAL block box, never display:contents),
+which makes the visual-editing overlay outline it as an array item with
+insert-before/after (the grouped insert menu opens IN the canvas), duplicate,
+remove, and drag-to-reorder (on by default once the attribute exists; the
+mutation writes itself). Pair with `insertMenu.filter: true`. Attribute
+renders on preview surfaces only; the live build must stay byte-identical
+(parity enforces it).
+
+**DEPENDS ON card 10** (the full live-preview stack). Sites without it get
+card 10 first. Canonical implementation: presacademy (in progress); WCP has
+the attribute half already (sectionEditAttr).
+
+**Rollout intent (Nathan, 2026-08-28): every Sanity site gets this.** Order:
+presacademy (canonical) -> WCP polish delta -> THE STARTER (upgrade the
+template once: Astro 7 / adapter 14 / Sanity 6.4 pin set / embedded
+single-package studio / preview stack / these controls - so future sites are
+born with it) -> church-starter inherits by sync -> reid (already Sanity 6,
+shortest hop, most active) -> mas -> 2ndpreschicago (after its DNS cutover).
+Follow-up polish on the same card: the insert menu's grid view with
+per-section-type preview thumbnails, and "duplicate page" in the navigator.
 ## Sync sessions
 
 A sync session is a pass over one repo: run `sync-check`, reconcile drift, install the
