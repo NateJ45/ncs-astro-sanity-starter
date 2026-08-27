@@ -62,14 +62,14 @@ is installing it as of the date on the card.
 | 7 | Uptime workflow | yes | yes | no | yes | yes | yes | template | yes |
 | 8 | Playwright + axe + reflow suite | yes | yes | no | yes | no | no | no | no |
 | 9 | contrast.ts + theme-token gate | partial | yes | yes | yes | yes | yes | yes | yes |
-| 10 | Embedded-studio live-preview stack | yes | yes | no | no | no | no | no | no |
-| 11 | Preview click interceptor | yes | yes | no | no | no | no | no | no |
+| 10 | Embedded-studio live-preview stack | yes | yes | yes | no | no | no | no | no |
+| 11 | Preview click interceptor | yes | yes | yes | no | no | no | no | no |
 | 12 | Parity-gated page-builder conversion | partial | yes | partial | no | no | no | no | no |
-| 13 | react/react-dom exact pin | no | yes | no | no | no | no | no | no |
-| 14 | wrangler legacy_env pin | no | yes | no | no | no | no | no | no |
-| 15 | PENDING.md / TESTING.md docs registry | yes | yes | partial | yes | yes | yes | yes | yes |
+| 13 | react/react-dom exact pin | no | yes | yes | no | no | no | no | no |
+| 14 | wrangler legacy_env pin | no | yes | yes | no | no | no | no | no |
+| 15 | PENDING.md / TESTING.md docs registry | yes | yes | yes | yes | yes | yes | yes | yes |
 | 16 | Quarterly slop sweep | no | no | no | no | no | no | no | no |
-| 17 | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | in progress | no | no | no | no | no | n/a |
+| 17 | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes | yes | no | no | no | no | n/a |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -93,11 +93,10 @@ Deliberately narrow: Windows only, never overrides an explicit
 `MINIFLARE_WORKERD_PATH`, and no-ops when wrangler's binary is absent. Linux CI stays on
 the stock path.
 
-**Status in the starter:** installed but **not wired**. The starter is Astro 6.3 /
-adapter 13.5.5, which does not route the prerender through the vite plugin, so the crash
-does not occur and the wrapper is a no-op safety net. It matters the moment this repo
-takes the Astro 7 / adapter 14 upgrade. Wire it then:
-`"build": "node scripts/with-workerd.mjs astro build"`.
+**Status in the starter:** installed and **wired** as of 2026-08-28, when this repo took
+the Astro 7 / adapter 14 upgrade: `"build": "node scripts/with-workerd.mjs astro build"`.
+(Before that it sat here as a no-op safety net, because adapter 13.5.5 did not route the
+prerender through the vite plugin and the crash could not occur.)
 
 **Per-site adaptation:** none. Retire the wrapper when the plugin's pinned workerd
 starts on Windows again.
@@ -393,11 +392,46 @@ Related: `@sanity/ui` v3 has no subpath exports beyond `./theme`, so
 `import { useToast } from '@sanity/ui/toast'` is v4-only syntax and fails
 `sanity schema extract`. On v3, import from the package root.
 
-**Therefore: Studio files never port blindly across this family.** This starter is on
-Sanity **5** (studio package `sanity` ^5.28.0); WCP and presacademy are on **6**. A file
-copied across that boundary compiles and then dies at browser runtime, which is also
-where schema errors surface (they pass the build). Port the *pattern* from these cards,
-then write the file against the target repo's actual major.
+**Therefore: Studio files never port blindly across this family.** A file copied across a
+Sanity major boundary compiles and then dies at browser runtime, which is also where
+schema errors surface (they pass the build). Port the *pattern* from these cards, then
+write the file against the target repo's actual major.
+
+### Starter status: INSTALLED 2026-08-28
+
+This repo is no longer the Sanity-5 outlier. It took the whole card in one session: the
+exact pin set above, the studio folded into the root package (nested `studio/` deleted),
+the Studio embedded at `/studio` via `@sanity/astro` 3.4.2, and all five preview parts
+standing. Verified `find node_modules -path "*@sanity/ui/package.json"` prints exactly
+one line and `grep -l "errors.md#" dist/client/_astro/*.js` exactly one file.
+
+Three adaptations earned on the way in, each of which the NEXT repo will hit:
+
+- **`@sanity/visual-editing` needs an `overrides` entry too, not just a dependency pin.**
+  `@sanity/astro` depends on it by caret range; left alone npm nests a NEWER copy under
+  `@sanity/astro/node_modules`, which drags a second `@sanity/ui` (3.5.4) in with it and
+  breaks the one-instance invariant. presacademy does not show this only because its
+  lockfile was resolved when 5.4.5 was the latest. Pin it in `overrides`.
+- **`sanity schema extract --force` DOES exist on 6.4.0.** An earlier WCP-derived note
+  said otherwise. Without `--force` the second run fails on "Schema file already exists",
+  so the typegen script needs it to be re-runnable. (`--workspace` is still only needed
+  with multiple workspaces.)
+- **`sanity build` writes to `./dist` by default**, which would clobber the Astro build.
+  There is deliberately no `studio:build` script; the Studio is built by `astro build`.
+  A standalone bundle needs an explicit dir: `npx sanity build .studio-dist`.
+
+Also worth carrying: `buildLegacyTheme` is **light-only**. It hard-codes white component
+backgrounds, so the Studio's Dark appearance setting leaves every panel white. Migrating
+to `@sanity/ui`'s `buildTheme` gets a real, tested dark mode and costs the brand tinting
+of the Studio chrome, which is a good trade; keep the brand in the logo and the fonts.
+
+### Genericization note for a template
+
+A template must fail closed **legibly**. A clone with no project id and no token was
+answering `/preview` with a bare 500 and a Sanity stack trace, which reads like a broken
+template rather than an unfinished setup. The starter's copy checks configuration at every
+preview entry point and answers **503** naming the two missing pieces plus the
+`sanity cors add` step. Carry that idea, not the exact strings.
 
 ## Card 11: Preview click interceptor
 
@@ -417,6 +451,19 @@ exactly what this registry exists to stop.
 mapping encodes that site's URL structure, so this is a pattern to re-implement, not a
 file to copy. What ports is the three-way decision (remap / new tab / leave alone) and
 the reason.
+
+**Installed in the starter 2026-08-28**, including presacademy's later refinement: when
+the preview is EMBEDDED in the Studio, a click on a link with no preview route is
+suppressed entirely rather than opening a new tab, because inside Presentation that click
+is an edit gesture and a popping tab forces a switch back to the Studio every time. A
+standalone `/preview` tab still opens the new tab.
+
+**The map lives in THREE files that must agree**, and the starter says so in each:
+`SINGLETON_PREVIEW_PATHS` (`src/sanity/resolve.ts`, document to URL),
+`SINGLETON_BY_PATH` (`src/pages/preview/[...slug].astro`, URL to document type), and
+`FIRST_SEGMENT_PREVIEWABLE` (the interceptor). presacademy names two; the third is the
+one that silently degrades, because a missed entry there does not error, it just lets a
+click escape to the live site.
 
 ## Card 12: Parity-gated page-builder conversion
 
@@ -462,8 +509,16 @@ died inside workerd behind a wall of Miniflare stack frames. The real message,
 Pin both exact, no caret. General lesson: when a Miniflare or workerd failure looks
 unexplainable, read the lines **above** the `MiniflareCoreError`.
 
-**Starter status:** carets today (`react` ^19.2.6), which is a live exposure the moment
-this repo installs a package that pulls react. Pin on the Astro 7 upgrade at the latest.
+**Starter status:** pinned exact 2026-08-28 with the Astro 7 upgrade: `react`,
+`react-dom` and `react-is` all `19.2.7`, no caret. `react-is` was added at the same time
+(the Sanity stack needs it, and it drifts the same way).
+
+**Adjacent, learned in that session:** a stale `package-lock.json` can hide the fix. An
+`overrides` entry added to collapse a nested duplicate did nothing on `npm install`
+because npm kept the already-resolved nested tree; the duplicate only disappeared after
+deleting the lockfile and node_modules and resolving clean. When a dedupe or override
+"does not work", verify on DISK (`find node_modules -path "*<pkg>/package.json"`) rather
+than trusting the install output, and be aware a clean re-resolve floats every caret.
 
 ## Card 14: wrangler legacy_env pin
 
@@ -474,6 +529,16 @@ this repo installs a package that pulls react. Pin on the Astro 7 upgrade at the
 supported"), so every `wrangler dev` / `deploy` against the generated config fails.
 presacademy pins `wrangler` to `~4.110.0`. Revisit when a newer adapter stops emitting
 the field.
+
+**Starter status (2026-08-28): pinned `~4.110.0`, with a finding.** The generated
+`dist/server/wrangler.json` from adapter **14.2.4** on this config contains **no**
+`legacy_env` field at all, and `wrangler dev` against it serves every route. So on this
+combination the pin is currently belt-and-braces rather than load-bearing. The reason it
+stays is a second, harder constraint: **the adapter's own peer range enforces the pair.**
+14.2.4 peers `wrangler ^4.83.0`, but 14.2.5 peers `wrangler ^4.125.0`, which is one minor
+away from the 4.126 rejection. So the starter pins the ADAPTER exact at 14.2.4 as well.
+Moving either one is a deliberate act: bump both, rebuild, inspect the generated config
+for `legacy_env`, and run a real `wrangler dev` before believing it.
 
 Adjacent, same family of pain: WCP's deploy must be
 `wrangler deploy -c dist/server/wrangler.json`; a plain `wrangler deploy` 404s every
@@ -499,10 +564,17 @@ The practice, not the filenames, is what ports: a registry is authoritative and 
 edited in the same commit as the thing it tracks; a changelog is narrative and appends.
 Keeping both, and knowing which is which, is the whole trick.
 
-**In this starter:** `PORTS.md` (this file) is the machine-checkable registry, backed by
-`scripts/sync-check.mjs`. `docs/agent/changelog.md` stays the prose ledger. Something
-that needs to be *checked* belongs here; something that needs to be *understood in
-sequence* belongs there.
+**In this starter:** `PORTS.md` (this file) is the machine-checkable registry of what is
+shared with the rest of the family, backed by `scripts/sync-check.mjs`.
+`docs/agent/changelog.md` stays the prose ledger. `docs/PENDING.md` was added 2026-08-28
+for the third thing neither of those covers: this repo's own open loops and
+waiting-on-a-human items. Something that needs to be *checked* belongs here; something
+that needs to be *understood in sequence* belongs in the changelog; something that is
+*still open* belongs in PENDING.
+
+There is no TESTING.md yet: the suite is one `npm test` over `src/lib/*.test.ts` plus the
+parity harness, and a map of two things is not worth a file. Write one the day a second
+suite (Playwright, card 8) lands.
 
 ---
 
@@ -544,8 +616,27 @@ renders on preview surfaces only; the live build must stay byte-identical
 (parity enforces it).
 
 **DEPENDS ON card 10** (the full live-preview stack). Sites without it get
-card 10 first. Canonical implementation: presacademy (in progress); WCP has
-the attribute half already (sectionEditAttr).
+card 10 first. Canonical implementation: presacademy; WCP has the attribute
+half already (sectionEditAttr).
+
+**Installed in the starter 2026-08-28.** Two adaptation notes:
+
+- **The array field name is per-repo, and here it is ONE name.** presacademy's
+  singletons use `flexibleSections` while its custom pages use `sections`, so its
+  `EditDoc` carries a discriminating `field`. This template holds every page's
+  sections in `pageBuilder`, singletons and `page` docs alike, so the field is a
+  single-member union kept only so the shape ports back.
+- **The preview-only wrapper does not need a component.** `SectionRenderer` picks
+  `const Wrap = editDoc ? 'div' : Fragment` and spreads the attribute. A
+  `<Fragment>` renders nothing, so the live build is byte-identical without a
+  second code path to keep honest. `npm run parity compare` passed 10/10 with the
+  feature installed, which is the proof.
+- **The grouped insert menu had to be created**, not merely switched on: this
+  template had no `insertMenu` config at all. `SECTION_INSERT_MENU` in
+  `src/sanity/schemaTypes/sections.ts` (four plain-language groups plus
+  `filter: true`) is shared by every `pageBuilder` array, including the curated
+  per-page lists, because a group whose types are all absent from a given array
+  simply does not render.
 
 **Rollout intent (Nathan, 2026-08-28): every Sanity site gets this.** Order:
 presacademy (canonical) -> WCP polish delta -> THE STARTER (upgrade the
@@ -614,3 +705,33 @@ backup and uptime workflows; those four cells read "yes" until it lands.
     downstream Sanity repos carry the unmarked copy; each pulls the
     marked version forward at its next session (church-starter's
     PENDING documents why marking downstream-first is wrong).
+
+### 2026-08-28: the starter takes the full modern stack (cards 1, 10, 11, 13, 14, 17)
+
+The template upgrade card 17's rollout plan called for, done in one session and gated per
+phase: Astro 6.3 to 7.2 with `@astrojs/cloudflare` 14.2.4 and wrangler `~4.110.0`; the
+Sanity 6.4 pin set; the nested `studio/` package folded into the root and embedded at
+`/studio`; the preview stack; and the in-canvas section controls. Full detail is in
+`docs/agent/changelog.md`; the reusable lessons are folded into cards 1, 10, 11, 13, 14
+and 17 above rather than repeated here.
+
+Gate results: `npm run build` green, `npm test` 94/94, `npm run parity compare` 10/10
+twice, `sync-check` self-check 7/7 SAME (no canonical file needed changing), one
+`@sanity/ui` on disk, one `errors.md#` chunk, typegen byte-stable, and `wrangler dev`
+serving `/`, `/about/` and `/studio/` with the Studio mounting in a real browser.
+
+Parity baselines were re-captured **twice**, both times with the diff classes enumerated
+first: once for the Astro 7 upgrade (generator string, island uid, minifier output,
+text-node whitespace) and once for a `sonner`/react-aria attribute that arrived with a
+clean lockfile re-resolve. Nothing structural moved in either.
+
+**What is NOT verified here, and what the next repo should do differently:** this
+template has no Sanity project, so the preview could only be proven to fail closed
+(503 naming the missing config; `/preview/live` 403 without the Studio cookie). Rendering
+a real draft, the click-to-edit overlay, and the in-canvas controls need a configured
+project and a `SANITY_TOKEN`. A site repo installing this card should run that check for
+real, in a browser, before ticking its cell.
+
+**Next in card 17's order:** reid-design-site (already Sanity 6, shortest hop), then
+mas-monograms, then 2ndpreschicago after its DNS cutover. ncs-church-starter should
+inherit most of this by sync from here rather than by a fresh port.

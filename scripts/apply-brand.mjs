@@ -143,8 +143,14 @@ function loadConfig() {
   if (!config.fonts.display || !config.fonts.body) {
     throw new Error(`apply-brand: brand/brand.config.json missing fonts.display or fonts.body`);
   }
-  if (!config.studio.themeProps) {
-    throw new Error(`apply-brand: brand/brand.config.json missing studio.themeProps`);
+  // 2026-08-28: the Studio theme moved from buildLegacyTheme (a light-ONLY
+  // palette of CSS custom properties) to @sanity/ui's buildTheme, which ships
+  // its own tested light AND dark schemes. The only brand input left is the
+  // font stacks, so studio.themeProps became studio.fonts.
+  if (!config.studio.fonts || !config.studio.fonts.display || !config.studio.fonts.body) {
+    throw new Error(
+      `apply-brand: brand/brand.config.json missing studio.fonts.display or studio.fonts.body`,
+    );
   }
 
   // JSON Schema validation (if schema file is present)
@@ -485,37 +491,48 @@ function rewriteSiteTs(config) {
   });
 }
 
-// ---- Rewrite: studio/sanity.config.ts -----------------------------------
+// ---- Rewrite: sanity.config.ts (repo root) ------------------------------
+//
+// 2026-08-28: the studio folded into the root package, so this targets the
+// repo-root sanity.config.ts rather than studio/sanity.config.ts. What it
+// rewrites also changed. The old buildLegacyTheme block was a dozen CSS custom
+// properties that produced a LIGHT-ONLY Studio (it hard-codes white component
+// backgrounds, so the Studio's Dark appearance setting left every panel white).
+// The Studio now uses @sanity/ui's buildTheme, which ships its own tested light
+// AND dark schemes, and the only brand input left is the two font stacks.
 
 function rewriteSanityConfig(config) {
-  rewriteFile(resolve(root, 'studio/sanity.config.ts'), function(text, filePath) {
-    // Extract the studioThemeProps object block using brace-walking
-    const blockStart = text.indexOf('const studioThemeProps');
-    if (blockStart === -1) {
-      throw new Error(`apply-brand: studioThemeProps block not found in ${filePath}`);
+  rewriteFile(resolve(root, 'sanity.config.ts'), function(text, filePath) {
+    // Both are single-quoted one-line literals so a stack containing double
+    // quotes (the usual shape: '"Libre Baskerville", Georgia, serif') drops in
+    // verbatim. A stack containing a single quote would break the literal, so
+    // reject it here rather than emitting a file that will not parse.
+    for (const [label, value] of [
+      ['studio.fonts.display', config.studio.fonts.display],
+      ['studio.fonts.body', config.studio.fonts.body],
+    ]) {
+      if (value.includes("'")) {
+        throw new Error(
+          `apply-brand: ${label} contains a single quote, which cannot be written into ` +
+            `${filePath}. Use double quotes around family names.`,
+        );
+      }
     }
-    const braceOpen = text.indexOf('{', blockStart);
-    let depth = 1;
-    let i = braceOpen + 1;
-    while (i < text.length && depth > 0) {
-      if (text[i] === '{') depth++;
-      else if (text[i] === '}') depth--;
-      i++;
-    }
-    const braceClose = i - 1;
-    const before = text.slice(0, braceOpen + 1);
-    const inner = text.slice(braceOpen + 1, braceClose);
-    const after = text.slice(braceClose);
 
-    const subs = Object.entries(config.studio.themeProps).map(function([key, value]) {
-      return {
-        label: key,
-        pattern: new RegExp("('" + esc(key) + "':\\s*')([^']+)(')"),
-        replacer: function(_, g1, _g2, g3) { return g1 + value + g3; },
-      };
-    });
+    const subs = [
+      {
+        label: 'DISPLAY_STACK',
+        pattern: /(const DISPLAY_STACK = ')([^']*)(';)/,
+        replacer: function (_, g1, _g2, g3) { return g1 + config.studio.fonts.display + g3; },
+      },
+      {
+        label: 'BODY_STACK',
+        pattern: /(const BODY_STACK = ')([^']*)(';)/,
+        replacer: function (_, g1, _g2, g3) { return g1 + config.studio.fonts.body + g3; },
+      },
+    ];
 
-    return before + applySubstitutions(inner, subs, filePath + ' [studioThemeProps]') + after;
+    return applySubstitutions(text, subs, filePath);
   });
 }
 

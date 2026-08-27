@@ -14,10 +14,10 @@ considering the module live.
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/shop/studio/*.ts studio/schemaTypes/
+Copy-Item modules/shop/studio/*.ts src/sanity/schemaTypes/
 ```
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 Add three import lines and three array entries. Follow the existing grouping
 comments:
@@ -42,7 +42,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 **a) Add `shopPage` to `SINGLETON_TYPES`:**
 

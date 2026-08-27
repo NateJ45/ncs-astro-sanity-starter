@@ -1,16 +1,36 @@
-# Cloudflare applies these headers to every route. Mirrors the NCS portfolio pattern.
-# Content-Security-Policy beyond frame-ancestors is intentionally not set — getting it right
-# requires testing because of the Sanity CDN, Web3Forms POST, Calendly iframe, and the
-# Cloudflare Analytics beacon. Revisit post-launch.
+# Cloudflare applies these headers to every route (Workers Static Assets honors _headers).
 #
-# frame-ancestors: replaces the legacy X-Frame-Options so we can selectively allow
-# the deployed Sanity Studio (and local studio dev servers on :3333/:3334) to iframe
-# the live site for the iframe-pane preview plugin. 'self' lets the site embed itself.
-# Modern browsers prefer CSP frame-ancestors over X-Frame-Options when both are present.
+# Content-Security-Policy beyond frame-ancestors is intentionally NOT set here.
+# Getting it right needs real testing against this project's actual embeds
+# (Sanity CDN, Web3Forms POST, Calendly iframe, the Cloudflare Analytics beacon),
+# and a half-right CSP silently breaks widgets rather than failing loudly. A
+# project that wants one should copy presacademy's block, which is a tested
+# example, and then verify every embed under `npm run preview` (wrangler dev) --
+# a plain static file server sends no headers, so it proves nothing.
+#
+# WHEN YOU DO ADD A FULL CSP, the embedded Studio and the live preview need:
+#   connect-src   https://api.sanity.io https://*.api.sanity.io
+#                 wss://*.api.sanity.io          (the Studio's realtime channel)
+#                 https://*.apicdn.sanity.io
+#                 https://sanity-cdn.com https://*.sanity-cdn.com
+#                                                (the Studio's module/version ping;
+#                                                 blocked, it logs "Failed to fetch
+#                                                 version for package")
+#   font-src      https://design-system-static.sanity.io   (the Studio's own Inter)
+#                 https://fonts.gstatic.com                (brand fonts, if used)
+#   style-src     https://fonts.googleapis.com             (brand fonts, if used)
+#   img-src       https: data:                             (cdn.sanity.io images)
+#   worker-src    'self' blob:                             (the Studio uses blob workers)
+#
+# frame-ancestors replaces the legacy X-Frame-Options. 'self' is exactly right
+# now that the Studio is EMBEDDED at /studio: the Presentation tool iframes
+# /preview/* from the same origin. (Before 2026-08-28 this also listed
+# *.sanity.studio for a hosted Studio and the iframe-pane plugin; both are
+# retired. Re-add those origins only if you deliberately run a hosted Studio.)
 
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains
-  Content-Security-Policy: frame-ancestors 'self' https://your-project.sanity.studio https://*.sanity.studio https://www.sanity.io https://*.sanity.io http://localhost:3333 http://localhost:3334
+  Content-Security-Policy: frame-ancestors 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Cross-Origin-Opener-Policy: same-origin

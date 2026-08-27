@@ -13,7 +13,7 @@
 
 import { defineType, defineField } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons';
-import { SECTION_TYPES } from './sections';
+import { SECTION_TYPES, sectionArrayOptions } from './sections';
 
 // Every built-in route segment. A custom page slug may not match any of these.
 // Keep in sync with src/lib/reservedSlugs.ts.
@@ -66,6 +66,8 @@ export const page = defineType({
       group: 'content',
       description: 'Build the page by adding sections. Drag to reorder. Add as many as you like.',
       of: SECTION_TYPES,
+      // Grouped + searchable insert menu, in the form AND in the preview canvas.
+      options: sectionArrayOptions,
     }),
 
     // ── Menu placement ────────────────────────────────────────────────────────

@@ -53,9 +53,9 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 
 All `*Page` singletons have `seoTitle` and `seoDescription` fields.
 
-**Module schemas** for opt-in surfaces (portfolio, shop, quiz, calculator, etc.) are documented under `docs/modules/`. Module query files are co-located at `modules/<name>/src/lib/<name>Queries.ts` — copy this file alongside the other module files when enabling a module. Do not add module schemas to the core `studio/schemaTypes/` without enabling the corresponding module.
+**Module schemas** for opt-in surfaces (portfolio, shop, quiz, calculator, etc.) are documented under `docs/modules/`. Module query files are co-located at `modules/<name>/src/lib/<name>Queries.ts` — copy this file alongside the other module files when enabling a module. Do not add module schemas to the core `src/sanity/schemaTypes/` without enabling the corresponding module.
 
-**`definePageSingleton` factory (`studio/schemaTypes/_pageSingleton.ts`):**
+**`definePageSingleton` factory (`src/sanity/schemaTypes/_pageSingleton.ts`):**
 A reusable helper that builds a standard page-singleton document type. All page singletons share the same outer shape (hero fields, a `pageBuilder` array, SEO fields), and this factory produces that shape without repeating it. The function signature is:
 
 ```ts
@@ -69,9 +69,9 @@ export const teamPage = definePageSingleton(
 ```
 
 After creating a new singleton with the factory, register it in three places:
-1. `studio/schemaTypes/index.ts` (add to the `schemaTypes` array)
-2. `studio/structure.ts` (add to `SINGLETON_TYPES` and add a `singletonWithPreview` list item under Pages)
-3. Run `npm run typegen` and `npm run studio:deploy`
+1. `src/sanity/schemaTypes/index.ts` (add to the `schemaTypes` array)
+2. `src/sanity/structure.ts` (add to `SINGLETON_TYPES` and add a `singletonWithPreview` list item under Pages)
+3. Run `npm run typegen`, commit the regenerated types, and deploy the site (the embedded Studio ships with it)
 
 **Do NOT retroactively refactor existing singletons** onto this factory. Each existing singleton has hand-authored field variations (extra groups, page-specific fields). The factory is for new singletons only.
 
@@ -101,7 +101,7 @@ Rich section types that auto-populate from collections (`servicesGridSection`, `
 
 ### The deploy rule (read this first)
 
-**Run `npm run studio:deploy` after ANY schema change.** Skip it and the hosted Studio shows "unknown fields" next to a "Remove field" prompt. **Never click "Remove field":** it deletes that field's data across every document and cannot be undone without a dataset restore. Correct sequence: edit schema, `npm run typegen`, `npm run studio:deploy`, commit.
+**Never click "Remove field" in the Studio.** It deletes that field's data across every document and cannot be undone without a dataset restore. It appears when the Studio's schema is older than the data. The Studio is embedded at `/studio` and ships with the site build, so deploying the site publishes the schema. There is no separate Studio deploy (and `npx sanity deploy` must NOT be run: it would create a standalone Studio that silently falls behind). Correct sequence: edit schema, `npm run typegen`, commit, deploy.
 
 ### Env-driven config and the graceful-empty build
 
@@ -132,7 +132,7 @@ The `isSanityUnconfigured` guard and the fallback pattern are load-bearing. Do n
 
 The Sanity client is at `src/lib/sanity.ts`. It exports both `client` (the typed CDN client for queries) and `urlFor()` (for building image URLs from asset references).
 
-`npm run typegen` runs `sanity typegen generate` against the schemas in `studio/schemaTypes/` and writes `src/lib/sanity.types.ts`. That file is committed to the repo so collaborators get full type safety without needing to run typegen themselves. Run `npm run typegen` locally after any schema change before testing.
+`npm run typegen` runs `sanity typegen generate` against the schemas in `src/sanity/schemaTypes/` and writes `src/lib/sanity.types.ts`. That file is committed to the repo so collaborators get full type safety without needing to run typegen themselves. Run `npm run typegen` locally after any schema change before testing.
 
 All GROQ queries live in `src/lib/queries.ts`. Each page has a typed query function that pulls the singleton plus any auto-populated collections it needs.
 
@@ -144,7 +144,7 @@ All GROQ queries live in `src/lib/queries.ts`. Each page has a typed query funct
 
 **All-fields default.** The `default: true` property is removed from every schema field group definition. Without it, Studio opens documents on the "All fields" tab instead of a single group, so editors see everything without needing to know which group a field lives in.
 
-**Studio branding.** `studio/sanity.config.ts` configures the Studio title (shown in the browser tab), a custom theme, and a custom logo component wired via `studio.components.logo`. Replace the placeholder title, theme, and logo asset for each project.
+**Studio branding.** `sanity.config.ts` (repo root) configures the Studio title (shown in the browser tab), the theme, and a custom logo component wired via `studio.components.logo`. The theme is @sanity/ui's `buildTheme` with the brand font stacks swapped in, so the Studio has a real light AND dark mode; `npm run apply-brand` rewrites the two font stacks. Replace the placeholder title and logo asset for each project.
 
 **SEO length warnings.** `.warning()` validations on `seoTitle` (warns around 60 characters) and `seoDescription` (warns around 160 characters) across all page singletons and `journalEntry`. Editors see an amber warning if the text is getting too long for Google to show in full. A warning, not an error, so it does not block publishing.
 
@@ -181,6 +181,6 @@ Two schema-level controls govern what Canvas sees:
 
 The `purpose` strings carry compressed voice guidance for each field. These are NOT a hard guardrail -- editors should still apply the project voice in review.
 
-**Deploying Canvas annotation changes:** run `npm run studio:deploy`. Canvas reads the deployed Studio schema, so new `canvasApp.purpose` or `exclude` changes need a Studio redeploy to take effect.
+**Deploying Canvas annotation changes:** deploy the site. Canvas reads the deployed Studio schema, and the Studio ships with the site build, so `npm run deploy` is the whole step.
 
 **Activating Canvas** for the project (one-time): the toggle lives in [manage.sanity.io](https://manage.sanity.io) under the project's Canvas section.

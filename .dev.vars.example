@@ -1,0 +1,23 @@
+# Copy this file to `.dev.vars` for local `wrangler dev` (npm run preview).
+# These are WORKER RUNTIME secrets, read per request by the SSR routes through
+# `cloudflare:workers`. They are NOT the same thing as the build-time variables
+# in `.env`, and Astro's dev server does not read this file.
+#
+# In production set them with:
+#   npx wrangler secret put SANITY_TOKEN
+
+# ── Live draft preview (/preview/**, /api/draft-mode/*) ──────────────────────
+# A Sanity token with read access to DRAFTS. Viewer permission is enough.
+# Create it at sanity.io/manage -> your project -> API -> Tokens.
+#
+# Everything FAILS CLOSED without it: /api/draft-mode/enable cannot mint a valid
+# preview cookie (the fingerprint is empty, so no cookie can ever match),
+# /preview/live refuses the connection, and the preview routes error rather than
+# quietly serving published content dressed up as a draft. A fresh clone with no
+# token still builds and still serves the public site; only the preview is off.
+#
+# One more setup step lives outside this repo: the embedded Studio has to be
+# allowed to talk to the Sanity API from your origin.
+#   npx sanity cors add http://localhost:4321 --credentials
+#   npx sanity cors add https://<your-worker>.workers.dev --credentials
+SANITY_TOKEN=

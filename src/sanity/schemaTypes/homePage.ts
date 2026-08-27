@@ -9,6 +9,7 @@
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
 import { HOME_SECTION_TYPES } from './richSections';
+import { sectionArrayOptions } from './sections';
 
 export const homePage = defineType({
   name: 'homePage',
@@ -38,6 +39,8 @@ export const homePage = defineType({
       description:
         "Sections on this page. Drag to reorder, remove a section to hide it, or add a new block from the library. Edit each section's content by clicking into it.",
       of: HOME_SECTION_TYPES,
+      // Grouped + searchable insert menu, in the form AND in the preview canvas.
+      options: sectionArrayOptions,
     }),
 
     // SEO

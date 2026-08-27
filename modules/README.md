@@ -56,7 +56,7 @@ updated. The per-module enable doc at `docs/modules/<name>.md` gives the exact
 snippets; this section explains the general mechanism so you understand what is
 happening and why each step is necessary.
 
-### 1. Schemas (`studio/schemaTypes/index.ts`)
+### 1. Schemas (`src/sanity/schemaTypes/index.ts`)
 
 Each schema the module defines must be imported and added to the `schemaTypes`
 export array. Embedded object types (used as fields inside documents) must appear
@@ -64,7 +64,7 @@ export array. Embedded object types (used as fields inside documents) must appea
 Studio functionality, but the comment groups ("Object types", "Singletons",
 "Reusable content collections") should be respected so the file stays readable.
 
-### 2. Desk structure (`studio/structure.ts`)
+### 2. Desk structure (`src/sanity/structure.ts`)
 
 Two arrays control how documents surface in the Studio sidebar:
 

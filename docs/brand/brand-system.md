@@ -136,7 +136,7 @@ The script (`scripts/apply-brand.mjs`) targets comment-delimited regions in each
 |---|---|
 | `src/styles/globals.css` | `@theme` color tokens, `@theme` font tokens (including `--font-script` always), `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string |
 | `src/data/site.ts` | `name`, `domain`, `brandColors` (`storageKeyPrefix`, `themeStorageKey`, and `studio` are computed from `name` -- never rewritten) |
-| `studio/sanity.config.ts` | Studio theme CSS custom properties (`studioThemeProps`) |
+| `sanity.config.ts` | Studio theme font stacks (`DISPLAY_STACK` / `BODY_STACK`, from `studio.fonts`) |
 | `scripts/generate-og-default.mjs` | `wordmark`, `tagline` in the script's inputs block |
 | `scripts/lib/render-og.mjs` | `DEFAULTS` object (colors and font stack) |
 | `scripts/generate-og-pages.mjs` | `WORDMARK` fallback string |

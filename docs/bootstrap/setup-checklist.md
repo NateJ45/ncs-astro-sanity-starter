@@ -30,13 +30,15 @@ off or explicitly deferred with a reason.
 
 - [ ] Sanity project created at manage.sanity.io
 - [ ] Content editor invited at manage.sanity.io -> project -> Members
-- [ ] Studio deployed (`npm run studio:deploy`) with the final schema
+- [ ] Site deployed with the final schema (the embedded Studio at `/studio` ships with it)
+- [ ] Sanity CORS allows the deployed origin: `npx sanity cors add https://<origin> --credentials`
+- [ ] `SANITY_TOKEN` Worker secret set, so the live draft preview works: `npx wrangler secret put SANITY_TOKEN`
 - [ ] Studio URL shared with the editor and confirmed accessible
 - [ ] Core content seeded (`node scripts/seed-core.mjs`) and real copy in
       place (no "Studio Starter" placeholders visible in Studio or on pages)
 - [ ] All enabled modules seeded (run each module's `seed.mjs` if present)
 - [ ] `typegen` run after the final schema state (`npm run typegen`)
-- [ ] `studio:deploy` run after the final schema state
+- [ ] Site redeployed after the final schema state (that is what publishes the Studio's schema)
 
 ---
 

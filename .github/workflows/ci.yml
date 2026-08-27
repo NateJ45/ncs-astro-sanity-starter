@@ -17,11 +17,11 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install root dependencies
+      # ONE package since the Studio folded into the root on 2026-08-28, so
+      # there is no `npm ci --prefix studio` step and no separate Studio build:
+      # `npm run build` builds the embedded /studio along with the site.
+      - name: Install dependencies
         run: npm ci
-
-      - name: Install studio dependencies
-        run: npm ci --prefix studio
 
       - name: Generate Sanity types
         run: npm run typegen
@@ -41,11 +41,15 @@ jobs:
             exit 1
           fi
 
-      - name: Build Astro
+      - name: Build Astro (includes the embedded /studio)
         run: npm run build
-
-      - name: Build Sanity Studio
-        run: npm --prefix studio run build
 
       - name: Run tests
         run: npm test
+
+      # NOTE: `npm run parity compare` is deliberately NOT a CI step. The
+      # baselines in scripts/.parity/ are captured on a developer machine and
+      # the family has never verified that a Linux build reproduces them
+      # byte-for-byte. Parity is a local gate, run by hand on any change that is
+      # meant to be render-neutral (PORTS.md card 3). Wire it in here only after
+      # proving a CI capture matches a local one.

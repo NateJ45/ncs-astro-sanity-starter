@@ -7,6 +7,7 @@
 
 import { defineType, defineField } from 'sanity';
 import { SERVICES_SECTION_TYPES } from './richSections';
+import { sectionArrayOptions } from './sections';
 
 export const servicesPage = defineType({
   name: 'servicesPage',
@@ -32,6 +33,8 @@ export const servicesPage = defineType({
       description:
         "Sections on this page. Drag to reorder, remove a section to hide it, or add a new block from the library. Edit each section's content by clicking into it.",
       of: SERVICES_SECTION_TYPES,
+      // Grouped + searchable insert menu, in the form AND in the preview canvas.
+      options: sectionArrayOptions,
     }),
 
     defineField({

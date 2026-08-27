@@ -23,10 +23,10 @@ considering the module live.
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/resources/studio/*.ts studio/schemaTypes/
+Copy-Item modules/resources/studio/*.ts src/sanity/schemaTypes/
 ```
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 Add one import line and one array entry:
 
@@ -46,7 +46,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 **a) Add `resourcesPage` to `SINGLETON_TYPES`:**
 

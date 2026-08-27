@@ -14,12 +14,12 @@ considering the module live.
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/portfolio/studio/*.ts studio/schemaTypes/
+Copy-Item modules/portfolio/studio/*.ts src/sanity/schemaTypes/
 ```
 
-**Replace the filter option values before publishing.** The `project` schema ships with generic placeholder values for the `roomType` (titled "Project category") and `designStyle` (titled "Project style") fields. Open `studio/schemaTypes/project.ts` after copying and replace the `Category A/B/C/...` and `Style A/B/C/...` option titles and values with labels that match the client's actual project types and style vocabulary. The field names (`roomType`, `designStyle`) are kept as-is for data compatibility with the portfolio filter components; only the human-readable titles and option values need changing.
+**Replace the filter option values before publishing.** The `project` schema ships with generic placeholder values for the `roomType` (titled "Project category") and `designStyle` (titled "Project style") fields. Open `src/sanity/schemaTypes/project.ts` after copying and replace the `Category A/B/C/...` and `Style A/B/C/...` option titles and values with labels that match the client's actual project types and style vocabulary. The field names (`roomType`, `designStyle`) are kept as-is for data compatibility with the portfolio filter components; only the human-readable titles and option values need changing.
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 Add two import lines and two array entries. Follow the existing grouping comments:
 
@@ -41,7 +41,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 **a) Add `portfolioPage` to `SINGLETON_TYPES`:**
 

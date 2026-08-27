@@ -14,7 +14,7 @@ considering the module live.
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/style-quiz/studio/*.ts studio/schemaTypes/
+Copy-Item modules/style-quiz/studio/*.ts src/sanity/schemaTypes/
 ```
 
 > **Dependency:** The `styleQuiz` schema has a `routing.guideRef` field that
@@ -23,16 +23,16 @@ Copy-Item modules/style-quiz/studio/*.ts studio/schemaTypes/
 > does not fail:
 >
 > ```powershell
-> Copy-Item modules/lead-magnets/studio/leadMagnet.ts studio/schemaTypes/
+> Copy-Item modules/lead-magnets/studio/leadMagnet.ts src/sanity/schemaTypes/
 > ```
 >
-> Then register it in `studio/schemaTypes/index.ts` (import + add to the array)
-> and add `'leadMagnet'` to `ORDERABLE_TYPES` in `studio/structure.ts`.
+> Then register it in `src/sanity/schemaTypes/index.ts` (import + add to the array)
+> and add `'leadMagnet'` to `ORDERABLE_TYPES` in `src/sanity/structure.ts`.
 > The `leadMagnet` type will be hidden from the desk (it floats into
 > `HIDDEN_FROM_DEFAULT` via `ORDERABLE_TYPES`) but the schema will resolve.
 > If `lead-magnets` is already enabled, no extra step is needed.
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 Add one import line and one array entry. Follow the existing grouping comments:
 
@@ -49,7 +49,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 **a) Add `styleQuiz` to `SINGLETON_TYPES`:**
 

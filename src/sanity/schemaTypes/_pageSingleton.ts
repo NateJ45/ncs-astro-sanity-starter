@@ -34,7 +34,7 @@
 // variations that would be lost if blindly replaced.
 
 import { defineType, defineField } from 'sanity';
-import { SECTION_TYPES, additionalSectionsField } from './sections';
+import { SECTION_TYPES, additionalSectionsField, sectionArrayOptions } from './sections';
 
 interface PageDefaults {
   heroEyebrow?: string;
@@ -132,6 +132,8 @@ export function definePageSingleton(
         description:
           'Add, remove, and reorder sections on this page. Each section is a block from the library.',
         of: SECTION_TYPES,
+        // Grouped + searchable insert menu, in the form AND in the preview canvas.
+        options: sectionArrayOptions,
       }),
       {
         ...additionalSectionsField,

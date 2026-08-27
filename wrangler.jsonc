@@ -2,13 +2,27 @@
   // Cloudflare Workers configuration for this project.
   // Cloudflare merged Pages into Workers in early 2026; Workers is the path forward.
   "compatibility_date": "2026-05-26",
-  "compatibility_flags": ["global_fetch_strictly_public"],
+  // nodejs_compat (added 2026-08-28 with the Astro 7 / adapter 14 upgrade): the
+  // SSR routes' render graph can touch process.env (React internals, the Sanity
+  // client, the embedded Studio shell) and without the flag those reads throw at
+  // request time. global_fetch_strictly_public predates it.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "name": "ncs-astro-sanity-starter",
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
-    "directory": "./dist",
-    "binding": "ASSETS",
-    "not_found_handling": "404-page"
+    // @astrojs/cloudflare v14 splits the build into dist/client (static assets)
+    // + dist/server (the SSR bundle: /studio, /preview/**, /api/draft-mode/*).
+    //
+    // Deliberately NO "not_found_handling" here (removed 2026-08-28). With
+    // "404-page" set, Cloudflare answers NAVIGATION requests (Sec-Fetch-Mode:
+    // navigate) that miss the asset store straight from the static 404 page
+    // WITHOUT invoking the Worker, which silently 404s every SSR route for real
+    // browsers while curl (which sends no Sec-Fetch headers) sees them working.
+    // That broke presacademy's Presentation preview in production on 2026-08-26
+    // and hid from every command-line probe. Without the field, asset misses
+    // invoke the Worker and Astro renders the 404 page itself.
+    "directory": "./dist/client",
+    "binding": "ASSETS"
   },
   "observability": {
     "enabled": true

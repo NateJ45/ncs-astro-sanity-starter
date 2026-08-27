@@ -11,13 +11,14 @@
 // Editors drag rows to reorder; the plugin writes an `orderRank` string. GROQ
 // queries order by orderRank (with displayOrder fallback) so the site mirrors Studio.
 //
-// Preview pane: singletons explicitly attach a form + preview iframe view via the
-// singletonWithPreview helper. Other types pick up preview from defaultDocumentNode
-// in sanity.config.ts.
+// Preview: 2026-08-28 the per-document iframe tab (sanity-plugin-iframe-pane)
+// was retired in favour of the Presentation tool, which renders the SSR
+// /preview/* routes with click-to-edit and in-canvas section controls. The
+// singleton list items below therefore carry the plain form view, and
+// "see it on the page" is the Presentation tool in the navbar.
 
 import type { StructureBuilder, StructureResolverContext } from 'sanity/structure';
 import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list';
-import { Iframe, urlForDoc } from './sanity.config';
 import {
   BellIcon,
   CogIcon,
@@ -90,12 +91,14 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
 ]);
 
 /**
- * Build a singleton list item whose editor pane includes both the form view
- * and an iframe preview view (when the doc type has a viewable page).
+ * Build a singleton list item pinned to one document id.
  *
- * S.editor() and S.document().views([S.view.form()]) both pre-set views and
- * thereby bypass the defaultDocumentNode in sanity.config.ts. So we attach
- * views explicitly here for the singletons that need them.
+ * The name is historical: it used to attach an iframe preview view alongside
+ * the form. Since 2026-08-28 the live draft preview is the Presentation tool
+ * (src/sanity/resolve.ts maps every one of these types to a /preview path), so
+ * the editor pane is the form. Views are still set explicitly because
+ * S.document().views([...]) bypasses defaultDocumentNode in sanity.config.ts,
+ * and that is where the per-type extra tabs are added.
  */
 function singletonWithPreview(
   S: StructureBuilder,
@@ -103,23 +106,6 @@ function singletonWithPreview(
   title: string,
   icon: any,
 ) {
-  const hasPreview = urlForDoc(schemaType, {}) !== null;
-  const views = [
-    S.view.form(),
-    ...(hasPreview
-      ? [
-          S.view
-            .component(Iframe)
-            .options({
-              url: (doc: any) => urlForDoc(schemaType, doc) ?? '',
-              reload: { button: true },
-              defaultSize: 'desktop',
-            })
-            .title('Preview'),
-        ]
-      : []),
-  ];
-
   return S.listItem()
     .title(title)
     .icon(icon)
@@ -127,7 +113,7 @@ function singletonWithPreview(
       S.document()
         .schemaType(schemaType)
         .documentId(schemaType)
-        .views(views),
+        .views([S.view.form()]),
     );
 }
 

@@ -27,8 +27,11 @@ Before you start, make sure you have:
 git clone https://github.com/your-org/ncs-astro-sanity-starter my-new-site
 cd my-new-site
 npm install
-npm --prefix studio install
 ```
+
+One package, one `node_modules`. The Sanity Studio lives in this repo (its old
+nested `studio/` package was folded in on 2026-08-28) and is served at `/studio`
+by the site itself.
 
 The build works with no Sanity project configured. `sanityFetch` returns empty
 fallbacks and every page renders its empty-state content. You can run
@@ -64,22 +67,44 @@ SANITY_STUDIO_PREVIEW_URL=https://your-worker-name.your-account.workers.dev
 `PUBLIC_SANITY_DATASET` defaults to `production`; leave it unless you have a
 reason to use a different dataset.
 
-**c) Deploy the Studio once**
+**c) Allow your origins in Sanity CORS**
+
+The Studio is EMBEDDED at `/studio` on your own site, so it talks to the Sanity
+API from your origin. That origin has to be on the project's allow list, or the
+Studio loads and then fails to sign in.
 
 ```powershell
-npm run studio:deploy
+npx sanity cors add http://localhost:4321 --credentials
+npx sanity cors add https://your-worker-name.your-account.workers.dev --credentials
 ```
 
-You will be prompted to log in to Sanity on first run. The Studio deploys to
-`https://your-project-id.sanity.studio`. Share that URL with the content editor.
+Add the real domain too, once DNS is pointed. You will be prompted to log in to
+Sanity on first run.
 
-Invite the editor at [manage.sanity.io](https://manage.sanity.io) under the
-project -> Members tab. The editor does NOT need a development environment;
-they work entirely through the Studio URL.
+**d) Set the preview secret**
 
-**Reminder (from CLAUDE.md rule #1):** run `npm run studio:deploy` after every
-schema change going forward. Never click "Remove field" in Studio -- it deletes
-document data permanently.
+The live draft preview (`/preview/**`) reads drafts through a Worker runtime
+secret, which is separate from the build-time variables in `.env`.
+
+```powershell
+Copy-Item .dev.vars.example .dev.vars   # then paste a Viewer token into it
+npx wrangler secret put SANITY_TOKEN    # the same token, for production
+```
+
+Without it the public site is unaffected and the preview simply reports that it
+is not configured yet. See `.dev.vars.example`.
+
+**e) Invite the editor**
+
+Invite them at [manage.sanity.io](https://manage.sanity.io) under the project ->
+Members tab, and send them `https://<your-site>/studio`. They do NOT need a
+development environment.
+
+**There is NO separate Studio deploy.** The Studio is built by `astro build` and
+published with the site, so a schema change reaches editors on your next deploy.
+Do not run `npx sanity deploy`: it would publish a standalone Studio that
+silently falls behind this one. Never click "Remove field" in Studio -- it
+deletes document data permanently.
 
 ---
 
@@ -129,7 +154,7 @@ npm run apply-brand
 
 This rewrites `src/styles/globals.css` (`@theme` tokens, `:root`, `.dark`, font
 imports), `src/data/site.ts` (`name`, `domain`, `brandColors`),
-`studio/sanity.config.ts` (`studioThemeProps`), and the OG generator inputs,
+`sanity.config.ts` (`studioThemeProps`), and the OG generator inputs,
 then regenerates `public/og-default.png`.
 
 After `apply-brand`, verify with:
@@ -201,16 +226,18 @@ For each module you want to activate:
 
 1. Open its enable doc (`docs/modules/<name>.md`).
 2. Follow all numbered steps in order:
-   - Step 1: copy schemas into `studio/schemaTypes/`.
-   - Step 2: register schemas in `studio/schemaTypes/index.ts`.
-   - Step 3: register in `studio/structure.ts`.
+   - Step 1: copy schemas into `src/sanity/schemaTypes/`.
+   - Step 2: register schemas in `src/sanity/schemaTypes/index.ts`.
+   - Step 3: register in `src/sanity/structure.ts`.
+   - Step 3b: if a new section type carries a dropdown whose exact value drives
+     rendering, add that field name to `NON_STEGA_FIELDS` in `src/lib/cms-preview.ts`.
    - Step 4: copy app files with `Copy-Item`.
    - **Step 4b: add the module's query functions to `src/lib/queries.ts`.**
      This step is easy to miss -- the core starter does not include module
      queries, so they must be added manually from the module's enable doc.
    - Step 5+: add nav entries, sectionVisibility flags, and any module-specific
      config.
-3. Run `npm run typegen` and `npm run studio:deploy` after adding schemas.
+3. Run `npm run typegen` after adding schemas and commit the regenerated types. The embedded Studio picks them up on the next build.
 
 ---
 
@@ -317,7 +344,7 @@ taxonomy in `CLAUDE.md`. Key files to route through a planned session:
   shadcn overrides, base resets)
 - `src/layouts/BaseLayout.astro` (anti-FOUC script, scroll wiring, Lenis init)
 - `src/lib/sanity.ts` (the `isSanityUnconfigured` guard is load-bearing)
-- `studio/schemaTypes/*.ts` (field changes can break existing Sanity content)
+- `src/sanity/schemaTypes/*.ts` (field changes can break existing Sanity content)
 - `src/lib/queries.ts` and `src/lib/sanity.types.ts`
 - `astro.config.mjs`, `wrangler.jsonc`, `package.json`
 - `public/_headers` (security headers)

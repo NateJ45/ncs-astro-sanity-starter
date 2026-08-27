@@ -38,12 +38,12 @@ Full reference for the brand config shape, what `apply-brand` rewrites, and the 
 Modules live under `modules/<name>/` and are off by default. Enabling one is a copy-and-register operation:
 
 1. **Copy the module folder into the core dirs:**
-   - `modules/<name>/studio/*` into `studio/schemaTypes/` (schema files)
+   - `modules/<name>/studio/*` into `src/sanity/schemaTypes/` (schema files)
    - `modules/<name>/src/pages/*` into `src/pages/` (route files)
    - `modules/<name>/src/components/*` into `src/components/` (components)
    - The co-located query file `modules/<name>/src/lib/<name>Queries.ts` into `src/lib/` (GROQ queries). Nine of the ten modules ship a query file here. The `newsletter` module is the exception: it has no dedicated route or query file and is enabled by reading its `README.md` and embedding the component directly.
 
-2. **Register the schema** in `studio/schemaTypes/index.ts` and add the type to `studio/structure.ts`.
+2. **Register the schema** in `src/sanity/schemaTypes/index.ts` and add the type to `src/sanity/structure.ts`.
 
 3. **Wire navigation** — add the route to `Header.astro`'s `NAV_ITEMS` and to the footer links.
 
@@ -51,7 +51,7 @@ Modules live under `modules/<name>/` and are off by default. Enabling one is a c
 
 The co-located query file pattern means no hand-pasting of query functions into core `queries.ts`. Per-module guides are in `docs/modules/`.
 
-After enabling, run `npm run typegen`, then `npm run studio:deploy` to push the new schemas to the hosted Studio.
+After enabling, run `npm run typegen`, then rebuild. The Studio is embedded at `/studio` and ships with the site build, so there is no separate Studio deploy.
 
 ---
 
@@ -71,12 +71,13 @@ Blocks carry no background color field. `SectionRenderer` owns the alternating s
 
 ## Schema-change procedure
 
-Any change to `studio/schemaTypes/` must follow this sequence before committing:
+Any change to `src/sanity/schemaTypes/` must follow this sequence before committing:
 
-1. Edit the schema file in `studio/schemaTypes/`.
-2. Run `npm run check` -- this is the one-command gate that runs typegen, the site build, the Studio build, and all 79 unit tests in sequence. Fix any failures before continuing. (Individual steps: `npm run typegen`, `npm run build`, `npm --prefix studio run build`, `npm test`.)
+1. Edit the schema file in `src/sanity/schemaTypes/`.
+2. Run `npm run check` -- the one-command gate: typegen, the build (which includes the embedded Studio), and all 94 unit tests. Fix any failures before continuing. (Individual steps: `npm run typegen`, `npm run build`, `npm test`.) If the change could alter rendered markup, also run `npm run parity compare`.
+2b. If you added a dropdown/radio field whose exact value drives rendering, add its name to `NON_STEGA_FIELDS` in `src/lib/cms-preview.ts` in the same commit. Miss it and the block renders the wrong branch in the live preview only.
 3. Commit the schema file AND the regenerated `src/lib/sanity.types.ts` together.
-4. `npm run studio:deploy` -- pushes the updated schema to the hosted Studio. Skip this and the live Studio will show "unknown fields" next to a "Remove field" prompt. **Never click "Remove field"** -- it deletes that field's data across every document, and it cannot be undone without a dataset restore.
+4. Deploy the site (`npm run deploy`). The Studio is embedded, so deploying the site publishes the schema with it; there is no separate Studio deploy step. Until the deploy lands, the live Studio shows "unknown fields" next to a "Remove field" prompt. **Never click "Remove field"** -- it deletes that field's data across every document, and it cannot be undone without a dataset restore.
 
 ---
 
@@ -192,18 +193,19 @@ Comments stay attached to the specific field until resolved. Comments do not aff
 
 ### Studio deploy
 
-Studio code (schemas, structure, plugins) deploys separately from the site:
+There isn't one. The Studio is **embedded at `/studio`** and built by `astro build`, so
+deploying the site deploys the Studio. That is deliberate: a separately-deployed Studio
+only updates when someone remembers to push it, and silently falls behind while pointing
+at the same production data.
 
-```bash
-npm run studio:deploy
-# = npm --prefix studio run deploy
-```
+**Do not run `npx sanity deploy`.** It would publish a standalone Studio at
+`<studioHost>.sanity.studio` and recreate exactly that split. `sanity.cli.ts` omits
+`studioHost`/`deployment` to make it hard to do by accident.
 
-Run this after any change in `studio/schemaTypes/`, `studio/structure.ts`, or `studio/sanity.config.ts` — otherwise the hosted Studio doesn't see the new schema fields.
+Always run `npm run typegen` after schema changes so `src/lib/sanity.types.ts` is fresh,
+then commit both files together. CI fails the build if the committed types are stale.
 
-Always run `npm run typegen` after schema changes so `src/lib/sanity.types.ts` is fresh, then commit both files together.
-
-For the complete schema-change sequence including the Studio build verify step, see the "Schema-change procedure" section above.
+For the complete schema-change sequence, see the "Schema-change procedure" section above.
 
 ---
 
@@ -278,7 +280,9 @@ The items below apply to any project built on this starter. Replace the angle-br
 - [ ] Create Sanity project; set `PUBLIC_SANITY_PROJECT_ID`, `PUBLIC_SANITY_DATASET` in `.env` and Cloudflare → Workers → Variables
 - [ ] Set `SANITY_API_READ_TOKEN` (scoped read token from Sanity Manage → API → Tokens)
 - [ ] Set `SANITY_API_WRITE_TOKEN` in `.env` locally for running seed/patch scripts
-- [ ] Run `npm run studio:deploy` to publish the Studio
+- [ ] Deploy the site (`npm run deploy`) -- this publishes the embedded Studio at `/studio` too
+- [ ] Allow the origins on the Sanity project's CORS list: `npx sanity cors add https://<your-worker>.workers.dev --credentials` (and `http://localhost:4321` for local work). Without this the embedded Studio cannot sign in.
+- [ ] Set the `SANITY_TOKEN` Worker secret for the live preview: `npx wrangler secret put SANITY_TOKEN` (a Viewer token with draft read access). Locally it goes in `.dev.vars`; see `.dev.vars.example`.
 - [ ] Configure the Sanity → Cloudflare rebuild webhook with the deny-list filter (see above)
 
 **Wire external services:**
@@ -411,14 +415,13 @@ The PNGs land in `src/assets/` (NOT `public/`) so Astro's `<Image>` / `getImage(
 
 ### Add a new field to a page singleton
 
-1. Edit `studio/schemaTypes/<page>.ts` — add `defineField(...)`.
+1. Edit `src/sanity/schemaTypes/<page>.ts` — add `defineField(...)`.
 2. `npm run typegen` (regenerates `src/lib/sanity.types.ts`).
 3. Add the field to the GROQ projection in `src/lib/queries.ts` (for non-section fields) or to `sectionsProjection()` if it is inside a section block.
 4. Use the field in the corresponding Astro page or section component with a sensible fallback.
 5. Write a backfill script in `scripts/` to set the value on the existing production doc (use `setIfMissing` so future editor changes aren't clobbered).
-6. `npm --prefix studio run build` to confirm the Studio builds clean.
-7. `npm run studio:deploy` to push the new field to the hosted Studio.
-8. Commit the schema file and the regenerated `src/lib/sanity.types.ts` together, then push.
+6. `npm run build` to confirm the site and the embedded Studio build clean.
+7. Commit the schema file and the regenerated `src/lib/sanity.types.ts` together, then push. The deploy publishes the Studio along with the site.
 
 See the full schema-change procedure above (in the "Schema-change procedure" section) for the complete order of operations.
 

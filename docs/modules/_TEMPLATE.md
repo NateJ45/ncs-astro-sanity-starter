@@ -14,12 +14,12 @@ considering the module live.
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/<name>/studio/*.ts studio/schemaTypes/
+Copy-Item modules/<name>/studio/*.ts src/sanity/schemaTypes/
 ```
 
 If the module has no schemas (e.g. newsletter), skip this step.
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 For each `.ts` file copied in Step 1, add one import line and one entry in the
 `schemaTypes` array. Follow the existing grouping comments:
@@ -50,7 +50,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 Depending on what this module introduces, update one or more of the following:
 
@@ -155,7 +155,7 @@ npm run build     # expect PASS, module route(s) appear in output
 
 ### Studio desk item(s)
 
-Paste this into `studio/structure.ts` at the location described in Step 3:
+Paste this into `src/sanity/structure.ts` at the location described in Step 3:
 
 ```ts
 // TODO: paste the exact S.listItem(...) or singletonWithPreview(...) or

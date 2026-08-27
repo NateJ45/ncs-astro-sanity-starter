@@ -4,6 +4,7 @@
 
 import { defineType, defineField } from 'sanity';
 import { PROCESS_SECTION_TYPES } from './richSections';
+import { sectionArrayOptions } from './sections';
 
 export const processPage = defineType({
   name: 'processPage',
@@ -23,6 +24,8 @@ export const processPage = defineType({
       description:
         'The sections on the Process page. Drag to reorder, remove a section to hide it, or add a new block from the library.',
       of: PROCESS_SECTION_TYPES,
+      // Grouped + searchable insert menu, in the form AND in the preview canvas.
+      options: sectionArrayOptions,
     }),
 
     defineField({

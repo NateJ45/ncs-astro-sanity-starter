@@ -15,10 +15,10 @@ considering the module live.
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/events/studio/*.ts studio/schemaTypes/
+Copy-Item modules/events/studio/*.ts src/sanity/schemaTypes/
 ```
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 Add two import lines and two array entries:
 
@@ -40,7 +40,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 **a) Add `'eventsPage'` to `SINGLETON_TYPES`:**
 
@@ -115,7 +115,7 @@ npm run build     # expect PASS; /events appears in output
 
 ### Studio desk items
 
-Paste the **singleton** into the Pages `S.list().items([...])` block in `studio/structure.ts`:
+Paste the **singleton** into the Pages `S.list().items([...])` block in `src/sanity/structure.ts`:
 
 ```ts
 singletonWithPreview(S, 'eventsPage', 'Events Page', CalendarIcon),

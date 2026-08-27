@@ -34,21 +34,44 @@ import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
 import { classifySections } from '@/lib/sectionCadence';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
+import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
 
 interface Props {
   sections?: unknown[];
   /** Prefix for generated heading ids, so two renderers on a page do not collide. */
   idPrefix?: string;
+  /**
+   * PREVIEW ONLY. When the Studio preview route passes the document each
+   * section belongs to, every section is wrapped in a real block box carrying a
+   * `data-sanity` attribute, which is what gives the Presentation overlay its
+   * in-canvas insert / duplicate / remove / drag-to-reorder controls
+   * (PORTS.md card 17).
+   *
+   * The live pages never pass it, and with it absent the wrapper is a
+   * `<Fragment>`, which renders NOTHING at all. That is why the static build's
+   * markup stays byte-identical with this feature installed, and
+   * `npm run parity compare` is the standing gate on that promise.
+   */
+  editDoc?: EditDoc;
 }
 
-const { sections = [], idPrefix = 'section' } = Astro.props as Props;
+const { sections = [], idPrefix = 'section', editDoc } = Astro.props as Props;
 const rows = classifySections<PageBuilderBlock>(sections as PageBuilderBlock[], idPrefix);
+
+// A real element in preview, nothing at all on the live site. The wrapper must
+// NOT be `display: contents`: the overlay outlines the element's rect, and a
+// contents element has none. A plain block-level div around a full-width
+// <section> changes no layout.
+const Wrap = editDoc ? 'div' : Fragment;
+const wrapAttrs = (key: string | undefined) =>
+  editDoc && key ? { 'data-sanity': sectionEditAttr(editDoc, key) } : {};
 ---
 
 {rows.map(({ block: s, surface, insertDividerBefore, headingId }) => (
   <>
     {insertDividerBefore && <SectionDivider />}
 
+    <Wrap {...wrapAttrs((s as { _key?: string })._key)}>
     {s._type === 'heroSection' ? (
       <Hero
         eyebrow={s.eyebrow}
@@ -260,5 +283,6 @@ const rows = classifySections<PageBuilderBlock>(sections as PageBuilderBlock[], 
       // Unknown block type: render nothing, log in dev.
       import.meta.env.DEV && console.warn(`[SectionRenderer] Unknown block type: "${s._type}". Add a mapping in SectionRenderer.astro.`)
     )}
+    </Wrap>
   </>
 ))}

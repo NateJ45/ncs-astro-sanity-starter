@@ -20,7 +20,7 @@ Run the read-only dataset audit and interpret the results for the user.
      src/data/defaultSections.ts.
    - In --fields output, most "absent" fields are intentional optionals
      (seoImage, heroScriptAccent, integration URLs, etc.). Check the schema
-     description in studio/schemaTypes/ before calling a gap a problem.
+     description in src/sanity/schemaTypes/ before calling a gap a problem.
      Starter-dataset documents intentionally fill only the core fields.
 
 3. If the user asks to fix a gap, patch Sanity with a script per the

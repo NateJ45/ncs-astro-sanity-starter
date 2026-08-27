@@ -16,10 +16,10 @@ considering the module live.
 ### Step 1 -- Copy schemas into the Studio
 
 ```powershell
-Copy-Item modules/virtual-services/studio/*.ts studio/schemaTypes/
+Copy-Item modules/virtual-services/studio/*.ts src/sanity/schemaTypes/
 ```
 
-### Step 2 -- Register schemas in `studio/schemaTypes/index.ts`
+### Step 2 -- Register schemas in `src/sanity/schemaTypes/index.ts`
 
 Add one import line and one array entry:
 
@@ -39,7 +39,7 @@ export const schemaTypes = [
 ];
 ```
 
-### Step 3 -- Register in `studio/structure.ts`
+### Step 3 -- Register in `src/sanity/structure.ts`
 
 **a) Add `'virtualServicesPage'` to `SINGLETON_TYPES`:**
 
@@ -108,7 +108,7 @@ npm run build     # expect PASS; /virtual-services appears in output
 
 ### Studio desk item
 
-Paste this into the Pages `S.list().items([...])` block in `studio/structure.ts`:
+Paste this into the Pages `S.list().items([...])` block in `src/sanity/structure.ts`:
 
 ```ts
 singletonWithPreview(S, 'virtualServicesPage', 'Virtual Services Page', DesktopIcon),
@@ -151,7 +151,7 @@ After completing all enable steps:
 If you enabled the old `e-design` module on a live project:
 
 1. **Studio schema:** rename the Sanity document type. In your Studio, go to the dataset management tools and rename any existing `eDesignPage` document's `_type` field to `virtualServicesPage`, or create a new document of type `virtualServicesPage` and copy the content across manually.
-2. **Schema file:** replace `studio/schemaTypes/eDesignPage.ts` with `virtualServicesPage.ts` (from this module), update the import and array entry in `studio/schemaTypes/index.ts`, and update `SINGLETON_TYPES` in `studio/structure.ts`.
+2. **Schema file:** replace `src/sanity/schemaTypes/eDesignPage.ts` with `virtualServicesPage.ts` (from this module), update the import and array entry in `src/sanity/schemaTypes/index.ts`, and update `SINGLETON_TYPES` in `src/sanity/structure.ts`.
 3. **App files:** replace `src/pages/e-design.astro` with `src/pages/virtual-services.astro` and `src/lib/eDesignQueries.ts` with `src/lib/virtualServicesQueries.ts`.
 4. **Nav entry:** update the Header.astro `NAV_ITEMS` entry from `visible.eDesign` / `/e-design` to `visible.virtualServices` / `/virtual-services`.
 5. **Redirects:** add a redirect from `/e-design` to `/virtual-services` in your Astro config or Cloudflare rules to preserve any existing inbound links.

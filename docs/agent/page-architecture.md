@@ -34,7 +34,7 @@ The four core pages (home, about, services, process) and every custom `page` doc
 
 **Default fallback.** `src/data/defaultSections.ts` holds code-defined default section arrays for each core page. When `PUBLIC_SANITY_PROJECT_ID` is absent (fresh clone) or a page's `pageBuilder` array is empty, the route renders from these defaults. The site always renders non-blank content.
 
-### Block library (`studio/schemaTypes/sections.ts`)
+### Block library (`src/sanity/schemaTypes/sections.ts`)
 
 `SECTION_TYPES` (exported from `sections.ts`) is the single source of truth for the eleven general block types available on every page builder:
 
@@ -54,7 +54,7 @@ The four core pages (home, about, services, process) and every custom `page` doc
 
 Blocks deliberately carry no `backgroundColor` field. Background assignment is `SectionRenderer`'s responsibility.
 
-### Rich section types (`studio/schemaTypes/richSections.ts`)
+### Rich section types (`src/sanity/schemaTypes/richSections.ts`)
 
 Ten additional types for the core pages. These are richer blocks that auto-populate from Sanity collections (services, testimonials, process steps, philosophy points) or use structured inline data:
 
@@ -99,7 +99,7 @@ The cadence logic is in `src/lib/sectionCadence.ts` (unit-tested). Blocks have n
 
 ## Custom pages
 
-### `page` document type (`studio/schemaTypes/page.ts`)
+### `page` document type (`src/sanity/schemaTypes/page.ts`)
 
 A multi-instance (non-singleton) document type editors use to create new pages from the block library without touching code. Fields: `title`, `slug`, `pageBuilder` (array of general section blocks), `addToMainNav`, `navGroup`, `navLabel`, `addToFooter`, and SEO fields.
 

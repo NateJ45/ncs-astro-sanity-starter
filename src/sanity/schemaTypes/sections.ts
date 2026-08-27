@@ -480,6 +480,68 @@ export const pageSectionSchemas = [
 // builder offers the same blocks.
 export const SECTION_TYPES = pageSectionSchemas.map((s) => ({ type: s.name }));
 
+// =============================================================================
+// The grouped, searchable insert menu (2026-08-28, PORTS.md card 17)
+// =============================================================================
+// Every pageBuilder array shares one insert-menu configuration, so "add a
+// section" reads the same everywhere: a search box, and blocks sorted into four
+// plain-language groups instead of one long alphabetical list.
+//
+// This matters most OUTSIDE the Studio form. With the preview stack installed,
+// the Presentation overlay opens this same menu IN THE CANVAS when an editor
+// uses a section's insert-before/insert-after control, so the grouping is what
+// an editor sees while looking at the page.
+//
+// `filter: true` turns on the search box. Groups list type names; a group whose
+// types are all absent from a given array simply does not appear, which is what
+// lets one config serve the curated per-page lists in richSections.ts. Any type
+// not named in a group falls under "All".
+export const SECTION_INSERT_MENU = {
+  filter: true,
+  groups: [
+    {
+      name: 'basics',
+      title: 'Basics',
+      of: ['heroSection', 'richTextSection', 'imageTextSection', 'spacerSection'],
+    },
+    {
+      name: 'proof',
+      title: 'Proof and trust',
+      of: [
+        'quoteSection',
+        'testimonialsSection',
+        'statSection',
+        'logoStripSection',
+        'guaranteeSection',
+        'faqSection',
+      ],
+    },
+    {
+      name: 'media',
+      title: 'Media',
+      of: ['gallerySection', 'videoSection', 'embedSection'],
+    },
+    {
+      name: 'business',
+      title: 'About the business',
+      of: [
+        'servicesGridSection',
+        'processSection',
+        'storySection',
+        'valuesSection',
+        'founderSection',
+        'teamSection',
+        'serviceAreaSection',
+        'dynamicListSection',
+        'ctaBandSection',
+      ],
+    },
+  ],
+} as const;
+
+/** The `options` block every pageBuilder array should carry. */
+export const sectionArrayOptions = { insertMenu: SECTION_INSERT_MENU };
+
 // Reusable "extra sections" field for pages that keep their own structure but
 // want an append zone for library blocks. The consuming schema must declare an
 // `extra` field group. SectionRenderer renders the array; self-contained blocks
@@ -492,4 +554,5 @@ export const additionalSectionsField = defineField({
   description:
     'Optional. Add blocks from the library to the bottom of this page (a banner, a gallery, a call to action). Leave empty to keep the page exactly as it is.',
   of: SECTION_TYPES,
+  options: sectionArrayOptions,
 });

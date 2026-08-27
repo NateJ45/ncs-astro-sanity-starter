@@ -153,7 +153,7 @@ npm run apply-brand
 This rewrites:
 - `src/styles/globals.css` -- `@theme` palette tokens, font tokens, `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string
 - `src/data/site.ts` -- `name`, `domain`, `brandColors` (derived fields `storageKeyPrefix`, `themeStorageKey`, `studio` are computed automatically -- never stale)
-- `studio/sanity.config.ts` -- `studioThemeProps`
+- `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json; the Studio's colours come from @sanity/ui's built-in light/dark theme and are not brand-driven)
 - `scripts/generate-og-default.mjs` -- `wordmark`, `tagline`
 - `scripts/lib/render-og.mjs` -- `DEFAULTS` object colors and font stack
 - `scripts/generate-og-pages.mjs` -- `WORDMARK` fallback string
@@ -282,7 +282,7 @@ This requires `PUBLIC_SANITY_PROJECT_ID` to be set in `.env`. Flag if the projec
 yet connected to Sanity.
 
 **Studio theme:** The Sanity Studio theme was updated by `apply-brand`, but the Studio must
-be redeployed before editors see the new colors. Run `npm run studio:deploy` when ready.
+be rebuilt before editors see the new fonts. The Studio is embedded, so `npm run deploy` does it.
 
 **Worker name:** If `workerName` was set and `wrangler.jsonc` was rewritten, confirm that
 the Worker name is unique in the Cloudflare account before deploying.

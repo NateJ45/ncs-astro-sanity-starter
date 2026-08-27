@@ -1060,6 +1060,12 @@ docs.push({
     {
       _type: 'mapRow',
       _key: key(),
+      area: 'Preview (the tool with the page list)',
+      description: 'The live editing view. Pick a page from the list on the left and it appears on the right exactly as visitors will see it, including changes you have not published yet. Click any text on the page to jump straight to the field that holds it.',
+    },
+    {
+      _type: 'mapRow',
+      _key: key(),
       area: 'Home Page',
       description: 'The headline, hero text, section copy, and CTA buttons on the homepage. Images are uploaded separately and referenced here.',
     },
@@ -1114,6 +1120,32 @@ docs.push({
     {
       _type: 'howTo',
       _key: key(),
+      title: 'Rearrange a page while looking at it',
+      steps: [
+        'Open "Preview" from the top of the Studio.',
+        'Pick the page you want from the list on the left.',
+        'Hover a section on the page. An outline appears around it with a small toolbar.',
+        'Use the plus buttons to add a section above or below it. The menu that opens is grouped and searchable, so you can type "gallery" instead of hunting.',
+        'Drag the section by its outline to move it up or down the page.',
+        'Use the toolbar to duplicate a section, or to remove one you do not want.',
+        'Changes save as you go. Click Publish when the page looks right.',
+      ],
+    },
+    {
+      _type: 'howTo',
+      _key: key(),
+      title: 'Change wording without hunting for the field',
+      steps: [
+        'Open "Preview" and pick the page.',
+        'Click the words you want to change, right there on the page.',
+        'The edit panel opens on that exact field.',
+        'Type the new wording. The page beside you updates as you type.',
+        'Click Publish when you are happy with it.',
+      ],
+    },
+    {
+      _type: 'howTo',
+      _key: key(),
       title: 'Add a new testimonial',
       steps: [
         'Open "Testimonials" from the left navigation.',
@@ -1162,6 +1194,13 @@ docs.push({
       heading: 'Replace placeholder content before going live',
       tone: 'caution',
       body: 'The seed content is neutral placeholder copy. Every page has text that says "replace this with your own content." Make sure you have reviewed and updated all of it before pointing your real domain at the site.',
+    },
+    {
+      _type: 'tip',
+      _key: key(),
+      heading: 'Edit on the page, not in a list of fields',
+      tone: 'positive',
+      body: 'The "Preview" tool is the easiest way to work. You see the real page, click the thing you want to change, and the right field opens. You can also add, duplicate, reorder and remove whole sections without leaving the page. Everything you do there is a draft until you press Publish.',
     },
     {
       _type: 'tip',

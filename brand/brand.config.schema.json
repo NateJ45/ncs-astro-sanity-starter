@@ -177,11 +177,16 @@
     },
     "studio": {
       "type": "object",
-      "required": ["themeProps"],
+      "required": ["fonts"],
       "properties": {
-        "themeProps": {
+        "fonts": {
           "type": "object",
-          "description": "CSS custom properties for the Sanity Studio legacy theme."
+          "required": ["display", "body"],
+          "description": "Font stacks for the Sanity Studio theme, written into DISPLAY_STACK / BODY_STACK in the repo-root sanity.config.ts. Use double quotes around family names: the target is a single-quoted TS literal, so a single quote is rejected.",
+          "properties": {
+            "display": { "type": "string", "minLength": 1 },
+            "body": { "type": "string", "minLength": 1 }
+          }
         }
       }
     }

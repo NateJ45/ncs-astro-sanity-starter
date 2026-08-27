@@ -215,6 +215,6 @@ For reference, the four areas `apply-brand` touches. Described here so you know 
    Rewrites `name`, `domain`, `tagline`, and `brandColors`.
 
 4. **Studio theme + OG generator**
-   Rewrites the Studio theme props in `studio/sanity.config.ts` and the OG generator inputs, then regenerates `public/og-default.png`.
+   Rewrites the Studio theme's font stacks in `sanity.config.ts` (DISPLAY_STACK / BODY_STACK) and the OG generator inputs, then regenerates `public/og-default.png`. The Studio's COLOURS are no longer brand-driven: since 2026-08-28 it uses @sanity/ui's `buildTheme`, which ships a tested light and dark scheme, in place of the light-only `buildLegacyTheme` palette.
 
 No other files need to change for a brand swap. The `--tint-rgb` token propagates your hue through all the polish-layer overlays automatically.

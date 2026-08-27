@@ -1,0 +1,200 @@
+---
+/* ============================================================================
+   PreviewLayout - Studio-only shell for /preview/* pages
+   (ported from presacademy 2026-08-28; original lineage: the WCP site)
+   ============================================================================
+   Deliberately NOT BaseLayout: it skips analytics, canonical/OG tags, Lenis and
+   the theme bootstrap, none of which belong on a draft-content page that only
+   the Presentation Tool's iframe ever loads. `noindex, nofollow` is
+   non-negotiable here: these pages must never appear in search results.
+
+   Chrome-less on purpose. The real Header and Footer link to the live site,
+   which would bounce the editor's iframe OUT of the preview. A slim bar labels
+   the surface so a missing header reads as intentional rather than broken.
+   ============================================================================ */
+import '../styles/globals.css';
+import VisualEditingOverlay from '@/components/preview/VisualEditingOverlay.tsx';
+
+interface Props {
+  title: string;
+  draftMode: boolean;
+  /** Doc id this preview renders (e.g. "homePage" or a page doc id). */
+  pageId: string;
+}
+const { title, draftMode, pageId } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-draft={draftMode ? '1' : '0'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    <script is:inline>
+      // Before paint: mark whether this preview page is EMBEDDED in the Studio's
+      // Presentation iframe. Two behaviors hang off the class:
+      //  - The "Exit preview" button hides when embedded. Inside Presentation it
+      //    is a trap: it clears the draft cookie and strands the iframe on the
+      //    live site with no Studio connection, and nothing short of reloading
+      //    the whole Studio re-runs the enable handshake. The way out of
+      //    Presentation is Presentation's own chrome.
+      //  - The slim bar shows a reconnect hint if a page ever renders embedded
+      //    but WITHOUT draft mode (a dead session), instead of failing silently.
+      if (window.self !== window.top) {
+        document.documentElement.classList.add('in-studio-frame');
+        if (document.documentElement.dataset.draft !== '1') {
+          document.documentElement.classList.add('preview-disconnected');
+        }
+      }
+    </script>
+    <style>
+      .in-studio-frame [data-exit-preview] {
+        display: none;
+      }
+      [data-reconnect-hint] {
+        display: none;
+      }
+      .in-studio-frame.preview-disconnected [data-reconnect-hint] {
+        display: inline;
+      }
+      .in-studio-frame.preview-disconnected [data-connected-note] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="relative bg-background text-foreground">
+    <div
+      class="border-border-soft bg-card text-foreground/70 flex items-center justify-between gap-4 border-b px-4 py-1.5 text-xs"
+    >
+      <span data-connected-note
+        >Draft preview. The site header and footer render on the live site only.</span
+      >
+      <span data-reconnect-hint class="font-semibold"
+        >Draft session ended. Reload the Studio browser tab to reconnect the preview.</span
+      >
+    </div>
+    <main id="main"><slot /></main>
+
+    {/* The motion system's END states, forced. BaseLayout's IntersectionObserver
+        script is not loaded here (this shell is deliberately minimal), and the
+        reveal and stagger entrances hide content at opacity 0 until it runs, so
+        without this block the preview would render INVISIBLE sections. Keep it
+        in step with the motion vocabulary in src/styles/globals.css: today that
+        is [data-reveal], [data-stagger-grid] and .hero-entry-stagger. Looping
+        keyframe effects (the Ken Burns hero) are left running: they need no JS
+        and reach a visible state on their own. */}
+    <style is:global>
+      [data-reveal] {
+        opacity: 1 !important;
+        translate: 0 0 !important;
+      }
+      [data-stagger-grid] > * {
+        opacity: 1 !important;
+        translate: 0 0 !important;
+      }
+      .hero-entry-stagger > * {
+        opacity: 1 !important;
+        animation: none !important;
+        transform: none !important;
+      }
+    </style>
+
+    {
+      draftMode && (
+        <>
+          <VisualEditingOverlay client:only="react" pageId={pageId} />
+          <a
+            href="/api/draft-mode/disable"
+            data-exit-preview
+            class="bg-primary text-primary-foreground hover:bg-primary-dark fixed right-4 bottom-4 z-50 rounded-full px-4 py-2 text-sm font-bold shadow-lg"
+          >
+            Exit preview
+          </a>
+        </>
+      )
+    }
+
+    <script>
+      // =======================================================================
+      // Keep clicks INSIDE the preview surface (PORTS.md card 11)
+      // =======================================================================
+      // Section bodies are full of real-site links (/about, /services, CTAs).
+      // Left alone, clicking one navigates the Presentation iframe to the LIVE
+      // page, which has no Studio connection: the URL bar, the page navigator
+      // and the edit panel all silently freeze on the previous page while the
+      // iframe shows the real site, chrome and all. An editor reported exactly
+      // this against a production site in the family.
+      //
+      // So: same-origin links with a preview equivalent are remapped into
+      // /preview/* (the visual-editing history adapter then reports the new
+      // location, and Presentation resolves the document, so the navigator and
+      // the edit panel follow the click). Links with NO preview route (detail
+      // pages like /journal/<slug>, /api, /studio, external origins) split by
+      // context:
+      //  - EMBEDDED in the Studio: the navigation is SUPPRESSED entirely. A
+      //    click on a card there is an EDIT gesture (the stega overlay already
+      //    selects the right field and document), and a live tab popping open
+      //    on every card click forces a tab-switch back to the Studio each time.
+      //  - Standalone /preview tab: NEW TAB, so the preview surface is never
+      //    hijacked.
+      //
+      // THE ROUTE MAP IS PER-SITE. FIRST_SEGMENT_PREVIEWABLE mirrors
+      // SINGLETON_BY_PATH in src/pages/preview/[...slug].astro (plus: any
+      // single-segment path is a custom `page` slug, which /preview/<slug> also
+      // renders). Keep the two in sync.
+      const FIRST_SEGMENT_PREVIEWABLE = new Set([
+        'about',
+        'services',
+        'process',
+        'faq',
+        'contact',
+        'journal',
+        'privacy',
+      ]);
+      const NEVER_REMAP = new Set(['api', 'studio', 'preview', '404']);
+
+      document.addEventListener(
+        'click',
+        (event) => {
+          if (event.defaultPrevented || event.button !== 0) return;
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          const anchor = (event.target as Element | null)?.closest?.('a[href]');
+          if (!(anchor instanceof HTMLAnchorElement)) return;
+          if (anchor.target === '_blank' || anchor.hasAttribute('download')) return;
+
+          const embedded = document.documentElement.classList.contains('in-studio-frame');
+          const url = new URL(anchor.href, window.location.href);
+          // External origin: never let it take over the iframe.
+          if (url.origin !== window.location.origin) {
+            event.preventDefault();
+            if (!embedded) window.open(url.href, '_blank', 'noopener');
+            return;
+          }
+          const path = url.pathname.replace(/\/+$/, '') || '/';
+          // Already a preview path, an API call, or a same-page hash: default.
+          const first = path === '/' ? '' : path.split('/')[1];
+          if (path.startsWith('/preview') || first === 'api') return;
+          if (path === window.location.pathname && url.hash) return;
+
+          const segments = path === '/' ? [] : path.slice(1).split('/');
+          const previewable =
+            path === '/' ||
+            (segments.length === 1 && !NEVER_REMAP.has(first)) ||
+            (segments.length === 1 && FIRST_SEGMENT_PREVIEWABLE.has(first));
+
+          event.preventDefault();
+          if (previewable) {
+            window.location.assign(path === '/' ? '/preview' : `/preview${path}`);
+          } else if (!embedded) {
+            // Standalone tab: detail routes without a preview open in a new tab.
+            window.open(url.href, '_blank', 'noopener');
+          }
+          // Embedded: suppressed. The stega overlay's field selection IS the
+          // click's result; the editor stays in the Studio.
+        },
+        true,
+      );
+    </script>
+  </body>
+</html>
