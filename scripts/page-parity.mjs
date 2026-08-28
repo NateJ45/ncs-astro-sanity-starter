@@ -231,8 +231,22 @@ function collapseWhitespace(html) {
     .trim();
 }
 
+// The generator meta is pure toolchain churn: a patch-level Astro bump
+// rewrites it on every page and says nothing about the rendered site. A
+// same-code, same-content rebuild must not fail parity over it (bit
+// presacademy on 2026-08-28, when a lockfile rebuild moved 7.2.6 -> 7.2.9
+// and the ONLY diff across all 13 pages was this one line).
+function stripGeneratorMeta(html) {
+  return html.replace(
+    /<meta name="generator" content="Astro v[^"]*">/g,
+    '<meta name="generator" content="Astro vN">',
+  );
+}
+
 export function normalize(html) {
-  return collapseWhitespace(stripIslandPrefixes(stripAstroCids(stripAssetHashes(html))));
+  return collapseWhitespace(
+    stripIslandPrefixes(stripAstroCids(stripAssetHashes(stripGeneratorMeta(html)))),
+  );
 }
 
 // --------------------------------------------------------------------------
