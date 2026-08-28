@@ -226,20 +226,36 @@ const results = { SAME: [], DRIFT: [], 'MISSING-IN-STARTER': [] };
 const drifts = [];
 
 for (const rel of marked) {
-  const starterPath = join(starterDir, ...rel.split('/'));
+  // NESTED-APP RULE (2026-08-28): wcp keeps its whole app under site/, so its
+  // copy of scripts/foo.mjs lives at site/scripts/foo.mjs while the starter's
+  // is at scripts/foo.mjs. When the exact relative path is missing in the
+  // starter, retry once with the FIRST path segment stripped. One segment
+  // only, and only on a miss - a repo whose paths match the starter's never
+  // takes this branch, so it cannot mask a genuinely missing file there.
+  let starterRel = rel;
+  let starterPath = join(starterDir, ...rel.split('/'));
+  if (!existsSync(starterPath) && rel.includes('/')) {
+    const stripped = rel.split('/').slice(1).join('/');
+    const candidate = join(starterDir, ...stripped.split('/'));
+    if (existsSync(candidate)) {
+      starterRel = stripped;
+      starterPath = candidate;
+    }
+  }
   if (!existsSync(starterPath)) {
     results['MISSING-IN-STARTER'].push(rel);
     console.log(`  MISSING-IN-STARTER  ${rel}`);
     continue;
   }
+  const nestNote = starterRel === rel ? '' : `  (starter: ${starterRel})`;
   const siteText = normalize(readFileSync(join(siteDir, ...rel.split('/')), 'utf8'));
   const starterText = normalize(readFileSync(starterPath, 'utf8'));
   if (siteText === starterText) {
     results.SAME.push(rel);
-    console.log(`  SAME                ${rel}`);
+    console.log(`  SAME                ${rel}${nestNote}`);
   } else {
     results.DRIFT.push(rel);
-    console.log(`  DRIFT               ${rel}`);
+    console.log(`  DRIFT               ${rel}${nestNote}`);
     drifts.push([rel, firstDiffLine(siteText, starterText)]);
   }
 }

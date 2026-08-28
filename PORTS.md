@@ -1369,3 +1369,14 @@ starter is 17/17 SAME, and the cross-check from church against the
 starter is 16/16 SAME (church still does not carry the marker on
 `scripts/page-parity.mjs`, which is a pattern rather than an identical
 canonical file).
+
+### 2026-08-28: sync-check learns the nested-app rule
+
+wcp keeps its whole app under site/, so every marked file there
+reported MISSING-IN-STARTER - the checker compared repo-relative
+paths only. sync-check.mjs now retries a miss once with the first
+path segment stripped (one segment, only on a miss, labeled in the
+output as "(starter: <path>)"). First run against wcp immediately
+surfaced two real drifts (free-dist / with-workerd carrying
+pre-genericization em-dash comments; starter copies pulled forward)
+plus the documented deliberate icons-5 drift in shareDraftLink.
