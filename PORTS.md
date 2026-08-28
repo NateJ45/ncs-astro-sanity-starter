@@ -2110,3 +2110,15 @@ script, unrelated to this card and still open.
 What no test can reach without a Studio open: the actions rendering in
 the publish menu, the plugin layout composing with an existing one, and
 the key press itself. Those are the three things to click first.
+
+### 2026-08-28: tsc was blind behind TS5101
+
+npx tsc --noEmit stops at the TS5101 baseUrl deprecation before
+checking any file, so every repo whose only type gate was bare tsc
+verified nothing. Found when WCP's astro check caught a real bug in
+canonical undoRedo.ts (the as-RawDoc contextual-generic trap, now
+fixed canonically). tsconfigs carry ignoreDeprecations '6.0' now;
+the trustworthy gate for Astro repos is astro check, and bare tsc's
+leftover noise (.astro imports, cloudflare:workers types) is
+environmental, not code. Follow-up decision queued: install
+@astrojs/check family-wide so every repo gates like WCP.

@@ -412,12 +412,17 @@ export async function undoLast(client: SanityClient, documentId: string): Promis
   // `_updatedAt` goes with `_rev`: the server sets both, and sending the old
   // one back would be a lie about when this document last changed.
   const { _updatedAt: _ignored, ...body } = previous;
-  const written = (await client.createOrReplace(
-    { ...body, _id: documentId },
-    {
-      transactionId,
-    },
-  )) as RawDoc;
+  // DRIFT FROM THE CANONICAL COPY (the `as RawDoc` on the argument, twice in
+  // this file, on purpose). The trailing `as RawDoc` gives the call a
+  // contextual type, so @sanity/client infers its document generic as RawDoc
+  // and then demands `_type` on the argument, which is only `unknown`-keyed
+  // here. `npx tsc --noEmit` never sees it (it stops at the TS5101 baseUrl
+  // deprecation), but `npx astro check` does, and that is this repo's gate.
+  // sync-check will report this file as DRIFT until the starter takes the same
+  // two casts.
+  const written = (await client.createOrReplace({ ...body, _id: documentId } as RawDoc, {
+    transactionId,
+  })) as RawDoc;
 
   const entry: RedoEntry = {
     documentId,
@@ -453,12 +458,10 @@ export async function redoLast(client: SanityClient, documentId: string): Promis
 
   const transactionId = newTransactionId();
   const { _updatedAt: _ignored, ...body } = next;
-  const written = (await client.createOrReplace(
-    { ...body, _id: documentId },
-    {
-      transactionId,
-    },
-  )) as RawDoc;
+  // The second of the two drifting casts. See undoLast above.
+  const written = (await client.createOrReplace({ ...body, _id: documentId } as RawDoc, {
+    transactionId,
+  })) as RawDoc;
 
   state.ownTransactionIds.add(transactionId);
   state.undone.delete(entry.transactionId);
