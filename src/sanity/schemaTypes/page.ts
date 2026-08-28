@@ -14,13 +14,31 @@
 import { defineType, defineField } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons';
 import { SECTION_TYPES, sectionArrayOptions } from './sections';
+import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
 
 // Every built-in route segment. A custom page slug may not match any of these.
 // Keep in sync with src/lib/reservedSlugs.ts.
 const RESERVED_SLUGS = new Set([
-  'about', 'services', 'process', 'portfolio', 'faq', 'contact', 'journal',
-  'e-design', 'shop', 'gift-certificates', 'quiz', 'calculator', 'resources',
-  'guides', 'press', 'privacy', '404', 'sitemap-index.xml', 'og', '_astro',
+  'about',
+  'services',
+  'process',
+  'portfolio',
+  'faq',
+  'contact',
+  'journal',
+  'e-design',
+  'shop',
+  'gift-certificates',
+  'quiz',
+  'calculator',
+  'resources',
+  'guides',
+  'press',
+  'privacy',
+  '404',
+  'sitemap-index.xml',
+  'og',
+  '_astro',
 ]);
 
 export const page = defineType({
@@ -33,6 +51,7 @@ export const page = defineType({
     { name: 'extra', title: 'Extra sections' },
     { name: 'menu', title: 'Menu placement' },
     { name: 'seo', title: 'SEO' },
+    PUBLISH_AT_GROUP,
   ],
   fields: [
     defineField({
@@ -40,7 +59,8 @@ export const page = defineType({
       title: 'Page title',
       type: 'string',
       group: 'content',
-      description: 'The name of this page (used for the menu link and the browser tab unless you set an SEO title).',
+      description:
+        'The name of this page (used for the menu link and the browser tab unless you set an SEO title).',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -48,13 +68,15 @@ export const page = defineType({
       title: 'Web address',
       type: 'slug',
       group: 'content',
-      description: 'The end of the address, like "studio-tour" for example.com/studio-tour. Click Generate to make one from the title.',
+      description:
+        'The end of the address, like "studio-tour" for example.com/studio-tour. Click Generate to make one from the title.',
       options: { source: 'title', maxLength: 96 },
       validation: (Rule) =>
         Rule.required().custom((slug) => {
           const v = slug?.current;
           if (!v) return 'Add a web address (click Generate).';
-          if (RESERVED_SLUGS.has(v)) return `"${v}" is already used by a built-in page. Pick a different address.`;
+          if (RESERVED_SLUGS.has(v))
+            return `"${v}" is already used by a built-in page. Pick a different address.`;
           if (!/^[a-z0-9-]+$/.test(v)) return 'Use only lowercase letters, numbers, and dashes.';
           return true;
         }),
@@ -77,7 +99,8 @@ export const page = defineType({
       type: 'boolean',
       group: 'menu',
       initialValue: false,
-      description: 'Off by default, so you can build and preview privately. Turn on when you want visitors to find it in the menu.',
+      description:
+        'Off by default, so you can build and preview privately. Turn on when you want visitors to find it in the menu.',
     }),
     defineField({
       name: 'navGroup',
@@ -101,7 +124,8 @@ export const page = defineType({
       type: 'string',
       group: 'menu',
       hidden: ({ parent }) => !parent?.addToMainNav,
-      description: 'Shorter text for the menu, if the page title is long. Leave blank to use the title.',
+      description:
+        'Shorter text for the menu, if the page title is long. Leave blank to use the title.',
     }),
     defineField({
       name: 'addToFooter',
@@ -117,8 +141,12 @@ export const page = defineType({
       title: 'SEO title',
       type: 'string',
       group: 'seo',
-      description: 'Browser tab and search result title. Aim for 50 to 60 characters. Leave blank to use the page title.',
-      validation: (Rule) => Rule.max(60).warning('Titles longer than about 60 characters get cut off in search results.'),
+      description:
+        'Browser tab and search result title. Aim for 50 to 60 characters. Leave blank to use the page title.',
+      validation: (Rule) =>
+        Rule.max(60).warning(
+          'Titles longer than about 60 characters get cut off in search results.',
+        ),
     }),
     defineField({
       name: 'seoDescription',
@@ -127,17 +155,25 @@ export const page = defineType({
       rows: 3,
       group: 'seo',
       description: 'The sentence under the title in search results. Aim for 150 to 160 characters.',
-      validation: (Rule) => Rule.max(160).warning('Descriptions longer than about 160 characters get cut off in search results.'),
+      validation: (Rule) =>
+        Rule.max(160).warning(
+          'Descriptions longer than about 160 characters get cut off in search results.',
+        ),
     }),
     defineField({
       name: 'seoImage',
       title: 'Social share image',
       type: 'image',
       group: 'seo',
-      description: 'Optional. Shown when this page is shared. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
+      description:
+        'Optional. Shown when this page is shared. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
       options: { hotspot: true },
       fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),
+
+    // ── Publishing ────────────────────────────────────────────────────────────
+    // Free-tier scheduled publishing; see ./_publishAt.ts.
+    publishAtField(),
   ],
   preview: {
     select: { title: 'title', slug: 'slug.current', inNav: 'addToMainNav' },

@@ -51,26 +51,28 @@ none of its copies are marked.
 or present but not wired into that repo's gate. `no` = absent. `yes` = a session
 is installing it as of the date on the card.
 
-| #   | Card                                                              | wcp     | presacademy | starter | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio |
-| --- | ----------------------------------------------------------------- | ------- | ----------- | ------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- |
-| 1   | with-workerd build wrapper                                        | yes     | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
-| 2   | free-dist prebuild unlock                                         | yes     | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
-| 3   | page-parity harness                                               | yes     | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
-| 4   | sanity-lib seed/patch plumbing                                    | partial | yes         | yes     | yes              | yes           | yes            | yes                | n/a                 |
-| 5   | stale-types CI guard                                              | yes     | yes         | yes     | yes              | yes           | yes            | yes                | n/a                 |
-| 6   | Nightly Sanity backup workflow                                    | yes     | yes         | no      | yes              | yes           | yes            | template           | n/a                 |
-| 7   | Uptime workflow                                                   | yes     | yes         | no      | yes              | yes           | yes            | template           | yes                 |
-| 8   | Playwright + axe + reflow suite                                   | yes     | yes         | no      | yes              | no            | no             | no                 | no                  |
-| 9   | contrast.ts + theme-token gate                                    | partial | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
-| 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes     | staged           | staged        | no             | yes                | n/a                 |
-| 11  | Preview click interceptor                                         | yes     | yes         | yes     | staged           | staged        | no             | yes                | n/a                 |
-| 12  | Parity-gated page-builder conversion                              | partial | yes         | partial | no               | no            | no             | no                 | no                  |
-| 13  | react/react-dom exact pin                                         | no      | yes         | yes     | staged           | staged        | no             | yes                | no                  |
-| 14  | wrangler legacy_env pin                                           | no      | yes         | yes     | staged           | staged        | no             | yes                | no                  |
-| 15  | PENDING.md / TESTING.md docs registry                             | yes     | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
-| 16  | Quarterly slop sweep                                              | no      | no          | no      | no               | no            | no             | no                 | no                  |
-| 17  | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes         | yes     | staged           | staged        | no             | yes                | n/a                 |
-| 18  | Chrome options (editable header/footer content)                   | yes     | yes         | yes     | staged           | staged        | no             | yes                | n/a                 |
+| #   | Card                                                              | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio |
+| --- | ----------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- |
+| 1   | with-workerd build wrapper                                        | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
+| 2   | free-dist prebuild unlock                                         | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
+| 3   | page-parity harness                                               | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
+| 4   | sanity-lib seed/patch plumbing                                    | partial | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 |
+| 5   | stale-types CI guard                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 |
+| 6   | Nightly Sanity backup workflow                                    | yes     | yes         | no       | yes              | yes           | yes            | template           | n/a                 |
+| 7   | Uptime workflow                                                   | yes     | yes         | no       | yes              | yes           | yes            | template           | yes                 |
+| 8   | Playwright + axe + reflow suite                                   | yes     | yes         | no       | yes              | no            | no             | no                 | no                  |
+| 9   | contrast.ts + theme-token gate                                    | partial | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
+| 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
+| 11  | Preview click interceptor                                         | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
+| 12  | Parity-gated page-builder conversion                              | partial | yes         | partial  | no               | no            | no             | no                 | no                  |
+| 13  | react/react-dom exact pin                                         | no      | yes         | yes      | staged           | staged        | no             | yes                | no                  |
+| 14  | wrangler legacy_env pin                                           | no      | yes         | yes      | staged           | staged        | no             | yes                | no                  |
+| 15  | PENDING.md / TESTING.md docs registry                             | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
+| 16  | Quarterly slop sweep                                              | no      | no          | no       | no               | no            | no             | no                 | no                  |
+| 17  | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
+| 18  | Chrome options (editable header/footer content)                   | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
+| 19  | Shareable draft links                                             | no      | no          | yes      | no               | no            | no             | yes                | n/a                 |
+| 20  | publishAt scheduled publishing (free-tier)                        | no      | no          | template | no               | no            | no             | template           | n/a                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -764,6 +766,140 @@ every page; what it imports is a site-wide decision.
 flavor) / starter yes / church-starter yes / reid staged / mas staged /
 2ndpres parked (after its DNS cutover).
 
+## Card 19: Shareable draft links (2026-08-28)
+
+**Canonical:** `src/sanity/components/shareDraftLink.tsx`
+
+**What:** a "Copy share link" affordance in the Studio that hands an editor a URL
+an outside reviewer can open, with no Sanity login, to read the CURRENT DRAFT of
+one page. It sits in the publish menu of every document that has a page of its
+own (a document action registered in `sanity.config.ts`), and, in repos that ship
+the Presentation page navigator, as a per-row icon button on that list too.
+
+**Why:** "can the board chair read this before it goes live?" had two answers and
+both were wrong. Publish it and unpublish it, or make a volunteer a Sanity
+account. The mechanism to do it properly was already in the repo and had only
+ever been pointed at an iframe.
+
+**How the link is minted.** `createPreviewSecret()` from
+`@sanity/preview-url-secret/create-secret` - the same call the Presentation tool
+makes, from the Studio's own authenticated client. The returned secret is dropped
+into the URL the enable endpoint already understands:
+
+```
+/api/draft-mode/enable?sanity-preview-secret=<minted>&sanity-preview-pathname=/preview/<page>
+```
+
+`/api/draft-mode/enable` is NOT modified by this card. It still runs
+`validatePreviewUrl()` and still answers a bare 401 for an invalid, tampered, or
+expired secret before setting any cookie. The feature is additive: a new way to
+obtain a valid secret, not a new way in.
+
+**The TTL caveat, stated in the UI.** `SECRET_TTL` is a hard-coded `60 * 60` in
+`@sanity/preview-url-secret/constants`, and the validating query (`_updatedAt >
+now() - SECRET_TTL`) lives inside the package. There is no `ttl` option on the
+create call and no supported way to widen it, so **a share link works for about
+an hour and then stops**. Every surface says so out loud - the toast, the button
+tooltip, the document-action title, the church guide - because the alternative is
+a reviewer meeting a 401 the next morning and reporting the site as broken.
+Re-minting is one click, which is the intended answer to an expired link.
+
+The package also ships a "shared access" singleton with a NON-expiring secret
+(`toggle-preview-access-sharing`). Deliberately not used: it switches draft
+preview on for anyone who ever saw any link, forever, with no per-link
+revocation. For a volunteer-run site a one-hour link is the safer default.
+
+**HTTPS only.** The enable endpoint sets its cookie `secure: true; sameSite:
+none` (required because Presentation loads it cross-context). Browsers refuse a
+secure cookie over plain http, so share links work on the deployed origin and not
+against `http://localhost:4321`. Test them deployed.
+
+**Per-site adaptation:** none beyond having the preview stack (card 10). The
+module derives the preview path from that repo's own `pathForDoc()` in
+`src/sanity/urls.ts`, so a repo with different routes needs no edit here. Repos
+without a `PreviewNavigator.tsx` get the document action only, which is a
+complete feature on its own.
+
+**Applied to:** starter yes (canonical) / church-starter yes (document action
+only, it has no page navigator) / everything else pending rollout.
+
+## Card 20: publishAt scheduled publishing, free tier (2026-08-28)
+
+**Canonical:** `src/sanity/schemaTypes/_publishAt.ts`, `scripts/publish-due.mjs`,
+`.github/workflows/publish-due.yml`
+
+**What:** an editor sets "Publish automatically at" on a page, leaves it as a
+draft, and it publishes itself. Three small parts: a `datetime` field, a
+dependency-free Node script, and a half-hourly workflow.
+
+**Why:** Sanity's own Scheduled Drafts is a **Growth-plan** feature. Every site in
+this family runs on the free plan, and "write it Friday night, have it live
+Monday morning" is a thing volunteers actually ask for, so it gets built rather
+than bought.
+
+**The field.** `PUBLISH_AT_GROUP` + `publishAtField()` are exported as a PAIR and
+must be spread together - the group into the type's `groups`, the field into its
+`fields`. A field naming a group its type never declared is a hard Studio 6.4+
+crash, not a warning. The script's query is schema-agnostic, so adding the pair
+to a new document type is the entire installation: no script change, no workflow
+change.
+
+**Timezone honesty.** Sanity's datetime input shows and accepts the editor's
+LOCAL time and stores UTC; the script compares against `now()` evaluated by
+Sanity, so it is UTC on both sides and the runner's own clock is irrelevant. The
+description says "your own local time" so nobody has to reason about it, and
+"within the half hour" so nobody expects 9:00:00.
+
+**Publishing is two mutations in one request.** Sanity's own publish action is
+`createOrReplace` at the id without the `drafts.` prefix, then `delete` the draft.
+This mirrors that, in a single mutation array so it is atomic. `publishAt` is
+STRIPPED on the way through rather than cleared afterwards: the published
+document never carries a schedule, so there is no window in which a crash between
+two writes leaves a document that republishes itself every half hour.
+
+**The no-npm-install cron design, and why.** At `*/30` this runs 48 times a day.
+`npm ci` would spend a couple of minutes of Actions time per run installing
+several hundred megabytes in order to make three HTTP calls - roughly two hours
+of runner time a day to publish, on most days, nothing. So `publish-due.mjs`
+imports nothing from `node_modules`: it uses global `fetch` against Sanity's HTTP
+API and the job is checkout + setup-node + node, a few seconds. Its only local
+import is `scripts/lib/loadEnv.mjs`, itself dependency-free and used only for
+local runs. **If the script ever needs a package, the design broke; do not add an
+install step.**
+
+Endpoints, both `Authorization: Bearer <SANITY_AUTH_TOKEN>`:
+
+- `POST https://<projectId>.api.sanity.io/v2025-02-19/data/query/<dataset>?perspective=raw`
+  with `{query}`. `perspective=raw` is required - the default perspective hides
+  `drafts.*`, which are the only documents this cares about.
+- `POST https://<projectId>.api.sanity.io/v2025-02-19/data/mutate/<dataset>?returnIds=true`
+  with `{mutations:[{createOrReplace}, {delete}]}`.
+
+**Dry run by default.** Bare `node scripts/publish-due.mjs` prints the queue and
+writes nothing; `--apply` publishes. The workflow passes `--apply`. Same gate as
+every other Sanity script in `scripts/`, for the same reason: a human running it
+by hand cannot publish by accident.
+
+**Workflow gating** is card 6's two-job gate, copied verbatim: a `gate` job checks
+for the `SANITY_AUTH_TOKEN` secret and the `SANITY_PROJECT_ID` variable and emits
+a `::warning::` with `ready=false` when either is missing, and the `publish` job
+is `if: needs.gate.outputs.ready == 'true'`. A fork without the secret skips
+instead of failing. One difference from the backup workflow: this token must have
+WRITE access, where a read token is enough for the backup.
+
+**In both TEMPLATE repos the `schedule:` block ships COMMENTED OUT**, exactly as
+`sanity-backup.yml` does, because neither template has a Sanity project of its
+own and a gate job firing 48 times a day only to skip is the same waste in
+miniature. A fork uncomments one line. `workflow_dispatch` stays on, so a manual
+run always works.
+
+**Per-site adaptation:** set the secret and the variable, uncomment the schedule,
+and add the field pair to any document type that should be schedulable.
+
+**Applied to:** starter yes (canonical, on `page` + the `_pageSingleton` factory)
+/ church-starter yes (on `page` + the `churchPages` factory, so all eleven church
+page singletons) / everything else pending rollout.
+
 ## Sync sessions
 
 A sync session is a pass over one repo: run `sync-check`, reconcile drift, install the
@@ -947,3 +1083,49 @@ compare` 10/10 (starter) and 20/20 (church), unit tests pass, and
 `sanity schema extract --enforce-required-fields` succeeds. The parity
 run is what caught the SanityImage-import CSS-bundle rename recorded on
 the card. Baselines were NOT regenerated in either repo.
+
+### 2026-08-28: publishing confidence lands in both templates (cards 19 + 20)
+
+Unlocked Studio Phase E, written here first and installed in
+church-starter in the same pass. Three files are byte-identical
+across the two repos and PORTABLE-marked here:
+`src/sanity/components/shareDraftLink.tsx`,
+`src/sanity/schemaTypes/_publishAt.ts`, `scripts/publish-due.mjs`.
+The fourth, `.github/workflows/publish-due.yml`, differs only in the
+paragraph naming which template it is sitting in.
+
+Three adaptation notes for the next repo:
+
+- **church-starter has no PreviewNavigator.** The share affordance is
+  therefore the document action alone there, which is why the module
+  was written as a `useShareDraftLink()` hook with the action beside
+  it rather than as navigator markup. The starter, which does have a
+  navigator, calls the same hook from a per-row button. Any repo
+  gains the navigator button by adding one `<Button>`; none of them
+  needs a navigator to get the feature.
+- **Where the field went, and where it did not.** Both repos put the
+  group/field pair on `page` and on their page-singleton factory. In
+  church-starter that factory backs all eleven church page
+  singletons, so coverage is broad. In the starter the factory is
+  currently uncalled (every core singleton is hand-authored), so only
+  `page` carries the field in practice. Hand-authored singletons in
+  either repo do NOT have it yet; adding it is spreading
+  `PUBLISH_AT_GROUP` into that type's `groups` and `publishAtField()`
+  into its `fields`, together, and nothing else. The script never
+  needs to know.
+- **The dry-run could not be exercised against real data.** Neither
+  template has a `.env` or a Sanity project, so `publish-due.mjs` was
+  proven only to parse, to fail closed on a missing project id and on
+  a missing token, and to keep the token out of every message. The
+  first fork to enable this should run the bare (dry) form against a
+  real dataset with one scheduled draft before uncommenting the cron.
+
+Both repos verified green: `npx tsc --noEmit` clean (TS5101 baseUrl
+deprecation only), `npm run typegen` re-run and committed,
+`npm run build` clean, `node scripts/page-parity.mjs compare` 10/10
+(starter) and 20/20 (church) - nothing here touches built HTML - unit
+tests 94/94 and 60/60, and `sanity schema extract
+--enforce-required-fields` succeeds in both with `publishAt` present
+and optional. Prettier reformatted `page.ts` in both repos and
+`_pageSingleton.ts` / `churchPages.ts` beyond the edited lines; those
+files had drifted from `npm run format` before this session.

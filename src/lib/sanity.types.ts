@@ -271,56 +271,6 @@ export type StudioGuide = {
   }>;
 };
 
-export type PrivacyPage = {
-  _id: string;
-  _type: 'privacyPage';
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  seoTitle?: string;
-  seoDescription?: string;
-  seoImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: 'image';
-  };
-  heroEyebrow?: string;
-  heroHeadline?: string;
-  heroSubhead?: string;
-  heroImage?: {
-    asset?: SanityImageAssetReference;
-    media?: unknown;
-    hotspot?: SanityImageHotspot;
-    crop?: SanityImageCrop;
-    alt?: string;
-    _type: 'image';
-  };
-  heroScriptAccent?: string;
-  lastUpdated?: string;
-  body?: Array<{
-    children?: Array<{
-      marks?: Array<string>;
-      text?: string;
-      _type: 'span';
-      _key: string;
-    }>;
-    style?: 'normal' | 'h2' | 'h3';
-    listItem?: 'bullet' | 'number';
-    markDefs?: Array<{
-      href?: string;
-      openInNewTab?: boolean;
-      _type: 'link';
-      _key: string;
-    }>;
-    level?: number;
-    _type: 'block';
-    _key: string;
-  }>;
-};
-
 export type NotFoundPage = {
   _id: string;
   _type: 'notFoundPage';
@@ -390,12 +340,9 @@ export type SiteSettings = {
   email?: string;
   phone?: string;
   navItems?: Array<
-    | {
-        label?: string;
-        href?: string;
-        _type: 'navLink';
+    | ({
         _key: string;
-      }
+      } & NavLink)
     | {
         label?: string;
         links?: Array<{
@@ -410,15 +357,41 @@ export type SiteSettings = {
   >;
   footerColumns?: Array<{
     title?: string;
-    links?: Array<{
-      label?: string;
-      href?: string;
-      _type: 'footerLink';
-      _key: string;
-    }>;
+    links?: Array<
+      | ({
+          _key: string;
+        } & NavLink)
+      | {
+          label?: string;
+          href?: string;
+          _type: 'footerLink';
+          _key: string;
+        }
+    >;
     _type: 'footerColumn';
     _key: string;
   }>;
+  headerCta?: {
+    show?: boolean;
+    label?: string;
+    link?: NavLink;
+  };
+  showEmail?: boolean;
+  showSocials?: boolean;
+  showFooterSocials?: boolean;
+  legalNav?: Array<
+    {
+      _key: string;
+    } & NavLink
+  >;
+  logo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
   availabilityStatus?: string;
   serviceAreas?: Array<string>;
   travelFees?: Array<{
@@ -494,6 +467,87 @@ export type SiteSettings = {
     showBudgetCalculator?: boolean;
   };
   satisfactionGuarantee?: string;
+};
+
+export type HomePageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'homePage';
+};
+
+export type AboutPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'aboutPage';
+};
+
+export type ServicesPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'servicesPage';
+};
+
+export type ProcessPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'processPage';
+};
+
+export type FaqPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'faqPage';
+};
+
+export type ContactPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'contactPage';
+};
+
+export type JournalPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'journalPage';
+};
+
+export type PrivacyPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'privacyPage';
+};
+
+export type PageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'page';
+};
+
+export type NavLink = {
+  _type: 'navLink';
+  label?: string;
+  linkType?: 'internal' | 'external';
+  internalPage?:
+    | HomePageReference
+    | AboutPageReference
+    | ServicesPageReference
+    | ProcessPageReference
+    | FaqPageReference
+    | ContactPageReference
+    | JournalPageReference
+    | PrivacyPageReference
+    | PageReference;
+  externalUrl?: string;
+  href?: string;
 };
 
 export type DynamicListSection = {
@@ -846,53 +900,54 @@ export type HeroSection = {
   size?: 'tall' | 'short';
 };
 
-export type HomePageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'homePage';
-};
-
-export type AboutPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'aboutPage';
-};
-
-export type ServicesPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'servicesPage';
-};
-
-export type ProcessPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'processPage';
-};
-
-export type FaqPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'faqPage';
-};
-
-export type ContactPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'contactPage';
-};
-
-export type JournalPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'journalPage';
+export type PrivacyPage = {
+  _id: string;
+  _type: 'privacyPage';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  heroEyebrow?: string;
+  heroHeadline?: string;
+  heroSubhead?: string;
+  heroImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  heroScriptAccent?: string;
+  lastUpdated?: string;
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal' | 'h2' | 'h3';
+    listItem?: 'bullet' | 'number';
+    markDefs?: Array<{
+      href?: string;
+      openInNewTab?: boolean;
+      _type: 'link';
+      _key: string;
+    }>;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
 };
 
 export type JournalEntryReference = {
@@ -900,13 +955,6 @@ export type JournalEntryReference = {
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'journalEntry';
-};
-
-export type PageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'page';
 };
 
 export type CtaBlock = {
@@ -986,6 +1034,7 @@ export type Page = {
     alt?: string;
     _type: 'image';
   };
+  publishAt?: string;
 };
 
 export type JournalCategoryReference = {
@@ -1944,10 +1993,19 @@ export type AllSanitySchemaTypes =
   | StudioPlaybook
   | StudioNotes
   | StudioGuide
-  | PrivacyPage
   | NotFoundPage
   | BusinessInfo
   | SiteSettings
+  | HomePageReference
+  | AboutPageReference
+  | ServicesPageReference
+  | ProcessPageReference
+  | FaqPageReference
+  | ContactPageReference
+  | JournalPageReference
+  | PrivacyPageReference
+  | PageReference
+  | NavLink
   | DynamicListSection
   | TeamSection
   | FaqItemReference
@@ -1972,15 +2030,8 @@ export type AllSanitySchemaTypes =
   | ImageTextSection
   | RichTextSection
   | HeroSection
-  | HomePageReference
-  | AboutPageReference
-  | ServicesPageReference
-  | ProcessPageReference
-  | FaqPageReference
-  | ContactPageReference
-  | JournalPageReference
+  | PrivacyPage
   | JournalEntryReference
-  | PageReference
   | CtaBlock
   | Page
   | JournalCategoryReference

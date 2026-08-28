@@ -1,0 +1,82 @@
+name: Publish scheduled drafts
+
+# Free-tier scheduled publishing. Sanity's own Scheduled Drafts needs the Growth
+# plan, so instead: an editor sets "Publish automatically at" on a draft in the
+# Studio, and this job publishes it once the time has passed.
+# See scripts/publish-due.mjs and src/sanity/schemaTypes/_publishAt.ts.
+#
+# ── WHY THIS JOB DOES NOT RUN `npm ci` ───────────────────────────────────────
+# At */30 this runs 48 times a day. Installing the full dependency tree each
+# time would burn a few minutes of Actions time per run in order to make three
+# HTTP calls. publish-due.mjs is therefore dependency-free: it uses global fetch
+# against Sanity's HTTP API, so the job is checkout + setup-node + node, a few
+# seconds. Do NOT add an install step here; if the script ever needs a package,
+# that is the signal that the design broke, not that the job needs npm.
+#
+# ── THIS REPO IS A TEMPLATE ──────────────────────────────────────────────────
+# ncs-astro-sanity-starter ships no Sanity project of its own, so there are no
+# drafts to publish and the schedule is COMMENTED OUT (same stance as
+# sanity-backup.yml elsewhere in the family). It is committed anyway so a FORK
+# inherits working scheduled publishing on day one.
+#
+# To enable in a fork, per site:
+#   1. Set the SANITY_AUTH_TOKEN repo secret. It must be a WRITE token here
+#      (unlike the backup workflow, where a read token is enough).
+#   2. Set the SANITY_PROJECT_ID repo variable to that site's Sanity project id.
+#      Not a secret (it ships in the client bundle), a variable because this
+#      file is a template and every fork has a different one.
+#   3. Uncomment the `schedule:` block below.
+#
+# The two-job gate below is the load-bearing part and is intact: with the secret
+# or the variable missing, the workflow logs a warning and skips rather than
+# failing. That is what makes it safe to commit before either exists.
+# workflow_dispatch stays on, so a manual run always works.
+#
+# ── HONEST TIMING ────────────────────────────────────────────────────────────
+# */30 means "within about half an hour of the time the editor picked", and the
+# field description in the Studio says exactly that. GitHub's scheduler is also
+# best-effort and can be delayed under load, so treat this as a soft promise.
+on:
+  # schedule:
+  #   - cron: '*/30 * * * *' # every half hour
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$PROJECT_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SANITY_AUTH_TOKEN secret and/or SANITY_PROJECT_ID variable not set; skipping scheduled publishing. Expected in the unforked template."
+          fi
+
+  publish:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # No install step on purpose. See the header.
+      - name: Publish anything whose time has come
+        env:
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          SANITY_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          SANITY_DATASET: production
+        # --apply is what turns the script from a dry run into a publish. The
+        # script defaults to dry-run precisely so that a human running it by
+        # hand cannot publish by accident.
+        run: node scripts/publish-due.mjs --apply

@@ -26,6 +26,7 @@
 //   - A hero group: background image, eyebrow, headline, subhead, script accent
 //   - A page-builder group: the full SECTION_TYPES (general blocks) + additionalSections
 //   - A SEO group: seoTitle, seoDescription, seoImage
+//   - A Publishing group: publishAt (free-tier scheduled publishing)
 //   - Any extra groups / fields you append via the `extra` argument
 //
 // IMPORTANT: after adding a new singleton you must run `npm run typegen` and
@@ -35,6 +36,7 @@
 
 import { defineType, defineField } from 'sanity';
 import { SECTION_TYPES, additionalSectionsField, sectionArrayOptions } from './sections';
+import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
 
 interface PageDefaults {
   heroEyebrow?: string;
@@ -70,9 +72,10 @@ export function definePageSingleton(
     // Configuration-style document -- keep Canvas AI writing tools away from it.
     options: { canvasApp: { exclude: true } },
     groups: [
-      { name: 'hero',     title: 'Hero' },
-      { name: 'builder',  title: 'Page sections' },
-      { name: 'seo',      title: 'SEO' },
+      { name: 'hero', title: 'Hero' },
+      { name: 'builder', title: 'Page sections' },
+      { name: 'seo', title: 'SEO' },
+      PUBLISH_AT_GROUP,
       ...(extra.groups ?? []),
     ],
     fields: [
@@ -85,9 +88,7 @@ export function definePageSingleton(
         description:
           'Full-bleed photo behind the hero text. Landscape orientation works best. Leave empty to use a solid brand-color hero.',
         options: { hotspot: true },
-        fields: [
-          defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-        ],
+        fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
       }),
       defineField({
         name: 'heroEyebrow',
@@ -174,6 +175,10 @@ export function definePageSingleton(
         options: { hotspot: true },
         fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
       }),
+
+      // ── Publishing ────────────────────────────────────────────────────────
+      // Free-tier scheduled publishing; see ./_publishAt.ts.
+      publishAtField(),
 
       // ── Per-page extras ───────────────────────────────────────────────────
       ...(extra.fields ?? []),

@@ -35,6 +35,7 @@ import { envVal } from './src/sanity/urls';
 import StudioLogo from './src/sanity/components/StudioLogo';
 import { CharacterCountInput } from './src/sanity/components/CharacterCountInput';
 import { documentBadges } from './src/sanity/components/documentBadges';
+import { shareDraftLinkAction } from './src/sanity/components/shareDraftLink';
 
 // =============================================================================
 // Studio theme
@@ -171,12 +172,13 @@ export default defineConfig({
       return prev;
     },
     actions: (prev, { schemaType }) => {
-      if (SINGLETON_TYPES.has(schemaType)) {
-        return prev.filter(
-          ({ action }) => !['unpublish', 'delete', 'duplicate'].includes(action || ''),
-        );
-      }
-      return prev;
+      const base = SINGLETON_TYPES.has(schemaType)
+        ? prev.filter(({ action }) => !['unpublish', 'delete', 'duplicate'].includes(action || ''))
+        : prev;
+      // "Copy share link" sits in the publish menu of every document that has a
+      // page of its own; the action returns null for the rest, so appending it
+      // unconditionally is safe. See src/sanity/components/shareDraftLink.tsx.
+      return [...base, shareDraftLinkAction];
     },
   },
 });
