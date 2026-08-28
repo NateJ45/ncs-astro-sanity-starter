@@ -41,6 +41,9 @@ if (!pageDoc) return Astro.redirect('/404');
 const title = (pageDoc as any).seoTitle ?? (pageDoc as any).title ?? site.name;
 const description = (pageDoc as any).seoDescription ?? '';
 const seoImage = (pageDoc as any).seoImage ?? undefined;
+// "Keep this page out of Google" (page.hideFromSearch). The other half of that
+// switch is the sitemap filter in astro.config.mjs, which drops the same page.
+const noindex = (pageDoc as any).hideFromSearch === true;
 
 const schemas = [
   breadcrumbSchema([
@@ -50,6 +53,6 @@ const schemas = [
 ];
 ---
 
-<BaseLayout {title} {description} {schemas} {siteSettings} seoImage={seoImage}>
+<BaseLayout {title} {description} {schemas} {siteSettings} {noindex} seoImage={seoImage}>
   <SectionRenderer sections={(pageDoc as any).pageBuilder} idPrefix="page" />
 </BaseLayout>

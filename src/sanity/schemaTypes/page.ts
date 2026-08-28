@@ -15,6 +15,7 @@ import { defineType, defineField } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons';
 import { SECTION_TYPES, sectionArrayOptions } from './sections';
 import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
+import { seoFields } from './_seoFields';
 
 // Every built-in route segment. A custom page slug may not match any of these.
 // Keep in sync with src/lib/reservedSlugs.ts.
@@ -50,7 +51,7 @@ export const page = defineType({
     { name: 'content', title: 'Content', default: true },
     { name: 'extra', title: 'Extra sections' },
     { name: 'menu', title: 'Menu placement' },
-    { name: 'seo', title: 'SEO' },
+    { name: 'seo', title: 'Search & sharing' },
     PUBLISH_AT_GROUP,
   ],
   fields: [
@@ -135,40 +136,66 @@ export const page = defineType({
       initialValue: false,
     }),
 
-    // ── SEO ───────────────────────────────────────────────────────────────────
+    // ── Archived ──────────────────────────────────────────────────────────────
+    // A real "put it away", not a delete. The document stays exactly as it is,
+    // and every live-site query skips it (`archived != true`, so a page made
+    // before this field existed stays visible). Nothing reference-blocks it, and
+    // Restore brings the page back unchanged. Set from the publish menu
+    // (components/pageActions.tsx) or a navigator row, so it is deliberately
+    // NOT in a field group an editor browses past.
     defineField({
-      name: 'seoTitle',
-      title: 'SEO title',
-      type: 'string',
-      group: 'seo',
+      name: 'archived',
+      title: 'Archived',
+      type: 'boolean',
+      group: 'menu',
       description:
-        'Browser tab and search result title. Aim for 50 to 60 characters. Leave blank to use the page title.',
-      validation: (Rule) =>
-        Rule.max(60).warning(
-          'Titles longer than about 60 characters get cut off in search results.',
-        ),
+        'Archived pages come off the site but are kept here so they can be restored. Publish after changing this.',
     }),
-    defineField({
-      name: 'seoDescription',
-      title: 'SEO description',
-      type: 'text',
-      rows: 3,
+
+    // ── Search & sharing ──────────────────────────────────────────────────────
+    // The whole group, in one order, from the shared helper. The three fields
+    // this page already had are passed back in by REFERENCE so their names and
+    // wording never change; the helper adds the live snippet preview and the
+    // "keep this page out of Google" switch. See ./_seoFields.ts.
+    ...seoFields({
       group: 'seo',
-      description: 'The sentence under the title in search results. Aim for 150 to 160 characters.',
-      validation: (Rule) =>
-        Rule.max(160).warning(
-          'Descriptions longer than about 160 characters get cut off in search results.',
-        ),
-    }),
-    defineField({
-      name: 'seoImage',
-      title: 'Social share image',
-      type: 'image',
-      group: 'seo',
-      description:
-        'Optional. Shown when this page is shared. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
-      options: { hotspot: true },
-      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
+      reuse: {
+        title: defineField({
+          name: 'seoTitle',
+          title: 'SEO title',
+          type: 'string',
+          group: 'seo',
+          description:
+            'Browser tab and search result title. Aim for 50 to 60 characters. Leave blank to use the page title.',
+          validation: (Rule) =>
+            Rule.max(60).warning(
+              'Titles longer than about 60 characters get cut off in search results.',
+            ),
+        }),
+        description: defineField({
+          name: 'seoDescription',
+          title: 'SEO description',
+          type: 'text',
+          rows: 3,
+          group: 'seo',
+          description:
+            'The sentence under the title in search results. Aim for 150 to 160 characters.',
+          validation: (Rule) =>
+            Rule.max(160).warning(
+              'Descriptions longer than about 160 characters get cut off in search results.',
+            ),
+        }),
+        image: defineField({
+          name: 'seoImage',
+          title: 'Social share image',
+          type: 'image',
+          group: 'seo',
+          description:
+            'Optional. Shown when this page is shared. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
+          options: { hotspot: true },
+          fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
+        }),
+      },
     }),
 
     // ── Publishing ────────────────────────────────────────────────────────────
@@ -176,10 +203,17 @@ export const page = defineType({
     publishAtField(),
   ],
   preview: {
-    select: { title: 'title', slug: 'slug.current', inNav: 'addToMainNav' },
-    prepare: ({ title, slug, inNav }) => ({
+    select: {
+      title: 'title',
+      slug: 'slug.current',
+      inNav: 'addToMainNav',
+      archived: 'archived',
+    },
+    prepare: ({ title, slug, inNav, archived }) => ({
       title: title || 'Untitled page',
-      subtitle: `/${slug ?? '...'}${inNav ? '  ·  in menu' : ''}`,
+      subtitle: archived
+        ? `Archived  ·  /${slug ?? '...'}`
+        : `/${slug ?? '...'}${inNav ? '  ·  in menu' : ''}`,
     }),
   },
 });

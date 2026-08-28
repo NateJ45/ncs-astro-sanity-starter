@@ -157,7 +157,8 @@ export function sectionsProjection(field = 'pageBuilder'): string {
 // into a projection that adds children (navItems' dropdown groups).
 const NAV_LINK_FIELDS = `_key, _type, label, linkType, href, externalUrl,
     "slug": internalPage->slug.current,
-    "docType": internalPage->_type`;
+    "docType": internalPage->_type,
+    "pageArchived": internalPage->archived`;
 export const NAV_LINK_PROJECTION = `{ ${NAV_LINK_FIELDS} }`;
 
 // Module-level memoized promise. The first call triggers the actual Sanity
@@ -624,7 +625,7 @@ export async function getPage(slug: string) {
     `*[_type == "page" && slug.current == $slug][0]{
       title,
       "slug": slug.current,
-      seoTitle, seoDescription,
+      seoTitle, seoDescription, hideFromSearch,
       seoImage${IMAGE_PROJECTION},
       ${sectionsProjection('pageBuilder')}
     }`,
@@ -634,9 +635,13 @@ export async function getPage(slug: string) {
 }
 
 // Slugs of every published custom page, for getStaticPaths in [slug].astro.
+//
+// `archived != true`, never `archived == false`: a page made before the archive
+// field existed has no value there and must stay visible. An archived page is
+// simply not built, so its URL 404s and never reaches the sitemap.
 export async function getAllPageSlugs(): Promise<string[]> {
   const list: Array<{ slug: string }> = await sanityFetch(
-    `*[_type == "page" && defined(slug.current)]{ "slug": slug.current }`,
+    `*[_type == "page" && defined(slug.current) && archived != true]{ "slug": slug.current }`,
     {},
     [],
   );
@@ -645,9 +650,12 @@ export async function getAllPageSlugs(): Promise<string[]> {
 
 // Custom pages flagged to appear in the main nav and/or footer. Header.astro
 // and Footer.astro can inject these alongside the built-in links.
+//
+// Archived pages drop out: the page is not built, so a menu link to it would be
+// a 404 in the middle of the navigation.
 export async function getNavPages() {
   return sanityFetch(
-    `*[_type == "page" && defined(slug.current) && (addToMainNav == true || addToFooter == true)]{
+    `*[_type == "page" && defined(slug.current) && archived != true && (addToMainNav == true || addToFooter == true)]{
     title,
     "slug": slug.current,
     navLabel,

@@ -73,6 +73,8 @@ is installing it as of the date on the card.
 | 18  | Chrome options (editable header/footer content)                   | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
 | 19  | Shareable draft links                                             | no      | no          | yes      | no               | no            | no             | yes                | n/a                 |
 | 20  | publishAt scheduled publishing (free-tier)                        | no      | no          | template | no               | no            | no             | template           | n/a                 |
+| 21  | Pages as first-class objects (duplicate / archive / SEO panel)    | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
+| 22  | Redirects on rename                                               | yes     | no          | yes      | no               | no            | no             | yes                | n/a                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -900,6 +902,153 @@ and add the field pair to any document type that should be schedulable.
 / church-starter yes (on `page` + the `churchPages` factory, so all eleven church
 page singletons) / everything else pending rollout.
 
+## Card 21: Pages as first-class objects (2026-08-28)
+
+**Canonical:** `src/sanity/pageOps.ts`, `src/sanity/components/pageActions.tsx`,
+`src/sanity/schemaTypes/_seoFields.ts`, `src/sanity/components/SeoSnippetInput.tsx`
+
+**What:** three verbs and one panel that turn a `page` document from a row in a
+list into something an editor can handle like a page in Squarespace.
+
+- **Duplicate.** Copies the page into a NEW DRAFT called "... copy", at a free
+  web address ("about" then "about-copy" then "about-copy-2"), with every nested
+  array `_key` regenerated.
+- **Archive / Restore.** Sets `archived` on both twins. Every live-site query
+  skips an archived page; nothing is deleted, so Restore is complete.
+- **Search & sharing.** The SEO group gains a live Google-snippet and share-card
+  preview at the top, and a "Keep this page out of Google" switch.
+
+**Why Duplicate had to be rebuilt.** Sanity ships a `duplicate` action, and it
+copies the slug. The copy is then a second document claiming an address that is
+already taken; the build can emit only one of them and which one wins is
+arbitrary. The config filters the stock action out for `page` and registers ours
+in its place, so the menu still reads "Duplicate" and now does the right thing.
+
+**Why Archive is not Delete.** Delete is refused while any other document links
+to the page, and it throws the words away. An event page an editor wants back
+next year is the common case, not the rare one. `archived` is a plain boolean;
+the live-site queries test `archived != true`, **never `archived == false`**, so
+a page created before the field existed stays visible. Delete is still there for
+a page that really should go.
+
+**Both twins, and only the twins that exist.** `setPageArchived()` looks up which
+of `<id>` / `drafts.<id>` are actually present before patching. A patch against a
+missing document id fails the WHOLE transaction, so patching both blind throws on
+a page that has no draft, which is most of them.
+
+**Archive needs a publish** to reach the live site, because the site is rebuilt
+from published content. Every toast says so.
+
+**One implementation, two surfaces.** The verbs are plain functions in
+`pageOps.ts`. `pageActions.tsx` puts them in the publish menu (every repo);
+`PreviewNavigator.tsx` puts them on a per-row "..." menu with an **Archived**
+group at the bottom of the list (only the repos that ship the page navigator).
+A repo with no navigator has the complete feature from the document actions
+alone, which is how the church starter has it.
+
+**REUSE, DO NOT RENAME (the SEO panel's one rule).** `seoFields()` takes the
+document's EXISTING SEO field definitions in a `reuse` argument and puts them in
+the right order, rather than defining new ones. A rename would move the data to a
+new path, and every page in the dataset would quietly go back to a default title.
+So on a type that already had SEO fields the helper contributes exactly two new
+things: the value-less `seoPreview` field whose custom input draws the previews,
+and `hideFromSearch`.
+
+**`hideFromSearch` has to be honoured in TWO places or it is a dead control:** a
+`<meta name="robots" content="noindex, follow">` on the page (the route passes
+`noindex` to `BaseLayout`), and the page dropped from the sitemap (the `filter`
+in `astro.config.mjs`, fed by a build-time query). One without the other is worse
+than neither, because the switch looks like it worked.
+
+**The preview is an INPUT, never a document VIEW.** It calls `useFormValue`,
+which needs a `FormValueProvider`. An input always renders inside the document
+form, so the provider is there. A standalone `S.view.component` pane does NOT get
+one inside the Presentation tool: the hook throws, the panel's error boundary
+trips, and the preview iframe stops refreshing. This cost the WCP repo an evening
+in 2026-07; keep the split.
+
+**Per-site adaptation:** `PAGE_OPS_TYPES` in `pageActions.tsx` is `{'page'}` -
+the multi-instance builder page every repo in this family has. Page SINGLETONS
+are deliberately excluded: one-per-site means duplicating or archiving one would
+leave the site with a route and no document. `pageOps.ts` reads and writes the
+slug in whichever shape the repo uses (Sanity's `slug` object, or WCP's plain
+string, which has to hold slashes), so no edit is needed there either. The only
+real per-site work is passing the repo's own SEO field definitions into
+`seoFields({ reuse })`, and wiring `noindex` on the routes that render `page`.
+
+**Applied to:** starter yes (canonical: publish-menu actions + navigator rows) /
+church-starter yes (publish-menu actions only, it has no page navigator) / WCP
+partial (the same feature, older and repo-specific: its navigator carries the
+verbs and its `seoFields.ts` predates this canonical copy) / everything else
+pending rollout.
+
+## Card 22: Redirects on rename (2026-08-28)
+
+**Canonical:** `src/lib/redirects.ts` (+ `src/lib/redirects.test.ts`),
+`src/sanity/components/slugRedirect.tsx`
+
+**What:** an editor changes a page's web address, presses Publish, and the old
+address keeps working. A `redirect` document type holds the forwards, a
+build-time read folds them into Astro's `redirects` map, and a wrapper around the
+stock Publish action files one automatically on a rename.
+
+**Why:** the manual Redirects list on its own depends on somebody remembering at
+exactly the wrong moment. Every bookmark, printed bulletin, and Google result for
+the old address 404s quietly until they do.
+
+**Build time, not request time.** These are `output: 'static'` sites, so the 404
+route is prerendered and middleware never runs for it. Making it SSR to read a
+redirect list would put a Worker invocation in front of the one route that exists
+to be cheap. The Cloudflare adapter turns the `redirects` map into real 301s at
+build, which cost nothing per request, and a publish rebuilds the site anyway.
+
+**The path arithmetic is shared and tested.** `src/lib/redirects.ts` is imported
+by BOTH `astro.config.mjs` (build) and the Studio action. If the two disagreed
+about what `/old-page/` means, an auto-filed redirect would sit in the Studio
+looking correct and never fire. Hence `redirects.test.ts`. The rules: normalize
+both sides, drop a self-redirect, drop a half-filled row, drop an external
+left-hand side (it could never match a request), later entry wins.
+
+**No type list in the action, on purpose.** Which documents have a slug-derived
+address is already encoded in each repo's `pathForDoc()` (`src/sanity/urls.ts`).
+A type with a fixed path returns the same string before and after, so the
+comparison is a no-op for it; a type with no public page returns null. That is
+what lets `slugRedirect.tsx` be byte-identical across repos with completely
+different routes, and why `redirects.ts` deliberately does NOT carry a
+document-type-to-path map the way WCP's ancestor version does.
+
+**The wrapper must be memoized.** A document-action wrapper needs a STABLE
+component identity across renders, or React unmounts and remounts the action
+every pass and the stock Publish action loses its own state (the "publishing..."
+spinner, the disabled logic). The actions resolver in `sanity.config.ts` runs on
+every render, so the wrapper is cached in a `WeakMap` keyed by the action it
+wraps.
+
+**It never blocks Publish.** A failed redirect write toasts a warning and
+publishes anyway. The editor's change is the important part; the forward can be
+added by hand.
+
+**Renames repoint, they do not chain.** A second rename patches the existing
+`A -> B` entry to `A -> C` rather than adding `B -> C`, so visitors always take
+one hop. An existing redirect for the same old address is never overwritten: it
+may have been hand-corrected.
+
+**The redirect is created PUBLISHED** (a plain `create`, not a draft), because
+the build-time reader only sees published documents. A draft redirect would look
+filed and never fire.
+
+**Fail-safe reads.** `cmsQuery()` in `astro.config.mjs` returns the empty answer
+for anything that is not a clean 200 - no project id, no token, Sanity down, bad
+data - so this feature can never fail a build.
+
+**Per-site adaptation:** a site that also carries hand-written launch redirects
+(WCP's Squarespace map) puts them BEFORE `...cmsRedirects` in the `redirects`
+object, so a Studio entry can correct a stale launch one without a code change.
+
+**Applied to:** starter yes (canonical) / church-starter yes / WCP yes (the
+original, with a repo-specific `redirects.ts` that also owns the doc-type path
+map, plus the launch-migration entries) / everything else pending rollout.
+
 ## Sync sessions
 
 A sync session is a pass over one repo: run `sync-check`, reconcile drift, install the
@@ -1129,3 +1278,94 @@ tests 94/94 and 60/60, and `sanity schema extract
 and optional. Prettier reformatted `page.ts` in both repos and
 `_pageSingleton.ts` / `churchPages.ts` beyond the edited lines; those
 files had drifted from `npm run format` before this session.
+
+### 2026-08-28: Pages as first-class objects, in both templates (cards 21, 22)
+
+Installed in `ncs-astro-sanity-starter` (canonical) and
+`ncs-church-starter`: `src/lib/redirects.ts` + `redirects.test.ts`,
+`src/sanity/pageOps.ts`, `src/sanity/components/pageActions.tsx`,
+`src/sanity/components/slugRedirect.tsx`,
+`src/sanity/components/SeoSnippetInput.tsx`,
+`src/sanity/schemaTypes/_seoFields.ts` (all seven PORTABLE-marked and
+byte-identical across the two repos), plus a per-repo
+`schemaTypes/redirect.ts`, the `archived` + Search & sharing wiring on
+each `page` type, a Redirects list under Pages in each desk structure,
+the build-time redirect and hidden-page reads in each
+`astro.config.mjs`, and the actions wiring in each `sanity.config.ts`.
+The starter additionally grew the per-row "..." menu and the
+**Archived** group in `PreviewNavigator.tsx`; the church starter has
+no navigator and takes the document actions alone, which is the
+complete feature.
+
+The reference implementation was WCP's, and three things were
+deliberately NOT copied straight across:
+
+- **`redirects.ts` lost the doc-type-to-path map.** WCP's version owns
+  `pathForPageSlug` / `pathForPostSlug` / `pathForDocSlug`. Both
+  templates already have that map, per repo, in
+  `src/sanity/urls.ts` (`pathForDoc`), so the canonical file keeps only
+  the pure path arithmetic and the publish action asks `pathForDoc`
+  instead. That is what makes both `redirects.ts` and
+  `slugRedirect.tsx` byte-identical in repos whose routes have nothing
+  in common, and it removed the need for a `SLUG_REDIRECT_TYPES` list.
+- **The verbs were pulled out of the navigator into `pageOps.ts`.** In
+  WCP they live inside `PreviewNavigator.tsx`. The church starter has
+  no navigator, so a navigator-only feature would have been
+  church-shaped as "not available". Splitting logic from surface gave
+  the church the full feature through document actions and gave the
+  starter both surfaces from one implementation.
+- **Menu drag was skipped in both, on purpose (mission call).** WCP's
+  navigator can drag a page into the header menu because WCP's menu is
+  a `navigation` singleton of page references. In these templates the
+  menu is `siteSettings.navItems`, already fully editable in Site
+  settings, and the navigator's groups are publication-state groups,
+  not menu-membership groups. A drag target would have had to be
+  invented rather than ported.
+
+Adaptation notes earned on the way:
+
+- **`archived` reaches the live site through four queries, not one.**
+  `getAllPageSlugs` (so the route is never built), the nav link
+  projection plus `navHref` (so a menu link to an archived page is
+  dropped instead of pointing at a 404), and the sitemap read in
+  `astro.config.mjs`. Every test is `archived != true`, never
+  `archived == false`.
+- **Patching both twins needs a presence check first.** A patch against
+  a missing document id fails the whole transaction, so
+  `setPageArchived` looks up which of `<id>` / `drafts.<id>` exist
+  before building it. WCP's navigator got this right by carrying
+  `hasDraft` / `hasPublished` on each row; a function with no row to
+  read has to ask.
+- **`hideFromSearch` was added only to `page`, not to the page
+  singletons.** The singletons' SEO fields are hand-authored per type
+  and nothing on the routes reads a `noindex` from them yet; a switch
+  with no second half is a dead control, which is exactly what
+  `_seoFields.ts`'s header warns against. The starter's uncalled
+  `_pageSingleton` factory was edited and then reverted for that
+  reason. Extending it later is: pass the type's existing three SEO
+  fields into `seoFields({ reuse })`, add `hideFromSearch` to that
+  page's GROQ projection, pass `noindex` to `BaseLayout`, and add the
+  type to the sitemap read.
+- **The global `CharacterCountInput` wrapper is safe over a field-level
+  custom input.** It renders `props.renderDefault(props)` untouched for
+  anything without a max length, so the value-less `seoPreview` field
+  reaches `SeoSnippetInput` normally. Worth knowing before adding any
+  other custom input to these repos.
+- **`sanity schema extract --path` is resolved relative to the repo
+  root and rejects an absolute Windows path** (it tries to `mkdir`
+  `<repo>\C:\Users\...`). Pass a bare filename and delete it after.
+
+Both repos verified green: `npx tsc --noEmit` clean (TS5101 baseUrl
+deprecation only), `npm run lint` with no new findings (the starter's
+one pre-existing error in `pageBuilder.types.ts` is untouched), prettier
+clean on every edited file, `npm run build` clean, `npm run typegen`
+re-run and committed, `sanity schema extract
+--enforce-required-fields` succeeds in both, unit tests **106/106**
+(starter, 94 + 12) and **72/72** (church, 60 + 12), and
+`node scripts/page-parity.mjs compare` **10/10** and **20/20** with no
+regeneration - nothing here changes rendered HTML until an editor
+archives a page or ticks a switch. `sync-check` self-check in the
+starter is 17/17 SAME, and the cross-check from church against the
+starter is 16/16 SAME (church still does not carry the marker on
+`scripts/page-parity.mjs`, which is a pattern rather than an identical
+canonical file).

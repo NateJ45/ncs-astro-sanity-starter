@@ -2,9 +2,30 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useClient } from 'sanity';
 import { usePresentationNavigate, usePresentationParams } from 'sanity/presentation';
-import { Box, Button, Card, Flex, Spinner, Stack, Text } from '@sanity/ui';
-import { AddIcon, LaunchIcon, ShareIcon } from '@sanity/icons';
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Menu,
+  MenuButton,
+  MenuItem,
+  Spinner,
+  Stack,
+  Text,
+  useToast,
+} from '@sanity/ui';
+import {
+  AddIcon,
+  ArchiveIcon,
+  CopyIcon,
+  EllipsisVerticalIcon,
+  LaunchIcon,
+  RestoreIcon,
+  ShareIcon,
+} from '@sanity/icons';
 import { SINGLETON_PREVIEW_PATHS } from '../resolve';
+import { duplicatePage, setPageArchived, type PageOpsClient } from '../pageOps';
 import { SHARE_LINK_TTL_PHRASE, useShareDraftLink } from './shareDraftLink';
 
 // =============================================================================
@@ -24,6 +45,12 @@ import { SHARE_LINK_TTL_PHRASE, useShareDraftLink } from './shareDraftLink';
 //    CURRENT DRAFT of that page to someone with no Sanity login. See
 //    ./shareDraftLink.tsx for the handshake and why an hour is the ceiling.
 //  - "New page": creates a fresh `page` DRAFT and opens it right here.
+//  - A per-row "..." menu on custom pages (PORTS.md card 21):
+//      Duplicate - copies the page into a NEW DRAFT at a free web address.
+//      Archive / Restore - sets `archived` on both twins. Every live-site query
+//      skips an archived page, but nothing is deleted, so Restore is complete.
+//      Archived rows collect in a group at the bottom of the list.
+//    Both verbs are ../pageOps.ts, shared with the publish-menu actions.
 //  - Site settings pinned at the bottom.
 //
 // The custom-page list LIVE-refreshes through client.listen, so a rename, a new
@@ -53,6 +80,11 @@ const livePathFor = (type: string) => {
   return href === '/preview' ? '/' : href.replace(/^\/preview/, '');
 };
 
+/** The list groups, in display order. Archived last: it is the drawer, not the
+ *  desk. */
+const GROUPS = ['Main pages', 'Custom pages', 'Archived'] as const;
+type Group = (typeof GROUPS)[number];
+
 interface NavRow {
   id: string;
   type: string;
@@ -61,7 +93,8 @@ interface NavRow {
   liveHref?: string;
   hasDraft: boolean;
   hasPublished: boolean;
-  group: 'Main pages' | 'Custom pages';
+  archived: boolean;
+  group: Group;
 }
 
 // Collapse draft + published twins of one document into a single row's status.
@@ -92,9 +125,15 @@ async function fetchRows(client: ReturnType<typeof useClient>): Promise<NavRow[]
     client.fetch<{ _id: string; _type: string }[]>('*[_type in $types]{ _id, _type }', {
       types: singletonTypes,
     }),
-    client.fetch<{ _id: string; _type: string; title?: string; slug?: { current?: string } }[]>(
-      '*[_type == "page"]{ _id, _type, title, slug }',
-    ),
+    client.fetch<
+      {
+        _id: string;
+        _type: string;
+        title?: string;
+        slug?: { current?: string };
+        archived?: boolean;
+      }[]
+    >('*[_type == "page"]{ _id, _type, title, slug, archived }'),
   ]);
 
   const byType = new Map<string, { draft: boolean; published: boolean }>();
@@ -115,21 +154,25 @@ async function fetchRows(client: ReturnType<typeof useClient>): Promise<NavRow[]
     liveHref: byType.get(type)?.published ? livePathFor(type) : undefined,
     hasDraft: byType.get(type)?.draft ?? false,
     hasPublished: byType.get(type)?.published ?? false,
+    archived: false,
     group: 'Main pages',
   }));
 
   for (const [id, { doc, draft, published }] of collapse(pages)) {
     const slug = doc.slug?.current;
     if (!slug) continue;
+    const archived = doc.archived === true;
     rows.push({
       id,
       type: 'page',
       label: doc.title || slug,
       href: `/preview/${slug}`,
-      liveHref: published ? `/${slug}` : undefined,
+      // No live link for an archived page: it is not built any more.
+      liveHref: published && !archived ? `/${slug}` : undefined,
       hasDraft: draft,
       hasPublished: published,
-      group: 'Custom pages',
+      archived,
+      group: archived ? 'Archived' : 'Custom pages',
     });
   }
   return rows;
@@ -160,6 +203,8 @@ export function PreviewNavigator() {
   const params = usePresentationParams();
   const [rows, setRows] = useState<NavRow[] | null>(null);
   const [creating, setCreating] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const toast = useToast();
   const { share, sharing } = useShareDraftLink();
 
   const refetch = useCallback(() => {
@@ -240,11 +285,69 @@ export function PreviewNavigator() {
     }
   }, [client, navigate, current, refetch]);
 
+  // ---------------------------------------------------------------------------
+  // Duplicate / Archive / Restore (PORTS.md card 21)
+  // ---------------------------------------------------------------------------
+  // The logic is ../pageOps.ts, shared with the publish-menu actions, so the
+  // same click does the same thing from either surface. Everything here is the
+  // reporting: a busy row, a toast, and a refetch.
+  const duplicateRow = useCallback(
+    async (row: NavRow) => {
+      setBusyId(row.id);
+      try {
+        const newId = await duplicatePage(
+          client as unknown as PageOpsClient,
+          row.type,
+          row.id,
+          row.label,
+        );
+        refetch();
+        navigate(current || '/preview', { type: row.type, id: newId });
+        toast.push({
+          status: 'success',
+          title: `Copied "${row.label}"`,
+          description: 'The copy is a draft. Change what you need, then Publish it.',
+          duration: 8000,
+        });
+      } catch (err) {
+        console.error('[navigator] duplicate failed', err);
+        toast.push({ status: 'error', title: 'Could not copy that page. Please try again.' });
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [client, current, navigate, refetch, toast],
+  );
+
+  const archiveRow = useCallback(
+    async (row: NavRow, archived: boolean) => {
+      setBusyId(row.id);
+      try {
+        await setPageArchived(client as unknown as PageOpsClient, row.id, archived);
+        refetch();
+        toast.push({
+          status: 'success',
+          title: archived ? `Archived "${row.label}"` : `Restored "${row.label}"`,
+          description: archived
+            ? 'It is off the site and kept here. Publish to make that live.'
+            : 'It is back on the site. Publish to make that live.',
+          duration: 8000,
+        });
+      } catch (err) {
+        console.error('[navigator] archive failed', err);
+        toast.push({ status: 'error', title: 'Could not do that. Please try again.' });
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [client, refetch, toast],
+  );
+
   const grouped = useMemo(() => {
     if (!rows) return null;
-    return (['Main pages', 'Custom pages'] as const)
-      .map((g) => ({ title: g, rows: rows.filter((r) => r.group === g) }))
-      .filter((g) => g.rows.length > 0);
+    return GROUPS.map((g) => ({ title: g, rows: rows.filter((r) => r.group === g) })).filter(
+      (g) => g.rows.length > 0,
+    );
   }, [rows]);
 
   return (
@@ -278,7 +381,13 @@ export function PreviewNavigator() {
                           radius={2}
                           tone={active ? 'primary' : 'default'}
                           pressed={active}
-                          style={{ cursor: 'pointer', textAlign: 'left', minWidth: 0 }}
+                          style={{
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            minWidth: 0,
+                            // Archived rows stay readable but visibly set aside.
+                            opacity: r.archived ? 0.6 : 1,
+                          }}
                           onClick={() => go(r.href, r.type, r.id)}
                         >
                           <Flex align="center" gap={2}>
@@ -317,6 +426,49 @@ export function PreviewNavigator() {
                             icon={LaunchIcon}
                             title={`Open the live page (${r.liveHref})`}
                             aria-label={`Open the live page for ${r.label}`}
+                          />
+                        )}
+                        {/* Page verbs. Only custom pages: a singleton is
+                            one-per-site, so copying or archiving one would
+                            leave the site with a route and no document. */}
+                        {r.type === 'page' && (
+                          <MenuButton
+                            id={`page-ops-${r.id}`}
+                            button={
+                              <Button
+                                mode="bleed"
+                                padding={2}
+                                icon={EllipsisVerticalIcon}
+                                disabled={busyId === r.id}
+                                title="Copy or archive this page"
+                                aria-label={`More actions for ${r.label}`}
+                              />
+                            }
+                            menu={
+                              <Menu>
+                                <MenuItem
+                                  icon={CopyIcon}
+                                  text="Duplicate"
+                                  onClick={() => void duplicateRow(r)}
+                                />
+                                {r.archived ? (
+                                  <MenuItem
+                                    icon={RestoreIcon}
+                                    text="Restore"
+                                    tone="positive"
+                                    onClick={() => void archiveRow(r, false)}
+                                  />
+                                ) : (
+                                  <MenuItem
+                                    icon={ArchiveIcon}
+                                    text="Archive"
+                                    tone="caution"
+                                    onClick={() => void archiveRow(r, true)}
+                                  />
+                                )}
+                              </Menu>
+                            }
+                            popover={{ portal: true, placement: 'bottom-end' }}
                           />
                         )}
                       </Flex>

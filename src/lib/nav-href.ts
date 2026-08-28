@@ -45,6 +45,9 @@ export interface RawNavLink {
   slug?: string | null;
   /** internalPage->_type */
   docType?: string | null;
+  /** internalPage->archived. An archived page is not built, so a menu link to
+   *  it would be a 404 in the middle of the navigation. */
+  pageArchived?: boolean | null;
 }
 
 /** A link that survived resolution: both halves present. */
@@ -77,6 +80,9 @@ export function navHref(link?: RawNavLink | null): string | undefined {
 
   const docType = plain(link.docType);
   if (!docType) return undefined;
+  // An archived page has been taken off the site. Drop the link rather than
+  // point the menu at a 404.
+  if (link.pageArchived === true) return undefined;
   if (docType === 'page') {
     const slug = plain(link.slug);
     return slug ? `/${slug}` : undefined;

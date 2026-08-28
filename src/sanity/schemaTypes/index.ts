@@ -22,6 +22,7 @@ import { philosophyPoint } from './philosophyPoint';
 import { privacyPage } from './privacyPage';
 import { processPage } from './processPage';
 import { processStep } from './processStep';
+import { redirect } from './redirect';
 import { service } from './service';
 import { servicesPage } from './servicesPage';
 import { siteSettings } from './siteSettings';
@@ -69,4 +70,7 @@ export const schemaTypes = [
   journalEntry,
   // Custom pages built from the section library (multi-instance, not a singleton)
   page,
+  // Old address -> new address forwards, filed by hand or automatically on a
+  // web-address change (see components/slugRedirect.tsx).
+  redirect,
 ];

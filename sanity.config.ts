@@ -36,6 +36,12 @@ import StudioLogo from './src/sanity/components/StudioLogo';
 import { CharacterCountInput } from './src/sanity/components/CharacterCountInput';
 import { documentBadges } from './src/sanity/components/documentBadges';
 import { shareDraftLinkAction } from './src/sanity/components/shareDraftLink';
+import {
+  archivePageAction,
+  duplicatePageAction,
+  PAGE_OPS_TYPES,
+} from './src/sanity/components/pageActions';
+import { withSlugRedirect } from './src/sanity/components/slugRedirect';
 
 // =============================================================================
 // Studio theme
@@ -172,13 +178,31 @@ export default defineConfig({
       return prev;
     },
     actions: (prev, { schemaType }) => {
-      const base = SINGLETON_TYPES.has(schemaType)
+      let base = SINGLETON_TYPES.has(schemaType)
         ? prev.filter(({ action }) => !['unpublish', 'delete', 'duplicate'].includes(action || ''))
         : prev;
+
+      // Pages as first-class objects (PORTS.md card 21). On the `page` type the
+      // stock "Duplicate" is replaced: it copies the web address too, so the
+      // copy is a second document claiming an address that is already taken.
+      // See src/sanity/components/pageActions.tsx.
+      if (PAGE_OPS_TYPES.has(schemaType)) {
+        base = base.filter(({ action }) => action !== 'duplicate');
+      }
+
+      // Safe rename (PORTS.md card 21): Publish files an old-address ->
+      // new-address redirect first when the address changed. The wrapper is
+      // memoized by the action it wraps, so this resolver may run on every
+      // render without remounting the publish button.
+      base = base.map((action) =>
+        action.action === 'publish' ? withSlugRedirect(action) : action,
+      );
+
       // "Copy share link" sits in the publish menu of every document that has a
       // page of its own; the action returns null for the rest, so appending it
       // unconditionally is safe. See src/sanity/components/shareDraftLink.tsx.
-      return [...base, shareDraftLinkAction];
+      // The two page actions return null for every type but `page`.
+      return [...base, duplicatePageAction, archivePageAction, shareDraftLinkAction];
     },
   },
 });

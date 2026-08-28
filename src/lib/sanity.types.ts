@@ -31,6 +31,18 @@ export type Photo = {
   _type: 'image';
 };
 
+export type Redirect = {
+  _id: string;
+  _type: 'redirect';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  from?: string;
+  to?: string;
+  permanent?: boolean;
+  note?: string;
+};
+
 export type JournalCategory = {
   _id: string;
   _type: 'journalCategory';
@@ -1024,6 +1036,8 @@ export type Page = {
   navGroup?: 'top' | 'services' | 'resources';
   navLabel?: string;
   addToFooter?: boolean;
+  archived?: boolean;
+  seoPreview?: string;
   seoTitle?: string;
   seoDescription?: string;
   seoImage?: {
@@ -1034,6 +1048,7 @@ export type Page = {
     alt?: string;
     _type: 'image';
   };
+  hideFromSearch?: boolean;
   publishAt?: string;
 };
 
@@ -1979,6 +1994,7 @@ export type Geopoint = {
 export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | Photo
+  | Redirect
   | JournalCategory
   | Slug
   | ProcessStep

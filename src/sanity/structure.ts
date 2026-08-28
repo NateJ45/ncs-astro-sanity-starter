@@ -43,6 +43,7 @@ import {
   ColorWheelIcon,
   RocketIcon,
   OlistIcon,
+  ArrowRightIcon,
 } from '@sanity/icons';
 import StudioGuide from './components/StudioGuide';
 import BusinessOverview from './components/BusinessOverview';
@@ -67,11 +68,7 @@ const SINGLETON_TYPES = [
   'studioPlaybook',
 ] as const;
 
-const ORDERABLE_TYPES = [
-  'service',
-  'philosophyPoint',
-  'processStep',
-] as const;
+const ORDERABLE_TYPES = ['service', 'philosophyPoint', 'processStep'] as const;
 
 const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...SINGLETON_TYPES,
@@ -83,6 +80,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'journalEntry',
   'journalCategory',
   'page', // custom pages, placed explicitly under "Pages"
+  'redirect', // placed explicitly under "Pages" -> Redirects
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
   'media.tag',
@@ -100,21 +98,11 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
  * S.document().views([...]) bypasses defaultDocumentNode in sanity.config.ts,
  * and that is where the per-type extra tabs are added.
  */
-function singletonWithPreview(
-  S: StructureBuilder,
-  schemaType: string,
-  title: string,
-  icon: any,
-) {
+function singletonWithPreview(S: StructureBuilder, schemaType: string, title: string, icon: any) {
   return S.listItem()
     .title(title)
     .icon(icon)
-    .child(
-      S.document()
-        .schemaType(schemaType)
-        .documentId(schemaType)
-        .views([S.view.form()]),
-    );
+    .child(S.document().schemaType(schemaType).documentId(schemaType).views([S.view.form()]));
 }
 
 export const deskStructure = (S: StructureBuilder, context: StructureResolverContext) =>
@@ -172,7 +160,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                       S.view.form().title('Edit'),
                     ]),
                 ),
-            ])
+            ]),
         ),
 
       S.divider(),
@@ -207,7 +195,19 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
 
               // Custom pages: editors build these themselves from the section library.
               // Multi-instance (not a singleton), so it is a normal document list.
-              S.documentTypeListItem('page').title('Custom pages (build your own)').icon(DocumentsIcon),
+              S.documentTypeListItem('page')
+                .title('Custom pages (build your own)')
+                .icon(DocumentsIcon),
+
+              S.divider(),
+
+              // Redirects: old address -> new address. Most entries are filed
+              // automatically when a page's web address changes on publish
+              // (src/sanity/components/slugRedirect.tsx); the editor adds one by
+              // hand for an address that never existed on this site.
+              S.documentTypeListItem('redirect')
+                .title('Redirects (old links)')
+                .icon(ArrowRightIcon),
             ]),
         ),
 
@@ -280,5 +280,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
 
       // Safety net: surface any document type we have NOT explicitly placed above
       // (and keep the hidden set, including media.tag, out of the desk root).
-      ...S.documentTypeListItems().filter((item) => !HIDDEN_FROM_DEFAULT.has(item.getId() as string)),
+      ...S.documentTypeListItems().filter(
+        (item) => !HIDDEN_FROM_DEFAULT.has(item.getId() as string),
+      ),
     ]);

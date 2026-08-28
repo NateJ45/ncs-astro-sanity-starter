@@ -79,6 +79,37 @@ After DNS cutover, submit `sitemap-index.xml` to Google Search Console. Verify t
 - Description: target 150-160 characters. Speak to the reader, not the search engine. Don't restate the title.
 - If `seoTitle` is empty, BaseLayout falls back to the page's primary headline. Don't rely on the fallback for launch -- fill the field.
 
+### The "Search & sharing" panel on a custom page (PORTS.md card 21)
+
+The `page` document type builds its SEO group through `seoFields()` in
+`src/sanity/schemaTypes/_seoFields.ts`. The page's own `seoTitle`, `seoDescription`, and
+`seoImage` definitions are passed back in by REFERENCE, so their names and wording are
+unchanged; the helper adds two things:
+
+- `seoPreview` -- a value-less field whose custom input (`src/sanity/components/SeoSnippetInput.tsx`)
+  draws a live Google result and a live share card as the editor types. It is an INPUT and
+  must never be re-registered as a document VIEW: a view mounted inside the Presentation
+  tool has no `FormValueProvider`, so `useFormValue` throws and freezes the panel.
+- `hideFromSearch` -- "Keep this page out of Google". **Two halves, and both are required**,
+  or the switch silently does nothing: `src/pages/[slug].astro` passes `noindex` to
+  BaseLayout (which emits `<meta name="robots" content="noindex, follow">`), and the
+  `sitemap()` filter in `astro.config.mjs` drops the same path using a build-time query.
+
+Page singletons do NOT have `hideFromSearch` yet, on purpose -- nothing on their routes
+reads it. Adding it means doing both halves for that page in the same change.
+
+### Redirects when a page is renamed (PORTS.md card 22)
+
+Changing a page's web address files an old-path -> new-path `redirect` document
+automatically at publish time (`src/sanity/components/slugRedirect.tsx`). Published
+redirects are read at build time in `astro.config.mjs` and folded into Astro's `redirects`
+map, which the Cloudflare adapter emits as real 301/302s. The editor can also add one by
+hand under Pages -> Redirects for an address that never existed on this site. The path
+normalization rules are shared with the build and unit-tested in `src/lib/redirects.ts`.
+
+An **archived** page is not built at all, so its URL 404s, it drops out of the menus, and
+it never reaches the sitemap.
+
 ### Image SEO
 
 For Sanity-uploaded images, the alt text field does double duty: accessibility (required) and image search signal. Good alt text describes the image AND uses relevant terms where natural. Descriptive alt beats empty alt; meaningful descriptive alt beats generic.
@@ -88,6 +119,7 @@ See the [Image guidelines for editors](images.md#image-guidelines-for-editors) s
 ### Pre-launch SEO checklist
 
 - [ ] Every page has unique `seoTitle` and `seoDescription` in Sanity
+- [ ] No page is left with "Keep this page out of Google" on by mistake (check Pages, then each custom page's Search & sharing tab)
 - [ ] `og-default.png` regenerated with the actual project brand inputs
 - [ ] `src/data/site.ts` `url` set to the production domain (robots.txt is generated from this automatically)
 - [ ] `llms.txt` updated for the actual page set
