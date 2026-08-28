@@ -8,12 +8,21 @@
    the Presentation Tool's iframe ever loads. `noindex, nofollow` is
    non-negotiable here: these pages must never appear in search results.
 
-   Chrome-less on purpose. The real Header and Footer link to the live site,
-   which would bounce the editor's iframe OUT of the preview. A slim bar labels
-   the surface so a missing header reads as intentional rather than broken.
+   Renders the REAL Header and Footer around the page body (2026-08-28) so the
+   preview matches production edge to edge. This shell was chrome-less until
+   the click interceptor existed: back then a header link would have bounced
+   the iframe onto the live site. The interceptor closed that hole (edit-mode
+   clicks select only; browse-mode clicks remap into /preview/*). Each piece
+   is wrapped in a `data-sanity` attribute pointed at `siteSettings` - the
+   WordPress-template-part gesture: in Edit mode the chrome outlines as an
+   editable surface and a click opens Site settings in the edit panel.
    ============================================================================ */
 import '../styles/globals.css';
 import VisualEditingOverlay from '@/components/preview/VisualEditingOverlay.tsx';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import { previewFetch } from '@/lib/cms-preview';
+import { docEditAttr } from '@/lib/preview-edit-attr';
 
 interface Props {
   title: string;
@@ -22,6 +31,19 @@ interface Props {
   pageId: string;
 }
 const { title, draftMode, pageId } = Astro.props;
+
+// Draft-aware settings for the chrome, so header/footer edits live-update in
+// the preview. Null-safe: Header and Footer render their fallbacks cleanly.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw doc, the same loose shape BaseLayout passes
+const chromeSettings = await previewFetch<any>(
+  draftMode,
+  '*[_type == "siteSettings"][0]',
+).catch(() => null);
+
+// Header opens the doc at its identity, footer at the tagline, so each click
+// lands the editor near what that piece of chrome shows.
+const headerAttr = docEditAttr('siteSettings', 'siteSettings', 'title');
+const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
 ---
 
 <!doctype html>
@@ -68,13 +90,22 @@ const { title, draftMode, pageId } = Astro.props;
       class="border-border-soft bg-card text-foreground/70 flex items-center justify-between gap-4 border-b px-4 py-1.5 text-xs"
     >
       <span data-connected-note
-        >Draft preview. The site header and footer render on the live site only.</span
+        >Draft preview. Click the header or footer to edit Site settings.</span
       >
       <span data-reconnect-hint class="font-semibold"
         >Draft session ended. Reload the Studio browser tab to reconnect the preview.</span
       >
     </div>
+    {/* The real site chrome, draft-aware, each piece an editable surface. The
+        wrapper divs are REAL block boxes on purpose: the overlay outlines the
+        element's rect (same rule as sectionEditAttr). */}
+    <div data-sanity={headerAttr}>
+      <Header siteSettings={chromeSettings} />
+    </div>
     <main id="main"><slot /></main>
+    <div data-sanity={footerAttr}>
+      <Footer siteSettings={chromeSettings} />
+    </div>
 
     {/* The motion system's END states, forced. BaseLayout's IntersectionObserver
         script is not loaded here (this shell is deliberately minimal), and the

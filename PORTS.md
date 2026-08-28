@@ -806,3 +806,21 @@ only - no navigator], reid + mas modern-stack branches):
 Verified on the presacademy build: an edit-mode click on a CTA leaves
 the URL untouched; the same click without overlay boxes remaps into
 /preview/*.
+
+### 2026-08-28 (later still): the chrome joins the preview as a template part
+
+The preview shell renders the REAL Header and Footer around every
+page (they were chrome-less only because header links used to bounce
+the iframe onto the live site - the click interceptor closed that
+hole). siteSettings is fetched draft-aware in PreviewLayout so chrome
+edits live-update. Each piece is wrapped in a data-sanity attribute
+via the new docEditAttr(id, type, path) helper in preview-edit-attr:
+the WordPress-template-part gesture. In Edit mode the header/footer
+outline as editable surfaces and a click opens the owning document in
+the edit panel. Applied to presacademy (header->title,
+footer->mission), wcp (header->the navigation doc's mainNav,
+footer->siteSettings; its chrome already rendered via linkBase),
+starter, church-starter, reid + mas modern-stack (all
+header->siteSettings.title, footer->tagline). Headers/Footers accept
+an optional siteSettings prop with clean fallbacks in every repo, so
+a null fetch can never blank the chrome.
