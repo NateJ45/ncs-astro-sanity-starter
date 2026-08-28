@@ -42,6 +42,9 @@ import {
   PAGE_OPS_TYPES,
 } from './src/sanity/components/pageActions';
 import { withSlugRedirect } from './src/sanity/components/slugRedirect';
+import { SaveSectionPresetAction } from './src/sanity/actions/saveSectionPreset';
+import { CheckPageAction } from './src/sanity/actions/checkPage';
+import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 
 // =============================================================================
 // Studio theme
@@ -202,7 +205,23 @@ export default defineConfig({
       // page of its own; the action returns null for the rest, so appending it
       // unconditionally is safe. See src/sanity/components/shareDraftLink.tsx.
       // The two page actions return null for every type but `page`.
-      return [...base, duplicatePageAction, archivePageAction, shareDraftLinkAction];
+      //
+      // Page-builder helpers (PORTS.md card 24): "Save a section as preset..."
+      // keeps one band of this page for reuse, and "Check this page..." reads
+      // the draft back for missing photo descriptions, empty sections and odd
+      // links. Both are offered only where a page-builder array exists, which
+      // is one list in src/sanity/pageBuilderConfig.ts.
+      const pageHelpers = PAGE_BUILDER_TYPES.has(schemaType)
+        ? [SaveSectionPresetAction, CheckPageAction]
+        : [];
+
+      return [
+        ...base,
+        duplicatePageAction,
+        archivePageAction,
+        ...pageHelpers,
+        shareDraftLinkAction,
+      ];
     },
   },
 });

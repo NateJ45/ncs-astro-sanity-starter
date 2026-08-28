@@ -1,15 +1,18 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// pageOps - duplicate and archive, as plain functions
+// pageOps - duplicate, archive, and add a saved section, as plain functions
 // =============================================================================
-// "Pages as first-class objects" gives an editor three verbs the Studio does not
-// ship: copy this page, put it away, bring it back. The verbs are the same
-// wherever they are offered, so the LOGIC lives here and the surfaces stay thin:
+// "Pages as first-class objects" gives an editor verbs the Studio does not
+// ship: copy this page, put it away, bring it back, drop a saved section onto
+// it. The verbs are the same wherever they are offered, so the LOGIC lives here
+// and the surfaces stay thin:
 //
 //   - src/sanity/components/pageActions.tsx  (the publish-menu actions, in every
 //     repo in this family)
 //   - src/sanity/components/PreviewNavigator.tsx (per-row buttons, in the repos
 //     that ship the Presentation page list)
+//   - src/sanity/actions/addPresetToPage.tsx (a "put this on a page" dialog, in
+//     the repos that have no navigator to offer it from)
 //
 // DUPLICATE makes a DRAFT. A copy that published itself would be a second live
 // page at a made-up address, so the copy starts as a draft the editor finishes
@@ -24,6 +27,12 @@
 // nothing is reference-blocked, so Restore is complete: it unsets the same field
 // on both twins and the page comes back exactly as it was.
 //
+// ADD A SAVED SECTION writes to the DRAFT, always. A saved section that
+// appeared on the live page the moment it was clicked would be a publish nobody
+// asked for, so the section is appended to the draft twin (made from the
+// published document first when there is not one yet, which is exactly what
+// typing in the form would have done) and the editor still presses Publish.
+//
 // The queries the live site runs test `archived != true`, never `archived ==
 // false`, so a page made before this field existed stays visible.
 // =============================================================================
@@ -33,6 +42,8 @@
 export interface PageOpsClient {
   fetch: <T>(query: string, params?: Record<string, unknown>) => Promise<T>;
   create: (doc: Record<string, unknown>) => Promise<{ _id: string }>;
+  createIfNotExists: (doc: Record<string, unknown>) => Promise<{ _id: string }>;
+  patch: (id: string) => PageOpsCommittablePatch;
   transaction: () => PageOpsTransaction;
 }
 
@@ -44,6 +55,13 @@ export interface PageOpsTransaction {
 export interface PageOpsPatch {
   set: (value: Record<string, unknown>) => PageOpsPatch;
   unset: (paths: string[]) => PageOpsPatch;
+  setIfMissing: (value: Record<string, unknown>) => PageOpsPatch;
+  append: (path: string, items: unknown[]) => PageOpsPatch;
+}
+
+/** The patch builder `client.patch(id)` returns: the same verbs, plus commit. */
+export interface PageOpsCommittablePatch extends PageOpsPatch {
+  commit: () => Promise<unknown>;
 }
 
 /** A fresh Sanity array `_key`. Short, random, and collision-free in practice. */
@@ -164,4 +182,45 @@ export async function setPageArchived(
       : tx.patch(each, (p) => p.unset(['archived']));
   }
   await tx.commit();
+}
+
+/**
+ * Append one saved section to a page's DRAFT and leave it there for the editor
+ * to place and publish.
+ *
+ * `field` is the page-builder array on that document type; the caller reads it
+ * from its repo's SECTION_HOST_TYPES so this function never has to know the
+ * repo's field names. `section` is the captured value out of a `sectionPreset`.
+ *
+ * Every nested `_key` is replaced, and the section itself gets a fresh one, so
+ * the same preset can be added to the same page twice without the array
+ * carrying two members with one key (a real corruption, and one Sanity's
+ * conflict resolution handles unpredictably).
+ */
+export async function addSectionToPage(
+  client: PageOpsClient,
+  id: string,
+  field: string,
+  section: Record<string, unknown>,
+): Promise<void> {
+  const draftId = `drafts.${id}`;
+  const draft = await client.fetch<string[]>('*[_id == $id]._id', { id: draftId });
+  if (!draft?.length) {
+    const published = await client.fetch<Record<string, unknown> | null>('*[_id == $id][0]', {
+      id,
+    });
+    if (!published) throw new Error(`No page to add to at ${id}`);
+    const copy: Record<string, unknown> = { ...published, _id: draftId };
+    delete copy._rev;
+    delete copy._createdAt;
+    delete copy._updatedAt;
+    await client.createIfNotExists(copy);
+  }
+
+  const fresh = regenerateKeys({ ...section, _key: newKey() }) as Record<string, unknown>;
+  await client
+    .patch(draftId)
+    .setIfMissing({ [field]: [] })
+    .append(field, [fresh])
+    .commit();
 }

@@ -25,7 +25,9 @@ import {
   ShareIcon,
 } from '@sanity/icons';
 import { SINGLETON_PREVIEW_PATHS } from '../resolve';
-import { duplicatePage, setPageArchived, type PageOpsClient } from '../pageOps';
+import { addSectionToPage, duplicatePage, setPageArchived, type PageOpsClient } from '../pageOps';
+import { SECTION_HOST_TYPES } from '../pageBuilderConfig';
+import { sectionLabel } from '../../lib/page-checks';
 import { SHARE_LINK_TTL_PHRASE, useShareDraftLink } from './shareDraftLink';
 
 // =============================================================================
@@ -52,6 +54,11 @@ import { SHARE_LINK_TTL_PHRASE, useShareDraftLink } from './shareDraftLink';
 //      Archived rows collect in a group at the bottom of the list.
 //    Both verbs are ../pageOps.ts, shared with the publish-menu actions.
 //  - Site settings pinned at the bottom.
+//
+// Saved sections (PORTS.md card 24): a collapsible group under the page list
+// showing every `sectionPreset` document, each with an "add to the page you are
+// looking at" button. It lives here because the page form's own "+ Add section"
+// picker can only offer schema TYPES, never documents.
 //
 // The custom-page list LIVE-refreshes through client.listen, so a rename, a new
 // page, or a publish shows up without reopening the tool.
@@ -96,6 +103,26 @@ interface NavRow {
   archived: boolean;
   group: Group;
 }
+
+/** One saved section (a `sectionPreset` document), ready to add to a page. */
+interface PresetRow {
+  id: string;
+  title: string;
+  sectionType: string;
+  /** The captured section object, exactly as it will be appended. */
+  section: Record<string, unknown> | null;
+}
+
+/** A raw sectionPreset document, as the list query returns it. */
+interface PresetDoc {
+  _id: string;
+  title?: string;
+  sectionType?: string;
+  section?: unknown;
+}
+
+/** Past this many saved sections the list stops being scannable - say so. */
+const PRESET_SOFT_CAP = 30;
 
 // Collapse draft + published twins of one document into a single row's status.
 function collapse<T extends { _id: string }>(
@@ -178,6 +205,34 @@ async function fetchRows(client: ReturnType<typeof useClient>): Promise<NavRow[]
   return rows;
 }
 
+/**
+ * Collapse the saved-section documents into rows, newest wording first (the
+ * draft twin wins, same rule as the page list), sorted by name.
+ */
+function buildPresets(docs: PresetDoc[]): PresetRow[] {
+  const rows: PresetRow[] = [];
+  for (const [id, { doc }] of collapse(docs)) {
+    const held = Array.isArray(doc.section) ? doc.section[0] : null;
+    const section =
+      held && typeof held === 'object' && !Array.isArray(held)
+        ? (held as Record<string, unknown>)
+        : null;
+    const type =
+      doc.sectionType || (section && typeof section._type === 'string' ? section._type : '');
+    rows.push({ id, title: doc.title || '(unnamed saved section)', sectionType: type, section });
+  }
+  rows.sort((a, b) => a.title.localeCompare(b.title));
+  return rows;
+}
+
+/** Every saved section, whole: adding one to a page is a plain copy of it. */
+async function fetchPresets(client: ReturnType<typeof useClient>): Promise<PresetRow[]> {
+  const docs = await client.fetch<PresetDoc[]>(
+    '*[_type == "sectionPreset"]{ _id, title, sectionType, section }',
+  );
+  return buildPresets(docs ?? []);
+}
+
 /** Amber = live page with unpublished edits; hollow = never published. */
 function StatusDot({ row }: { row: NavRow }) {
   if (!row.hasDraft) return null;
@@ -202,6 +257,7 @@ export function PreviewNavigator() {
   const navigate = usePresentationNavigate();
   const params = usePresentationParams();
   const [rows, setRows] = useState<NavRow[] | null>(null);
+  const [presets, setPresets] = useState<PresetRow[] | null>(null);
   const [creating, setCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const toast = useToast();
@@ -211,16 +267,23 @@ export function PreviewNavigator() {
     fetchRows(client)
       .then(setRows)
       .catch(() => setRows([]));
+    fetchPresets(client)
+      .then(setPresets)
+      .catch(() => setPresets([]));
   }, [client]);
 
   useEffect(() => {
     refetch();
-    // Live refresh: any page mutation (rename, publish, new page) triggers a
-    // refetch after a short settle. visibility:'query' waits until it is
-    // actually queryable.
+    // Live refresh: any page or saved-section mutation (rename, publish, new
+    // page, a section just saved) triggers a refetch after a short settle.
+    // visibility:'query' waits until it is actually queryable.
     let timer: ReturnType<typeof setTimeout> | undefined;
     const sub = client
-      .listen('*[_type == "page"]', {}, { visibility: 'query', events: ['mutation'] })
+      .listen(
+        '*[_type in ["page", "sectionPreset"]]',
+        {},
+        { visibility: 'query', events: ['mutation'] },
+      )
       .subscribe(() => {
         clearTimeout(timer);
         timer = setTimeout(refetch, 800);
@@ -349,6 +412,60 @@ export function PreviewNavigator() {
       (g) => g.rows.length > 0,
     );
   }, [rows]);
+
+  // ---------------------------------------------------------------------------
+  // Saved sections (PORTS.md card 24)
+  // ---------------------------------------------------------------------------
+  // The "+ Add section" picker inside a page can only offer schema TYPES, so a
+  // saved section (a `sectionPreset` DOCUMENT) has no way in there. This panel
+  // already knows which page the preview is on, so it is the one place that can
+  // say "add this to the page you are looking at".
+  const [presetsOpen, setPresetsOpen] = useState(false);
+
+  // Which page the preview is showing, as a row. `pending` wins so a click and
+  // an immediate "Add" land on the same page. An exact href match first; the
+  // endsWith fallback is the same one the row highlight uses.
+  const currentRow = useMemo(() => {
+    if (!rows) return null;
+    const href = pending?.href ?? current;
+    if (!href) return null;
+    return rows.find((r) => r.href === href) ?? rows.find((r) => href.endsWith(r.href)) ?? null;
+  }, [rows, pending, current]);
+
+  // The page-builder array on the page in view, or undefined when that page has
+  // none (a settings-shaped singleton, say). Undefined disables the button.
+  const currentField = currentRow ? SECTION_HOST_TYPES[currentRow.type] : undefined;
+
+  const addPreset = useCallback(
+    async (preset: PresetRow) => {
+      if (!currentRow || !currentField || !preset.section) return;
+      setBusyId(preset.id);
+      try {
+        await addSectionToPage(
+          client as unknown as PageOpsClient,
+          currentRow.id,
+          currentField,
+          preset.section,
+        );
+        refetch();
+        toast.push({
+          status: 'success',
+          title: `Added "${preset.title}" to ${currentRow.label}`,
+          description: 'It is at the bottom of the page. Drag it where you want it, then Publish.',
+          duration: 8000,
+        });
+      } catch (err) {
+        console.error('[navigator] add preset failed', err);
+        toast.push({
+          status: 'error',
+          title: 'Could not add that saved section. Please try again.',
+        });
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [client, currentRow, currentField, refetch, toast],
+  );
 
   return (
     <Flex direction="column" style={{ height: '100%' }}>
@@ -486,6 +603,93 @@ export function PreviewNavigator() {
             disabled={creating}
             onClick={() => void createPage()}
           />
+
+          {/* Saved sections - closed by default, so the page list stays the
+              thing this panel is about. */}
+          <Stack space={2}>
+            <Button
+              mode="bleed"
+              padding={2}
+              justify="flex-start"
+              onClick={() => setPresetsOpen((v) => !v)}
+              text={`${presetsOpen ? '▾' : '▸'} Saved sections${
+                presets?.length ? ` (${presets.length})` : ''
+              }`}
+              aria-expanded={presetsOpen}
+              title="Sections you kept from another page, ready to add to this one."
+            />
+            {presetsOpen && (
+              <Stack space={2}>
+                {!presets || presets.length === 0 ? (
+                  <Text size={1} muted>
+                    None yet. Open a page, then use "Save a section as preset..." in its publish
+                    menu to keep one here.
+                  </Text>
+                ) : (
+                  <>
+                    {presets.length > PRESET_SOFT_CAP && (
+                      <Text size={1} muted>
+                        That is a lot of saved sections. Deleting the ones nobody uses makes this
+                        list findable again.
+                      </Text>
+                    )}
+                    {!currentField && (
+                      <Text size={1} muted>
+                        {currentRow
+                          ? 'This page does not build itself from sections, so a saved section cannot go on it.'
+                          : 'Open a page first, then add one to it.'}
+                      </Text>
+                    )}
+                    {presets.map((p) => (
+                      <Flex key={p.id} align="center" gap={1}>
+                        <Card
+                          as="button"
+                          flex={1}
+                          padding={2}
+                          radius={2}
+                          style={{ cursor: 'pointer', textAlign: 'left', minWidth: 0 }}
+                          onClick={() =>
+                            navigate(current || '/preview', { type: 'sectionPreset', id: p.id })
+                          }
+                          title={`Open "${p.title}" to change it`}
+                        >
+                          <Stack space={1}>
+                            <Text size={1} textOverflow="ellipsis">
+                              {p.title}
+                            </Text>
+                            {p.sectionType && (
+                              <Text size={0} muted textOverflow="ellipsis">
+                                {sectionLabel(p.sectionType)}
+                              </Text>
+                            )}
+                          </Stack>
+                        </Card>
+                        <Button
+                          mode="ghost"
+                          padding={2}
+                          icon={AddIcon}
+                          disabled={!currentField || !p.section || busyId === p.id}
+                          title={
+                            !p.section
+                              ? 'This saved section is empty. Open it and put a section in it.'
+                              : currentField
+                                ? `Add "${p.title}" to ${currentRow?.label}`
+                                : 'Open a page first, then add it.'
+                          }
+                          aria-label={
+                            currentField
+                              ? `Add ${p.title} to ${currentRow?.label}`
+                              : `Add ${p.title}`
+                          }
+                          onClick={() => void addPreset(p)}
+                        />
+                      </Flex>
+                    ))}
+                  </>
+                )}
+              </Stack>
+            )}
+          </Stack>
         </Stack>
       </Box>
       {/* Pinned under the page list so "edit the settings" never needs a trip

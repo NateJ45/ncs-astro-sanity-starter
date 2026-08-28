@@ -24,6 +24,7 @@ import { privacyPage } from './privacyPage';
 import { processPage } from './processPage';
 import { processStep } from './processStep';
 import { redirect } from './redirect';
+import { sectionPreset } from './sectionPreset';
 import { service } from './service';
 import { servicesPage } from './servicesPage';
 import { siteSettings } from './siteSettings';
@@ -73,6 +74,9 @@ export const schemaTypes = [
   journalEntry,
   // Custom pages built from the section library (multi-instance, not a singleton)
   page,
+  // One saved section, kept for reuse on other pages. Not content: nothing
+  // about a preset reaches the live site until it is added to a page.
+  sectionPreset,
   // Old address -> new address forwards, filed by hand or automatically on a
   // web-address change (see components/slugRedirect.tsx).
   redirect,

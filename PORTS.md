@@ -76,6 +76,8 @@ is installing it as of the date on the card.
 | 21  | Pages as first-class objects (duplicate / archive / SEO panel)    | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
 | 22  | Redirects on rename                                               | yes     | no          | yes      | no               | no            | no             | yes                | n/a                 |
 | 23  | Editor-defined forms                                              | yes     | no          | yes      | no               | no            | no             | yes                | no                  |
+| 24  | Saved sections (section presets)                                  | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
+| 25  | Pre-publish page checks                                           | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -1135,6 +1137,154 @@ church-starter yes (on the `sectionForm` page-builder block) / WCP yes (the
 original, `formField` + an `/api/contact` server fold) / everything else pending
 rollout.
 
+## Card 24: Saved sections (2026-08-28)
+
+**Canonical:** `src/sanity/actions/saveSectionPreset.tsx`, plus `addSectionToPage()`
+in `src/sanity/pageOps.ts`
+**Per repo:** `src/sanity/schemaTypes/sectionPreset.ts`,
+`src/sanity/pageBuilderConfig.ts`
+
+**What:** an editor keeps one band of a page and drops a copy of it on any other
+page. "Save a section as preset..." in a page's publish menu lists that page's
+sections, the editor picks one and names it, and a `sectionPreset` document is
+written. Adding it back is a copy, not a link.
+
+**Why:** the section an editor is proudest of is the one they most want to
+repeat, and today repeating it means either rebuilding it by hand or duplicating
+a whole page to get at one strip of it. The page-builder promises reuse and
+until now offered none.
+
+**THE SCHEMA SHAPE IS THE WHOLE TRICK.** `section` is an ARRAY of every section
+type, capped at one by validation. Sanity has no syntax for a union OBJECT
+field, and a field per type would be twenty fields. The array buys three things
+for free: the same grouped insert menu the page builder uses, the real section
+FORM (so a saved section is EDITABLE in place, not just replayed), and the
+type's own preview. `sectionType` is a read-only stamp copied out of the array
+when the preset is captured, so a list can label a preset without opening it.
+
+**No field groups on the type, deliberately.** An undefined group name is a
+fatal Studio-RUNTIME error in Sanity 6.4 that `astro build` does not catch. Four
+fields need no tabs, so the risk is simply not taken.
+
+**Why a document action and not the section's own menu.** Array-item menus are
+built from the array input's options and the visual-editing overlay's toolbar is
+internal; Sanity opens neither to a plugin. A document action is the surface we
+own.
+
+**It writes a PUBLISHED preset and reads the DRAFT page.** A preset is a tool,
+not content: nothing about it reaches the website, so "publish your saved
+section before you can use it" would be ceremony. The source is the draft
+because a section is usually saved right after it is made.
+
+**Adding one always writes to the DRAFT of the target page**, and the section
+lands at the BOTTOM. A saved section that went live on click would be a publish
+nobody asked for. When the target has no draft yet, one is made from the
+published document first, which is exactly what typing in the form would have
+done. Every `_key` is regenerated at every depth on the way in AND on the way
+out, so the same preset can go on the same page twice.
+
+**THE INSERT SURFACE DIFFERS PER REPO, AND THAT IS THE INTERESTING PART.** The
+verb is one function (`addSectionToPage` in the canonical `pageOps.ts`); only
+the direction of the question changes:
+
+- **Repos with the Presentation navigator** (starter, wcp) get a collapsible
+  "Saved sections" group under the page list, one "add" button per row, adding
+  to the page the preview is currently showing. Current page = the sticky
+  pending navigation intent ?? `params.preview`, matched against row hrefs (exact
+  first, `endsWith` fallback) - the same resolution the row highlight uses, so a
+  click and an immediate "Add" can never disagree. Disabled with a plain-words
+  tooltip when no page is open, or when the open page has no builder array.
+- **Repos with no navigator** (church-starter) get "Add to a page..." on the
+  saved section ITSELF, listing the pages grouped Main / Custom. Same verb,
+  reversed direction. Archived pages are left out: adding to a page that is off
+  the site is almost certainly a misclick.
+
+A page's own "+ Add section" picker can offer schema TYPES only, never
+documents, which is why neither surface is inside it.
+
+**Applied to:** starter yes (canonical + navigator group) / church-starter yes
+(canonical + "Add to a page..." action) / WCP partial (the original: its own
+`sectionPreset`, its own `saveSectionPreset.tsx` and navigator group, all
+pre-config-object - see the fold-back note on card 25) / everything else pending
+rollout.
+
+## Card 25: Pre-publish page checks (2026-08-28)
+
+**Canonical:** `src/lib/page-checks.ts` (+ `src/lib/page-checks.test.ts`),
+`src/sanity/actions/checkPage.tsx`
+**Per repo:** `src/sanity/pageBuilderConfig.ts`
+
+**What:** "Check this page..." in a page's publish menu reads the DRAFT back and
+reports three kinds of "worth a look": photos with no alt text, sections with
+nothing typed in them, and links to same-site addresses no page seems to own.
+
+**Why:** an editor about to publish has no way to ask "did I forget anything?"
+short of reading the whole page again, and the three things they forget are
+always the same three.
+
+**IT NEVER BLOCKS PUBLISH AND IT NEVER EDITS.** Sanity's own required-field
+validation already stops genuinely broken content; this is the softer layer
+above it. Every line of copy says "worth a look" rather than "wrong", the dialog
+ends with a line admitting it can be mistaken, and the Publish button is
+untouched while it is open. The moment a courtesy check starts refusing things,
+editors learn to click past it.
+
+**Every check is a heuristic that UNDER-REPORTS on purpose.** The link check
+compares by FIRST PATH SEGMENT only, because `/events/harvest-supper` and
+`/journal/spring-refresh` are real addresses built by code from a collection and
+no `page` document owns them; matching whole paths would flag half the site and
+the feature would be ignored inside a week. Alt text is accepted in any of the
+three shapes the family models it in (`alt` on the image, `alt` beside it,
+`<key>Alt` beside it), so a parent holding two images and one alt reads as
+described. That miss is the right trade.
+
+**"Empty" needs two exemption lists or it is permanently silent.** Setting keys
+(`variant`, `tone`, `layout`, `background`, ...) are enum values with an
+initialValue, so a completely untouched section already has several strings in
+it; they do not count as words. And sections that fill THEMSELVES from a
+collection (an FAQ list, an auto list, a form) are skipped whole: a dynamic list
+with no heading is not an empty section, it is a section whose words live in the
+Events list.
+
+**THE CONFIG OBJECT IS THE PORT.** WCP's ancestor hard-codes its own array field
+name (`sections`), its own `SETTING_KEYS`, its own `SELF_FILLING_SECTIONS`, and
+its own `CODE_OWNED_PATHS` in the library file, which makes that file
+unshareable: the three repos name their builder arrays `pageBuilder`,
+`sections`, and `flexibleSections`, and no two agree on which sections are
+self-filling. The canonical core now takes a `PageCheckConfig` and every
+repo-specific answer arrives from `src/sanity/pageBuilderConfig.ts`, at a path
+every repo shares. That file also carries `SECTION_HOST_TYPES` (type -> builder
+field), which is what wires card 24's actions and the document-actions resolver,
+so a fork adapts BOTH cards by editing one file.
+
+**Two shape changes came with the config, and both are deliberate:**
+
+1. **Section numbering runs on across several arrays.** A repo with a main
+   builder and an "extra sections" append zone shows the editor one list, so the
+   checks count one list.
+2. **The header (hero) is NOT checked for emptiness by default.** WCP's version
+   checks it. Here `header.checkEmpty` is opt-in, because in two of the three
+   repos a page whose banner is one background photo over built-in copy is a
+   perfectly normal page, and flagging it would be the false positive that
+   teaches an editor to ignore the dialog. WCP sets it true when it folds back.
+
+**FUTURE WCP SYNC TASK (open).** WCP still runs the pre-config ancestor of
+`page-checks.ts`, `checkPage.tsx`, `saveSectionPreset.tsx` and its own
+`sanity-keys.ts`. Folding it forward is: add `src/sanity/pageBuilderConfig.ts`
+with `sectionArrays: ['sections']`, `header: { label: 'Hero (top banner)',
+fields: ['hero'], checkEmpty: true }`, its `SELF_FILLING_SECTIONS` and
+`CODE_OWNED_PATHS` lists, and `SECTION_HOST_TYPES` for `page` (+ `hubPage` if
+the hub ever gains the action); drop in the four canonical files; move
+`newKey`/`regenerateKeys` from `src/lib/sanity-keys.ts` to `pageOps.ts` (which
+WCP does not yet carry) or keep `sanity-keys.ts` and re-point the canonical
+imports - the second is drift, so prefer the first; port the Vitest suite to the
+node:test canonical copy; and add the PORTABLE markers. Nothing about it is
+urgent: the ancestor works, it is simply not shared.
+
+**Applied to:** starter yes (canonical) / church-starter yes (canonical) / WCP
+partial (the pre-config ancestor, see the fold-back note above) / everything
+else pending rollout.
+
 ## Sync sessions
 
 A sync session is a pass over one repo: run `sync-check`, reconcile drift, install the
@@ -1517,3 +1667,76 @@ is a zero-diff no-op, which is the proof the change is additive.
 three new canonical files all report SAME. One PRE-EXISTING drift
 remains in church: `scripts/sync-check.mjs` never received the
 nested-app rule from the session above. Untouched here, still open.
+
+### 2026-08-28: saved sections + pre-publish checks land in both templates (cards 24 + 25)
+
+Both templates learned wcp's Unlocked Studio Phase C and E: keep a
+section and reuse it, and read a page back before publishing. Four new
+canonical files, byte-identical in both (`src/lib/page-checks.ts`, its
+test, `src/sanity/actions/checkPage.tsx`,
+`src/sanity/actions/saveSectionPreset.tsx`), one canonical file
+extended (`addSectionToPage()` joins duplicate and archive in
+`src/sanity/pageOps.ts`), and two per-repo files each: the
+`sectionPreset` document against that repo's own section union, and
+`src/sanity/pageBuilderConfig.ts`.
+
+**The config-object restructure is deliberate canonical evolution,
+ahead of wcp's copy.** wcp's ancestor bakes its own field names and
+lists into the library file, which is exactly why it could not be
+shared. Card 25 carries the fold-back recipe; nothing about it is
+urgent.
+
+Adaptation notes earned on the way:
+
+- **The section union is reused, never rewritten.** The starter's
+  preset takes `[...SECTION_TYPES, ...RICH_SECTION_TYPES]` (the widest
+  union in the repo, so a preset can be saved from any page);
+  church-starter's takes `FLEXIBLE_SECTION_MEMBERS`. Both carry the
+  repo's own `sectionArrayOptions`, so the picker inside a preset reads
+  exactly like the picker on a page. A hand-written member list would
+  have gone stale on the next block added.
+- **`sectionLabel` had to learn both naming conventions.** The starter
+  suffixes its types (`imageTextSection`), church-starter prefixes them
+  (`sectionImageText`). One canonical function strips either, so both
+  read "Image text". wcp, which only suffixes, is unaffected by the
+  added prefix rule.
+- **The insert surface is where the two repos genuinely differ, and
+  splitting the verb from the surface is what let both have the
+  feature.** The starter has the Presentation navigator, so it got the
+  "Saved sections" group with per-row "add to the page you are looking
+  at". church-starter has no navigator at all, so the same verb hangs
+  on the saved section instead: "Add to a page..." with a page picker.
+  Same `addSectionToPage`, opposite direction. This is the same lesson
+  cards 21/22 recorded, met again.
+- **`PageOpsClient` grew `createIfNotExists` and `patch`.** Both
+  existing call sites cast through `as unknown as PageOpsClient`, so
+  widening the interface broke nothing, and the real Sanity client
+  satisfies all of it.
+- **One list wires three things.** `SECTION_HOST_TYPES` in
+  `pageBuilderConfig.ts` is the document-actions gate, the navigator's
+  "can a saved section go here?" test, and church's page picker. In
+  church that list is the generic `page` plus eighteen singletons that
+  all share `flexibleSections`, so the actions resolver branches once
+  on a set rather than naming types in three places.
+- **The starter's `additionalSections` append zone is read by the
+  checks but is never an add TARGET.** A saved section goes to the main
+  builder; the checks still walk both, numbered as one list, because
+  that is how the editor sees the page.
+- **The navigator's live `listen` had to widen to
+  `*[_type in ["page", "sectionPreset"]]`,** or a section just saved
+  from a page would not appear in the panel until the tool was
+  reopened.
+
+Verified in both repos: `npx tsc --noEmit` clean (TS5101 baseUrl
+deprecation only), `npm run build` green, `page-parity compare`
+**10/10** and **20/20** (nothing here touches rendered HTML until an
+editor adds a section), `sanity schema extract
+--enforce-required-fields` succeeds, `npm run typegen` regenerates
+cleanly (79 and 119 schema types), `npm run lint` with no new findings
+(the starter's one pre-existing `pageBuilder.types.ts` error is
+untouched), prettier clean on every new and edited file. Unit tests
+**150/150** (starter, 124 + 26) and **116/116** (church, 90 + 26).
+`sync-check` self-check in the starter is 24/24 SAME and the
+cross-check from church is 23/23 SAME, the five shared files included.
+The pre-existing church drift on `scripts/sync-check.mjs` (no
+nested-app rule) is still open and still untouched.

@@ -21,6 +21,7 @@ import type { StructureBuilder, StructureResolverContext } from 'sanity/structur
 import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list';
 import {
   BellIcon,
+  BlockElementIcon,
   CogIcon,
   HomeIcon,
   UserIcon,
@@ -80,6 +81,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'journalEntry',
   'journalCategory',
   'page', // custom pages, placed explicitly under "Pages"
+  'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
@@ -198,6 +200,17 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               S.documentTypeListItem('page')
                 .title('Custom pages (build your own)')
                 .icon(DocumentsIcon),
+
+              S.divider(),
+
+              // Saved sections: one band of a page, kept for reuse. Made from a
+              // page's publish menu ("Save a section as preset..."), added to a
+              // page from the Saved sections group in the Presentation
+              // navigator. Ordered by name, because the name is the only way
+              // you find one again.
+              S.documentTypeListItem('sectionPreset')
+                .title('Saved sections')
+                .icon(BlockElementIcon),
 
               S.divider(),
 
