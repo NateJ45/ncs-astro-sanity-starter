@@ -465,6 +465,16 @@ standalone `/preview` tab still opens the new tab.
 one that silently degrades, because a missed entry there does not error, it just lets a
 click escape to the live site.
 
+### Edit-mode gate (2026-08-28 amendment)
+
+While Presentation's Edit toggle is ON, @sanity/visual-editing keeps
+outline boxes (`[data-sanity-overlay-element]`) in the DOM. The
+interceptor treats their presence (when embedded) as edit mode and
+suppresses ALL navigation - even links with preview equivalents. A
+CTA button click then selects the field and nothing else, which is
+what an editor mid-edit expects. Toggle Edit off and the boxes leave
+the DOM, so clicks browse the preview again (remap as before).
+
 ## Card 12: Parity-gated page-builder conversion
 
 **Dated 2026-08-26 (presacademy). Reference:**
@@ -775,3 +785,24 @@ functions with the memo skipped so draft reads never leak between
 Worker requests; and verify surprising upstream markup changes in a
 real browser before pinning (radix accordion's dropped aria-controls
 was deliberate and axe-clean).
+
+### 2026-08-28 (later): edit-mode gate + sticky page-list navigation
+
+Two editor reports from presacademy, fixed and rolled to every
+Presentation repo (presacademy, wcp, starter, church-starter [layout
+only - no navigator], reid + mas modern-stack branches):
+
+1. Edit-mode gate in PreviewLayout's interceptor (see Card 11's
+   amendment).
+2. STICKY navigation in PreviewNavigator: a page-list click during a
+   preview page load was silently dropped, because Presentation can
+   only hand the iframe its next URL once the new page's
+   visual-editing script reconnects. The navigator now records the
+   click's intent, highlights the row immediately, and re-issues
+   navigate() every 750ms until params.preview reports arrival (~6s
+   cap). When the first navigate lands, `current` matches at once and
+   no retry ever fires.
+
+Verified on the presacademy build: an edit-mode click on a CTA leaves
+the URL untouched; the same click without overlay boxes remaps into
+/preview/*.

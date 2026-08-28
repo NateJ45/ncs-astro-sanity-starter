@@ -184,6 +184,43 @@ export function PreviewNavigator() {
   // params.preview is the iframe's current URL; compare pathnames only.
   const current = (params.preview ?? '').split('?')[0];
 
+  // STICKY navigation (2026-08-28, editor feedback on presacademy): every
+  // preview page change is a full document load, and Presentation can only
+  // hand the iframe its next URL once the NEW page's visual-editing script
+  // has reconnected. A click that lands inside that window (an editor
+  // moving quickly through the page list) is silently dropped. So a click
+  // records its intent and an effect re-issues navigate() every 750ms
+  // until params.preview reports the requested path (or ~6s pass). When
+  // the first navigate lands immediately, `current` matches at once and no
+  // retry ever fires. `pending` also drives the row highlight, so the list
+  // responds to the click instantly instead of after the page load.
+  const [pending, setPending] = useState<{ href: string; type: string; id: string } | null>(null);
+  const go = useCallback(
+    (href: string, type: string, id: string) => {
+      setPending({ href, type, id });
+      navigate(href, { type, id });
+    },
+    [navigate],
+  );
+  useEffect(() => {
+    if (!pending) return;
+    if (current === pending.href) {
+      setPending(null);
+      return;
+    }
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      if (tries > 8) {
+        clearInterval(timer);
+        setPending(null);
+        return;
+      }
+      navigate(pending.href, { type: pending.type, id: pending.id });
+    }, 750);
+    return () => clearInterval(timer);
+  }, [pending, current, navigate]);
+
   // "New page": create an empty DRAFT (so nothing half-made ever publishes
   // itself) and open it in the edit panel right here.
   const createPage = useCallback(async () => {
@@ -224,8 +261,9 @@ export function PreviewNavigator() {
                 </Text>
                 <Stack space={1}>
                   {group.rows.map((r) => {
-                    const active =
-                      current === r.href || (r.href !== '/preview' && current.endsWith(r.href));
+                    const active = pending
+                      ? pending.href === r.href
+                      : current === r.href || (r.href !== '/preview' && current.endsWith(r.href));
                     return (
                       <Flex key={r.id} align="center" gap={1}>
                         <Card
@@ -236,7 +274,7 @@ export function PreviewNavigator() {
                           tone={active ? 'primary' : 'default'}
                           pressed={active}
                           style={{ cursor: 'pointer', textAlign: 'left', minWidth: 0 }}
-                          onClick={() => navigate(r.href, { type: r.type, id: r.id })}
+                          onClick={() => go(r.href, r.type, r.id)}
                         >
                           <Flex align="center" gap={2}>
                             <Text
