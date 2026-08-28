@@ -1443,6 +1443,57 @@ in `sanity/lib/_chunks-es/index2.js` sends exactly these parameters, plus a
 and no extra token: it goes through `useClient(...).request()`, on the editor's
 own session.
 
+### The postmortem: it shipped, and it lied (2026-08-28)
+
+The first version of this card went live on presacademy and **reported success
+while changing nothing**. Worth reading before touching any of it.
+
+**The repro.** A page open in Presentation, its background changed with an
+in-canvas chip (card 28). Ctrl+Z. The toast said "Change undone" three times and
+`background.tone` stayed `'chapel'` through all three.
+
+**What the transaction log actually showed.** The draft's entire history was
+FOUR transactions: one client-UUID create at 16:45:56 whose `apply` was a
+whole-document literal already carrying `tone: 'chapel'` (the overlay's
+`createIfNotExists` + `set`, batched into one transaction by the optimistic
+actor), then three server-id transactions at 16:46:41, 16:47:21 and 16:47:24
+**whose only effect was to move `_updatedAt`**. Those three were the undos. They
+landed, they were not overwritten by anything, and they wrote the document back
+to itself.
+
+So the popular hypothesis — Presentation's optimistic actor holding an in-memory
+snapshot and clobbering our write — was **wrong**, and the log proved it: there
+were no competing transactions at all. Two ordinary bugs, both ours:
+
+1. **A create transaction's `revert` is `[]`, an EMPTY patch, not a null
+   literal. And `applyPatch(doc, [])` returns the document UNCHANGED.** The code
+   detected "this transaction created the draft" by testing `applyPatch`'s result
+   for `null`, which never fired. The delete branch was unreachable, so the
+   "previous" document was the current one, and `createOrReplace` wrote it back.
+   The unit tests passed throughout because the FAKE built create-reverts as
+   `[0, null]` — the fixture encoded the same wrong assumption as the code, which
+   is the real lesson: a fake that agrees with the bug proves nothing.
+2. **`client.createOrReplace(doc, {transactionId})` silently ignores the id.**
+   In @sanity/client, `_create` (behind `create`, `createOrReplace`,
+   `createIfNotExists`) builds its body as `{mutations: [...]}` and never copies
+   `options.transactionId` into it; only `_mutate` does. Every id we minted was
+   dropped, the server assigned its own, and `ownTransactionIds` therefore
+   recognised none of our own writes — which silently broke multi-step undo.
+
+**The three fixes.** Absence is now read from the patch shape
+(`revert.length === 0`), never inferred from `applyPatch`. Our own writes are
+recorded by the id the SERVER returns, so nothing depends on the client
+forwarding one. And a new honesty rule: before writing, the candidate is
+compared with the current document ignoring `_updatedAt` and `_rev`, and a
+transaction that would not move anything is skipped in favour of the next one
+back. This feature is no longer able to say "Change undone" while the document
+stands still. Re-introducing bug 1 alone now fails 8 tests.
+
+A fourth shape exists too and is handled: a transaction with **both** patches
+empty, which names the document but changed nothing about it (seen on
+`drafts.homePage` in the live log). It is never a useful step back and is
+skipped.
+
 ### Three findings, all verified against a live dataset before the code was written
 
 1. **`excludeContent=false` is REFUSED.** The API answers `403 permissionDenied`
@@ -1471,7 +1522,8 @@ own session.
   see, and undo refuses with "Someone else edited since" rather than clobbering
   it.
 - **The draft-creation edge.** If the transaction being undone CREATED the
-  draft, `applyPatch` returns `null` and the honest undo is deleting the draft.
+  draft — read from `revert.length === 0`, never from `applyPatch`, see the
+  postmortem — the honest undo is deleting the draft.
   That is allowed only after checking the published twin still exists. With no
   twin it refuses: "This would remove the only copy". Ctrl+Z must never be able
   to lose a document.
@@ -1513,12 +1565,13 @@ press falls through untouched.
 
 ### Two deliberate deviations from the obvious design
 
-**Transaction ids are plain UUIDs, not `undo-<uuid>`.** A prefix would be
-readable in the API log, but a transaction id becomes the document's `_rev`, and
-a UUID is exactly what the Studio itself mints for an edit. Rather than bet an
-editor's document on the server accepting a novel `_rev` shape, our own
-transactions are recognised by a tracked Set of ids. The request carries
-`tag=undo-redo.transactions` instead, which is where you would go looking anyway.
+**We do not supply transaction ids at all.** The first version minted a UUID and
+passed `{transactionId}`, which reads as though it works and does not — see the
+postmortem. Our own writes are now recognised by the id the SERVER assigns,
+read back out of the mutation result (`returnDocuments: false` gives
+`{transactionId, ...}`), which is also the document's new `_rev`. That is the id
+actually in the log, so nothing depends on the client forwarding one. The
+request carries `tag=undo-redo.transactions` for anyone reading the API log.
 
 **`mendoza` is imported bare, and it is not a direct dependency.** It arrives
 hoisted at `node_modules/mendoza` as a transitive dep of `sanity` (verified in
@@ -1535,18 +1588,36 @@ Copy the three canonical files, then two lines of wiring in `sanity.config.ts`:
 action list for the page-builder types (beside cards 24 and 25 — a page is where
 a mis-drag actually costs something). Nothing schema-side changes, so no typegen
 and no parity movement. Add the guide entry: it must say Ctrl+Z works OUTSIDE
-text boxes, that inside a text box the text box's own undo runs, and that
-Version history remains the deep restore.
+text boxes, that inside a text box the text box's own undo runs, that the
+shortcut is not heard over the Presentation preview (use the menu there), and
+that Version history remains the deep restore.
+
+**Known limit: the preview iframe eats the key.** A key pressed while focus is
+inside Presentation's iframe goes to the iframe's window, not the Studio's, so
+the shortcut is dead exactly when an editor has just used an in-canvas chip.
+The two document actions are unaffected and are the reliable path. Forwarding
+the key out was considered and declined: it needs a postMessage protocol between
+the public preview island and the Studio layout wrapper — key handling in a
+public bundle plus an origin check — for a shortcut with a working button two
+inches away.
 
 **Verified without a browser session:** the whole of the pure logic — the
-request shape, NDJSON parsing, the rev guard, target selection, stack
-invalidation — is unit tested (27 assertions), and undo/redo run end to end
-against a miniature in-memory Sanity that mints a `_rev` per transaction the way
-the real one does, through the REAL `applyPatch`. The live translog was dry-run
-read-only against presacademy's production dataset on 2026-08-28, which is where
-the three findings above came from. What is NOT exercised without a Studio open:
-the two actions rendering, the layout composing with an existing
-`studio.components.layout`, and the key press itself.
+request shape, NDJSON parsing, the rev guard, absence detection, target
+selection, the no-op skip, stack invalidation — is unit tested (41 assertions),
+and undo/redo run end to end against a miniature in-memory Sanity through the
+REAL `applyPatch`. That fake is now faithful in the three ways that caused the
+incident: creates carry an EMPTY revert, `_updatedAt` moves on every write, and
+a caller-supplied `transactionId` is ignored. Re-introducing the create-detection
+bug fails 8 tests. The live translog was read (read-only) against presacademy's
+production dataset, which is where every finding here came from.
+
+What is STILL not exercised without a Studio open, and is now in
+`docs/PENDING.md`: the two actions rendering, the layout composing with an
+existing `studio.components.layout`, the key press itself, multi-step undo
+against a real server, and whether a whole-document `createOrReplace` is safe
+while Presentation's optimistic actor holds in-flight patches for the same
+draft (the log showed no sign of trouble during the incident, but that is
+absence of evidence).
 
 **Applied to:** starter yes / presacademy yes / WCP pending / church-starter
 pending / reid-design-site pending / mas-monograms pending / 2ndpreschicago
@@ -2141,3 +2212,45 @@ presacademy only; canonicalization here after Nathan's deployed
 click-through. Known follow-up: canonical pageOps.ts:225 has a
 type-only .commit error on PageOpsPatch that only astro check-gated
 repos can see - fix at the next sync.
+
+### 2026-08-28 (later): card 27 shipped broken, and what the log said
+
+Undo reported success and changed nothing, three times, on deployed
+presacademy. The full account is in card 27's postmortem; the short
+version is that both causes were ours and neither was the one everyone
+guessed.
+
+The suspicion was that Presentation's optimistic actor was overwriting
+our mutation. The transaction log for `drafts.pricingPage` refuted it
+in about a minute: four transactions, one create carrying the tone, and
+three undo writes whose only effect was to move `_updatedAt`. No
+competing transactions at all. The undos landed; they wrote the
+document back to itself.
+
+Cause one: a create transaction's `revert` is `[]`, and
+`applyPatch(doc, [])` returns the document unchanged, so the null test
+that was supposed to mean "this created the draft" never fired. Cause
+two: `@sanity/client`'s `_create` never forwards `options.transactionId`
+into the request body (only `_mutate` does), so every id we minted was
+dropped and our own writes were unrecognisable to us.
+
+**The part worth carrying to every other card.** The unit tests were
+green through all of it, because the fake built create-reverts as
+`[0, null]` — the fixture encoded the same wrong assumption as the code.
+A fake that agrees with the bug proves nothing. The fake is now faithful
+in the three ways that mattered (empty revert on create, `_updatedAt`
+moving on every write, caller transaction ids ignored), and
+re-introducing cause one fails 8 tests instead of 0.
+
+A third rule came out of it that is not a bug fix but a policy: an undo
+that would not move anything other than `_updatedAt` is skipped in
+favour of the next step back, so the feature cannot say "Change undone"
+while the document stands still.
+
+Both repos: 249 tests in the starter, 341 in presacademy, sync-check 30
+SAME self / 19 SAME cross, no new tsc errors either side. The deployed
+round trip - the actions rendering, multi-step undo against a real
+server, and whether a whole-document write is safe beside the
+optimistic actor - is in presacademy's `docs/PENDING.md`, along with
+the leftover `drafts.pricingPage` fixture for Nathan to discard.
+Ctrl+Z over the preview iframe stays a documented limitation.

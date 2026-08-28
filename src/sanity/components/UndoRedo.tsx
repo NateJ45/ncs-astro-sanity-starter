@@ -39,6 +39,21 @@ import {
 // way an editor expects. This shortcut is for everything OUTSIDE a text box:
 // the section you just dragged, the swatch you just changed, the block you just
 // deleted.
+//
+// KNOWN LIMIT: THE PREVIEW IFRAME EATS THE KEY. Presentation renders the site
+// in an iframe, and a key pressed while focus is inside it is delivered to the
+// IFRAME's window, not to this one. So Ctrl+Z does nothing while the editor is
+// clicking around the page picture - including straight after using one of the
+// in-canvas chips (card 28), which is exactly when they are most likely to
+// want it. The two document ACTIONS are unaffected and remain the reliable
+// path; the guide says to use them, or to click into the Studio panel first.
+//
+// Forwarding the key out of the iframe was considered and NOT done. It would
+// mean a new postMessage protocol between the public preview island and this
+// wrapper - key handling shipped in a public bundle, and the Studio coupled to
+// an origin check - for a shortcut that has a working button two inches away.
+// If it is ever wanted, the seam is the overlay island in
+// src/components/preview/overlay/, and it needs a deployed Studio to test.
 // =============================================================================
 
 const API = { apiVersion: '2025-01-01' } as const;

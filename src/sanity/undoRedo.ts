@@ -25,8 +25,9 @@ import type { SanityClient } from '@sanity/client';
 // Studio's own Version history makes (sanity's Timeline fetches with exactly
 // these parameters), so it needs no extra permission and no extra token.
 //
-// THREE THINGS THAT ARE NOT OBVIOUS, all verified against a live dataset on
-// 2026-08-28 before a line of this was written:
+// FIVE THINGS THAT ARE NOT OBVIOUS, all verified by reading a live transaction
+// log (2026-08-28). Numbers 4 and 5 were found the hard way, by a first version
+// of this file that shipped and lied - see the postmortem below.
 //
 //   1. `excludeContent=false` is REFUSED. The API answers 403
 //      "This API requires excludeContent to be true". The effects come back
@@ -40,6 +41,38 @@ import type { SanityClient } from '@sanity/client';
 //      index in the patch - the document comes back with `_type` reading
 //      "homePage3:54" and a paragraph turned into an array of letters. Sanity's
 //      own applyMendozaPatch does the same strip; this is not a nicety.
+//   4. A transaction that CREATED a document has `revert: []` - an EMPTY patch,
+//      NOT a null literal. And `applyPatch(doc, [])` returns the document
+//      UNCHANGED, not null. So "did this transaction create the document?"
+//      cannot be answered by testing applyPatch's result for null. It is
+//      answered by `revert.length === 0`. Both patches empty is a third thing
+//      again: a transaction that listed this document but changed nothing
+//      about it.
+//   5. `client.createOrReplace(doc, {transactionId})` SILENTLY IGNORES the
+//      transaction id. In @sanity/client, `_create` builds its request body as
+//      `{mutations: [...]}` and never copies `options.transactionId` into it;
+//      only `_mutate` does. So the id we ask for is not the id the transaction
+//      gets. Nothing here supplies one any more: we read the id the SERVER
+//      assigned back out of the mutation result, which is also the document's
+//      new `_rev`.
+//
+// THE POSTMORTEM (2026-08-28, deployed presacademy). Ctrl+Z on a page whose
+// draft had been created by a Presentation overlay chip toasted "Change undone"
+// three times and changed nothing. The transaction log told the whole story:
+// the draft's entire history was ONE transaction (createIfNotExists + the tone
+// set, batched by the overlay's optimistic actor), whose revert was `[]`.
+// Finding 4 had not been made yet, so `applyPatch(current, [])` handed back the
+// same document, the null test did not fire, the delete branch was never
+// reached, and we wrote the document back to itself. Three times. Each write
+// produced a real transaction whose only effect was to move `_updatedAt`.
+//
+// Two rules came out of it, and both are enforced below:
+//   - Absence is read from the PATCH SHAPE, never inferred from applyPatch.
+//   - An undo that would not change anything is NOT an undo. Before writing,
+//     the candidate is compared with the current document ignoring `_updatedAt`
+//     and `_rev`; if nothing moves, that transaction is skipped and the next
+//     one back is tried. This feature is never allowed to say "Change undone"
+//     while the document stands still.
 //
 // SAFETY. Only the DRAFT id is ever read or written, which makes this
 // inherently publish-safe: a publish is a mutation on the published twin, so it
@@ -182,7 +215,7 @@ export function effectFor(tx: TranslogTransaction, documentId: string): Transact
   return effect;
 }
 
-/** Newest first, only the transactions that actually changed this document. */
+/** Newest first, every transaction that LISTED this document. */
 export function transactionsTouching(
   txs: TranslogTransaction[],
   documentId: string,
@@ -191,23 +224,118 @@ export function transactionsTouching(
 }
 
 /**
- * The next step back: the newest transaction that is neither one of our own
- * undo/redo writes nor a step this session has already undone.
- *
- * Applying that transaction's `revert` to the CURRENT document is correct even
- * after several undos, because each undo leaves the document in exactly the
- * state that transaction produced.
+ * A transaction that named this document but did nothing to it: BOTH patches
+ * empty. Real in the wild (a multi-document transaction where the other
+ * document is the one that moved). Never a useful step back.
  */
-export function nextUndoTarget(
+export function isNoOpEffect(effect: TransactionEffect): boolean {
+  return effect.apply.length === 0 && effect.revert.length === 0;
+}
+
+/** What the document looked like before a transaction: gone, or these fields. */
+export type PreviousDocument = { absent: true } | { absent: false; doc: Record<string, unknown> };
+
+/**
+ * The document as it stood BEFORE one transaction.
+ *
+ * ABSENCE IS READ FROM THE PATCH SHAPE, never inferred from applyPatch's
+ * result. A transaction that created the document carries `revert: []`, and
+ * `applyPatch(doc, [])` hands back the document UNCHANGED - so testing the
+ * result for null silently turns "delete this draft" into "write the document
+ * back to itself", which is precisely the bug this file shipped with once. See
+ * finding 4 in the header.
+ */
+export function documentBefore(
+  current: Record<string, unknown>,
+  effect: TransactionEffect,
+): PreviousDocument {
+  if (effect.revert.length === 0) return { absent: true };
+  const doc = applyPatch(withoutRev(current), effect.revert) as Record<string, unknown> | null;
+  return doc === null ? { absent: true } : { absent: false, doc };
+}
+
+/** Fields the server owns. A move in these alone is not a change an editor made. */
+const VOLATILE_FIELDS = new Set(['_rev', '_updatedAt']);
+
+/** Structural equality, ignoring the fields the server rewrites on every write. */
+export function sameIgnoringVolatile(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    return a.every((item, i) => sameIgnoringVolatile(item, b[i]));
+  }
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  const left = Object.keys(a as object).filter((k) => !VOLATILE_FIELDS.has(k));
+  const right = Object.keys(b as object).filter((k) => !VOLATILE_FIELDS.has(k));
+  if (left.length !== right.length) return false;
+  return left.every(
+    (key) =>
+      Object.prototype.hasOwnProperty.call(b, key) &&
+      sameIgnoringVolatile(
+        (a as Record<string, unknown>)[key],
+        (b as Record<string, unknown>)[key],
+      ),
+  );
+}
+
+/**
+ * Would stepping back over this transaction actually move anything? Deleting
+ * the draft always counts. Otherwise the candidate is compared with the current
+ * document ignoring `_updatedAt` and `_rev`.
+ *
+ * This is the rule that stops the feature lying. A transaction can be perfectly
+ * real and still leave the document identical - our own no-op writes did, and
+ * so does anything that only touches a server-owned field - and an undo that
+ * writes the same value back while toasting "Change undone" is worse than no
+ * undo at all.
+ */
+export function changesSomething(
+  current: Record<string, unknown>,
+  previous: PreviousDocument,
+): boolean {
+  if (previous.absent) return true;
+  return !sameIgnoringVolatile(previous.doc, withoutRev(current));
+}
+
+/** A step back that is worth taking: the transaction, and what it restores. */
+export interface UndoTarget {
+  tx: TranslogTransaction;
+  effect: TransactionEffect;
+  previous: PreviousDocument;
+}
+
+/**
+ * The next step back: the newest transaction that is not one of our own
+ * undo/redo writes, not a step this session has already undone, not a no-op,
+ * and not one whose "before" is the document we already have.
+ *
+ * EVERY candidate is measured against the CURRENT document, never against a
+ * reconstructed intermediate. That holds in both cases the loop can skip:
+ *
+ *   - Our own undo and the transaction it undid always come in a PAIR, and the
+ *     pair cancels: after an undo, the document already IS the state the next
+ *     candidate produced.
+ *   - A candidate whose revert changes nothing means the document already IS
+ *     the state before it, which is equally the state after the candidate
+ *     before it.
+ *
+ * So in both cases `current` is the right thing to apply the next `revert` to,
+ * and reconstructing intermediates would add a way to be wrong for no gain.
+ */
+export function pickUndoTarget(
   txs: TranslogTransaction[],
   documentId: string,
+  current: Record<string, unknown>,
   ownTransactionIds: ReadonlySet<string>,
   alreadyUndone: ReadonlySet<string>,
-): TranslogTransaction | null {
+): UndoTarget | null {
   for (const tx of transactionsTouching(txs, documentId)) {
-    if (ownTransactionIds.has(tx.id)) continue;
-    if (alreadyUndone.has(tx.id)) continue;
-    return tx;
+    const effect = effectFor(tx, documentId);
+    if (!effect || isNoOpEffect(effect)) continue;
+    if (ownTransactionIds.has(tx.id) || alreadyUndone.has(tx.id)) continue;
+    const previous = documentBefore(current, effect);
+    if (!changesSomething(current, previous)) continue;
+    return { tx, effect, previous };
   }
   return null;
 }
@@ -329,18 +457,29 @@ function syncToDocument(documentId: string, currentRev: string | undefined): Doc
 }
 
 /**
- * A transaction id for our own writes. A plain UUID, which is exactly what the
- * Studio itself mints (a document edited in the Studio carries a UUID `_rev`),
- * so there is no chance of the API rejecting the shape. Our own ids are tracked
- * in `ownTransactionIds` rather than recognised by a prefix.
+ * Record a write of ours by the id the SERVER gave it, and remember where it
+ * left the document.
+ *
+ * We do not supply transaction ids. An earlier version minted a UUID and passed
+ * it as `{transactionId}`, which reads as if it works and does not:
+ * @sanity/client's `_create` (behind `create`, `createOrReplace` and
+ * `createIfNotExists`) builds its request body as `{mutations: [...]}` and never
+ * copies `options.transactionId` into it - only `_mutate` does. The id we asked
+ * for was silently dropped, the server assigned its own, and `ownTransactionIds`
+ * therefore never recognised a single one of our own transactions.
+ *
+ * Reading the assigned id back out of the mutation result is both simpler and
+ * immune to that: it is the id that is actually in the log, and it is the
+ * document's new `_rev`.
  */
-function newTransactionId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  // Only reached in an environment without WebCrypto. Uniqueness is all that
-  // is asked of it.
-  return `${Date.now().toString(16)}-${Math.random().toString(16).slice(2)}`;
+function recordOwnWrite(state: DocState, transactionId: string | null): void {
+  if (transactionId) state.ownTransactionIds.add(transactionId);
+  state.expectedRev = transactionId;
+}
+
+/** The shape a mutation returns when asked not to hand the document back. */
+interface MutationReceipt {
+  transactionId?: string;
 }
 
 // -----------------------------------------------------------------------------
@@ -366,10 +505,11 @@ export async function fetchLastTransactions(
  * Step one change back on this draft.
  *
  * Reads the draft, finds the newest transaction this session has not already
- * stepped past, checks that nothing else has landed, then writes the document
- * as it was. If that transaction is the one that CREATED the draft, the undo is
- * a delete of the draft - allowed only when a published copy still exists, so
- * the document cannot be lost by pressing Ctrl+Z.
+ * stepped past AND that would actually move something, checks that nothing else
+ * has landed, then writes the document as it was. If that transaction is the
+ * one that CREATED the draft, the undo is a delete of the draft - allowed only
+ * when a published copy still exists, so the document cannot be lost by
+ * pressing Ctrl+Z.
  */
 export async function undoLast(client: SanityClient, documentId: string): Promise<UndoResult> {
   const current = (await client.getDocument(documentId)) as RawDoc | undefined;
@@ -380,60 +520,51 @@ export async function undoLast(client: SanityClient, documentId: string): Promis
   const txs = await fetchLastTransactions(client, documentId);
   if (!isRevInSync(txs, documentId, current._rev)) return { ok: false, reason: 'stale' };
 
-  const target = nextUndoTarget(txs, documentId, state.ownTransactionIds, state.undone);
+  const target = pickUndoTarget(txs, documentId, current, state.ownTransactionIds, state.undone);
   if (!target) return { ok: false, reason: 'nothing' };
 
-  const effect = effectFor(target, documentId);
-  if (!effect) return { ok: false, reason: 'nothing' };
-
-  const previous = applyPatch(withoutRev(current), effect.revert) as Record<string, unknown> | null;
-
-  const transactionId = newTransactionId();
-
   // The transaction being undone CREATED this draft, so "before" is no draft.
-  if (previous === null) {
+  // Read from the patch shape, never from applyPatch's result: see finding 4.
+  if (target.previous.absent) {
     const published = await client.getDocument(publishedIdOf(documentId));
     if (!published) return { ok: false, reason: 'only-copy' };
-    await client.delete(documentId, { transactionId });
+    const receipt = (await client.delete(documentId, {
+      returnDocuments: false,
+    })) as MutationReceipt;
     const entry: RedoEntry = {
       documentId,
-      transactionId: target.id,
-      apply: effect.apply,
+      transactionId: target.tx.id,
+      apply: target.effect.apply,
       revAfterUndo: null,
     };
-    state.ownTransactionIds.add(transactionId);
-    state.undone.add(target.id);
-    state.redoStack.unshift(entry);
+    if (receipt.transactionId) state.ownTransactionIds.add(receipt.transactionId);
+    // The draft is gone, so there is no rev to sit on.
     state.expectedRev = null;
+    state.undone.add(target.tx.id);
+    state.redoStack.unshift(entry);
     notify();
     return { ok: true, entry, removedDraft: true };
   }
 
   // `_updatedAt` goes with `_rev`: the server sets both, and sending the old
   // one back would be a lie about when this document last changed.
-  const { _updatedAt: _ignored, ...body } = previous;
-  // DRIFT FROM THE CANONICAL COPY (the `as RawDoc` on the argument, twice in
-  // this file, on purpose). The trailing `as RawDoc` gives the call a
-  // contextual type, so @sanity/client infers its document generic as RawDoc
-  // and then demands `_type` on the argument, which is only `unknown`-keyed
-  // here. `npx tsc --noEmit` never sees it (it stops at the TS5101 baseUrl
-  // deprecation), but `npx astro check` does, and that is this repo's gate.
-  // sync-check will report this file as DRIFT until the starter takes the same
-  // two casts.
-  const written = (await client.createOrReplace({ ...body, _id: documentId } as RawDoc, {
-    transactionId,
-  })) as RawDoc;
+  const { _updatedAt: _ignored, ...body } = target.previous.doc;
+  // The `as RawDoc` on the argument (twice in this file) is deliberate and
+  // canonical: @sanity/client cannot pick a createOrReplace overload for an
+  // argument that is only `unknown`-keyed, and drops TS2769 without it.
+  const receipt = (await client.createOrReplace({ ...body, _id: documentId } as RawDoc, {
+    returnDocuments: false,
+  })) as MutationReceipt;
 
   const entry: RedoEntry = {
     documentId,
-    transactionId: target.id,
-    apply: effect.apply,
-    revAfterUndo: written._rev ?? transactionId,
+    transactionId: target.tx.id,
+    apply: target.effect.apply,
+    revAfterUndo: receipt.transactionId ?? null,
   };
-  state.ownTransactionIds.add(transactionId);
-  state.undone.add(target.id);
+  recordOwnWrite(state, receipt.transactionId ?? null);
+  state.undone.add(target.tx.id);
   state.redoStack.unshift(entry);
-  state.expectedRev = entry.revAfterUndo;
   notify();
   return { ok: true, entry, removedDraft: false };
 }
@@ -456,17 +587,15 @@ export async function redoLast(client: SanityClient, documentId: string): Promis
   const next = applyPatch(base, entry.apply) as Record<string, unknown> | null;
   if (next === null) return { ok: false, reason: 'stale' };
 
-  const transactionId = newTransactionId();
   const { _updatedAt: _ignored, ...body } = next;
-  // The second of the two drifting casts. See undoLast above.
-  const written = (await client.createOrReplace({ ...body, _id: documentId } as RawDoc, {
-    transactionId,
-  })) as RawDoc;
+  // The second of the two casts. See undoLast above.
+  const receipt = (await client.createOrReplace({ ...body, _id: documentId } as RawDoc, {
+    returnDocuments: false,
+  })) as MutationReceipt;
 
-  state.ownTransactionIds.add(transactionId);
   state.undone.delete(entry.transactionId);
   state.redoStack.shift();
-  state.expectedRev = written._rev ?? transactionId;
+  recordOwnWrite(state, receipt.transactionId ?? null);
   notify();
   return { ok: true, entry };
 }
