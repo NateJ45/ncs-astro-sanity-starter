@@ -2122,3 +2122,22 @@ the trustworthy gate for Astro repos is astro check, and bare tsc's
 leftover noise (.astro imports, cloudflare:workers types) is
 environmental, not code. Follow-up decision queued: install
 @astrojs/check family-wide so every repo gates like WCP.
+
+### 2026-08-28: card 28 - the floating in-canvas layer (presacademy first)
+
+Squarespace-style popovers in the Presentation canvas, built on the
+overlay-component API (components prop on <VisualEditing>; resolver
+runs only in Edit mode with the optimistic actor ready; controls
+must opt into PointerEvents over the pointer-events:none layer).
+Surface/accent chips on section hover, click-a-word headingAccent,
+Edit-here popovers (textarea for hero fields, strong/em-only
+contenteditable for rich twins with an allow-list paste tokenizer),
+and preset-adds adopting the neighbour's tone (caller-side;
+pageOps stays byte-exact). Writes go through useDocuments from
+@sanity/visual-editing/react - comlink to the Studio, drafts always,
+no browser token, covered by card 27's undo. A drift gate parses
+blocks.ts so schema and registry cannot diverge silently. Live on
+presacademy only; canonicalization here after Nathan's deployed
+click-through. Known follow-up: canonical pageOps.ts:225 has a
+type-only .commit error on PageOpsPatch that only astro check-gated
+repos can see - fix at the next sync.
