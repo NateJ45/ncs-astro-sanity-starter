@@ -1740,3 +1740,13 @@ untouched), prettier clean on every new and edited file. Unit tests
 cross-check from church is 23/23 SAME, the five shared files included.
 The pre-existing church drift on `scripts/sync-check.mjs` (no
 nested-app rule) is still open and still untouched.
+
+### 2026-08-28: the client offer written down
+
+docs/CLIENT-OFFER.md states what the Unlocked Studio program lets you
+promise a client, what stays locked and why that is the product, the
+free-plan roles reality (Admin/Editor only; Growth unlocks custom
+roles and Sanity's own scheduling - card 20 exists so scheduling does
+not need it), the theme-presets default-no decision, the care plan,
+and the words to avoid (requests served, not page views; one-hour
+share links; count the seats).
