@@ -646,6 +646,31 @@ born with it) -> church-starter inherits by sync -> reid (already Sanity 6,
 shortest hop, most active) -> mas -> 2ndpreschicago (after its DNS cutover).
 Follow-up polish on the same card: the insert menu's grid view with
 per-section-type preview thumbnails, and "duplicate page" in the navigator.
+### Card 10/17 lore corrections (mas upgrade, 2026-08-28)
+
+- **The one-styled-components invariant grep must be precise.**
+  `grep -l "errors.md#" dist/client/_astro/*.js` false-positives on any
+  bundle containing `polished` (a Sanity dependency using the same
+  filename). Use `styled-components/src/utils/errors.md#` as the
+  pattern. (The starter and church builds happened not to co-locate
+  polished, which is why 'one file' held there.)
+- **Stega markers are zero-width characters, not the Unicode tag
+  block** - measuring the tag block reads zero on a fully encoded
+  string and mimics a broken preview.
+- **`wrangler ~4.110` is LOAD-BEARING on some configs**: mas's adapter
+  14.2.4 build DOES emit legacy_env, unlike the starter's. The pin
+  stays a hard rule, not belt-and-braces.
+- **Keyless primitive arrays** (arrays of plain strings) have no `_key`;
+  in-canvas attributes must fall back to index paths or controls
+  silently do not render.
+- **The founding `overrides: {vite:"^7"}`** in older forks starves
+  Astro 7 of vite 8 and surfaces as "Could not find the prerender
+  entry point". Remove it in phase A.
+- **Auto-deploy-from-main repos**: the dashboard deploy command must
+  switch to `-c dist/server/wrangler.json` BEFORE the upgrade merges,
+  or /studio and /preview 404. Land on a holding branch until the
+  human flips it (mas: modern-stack branch).
+
 ## Sync sessions
 
 A sync session is a pass over one repo: run `sync-check`, reconcile drift, install the
