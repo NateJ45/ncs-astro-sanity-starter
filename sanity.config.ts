@@ -44,6 +44,7 @@ import {
 import { withSlugRedirect } from './src/sanity/components/slugRedirect';
 import { SaveSectionPresetAction } from './src/sanity/actions/saveSectionPreset';
 import { CheckPageAction } from './src/sanity/actions/checkPage';
+import { UndoAction, RedoAction, undoRedoShortcuts } from './src/sanity/components/UndoRedo';
 import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 
 // =============================================================================
@@ -161,6 +162,12 @@ export default defineConfig({
     // Vision (GROQ query runner) is a developer tool, not an editor tool.
     // Gate it to local dev so it doesn't clutter the deployed Studio.
     ...(IS_DEV ? [visionTool()] : []),
+    // Ctrl+Z / Ctrl+Shift+Z (Cmd on a Mac) for everything that is not typing:
+    // sections added, dragged or removed, photos cleared, options changed
+    // (PORTS.md card 27). The buttons are the two document actions below; this
+    // plugin only adds the keyboard layer, and it stays out of text boxes so
+    // their own undo keeps working. See src/sanity/components/UndoRedo.tsx.
+    undoRedoShortcuts(),
   ],
 
   schema: {
@@ -211,8 +218,14 @@ export default defineConfig({
       // the draft back for missing photo descriptions, empty sections and odd
       // links. Both are offered only where a page-builder array exists, which
       // is one list in src/sanity/pageBuilderConfig.ts.
+      //
+      // Undo / Redo (PORTS.md card 27) sit beside them, on the page-builder
+      // types for the same reason: a page is where a mis-drag or a wrong
+      // background actually costs something, and where "which change do you
+      // mean?" has an obvious answer. The keyboard shortcut is registered
+      // separately, by the plugin in the plugins array above.
       const pageHelpers = PAGE_BUILDER_TYPES.has(schemaType)
-        ? [SaveSectionPresetAction, CheckPageAction]
+        ? [SaveSectionPresetAction, CheckPageAction, UndoAction, RedoAction]
         : [];
 
       return [

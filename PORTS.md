@@ -79,6 +79,7 @@ is installing it as of the date on the card.
 | 24  | Saved sections (section presets)                                  | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
 | 25  | Pre-publish page checks                                           | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
 | 26  | Appearance controls (surfaces, accents, rich twins, layout)       | partial | yes         | partial  | no               | no            | no             | yes                | no                  |
+| 27  | Undo & redo                                                       | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -1407,6 +1408,150 @@ not this one) / starter yes (partial by design, see above) / church-starter yes
 (full: six surfaces, three accents, six rich twins, five heading accents, six
 column registries) / reid-design-site pending / mas-monograms pending.
 
+---
+
+## Card 27: Undo & redo (2026-08-28)
+
+**Canonical:** `src/sanity/undoRedo.ts`, `src/sanity/components/UndoRedo.tsx`,
+`src/lib/undoRedo.test.ts`
+
+**What:** Squarespace's Ctrl+Z, in the Studio, for everything an editor does to a
+draft. Two document actions ("Undo last change", "Redo") in the publish menu, and
+`Ctrl+Z` / `Ctrl+Shift+Z` / `Ctrl+Y` (`Cmd` on a Mac) with a page open. Not just
+typing: sections added, dragged, duplicated or removed, photos swapped or
+cleared, backgrounds and options changed. The gap this closes is the one an
+editor notices within an hour of arriving from Squarespace: a mis-drag had no
+answer short of Version history, which is five clicks and a scary word.
+
+### The mechanism
+
+Every mutation Sanity accepts lands in a transaction log, and each entry carries
+a **mendoza patch in both directions**:
+
+```
+GET /data/history/<dataset>/transactions/<draftId>
+    ?effectFormat=mendoza&excludeContent=true&excludeMutations=true
+    &includeIdentifiedDocumentsOnly=true&reverse=true&limit=25
+```
+
+NDJSON, newest first, each line `{id, timestamp, author, documentIDs, effects}`
+with `effects[<docId>] = {apply, revert}`. Apply `revert` to the document as it
+stands and you have it as it was; apply `apply` to that and you are forward
+again. This is sanity's OWN history request (`Timeline.fetchMoreTransactions`
+in `sanity/lib/_chunks-es/index2.js` sends exactly these parameters, plus a
+`toTransaction` paging cursor we do not need), so it needs no extra permission
+and no extra token: it goes through `useClient(...).request()`, on the editor's
+own session.
+
+### Three findings, all verified against a live dataset before the code was written
+
+1. **`excludeContent=false` is REFUSED.** The API answers `403 permissionDenied`
+   with "This API requires excludeContent to be true". The effects come back
+   regardless — `excludeContent` drops the mutation payloads, not the effects —
+   so there is nothing lost, and a test asserts the flag so it cannot be flipped
+   back by someone tidying.
+2. **A transaction's `id` IS the `_rev` the document carries afterwards.** That
+   is the whole rev guard, and it is why no extra bookkeeping is needed to know
+   whether the log we just read explains the document in front of us.
+3. **`_rev` MUST be stripped before `applyPatch`.** It is not part of the value
+   the effects were computed against, and leaving it on shifts every field index
+   in the patch: the document comes back with `_type` reading `"homePage3:54"`
+   and a paragraph turned into an array of single letters. Sanity's own
+   `applyMendozaPatch` does the same strip. This looks like data corruption and
+   is really an off-by-one; it would be a miserable afternoon to find twice.
+
+### The rules that make it safe
+
+- **Drafts only, which makes it inherently publish-safe.** Only the `drafts.`
+  id is ever read or written. A publish is a mutation on the PUBLISHED twin, so
+  it is not in this log at all and cannot be stepped over. No special case
+  needed; the scope is the safety.
+- **The rev guard.** Before writing, the newest transaction touching the draft
+  must have `id === draft._rev`. If it does not, something landed that we cannot
+  see, and undo refuses with "Someone else edited since" rather than clobbering
+  it.
+- **The draft-creation edge.** If the transaction being undone CREATED the
+  draft, `applyPatch` returns `null` and the honest undo is deleting the draft.
+  That is allowed only after checking the published twin still exists. With no
+  twin it refuses: "This would remove the only copy". Ctrl+Z must never be able
+  to lose a document.
+- **Repeated undo steps BACK, not back and forth.** Naively re-reading the
+  newest transaction oscillates between two states forever, because our own undo
+  is itself the newest transaction. A per-document register of the transaction
+  ids we wrote, plus the originals already stepped past, makes `nextUndoTarget`
+  skip both. Applying that target's `revert` to the current document is still
+  correct, because each undo leaves the document in exactly the state that
+  target produced. There is a test named for the oscillation.
+- **Redo invalidation, in one line.** Each undo/redo records the `_rev` it left
+  the document at. If the document has moved off that rev by the next call, the
+  whole stack is dropped: any transaction we did not make — the editor typing, a
+  colleague, a script — changes `_rev`, and the states the redo stack pointed at
+  are no longer reachable by replaying `apply`.
+- **The input-focus rule.** The shortcut does nothing, and calls no
+  `preventDefault`, when focus is inside
+  `input, textarea, select, [contenteditable="true"], [data-slate-editor]`. The
+  browser's own per-field undo and the Portable Text editor's own history win
+  there, which is what an editor expects. This shortcut is for everything
+  outside a text box.
+- **In memory, and it says so.** The stack is a module-level Map, gone on
+  reload. The guide says undo is for the last few minutes and Version history is
+  the deep restore.
+
+### The active-document problem, and the pragmatic answer
+
+The keyboard listener has to live in a `studio.components.layout` wrapper (a
+plugin has no other window-level seam), and a layout wrapper cannot ask "which
+document is open?" — the router shape is internal and moves between versions.
+
+So the ACTIONS tell the layout. Both actions render whenever a document pane is
+open, so `useUndoRedo(documentId)` pushes its id onto a module-level stack on
+mount and splices it off on unmount; `activeDocumentId()` returns the newest,
+which is what an editor means by "this one" with two panes side by side. The
+listener reads it **at the moment of the key press**, not at render, so it
+outlives every pane that opens under it. No document open, no shortcut: the key
+press falls through untouched.
+
+### Two deliberate deviations from the obvious design
+
+**Transaction ids are plain UUIDs, not `undo-<uuid>`.** A prefix would be
+readable in the API log, but a transaction id becomes the document's `_rev`, and
+a UUID is exactly what the Studio itself mints for an edit. Rather than bet an
+editor's document on the server accepting a novel `_rev` shape, our own
+transactions are recognised by a tracked Set of ids. The request carries
+`tag=undo-redo.transactions` instead, which is where you would go looking anyway.
+
+**`mendoza` is imported bare, and it is not a direct dependency.** It arrives
+hoisted at `node_modules/mendoza` as a transitive dep of `sanity` (verified in
+both repos before wiring). `sanity` re-exports nothing mendoza-shaped, and
+importing through a transitive PATH would be worse. If a repo in the family ever
+hoists it somewhere else, that repo cannot take this card until `mendoza` is
+added to its `package.json` — check `node_modules/mendoza/package.json` exists
+before porting.
+
+### Installing it in a site
+
+Copy the three canonical files, then two lines of wiring in `sanity.config.ts`:
+`undoRedoShortcuts()` in `plugins`, and `UndoAction, RedoAction` appended to the
+action list for the page-builder types (beside cards 24 and 25 — a page is where
+a mis-drag actually costs something). Nothing schema-side changes, so no typegen
+and no parity movement. Add the guide entry: it must say Ctrl+Z works OUTSIDE
+text boxes, that inside a text box the text box's own undo runs, and that
+Version history remains the deep restore.
+
+**Verified without a browser session:** the whole of the pure logic — the
+request shape, NDJSON parsing, the rev guard, target selection, stack
+invalidation — is unit tested (27 assertions), and undo/redo run end to end
+against a miniature in-memory Sanity that mints a `_rev` per transaction the way
+the real one does, through the REAL `applyPatch`. The live translog was dry-run
+read-only against presacademy's production dataset on 2026-08-28, which is where
+the three findings above came from. What is NOT exercised without a Studio open:
+the two actions rendering, the layout composing with an existing
+`studio.components.layout`, and the key press itself.
+
+**Applied to:** starter yes / presacademy yes / WCP pending / church-starter
+pending / reid-design-site pending / mas-monograms pending / 2ndpreschicago
+pending / nixoncreativestudio n/a (no Studio).
+
 ## Sync sessions
 
 A sync session is a pass over one repo: run `sync-check`, reconcile drift, install the
@@ -1921,3 +2066,47 @@ sync-check 27 SAME.
 Not yet swept for this card: reid-design-site, mas-monograms,
 2ndpreschicago, nixoncreativestudio. WCP stays `partial`: it has the
 emphasis layer and its own older colour knobs.
+
+### 2026-08-28: undo & redo land in both templates (card 27)
+
+Three canonical files, byte-identical in both repos and both marked:
+`src/sanity/undoRedo.ts` (the transaction-log machinery),
+`src/sanity/components/UndoRedo.tsx` (two document actions plus the
+keyboard plugin), `src/lib/undoRedo.test.ts` (27 tests). Wiring is two
+lines per repo: `undoRedoShortcuts()` in `plugins`, and
+`UndoAction, RedoAction` beside cards 24 and 25 on the page-builder
+types. No schema change, so no typegen and no parity movement.
+
+**The mechanism was established empirically, not from memory.** A
+read-only dry run against presacademy's production dataset settled
+three things the same morning: `excludeContent=false` is refused with a
+403, a transaction's `id` is the `_rev` it leaves behind (which is the
+rev guard, free), and `_rev` must be stripped before `applyPatch` or
+the reverted document comes back with its `_type` reading
+`"homePage3:54"`. The same dry run replayed five real transactions of
+`drafts.homePage` and confirmed `apply(revert(doc)) === doc` exactly.
+All three are written into the card and the file header, because the
+third one in particular looks like corruption rather than an
+off-by-one.
+
+**presacademy** also gained the guide entry "Undo a change", and the
+`sections` guide's see-also now points at it. The line it already
+carried — "Removing a section is undoable before you publish" — is
+finally true in the way an editor would read it.
+
+**starter** got the same three files and the same wiring. Its
+`sanity.config.ts` has no layout component of its own, so the plugin's
+layout is the only one; presacademy's composes on top of `StudioLayout`
+(fonts), which is the arrangement to watch when porting to a repo that
+already wraps the layout.
+
+Verification: 235 tests in the starter, 258 in presacademy, both
+green; `tsc --noEmit` clean in both; both build; starter parity 10/10;
+sync-check 30 SAME self-check and 19 SAME cross-check. presacademy's
+parity harness reports 0/13, and it does so on a clean tree too
+(verified by stashing) — a pre-existing baseline drift in the theme
+script, unrelated to this card and still open.
+
+What no test can reach without a Studio open: the actions rendering in
+the publish menu, the plugin layout composing with an existing one, and
+the key press itself. Those are the three things to click first.
