@@ -9,6 +9,7 @@ import { ctaBlock } from './ctaBlock';
 import { faqCategory } from './faqCategory';
 import { faqItem } from './faqItem';
 import { faqPage } from './faqPage';
+import { formQuestion } from './formQuestion';
 import { homePage } from './homePage';
 import { journalCategory } from './journalCategory';
 import { journalEntry } from './journalEntry';
@@ -36,6 +37,8 @@ export const schemaTypes = [
   ctaBlock,
   // Shared menu link (header menu, footer columns, small print, header button)
   navLink,
+  // One editor-written form question (contactPage.formFields).
+  formQuestion,
   // Page-builder section blocks (objects). Registered before the documents
   // whose pageBuilder arrays reference them.
   ...pageSectionSchemas,

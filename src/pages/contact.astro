@@ -7,6 +7,7 @@ import { getContactPage, getSiteSettings } from '@/lib/queries';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { telHref } from '@/lib/phone';
 import { site } from '@/data/site';
+import { normalizeCustomFields } from '@/lib/custom-form-fields';
 import Hero from '@/components/Hero.astro';
 import PortableTextStatic from '@/components/PortableTextStatic.astro';
 import ContactForm from '@/components/ContactForm';
@@ -28,6 +29,13 @@ const heroEyebrow   = page?.heroEyebrow   ?? 'Request a Consultation.';
 const heroHeadline  = page?.heroHeadline  ?? 'Start the Conversation.';
 const heroSubhead   = page?.heroSubhead   ?? '';
 const formIntroNote = page?.formIntroNote ?? '';
+
+// Editor-written form questions (contactPage.formFields). Shaped here so the
+// island receives a clean list. The prop is SPREAD rather than passed directly:
+// with no questions the island must receive no new prop at all, which keeps the
+// rendered page byte-for-byte what it was.
+const questions = normalizeCustomFields(page?.formFields);
+const questionProps = questions.length > 0 ? { customFields: questions } : {};
 
 const schedulingLink      = page?.schedulingLink;
 const schedulingLinkLabel = page?.schedulingLinkLabel ?? 'Schedule a 20-minute discovery call.';
@@ -88,6 +96,7 @@ const schemas = [
         budgets={page?.formBudgetOptions}
         timelines={page?.formTimelineOptions}
         sources={page?.formSourceOptions}
+        {...questionProps}
       />
 
       {/* Email failsafe — surfaced right after the form so visitors who hit

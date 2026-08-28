@@ -75,6 +75,7 @@ is installing it as of the date on the card.
 | 20  | publishAt scheduled publishing (free-tier)                        | no      | no          | template | no               | no            | no             | template           | n/a                 |
 | 21  | Pages as first-class objects (duplicate / archive / SEO panel)    | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
 | 22  | Redirects on rename                                               | yes     | no          | yes      | no               | no            | no             | yes                | n/a                 |
+| 23  | Editor-defined forms                                              | yes     | no          | yes      | no               | no            | no             | yes                | no                  |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -1049,6 +1050,91 @@ object, so a Studio entry can correct a stale launch one without a code change.
 original, with a repo-specific `redirects.ts` that also owns the doc-type path
 map, plus the launch-migration entries) / everything else pending rollout.
 
+## Card 23: Editor-defined forms (2026-08-28)
+
+**Canonical:** `src/lib/custom-form-fields.ts` (+ `src/lib/custom-form-fields.test.ts`),
+`src/sanity/schemaTypes/formQuestion.ts`
+
+**What:** an editor writes their own form questions in the Studio and the site
+asks them. A `formQuestion` object holds one question (the words, an answer type,
+choices for a dropdown, and whether it must be answered); a `fields` array on the
+form surface holds up to twelve of them. Empty array, and the form is exactly the
+form that shipped. One question, and the visitor sees the editor's form.
+
+**Why:** "can you add a question to the form?" is the single most common request a
+volunteer or a small-business owner makes, and until now it was a developer
+ticket every time. The whole point of the page-builder is that it is not.
+
+**The standard contact block ALWAYS leads.** Name, email, and phone are drawn
+first, before any editor question, on every path. This is the load-bearing rule
+of the whole card, and it exists because the failure it prevents is silent: an
+editor builds a perfectly reasonable form, forgets to ask for an email address,
+and the site collects messages nobody can ever reply to. Nothing an editor can
+write removes that block. A schema that lets an editor define ALL the fields (as
+church-starter's older `form` document does) has this hole; this one does not.
+
+**The answers are folded into the message, and that is the entire design.** The
+renderer names each answer `custom_<n>` and carries the question text alongside
+it in `custom_<n>_label` (plus a `custom_<n>_req` marker). The submit path turns
+those into plain `Question: answer` lines and appends them to the `message` the
+site already sends. So a brand-new question needs NO code change, NO schema
+change, and no change to whatever receives the submission - Web3Forms, an email,
+a webhook, a Sanity `submission` document, a Google Sheet. Downstream never
+learns that editor-defined questions exist. Resist the temptation to give each
+question its own key in the payload: that is the version that needs a migration
+every time somebody renames a question.
+
+**Two pure functions, shared by both sides, unit-tested.**
+`normalizeCustomFields()` shapes the raw Sanity value into what the renderer
+draws; `parseCustomFieldEntries()` turns posted `[name, value]` pairs into the
+lines. They are in one dependency-free module because the renderer and the submit
+path MUST agree about the caps and about what "answered" means. `parse` takes an
+`Iterable<[string, string]>`, which is exactly what `FormData.entries()` gives a
+server route and what a React island can synthesize, so the same tested code
+serves a native POST and a client-side fetch.
+
+**The caps are deliberate and belong to the library, not the schema:** 12
+questions, 2000 characters per answer, 12000 characters over all answers, 200
+characters per question label. The Studio validates the 12 as well, but the
+Studio is not a security boundary - a stale open page can post anything. Twelve
+is also a design limit, not just a safety one: a longer form is the fastest way
+to lose the person filling it in.
+
+**It degrades instead of throwing.** A question with no label cannot be asked and
+a dropdown with no choices cannot be answered, so both are dropped; an unknown
+answer type falls back to a text box; questions past the cap are IGNORED rather
+than rejected, so a page a visitor left open before an edit still submits.
+
+**Never log an answer.** The parser returns a visitor-facing error string and
+nothing else. Form answers are the most personal data these sites handle.
+
+**Native validation plus `aria-required` plus a visible cue.** All three, on every
+required question, so the browser, assistive technology, and the eye agree. The
+honeypot on the existing form is preserved untouched.
+
+**Type name: `formQuestion`, not `formField`.** church-starter's `form` document
+already registers a `formField` array member, and two schema types with one name
+is a Studio-runtime crash that a build will not catch. The canonical file is
+byte-identical everywhere, so it cannot dodge the collision per-repo - the name
+had to be chosen to clear it once. WCP's ancestor version calls it `formField`;
+that is the one intentional divergence from the original.
+
+**Per-site adaptation:** wire the `fields` array into whatever the repo's form
+story already is, and fold the lines into whatever it already submits. WCP has an
+Astro API route and a native POST, so it appends the lines to the stored/emailed
+`message` server-side. Both templates are React islands posting to Web3Forms, so
+the fold happens in the island just before `fetch`, and the payload still carries
+one `message`. In the starter the questions REPLACE the built-in project
+questionnaire (a form asking both "rough budget range" and a church picnic
+question is nonsense); in church-starter they are an alternative to referencing a
+`form` document. In both, an empty array is a zero-diff no-op, which is what makes
+the change safe to ship: `page-parity compare` proves it.
+
+**Applied to:** starter yes (canonical, on `contactPage.formFields`) /
+church-starter yes (on the `sectionForm` page-builder block) / WCP yes (the
+original, `formField` + an `/api/contact` server fold) / everything else pending
+rollout.
+
 ## Sync sessions
 
 A sync session is a pass over one repo: run `sync-check`, reconcile drift, install the
@@ -1380,3 +1466,54 @@ output as "(starter: <path>)"). First run against wcp immediately
 surfaced two real drifts (free-dist / with-workerd carrying
 pre-genericization em-dash comments; starter copies pulled forward)
 plus the documented deliberate icons-5 drift in shareDraftLink.
+
+### 2026-08-28: editor-defined forms land in both templates (card 23)
+
+Both templates learned to let an editor write their own form questions,
+ported from wcp's Unlocked Studio Phase D. Three new canonical files,
+byte-identical in both: `src/lib/custom-form-fields.ts`, its test, and
+`src/sanity/schemaTypes/formQuestion.ts`. The starter hangs the `fields`
+array on `contactPage` (`formFields`) and teaches `ContactForm.tsx` to
+draw the questions and fold the answers; church-starter hangs it on the
+`sectionForm` page-builder block, with a new `QuestionsForm.tsx` island
+beside the untouched `FormRenderer.tsx`.
+
+Adaptation notes earned on the way:
+
+- **The type is `formQuestion`, not `formField`.** church-starter's
+  `form` document already registers a `formField` array member. Two
+  schema types with one name is a browser-runtime Studio crash that
+  `astro build` does not catch, and a byte-identical canonical file
+  cannot rename itself per repo. Named once, for the whole family.
+- **Neither template has a form API route, and neither needed one.**
+  Both post client-side to Web3Forms from a React island. The lib's
+  `parseCustomFieldEntries` takes an `Iterable<[string, string]>`, so
+  the island synthesizes the same pairs a native POST would produce and
+  the fold happens just before `fetch`. Same tested code, no route, no
+  new env var. `PUBLIC_WEB3FORMS_KEY` still gates delivery, and the
+  keyless fallback each repo already had (inline notice in the starter,
+  mailto in church) is preserved.
+- **An island prop must be SPREAD, not passed, to keep parity.** Astro
+  serializes island props into the rendered `<astro-island>` element, so
+  passing `customFields={[]}` would change the HTML of a page with no
+  questions. `contact.astro` builds `questionProps` and spreads an empty
+  object instead, and parity stays zero-diff.
+- **church's `sectionForm.form` reference stopped being plainly
+  required.** It is now a custom rule: a Form document OR at least one
+  question. A section built the old way still cannot be left empty.
+- **The starter's questions replace the built-in questionnaire**
+  (location, project type, budget, timeline, message, source), matching
+  wcp's variant semantics. `validate()` returns early on the studio
+  fields when questions exist, and the payload omits them rather than
+  sending blanks.
+
+Verified in both repos: `npx tsc --noEmit` clean, `npm run build` green,
+`sanity schema extract --enforce-required-fields` succeeds, `npm run
+typegen` regenerates cleanly (78 and 118 schema types). Unit tests
+**124/124** (starter, 106 + 18) and **90/90** (church, 72 + 18).
+`page-parity compare` **10/10** and **20/20** - an empty questions array
+is a zero-diff no-op, which is the proof the change is additive.
+`sync-check` self-check in the starter is 20/20 SAME; from church the
+three new canonical files all report SAME. One PRE-EXISTING drift
+remains in church: `scripts/sync-check.mjs` never received the
+nested-app rule from the session above. Untouched here, still open.

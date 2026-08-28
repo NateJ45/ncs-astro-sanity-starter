@@ -22,8 +22,20 @@
 // below remain the fallback so the form renders cleanly even before
 // contactPage.form*Options are set in Studio.
 
+// Editor-defined questions (contactPage.formFields, added 2026-08-28): when the
+// Studio holds one or more questions, THEY replace the studio-specific middle of
+// the form (location, project type, budget, timeline, message, source). The name,
+// email, and phone boxes above always stay, so a reply address is guaranteed no
+// matter what an editor writes. With no questions the form is byte-for-byte the
+// one documented above. The answers are folded into `message` as "Label: answer"
+// lines, so Web3Forms and the studio inbox need no change at all.
+
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { site } from '@/data/site';
+import {
+  parseCustomFieldEntries,
+  type CustomFormField,
+} from '@/lib/custom-form-fields';
 
 const DRAFT_KEY = `${site.storageKeyPrefix}-contact-draft`;
 const WEB3FORMS_ENDPOINT = 'https://api.web3forms.com/submit';
@@ -108,6 +120,12 @@ interface ContactFormProps {
   timelines?: string[];
   /** Optional. Override the default "how did you hear" dropdown options (from contactPage.formSourceOptions). */
   sources?: string[];
+  /**
+   * Optional. Editor-written questions (from contactPage.formFields, already
+   * shaped by normalizeCustomFields). One or more of these REPLACE the built-in
+   * project questions. Empty or absent leaves the form exactly as it was.
+   */
+  customFields?: CustomFormField[];
 }
 
 interface Draft {
@@ -144,7 +162,11 @@ export default function ContactForm({
   budgets,
   timelines,
   sources,
+  customFields,
 }: ContactFormProps = {}) {
+  // Editor-written questions. Empty list -> the built-in form, unchanged.
+  const custom = customFields ?? [];
+  const useCustom = custom.length > 0;
   // Use Sanity-driven options when provided; fall back to defaults so the form
   // is still usable when contactPage.form*Options haven't been filled in.
   const pick = (override?: string[], fallback?: readonly string[]) =>
@@ -156,6 +178,10 @@ export default function ContactForm({
   const sourceOptions = pick(sources, SOURCE_OPTIONS);
 
   const [draft, setDraft] = useState<Draft>(EMPTY);
+  // Answers to the editor-written questions, keyed by position. Deliberately
+  // NOT saved to the localStorage draft: an editor can rewrite the questions at
+  // any time, and a restored answer under a changed question is worse than none.
+  const [customValues, setCustomValues] = useState<Record<number, string | boolean>>({});
   const [status, setStatus] = useState<Status>('idle');
   const [errors, setErrors] = useState<Partial<Record<keyof Draft, string>>>({});
   const [errorMessage, setErrorMessage] = useState('');
@@ -220,11 +246,32 @@ export default function ContactForm({
     if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
   }
 
+  // Turn the editor-written answers into the [name, value] pairs the shared
+  // parser expects — the same shape a native form POST would produce. A ticked
+  // box posts "Yes"; an unticked one posts nothing, exactly like real HTML.
+  function customEntries(): Array<[string, string]> {
+    const entries: Array<[string, string]> = [];
+    custom.forEach((f, i) => {
+      entries.push([`custom_${i}_label`, f.label]);
+      if (f.required) entries.push([`custom_${i}_req`, '1']);
+      const v = customValues[i];
+      if (f.kind === 'checkbox') {
+        if (v === true) entries.push([`custom_${i}`, 'Yes']);
+      } else if (typeof v === 'string' && v.trim()) {
+        entries.push([`custom_${i}`, v]);
+      }
+    });
+    return entries;
+  }
+
   function validate(d: Draft): Partial<Record<keyof Draft, string>> {
     const errs: Partial<Record<keyof Draft, string>> = {};
     if (!d.name.trim()) errs.name = 'Please enter your name.';
     if (!d.email.trim()) errs.email = 'Please enter an email address.';
     else if (!/.+@.+\..+/.test(d.email)) errs.email = 'That email address looks off.';
+    // The built-in project questions only exist when the Studio has no
+    // editor-written ones, so only gate on them in that case.
+    if (useCustom) return errs;
     if (!d.location) errs.location = "Pick the closest area — even if it's 'outside.'";
     if (!d.projectType) errs.projectType = 'Pick the closest match — we can sort the rest later.';
     if (!d.budget) errs.budget = 'A rough range helps us suggest the right tier.';
@@ -254,6 +301,20 @@ export default function ContactForm({
       return;
     }
 
+    // Editor-written answers -> "Label: answer" lines. The shared parser owns
+    // the caps and the required check, so the browser and this code agree. It
+    // returns a visitor-facing message; it never logs an answer.
+    const parsed = parseCustomFieldEntries(customEntries());
+    if (parsed.error) {
+      setErrorMessage(parsed.error);
+      formRef.current?.querySelector<HTMLElement>('[data-custom-question]')?.focus();
+      return;
+    }
+    // Fold the lines into the message. This is the whole point of the design:
+    // whatever receives the submission still sees one `message`, so nothing
+    // downstream has to learn about editor-written questions.
+    const message = useCustom ? parsed.lines.join('\n') : draft.message;
+
     if (!ACCESS_KEY) {
       setStatus('error');
       setErrorMessage(
@@ -269,20 +330,27 @@ export default function ContactForm({
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
           access_key: ACCESS_KEY,
-          // Subject line front-loads project type + location for easy inbox triage.
-          subject: `Inquiry: ${draft.projectType} in ${draft.location} (${draft.name})`,
+          // Subject line front-loads project type + location for easy inbox
+          // triage. With editor-written questions there is no project type or
+          // location, so the subject falls back to the visitor's name.
+          subject: useCustom
+            ? `Inquiry from ${draft.name}`
+            : `Inquiry: ${draft.projectType} in ${draft.location} (${draft.name})`,
           from_name: `${site.name} website`,
           name: draft.name,
           email: draft.email,
           phone: draft.phone || undefined,
-          location: draft.location,
-          project_type: draft.projectType,
-          budget_range: draft.budget,
-          timeline: draft.timeline,
-          message: draft.message,
+          // The built-in project fields only exist on the built-in form. Omit
+          // them entirely when the editor wrote their own questions, so the
+          // notification email has no empty rows.
+          location: useCustom ? undefined : draft.location,
+          project_type: useCustom ? undefined : draft.projectType,
+          budget_range: useCustom ? undefined : draft.budget,
+          timeline: useCustom ? undefined : draft.timeline,
+          message,
           // Lead source is optional; omit from the payload when blank so it
           // doesn't add a "Source: " line to the notification email for no reason.
-          source: draft.source || undefined,
+          source: (useCustom ? '' : draft.source) || undefined,
           // Web3Forms autoresponder fields. When these are set, Web3Forms
           // sends a confirmation email to the visitor in addition to the
           // notification email to the studio. The reply-to_email key is
@@ -301,6 +369,7 @@ export default function ContactForm({
         setStatus('success');
         try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
         setDraft(EMPTY);
+        setCustomValues({});
       } else {
         setStatus('error');
         setErrorMessage(
@@ -406,6 +475,11 @@ export default function ContactForm({
         </div>
       </div>
 
+      {/* Everything from here to the submit button is the built-in project
+          questionnaire. An editor who writes their own questions replaces this
+          whole middle, never the name/email/phone block above it. */}
+      {!useCustom && (
+      <>
       {/* Location + project type — paired row. Location is asked first so the
           studio can mentally bucket the lead before reading the rest. */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-m">
@@ -556,6 +630,101 @@ export default function ContactForm({
           ))}
         </select>
       </div>
+      </>
+      )}
+
+      {/* Editor-written questions (contactPage.formFields). Native `required`
+          plus aria-required plus a visible cue, so the browser, assistive tech,
+          and the eye all agree about what has to be answered. maxLength matches
+          MAX_FIELD_LENGTH in src/lib/custom-form-fields.ts. */}
+      {custom.map((f, i) => {
+        const id = `custom-${i}`;
+        const name = `custom_${i}`;
+        const value = customValues[i];
+        const set = (v: string | boolean) => setCustomValues((m) => ({ ...m, [i]: v }));
+        const cue = f.required ? (
+          <span className="text-destructive" aria-hidden="true"> *</span>
+        ) : (
+          <span className="text-muted-foreground font-normal"> (optional)</span>
+        );
+        const cls =
+          'w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring';
+
+        if (f.kind === 'checkbox') {
+          return (
+            <div key={id} className="flex items-start gap-s">
+              <input
+                id={id}
+                name={name}
+                type="checkbox"
+                data-custom-question
+                checked={value === true}
+                onChange={(e) => set(e.target.checked)}
+                required={f.required}
+                aria-required={f.required || undefined}
+                className="mt-1 h-5 w-5"
+              />
+              <label htmlFor={id} className="text-sm text-foreground">
+                {f.label}
+                {f.required && <span className="text-destructive" aria-hidden="true"> *</span>}
+              </label>
+            </div>
+          );
+        }
+
+        return (
+          <div key={id}>
+            <label htmlFor={id} className="block text-sm font-semibold text-foreground mb-1">
+              {f.label}
+              {cue}
+            </label>
+            {f.kind === 'textarea' ? (
+              <textarea
+                id={id}
+                name={name}
+                rows={6}
+                maxLength={2000}
+                data-custom-question
+                value={(value as string) || ''}
+                onChange={(e) => set(e.target.value)}
+                required={f.required}
+                aria-required={f.required || undefined}
+                className={cls}
+              />
+            ) : f.kind === 'select' ? (
+              <select
+                id={id}
+                name={name}
+                data-custom-question
+                value={(value as string) || ''}
+                onChange={(e) => set(e.target.value)}
+                required={f.required}
+                aria-required={f.required || undefined}
+                className={cls}
+              >
+                <option value="">Select an option</option>
+                {f.options.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                id={id}
+                name={name}
+                type={f.kind === 'email' ? 'email' : f.kind === 'phone' ? 'tel' : 'text'}
+                maxLength={2000}
+                data-custom-question
+                autoComplete={f.kind === 'email' ? 'email' : f.kind === 'phone' ? 'tel' : undefined}
+                value={(value as string) || ''}
+                onChange={(e) => set(e.target.value)}
+                required={f.required}
+                aria-required={f.required || undefined}
+                className={cls}
+              />
+            )}
+          </div>
+        );
+      })}
 
       <button
         type="submit"

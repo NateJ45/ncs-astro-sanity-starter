@@ -912,6 +912,14 @@ export type HeroSection = {
   size?: 'tall' | 'short';
 };
 
+export type FormQuestion = {
+  _type: 'formQuestion';
+  label?: string;
+  kind?: 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'checkbox';
+  options?: Array<string>;
+  required?: boolean;
+};
+
 export type PrivacyPage = {
   _id: string;
   _type: 'privacyPage';
@@ -1306,6 +1314,11 @@ export type ContactPage = {
   formBudgetOptions?: Array<string>;
   formTimelineOptions?: Array<string>;
   formSourceOptions?: Array<string>;
+  formFields?: Array<
+    {
+      _key: string;
+    } & FormQuestion
+  >;
   whatToExpectEyebrow?: string;
   whatToExpectHeadline?: string;
   whatToExpectContent?: Array<{
@@ -2046,6 +2059,7 @@ export type AllSanitySchemaTypes =
   | ImageTextSection
   | RichTextSection
   | HeroSection
+  | FormQuestion
   | PrivacyPage
   | JournalEntryReference
   | CtaBlock

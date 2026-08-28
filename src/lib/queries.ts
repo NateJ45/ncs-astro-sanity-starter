@@ -402,6 +402,7 @@ export async function getContactPage() {
     formBudgetOptions,
     formTimelineOptions,
     formSourceOptions,
+    formFields[]{ label, kind, options, required },
     whatToExpectEyebrow,
     whatToExpectHeadline,
     whatToExpectContent,

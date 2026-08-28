@@ -120,6 +120,22 @@ export const contactPage = defineType({
         'Optional lead-source dropdown options. Useful for understanding where good leads come from over time. Leave blank to use the built-in defaults (Google, Instagram, Facebook, Houzz, referrals, journal, project in person, Other).',
       of: [defineArrayMember({ type: 'string' })],
     }),
+    // Editor-defined questions. Leave this empty and the contact form is
+    // exactly the built-in one. Add a question and YOUR questions replace the
+    // studio-specific middle of the form (location, project type, budget,
+    // timeline, message, source). The standard name, email, and phone boxes
+    // always stay at the top, so a reply address is guaranteed either way.
+    // Shaping and caps: src/lib/custom-form-fields.ts.
+    defineField({
+      name: 'formFields',
+      title: 'Your own questions',
+      type: 'array',
+      group: 'form',
+      description:
+        'Optional. Write your own questions and they replace the built-in project questions. The name, email, and phone boxes always come first. Maximum 12 questions.',
+      of: [defineArrayMember({ type: 'formQuestion' })],
+      validation: (Rule) => Rule.max(12),
+    }),
     defineField({
       name: 'whatToExpectEyebrow',
       title: '"What to expect" eyebrow',
