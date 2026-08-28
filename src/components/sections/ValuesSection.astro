@@ -4,6 +4,7 @@
 // Points are resolved from the philosophyPoint collection at query time.
 // SELF_CONTAINED — manages its own bg-muted surface.
 import SectionHeading from '@/components/SectionHeading.astro';
+import { columnsClass } from '@/lib/layout-variants';
 
 interface PhilosophyPoint {
   title?: string;
@@ -14,6 +15,8 @@ interface Props {
   eyebrow?: string;
   headline?: string;
   points?: PhilosophyPoint[];
+  /** How many cards across on a desktop. Three is what this grid always was. */
+  columns?: number;
   headingId?: string;
 }
 
@@ -21,8 +24,13 @@ const {
   eyebrow = 'How We Work.',
   headline = 'Principles that guide every project.',
   points = [],
+  columns,
   headingId = 'values-section-heading',
 } = Astro.props as Props;
+
+// Unset, this emits `md:grid-cols-3`, which is the string that was inline on
+// the grid below before src/lib/layout-variants.ts existed (2026-08-28).
+const colClass = columnsClass('valuesSection', columns);
 ---
 
 {points.length > 0 && (
@@ -36,7 +44,7 @@ const {
         class="mx-auto"
       />
 
-      <div class="mt-section-lg grid grid-cols-1 md:grid-cols-3 gap-l" data-stagger-grid>
+      <div class={`mt-section-lg grid grid-cols-1 ${colClass} gap-l`} data-stagger-grid>
         {points.map((point, idx) => (
           <article class="bg-card p-l rounded-md border border-border-soft">
             <p class="font-display text-h2 text-link/85 leading-none mb-s" aria-hidden="true">

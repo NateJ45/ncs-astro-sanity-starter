@@ -12,7 +12,11 @@ interface Props {
   eyebrow?: string;
   headline?: string;
   scriptAccent?: string;
+  /** One word of the headline in the brand accent colour. See SectionHeading. */
+  headingAccent?: string;
   subhead?: string;
+  /** Optional rich twin of `subhead`: bold and italic only. */
+  subheadRich?: unknown;
   services?: any[];
   cta?: any;
   footnote?: string;
@@ -24,7 +28,9 @@ const {
   eyebrow = 'Our Services.',
   headline = 'Find the right fit for your project.',
   scriptAccent,
+  headingAccent,
   subhead,
+  subheadRich,
   services = [],
   cta,
   footnote,
@@ -41,10 +47,12 @@ const isGrid = variant === 'grid';
       eyebrow={eyebrow}
       headline={headline}
       subhead={subhead}
+      subheadRich={subheadRich}
       headingId={headingId}
       align="center"
       class="mx-auto"
       scriptAccent={scriptAccent}
+      headingAccent={headingAccent}
     />
 
     {isGrid ? (

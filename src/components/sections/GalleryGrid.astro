@@ -3,6 +3,8 @@
 // optional captions. Surface comes from SectionRenderer. Safe to edit by hand.
 import SanityImage from '@/components/SanityImage.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
+import { columnsClass } from '@/lib/layout-variants';
+import { surfaceClass } from '@/lib/surfaces';
 
 interface GalleryImage {
   asset?: { _ref?: string; _id?: string };
@@ -20,14 +22,13 @@ interface Props {
 
 const { heading, images = [], columns = 3, surface = 'background', headingId } = Astro.props as Props;
 
-const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+// The surface classes come from src/lib/surfaces.ts, which is where the
+// contrast gate measures this pair; the column classes from
+// src/lib/layout-variants.ts, which holds this section's map verbatim. Both
+// emit exactly the strings that were inline here before (2026-08-28).
+const bg = surfaceClass(surface);
 const pics = (images ?? []).filter((i) => i?.asset);
-const colClass =
-  columns === 2
-    ? 'sm:grid-cols-2'
-    : columns === 4
-      ? 'sm:grid-cols-2 lg:grid-cols-4'
-      : 'sm:grid-cols-2 lg:grid-cols-3';
+const colClass = columnsClass('gallerySection', columns);
 ---
 
 {pics.length > 0 && (

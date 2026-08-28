@@ -78,6 +78,7 @@ is installing it as of the date on the card.
 | 23  | Editor-defined forms                                              | yes     | no          | yes      | no               | no            | no             | yes                | no                  |
 | 24  | Saved sections (section presets)                                  | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
 | 25  | Pre-publish page checks                                           | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
+| 26  | Appearance controls (surfaces, accents, rich twins, layout)       | partial | yes         | partial  | no               | no            | no             | yes                | no                  |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -1285,6 +1286,127 @@ urgent: the ancestor works, it is simply not shared.
 partial (the pre-config ancestor, see the fold-back note above) / everything
 else pending rollout.
 
+---
+
+## Card 26: Appearance controls (2026-08-28)
+
+**Canonical:** `src/lib/inline-rich.ts`, `src/lib/heading-accent.ts`,
+`src/components/InlineRich.astro`
+**Per repo (NOT canonical, on purpose):** `src/lib/surfaces.ts` +
+`src/lib/surfaces.test.ts`, `src/lib/layout-variants.ts` +
+`src/lib/layout-variants.test.ts`, `src/sanity/components/SwatchInput.tsx`,
+the `.heading-accent` / `.accent-*` / `.surface-*` rules in
+`src/styles/globals.css`
+
+**What:** the four things an editor kept asking for and could not have. A
+section's SURFACE, picked from a row of designed colour chips. Its ACCENT, the
+small colour inside it. BOLD AND ITALIC inside a short support line that was a
+plain string. And ONE WORD of a heading in the accent colour. Plus the layout
+half: how many cards across, and which side the picture is on.
+
+### The five rules that make it safe
+
+1. **A surface is a designed PAIR, never a picker.** Every option is a
+   background bundled with the ink and the link colour that belong on it. There
+   is no hex entry and no colour wheel, so an editor cannot produce an
+   unreadable band. `src/lib/surfaces.ts` is the one place the classes, the
+   Studio swatch literals and the gate all read.
+2. **The contrast gate resolves the REAL tokens, in BOTH themes.** The test
+   parses `src/styles/globals.css`, walks `@theme` / `@theme inline` / `:root`
+   for light and `.dark` for dark, follows `var()` aliases, and measures every
+   pair: AA 4.5:1 for body, headings and links, 3:1 for the accent as a mark. It
+   also pins the literal hexes the Studio draws with to the resolved tokens, so
+   a rebrand cannot leave the swatch row showing colours the site abandoned.
+   **If a pair fails, fix the pair. Never lower a threshold.**
+3. **The default emits NO class.** The house accent returns `null` from
+   `accentClass()` and the original tone values emit exactly the strings they
+   always did, so every already-published section renders byte-identical HTML.
+   `scripts/page-parity.mjs compare` at zero diffs is the standing proof, and it
+   is the acceptance test for this card in any repo.
+4. **Rich text arrives as a TWIN, not a migration.** The plain string field
+   keeps its name, its type and its stored value; a sibling `<name>Rich`
+   portable-text field allows `strong` and `em` and nothing else. The plain
+   field hides only once the twin holds text; the renderer prefers the twin.
+   A dataset with no twins is a dataset that renders exactly as before.
+5. **Headings get ONE accent.** The colour accent is the sibling of the script
+   accent, and where both exist the script accent wins and the colour one is
+   skipped. Two accents in one heading is decoration.
+
+### The stega trap (the bug class this card exists to avoid)
+
+`headingAccent` is matched against the heading with `indexOf`. In the
+Presentation preview both strings arrive carrying an invisible run of Unicode
+tag characters, so a naive match never fires and the accent silently does
+nothing IN PREVIEW ONLY. Two defences, and you want both: `heading-accent.ts`
+strips both sides with `plain()` (that helper also runs on the live site, where
+the NON_STEGA list does not exist), and `headingAccent` goes on
+`NON_STEGA_FIELDS` in `src/lib/cms-preview.ts`. Every new enum from this card
+(`accent`, and `tone`'s new values) goes on that list too, and `accent` goes on
+`extraSettingKeys` in `src/sanity/pageBuilderConfig.ts` — it ships with an
+`initialValue`, so counted as content it would make card 25's "nothing typed
+here" check permanently silent.
+
+The accepted cost, stated plainly: on a heading that HAS an accent word, the
+cleaned string is what renders, so click-to-edit on that one heading stops
+working in the preview. Every other field still works, and the live site is
+unaffected because it never carries stega at all.
+
+### The layout half
+
+`src/lib/layout-variants.ts` is a REGISTRY, not a formula, and that is the
+point: the grids in one repo do not agree with each other about where a phone
+stops stacking, so collapsing them into a formula moves live pages. Each entry
+carries its section's real class strings verbatim, plus `baseColumns` (the
+unprefixed grid class the component itself carries) and `phoneColumns`. The test
+replays the two together for every option and fails if any option changes what a
+320px phone renders — which is what lets an existing reflow sweep stand in for
+the non-default values. A drift test re-derives `baseColumns` from the `.astro`
+source so the copy cannot go stale. DENSITY is documented, never duplicated:
+whatever padding knob the repo already has is the density control.
+
+### THE RIGHT-CLICK DISCOVERY
+
+The in-canvas section verbs from card 17 — insert (with the picture picker),
+duplicate, move, remove — live on **RIGHT-CLICK inside the section outline**,
+plus a draggable tag at the outline's corner. Hovering only outlines. Three
+passages in presacademy's guide promised a hover toolbar that does not exist,
+which is exactly why a real editor could not find the controls; corrected
+2026-08-28 after that report. **Any guide that teaches card 17 must teach the
+right-click gesture and the corner drag tag by name.** Verified live in the
+deployed Studio.
+
+### The curly-apostrophe gotcha (a build break, not a nit)
+
+Guide copy in `src/sanity/guides/content.tsx` lives in SINGLE-quoted string
+literals and the file's convention is curly quotes. A straight `'` typed inside
+one of those strings terminates it and breaks the build. presacademy shipped
+exactly that and needed a follow-up commit. Write `outline’s`, not `outline's`.
+
+### Adapting it to a repo that has no shared shell
+
+The accent needs one element to hang a class on. In a repo where every section
+paints its own `<section>` and a renderer owns an automatic surface cadence
+(this starter), there is nothing to hang it on and no per-section colour field is
+allowed anyway — see `CLAUDE.md` #9. So here the card lands PARTIAL and
+honestly: `surfaces.ts` formalises the surfaces the cadence already assigns and
+gates them, the heading accent is one fixed brand colour (the editor picks the
+WORD, not the colour), the rich twins and the layout registry land in full, and
+there is no surface swatch, no accent enum and no `SwatchInput.tsx`. Do not
+"fix" that by adding a tone field: it would break the cadence the renderer
+exists to protect.
+
+**On `SwatchInput.tsx` being per-repo:** the component SHAPE is identical
+everywhere; only the dot map is brand-specific. It could be canonicalised by
+taking the two maps as props. Left per-repo until a third repo wants it; the
+seam is the two `*Swatches` adapters and the two exported wrappers.
+
+**Applied to:** presacademy yes (origin) / WCP partial (it has the emphasis
+layer — `emphasisText` + `emphasis.ts` with `stegaClean` — and its section
+colour knobs predate this card, so surfaces/accents there are an ancestor form,
+not this one) / starter yes (partial by design, see above) / church-starter yes
+(full: six surfaces, three accents, six rich twins, five heading accents, six
+column registries) / reid-design-site pending / mas-monograms pending.
+
 ## Sync sessions
 
 A sync session is a pass over one repo: run `sync-check`, reconcile drift, install the
@@ -1760,3 +1882,42 @@ guide quotes their labels verbatim) and pageOps (wcp's duplicate
 must strip hubKey and branch hub preview hrefs; canonical pageOps
 has no hub concept). Test files are per-runner everywhere: the
 canonical suite is node:test, wcp's is vitest with the same cases.
+
+### 2026-08-28: appearance controls land in both templates (card 26)
+
+Ported from presacademy, adapted per repo. Three new canonical files
+(`src/lib/inline-rich.ts`, `src/lib/heading-accent.ts`,
+`src/components/InlineRich.astro`) now carry the PORTABLE marker and
+report SAME in both directions; everything else is deliberately
+per-repo, because the colour maps are the brand.
+
+**church-starter got it in full.** Six surface pairs (Paper, Warm,
+Bright card, Chapel green, Chapel deep, Ink — `card` and `ink` are
+the additions, the four originals emit their old classes), three
+accents (Bronze default/no class, Chapel green, Ink) wired once in
+SectionShell so every pill and accent word follows with no per-block
+colour edit, swatch chips in the Studio, six rich twins, five heading
+accents, and a six-entry column registry with two new controls
+(steps, dynamic list). 75-assertion contrast gate, tightest pair
+5.99:1, nothing lowered. 209 tests, parity 20/20, typegen committed.
+Its guide gained a "Change how a section looks" entry and — the other
+half of the editor report — its `sections` guide now teaches the
+right-click gesture, and the stale "there is no live preview inside
+Sanity" line is gone, because there is.
+
+**starter got it partial ON PURPOSE**, and the card says why: CLAUDE.md
+#9 forbids a per-block surface field here (the SectionRenderer owns
+the alternating cadence so reordering cannot break the rhythm) and
+there is no shared section shell to hang an accent class on. So
+`surfaces.ts` formalises and GATES the four surfaces the cadence and
+the components already paint — including the shadcn `:root`/`.dark`
+overrides that theme-tokens.test.ts explicitly left out — the heading
+accent is one fixed brand colour with the word as the only choice,
+and the rich twins and layout registry land in full through
+SectionHeading.astro, which serves nearly every section at once. No
+tone field, no accent enum, no SwatchInput. 208 tests, parity 10/10,
+sync-check 27 SAME.
+
+Not yet swept for this card: reid-design-site, mas-monograms,
+2ndpreschicago, nixoncreativestudio. WCP stays `partial`: it has the
+emphasis layer and its own older colour knobs.

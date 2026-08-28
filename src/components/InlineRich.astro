@@ -1,0 +1,29 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Renders the restricted "rich twin" of a plain string field (see
+// src/lib/inline-rich.ts) as inline markup only: <strong>, <em>, or bare text.
+// It emits NO block wrapper, so the caller keeps its own <p> and its own
+// classes and the section's prose styling is untouched.
+//
+// Only reached when hasInlineRich() is true, so there is no empty-state branch
+// here on purpose: a caller that renders this for an empty twin has a bug the
+// caller should fix, not a blank this component should paper over.
+import { inlineRichRuns } from '@/lib/inline-rich';
+
+const { value } = Astro.props as { value: unknown };
+const runs = inlineRichRuns(value);
+---
+
+{
+  runs.map((r) =>
+    r.strong && r.em ? (
+      <strong><em>{r.text}</em></strong>
+    ) : r.strong ? (
+      <strong>{r.text}</strong>
+    ) : r.em ? (
+      <em>{r.text}</em>
+    ) : (
+      <Fragment>{r.text}</Fragment>
+    ),
+  )
+}

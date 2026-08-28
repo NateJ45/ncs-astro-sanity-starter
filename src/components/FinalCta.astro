@@ -13,6 +13,9 @@
 import CtaLink from '@/components/CtaLink.astro';
 import SanityImage from '@/components/SanityImage.astro';
 import { splitScriptAccent } from '@/lib/scriptAccent';
+import { splitHeadingAccent } from '@/lib/heading-accent';
+import { hasInlineRich } from '@/lib/inline-rich';
+import InlineRich from '@/components/InlineRich.astro';
 
 interface CtaBlock {
   label?: string;
@@ -45,6 +48,16 @@ interface Props {
    */
   scriptAccent?: string;
   /**
+   * The COLOUR sibling of the script accent (PORTS.md card 26). One word from
+   * the headline, set in the section accent. Skipped when a script accent is
+   * already in play: one accent per heading. On this panel the accent is pinned
+   * by `.bg-accent-dark` in globals.css, because the band is the same near-black
+   * whatever theme the reader is in.
+   */
+  headingAccent?: string;
+  /** Optional rich twin of `subhead`: bold and italic only. */
+  subheadRich?: unknown;
+  /**
    * Optional decorative background photo. When set, it fills the panel behind a
    * fixed charcoal scrim that keeps the cream headline and bronze button
    * readable. When absent, the panel renders as the solid Charcoal Dark surface,
@@ -67,6 +80,8 @@ const {
   headingId = 'final-cta',
   fallbackCtaLabel = 'Book a Consultation',
   scriptAccent,
+  headingAccent,
+  subheadRich,
   backgroundImage,
 } = Astro.props as Props;
 
@@ -77,6 +92,13 @@ const hasBackground = !!backgroundImage?.asset;
 // Split the headline around the script-accent word when provided.
 const { found: scriptFound, before: scriptBefore, word: scriptWord, after: scriptAfter } =
   splitScriptAccent(headline, scriptAccent);
+
+// The colour accent, only considered when the script accent did not fire.
+const colour = scriptFound
+  ? { found: false, before: '', word: '', after: '', heading: headline }
+  : splitHeadingAccent(headline, headingAccent);
+
+const richSubhead = hasInlineRich(subheadRich);
 ---
 
 <section
@@ -121,10 +143,14 @@ const { found: scriptFound, before: scriptBefore, word: scriptWord, after: scrip
     <h2 id={headingId} class="font-display text-h1 leading-tight text-bg">
       {scriptFound
         ? <>{scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}</>
+        : colour.found
+        ? <>{colour.before}<span class="heading-accent">{colour.word}</span>{colour.after}</>
         : headline}
     </h2>
-    {subhead && (
-      <p class="mt-m text-lg text-bg/85 max-w-2xl mx-auto">{subhead}</p>
+    {(subhead || richSubhead) && (
+      <p class="mt-m text-lg text-bg/85 max-w-2xl mx-auto">
+        {richSubhead ? <InlineRich value={subheadRich} /> : subhead}
+      </p>
     )}
     <div class="mt-l flex flex-wrap justify-center gap-s">
       <CtaLink

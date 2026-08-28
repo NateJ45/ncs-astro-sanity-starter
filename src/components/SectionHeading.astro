@@ -17,13 +17,37 @@
 //     passed with a matching string.
 //   - Logic is shared with Hero.astro via splitScriptAccent() in src/lib/scriptAccent.ts.
 //   - At most one script accent per heading (editorial discipline, per CLAUDE.md).
+//
+// Heading accent (PORTS.md card 26, 2026-08-28):
+//   - headingAccent?: the COLOUR sibling of the script accent. Same idea, same
+//     one-per-heading rule: an editor types a word that already appears in the
+//     headline and the first match is wrapped in `.heading-accent`, which reads
+//     the brand accent colour (globals.css; measured on every surface in both
+//     themes by src/lib/surfaces.test.ts). Matching is case-insensitive and
+//     stega-safe, unlike splitScriptAccent - see src/lib/heading-accent.ts.
+//   - PRECEDENCE, and it is deliberate: if a script accent is set AND found,
+//     the colour accent is skipped. Two accents on one heading is decoration,
+//     not emphasis, and the script accent is the older, louder device.
+//   - Unset or not found, `headline` renders exactly the string it always did.
+//
+// Rich subhead (same card):
+//   - subheadRich?: the optional portable-text twin of `subhead`, allowing bold
+//     and italic and nothing else (src/lib/inline-rich.ts). When it holds text
+//     it is rendered INSIDE the same <p> with the same classes, so the only
+//     difference in the markup is the <strong> / <em> the editor asked for.
+//     Empty or absent, the plain `subhead` renders untouched.
 
 import { splitScriptAccent } from '@/lib/scriptAccent';
+import { splitHeadingAccent } from '@/lib/heading-accent';
+import { hasInlineRich } from '@/lib/inline-rich';
+import InlineRich from '@/components/InlineRich.astro';
 
 interface Props {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  /** Optional rich twin of `subhead`: bold and italic only. */
+  subheadRich?: unknown;
   headingId: string;
   level?: 'h1' | 'h2' | 'h3';
   align?: 'left' | 'center';
@@ -34,6 +58,12 @@ interface Props {
    * Leave undefined or blank to skip. Use sparingly — one accent per heading.
    */
   scriptAccent?: string;
+  /**
+   * Optional single word/phrase from the headline to set in the brand accent
+   * colour. Case-insensitive, first match only. Ignored when a script accent is
+   * already in play: one accent per heading.
+   */
+  headingAccent?: string;
   class?: string;
 }
 
@@ -41,11 +71,13 @@ const {
   eyebrow,
   headline,
   subhead,
+  subheadRich,
   headingId,
   level = 'h2',
   align = 'left',
   tone = 'default',
   scriptAccent,
+  headingAccent,
   class: extraClass = '',
 } = Astro.props as Props;
 
@@ -53,6 +85,13 @@ const {
 // When not found or not set, `found` is false and we render `headline` plain.
 const { found: scriptFound, before: scriptBefore, word: scriptWord, after: scriptAfter } =
   splitScriptAccent(headline ?? '', scriptAccent);
+
+// The colour accent, only considered when the script accent did not fire.
+const colour = scriptFound
+  ? { found: false, before: '', word: '', after: '', heading: headline ?? '' }
+  : splitHeadingAccent(headline, headingAccent);
+
+const richSubhead = hasInlineRich(subheadRich);
 
 const headingClass =
   level === 'h1'
@@ -92,23 +131,31 @@ const accentAlign = align === 'center' ? 'mx-auto' : '';
       <h1 id={headingId} class:list={[headingClass, toneHeadline]}>
         {scriptFound
           ? <>{scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}</>
+          : colour.found
+          ? <>{colour.before}<span class="heading-accent">{colour.word}</span>{colour.after}</>
           : headline}
       </h1>
     ) : level === 'h2' ? (
       <h2 id={headingId} class:list={[headingClass, toneHeadline]}>
         {scriptFound
           ? <>{scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}</>
+          : colour.found
+          ? <>{colour.before}<span class="heading-accent">{colour.word}</span>{colour.after}</>
           : headline}
       </h2>
     ) : (
       <h3 id={headingId} class:list={[headingClass, toneHeadline]}>
         {scriptFound
           ? <>{scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}</>
+          : colour.found
+          ? <>{colour.before}<span class="heading-accent">{colour.word}</span>{colour.after}</>
           : headline}
       </h3>
     )
   )}
-  {subhead && (
-    <p class:list={['mt-m text-lg', toneSub]}>{subhead}</p>
+  {(subhead || richSubhead) && (
+    <p class:list={['mt-m text-lg', toneSub]}>
+      {richSubhead ? <InlineRich value={subheadRich} /> : subhead}
+    </p>
   )}
 </div>

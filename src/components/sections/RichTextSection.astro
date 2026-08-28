@@ -4,11 +4,14 @@
 // cadence stays correct no matter the order. Safe to edit by hand.
 import SectionHeading from '@/components/SectionHeading.astro';
 import PortableText from '@/components/PortableText';
+import { surfaceClass } from '@/lib/surfaces';
 
 interface Props {
   eyebrow?: string;
   heading?: string;
   scriptAccent?: string;
+  /** One word of the heading in the brand accent colour. See SectionHeading. */
+  headingAccent?: string;
   body?: any;
   width?: 'normal' | 'narrow';
   align?: 'left' | 'center';
@@ -20,6 +23,7 @@ const {
   eyebrow,
   heading,
   scriptAccent,
+  headingAccent,
   body,
   width = 'normal',
   align = 'left',
@@ -27,7 +31,9 @@ const {
   headingId,
 } = Astro.props as Props;
 
-const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+// Surface classes come from src/lib/surfaces.ts, where the contrast gate
+// measures this pair. Same strings as the ternary that was here (2026-08-28).
+const bg = surfaceClass(surface);
 const widthClass = width === 'narrow' ? 'max-w-prose' : 'max-w-content';
 const alignClass = align === 'center' ? 'text-center' : '';
 const proseClass = ['text-foreground/85 text-lg leading-relaxed', heading ? 'mt-l' : '', alignClass]
@@ -44,6 +50,7 @@ const proseClass = ['text-foreground/85 text-lg leading-relaxed', heading ? 'mt-
         headingId={headingId}
         align={align}
         scriptAccent={scriptAccent}
+        headingAccent={headingAccent}
         class={align === 'center' ? 'mx-auto' : ''}
       />
     )}

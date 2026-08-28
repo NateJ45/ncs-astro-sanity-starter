@@ -17,14 +17,19 @@ import SectionHeading from '@/components/SectionHeading.astro';
 import SanityImage from '@/components/SanityImage.astro';
 import CtaLink from '@/components/CtaLink.astro';
 import type { ProjectedDynamicListSection } from '@/lib/pageBuilder.types';
+import { columnsClass } from '@/lib/layout-variants';
 
 type Props = {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  /** Optional rich twin of `subhead` (bold / italic). See src/lib/inline-rich.ts. */
+  subheadRich?: unknown;
   source?: 'journal' | 'services' | 'testimonials' | 'faqs';
   items?: ProjectedDynamicListSection['items'];
   cta?: ProjectedDynamicListSection['cta'];
+  /** How many cards across on a desktop. Three is what this grid always was. */
+  columns?: number;
   headingId?: string;
 };
 
@@ -32,13 +37,21 @@ const {
   eyebrow,
   headline = 'Latest updates',
   subhead,
+  subheadRich,
   source = 'journal',
   items = [],
   cta,
+  columns,
   headingId = 'dynamic-list-heading',
 } = Astro.props as Props;
 
 const hasItems = Array.isArray(items) && items.length > 0;
+
+// Unset, this emits `sm:grid-cols-2 lg:grid-cols-3`, which is the string that
+// was inline on all three card grids below before src/lib/layout-variants.ts
+// existed (2026-08-28). One value drives all three, because they are three
+// renderings of one grid, not three grids.
+const colClass = columnsClass('dynamicListSection', columns);
 
 // Format a datetime string to a short readable date.
 function formatDate(d?: string | null): string {
@@ -70,6 +83,7 @@ const fallbackLabel: Record<string, string> = {
         eyebrow={eyebrow}
         headline={headline}
         subhead={subhead}
+        subheadRich={subheadRich}
         headingId={headingId}
         align="center"
         class="mx-auto"
@@ -77,7 +91,7 @@ const fallbackLabel: Record<string, string> = {
 
       {/* ── Journal cards ────────────────────────────────────────────── */}
       {source === 'journal' && (
-        <ul class="mt-section-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-m list-none p-0" data-stagger-grid>
+        <ul class={`mt-section-lg grid grid-cols-1 ${colClass} gap-m list-none p-0`} data-stagger-grid>
           {items.map((item) => (
             <li>
               {item.href ? (
@@ -124,7 +138,7 @@ const fallbackLabel: Record<string, string> = {
 
       {/* ── Service cards ────────────────────────────────────────────── */}
       {source === 'services' && (
-        <ul class="mt-section-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-m list-none p-0" data-stagger-grid>
+        <ul class={`mt-section-lg grid grid-cols-1 ${colClass} gap-m list-none p-0`} data-stagger-grid>
           {items.map((item) => (
             <li>
               {item.href ? (
@@ -156,7 +170,7 @@ const fallbackLabel: Record<string, string> = {
 
       {/* ── Testimonial cards ────────────────────────────────────────── */}
       {source === 'testimonials' && (
-        <ul class="mt-section-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-m list-none p-0" data-stagger-grid>
+        <ul class={`mt-section-lg grid grid-cols-1 ${colClass} gap-m list-none p-0`} data-stagger-grid>
           {items.map((item) => (
             <li class="flex">
               <blockquote class="flex-1 rounded-md border border-border-soft bg-card p-m flex flex-col">

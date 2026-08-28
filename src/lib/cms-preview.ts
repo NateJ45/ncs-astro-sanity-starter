@@ -124,6 +124,23 @@ const NON_STEGA_FIELDS = new Set([
   'icon',
   'aspect',
   'ratio',
+  // Appearance controls, 2026-08-28 (PORTS.md card 26). Audited field by field:
+  //   headingAccent  NEW, and the sharpest case on this list: it is matched
+  //                  against the heading with indexOf, so an encoded value
+  //                  would never find its own word and the accent would
+  //                  silently do nothing in the preview while the live page
+  //                  showed it. src/lib/heading-accent.ts ALSO strips both
+  //                  sides with plain() -- belt and braces, because that helper
+  //                  runs on the live site too, where this list does not exist.
+  //   columns        already listed above, and it is what the two NEW column
+  //                  controls (valuesSection, dynamicListSection) are named.
+  //   imageSide      already listed above; the wave rewords its Studio label
+  //                  and touches nothing else.
+  // Nothing else in this wave drives logic from a string: the `subheadRich`
+  // twins are portable text meant to be clicked into, so they KEEP their stega,
+  // and this template adds no surface or accent COLOUR enum at all (see
+  // src/lib/surfaces.ts for why).
+  'headingAccent',
 ]);
 
 export function getPreviewClient(draftMode: boolean): SanityClient {

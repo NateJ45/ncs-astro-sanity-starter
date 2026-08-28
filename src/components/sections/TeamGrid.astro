@@ -29,6 +29,8 @@ interface Props {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  /** Optional rich twin of `subhead`: bold and italic only. */
+  subheadRich?: unknown;
   members?: TeamMember[];
   headingId?: string;
 }
@@ -37,6 +39,7 @@ const {
   eyebrow,
   headline = 'Meet the Team.',
   subhead,
+  subheadRich,
   members = [],
   headingId = 'team-section-heading',
 } = Astro.props as Props;
@@ -51,6 +54,7 @@ const validMembers = members.filter((m) => m?.name);
         eyebrow={eyebrow}
         headline={headline}
         subhead={subhead}
+        subheadRich={subheadRich}
         headingId={headingId}
         align="center"
         class="mx-auto"

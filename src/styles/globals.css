@@ -501,6 +501,29 @@
   );
 }
 
+/* ---------- The accent word inside a heading (PORTS.md card 26) -------------
+   The colour sibling of the script accent (.font-script above, logic in
+   src/lib/scriptAccent.ts). An editor types a word that already appears in a
+   heading and SectionHeading.astro wraps the first match in this class. There
+   is deliberately NO editor-facing colour choice: the word is the choice, the
+   colour is the brand's.
+
+   The surface half of this lives in src/lib/surfaces.ts, and
+   src/lib/surfaces.test.ts measures the pairing on every surface a section
+   paints, in both themes, at the 3:1 large-text threshold. It also asserts that
+   BOTH rules below still exist, because deleting either one silently breaks a
+   measurement it is still passing. */
+.heading-accent {
+  color: var(--section-accent, var(--primary));
+}
+
+/* On the fixed ink band (the closing CTA panel) a theme-aware token would flip
+   with the READER's page theme rather than with the band it is sitting on, so
+   pin it to the lifted slate that reads on near-black in either theme. */
+.bg-accent-dark {
+  --section-accent: #8A96A6;
+}
+
 /* Tactile press on primary CTAs. Tap/click depresses ~1px so the press
    registers physically — common Apple-Material trick. */
 .press-tactile {

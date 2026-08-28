@@ -89,8 +89,10 @@ const wrapAttrs = (key: string | undefined) =>
         eyebrow={s.eyebrow}
         headline={s.headline}
         subhead={s.subhead}
+        subheadRich={s.subheadRich}
         cta={s.cta}
         scriptAccent={s.scriptAccent}
+        headingAccent={s.headingAccent}
         backgroundImage={s.backgroundImage}
         headingId={headingId}
       />
@@ -117,6 +119,7 @@ const wrapAttrs = (key: string | undefined) =>
         eyebrow={s.eyebrow}
         heading={s.heading}
         scriptAccent={s.scriptAccent}
+        headingAccent={s.headingAccent}
         body={s.body}
         width={s.width}
         align={s.align}
@@ -171,7 +174,9 @@ const wrapAttrs = (key: string | undefined) =>
         eyebrow={s.eyebrow}
         headline={s.headline}
         scriptAccent={s.scriptAccent}
+        headingAccent={s.headingAccent}
         subhead={s.subhead}
+        subheadRich={s.subheadRich}
         services={s.services ?? []}
         cta={s.cta}
         footnote={s.footnote}
@@ -183,7 +188,9 @@ const wrapAttrs = (key: string | undefined) =>
         eyebrow={s.eyebrow}
         headline={s.headline}
         scriptAccent={s.scriptAccent}
+        headingAccent={s.headingAccent}
         subhead={s.subhead}
+        subheadRich={s.subheadRich}
         featuredQuote={s.featuredQuote}
         testimonialsToShow={s.testimonialsToShow ?? []}
         attribution={s.attribution}
@@ -206,6 +213,7 @@ const wrapAttrs = (key: string | undefined) =>
         eyebrow={s.eyebrow}
         headline={s.headline}
         points={s.points ?? []}
+        columns={s.columns}
         headingId={headingId}
       />
     ) : s._type === 'processSection' ? (
@@ -238,7 +246,9 @@ const wrapAttrs = (key: string | undefined) =>
       <FaqSection
         eyebrow={s.eyebrow}
         headline={s.headline}
+        headingAccent={s.headingAccent}
         subhead={s.subhead}
+        subheadRich={s.subheadRich}
         items={s.items ?? []}
         cta={s.cta}
         headingId={headingId}
@@ -256,6 +266,7 @@ const wrapAttrs = (key: string | undefined) =>
         eyebrow={s.eyebrow}
         headline={s.headline}
         subhead={s.subhead}
+        subheadRich={s.subheadRich}
         members={s.members ?? []}
         headingId={headingId}
       />
@@ -274,9 +285,11 @@ const wrapAttrs = (key: string | undefined) =>
         eyebrow={s.eyebrow}
         headline={s.headline}
         subhead={s.subhead}
+        subheadRich={s.subheadRich}
         source={s.source}
         items={s.items ?? []}
         cta={s.cta}
+        columns={s.columns}
         headingId={headingId}
       />
     ) : (

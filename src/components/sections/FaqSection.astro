@@ -24,7 +24,11 @@ interface FaqItem {
 interface Props {
   eyebrow?: string;
   headline?: string;
+  /** One word of the headline in the brand accent colour. See SectionHeading. */
+  headingAccent?: string;
   subhead?: string;
+  /** Optional rich twin of `subhead`: bold and italic only. */
+  subheadRich?: unknown;
   items?: FaqItem[];
   cta?: any;
   headingId?: string;
@@ -33,7 +37,9 @@ interface Props {
 const {
   eyebrow,
   headline = 'Common Questions.',
+  headingAccent,
   subhead,
+  subheadRich,
   items = [],
   cta,
   headingId = 'faq-section-heading',
@@ -53,9 +59,11 @@ const validItems = items.filter((i) => i?.question);
         eyebrow={eyebrow}
         headline={headline}
         subhead={subhead}
+        subheadRich={subheadRich}
         headingId={headingId}
         align="center"
         class="mx-auto"
+        headingAccent={headingAccent}
       />
 
       <div class="mt-section-lg max-w-3xl mx-auto">

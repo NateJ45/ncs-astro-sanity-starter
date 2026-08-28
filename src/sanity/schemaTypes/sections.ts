@@ -26,6 +26,8 @@ import {
   EarthGlobeIcon,
   CodeBlockIcon,
 } from '@sanity/icons';
+import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
+import { sideOptions } from '../../lib/layout-variants';
 
 // Shared image field with required alt text (accessibility + SEO).
 const imageWithAlt = (name = 'image', title = 'Image') =>
@@ -130,6 +132,7 @@ export const richTextSection = defineType({
       type: 'string',
       description: 'One word from the heading to render in the script font. Must match exactly.',
     }),
+    headingAccentField(),
     proseBody('body', 'Text'),
     defineField({
       name: 'width',
@@ -162,10 +165,13 @@ export const imageTextSection = defineType({
     imageWithAlt('image', 'Image'),
     defineField({
       name: 'imageSide',
-      title: 'Image goes on the',
+      title: 'Which side is the image on?',
       type: 'string',
       initialValue: 'left',
-      options: { list: [{ title: 'Left', value: 'left' }, { title: 'Right', value: 'right' }], layout: 'radio' },
+      // Wording only. The stored values and the default are unchanged; the
+      // labels come from the shared registry so both halves of a media pair
+      // read the same way. See src/lib/layout-variants.ts.
+      options: { list: sideOptions('Image'), layout: 'radio' },
     }),
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'heading', title: 'Heading', type: 'string' }),
@@ -202,13 +208,7 @@ export const gallerySection = defineType({
         }),
       ],
     }),
-    defineField({
-      name: 'columns',
-      title: 'Columns',
-      type: 'number',
-      initialValue: 3,
-      options: { list: [2, 3, 4] },
-    }),
+    columnsField('gallerySection'),
   ],
   preview: {
     select: { images: 'images', heading: 'heading' },
@@ -282,7 +282,15 @@ export const ctaBandSection = defineType({
       type: 'string',
       description: 'One word from the headline to render in the script font. Must match exactly.',
     }),
-    defineField({ name: 'subhead', title: 'Subhead', type: 'text', rows: 2 }),
+    headingAccentField(),
+    defineField({
+      name: 'subhead',
+      title: 'Subhead',
+      type: 'text',
+      rows: 2,
+      hidden: hideWhenRich('subheadRich'),
+    }),
+    richTwin('subheadRich', 'Subhead'),
     defineField({ name: 'cta', title: 'Button', type: 'ctaBlock' }),
     imageWithAlt('backgroundImage', 'Background photo (optional)'),
   ],

@@ -646,6 +646,21 @@ export type DynamicListSection = {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  subheadRich?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal';
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
+  columns?: 2 | 3;
   source?: 'journal' | 'services' | 'testimonials' | 'faqs';
   limit?: number;
   cta?: CtaBlock;
@@ -656,6 +671,20 @@ export type TeamSection = {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  subheadRich?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal';
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
   members?: Array<{
     name?: string;
     role?: string;
@@ -683,7 +712,22 @@ export type FaqSection = {
   _type: 'faqSection';
   eyebrow?: string;
   headline?: string;
+  headingAccent?: string;
   subhead?: string;
+  subheadRich?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal';
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
   items?: Array<
     {
       _key: string;
@@ -718,6 +762,7 @@ export type ValuesSection = {
   _type: 'valuesSection';
   eyebrow?: string;
   headline?: string;
+  columns?: 2 | 3;
 };
 
 export type StorySection = {
@@ -767,7 +812,22 @@ export type TestimonialsSection = {
   eyebrow?: string;
   headline?: string;
   scriptAccent?: string;
+  headingAccent?: string;
   subhead?: string;
+  subheadRich?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal';
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
   featuredQuote?: TestimonialReference;
   testimonialsToShow?: Array<
     {
@@ -782,7 +842,22 @@ export type ServicesGridSection = {
   eyebrow?: string;
   headline?: string;
   scriptAccent?: string;
+  headingAccent?: string;
   subhead?: string;
+  subheadRich?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal';
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
   cta?: CtaBlock;
   footnote?: string;
   variant?: 'grid' | 'list';
@@ -864,7 +939,22 @@ export type CtaBandSection = {
   eyebrow?: string;
   headline?: string;
   scriptAccent?: string;
+  headingAccent?: string;
   subhead?: string;
+  subheadRich?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal';
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
   cta?: CtaBlock;
   backgroundImage?: {
     asset?: SanityImageAssetReference;
@@ -950,6 +1040,7 @@ export type RichTextSection = {
   eyebrow?: string;
   heading?: string;
   scriptAccent?: string;
+  headingAccent?: string;
   body?: Array<{
     children?: Array<{
       marks?: Array<string>;

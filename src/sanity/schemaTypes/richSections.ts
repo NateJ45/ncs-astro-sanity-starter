@@ -29,6 +29,7 @@ import {
   SyncIcon,
 } from '@sanity/icons';
 import { SECTION_TYPES } from './sections';
+import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
 
 // ── Shared helpers (mirrors sections.ts helpers — keep in sync if you change
 //    the main helpers, or extract to a shared file in a future refactor) ──────
@@ -148,7 +149,15 @@ export const servicesGridSection = defineType({
       description:
         'One word from the headline to render in the script font. Must match exactly. Leave blank to skip.',
     }),
-    defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
+    headingAccentField(),
+    defineField({
+      name: 'subhead',
+      title: 'Subhead (optional)',
+      type: 'text',
+      rows: 2,
+      hidden: hideWhenRich('subheadRich'),
+    }),
+    richTwin('subheadRich', 'Subhead'),
     defineField({ name: 'cta', title: 'Button (optional)', type: 'ctaBlock' }),
     defineField({
       name: 'footnote',
@@ -195,7 +204,15 @@ export const testimonialsSection = defineType({
       type: 'string',
       description: 'One word from the headline to render in the script font. Must match exactly.',
     }),
-    defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
+    headingAccentField(),
+    defineField({
+      name: 'subhead',
+      title: 'Subhead (optional)',
+      type: 'text',
+      rows: 2,
+      hidden: hideWhenRich('subheadRich'),
+    }),
+    richTwin('subheadRich', 'Subhead'),
     defineField({
       name: 'featuredQuote',
       title: 'Featured testimonial (large pull-quote)',
@@ -277,6 +294,7 @@ export const valuesSection = defineType({
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    columnsField('valuesSection'),
   ],
   preview: {
     select: { title: 'headline' },
@@ -410,7 +428,15 @@ export const faqSection = defineType({
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
-    defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
+    headingAccentField(),
+    defineField({
+      name: 'subhead',
+      title: 'Subhead (optional)',
+      type: 'text',
+      rows: 2,
+      hidden: hideWhenRich('subheadRich'),
+    }),
+    richTwin('subheadRich', 'Subhead'),
     defineField({
       name: 'items',
       title: 'Questions to show',
@@ -445,7 +471,14 @@ export const teamSection = defineType({
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
-    defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
+    defineField({
+      name: 'subhead',
+      title: 'Subhead (optional)',
+      type: 'text',
+      rows: 2,
+      hidden: hideWhenRich('subheadRich'),
+    }),
+    richTwin('subheadRich', 'Subhead'),
     defineField({
       name: 'members',
       title: 'Team members',
@@ -528,7 +561,15 @@ export const dynamicListSection = defineType({
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
-    defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
+    defineField({
+      name: 'subhead',
+      title: 'Subhead (optional)',
+      type: 'text',
+      rows: 2,
+      hidden: hideWhenRich('subheadRich'),
+    }),
+    richTwin('subheadRich', 'Subhead'),
+    columnsField('dynamicListSection'),
     defineField({
       name: 'source',
       title: 'Show items from',
