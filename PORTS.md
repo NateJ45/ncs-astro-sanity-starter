@@ -1268,7 +1268,7 @@ so a fork adapts BOTH cards by editing one file.
    perfectly normal page, and flagging it would be the false positive that
    teaches an editor to ignore the dialog. WCP sets it true when it folds back.
 
-**FUTURE WCP SYNC TASK (open).** WCP still runs the pre-config ancestor of
+**FUTURE WCP SYNC TASK (done 2026-08-28).** WCP still runs the pre-config ancestor of
 `page-checks.ts`, `checkPage.tsx`, `saveSectionPreset.tsx` and its own
 `sanity-keys.ts`. Folding it forward is: add `src/sanity/pageBuilderConfig.ts`
 with `sectionArrays: ['sections']`, `header: { label: 'Hero (top banner)',
@@ -1750,3 +1750,13 @@ roles and Sanity's own scheduling - card 20 exists so scheduling does
 not need it), the theme-presets default-no decision, the care plan,
 and the words to avoid (requests served, not page views; one-hour
 share links; count the seats).
+
+### 2026-08-28: card 25 fold-back landed in wcp
+
+wcp is now canonical on page-checks.ts (SAME) with its own
+pageBuilderConfig.ts. Deliberately divergent there, by design, with
+reasons in the file headers: the two action files (wcp's volunteer
+guide quotes their labels verbatim) and pageOps (wcp's duplicate
+must strip hubKey and branch hub preview hrefs; canonical pageOps
+has no hub concept). Test files are per-runner everywhere: the
+canonical suite is node:test, wcp's is vitest with the same cases.
