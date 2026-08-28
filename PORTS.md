@@ -62,14 +62,14 @@ is installing it as of the date on the card.
 | 7 | Uptime workflow | yes | yes | no | yes | yes | yes | template | yes |
 | 8 | Playwright + axe + reflow suite | yes | yes | no | yes | no | no | no | no |
 | 9 | contrast.ts + theme-token gate | partial | yes | yes | yes | yes | yes | yes | yes |
-| 10 | Embedded-studio live-preview stack | yes | yes | yes | no | no | no | no | no |
-| 11 | Preview click interceptor | yes | yes | yes | no | no | no | no | no |
+| 10 | Embedded-studio live-preview stack | yes | yes | yes | staged | staged | no | yes | n/a |
+| 11 | Preview click interceptor | yes | yes | yes | staged | staged | no | yes | n/a |
 | 12 | Parity-gated page-builder conversion | partial | yes | partial | no | no | no | no | no |
-| 13 | react/react-dom exact pin | no | yes | yes | no | no | no | no | no |
-| 14 | wrangler legacy_env pin | no | yes | yes | no | no | no | no | no |
+| 13 | react/react-dom exact pin | no | yes | yes | staged | staged | no | yes | no |
+| 14 | wrangler legacy_env pin | no | yes | yes | staged | staged | no | yes | no |
 | 15 | PENDING.md / TESTING.md docs registry | yes | yes | yes | yes | yes | yes | yes | yes |
 | 16 | Quarterly slop sweep | no | no | no | no | no | no | no | no |
-| 17 | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes | yes | no | no | no | no | n/a |
+| 17 | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes | yes | staged | staged | no | yes | n/a |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -760,3 +760,18 @@ real, in a browser, before ticking its cell.
 **Next in card 17's order:** reid-design-site (already Sanity 6, shortest hop), then
 mas-monograms, then 2ndpreschicago after its DNS cutover. ncs-church-starter should
 inherit most of this by sync from here rather than by a fresh port.
+
+### Card 10/17 rollout complete (2026-08-28, late)
+
+Every Sanity repo except 2ndpreschicago (parked for DNS cutover) now
+carries the modern stack. "staged" = verified and pushed to a
+modern-stack HOLDING BRANCH because those repos auto-deploy from main
+via Cloudflare Workers Builds; the dashboard deploy command must
+become `npx wrangler deploy -c dist/server/wrangler.json` BEFORE the
+merge, or every SSR route 404s. reid additions to the lore:
+sanity-plugin-iframe-pane floats a third @sanity/ui by caret (drop it,
+presentationTool supersedes it); pass a per-request client into query
+functions with the memo skipped so draft reads never leak between
+Worker requests; and verify surprising upstream markup changes in a
+real browser before pinning (radix accordion's dropped aria-controls
+was deliberate and axe-clean).
