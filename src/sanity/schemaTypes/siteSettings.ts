@@ -39,8 +39,7 @@ export const siteSettings = defineType({
       title: 'Public email',
       type: 'string',
       description: 'Public email address shown on the Contact page.',
-      validation: (Rule) =>
-        Rule.required().regex(/.+@.+\..+/, { name: 'email', invert: false }),
+      validation: (Rule) => Rule.required().regex(/.+@.+\..+/, { name: 'email', invert: false }),
     }),
     defineField({
       name: 'phone',
@@ -63,31 +62,13 @@ export const siteSettings = defineType({
       type: 'array',
       group: 'navigation',
       description:
-        'The links in the website header. Drag to reorder. Add a "Link" for a single page, or a "Dropdown" to group several links under one label. Leave empty to use the built-in default menu. Once you add items here, they replace the whole menu, so include every link you want.',
+        'The links in the website header. Drag to reorder. Add a "Link" for a single page, or a "Dropdown" to group several links under one label. The header design fits at most six, so keep the list short. Leave empty to use the built-in default menu. Once you add items here, they replace the whole menu, so include every link you want.',
+      validation: (Rule) => Rule.max(6),
       of: [
-        defineArrayMember({
-          type: 'object',
-          name: 'navLink',
-          title: 'Link',
-          icon: LinkIcon,
-          fields: [
-            defineField({
-              name: 'label',
-              title: 'Label',
-              type: 'string',
-              description: 'What visitors see, e.g. "Services".',
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'href',
-              title: 'Address',
-              type: 'string',
-              description: 'A page on this site like /services, or a full URL like https://example.com.',
-              validation: (Rule) => Rule.required(),
-            }),
-          ],
-          preview: { select: { title: 'label', subtitle: 'href' } },
-        }),
+        // The shared link object (./navLink.ts). Existing menu items already
+        // carry _type "navLink", so they keep working unchanged and simply gain
+        // the page picker.
+        defineArrayMember({ type: 'navLink' }),
         defineArrayMember({
           type: 'object',
           name: 'navGroup',
@@ -112,7 +93,12 @@ export const siteSettings = defineType({
                   title: 'Link',
                   icon: LinkIcon,
                   fields: [
-                    defineField({ name: 'label', title: 'Label', type: 'string', validation: (Rule) => Rule.required() }),
+                    defineField({
+                      name: 'label',
+                      title: 'Label',
+                      type: 'string',
+                      validation: (Rule) => Rule.required(),
+                    }),
                     defineField({
                       name: 'href',
                       title: 'Address',
@@ -143,7 +129,8 @@ export const siteSettings = defineType({
       type: 'array',
       group: 'navigation',
       description:
-        'The titled link columns in the footer. Leave empty to use the built-in default columns. The "Get in touch" column (email, phone, socials) always shows automatically. Aim for three or four columns so the footer grid stays balanced.',
+        'The titled link columns in the footer. Leave empty to use the built-in default columns. The "Get in touch" column (email, phone, socials) always shows automatically. Aim for three or four columns so the footer grid stays balanced; four is the most that fits.',
+      validation: (Rule) => Rule.max(4),
       of: [
         defineArrayMember({
           type: 'object',
@@ -163,13 +150,22 @@ export const siteSettings = defineType({
               title: 'Links',
               type: 'array',
               of: [
+                // Shared link object first, so "Add item" reaches for it.
+                defineArrayMember({ type: 'navLink' }),
+                // The original hand-typed link, kept so columns written before
+                // the picker existed stay editable in place.
                 defineArrayMember({
                   type: 'object',
                   name: 'footerLink',
-                  title: 'Link',
+                  title: 'Link (typed address)',
                   icon: LinkIcon,
                   fields: [
-                    defineField({ name: 'label', title: 'Label', type: 'string', validation: (Rule) => Rule.required() }),
+                    defineField({
+                      name: 'label',
+                      title: 'Label',
+                      type: 'string',
+                      validation: (Rule) => Rule.required(),
+                    }),
                     defineField({
                       name: 'href',
                       title: 'Address',
@@ -181,7 +177,7 @@ export const siteSettings = defineType({
                   preview: { select: { title: 'label', subtitle: 'href' } },
                 }),
               ],
-              validation: (Rule) => Rule.required().min(1),
+              validation: (Rule) => Rule.required().min(1).max(8),
             }),
           ],
           preview: {
@@ -191,6 +187,117 @@ export const siteSettings = defineType({
               subtitle: `Column: ${Array.isArray(links) ? links.length : 0} link(s)`,
             }),
           },
+        }),
+      ],
+    }),
+
+    // The button at the right of the header (and at the top of the phone menu).
+    // Everything is optional: an empty label keeps the built-in
+    // "Book a consultation" pointing at Contact, and turning it off removes the
+    // button everywhere.
+    defineField({
+      name: 'headerCta',
+      title: 'Header button',
+      type: 'object',
+      group: 'navigation',
+      description:
+        'The one button at the right of the header. Leave the boxes blank to keep the built-in "Book a consultation" button.',
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({
+          name: 'show',
+          title: 'Show the header button',
+          type: 'boolean',
+          description: 'Turn off to remove the button from the header and the phone menu.',
+          initialValue: true,
+        }),
+        defineField({
+          name: 'label',
+          title: 'Button text',
+          type: 'string',
+          description: 'Leave blank for "Book a consultation".',
+        }),
+        defineField({
+          name: 'link',
+          title: 'Where the button goes',
+          type: 'navLink',
+          description: 'Leave blank to keep pointing at the Contact page.',
+        }),
+      ],
+      preview: {
+        select: { show: 'show', label: 'label' },
+        prepare: ({ show, label }) => ({
+          title: label || 'Book a consultation',
+          subtitle: show === false ? 'Hidden' : 'Header button',
+        }),
+      },
+    }),
+
+    // Small on/off switches for the bits of contact detail the chrome carries.
+    // All are ON unless explicitly turned off, so an untouched site is
+    // unchanged (the site reads a blank value as "yes").
+    defineField({
+      name: 'showEmail',
+      title: 'Show the email address in the menu',
+      type: 'boolean',
+      group: 'navigation',
+      description:
+        'The "Get in touch" email at the foot of the phone menu. On unless you turn it off.',
+      initialValue: true,
+    }),
+    defineField({
+      name: 'showSocials',
+      title: 'Show social buttons in the menu',
+      type: 'boolean',
+      group: 'navigation',
+      description:
+        'The Instagram and Facebook buttons in the header eyebrow strip and at the foot of the phone menu. On unless you turn it off.',
+      initialValue: true,
+    }),
+    defineField({
+      name: 'showFooterSocials',
+      title: 'Show social buttons in the footer',
+      type: 'boolean',
+      group: 'navigation',
+      description:
+        'The social buttons in the footer "Get in touch" column. On unless you turn it off.',
+      initialValue: true,
+    }),
+
+    // The small print row along the very bottom of the footer.
+    defineField({
+      name: 'legalNav',
+      title: 'Footer small-print links',
+      type: 'array',
+      group: 'navigation',
+      description:
+        'The little links beside the copyright line at the very bottom, e.g. Privacy policy. Leave empty to keep the built-in privacy link.',
+      validation: (Rule) => Rule.max(6),
+      of: [defineArrayMember({ type: 'navLink' })],
+    }),
+
+    // An uploaded logo replaces the built-in image logo at the top of every
+    // page. Left blank, the template's own logo files keep rendering.
+    defineField({
+      name: 'logo',
+      title: 'Logo (optional)',
+      type: 'image',
+      group: 'identity',
+      description:
+        'A logo image for the top of every page. Leave blank and the site keeps the logo files that ship with the template. When set, this image replaces them and is scaled to the header height, so upload it with any spare space already trimmed off. One image is used in both light and dark mode.',
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          description: 'What the logo says, for screen readers. Example: "Studio Name".',
+          validation: (Rule) =>
+            Rule.custom((value, ctx: any) =>
+              ctx.parent?.asset && !value
+                ? 'Add alt text so screen readers can read the logo'
+                : true,
+            ),
         }),
       ],
     }),
@@ -209,7 +316,8 @@ export const siteSettings = defineType({
       name: 'serviceAreas',
       title: 'Service areas',
       type: 'array',
-      description: 'Cities and neighborhoods you serve, in display order. Put your primary market first.',
+      description:
+        'Cities and neighborhoods you serve, in display order. Put your primary market first.',
       of: [defineArrayMember({ type: 'string' })],
       validation: (Rule) => Rule.required().min(1),
       hidden: true,
@@ -314,7 +422,8 @@ export const siteSettings = defineType({
               name: 'label',
               title: 'Label (optional)',
               type: 'string',
-              description: 'Custom label for "Other" platforms. Used as the aria-label on the icon button.',
+              description:
+                'Custom label for "Other" platforms. Used as the aria-label on the icon button.',
             }),
           ],
           preview: {
@@ -335,18 +444,18 @@ export const siteSettings = defineType({
         'The schema.org business category search engines use to understand what your business does. Pick the closest match. This feeds the structured data (JSON-LD) on every page, which helps Google show your listing correctly in Maps, search cards, and rich results.',
       options: {
         list: [
-          { title: 'Local Business (generic)',          value: 'LocalBusiness' },
-          { title: 'Professional Service',              value: 'ProfessionalService' },
-          { title: 'Home and Construction Business',    value: 'HomeAndConstructionBusiness' },
-          { title: 'Legal Service',                     value: 'LegalService' },
-          { title: 'Medical Business',                  value: 'MedicalBusiness' },
-          { title: 'Health and Beauty Business',        value: 'HealthAndBeautyBusiness' },
-          { title: 'Food Establishment',                value: 'FoodEstablishment' },
-          { title: 'Store',                             value: 'Store' },
-          { title: 'Real Estate Agent',                 value: 'RealEstateAgent' },
-          { title: 'Travel Agency',                     value: 'TravelAgency' },
-          { title: 'Educational Organization',          value: 'EducationalOrganization' },
-          { title: 'NGO',                               value: 'NGO' },
+          { title: 'Local Business (generic)', value: 'LocalBusiness' },
+          { title: 'Professional Service', value: 'ProfessionalService' },
+          { title: 'Home and Construction Business', value: 'HomeAndConstructionBusiness' },
+          { title: 'Legal Service', value: 'LegalService' },
+          { title: 'Medical Business', value: 'MedicalBusiness' },
+          { title: 'Health and Beauty Business', value: 'HealthAndBeautyBusiness' },
+          { title: 'Food Establishment', value: 'FoodEstablishment' },
+          { title: 'Store', value: 'Store' },
+          { title: 'Real Estate Agent', value: 'RealEstateAgent' },
+          { title: 'Travel Agency', value: 'TravelAgency' },
+          { title: 'Educational Organization', value: 'EducationalOrganization' },
+          { title: 'NGO', value: 'NGO' },
         ],
         layout: 'dropdown',
       },
@@ -356,11 +465,10 @@ export const siteSettings = defineType({
       name: 'seoImage',
       title: 'Default social share image',
       type: 'image',
-      description: 'The image shown when any page of the site is shared on social media or in a text message (the Open Graph image). Use a wide image, about 1200 by 630 pixels. Individual pages can override this in their own SEO section. Leave blank to use the auto-generated branded cards.',
+      description:
+        'The image shown when any page of the site is shared on social media or in a text message (the Open Graph image). Use a wide image, about 1200 by 630 pixels. Individual pages can override this in their own SEO section. Leave blank to use the auto-generated branded cards.',
       options: { hotspot: true },
-      fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-      ],
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),
     defineField({
       name: 'footerCredit',
@@ -372,7 +480,8 @@ export const siteSettings = defineType({
       name: 'footerCreditUrl',
       title: 'Footer credit URL',
       type: 'url',
-      description: 'Optional. When set, the footer credit becomes a link to this URL (opens in a new tab).',
+      description:
+        'Optional. When set, the footer credit becomes a link to this URL (opens in a new tab).',
     }),
 
     // ── Newsletter ──────────────────────────────────────────────────────────
@@ -394,7 +503,8 @@ export const siteSettings = defineType({
           name: 'providerLabel',
           title: 'Provider label',
           type: 'string',
-          description: 'Internal label only. Example: "MailerLite" or "Buttondown". Not shown to visitors.',
+          description:
+            'Internal label only. Example: "MailerLite" or "Buttondown". Not shown to visitors.',
         }),
         defineField({
           name: 'formActionUrl',
@@ -406,7 +516,8 @@ export const siteSettings = defineType({
           name: 'audienceId',
           title: 'Audience / list ID',
           type: 'string',
-          description: 'Your provider list or audience ID. Used when the provider needs it in the POST body.',
+          description:
+            'Your provider list or audience ID. Used when the provider needs it in the POST body.',
         }),
         defineField({
           name: 'heading',
@@ -433,14 +544,16 @@ export const siteSettings = defineType({
           title: 'Success message',
           type: 'text',
           rows: 2,
-          description: 'Message shown after a successful signup. Example: "You\'re in. Check your inbox."',
+          description:
+            'Message shown after a successful signup. Example: "You\'re in. Check your inbox."',
         }),
         defineField({
           name: 'consentNote',
           title: 'Consent note',
           type: 'text',
           rows: 2,
-          description: 'Small-print consent line near the submit button. Link to /privacy included automatically.',
+          description:
+            'Small-print consent line near the submit button. Link to /privacy included automatically.',
         }),
       ],
     }),

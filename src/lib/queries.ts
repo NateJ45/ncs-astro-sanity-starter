@@ -150,14 +150,25 @@ export function sectionsProjection(field = 'pageBuilder'): string {
 // siteSettings.serviceAreas etc. keep working with no change; only the source
 // document changed.
 
+// One menu link (schemaTypes/navLink.ts), as every menu needs it: the label,
+// the hand-typed address that older items still carry, and the picked page
+// DEREFERENCED down to a type + slug. src/lib/nav-href.ts turns that into an
+// href. The field list is separate from the braces so it can also be spread
+// into a projection that adds children (navItems' dropdown groups).
+const NAV_LINK_FIELDS = `_key, _type, label, linkType, href, externalUrl,
+    "slug": internalPage->slug.current,
+    "docType": internalPage->_type`;
+export const NAV_LINK_PROJECTION = `{ ${NAV_LINK_FIELDS} }`;
+
 // Module-level memoized promise. The first call triggers the actual Sanity
 // fetch; every subsequent call (across all pages in the same build process)
 // returns the same promise, collapsing 11+ per-page calls to one request.
 let _siteSettingsPromise: Promise<any> | null = null;
 
-export async function getSiteSettings() {
-  if (_siteSettingsPromise) return _siteSettingsPromise;
-  _siteSettingsPromise = sanityFetch(`*[_type == "siteSettings"][0]{
+// Exported so the preview shell (src/layouts/PreviewLayout.astro) fetches the
+// chrome through the SAME projection. Fetching the raw document would leave
+// every dereferenced menu link null in the preview.
+export const SITE_SETTINGS_PROJECTION = `{
     title,
     tagline,
     email,
@@ -185,17 +196,22 @@ export async function getSiteSettings() {
     googleBusinessUrl,
     reviewsNote,
     satisfactionGuarantee,
+    logo${IMAGE_PROJECTION},
     // Optional editor-managed menus. Empty arrays mean "use the built-in defaults."
     navItems[]{
-      _type,
-      label,
-      href,
-      links[]{ label, href }
+      ${NAV_LINK_FIELDS},
+      links[]${NAV_LINK_PROJECTION}
     },
     footerColumns[]{
+      _key,
       title,
-      links[]{ label, href }
+      links[]${NAV_LINK_PROJECTION}
     },
+    legalNav[]${NAV_LINK_PROJECTION},
+    headerCta{ show, label, link${NAV_LINK_PROJECTION} },
+    showEmail,
+    showSocials,
+    showFooterSocials,
     sectionVisibility{
       showPortfolio,
       showJournal,
@@ -208,7 +224,15 @@ export async function getSiteSettings() {
       showStyleQuiz,
       showBudgetCalculator
     }
-  }`, {}, null);
+  }`;
+
+export async function getSiteSettings() {
+  if (_siteSettingsPromise) return _siteSettingsPromise;
+  _siteSettingsPromise = sanityFetch(
+    `*[_type == "siteSettings"][0]${SITE_SETTINGS_PROJECTION}`,
+    {},
+    null,
+  );
   return _siteSettingsPromise;
 }
 
@@ -216,7 +240,8 @@ export async function getSiteSettings() {
 // Most consumers read these through getSiteSettings (flat names), but pages
 // or blocks that need businessInfo directly can use this.
 export async function getBusinessInfo() {
-  return sanityFetch(`*[_type == "businessInfo"][0]{
+  return sanityFetch(
+    `*[_type == "businessInfo"][0]{
     businessModel,
     city,
     state,
@@ -232,7 +257,10 @@ export async function getBusinessInfo() {
       geoLat,
       geoLng
     }
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- Announcement banner --------------------------------------------------
@@ -261,58 +289,79 @@ export async function getActiveAnnouncement() {
 // ---- Home page ------------------------------------------------------------
 
 export async function getHomePage() {
-  return sanityFetch(`*[_type == "homePage"][0]{
+  return sanityFetch(
+    `*[_type == "homePage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
     ${sectionsProjection('pageBuilder')}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- About page -----------------------------------------------------------
 
 export async function getAboutPage() {
-  return sanityFetch(`*[_type == "aboutPage"][0]{
+  return sanityFetch(
+    `*[_type == "aboutPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
     ${sectionsProjection('pageBuilder')}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- Services page --------------------------------------------------------
 
 export async function getServicesPage() {
-  return sanityFetch(`*[_type == "servicesPage"][0]{
+  return sanityFetch(
+    `*[_type == "servicesPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
     ${sectionsProjection('pageBuilder')}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // Minimal service list for JSON-LD on the services page.
 export async function getServiceListForSchema() {
-  return sanityFetch(`*[_type == "service"] | order(orderRank asc, displayOrder asc){
+  return sanityFetch(
+    `*[_type == "service"] | order(orderRank asc, displayOrder asc){
     _id, name, slug, shortDescription, price, priceNumeric
-  }`, {}, []);
+  }`,
+    {},
+    [],
+  );
 }
 
 // ---- Process page -----------------------------------------------------------
 
 export async function getProcessPage() {
-  return sanityFetch(`*[_type == "processPage"][0]{
+  return sanityFetch(
+    `*[_type == "processPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
     ${sectionsProjection('pageBuilder')}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- FAQ page -------------------------------------------------------------
 
 export async function getFaqPage() {
-  return sanityFetch(`*[_type == "faqPage"][0]{
+  return sanityFetch(
+    `*[_type == "faqPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -329,13 +378,17 @@ export async function getFaqPage() {
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     finalCta${CTA_PROJECTION},
     secondaryCta${CTA_PROJECTION}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- Contact page ---------------------------------------------------------
 
 export async function getContactPage() {
-  return sanityFetch(`*[_type == "contactPage"][0]{
+  return sanityFetch(
+    `*[_type == "contactPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -357,13 +410,17 @@ export async function getContactPage() {
     schedulingLink,
     schedulingLinkLabel,
     availabilityNote
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- 404 page -------------------------------------------------------------
 
 export async function getNotFoundPage() {
-  return sanityFetch(`*[_type == "notFoundPage"][0]{
+  return sanityFetch(
+    `*[_type == "notFoundPage"][0]{
     seoTitle,
     seoDescription,
     eyebrow,
@@ -373,7 +430,10 @@ export async function getNotFoundPage() {
     primaryCtaLabel, primaryCtaHref,
     secondaryCtaLabel, secondaryCtaHref,
     tertiaryCtaLabel, tertiaryCtaHref
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- Projects (used by Footer.astro for Latest Projects column) -----------
@@ -395,10 +455,14 @@ export interface CoreProjectCard {
 }
 
 export async function getAllProjects(): Promise<CoreProjectCard[]> {
-  return sanityFetch(`*[_type == "project"] | order(orderRank asc, coalesce(displayOrder, 999) asc, publishedAt desc){
+  return sanityFetch(
+    `*[_type == "project"] | order(orderRank asc, coalesce(displayOrder, 999) asc, publishedAt desc){
     _id, title, slug, location, year, roomType, designStyle, briefSummary,
     heroImage${IMAGE_PROJECTION}
-  }`, {}, []);
+  }`,
+    {},
+    [],
+  );
 }
 
 // ---- Journal --------------------------------------------------------------
@@ -416,7 +480,8 @@ const JOURNAL_CARD_PROJECTION = `{
 }`;
 
 export async function getJournalPage() {
-  return sanityFetch(`*[_type == "journalPage"][0]{
+  return sanityFetch(
+    `*[_type == "journalPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -427,19 +492,30 @@ export async function getJournalPage() {
     finalCtaHeadline, finalCtaScriptAccent, finalCtaSubhead,
     finalCtaBackgroundImage${IMAGE_PROJECTION},
     finalCta${CTA_PROJECTION}
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 export async function getAllJournalEntries() {
   // Featured first, then newest first. Excerpt + cover only (no body).
-  return sanityFetch(`*[_type == "journalEntry"] | order(featured desc, publishedAt desc) ${JOURNAL_CARD_PROJECTION}`, {}, []);
+  return sanityFetch(
+    `*[_type == "journalEntry"] | order(featured desc, publishedAt desc) ${JOURNAL_CARD_PROJECTION}`,
+    {},
+    [],
+  );
 }
 
 export async function getAllJournalCategories() {
-  return sanityFetch(`*[_type == "journalCategory"] | order(title asc){
+  return sanityFetch(
+    `*[_type == "journalCategory"] | order(title asc){
     _id, title, slug, description,
     "postCount": count(*[_type == "journalEntry" && references(^._id)])
-  }`, {}, []);
+  }`,
+    {},
+    [],
+  );
 }
 
 export async function getJournalEntryBySlug(slug: string) {
@@ -497,7 +573,8 @@ export async function getAllJournalSlugs(): Promise<string[]> {
 // ---- Privacy page ---------------------------------------------------------
 
 export async function getPrivacyPage() {
-  return sanityFetch(`*[_type == "privacyPage"][0]{
+  return sanityFetch(
+    `*[_type == "privacyPage"][0]{
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -506,7 +583,10 @@ export async function getPrivacyPage() {
     heroScriptAccent,
     lastUpdated,
     body
-  }`, {}, null);
+  }`,
+    {},
+    null,
+  );
 }
 
 // ---- Press items (used by core: about.astro + index.astro PressStrip) ----
@@ -525,11 +605,15 @@ export interface CorePressItem {
 
 // Press items ordered by orderRank for the PressStrip on the home + about pages.
 export async function getPressItems(): Promise<CorePressItem[]> {
-  return sanityFetch(`*[_type == "pressItem"] | order(orderRank asc){
+  return sanityFetch(
+    `*[_type == "pressItem"] | order(orderRank asc){
     _id, outlet,
     logo${IMAGE_PROJECTION},
     quote, url, date, orderRank
-  }`, {}, []);
+  }`,
+    {},
+    [],
+  );
 }
 
 // ---- Custom pages (page builder) ------------------------------------------
@@ -562,13 +646,16 @@ export async function getAllPageSlugs(): Promise<string[]> {
 // Custom pages flagged to appear in the main nav and/or footer. Header.astro
 // and Footer.astro can inject these alongside the built-in links.
 export async function getNavPages() {
-  return sanityFetch(`*[_type == "page" && defined(slug.current) && (addToMainNav == true || addToFooter == true)]{
+  return sanityFetch(
+    `*[_type == "page" && defined(slug.current) && (addToMainNav == true || addToFooter == true)]{
     title,
     "slug": slug.current,
     navLabel,
     addToMainNav,
     navGroup,
     addToFooter
-  }`, {}, []);
+  }`,
+    {},
+    [],
+  );
 }
-

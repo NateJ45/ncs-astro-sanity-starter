@@ -44,6 +44,7 @@ import { getAllProjects, type CoreProjectCard } from '@/lib/queries';
 import logoLightAsset from '@/assets/logo-light.png';
 import logoDarkAsset from '@/assets/logo-dark.png';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
+import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
 
 // Pre-render the four footer-logo variants (1x + 2x for each theme) so we
@@ -74,53 +75,31 @@ interface SocialLink {
   label?: string;
 }
 
-interface FooterColumn {
-  title?: string;
-  links?: Array<{ label?: string; href?: string }>;
-}
-
 interface Props {
-  siteSettings?: {
-    title?: string;
-    email?: string;
-    phone?: string;
-    socialInstagram?: string;
-    socialFacebook?: string;
-    socialLinks?: SocialLink[] | null;
-    serviceAreas?: string[];
-    tagline?: string;
-    footerCredit?: string;
-    footerCreditUrl?: string;
-    newsletter?: NewsletterConfig | null;
-    /** Optional editor-managed footer link columns from Sanity siteSettings.footerColumns.
-     *  When non-empty, replaces the built-in Studio / Work / Free tools columns.
-     *  The "Get in touch" column always renders automatically at the end. */
-    footerColumns?: FooterColumn[] | null;
-    sectionVisibility?: {
-      showPortfolio?: boolean | null;
-      showJournal?: boolean | null;
-      showShop?: boolean | null;
-      showEDesign?: boolean | null;
-      showGiftCertificates?: boolean | null;
-      showPress?: boolean | null;
-      showResources?: boolean | null;
-      showGuides?: boolean | null;
-      showStyleQuiz?: boolean | null;
-      showBudgetCalculator?: boolean | null;
-    } | null;
-  } | null;
-}
-
-// Normalise Sanity footerColumns into the FooterColumn shape.
-// The field lives at siteSettings.footerColumns (projected by getSiteSettings).
-function normaliseSanityFooterColumns(
-  cols: FooterColumn[] | null | undefined,
-): FooterColumn[] {
-  if (!Array.isArray(cols) || cols.length === 0) return [];
-  return cols.filter((c) => c.title && Array.isArray(c.links) && c.links.length > 0);
+  siteSettings?:
+    | (RawChromeSettings & {
+        title?: string;
+        email?: string;
+        phone?: string;
+        socialInstagram?: string;
+        socialFacebook?: string;
+        socialLinks?: SocialLink[] | null;
+        serviceAreas?: string[];
+        tagline?: string;
+        footerCredit?: string;
+        footerCreditUrl?: string;
+        newsletter?: NewsletterConfig | null;
+      })
+    | null;
 }
 
 const { siteSettings } = Astro.props as Props;
+
+// The chrome (footer columns, the small-print row, the social switch) resolves
+// through one shared helper (see src/lib/siteSettings.ts) so the footer can't
+// drift from the header. Both menus come back EMPTY when Sanity is empty, and
+// the built-in markup below renders instead.
+const chrome = resolveSiteSettings(siteSettings);
 
 // Normalize section visibility. Unset => visible (safe default for live site).
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
@@ -131,9 +110,12 @@ const phone = siteSettings?.phone ?? '';
 
 // Social links: prefer the new socialLinks array; fall back to the legacy
 // socialInstagram / socialFacebook fields so existing datasets keep working.
-const rawSocialLinks = siteSettings?.socialLinks ?? [];
-const ig = siteSettings?.socialInstagram ?? '';
-const fb = siteSettings?.socialFacebook ?? '';
+// The footer's own "show social buttons" switch (Site Settings -> Navigation).
+// Unset means yes, so an untouched site is unchanged.
+const showFooterSocials = chrome.showFooterSocials;
+const rawSocialLinks = showFooterSocials ? (siteSettings?.socialLinks ?? []) : [];
+const ig = showFooterSocials ? (siteSettings?.socialInstagram ?? '') : '';
+const fb = showFooterSocials ? (siteSettings?.socialFacebook ?? '') : '';
 const socialLinksToRender: SocialLink[] =
   rawSocialLinks.length > 0
     ? rawSocialLinks.filter((l) => l?.url)
@@ -166,8 +148,12 @@ const siteCreditUrl = siteSettings?.footerCreditUrl;
 // Optional editor-managed footer columns. When non-empty, these replace the
 // built-in Studio / Work / Free tools columns. "Get in touch" always renders
 // as the last column regardless. Additive: empty = built-in defaults.
-const sanityFooterColumns = normaliseSanityFooterColumns(siteSettings?.footerColumns);
+const sanityFooterColumns = chrome.footerColumns;
 const useCustomFooterColumns = sanityFooterColumns.length > 0;
+
+// The small-print row at the very bottom. EMPTY means "keep the built-in
+// privacy link", which is rendered as its own markup below.
+const LEGAL_LINKS = chrome.legalNav;
 
 // Pull the three most recent projects for the Latest Projects column.
 // Falls back to an empty array when Sanity isn't reachable (build won't fail).
@@ -211,9 +197,9 @@ const latestProjects = allProjects.slice(0, 3);
             {col.title}
           </p>
           <ul class="text-sm space-y-2 list-none p-0">
-            {(col.links ?? []).map((link) => (
+            {col.links.map((link) => (
               <li>
-                <a href={link.href ?? '#'} class="text-foreground/85 hover:text-link transition-colors">
+                <a href={link.href} class="text-foreground/85 hover:text-link transition-colors">
                   {link.label}
                 </a>
               </li>
@@ -403,9 +389,17 @@ const latestProjects = allProjects.slice(0, 3);
     <div class="mx-auto max-w-content px-m py-m flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-xs text-xs text-foreground/80 text-center">
       <p>© {currentYear} {brandName}</p>
       <div class="flex items-center gap-m">
-        <a href="/privacy" class="underline underline-offset-2 hover:text-link transition-colors">
-          Privacy policy
-        </a>
+        {LEGAL_LINKS.length > 0 ? (
+          LEGAL_LINKS.map((l) => (
+            <a href={l.href} class="underline underline-offset-2 hover:text-link transition-colors">
+              {l.label}
+            </a>
+          ))
+        ) : (
+          <a href="/privacy" class="underline underline-offset-2 hover:text-link transition-colors">
+            Privacy policy
+          </a>
+        )}
         {siteCredit && (
           siteCreditUrl ? (
             <a

@@ -23,8 +23,9 @@ import MobileNav from './MobileNav';
 import { ChevronDown } from 'lucide-react';
 import logoLightAsset from '@/assets/logo-light.svg';
 import logoDarkAsset from '@/assets/logo-dark.svg';
-import { getSectionVisibility, type SectionVisibility } from '@/lib/sectionVisibility';
+import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
+import { urlFor } from '@/lib/sanity';
 
 // SVG logos are passed through Astro's image pipeline for cache-busted URLs.
 // SVGs are resolution-independent so no 1x/2x variants are needed — one URL
@@ -39,61 +40,70 @@ const logoLightWebpMobile = logoLightImg;
 const logoDarkWebpMobile = logoDarkImg;
 
 interface Props {
-  siteSettings?: {
-    siteName?: string;
-    title?: string;
-    tagline?: string;
-    email?: string;
-    phone?: string;
-    socialInstagram?: string;
-    socialFacebook?: string;
-    availabilityStatus?: string;
-    /** Optional editor-managed top-menu items from Sanity siteSettings.navItems.
-     *  When non-empty, replaces the built-in FALLBACK_NAV_ITEMS below. */
-    navItems?: Array<{
-      _type?: string;
-      label?: string;
-      href?: string;
-      links?: Array<{ label?: string; href?: string }>;
-    }> | null;
-    sectionVisibility?: {
-      showPortfolio?: boolean | null;
-      showJournal?: boolean | null;
-      showShop?: boolean | null;
-      showEDesign?: boolean | null;
-      showGiftCertificates?: boolean | null;
-      showPress?: boolean | null;
-      showResources?: boolean | null;
-      showGuides?: boolean | null;
-      showStyleQuiz?: boolean | null;
-      showBudgetCalculator?: boolean | null;
-    } | null;
-  } | null;
+  siteSettings?:
+    | (RawChromeSettings & {
+        siteName?: string;
+        title?: string;
+        tagline?: string;
+        email?: string;
+        phone?: string;
+        socialInstagram?: string;
+        socialFacebook?: string;
+        availabilityStatus?: string;
+      })
+    | null;
 }
 
 const { siteSettings } = Astro.props as Props;
 
-// Normalize section visibility from siteSettings. Unset => visible.
-const visible: SectionVisibility = getSectionVisibility(siteSettings?.sectionVisibility);
 const brandName = siteSettings?.siteName ?? siteSettings?.title ?? site.name;
 const availability = siteSettings?.availabilityStatus ?? '';
+
+// The chrome (menu, header button, logo, the show/hide switches) resolves
+// through one shared helper (see src/lib/siteSettings.ts) so the header, the
+// drawer, and the footer can never disagree about what the menu is.
+const chrome = resolveSiteSettings(siteSettings);
+const headerCta = chrome.headerCta;
+const logo = chrome.logo;
+// The logo box is 48px tall (h-12), so 280w covers a wide wordmark at 1x and
+// 560w covers it at 2x. Built with urlFor() rather than <SanityImage> because
+// the header renders on EVERY page: importing that component would pull its
+// module into the always-loaded chunk and rename the site-wide CSS bundle.
+const logoSrc = logo ? urlFor(logo).width(280).quality(80).auto('format').url() : undefined;
+const logoSrcset = logo
+  ? [280, 560]
+      .map((w) => `${urlFor(logo).width(w).quality(80).auto('format').url()} ${w}w`)
+      .join(', ')
+  : undefined;
+
+// Utility toggles (Site Settings -> Navigation). Both read "unset means yes",
+// so an untouched site is unchanged. Turning one off is expressed by handing
+// the markup an empty value rather than a new flag, which keeps the existing
+// `{email && ...}` guards as the single place that decides.
+const email = chrome.showEmail ? (siteSettings?.email ?? '') : '';
+const phone = siteSettings?.phone ?? '';
+const ig = chrome.showSocials ? (siteSettings?.socialInstagram ?? '') : '';
+const fb = chrome.showSocials ? (siteSettings?.socialFacebook ?? '') : '';
 
 // Subset of siteSettings the mobile menu needs. Pass as a plain object so the
 // React island doesn't try to serialize the whole Sanity document graph.
 const mobileNavSettings = siteSettings
   ? {
       tagline: siteSettings.tagline,
-      email: siteSettings.email,
+      email: chrome.showEmail ? siteSettings.email : undefined,
       phone: siteSettings.phone,
-      socialInstagram: siteSettings.socialInstagram,
-      socialFacebook: siteSettings.socialFacebook,
+      socialInstagram: chrome.showSocials ? siteSettings.socialInstagram : undefined,
+      socialFacebook: chrome.showSocials ? siteSettings.socialFacebook : undefined,
     }
   : null;
 
-const email = siteSettings?.email ?? '';
-const phone = siteSettings?.phone ?? '';
-const ig = siteSettings?.socialInstagram ?? '';
-const fb = siteSettings?.socialFacebook ?? '';
+// The drawer's CTA prop is only passed when it DIFFERS from the drawer's own
+// built-in button. An island's props are serialized into the page, so passing
+// the default every time would rewrite the markup of every page for no change.
+const mobileCtaProps =
+  headerCta.show && headerCta.label === 'Book a consultation' && headerCta.href === '/contact'
+    ? {}
+    : { cta: headerCta };
 
 // Core nav structure. Flat items render as plain anchor links; dropdown
 // items render as native <details>/<summary> disclosure groups on desktop
@@ -117,52 +127,11 @@ const fb = siteSettings?.socialFacebook ?? '';
 // /quiz, /calculator, /guides, /press, /resources) are opt-in via modules/
 // and are NOT linked from the core nav.
 
-// FALLBACK_NAV_ITEMS: used when siteSettings.navItems is empty or absent.
-// This is the default built-in menu for a fresh clone.
-const FALLBACK_NAV_ITEMS = [
-  { kind: 'flat' as const, label: 'About',    href: '/about' },
-  { kind: 'flat' as const, label: 'Services', href: '/services' },
-  { kind: 'flat' as const, label: 'FAQ',      href: '/faq' },
-  ...(visible.journal ? [{ kind: 'flat' as const, label: 'Journal', href: '/journal' }] : []),
-];
-
-// When the editor has defined navItems in Sanity siteSettings, prefer them
-// over the built-in defaults. Empty array = "use built-in defaults." This is
-// additive: a fresh clone with no navItems configured is byte-identical to the
-// old behavior.
-//
-// Sanity navItems can be flat links (_type: 'navLink') or dropdown groups
-// (_type: 'navGroup'). We normalise both into the same { kind, label, href?,
-// items? } shape that the template markup below already handles.
-type SanityNavItem = {
-  _type?: string;
-  label?: string;
-  href?: string;
-  links?: Array<{ label?: string; href?: string }>;
-};
-
-function normaliseSanityNav(items: SanityNavItem[]): typeof FALLBACK_NAV_ITEMS {
-  return items
-    .filter((item) => item.label)
-    .map((item) => {
-      if (item._type === 'navGroup' && Array.isArray(item.links) && item.links.length > 0) {
-        return {
-          kind: 'dropdown' as const,
-          label: item.label ?? '',
-          items: item.links
-            .filter((l) => l.label && l.href)
-            .map((l) => ({ label: l.label ?? '', href: l.href ?? '#' })),
-        };
-      }
-      return { kind: 'flat' as const, label: item.label ?? '', href: item.href ?? '#' };
-    });
-}
-
-const rawSanityNav = siteSettings?.navItems;
-const NAV_ITEMS: typeof FALLBACK_NAV_ITEMS =
-  Array.isArray(rawSanityNav) && rawSanityNav.length > 0
-    ? normaliseSanityNav(rawSanityNav as SanityNavItem[])
-    : FALLBACK_NAV_ITEMS;
+// The menu comes from Sanity (Site Settings -> Navigation). Both the mapping
+// and the built-in safety-net menu live in src/lib/siteSettings.ts, so the
+// header, the drawer, and the footer read one source. Empty in Sanity = the
+// built-in menu, so a fresh clone is byte-identical to the old behavior.
+const NAV_ITEMS = chrome.headerNav;
 
 // Flatten NAV_ITEMS into the shape MobileNav expects (a list of NavLink[]
 // with optional sub-items for the groups). MobileNav already handles both
@@ -332,19 +301,34 @@ function isGroupActive(items: { href: string }[]) {
         so the browser reserves the right layout box before the file lands
         — no CLS.
       */}
-      <img
-        alt={brandName}
-        width={280}
-        height={60}
-        class="h-12 w-auto"
-        loading="eager"
-        decoding="async"
-        data-theme-logo
-        data-logo-light-src={logoLightImg.src}
-        data-logo-light-srcset={logoLightSrcset}
-        data-logo-dark-src={logoDarkImg.src}
-        data-logo-dark-srcset={logoDarkSrcset}
-      />
+      {logo ? (
+        /* An uploaded Site Settings logo replaces the pair above. It carries no
+           data-theme-logo attribute, so the inline swap script below skips it
+           and the one image serves both themes. */
+        <img
+          src={logoSrc}
+          srcset={logoSrcset}
+          sizes="280px"
+          alt={logo.alt || brandName}
+          class="h-12 w-auto"
+          loading="eager"
+          decoding="async"
+        />
+      ) : (
+        <img
+          alt={brandName}
+          width={280}
+          height={60}
+          class="h-12 w-auto"
+          loading="eager"
+          decoding="async"
+          data-theme-logo
+          data-logo-light-src={logoLightImg.src}
+          data-logo-light-srcset={logoLightSrcset}
+          data-logo-dark-src={logoDarkImg.src}
+          data-logo-dark-srcset={logoDarkSrcset}
+        />
+      )}
     </a>
     {/* Synchronous inline setup — runs immediately after the img element
         is parsed, so the src is set before the browser begins any image
@@ -436,17 +420,19 @@ function isGroupActive(items: { href: string }[]) {
         )}
       </nav>
       <span class="h-6 w-px bg-border-soft" aria-hidden="true"></span>
-      <a
-        href="/contact"
-        class:list={[
-          'press-tactile inline-flex items-center px-m py-2 rounded-md text-xs uppercase tracking-eyebrow font-semibold',
-          isActive('/contact')
-            ? 'bg-accent-dark text-white'
-            : 'bg-primary-dark text-white hover:bg-accent-dark',
-        ]}
-      >
-        Book a consultation
-      </a>
+      {headerCta.show && (
+        <a
+          href={headerCta.href}
+          class:list={[
+            'press-tactile inline-flex items-center px-m py-2 rounded-md text-xs uppercase tracking-eyebrow font-semibold',
+            isActive(headerCta.href)
+              ? 'bg-accent-dark text-white'
+              : 'bg-primary-dark text-white hover:bg-accent-dark',
+          ]}
+        >
+          {headerCta.label}
+        </a>
+      )}
     </div>
 
     <MobileNav
@@ -455,6 +441,7 @@ function isGroupActive(items: { href: string }[]) {
       siteSettings={mobileNavSettings}
       logoLightUrl={logoLightWebpMobile.src}
       logoDarkUrl={logoDarkWebpMobile.src}
+      {...mobileCtaProps}
     />
   </div>
 </header>

@@ -51,25 +51,26 @@ none of its copies are marked.
 or present but not wired into that repo's gate. `no` = absent. `yes` = a session
 is installing it as of the date on the card.
 
-| # | Card | wcp | presacademy | starter | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | with-workerd build wrapper | yes | yes | yes | yes | yes | yes | yes | yes |
-| 2 | free-dist prebuild unlock | yes | yes | yes | yes | yes | yes | yes | yes |
-| 3 | page-parity harness | yes | yes | yes | yes | yes | yes | yes | yes |
-| 4 | sanity-lib seed/patch plumbing | partial | yes | yes | yes | yes | yes | yes | n/a |
-| 5 | stale-types CI guard | yes | yes | yes | yes | yes | yes | yes | n/a |
-| 6 | Nightly Sanity backup workflow | yes | yes | no | yes | yes | yes | template | n/a |
-| 7 | Uptime workflow | yes | yes | no | yes | yes | yes | template | yes |
-| 8 | Playwright + axe + reflow suite | yes | yes | no | yes | no | no | no | no |
-| 9 | contrast.ts + theme-token gate | partial | yes | yes | yes | yes | yes | yes | yes |
-| 10 | Embedded-studio live-preview stack | yes | yes | yes | staged | staged | no | yes | n/a |
-| 11 | Preview click interceptor | yes | yes | yes | staged | staged | no | yes | n/a |
-| 12 | Parity-gated page-builder conversion | partial | yes | partial | no | no | no | no | no |
-| 13 | react/react-dom exact pin | no | yes | yes | staged | staged | no | yes | no |
-| 14 | wrangler legacy_env pin | no | yes | yes | staged | staged | no | yes | no |
-| 15 | PENDING.md / TESTING.md docs registry | yes | yes | yes | yes | yes | yes | yes | yes |
-| 16 | Quarterly slop sweep | no | no | no | no | no | no | no | no |
-| 17 | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes | yes | staged | staged | no | yes | n/a |
+| #   | Card                                                              | wcp     | presacademy | starter | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio |
+| --- | ----------------------------------------------------------------- | ------- | ----------- | ------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- |
+| 1   | with-workerd build wrapper                                        | yes     | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
+| 2   | free-dist prebuild unlock                                         | yes     | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
+| 3   | page-parity harness                                               | yes     | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
+| 4   | sanity-lib seed/patch plumbing                                    | partial | yes         | yes     | yes              | yes           | yes            | yes                | n/a                 |
+| 5   | stale-types CI guard                                              | yes     | yes         | yes     | yes              | yes           | yes            | yes                | n/a                 |
+| 6   | Nightly Sanity backup workflow                                    | yes     | yes         | no      | yes              | yes           | yes            | template           | n/a                 |
+| 7   | Uptime workflow                                                   | yes     | yes         | no      | yes              | yes           | yes            | template           | yes                 |
+| 8   | Playwright + axe + reflow suite                                   | yes     | yes         | no      | yes              | no            | no             | no                 | no                  |
+| 9   | contrast.ts + theme-token gate                                    | partial | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
+| 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes     | staged           | staged        | no             | yes                | n/a                 |
+| 11  | Preview click interceptor                                         | yes     | yes         | yes     | staged           | staged        | no             | yes                | n/a                 |
+| 12  | Parity-gated page-builder conversion                              | partial | yes         | partial | no               | no            | no             | no                 | no                  |
+| 13  | react/react-dom exact pin                                         | no      | yes         | yes     | staged           | staged        | no             | yes                | no                  |
+| 14  | wrangler legacy_env pin                                           | no      | yes         | yes     | staged           | staged        | no             | yes                | no                  |
+| 15  | PENDING.md / TESTING.md docs registry                             | yes     | yes         | yes     | yes              | yes           | yes            | yes                | yes                 |
+| 16  | Quarterly slop sweep                                              | no      | no          | no      | no               | no            | no             | no                 | no                  |
+| 17  | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes         | yes     | staged           | staged        | no             | yes                | n/a                 |
+| 18  | Chrome options (editable header/footer content)                   | yes     | yes         | yes     | staged           | staged        | no             | yes                | n/a                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -394,7 +395,7 @@ Related: `@sanity/ui` v3 has no subpath exports beyond `./theme`, so
 
 **Therefore: Studio files never port blindly across this family.** A file copied across a
 Sanity major boundary compiles and then dies at browser runtime, which is also where
-schema errors surface (they pass the build). Port the *pattern* from these cards, then
+schema errors surface (they pass the build). Port the _pattern_ from these cards, then
 write the file against the target repo's actual major.
 
 ### Starter status: INSTALLED 2026-08-28
@@ -578,9 +579,9 @@ Keeping both, and knowing which is which, is the whole trick.
 shared with the rest of the family, backed by `scripts/sync-check.mjs`.
 `docs/agent/changelog.md` stays the prose ledger. `docs/PENDING.md` was added 2026-08-28
 for the third thing neither of those covers: this repo's own open loops and
-waiting-on-a-human items. Something that needs to be *checked* belongs here; something
-that needs to be *understood in sequence* belongs in the changelog; something that is
-*still open* belongs in PENDING.
+waiting-on-a-human items. Something that needs to be _checked_ belongs here; something
+that needs to be _understood in sequence_ belongs in the changelog; something that is
+_still open_ belongs in PENDING.
 
 There is no TESTING.md yet: the suite is one `npm test` over `src/lib/*.test.ts` plus the
 parity harness, and a map of two things is not worth a file. Write one the day a second
@@ -597,6 +598,7 @@ everything (the failure mode that bit presacademy's README/CLAUDE.md drift in
 June 2026).
 
 **The sweep, roughly one session per site:**
+
 1. Run the /simplify and code-review passes over recent hot spots.
 2. Dead-weight grep: unused deps (`npm ls` orphans, imports nothing
    references), dead components, stale scripts without RAN/DO-NOT-RUN headers.
@@ -656,6 +658,7 @@ born with it) -> church-starter inherits by sync -> reid (already Sanity 6,
 shortest hop, most active) -> mas -> 2ndpreschicago (after its DNS cutover).
 Follow-up polish on the same card: the insert menu's grid view with
 per-section-type preview thumbnails, and "duplicate page" in the navigator.
+
 ### Card 10/17 lore corrections (mas upgrade, 2026-08-28)
 
 - **The one-styled-components invariant grep must be precise.**
@@ -680,6 +683,86 @@ per-section-type preview thumbnails, and "duplicate page" in the navigator.
   switch to `-c dist/server/wrangler.json` BEFORE the upgrade merges,
   or /studio and /preview 404. Land on a holding branch until the
   human flips it (mas: modern-stack branch).
+
+## Card 18: Chrome options (editable header/footer content)
+
+**What:** the header and footer stop being code. One shared `navLink` object
+type gives every menu the same vocabulary, and Site Settings grows the fields
+that let an editor change the top menu, the footer link columns, the small-print
+row at the very bottom, the one header button, the logo, and three "show this
+bit of contact detail" switches - without a deploy. This is Phase A of the
+Unlocked Studio: the chrome is the last thing on a page that still needed a
+developer.
+
+**The navLink vocabulary.** `src/sanity/schemaTypes/navLink.ts`, registered as a
+top-level type and used by EVERY menu (top menu, dropdown children, footer
+columns, legal row, the header button's destination):
+
+- `label` - what visitors see.
+- `linkType` - radio: "A page on this site" / "Another website".
+- `internalPage` - a reference to a page document. The address is worked out
+  from the DEREFERENCED document type + slug, so renaming a slug can never
+  leave a dead menu link.
+- `externalUrl` - a full web address.
+- `href` - the original hand-typed address (see the compat rule below).
+
+Every document type listed in `internalPage.to[]` must have an entry in
+`SINGLETON_LIVE_PATHS` in `src/lib/nav-href.ts` (or the slug-based `page` case),
+or the link resolves to nothing. That map mirrors `SINGLETON_PREVIEW_PATHS` in
+`src/sanity/resolve.ts` with the `/preview` prefix removed; keep them in sync
+when a route moves.
+
+**The legacy-href-wins compat rule.** Every repo already had menus stored as
+`{label, href}` objects, most of them typed `navLink`. Nothing is renamed and
+nothing is migrated. `href` is kept on the shared type and it WINS over both
+newer fields, so today's menus render byte-identically; it hides itself once a
+link uses the picker. Where an inline object had a different name (the footer's
+`footerLink`), that member stays in the array alongside the shared type, titled
+"Link (typed address)", so columns written before the picker stay editable in
+place. Precedence inside one link, decided in exactly one function
+(`navHref()`): typed `href`, then the picked page, then the pasted URL. A link
+that resolves to nothing is DROPPED, never rendered as a dead `<a>`.
+
+**The centralized-fallback rule.** No component may re-implement a menu
+fallback. `resolveSiteSettings()` in `src/lib/siteSettings.ts` is the one place
+that decides what each chrome field resolves to, and Header / MobileNav / Footer
+read `settings.headerNav`, `.footerColumns`, `.legalNav`, `.headerCta`, `.logo`,
+`.showEmail`, `.showSocials`, `.showFooterSocials` and render. Two shapes of
+fallback, and which one a menu gets is decided by its built-in version:
+
+- A menu whose built-in version is DATA (the top menu, the header button)
+  resolves to that built-in when Sanity is empty, so the caller renders one loop
+  with no branch.
+- A menu whose built-in version is BESPOKE MARKUP (the starter's
+  Studio/Work/Free-tools columns, each link carrying its own module-visibility
+  flag; a legal row whose two links carry different link styles) resolves to an
+  EMPTY array, and the component keeps its own markup for that case. Flattening
+  those into data would change the rendered bytes of an untouched site, and
+  parity is the gate.
+
+The three switches use `onUnlessOff()`: `undefined` means YES. Sanity's
+`initialValue` only fills NEW documents, so a live singleton has no value for a
+newly added boolean at all - if undefined meant "off", the header would silently
+lose its email and socials the moment the field shipped.
+
+**Two more halves that are easy to forget.** The GROQ projection has to
+dereference the picked page (`"slug": internalPage->slug.current`,
+`"docType": internalPage->_type`), and `SITE_SETTINGS_PROJECTION` must be
+EXPORTED so `PreviewLayout.astro` fetches the chrome through it too. A preview
+shell that fetches the raw document leaves every picked-page link null, which
+looks like "the picker is broken" and is not.
+
+**Parity gotcha found installing this (starter + church, 2026-08-28):**
+importing `SanityImage.astro` into `Header.astro` for the logo pulls that
+component into the always-loaded chunk and RENAMES the site-wide CSS bundle
+(`BaseLayout.HASH.css` -> `SanityImage.HASH.css`), which fails parity on every
+page without one byte of markup changing. Build the logo URL with `urlFor()` and
+emit a plain `<img>` with a two-density srcset instead. A header renders on
+every page; what it imports is a site-wide decision.
+
+**Applied to:** presacademy yes (canonical) / wcp yes (its own navigation-doc
+flavor) / starter yes / church-starter yes / reid staged / mas staged /
+2ndpres parked (after its DNS cutover).
 
 ## Sync sessions
 
@@ -710,36 +793,37 @@ the moment the marker lands). No presacademy files were modified in this session
 WCP has a parallel session porting the parity harness, the stale-types guard, and the
 backup and uptime workflows; those four cells read "yes" until it lands.
 
-  WCP session outcome notes (2026-08-27): backup/uptime/stale-types
-  guard/parity all landed. Adaptations recorded on their cards: Sanity
-  6.4 has no `schema extract --force` and multi-workspace repos need
-  `--workspace`; typegen config lives in sanity-typegen.json; the
-  parity harness is a PATTERN, not an identical-canonical file (WCP
-  added Instagram normalizer rules and an env-divergence gotcha: the
-  Playwright webServer builds with fake tracker ids, so compare only
-  against a plain build). The workflow-level working-directory default
-  breaks no-checkout gate jobs; scope defaults to the export job.
+WCP session outcome notes (2026-08-27): backup/uptime/stale-types
+guard/parity all landed. Adaptations recorded on their cards: Sanity
+6.4 has no `schema extract --force` and multi-workspace repos need
+`--workspace`; typegen config lives in sanity-typegen.json; the
+parity harness is a PATTERN, not an identical-canonical file (WCP
+added Instagram normalizer rules and an env-divergence gotcha: the
+Playwright webServer builds with fake tracker ids, so compare only
+against a plain build). The workflow-level working-directory default
+breaks no-checkout gate jobs; scope defaults to the export job.
 
-  Family-wide sweep completed 2026-08-27/28: every repo had its first
-  sync session (reid, mas-monograms, 2ndpreschicago, church-starter,
-  nixoncreativestudio, plus presacademy's marker session). Adaptation
-  notes earned along the way, now part of the cards' lore:
-  - reid's Playwright CI job must build with REAL Sanity ids (its
-    hidden-route stubs derive from live sectionVisibility data); the
-    suite passed 140/140 and gates for real.
-  - Multi-hop origins (nixoncreativestudio: apex 301 -> www 307 ->
-    slash) need curl -sSL in uptime; single-hop sites pin literal 200s
-    on trailing-slash paths.
-  - Templates gate backup on a SANITY_PROJECT_ID variable instead of a
-    hardcoded id, schedules commented for forks (church-starter).
-  - mas-monograms' new stale-types guard caught a REAL stale-types bug
-    on its first run (studioGuide video fields).
-  - Cutover watch: secondpreschicago.org AND reiddesignllc.com still
-    serve from Squarespace; their SITE_URL variables wait for DNS.
-  - loadEnv.mjs is now PORTABLE-marked here (this commit). The five
-    downstream Sanity repos carry the unmarked copy; each pulls the
-    marked version forward at its next session (church-starter's
-    PENDING documents why marking downstream-first is wrong).
+Family-wide sweep completed 2026-08-27/28: every repo had its first
+sync session (reid, mas-monograms, 2ndpreschicago, church-starter,
+nixoncreativestudio, plus presacademy's marker session). Adaptation
+notes earned along the way, now part of the cards' lore:
+
+- reid's Playwright CI job must build with REAL Sanity ids (its
+  hidden-route stubs derive from live sectionVisibility data); the
+  suite passed 140/140 and gates for real.
+- Multi-hop origins (nixoncreativestudio: apex 301 -> www 307 ->
+  slash) need curl -sSL in uptime; single-hop sites pin literal 200s
+  on trailing-slash paths.
+- Templates gate backup on a SANITY_PROJECT_ID variable instead of a
+  hardcoded id, schedules commented for forks (church-starter).
+- mas-monograms' new stale-types guard caught a REAL stale-types bug
+  on its first run (studioGuide video fields).
+- Cutover watch: secondpreschicago.org AND reiddesignllc.com still
+  serve from Squarespace; their SITE_URL variables wait for DNS.
+- loadEnv.mjs is now PORTABLE-marked here (this commit). The five
+  downstream Sanity repos carry the unmarked copy; each pulls the
+  marked version forward at its next session (church-starter's
+  PENDING documents why marking downstream-first is wrong).
 
 ### 2026-08-28: the starter takes the full modern stack (cards 1, 10, 11, 13, 14, 17)
 
@@ -824,3 +908,42 @@ starter, church-starter, reid + mas modern-stack (all
 header->siteSettings.title, footer->tagline). Headers/Footers accept
 an optional siteSettings prop with clean fallbacks in every repo, so
 a null fetch can never blank the chrome.
+
+### 2026-08-28: card 18 lands in both templates (chrome options)
+
+Card 18 ported from presacademy (canonical) into the starter and
+church-starter in one pass. Each got the shared `navLink` type
+(registered in schemaTypes/index.ts), `src/lib/nav-href.ts` carrying
+its OWN singleton -> live-path map, the dereferencing
+NAV_LINK_PROJECTION plus an exported SITE_SETTINGS_PROJECTION that
+PreviewLayout now fetches through, and the chrome fallbacks pulled out
+of Header/Footer into resolveSiteSettings. New Site Settings fields in
+both: headerCta {show,label,link}, legalNav, logo (image + alt),
+showEmail, showSocials, showFooterSocials; navItems and footerColumns
+were REUSED, with the inline navLink member swapped for the shared
+type and the legacy footerLink kept beside it.
+
+Three adaptation notes worth carrying to the next repo:
+
+- **The starter's resolver is chrome-only.** church-starter already had
+  a `resolveSiteSettings` covering identity/contact/social, so the
+  menus joined it. The starter had no such module, so the new one
+  resolves the chrome and nothing else; its Header/Footer still read
+  identity fields off the raw document. Folding those in is a separate,
+  parity-risky change.
+- **Two fallbacks stayed in the components on purpose**: the starter's
+  footer columns (per-link module-visibility flags) and both footers'
+  legal rows (links with different link styles). They resolve to an
+  empty array and the component keeps its built-in markup. See the
+  centralized-fallback rule on the card.
+- **The header's max menu length is per-repo.** presacademy and the
+  starter cap navItems at 6; church-starter's own built-in menu is
+  seven entries wide, so it caps at 7. Capping below a repo's own
+  default menu would be a validation error nobody could satisfy.
+
+Both repos verified green: `npx tsc --noEmit` clean (TS5101 baseUrl
+deprecation only), `npm run build` clean, `node scripts/page-parity.mjs
+compare` 10/10 (starter) and 20/20 (church), unit tests pass, and
+`sanity schema extract --enforce-required-fields` succeeds. The parity
+run is what caught the SanityImage-import CSS-bundle rename recorded on
+the card. Baselines were NOT regenerated in either repo.

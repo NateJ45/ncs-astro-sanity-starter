@@ -13,6 +13,7 @@ import { homePage } from './homePage';
 import { journalCategory } from './journalCategory';
 import { journalEntry } from './journalEntry';
 import { journalPage } from './journalPage';
+import { navLink } from './navLink';
 import { page } from './page';
 import { pageSectionSchemas } from './sections';
 import { richSectionSchemas } from './richSections';
@@ -32,6 +33,8 @@ import { testimonial } from './testimonial';
 export const schemaTypes = [
   // Object types (embedded) first so they're defined before docs that reference them
   ctaBlock,
+  // Shared menu link (header menu, footer columns, small print, header button)
+  navLink,
   // Page-builder section blocks (objects). Registered before the documents
   // whose pageBuilder arrays reference them.
   ...pageSectionSchemas,
