@@ -21,9 +21,24 @@
 //
 // Connection lifecycle: Sanity ends listen connections periodically and the
 // Worker can be recycled; either just closes our stream, and the browser's
-// EventSource reconnects on its own (`retry:` below). When the preview tab goes
-// away, Workers cancels the response stream, which aborts the upstream fetch so
-// no orphaned Sanity connection lingers.
+// EventSource reconnects on its own (`retry:` below).
+//
+// THREE ROADS OUT, and all three must abort the upstream fetch (2026-08-28).
+// Every preview iframe reload opens a fresh listen through here, so an upstream
+// that outlives its client is a Worker invocation pinned open for nobody; pile
+// enough up and the account starts refusing connections, which is a plausible
+// second contributor to the `Error 1102` an editor hit on /preview.
+//
+//   1. `cancel()` - Workers cancels the response stream when the client goes
+//      away. This was the only road that aborted; it is still the usual one.
+//   2. `request.signal` - the request is aborted. Wired explicitly rather than
+//      trusted to reach us as a cancel: it is the platform's own statement that
+//      the client is gone, and it fires even while we are parked in
+//      `reader.read()` waiting for a Sanity event that will never come.
+//   3. `send()` throwing - the client went away MID-WRITE, so `enqueue` throws
+//      instead of `cancel` firing. That case used to set `open = false` and
+//      leave the read loop below spinning on a live upstream connection forever.
+//      That was the leak. It now closes and aborts like the others.
 // =============================================================================
 export const prerender = false;
 
@@ -40,7 +55,7 @@ import {
 
 const LISTEN_QUERY = '*[_id in [$pageId, $draftId] || !(_type in ["page"])]';
 
-export const GET: APIRoute = async ({ cookies, url }) => {
+export const GET: APIRoute = async ({ cookies, url, request }) => {
   // Same draft-mode gate as the preview pages themselves: only a browser that
   // went through the Presentation Tool's URL-secret handshake has this cookie.
   // No draft content flows through here, but there is no reason to let
@@ -71,6 +86,17 @@ export const GET: APIRoute = async ({ cookies, url }) => {
   // Signal-only: we tell the overlay THAT something changed, never what.
   upstream.searchParams.set('includeResult', 'false');
   upstream.searchParams.set('includeMutations', 'false');
+  // DO NOT change this to "transaction" to make the preview feel faster.
+  // "query" means Sanity waits until the change is visible to a QUERY before
+  // signalling, which is precisely what the overlay does next: it refetches this
+  // page from the server. A "transaction" event fires earlier, and the refetch
+  // it triggered would return data that is still stale, re-rendering the page
+  // with the OLD words. Worse, the overlay's instant-text path
+  // (src/components/preview/overlay/useInstantText.ts) has usually already put
+  // the NEW words on the page by then, so the early refresh would visibly undo
+  // them. The earlier signal already reaches the frame by a different road: the
+  // Studio relays its own transaction-visibility listen over the comlink, and
+  // that is what instant text listens to. This one stays slow on purpose.
   upstream.searchParams.set('visibility', 'query');
   upstream.searchParams.set('tag', 'starter.preview-live');
 
@@ -81,14 +107,6 @@ export const GET: APIRoute = async ({ cookies, url }) => {
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let open = true;
-      const send = (text: string) => {
-        if (!open) return;
-        try {
-          controller.enqueue(encoder.encode(text));
-        } catch {
-          open = false; // client went away mid-write
-        }
-      };
       const close = () => {
         if (!open) return;
         open = false;
@@ -99,6 +117,26 @@ export const GET: APIRoute = async ({ cookies, url }) => {
           /* already closed or cancelled */
         }
       };
+      const send = (text: string) => {
+        if (!open) return;
+        try {
+          controller.enqueue(encoder.encode(text));
+        } catch {
+          // Client went away mid-write (road 3 above). Take the upstream with
+          // us: the read loop below is otherwise happy to hold a Sanity listen
+          // open for a browser that is no longer there.
+          close();
+          abort.abort();
+        }
+      };
+
+      // Road 2. The listener is removed by `close()`'s own path going quiet:
+      // this stream and this request live and die together, so there is nothing
+      // to unregister that outlives them.
+      request.signal.addEventListener('abort', () => {
+        close();
+        abort.abort();
+      });
 
       // Client-side reconnect delay when this stream ends; EventSource handles
       // the retry loop. Each reconnect opens a fresh non-CDN Sanity listen

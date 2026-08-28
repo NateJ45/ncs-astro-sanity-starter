@@ -33,16 +33,45 @@ interface Props {
 }
 const { title, draftMode, pageId } = Astro.props;
 
+// ---------------------------------------------------------------------------
+// THE SOFT-REFRESH RENDER IS A CHEAPER RENDER (2026-08-28)
+// ---------------------------------------------------------------------------
+// The overlay's reconcile refetch sends `x-preview-soft-refresh: 1` and then
+// consumes exactly one thing from the response: `#main`. Everything this shell
+// draws AROUND <main> - the header and the footer - is parsed and thrown away.
+// That cost a Sanity round trip, on a route that measures ~0.9s per render
+// against a public page's ~0.1s, and a burst of edits runs this repeatedly.
+//
+// So on a soft refresh that fetch is skipped. This is safe in the narrow,
+// checkable sense that matters: NOTHING inside `#main` reads the value.
+// `chromeSettings` feeds only Header and Footer, and both are siblings of
+// <main> in the body below. The page body's own data comes from the route's
+// separate draft fetches (src/pages/preview/[...slug].astro), which are
+// untouched. The `#main` HTML is therefore byte-for-byte what a full render
+// produces, which is the only thing the swap can see.
+//
+// The chrome still renders, from its null fallbacks, so this response is a
+// valid page rather than a fragment. Nobody looks at it: the header is only ever
+// sent by the refetch in VisualEditingOverlay.tsx, never by a navigation.
+// Preview-only either way; the static build never reaches this route.
+const softRefresh = Astro.request.headers.get('x-preview-soft-refresh') === '1';
+
 // Draft-aware settings for the chrome, so header/footer edits live-update in
 // the preview. Null-safe: Header and Footer render their fallbacks cleanly.
 // The SAME projection the live build uses (src/lib/queries.ts), so menu links
 // that point at a picked page arrive dereferenced here too — fetching the raw
 // document would leave every one of them null in the preview.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw doc, the same loose shape BaseLayout passes
-const chromeSettings = await previewFetch<any>(
-  draftMode,
-  `*[_type == "siteSettings"][0]${SITE_SETTINGS_PROJECTION}`,
-).catch(() => null);
+//
+// Loose type: the raw doc, the same shape BaseLayout passes. (The
+// no-explicit-any disable this used to carry is gone — the rule stopped
+// reporting here once the fetch moved into the branch below, and an unused
+// directive is itself a lint warning.)
+const chromeSettings = softRefresh
+  ? null
+  : await previewFetch<any>(
+      draftMode,
+      `*[_type == "siteSettings"][0]${SITE_SETTINGS_PROJECTION}`,
+    ).catch(() => null);
 
 // Header opens the doc at its identity, footer at the tagline, so each click
 // lands the editor near what that piece of chrome shows.

@@ -45,6 +45,13 @@ Added 2026-08-28 (PORTS.md cards 10, 11 and 17). Editors see their **unpublished
 - **Never compare a stega-encoded string in logic.** Stega hides about 1KB of invisible markers inside every string it touches, so `align === 'left'` is `false` on an encoded value and the component silently picks the wrong branch, in preview only. Every enum that drives rendering is excluded via `NON_STEGA_FIELDS` in `cms-preview.ts`. **Add any new logic-driving dropdown field to that list the day you add the field.**
 - `src/pages/preview/live.ts` is an **SSE proxy**: it holds ONE long-lived connection to Sanity's listen API server-side (the token never reaches the browser) and forwards a tiny "change" signal. `VisualEditingOverlay` soft-refetches the page and swaps `#main`. It is event-driven on purpose. **Never replace it with an interval poll** (that is what burned the WCP Sanity quota).
 - The preview cookie carries an **unforgeable fingerprint** of the server-side token (`src/lib/preview-auth.ts`), not the package's default `'true'`.
+- **The preview is fast on purpose, and five rules keep it that way** (PORTS.md cards 29-29d, ported 2026-08-28 with deployed measurements). Read those cards before touching the refresh loop.
+  - **Instant text.** Plain string fields are swapped into the live DOM the moment an edit reaches the frame, ~100-140ms after the keystroke, long before the server can re-render. `src/lib/preview-text-diff.ts` (string leaves only, never portable text, items matched by `_key`), `src/lib/preview-stega.ts` (decode the invisible payload so a field is matched to its node by IDENTITY, not by searching for words) and `src/lib/preview-text-nodes.ts` (write only where the node reads EXACTLY the old value, and re-attach the payload). A missed instant update is invisible; a wrong one is a lie about what the page says.
+  - **`useEditState(id, type, 'default')`, never `'low'`** in `src/sanity/components/LiveDraftBridge.tsx`. Measured on the deployed Studio: under `'low'` the local store coalesced isolated keystrokes into the autosave commit and one keystroke took 413ms and the next 1429ms. The 60ms trailing throttle, not the store's scheduler, is what keeps it cheap.
+  - **One refresh at a time, and never a stale one** (`src/lib/preview-refresh.ts`). Single-flight, stale-response discard, and a 1200ms floor between refresh STARTS. A `/preview` render is ~0.9s of Worker CPU; an 80ms debounce with no in-flight guard produced six concurrent renders and a Cloudflare `Error 1102`.
+  - **Morph `#main`, never `replaceWith` it** (`src/lib/preview-morph.ts`). The wholesale swap re-decoded 14 images and blocked the main thread for ~1000ms, twice per keystroke; the morph does it in 12ms and rebuilds 0 images. A bailed morph returns false and the caller RE-PARSES and falls back, so it can be slow but never half-applied.
+  - **Staleness counts every channel.** Every document instant text applies bumps the scheduler's sequence (`noteInstantChange`), because the SSE stream runs a second behind the local channel and a render that started before an edit would otherwise be accepted carrying half-typed words.
+- **Two preview rules that no test can enforce.** (1) `/preview/**` responses MUST send `Cache-Control: no-store`; without it browsers heuristically cache them and the Studio iframe serves the PREVIOUS deploy until the cache ages out. (2) The `/preview/live` listen MUST stay `visibility: 'query'`. `'transaction'` looks faster and is worse: it fires before the query index has caught up, so the refetch it triggers returns stale data and the morph writes old words over the new ones instant text already placed.
 - Preview pages render chrome-less (a slim bar says so). The real Header and Footer link to the live site and would bounce the editor's iframe out of the preview.
 - **Two page shapes preview differently.** The four builder pages (home, about, services, process) and every custom `page` doc are their `pageBuilder` array end to end, so they preview in full fidelity through the same `SectionRenderer` the live page uses. The bespoke pages (faq, contact, journal, privacy, 404) have code-drawn middles, so they preview as their **editable surface**: hero fields, any page sections, the closing CTA, with a note on the page saying so. Converting one of those to the builder upgrades its preview for free (PORTS.md card 12) and is a separate job.
 - **In-canvas section controls.** Every section rendered in the preview carries a `data-sanity` attribute built by `sectionEditAttr` in `src/lib/preview-edit-attr.ts`, so the overlay can outline a whole section and offer insert-before/after (through the grouped, searchable insert menu), duplicate, remove, and drag-to-reorder right on the page. Stega alone cannot do this: it marks TEXT, and a section band has no text of its own. Two rules. (1) The attribute is **preview-only**: `SectionRenderer` renders the wrapper only when the preview route passes `editDoc`, so every live render is byte-identical, and `npm run parity compare` is the gate. (2) The wrapper must be a **real block box**, never `display: contents`, because the overlay outlines the element's rect and a `contents` element has none.
@@ -72,7 +79,7 @@ Added 2026-08-28 (PORTS.md cards 10, 11 and 17). Editors see their **unpublished
    - **No `assets.not_found_handling` in `wrangler.jsonc`.** With `404-page` set, Cloudflare answers navigation requests that miss the asset store from the static 404 page **without invoking the Worker**, which silently 404s every SSR route for real browsers while curl (which sends no `Sec-Fetch-*` headers) sees them working.
    - **The Windows build needs wrangler's workerd, and `npm run build` handles it.** The vite plugin's pinned workerd aborts at prerender on Windows (`std::terminate`), so `scripts/with-workerd.mjs` points `MINIFLARE_WORKERD_PATH` at wrangler's newer binary on win32. It is a no-op elsewhere.
    - **Curling a page is not verifying it.** `/studio` returns 200 with real HTML while being completely broken at React mount. Anything that mounts a client framework has to be opened in a real browser with the console read.
-8b. **Adding a logic-driving dropdown field to a schema means adding its name to `NON_STEGA_FIELDS`** in `src/lib/cms-preview.ts`, in the same commit. Miss it and the block renders the wrong branch **in the preview only**, which is the hardest kind of bug to notice.
+     8b. **Adding a logic-driving dropdown field to a schema means adding its name to `NON_STEGA_FIELDS`** in `src/lib/cms-preview.ts`, in the same commit. Miss it and the block renders the wrong branch **in the preview only**, which is the hardest kind of bug to notice.
 9. **`pageBuilder` cadence is managed by `SectionRenderer`, not by the blocks themselves.** Blocks carry no surface/color field. The alternating-surface logic lives in `src/lib/sectionCadence.ts`. Do not add color fields to block schemas.
 10. **The reserved-slug guard lives inside `getStaticPaths` in `[slug].astro`,** not at module scope. This is an Astro isolated-scope requirement; shared list is in `src/lib/reservedSlugs.ts`. If you move the guard outside `getStaticPaths`, it silently stops working.
 11. **`apply-brand` does not install font packages.** Run `npm install @fontsource/...` for the chosen fonts before running `npm run apply-brand`. The script rewrites imports and tokens but cannot install packages itself.
@@ -125,26 +132,26 @@ Standalone scripts:
 
 Core routes that ship with the starter (always on, not toggleable):
 
-| Path | Source | Notes |
-|---|---|---|
-| `/` | `src/pages/index.astro` | Home -- section-driven via `pageBuilder` + `SectionRenderer` |
-| `/about` | `src/pages/about.astro` | About -- section-driven via `pageBuilder` + `SectionRenderer` |
-| `/services` | `src/pages/services.astro` | Services -- section-driven via `pageBuilder` + `SectionRenderer` |
-| `/process` | `src/pages/process.astro` | Process -- section-driven via `pageBuilder` + `SectionRenderer` (graduated from module into core) |
-| `/[slug]` | `src/pages/[slug].astro` | Custom pages created in the Studio; reserved slugs are filtered inside `getStaticPaths` (see `src/lib/reservedSlugs.ts`) |
-| `/faq` | `src/pages/faq.astro` | FAQ page + faqItem collection grouped by category |
-| `/contact` | `src/pages/contact.astro` | Contact page + Web3Forms form + Calendly embed |
-| `/journal` | `src/pages/journal/index.astro` | Post grid with category chips |
-| `/journal/[slug]` | `src/pages/journal/[slug].astro` | Post detail: reading progress + header + cover + body + related |
-| `/privacy` | `src/pages/privacy.astro` | Privacy policy from singleton, with static fallback when doc is absent |
-| `/journal/rss.xml` | `src/pages/journal/rss.xml.ts` | Journal RSS feed |
-| `/studio` | `@sanity/astro` (mounted) | The embedded Sanity Studio |
-| `/preview/**` | `src/pages/preview/[...slug].astro` | SSR draft preview for the Studio's Presentation tool. noindex, sitemap-excluded |
-| `/preview/live` | `src/pages/preview/live.ts` | SSE proxy for preview auto-refresh (403 without the Studio cookie) |
-| `/api/draft-mode/*` | `src/pages/api/draft-mode/` | Turns draft mode on/off for the preview |
-| `/robots.txt` | `src/pages/robots.txt.ts` | Generated; reads production URL from `site.ts` |
-| `/sitemap-index.xml` | `@astrojs/sitemap` (auto) | Production sitemap |
-| `/404` | `src/pages/404.astro` | Custom 404 |
+| Path                 | Source                              | Notes                                                                                                                    |
+| -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `/`                  | `src/pages/index.astro`             | Home -- section-driven via `pageBuilder` + `SectionRenderer`                                                             |
+| `/about`             | `src/pages/about.astro`             | About -- section-driven via `pageBuilder` + `SectionRenderer`                                                            |
+| `/services`          | `src/pages/services.astro`          | Services -- section-driven via `pageBuilder` + `SectionRenderer`                                                         |
+| `/process`           | `src/pages/process.astro`           | Process -- section-driven via `pageBuilder` + `SectionRenderer` (graduated from module into core)                        |
+| `/[slug]`            | `src/pages/[slug].astro`            | Custom pages created in the Studio; reserved slugs are filtered inside `getStaticPaths` (see `src/lib/reservedSlugs.ts`) |
+| `/faq`               | `src/pages/faq.astro`               | FAQ page + faqItem collection grouped by category                                                                        |
+| `/contact`           | `src/pages/contact.astro`           | Contact page + Web3Forms form + Calendly embed                                                                           |
+| `/journal`           | `src/pages/journal/index.astro`     | Post grid with category chips                                                                                            |
+| `/journal/[slug]`    | `src/pages/journal/[slug].astro`    | Post detail: reading progress + header + cover + body + related                                                          |
+| `/privacy`           | `src/pages/privacy.astro`           | Privacy policy from singleton, with static fallback when doc is absent                                                   |
+| `/journal/rss.xml`   | `src/pages/journal/rss.xml.ts`      | Journal RSS feed                                                                                                         |
+| `/studio`            | `@sanity/astro` (mounted)           | The embedded Sanity Studio                                                                                               |
+| `/preview/**`        | `src/pages/preview/[...slug].astro` | SSR draft preview for the Studio's Presentation tool. noindex, sitemap-excluded                                          |
+| `/preview/live`      | `src/pages/preview/live.ts`         | SSE proxy for preview auto-refresh (403 without the Studio cookie)                                                       |
+| `/api/draft-mode/*`  | `src/pages/api/draft-mode/`         | Turns draft mode on/off for the preview                                                                                  |
+| `/robots.txt`        | `src/pages/robots.txt.ts`           | Generated; reads production URL from `site.ts`                                                                           |
+| `/sitemap-index.xml` | `@astrojs/sitemap` (auto)           | Production sitemap                                                                                                       |
+| `/404`               | `src/pages/404.astro`               | Custom 404                                                                                                               |
 
 The section-driven pages (home/about/services/process) render whichever `pageBuilder` array Sanity provides. If the array is absent (fresh clone, no Sanity project), the route falls back to code-defined defaults in `src/data/defaultSections.ts`, so the site is never blank.
 
@@ -180,7 +187,7 @@ These are the files where a project maintainer can make changes without risk of 
 - `src/styles/globals.css` -- the full file beyond the design seam tokens: shadcn `:root` / `.dark` overrides, **polish-layer utilities** (`.card-lift`, `.press-tactile`, `.nav-underline`, `.site-header`, `.reading-progress`, `.surface-warm`, `[data-reveal]`), base resets, paper-grain `body::before`, print stylesheet
 - `src/sanity/schemaTypes/*.ts` -- Sanity schemas. Changing fields can break existing content. See gotcha #1 above. Key schemas: `sections.ts` (11 general block types + `SECTION_TYPES` + `SECTION_INSERT_MENU`/`sectionArrayOptions` + `additionalSectionsField`), `richSections.ts` (11 rich section types + per-page curated lists), `businessInfo.ts` (service areas, travel, availability, geo, `businessModel`, `additionalLocations` -- split from siteSettings; merged back by `getSiteSettings()`), `siteSettings.ts` (`businessType`, `socialLinks` array), `faqCategory.ts`, `faqItem.ts` (`categoryRef` field), `page.ts` (custom page document type).
 - `sanity.config.ts` and `sanity.cli.ts` (repo root), `src/sanity/structure.ts`, `src/sanity/resolve.ts`, `src/sanity/urls.ts`, `src/sanity/components/` -- the Studio's workspace config, desk structure, Presentation location map, URL helpers and custom panes.
-- The preview stack: `src/lib/cms-preview.ts`, `src/lib/preview-auth.ts`, `src/lib/preview-edit-attr.ts`, `src/layouts/PreviewLayout.astro`, `src/components/preview/VisualEditingOverlay.tsx`, `src/pages/preview/`, `src/pages/api/draft-mode/`. Read the [Live draft preview](#live-draft-preview-preview) section before touching any of them.
+- The preview stack: `src/lib/cms-preview.ts`, `src/lib/preview-auth.ts`, `src/lib/preview-edit-attr.ts`, the seven `src/lib/preview-{stega,text-diff,text-nodes,live-draft,refresh,morph,navigation}.ts` (PORTABLE - the starter is the library of record for those, so edit them here and let `sync-check` propagate), `src/layouts/PreviewLayout.astro`, `src/components/preview/`, `src/sanity/components/LiveDraftBridge.tsx`, `src/pages/preview/`, `src/pages/api/draft-mode/`. Read the [Live draft preview](#live-draft-preview-preview) section before touching any of them.
 - `src/lib/sanity.ts` -- Sanity client, `sanityFetch` wrapper, `urlFor`, `parseSanityAssetDimensions`. The `isSanityUnconfigured` guard and graceful-fallback behavior are load-bearing for fresh-clone builds.
 - `src/lib/queries.ts`, `src/lib/sanity.types.ts` -- GROQ queries and generated types. Includes `sectionsProjection()`, `getPage`, `getAllPageSlugs`, `getNavPages`.
 - `src/lib/sectionCadence.ts` -- logic that maps section index to surface variant (the alternating-bg cadence). `SectionRenderer` calls this; blocks have no color field. Unit-tested in `src/lib/sectionCadence.test.ts`.
@@ -328,33 +335,33 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 
 `docs/bootstrap/` and `docs/modules/` are forthcoming (authored in a later phase). `docs/bootstrap/NEW-PROJECT.md` will be the setup entry point for adapting this starter to a new project.
 
-| Area | Doc |
-|---|---|
-| **Open loops registry (read early each session)** | `docs/PENDING.md` |
-| Stack detail + astro.config landmines | `docs/agent/stack-and-config.md` |
-| Page + section architecture, nav, visibility toggles | `docs/agent/page-architecture.md` |
-| Brand colors + theme system (light/dark discipline) | `docs/agent/theme-and-color.md` |
-| Brand reskin system (config schema, apply-brand, /reskin skill) | `docs/brand/brand-system.md` |
-| Polish layer (brand stripe, card-lift, scroll, Lenis, script accents) | `docs/agent/polish-layer.md` |
-| Animation layer (Lenis, motion, scroll-reveal, script accent) | `docs/agent/animation.md` |
-| Typography + spacing tokens | `docs/agent/design-tokens.md` |
-| Component catalog + long-read layout | `docs/agent/components.md` |
-| Component sourcing (shadcn, Starwind, Magic UI, PrimeReact, copy-paste sources, token-remap cheat sheet) | `docs/agent/component-sources.md` |
-| Error + empty states | `docs/agent/error-states.md` |
-| Image handling | `docs/agent/images.md` |
-| Accessibility | `docs/agent/accessibility.md` |
-| SEO + JSON-LD | `docs/agent/seo.md` |
-| Performance budgets + Lighthouse | `docs/agent/performance.md` |
-| Content data + Sanity integration | `docs/agent/sanity.md` |
-| Deployment + env vars + rebuild model | `docs/agent/deployment.md` |
-| Editor-driven vs hardcoded | `docs/agent/editor-vs-hardcoded.md` |
-| Cross-repo shared improvements (port cards + applied-to matrix + drift check) | `PORTS.md` |
-| Change history (prose ledger; the checkable matrix lives in PORTS.md) | `docs/agent/changelog.md` |
-| New-project setup runbook + pre-launch checklist (forthcoming) | `docs/bootstrap/NEW-PROJECT.md`, `docs/bootstrap/setup-checklist.md` |
-| Per-module enable guides (forthcoming) | `docs/modules/<module-name>.md` |
+| Area                                                                                                     | Doc                                                                  |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Open loops registry (read early each session)**                                                        | `docs/PENDING.md`                                                    |
+| Stack detail + astro.config landmines                                                                    | `docs/agent/stack-and-config.md`                                     |
+| Page + section architecture, nav, visibility toggles                                                     | `docs/agent/page-architecture.md`                                    |
+| Brand colors + theme system (light/dark discipline)                                                      | `docs/agent/theme-and-color.md`                                      |
+| Brand reskin system (config schema, apply-brand, /reskin skill)                                          | `docs/brand/brand-system.md`                                         |
+| Polish layer (brand stripe, card-lift, scroll, Lenis, script accents)                                    | `docs/agent/polish-layer.md`                                         |
+| Animation layer (Lenis, motion, scroll-reveal, script accent)                                            | `docs/agent/animation.md`                                            |
+| Typography + spacing tokens                                                                              | `docs/agent/design-tokens.md`                                        |
+| Component catalog + long-read layout                                                                     | `docs/agent/components.md`                                           |
+| Component sourcing (shadcn, Starwind, Magic UI, PrimeReact, copy-paste sources, token-remap cheat sheet) | `docs/agent/component-sources.md`                                    |
+| Error + empty states                                                                                     | `docs/agent/error-states.md`                                         |
+| Image handling                                                                                           | `docs/agent/images.md`                                               |
+| Accessibility                                                                                            | `docs/agent/accessibility.md`                                        |
+| SEO + JSON-LD                                                                                            | `docs/agent/seo.md`                                                  |
+| Performance budgets + Lighthouse                                                                         | `docs/agent/performance.md`                                          |
+| Content data + Sanity integration                                                                        | `docs/agent/sanity.md`                                               |
+| Deployment + env vars + rebuild model                                                                    | `docs/agent/deployment.md`                                           |
+| Editor-driven vs hardcoded                                                                               | `docs/agent/editor-vs-hardcoded.md`                                  |
+| Cross-repo shared improvements (port cards + applied-to matrix + drift check)                            | `PORTS.md`                                                           |
+| Change history (prose ledger; the checkable matrix lives in PORTS.md)                                    | `docs/agent/changelog.md`                                            |
+| New-project setup runbook + pre-launch checklist (forthcoming)                                           | `docs/bootstrap/NEW-PROJECT.md`, `docs/bootstrap/setup-checklist.md` |
+| Per-module enable guides (forthcoming)                                                                   | `docs/modules/<module-name>.md`                                      |
 
 ---
 
-*Structure: this file is the always-loaded constitution. Deep reference lives under `docs/agent/` (see the topic index above). Change history is in `docs/agent/changelog.md`.*
+_Structure: this file is the always-loaded constitution. Deep reference lives under `docs/agent/` (see the topic index above). Change history is in `docs/agent/changelog.md`._
 
 See `OPERATIONS.md` for the tactical playbook (deploy, patch content, run audits, common gotchas).

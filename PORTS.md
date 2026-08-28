@@ -80,9 +80,18 @@ is installing it as of the date on the card.
 | 25  | Pre-publish page checks                                           | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
 | 26  | Appearance controls (surfaces, accents, rich twins, layout)       | partial | yes         | partial  | no               | no            | no             | yes                | no                  |
 | 27  | Undo & redo                                                       | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
+| 29  | Instant preview text                                              | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
+| 29a | Local edit-state channel (LiveDraftBridge)                        | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
+| 29b | Refresh scheduler (single-flight / stale discard / floor)         | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
+| 29c | Preview morph (in-place reconcile)                                | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
+| 29d | Staleness counts every channel                                    | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
+
+Card 28 (the floating in-canvas layer) has no row yet: it is live on presacademy only
+and is not canonicalized here, so there is nothing for the matrix to be honest about.
+See its entry under Sync sessions.
 
 ---
 
@@ -1623,6 +1632,300 @@ absence of evidence).
 pending / reid-design-site pending / mas-monograms pending / 2ndpreschicago
 pending / nixoncreativestudio n/a (no Studio).
 
+## Card 29: Instant preview text (2026-08-28)
+
+**Dated 2026-08-28 (presacademy), canonicalized in the starter the same day.**
+**Canonical:** `src/lib/preview-stega.ts`, `src/lib/preview-text-diff.ts`,
+`src/lib/preview-text-nodes.ts` (+ their `.test.ts`).
+**Per-repo wiring:** `src/components/preview/overlay/useInstantText.ts`,
+`src/components/preview/overlay/timing.ts`, `src/components/preview/VisualEditingOverlay.tsx`.
+
+The old loop, end to end: type in the Studio, Studio autosave commits, Sanity indexes
+the change, the Worker's `/preview/live` listen fires, EventSource, debounce, refetch
+this preview URL on the server, swap `<main>`. Every hop is small; together they were
+1.5-3 seconds, and the editor spent them watching a page that still said the old thing.
+
+The frame already holds a live copy of the draft. `<VisualEditing>` starts an
+optimistic-document actor whose remote feed is the STUDIO, not Sanity: the Studio runs
+its own listen at `visibility: "transaction"` and relays every mutation over the
+comlink. So the frame learns about an edit before the query index has caught up, which
+is exactly what the server refetch has to wait for. Watch the actor, diff the document
+against the last one seen, and for every PLAIN STRING that changed write the new
+characters straight into the text nodes showing it. The refetch still happens; it stops
+being the thing anyone waits for.
+
+**Three tested pure helpers are what make this safe to point at a live page**, and all
+three are deliberately narrow:
+
+- `preview-text-diff.ts` reports only plain string leaves, only when BOTH sides are
+  strings, and never inside portable text (a block's marks, splits and merges move text
+  between spans as you type, so patching one span can show a sentence that never
+  existed). Array items are matched by `_key`, never by position, so a reorder reports
+  nothing instead of reporting every string as changed.
+- `preview-stega.ts` splits and reattaches the invisible `@vercel/stega` run every
+  preview string carries, and decodes it to `{id, type, path}`. Hand-rolled on purpose:
+  `@vercel/stega` is not a direct dependency, `@sanity/visual-editing-csm` is installed
+  NESTED and does not resolve from `src/`, and the one importable utility (`stegaClean`)
+  throws away the half we need. Forty lines beats a dependency.
+- `preview-text-nodes.ts` writes ONLY into a node whose visible characters are EXACTLY
+  the old value, and reattaches the payload it split off. So click-to-edit does not
+  degrade (the node keeps its identity), an accented heading whose text was cut in two
+  never matches, and a value rendered inside a longer sentence never matches. Everything
+  that does not match is left for the refresh. A missed instant update is invisible; a
+  wrong one is a lie about what the page says.
+
+**Measured, deployed:** keystroke to paint went from 413ms / 1429ms (two consecutive
+isolated keystrokes) to roughly 100-140ms. The swap itself costs about 4ms; everything
+else is the channel, which is card 29a.
+
+**Adapting it:** the three libs are byte-portable. The hook is not: it reads the
+optimistic document API, and how a repo gets a draft snapshot differs. presacademy wraps
+that in an `overlay/useDraftDocument.ts` because its in-canvas controls (card 28) also
+WRITE through it; the starter only reads, so the single `getDocument().getSnapshot()`
+call lives inside `useInstantText` itself. Both swallow the throw a cold frame produces
+rather than warning once per keystroke.
+
+## Card 29a: The local edit-state channel (2026-08-28)
+
+**Canonical:** `src/lib/preview-live-draft.ts` (+ `.test.ts`).
+**Per-repo wiring:** `src/sanity/components/LiveDraftBridge.tsx`, mounted from
+`PreviewNavigator.tsx`; received in `overlay/useInstantText.ts`.
+
+Card 29 made the swap cost 4ms and left a 1-2 second wait entirely UPSTREAM of it: the
+actor's feed is still a listen, so an edit is autosaved, committed and made visible as a
+transaction before the frame hears a word. The Studio has the answer a whole round trip
+earlier, in the local document store its form writes optimistic patches into, and the
+Studio and the preview iframe are same-origin. So post it across.
+
+**The priority lesson, which is the whole card.** `useEditState(id, type, priority)`
+takes the priority the local store schedules the observer at. The Studio's own
+`PostMessageRefreshMutations` asks for `'low'`, because it only needs to know THAT a
+document changed, eventually. This needs to know WHAT it says, now. Measured live on the
+deployed Studio, 2026-08-28: under `'low'` the store coalesced isolated keystrokes into
+the autosave commit, and one keystroke reached the preview in **413ms** and the next in
+**1429ms** - the editor's "still a second or two". Under `'default'`: **~100-140ms**.
+Use `'default'`. The 60ms trailing throttle in the bridge, not the store's scheduler, is
+what keeps this cheap: a keystroke is one snapshot, a burst is one post.
+
+**Four things keep the bridge from being a liability.** It renders null and holds no
+state. It is mounted from the navigator, which is the one place inside Presentation that
+already knows which page the preview is showing, and unmounted the moment that
+resolution goes away. It is throttled trailing. It never throws: a missing iframe, a
+cross-origin one, a frame mid-navigation are all swallowed.
+
+**Every message is untrusted.** The island ships in the public preview bundle and
+`window.addEventListener('message')` hears from any frame that cares to speak, so
+`parseLiveDraft` is a rejection funnel: the origin check is the caller's, and the
+envelope, the document, its `_id` and `_type` must be exactly right or the message is
+dropped silently. Nothing throws and nothing logs; a hostile page learns nothing and
+costs nothing. `document: null` is meaningful and sent on purpose ("this page has no
+draft"), which reads as silence rather than as an edit.
+
+**Source arbitration.** Both channels feed ONE "last document I applied" memory, and the
+diff is against that memory, so a snapshot OLDER than the memory does not read as
+"nothing changed" - it reads as a change BACK to the older words. The local channel is
+always ahead of the actor by construction, so every actor snapshot landing mid-burst is
+exactly that stale snapshot. `acceptsSource` therefore holds the actor back for
+`LOCAL_LEAD_MS` (2000ms) after any local snapshot: longer than one autosave round trip,
+short enough that a channel which stops (an older Studio, a preview opened outside
+Presentation, the navigator not resolving the page) hands control back within one edit.
+Nothing is lost when it does.
+
+**Adapting it:** `LIVE_DRAFT_MESSAGE` is `'pa:live-draft'` and stays that way in every
+repo. It is an arbitrary token whose only job is to match at both ends, and changing it
+per repo would fork a file that is otherwise identical everywhere for no gain.
+
+## Card 29b: The refresh scheduler (2026-08-28)
+
+**Canonical:** `src/lib/preview-refresh.ts` (+ `.test.ts`).
+**Per-repo wiring:** the scheduler loop in `VisualEditingOverlay.tsx`.
+
+**The failure, measured in the deployed Studio.** With `localStorage.previewTiming = '1'`
+set, a single burst of edits logged SIX overlapping soft refreshes - 1128, 1505, 1131,
+1245, 1494, 1228ms - which is six concurrent server renders of the same preview URL. A
+`/preview` render costs about 0.9s of Worker CPU (a public page costs about 0.1s), so six
+at once is how the editor got **`Error 1102: Worker exceeded resource limits`**.
+
+The old scheduler debounced with `clearTimeout`/`setTimeout` and nothing else. The
+debounce only guarded the window BEFORE a fetch started; once one was in flight, the next
+change event scheduled a fresh timer and a fresh fetch. No in-flight guard, no ceiling on
+concurrency, and no test of whether an arriving response was still worth having.
+
+**That last omission is the visible bug**, the one an editor reports as "the text I typed
+appears seconds later" even though instant text logs 4-6ms:
+
+```
+t0   refresh A starts        (server will render the PRE-edit page)
+t1   the edit lands, instant text writes the new words   <- page correct
+t2   refresh B starts
+t3   A's response arrives and replaces <main> with PRE-edit HTML
+```
+
+The words revert at t3 and only come back when B lands. With several racing, the LAST to
+land can be the STALEST, so the revert outlives every retry. Instant text was never slow;
+it was being undone.
+
+**Three rules, all pure so they can be tested rather than argued about:**
+
+1. **Single flight.** At most one refresh in flight. Change events arriving during one
+   set `dirty`; that flag runs exactly ONE more refresh afterwards, not one per event.
+2. **Stale discard.** Every attempt is stamped with `changeSeq` as it read at fetch
+   start. If the sequence has moved by the time the response lands, that HTML predates a
+   change we already know about and is not swapped in at any price. It marks the state
+   dirty instead, and the follow-up renders the truth.
+3. **Rate limit.** `REFRESH_MIN_INTERVAL_MS = 1200`, a floor on the interval between the
+   STARTS of consecutive refreshes. **Why 1200:** a `/preview` render is about 0.9s, so
+   anything below about a second means a burst is still overlapping renders - the exact
+   thing that tripped the 1102. An 80ms debounce with a 0.9s render is what produced six
+   at once. 1200ms leaves a real gap after a typical render instead of queueing the next
+   against its tail, and costs the editor nothing perceptible because instant text is
+   already showing the words. Raise it if the Worker runs hot; lowering it below the
+   render time re-creates the pile-up. `REFRESH_DEBOUNCE_MS` stays 80: it only has to be
+   wide enough that one autosave's two or three events share a refetch, because the
+   Studio already did the "wait for the editor to stop typing" batching.
+
+`dirty` is never dropped, only deferred, so the LAST refresh of a burst always happens
+and every caller of the comlink `refresh` promise resolves (Presentation spins its
+refresh button until it does).
+
+## Card 29c: The preview morph (2026-08-28)
+
+**Canonical:** `src/lib/preview-morph.ts` (+ `.test.ts`).
+**Per-repo wiring:** the morph + fast-path branch in `VisualEditingOverlay.tsx`.
+
+**The failure, measured in the deployed Studio.** The editor's words: the text
+"disappears for a second and then reappears after another second". The instrumentation
+around one keystroke found: a SINGLE keystroke produced TWO `#main` swaps about two
+seconds apart (the rate-limited follow-up, deliberate); nothing was left faded, hidden or
+zero-height afterwards at +0/+100/+400/+900ms across forty sampled elements, so this was
+never an animation replaying; `#main` held FOURTEEN `<img>` elements and zero
+astro-islands; and callbacks scheduled at +100/+400/+900ms all fired about a SECOND late,
+so the main thread was blocked for roughly that long at swap time.
+
+The cause was one line: `current.replaceWith(next)`. That throws the whole live `#main`
+subtree away and inserts a freshly parsed one, so every image becomes a brand-new element
+that has to be re-fetched, re-decoded and re-laid out. Both the blank-then-fill and the
+main-thread block, twice per keystroke, for a page whose words instant text had ALREADY
+corrected.
+
+**Deployed after:** images rebuilt per refresh **14 -> 0**; main-thread block at swap
+**~1000ms -> 12ms**; shrink/reflow events during sustained typing **-> 0**.
+
+**The image-identity rule.** `IMAGE_SOURCE_ATTRIBUTES` is `src`, `srcset`, `sizes`
+(`sizes` is in the list because it selects which `srcset` candidate is used, so writing
+it can change the resource even when `srcset` has not). When both sides are the same
+`<img>` pointing at the same bitmap, the morph EXCLUDES those three names explicitly. The
+attribute sync already refuses to write an unchanged value, so on its own this is
+redundant - it is stated as a GUARANTEE rather than a coincidence, because reusing image
+elements is the single biggest reason the file exists and a future tightening of
+`syncAttributes` must not be able to reintroduce a `src` write by accident. A test asserts
+nothing was written to them.
+
+**The fallback contract.** Every cap and every thrown error makes `morph` return false,
+and the caller then does exactly what it used to do: RE-PARSE the response and
+`replaceWith` it. Re-parse, not reuse - `to`'s children are MOVED into `from` as the walk
+goes, so a bailed morph leaves `to` no longer a whole `<main>`. A morph bug can therefore
+make the preview slow again, but it can never leave a half-updated page on screen.
+
+**The fast-path skip.** `isRedundantRender(fetched, live, lastAccepted)` is plain string
+equality on markup the same serializer produced. Two ways a render is known-redundant:
+`fetched === live` (the page already reads as the server says) and
+`fetched === lastAccepted` (the server re-rendered the same bytes, so it has NOT caught up
+with what instant text has since written). Case 2 is why a skip must NOT fire the
+soft-refresh event: that event is also the pending-swap memory's "the server now agrees"
+signal, and firing it there would retire swaps that have not landed. Nothing further is
+normalized on purpose - collapsing whitespace or sorting attributes would buy a few more
+skips and risk declaring two genuinely different pages equal, and the cost of a miss is
+now only a cheap morph.
+
+**Matching:** keyed children (`id`, `data-sanity`, `data-stype`, `data-key`, most
+specific first) claim their old counterpart wherever it sits, so a section reorder moves
+nodes instead of rebuilding them; keyless children claim the next unclaimed KEYLESS old
+child, and positional matching deliberately steps over keyed ones. `data-sanity` is the
+attribute that actually carries this: every section wrapper gets one from
+`src/lib/preview-edit-attr.ts`, built from the document id and the array item's `_key`.
+
+**Adapting it:** the file is written against a minimal structural interface
+(`MorphNode`/`MorphElement`/`MorphCharacterData`) rather than the DOM, the same trick
+`preview-text-nodes.ts` plays with `TextLike`, so the algorithm is tested with plain
+objects under `node:test`. Real `Element`/`Text` satisfy it structurally. Nothing in it is
+repo-specific.
+
+## Card 29d: Staleness counts every channel (2026-08-28)
+
+**Canonical:** the `seen` history in `src/lib/preview-live-draft.ts` and `applyKnownChange`
+in `src/lib/preview-text-nodes.ts` (both `.test.ts` covered).
+**Per-repo wiring:** the `noteInstantChange` bump in `VisualEditingOverlay.tsx`, passed to
+`useInstantText` as `onDocument`.
+
+**The bug:** "half my text disappears, then a second later it comes back." It survived
+cards 29b and 29c, and it had TWO causes.
+
+**Cause one: the sequence only counted the slowest channel.** Card 29b's stale discard
+compares the sequence a render was stamped with against the newest one KNOWN - and the
+sequence was bumped only by the SSE change events, which fire at Sanity's transaction
+visibility, about a second behind the keystroke. The instant-text path learns of the same
+edit in ~100ms over the local channel (card 29a). Between those two instants a render
+could START before an edit, LAND after it, and still be judged current; the morph then
+wrote the server's half-typed sentence over the finished one. Fix: every document instant
+text applies calls `onChange` too. **Staleness is a property of the newest KNOWN document,
+not of the slowest channel that could have told us about it.** This raises the number of
+DISCARDS during a burst and not the number of RENDERS - rules 1 and 3 of card 29b cap
+starts at one per `REFRESH_MIN_INTERVAL_MS` however many changes arrive between them. It
+marks the state dirty as well, on purpose: the server still has to render the newest text
+eventually, and a discard that scheduled nothing would leave the page correct only by
+instant text's grace, with structural edits unrendered.
+
+**Cause two: the re-apply could only recognise one stale value.** After a refresh, each
+pending swap was re-applied only where the node read exactly `previous`, on the reasoning
+that server HTML is either up to date or still showing the value the burst started from.
+It can be neither: a render that started mid-burst reads the query index at ITS OWN
+instant, so its words are an INTERMEDIATE value, the sentence as it stood half a second
+ago. That matched neither `previous` nor `next`, so the re-apply could not correct it and
+half a sentence sat on the page until the following render.
+
+**The value-history repair.** `PendingSwap.seen` keeps every OTHER value the field has
+been seen to hold this session, oldest first, capped at `MAX_SEEN = 12` (a render is at
+most a second or two behind and the local channel posts at most every 60ms, so a dozen
+covers far more history than any accepted render carries). The cap eats from just AFTER
+the oldest entry, because the oldest is the value the first server render of the burst is
+still going to arrive holding. `applyKnownChange` writes when the node reads exactly one
+of `seen` and is not already showing `next`.
+
+**Why that is still the same promise.** The match is still EXACT, against a value the
+field ACTUALLY HELD in a snapshot we diffed, and the node was matched to the field by its
+stega identity, not by searching the page for words. So "this node shows a value from this
+field's own past" means exactly "this node is showing a stale render of this field", and
+writing the newest value is a correction, not a guess. A node showing anything else - a
+transformed rendering, another editor's words, a value from before this session - matches
+nothing and is left alone. A missed instant update is invisible; a wrong one is a lie
+about what the page says.
+
+`rememberSwap` stays keyed by FIELD and never by source, which is what lets the two
+channels take turns on one field without either forgetting the other's work, and it drops
+the entry entirely when `next` comes back around to the original `previous` (the editor
+undid it): the field is level with the server, so there is nothing left to correct.
+
+### The two operational rules this layer depends on
+
+Neither is enforceable by a test, so they are written here.
+
+1. **Preview pages MUST send `Cache-Control: no-store`.** These SSR responses carried no
+   Cache-Control at all, so browsers applied HEURISTIC caching, and the Presentation
+   iframe kept serving the PREVIOUS deploy's page - stale island hashes, new editor
+   features invisible - until the cache aged out. Draft content is per-cookie anyway;
+   caching it was never right. Set it on the preview route
+   (`src/pages/preview/[...slug].astro`); `/preview/live` already sent it.
+2. **`visibility: 'query'` on the `/preview/live` listen must never be weakened.** It is
+   tempting to set `'transaction'` to make the preview feel faster. Do not. `'query'` means
+   Sanity waits until the change is visible to a QUERY before signalling, which is exactly
+   what the overlay does next: refetch this page from the server. A `'transaction'` event
+   fires earlier, and the refetch it triggers would return data that is STILL STALE, so
+   the morph would re-render the page with the OLD words - over the new ones instant text
+   has already put there. The earlier signal already reaches the frame by a different
+   road: the Studio relays its own transaction-visibility listen over the comlink, and
+   that is what instant text listens to. This one stays slow on purpose.
+
 ## Sync sessions
 
 A sync session is a pass over one repo: run `sync-check`, reconcile drift, install the
@@ -2254,3 +2557,82 @@ server, and whether a whole-document write is safe beside the
 optimistic actor - is in presacademy's `docs/PENDING.md`, along with
 the leftover `drafts.pricingPage` fixture for Nathan to discard.
 Ctrl+Z over the preview iframe stays a documented limitation.
+
+### 2026-08-28 (later still): cards 29-29d canonicalized in the starter
+
+The preview reliability and speed layer, built and proven on the deployed
+presacademy Studio with measurements, brought here as canonical.
+
+**Marked PORTABLE (14 files, byte-exact to presacademy apart from the marker
+line):** `src/lib/preview-stega.ts`, `preview-text-diff.ts`,
+`preview-text-nodes.ts`, `preview-live-draft.ts`, `preview-refresh.ts`,
+`preview-morph.ts`, `preview-navigation.ts`, and each one's `.test.ts`. All seven
+are pure: no DOM, no Sanity client, no repo names. `preview-morph` and
+`preview-text-nodes` are written against minimal structural interfaces
+(`MorphElement`, `TextLike`) precisely so they can be tested under `node:test`,
+which has no DOM. 110 assertions came with them; the suites ported verbatim.
+
+**Left per-repo (adapted, no marker):** `VisualEditingOverlay.tsx` (the scheduler
+loop, the morph and fast-path branch, `noteInstantChange`, the bfcache
+pagehide/pageshow handling), `overlay/useInstantText.ts`, `overlay/timing.ts`,
+`LiveDraftBridge.tsx`, `PreviewNavigator.tsx`, `pages/preview/live.ts`,
+`pages/preview/[...slug].astro`, `layouts/PreviewLayout.astro`. Each of those
+either names this repo's own document types or wires into a surface whose shape
+differs between sites.
+
+**Two infra fixes travelled with them.** The `/preview/live` SSE leak: `send()`
+throwing means the client went away MID-WRITE, so `cancel()` never fires; that
+path used to set `open = false` and leave the read loop holding a live Sanity
+listen open forever. It now closes AND aborts upstream, and `request.signal` is
+wired as a third road out because it fires even while parked in `reader.read()`.
+And `PreviewLayout.astro` now skips its chrome fetch when
+`x-preview-soft-refresh` is present: the refetch consumes exactly `#main`, and
+nothing inside `#main` reads `chromeSettings`, so the swapped HTML is
+byte-for-byte what a full render produces while the render costs one fewer Sanity
+round trip.
+
+**The navigator's two-click bug is fixed here too.** The starter carried the same
+sticky retry presacademy had: re-issue `navigate(sameHref)` every 750ms. That
+could never work, because leaving `params.preview` at the value it already held
+means Presentation's effect never re-runs and nothing is posted to the iframe.
+`preview-navigation.ts` replaces it with a bounce-aware intent machine: hold the
+intent THROUGH the match, watch for the flip back to the path we came from, and
+re-issue on that flip - which is a real change to `params.preview`, so the host
+effect does run. Capped at 4 attempts inside a 4s window.
+
+**One real divergence.** presacademy's `useInstantText` reads the draft through
+`overlay/useDraftDocument.ts`, which also carries `setAt`/`setInside`/`unsetAt`
+and a `write()` for the card-28 in-canvas controls, and which imports a
+`src/lib/sanity-path.ts` this repo does not have. The starter has no such
+controls and only ever READS, so the single `getDocument().getSnapshot()` call
+lives inside `useInstantText` itself and `useDraftDocument.ts` was not ported. If
+card 28 is ever canonicalized here, that file arrives with it and the hook should
+be rewired onto it.
+
+**Nothing was skipped for want of a surface.** Everything on the list had an
+equivalent in this repo, including the PreviewLayout chrome fetch (one here,
+two on presacademy: this repo has no announcement bar).
+
+**Verification:** `tsc --noEmit` 46 errors before and 46 after, all pre-existing
+and all environmental (`cloudflare:workers`, `.astro` imports, the Sanity
+`insertMenu` readonly-groups noise, and the known `pageOps.ts:225` `.commit`
+type-only error card 28's entry already flags); `npm test` 249 -> 359, 0 fail;
+`npm run lint` back to its pre-existing 1 error + 7 warnings, none in touched
+files; `npm run build` clean; `page-parity compare` 10/10 PASS (this whole layer
+is preview-only, so any parity movement would have been a bug); `sync-check`
+self-check 44 SAME / 0 drift; `sync-check ../presacademy` 19 SAME / 0 drift.
+
+**Why the cross-check does not list the new files, and what to do about it.**
+`sync-check` walks the SITE repo for the marker, and presacademy's copies of
+these fourteen do not carry it yet - that repo's session marked 19 other files
+and stopped there. So the new cards are invisible to the cross-check until
+presacademy adds the marker line, which is the first act of its next sync
+session. Byte-identity was verified by hand in the meantime (each starter copy
+diffed against presacademy's with the marker line stripped: identical, all
+fourteen), so the moment the marker lands they report SAME with no reconciliation
+needed.
+
+**One deliberate oddity to leave alone.** `LIVE_DRAFT_MESSAGE` is `'pa:live-draft'`
+in the canonical file and will stay that way everywhere. It is an arbitrary token
+whose only job is to match at both ends of one repo's postMessage channel;
+renaming it per repo would fork an otherwise identical file for nothing.
