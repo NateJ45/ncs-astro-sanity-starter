@@ -105,3 +105,83 @@ test('one click end to end: dropped navigate, bounce, automatic second attempt',
   assert.deepEqual(issued, ['/preview/about'], 'exactly one automatic re-issue');
   assert.equal(pending?.sawTarget, true, 'still armed, now on the target');
 });
+
+// -----------------------------------------------------------------------------
+// The SECOND click, made before the first had landed (2026-08-29)
+// -----------------------------------------------------------------------------
+// Reproduced in a deployed Studio: click one page, click another about a second
+// later, and the second click did nothing. Presentation ignores a navigate()
+// issued while it is still moving, so the first click's destination arrives
+// afterwards — neither the second intent's target nor where it started — and the
+// last branch used to call that "the editor moved on" and drop the click.
+
+/** Click /preview/about, then /preview/faq before about had arrived. */
+const secondClick = (now = T0): PendingNav =>
+  startNav('/preview/faq', 'page', 'page-faq', '/preview', now, '/preview/about');
+
+test('the superseded destination is remembered, and only when it is distinct', () => {
+  assert.equal(secondClick().superseded, '/preview/about');
+  // Re-clicking the page already in flight supersedes nothing.
+  assert.equal(
+    startNav('/preview/about', 'page', 'p', '/preview', T0, '/preview/about').superseded,
+    undefined,
+  );
+  // A predecessor heading back where we started is already the bounce target.
+  assert.equal(
+    startNav('/preview/faq', 'page', 'p', '/preview', T0, '/preview').superseded,
+    undefined,
+  );
+});
+
+test('the predecessor landing re-issues the dropped click instead of losing it', () => {
+  const step = stepNav(secondClick(), '/preview/about', T0 + 400);
+  assert.equal(step.action, 'retry', 'the second click must be asked for again');
+  assert.equal(step.pending?.href, '/preview/faq');
+  assert.equal(step.pending?.attempts, 2);
+  assert.equal(step.pending?.from, '/preview/about', 'the bounce target is where we now are');
+  assert.equal(step.pending?.superseded, undefined, 'consumed; it cannot land twice');
+});
+
+test('a page the editor navigated to themselves is still left alone', () => {
+  // Same intent, but the preview went somewhere neither click asked for — a
+  // link clicked inside the iframe. Dropping the intent is correct here.
+  const step = stepNav(secondClick(), '/preview/enroll', T0 + 400);
+  assert.equal(step.action, 'settle');
+  assert.equal(step.pending, null);
+});
+
+test('a genuine return to the superseded page is not yanked away', () => {
+  // The predecessor landed and was consumed; going back there later is the
+  // editor's own doing, so the intent drops rather than fighting them.
+  const retried = stepNav(secondClick(), '/preview/about', T0 + 400).pending!;
+  const step = stepNav({ ...retried, from: '/preview/faq' }, '/preview/about', T0 + 800);
+  assert.equal(step.action, 'settle');
+  assert.equal(step.pending, null);
+});
+
+test('the re-issued click still respects the window and the attempt cap', () => {
+  const late = stepNav(secondClick(), '/preview/about', T0 + NAV_WINDOW_MS + 1);
+  assert.equal(late.action, 'settle', 'too late to be the editor s intent any more');
+
+  const maxed = stepNav(
+    { ...secondClick(), attempts: NAV_MAX_ATTEMPTS },
+    '/preview/about',
+    T0 + 400,
+  );
+  assert.equal(maxed.action, 'settle');
+});
+
+test('two clicks end to end: the second one wins', () => {
+  // What params.preview reports: the first click lands, then the re-issued
+  // second click lands.
+  let pending: PendingNav | null = secondClick();
+  const issued: string[] = [];
+  ['/preview', '/preview/about', '/preview/faq'].forEach((current, i) => {
+    if (!pending) return;
+    const step = stepNav(pending, current, T0 + (i + 1) * 200);
+    if (step.action === 'retry' && step.pending) issued.push(step.pending.href);
+    pending = step.pending;
+  });
+  assert.deepEqual(issued, ['/preview/faq'], 'the swallowed click was re-issued exactly once');
+  assert.equal(pending?.sawTarget, true, 'and it arrived');
+});

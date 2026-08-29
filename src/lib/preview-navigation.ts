@@ -70,6 +70,21 @@ export interface PendingNav {
   sawTarget: boolean;
   /** When the current attempt's window opened. */
   startedAt: number;
+  /**
+   * Where the intent THIS ONE REPLACED was heading, when the editor clicked
+   * again before the previous navigation had landed (2026-08-29).
+   *
+   * Without it, a second click about a second after the first was silently
+   * dropped. Presentation ignores a navigate() issued while it is still moving,
+   * so the FIRST click's destination arrives afterwards — a path that is
+   * neither this intent's target nor the path it started from — and the last
+   * branch of stepNav read that as "the editor moved on" and gave up.
+   *
+   * Knowing where the superseded click was heading is what separates "my own
+   * predecessor just landed, so ask again" from "the editor clicked a link
+   * inside the preview", which must still be left alone.
+   */
+  superseded?: string;
 }
 
 /** What PreviewNavigator should do after a step. */
@@ -87,15 +102,33 @@ export interface NavStep {
   action: NavAction;
 }
 
-/** Record a click. `from` is the preview path currently showing. */
+/**
+ * Record a click. `from` is the preview path currently showing.
+ *
+ * `superseded` is the href of the intent still in flight, if the editor clicked
+ * again before the last one landed — pass `previous?.href`.
+ */
 export function startNav(
   href: string,
   type: string,
   id: string,
   from: string,
   now: number,
+  superseded?: string,
 ): PendingNav {
-  return { href, type, id, from, attempts: 1, sawTarget: false, startedAt: now };
+  return {
+    href,
+    type,
+    id,
+    from,
+    attempts: 1,
+    sawTarget: false,
+    startedAt: now,
+    // A click that re-selects the page already in flight is not superseding
+    // anything, and neither is one whose predecessor was heading where this
+    // intent started from — `from` already covers that as the bounce target.
+    ...(superseded && superseded !== href && superseded !== from ? { superseded } : {}),
+  };
 }
 
 /**
@@ -132,7 +165,35 @@ export function stepNav(pending: PendingNav, current: string, now: number): NavS
     };
   }
 
-  // Somewhere else entirely: the editor moved on, or something else navigated.
-  // A newer click replaces `pending` outright, so this is not that case.
+  // THE SUPERSEDED CLICK'S DESTINATION, ARRIVING LATE (2026-08-29).
+  // The editor clicked again before the last navigation landed. Presentation
+  // dropped this intent's navigate() because it was still moving, and what has
+  // just shown up is where the PREVIOUS click was going. Nothing else will
+  // re-issue this one, so the click would be lost — which is precisely the
+  // "I click, nothing happens, I have to click again" report. Ask again, under
+  // the same attempt and window bounds as a bounce.
+  if (pending.superseded && current === pending.superseded) {
+    if (expired || pending.attempts >= NAV_MAX_ATTEMPTS) {
+      return { pending: null, action: 'settle' };
+    }
+    return {
+      pending: {
+        ...pending,
+        attempts: pending.attempts + 1,
+        sawTarget: false,
+        startedAt: now,
+        // Consumed: the predecessor has landed and cannot land twice. Leaving
+        // it set would let a genuine editor navigation back to that same page
+        // be mistaken for it and yanked away.
+        superseded: undefined,
+        // It is where we are now, so it is what a bounce would return to.
+        from: current,
+      },
+      action: 'retry',
+    };
+  }
+
+  // Somewhere else entirely: the editor moved on, or something else navigated —
+  // a link clicked inside the preview, say. Leave it alone.
   return { pending: null, action: 'settle' };
 }

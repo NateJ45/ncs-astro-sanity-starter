@@ -313,7 +313,11 @@ export function PreviewNavigator() {
   const [pending, setPending] = useState<PendingNav | null>(null);
   const go = useCallback(
     (href: string, type: string, id: string) => {
-      setPending(startNav(href, type, id, current, Date.now()));
+      // The updater form hands over the intent still in flight, if any - a
+      // second click inside a second supersedes it, and startNav remembers
+      // where it was heading so stepNav can re-issue this click when that
+      // predecessor lands (the swallowed-click fix, 2026-08-29).
+      setPending((prev) => startNav(href, type, id, current, Date.now(), prev?.href));
       navigate(href, { type, id });
     },
     [navigate, current],
