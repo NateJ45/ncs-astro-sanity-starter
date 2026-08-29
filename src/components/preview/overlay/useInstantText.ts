@@ -83,7 +83,7 @@
 //   and stale HTML is exactly what this has to undo.)
 // =============================================================================
 import { useCallback, useEffect, useRef } from 'react';
-import { useDocuments, useOptimisticActor } from '@sanity/visual-editing/react';
+import { useOptimisticActor } from '@sanity/visual-editing/react';
 import { isEmptyActor } from '@sanity/visual-editing/optimistic';
 import { diffStringFields } from '../../../lib/preview-text-diff.ts';
 import { sourceKey } from '../../../lib/preview-stega.ts';
@@ -101,6 +101,7 @@ import {
   type PendingSwap,
 } from '../../../lib/preview-live-draft.ts';
 import { startTiming } from './timing.ts';
+import { useDraftDocument } from './useDraftDocument.ts';
 
 /**
  * The event this listens for after `<main>` has been replaced. Dispatched by the
@@ -125,24 +126,14 @@ const ACTOR_EVENTS = ['mutation', 'rebased.local', 'rebased.remote', 'sync'] as 
 export function useInstantText(pageId: string, onDocument?: () => void): void {
   // The optimistic document API, which is the only supported way this island can
   // see a draft: no token, no write client, nothing that must not ship in a
-  // public bundle. presacademy wraps this in an overlay/useDraftDocument.ts
-  // because its in-canvas controls also WRITE through it; this repo only reads,
-  // so the one read it needs lives here.
-  //
-  // `getDocument()` and `getSnapshot()` THROW on a cold frame (before the
-  // document has streamed in) rather than resolving to nothing, and this runs on
-  // every edit, so the failure is swallowed silently: the next event a moment
-  // later brings another chance, and a warn here would be a log line per
-  // keystroke.
-  const { getDocument } = useDocuments();
-  const readNow = useCallback(async (): Promise<Record<string, unknown> | null> => {
-    try {
-      const doc = getDocument<Record<string, unknown>>(pageId);
-      return (await doc.getSnapshot()) as Record<string, unknown> | null;
-    } catch {
-      return null;
-    }
-  }, [getDocument, pageId]);
+  // public bundle. ./useDraftDocument.ts is the canonical door to it, shared with
+  // the in-canvas controls that also WRITE through it (PORTS.md card 28). This
+  // path only reads, and it reads on every edit, so it takes `readNow`: ONE
+  // attempt, no retry sleep, no console warning. `getDocument()` and
+  // `getSnapshot()` THROW on a cold frame rather than resolving to nothing, and
+  // there is nothing to recover - the next event a moment later brings another
+  // chance, and a warn here would be a log line per keystroke.
+  const { readNow } = useDraftDocument(pageId);
 
   const actor = useOptimisticActor();
 

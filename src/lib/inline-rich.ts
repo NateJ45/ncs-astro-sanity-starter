@@ -30,12 +30,30 @@ export interface InlineRichBlock {
   children?: InlineRichSpan[];
 }
 
-/** One run of text and the two marks it may carry. */
+/**
+ * One run of text and the two marks it may carry.
+ *
+ * A run whose text is exactly RUN_BREAK is a HARD BREAK, not text. This
+ * template's reader never produces one (see `inlineRichRuns` below, which joins
+ * blocks with a space), but the write half is shared with repos whose twin
+ * renders `<br />` between blocks, so the vocabulary lives here.
+ */
 export interface InlineRun {
   text: string;
   strong: boolean;
   em: boolean;
 }
+
+/**
+ * The hard-break run. Compare with `run.text === RUN_BREAK`.
+ *
+ * It is a boundary, never text: two runs on opposite sides of one never merge,
+ * and `runsToInlineRich` starts a new block at each. Only a run whose WHOLE text
+ * is this string counts - a newline INSIDE a run is ordinary whitespace and
+ * squeezes to a space like any other, which is what keeps a pretty-printed paste
+ * from turning its source formatting into line breaks.
+ */
+export const RUN_BREAK = '\n';
 
 /**
  * True when the twin holds at least one non-blank character.

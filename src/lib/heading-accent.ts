@@ -75,3 +75,60 @@ export function splitHeadingAccent(
     heading: original,
   };
 }
+
+// -----------------------------------------------------------------------------
+// Picking the word by clicking it (in-canvas controls, PORTS.md card 28)
+// -----------------------------------------------------------------------------
+// Typing the accent word into a box means reading the heading, choosing a word,
+// and copying it correctly; the guide even has a step for "if nothing changes,
+// check the spelling". Clicking the word removes all three. The overlay draws
+// the heading a second time, as a row of buttons, one per word, so the value
+// stored is a slice of the heading by construction and can never miss.
+//
+// The heading arrives stega-encoded in the preview, so it is cleaned first for
+// exactly the reason in this file's header. Punctuation is kept in the LABEL
+// (a button reading "grace," beside its comma looks like the heading) but
+// dropped from the VALUE, because splitHeadingAccent matches the stored string
+// against the heading with indexOf and a trailing comma would make the accent
+// swallow it.
+
+/** One clickable piece of a heading. Whitespace comes through as `word: false`. */
+export interface HeadingToken {
+  /** Exactly as it appears in the heading, punctuation and all. */
+  text: string;
+  /** What to store when this token is chosen. Empty for whitespace. */
+  value: string;
+  /** True when this token is a word an editor may pick. */
+  word: boolean;
+}
+
+/** Characters that belong to the sentence rather than to the word. */
+const EDGE_PUNCTUATION = /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu;
+
+/**
+ * Split a heading into clickable word tokens and the whitespace between them.
+ * Order is preserved, so joining every `text` returns the cleaned heading.
+ */
+export function splitHeadingWords(heading?: string | null): HeadingToken[] {
+  const clean = plain(heading);
+  if (!clean) return [];
+  return clean
+    .split(/(\s+)/)
+    .filter((piece) => piece !== '')
+    .map((piece) => {
+      if (/^\s+$/.test(piece)) return { text: piece, value: '', word: false };
+      const value = piece.replace(EDGE_PUNCTUATION, '');
+      return { text: piece, value, word: value !== '' };
+    });
+}
+
+/**
+ * True when `token` is the word the stored accent currently points at, so the
+ * overlay can ring it and a second click can clear it. Case-insensitive, like
+ * the matching itself.
+ */
+export function isAccentedWord(token: HeadingToken, accent?: string | null): boolean {
+  const needle = plain(accent);
+  if (!needle || !token.word) return false;
+  return token.value.toLowerCase() === needle.toLowerCase();
+}

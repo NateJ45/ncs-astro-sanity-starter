@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { splitHeadingAccent } from './heading-accent.ts';
+import { isAccentedWord, splitHeadingAccent, splitHeadingWords } from './heading-accent.ts';
 import { hasInlineRich, inlineRichRuns } from './inline-rich.ts';
 import { splitScriptAccent } from './scriptAccent.ts';
 
@@ -55,6 +55,72 @@ describe('splitHeadingAccent', () => {
   it('can fire on the same heading the script accent does', () => {
     assert.equal(splitScriptAccent('One clear promise', 'promise').found, true);
     assert.equal(splitHeadingAccent('One clear promise', 'promise').found, true);
+  });
+});
+
+describe('splitHeadingWords', () => {
+  it('splits a heading into words and the spaces between them', () => {
+    const tokens = splitHeadingWords('Work that earns the look');
+    assert.deepEqual(
+      tokens.map((t) => t.text),
+      ['Work', ' ', 'that', ' ', 'earns', ' ', 'the', ' ', 'look'],
+    );
+    assert.deepEqual(
+      tokens.map((t) => t.word),
+      [true, false, true, false, true, false, true, false, true],
+    );
+  });
+
+  it('rejoins to the cleaned heading, so the overlay redraws it exactly', () => {
+    const heading = `Craft${STEGA}ed rooms,  finished well.`;
+    const tokens = splitHeadingWords(heading);
+    assert.equal(tokens.map((t) => t.text).join(''), 'Crafted rooms,  finished well.');
+  });
+
+  // The value is what gets STORED, and splitHeadingAccent matches it with
+  // indexOf: a trailing comma in the value would make the accent swallow it.
+  it('keeps punctuation on the label but off the stored value', () => {
+    const tokens = splitHeadingWords('Craft, unhurried.');
+    assert.deepEqual(tokens[0], { text: 'Craft,', value: 'Craft', word: true });
+    assert.deepEqual(tokens[2], { text: 'unhurried.', value: 'unhurried', word: true });
+  });
+
+  // The picker's whole promise: a word it offers cannot fail to match.
+  it('a value that survives is one splitHeadingAccent can find', () => {
+    const heading = 'Craft, unhurried.';
+    for (const token of splitHeadingWords(heading).filter((t) => t.word)) {
+      assert.equal(splitHeadingAccent(heading, token.value).found, true, token.value);
+    }
+  });
+
+  it('a token of pure punctuation is not offered as a word', () => {
+    const tokens = splitHeadingWords('Come — and stay');
+    const dash = tokens.find((t) => t.text === '—');
+    assert.equal(dash?.word, false);
+  });
+
+  it('is empty for an empty heading', () => {
+    assert.deepEqual(splitHeadingWords(''), []);
+    assert.deepEqual(splitHeadingWords(undefined), []);
+    assert.deepEqual(splitHeadingWords(STEGA), []);
+  });
+});
+
+describe('isAccentedWord', () => {
+  const tokens = splitHeadingWords('Craft, unhurried.');
+  const craft = tokens[0];
+
+  it('rings the word the stored accent points at, whatever its case', () => {
+    assert.equal(isAccentedWord(craft, 'Craft'), true);
+    assert.equal(isAccentedWord(craft, 'craft'), true);
+    assert.equal(isAccentedWord(craft, `cra${STEGA}ft`), true);
+  });
+
+  it('rings nothing else', () => {
+    assert.equal(isAccentedWord(craft, 'unhurried'), false);
+    assert.equal(isAccentedWord(craft, ''), false);
+    assert.equal(isAccentedWord(craft, undefined), false);
+    assert.equal(isAccentedWord({ text: ' ', value: '', word: false }, ''), false);
   });
 });
 

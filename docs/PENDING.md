@@ -36,9 +36,23 @@ What is still unproven, and what a fork should check on its first real project:
 - The in-canvas section controls appear on hover: insert before/after through the grouped
   menu, duplicate, remove, drag to reorder.
 - An edit in another tab reaches the preview through `/preview/live` without a reload.
+- **The floating controls from PORTS.md card 28** (added 2026-08-28). These are the least
+  provable part of the stack, because every one of them needs a resolver context the host
+  only builds against a real schema:
+  - clicking a heading on a text block, CTA band, services grid, testimonials or FAQ
+    section shows "Accent a word", and clicking a word in the card sets `headingAccent`
+    in the draft (the Studio's unpublished-changes badge should move);
+  - clicking the same word again clears it;
+  - clicking a subhead on any of the six twin-carrying sections shows "Edit here", the box
+    is seeded with the plain string, and the B / I buttons store `strong` / `em`;
+  - pasting a styled paragraph out of a word processor into that box keeps only bold and
+    italic and drops fonts, colours and tables;
+  - the card survives the pointer travelling to it (see the own-open-state rule on the
+    card) and closes on Escape, on Save, and on a click outside;
+  - Ctrl+Z in the Studio undoes what the card wrote (card 27).
 
-Whoever does this first should report back so PORTS.md card 10's starter cell carries a
-verified-in-anger note rather than an installed-and-gated one.
+Whoever does this first should report back so PORTS.md cards 10 and 28's starter cells
+carry a verified-in-anger note rather than an installed-and-gated one.
 
 ---
 

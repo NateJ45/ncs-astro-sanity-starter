@@ -80,6 +80,7 @@ is installing it as of the date on the card.
 | 25  | Pre-publish page checks                                           | partial | no          | yes      | no               | no            | no             | yes                | n/a                 |
 | 26  | Appearance controls (surfaces, accents, rich twins, layout)       | partial | yes         | partial  | no               | no            | no             | yes                | no                  |
 | 27  | Undo & redo                                                       | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
+| 28  | Floating in-canvas controls (accent word, "Edit here")            | yes     | yes         | partial  | no               | no            | no             | no                 | n/a                 |
 | 29  | Instant preview text                                              | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
 | 29a | Local edit-state channel (LiveDraftBridge)                        | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
 | 29b | Refresh scheduler (single-flight / stale discard / floor)         | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
@@ -89,9 +90,10 @@ is installing it as of the date on the card.
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
 
-Card 28 (the floating in-canvas layer) has no row yet: it is live on presacademy only
-and is not canonicalized here, so there is nothing for the matrix to be honest about.
-See its entry under Sync sessions.
+Card 28's starter cell reads `partial` for the same reason card 26's does, and the two
+have to be read together: this template forbids a per-block colour field, so the band
+card that is a third of that layer elsewhere has nothing here to write to and was
+deliberately not built. The two TEXT controls landed in full. See the card.
 
 ---
 
@@ -1632,6 +1634,150 @@ absence of evidence).
 pending / reid-design-site pending / mas-monograms pending / 2ndpreschicago
 pending / nixoncreativestudio n/a (no Studio).
 
+## Card 28: The floating in-canvas control layer (2026-08-28)
+
+**Dated 2026-08-28 (presacademy), canonicalized in the starter the same day.**
+**Canonical:** `src/lib/sanity-path.ts`, `src/lib/inline-rich.ts`,
+`src/lib/inline-rich-write.ts` (+ their `.test.ts`), the word-picker half of
+`src/lib/heading-accent.ts`, `src/components/preview/overlay/usePopover.ts`,
+`overlay/useDraftDocument.ts`, `overlay/styles.ts`
+**Read card 28b next:** it is the two-way reconciliation with presacademy and
+WCP, and it is where the `multiline` seam and the mark-boundary regression tests
+actually landed.
+**Per repo (NOT canonical, on purpose):** `src/lib/section-fields.ts` +
+`src/lib/section-fields.test.ts`, `overlay/index.ts`, `overlay/tool-theme.ts`,
+`overlay/HeadingAccentPicker.tsx`, `overlay/TextPopover.tsx`, and (where a repo
+has one) the surface/band card
+
+**What:** Squarespace-style popovers inside the Presentation canvas. Click a
+heading and pick its accent word by clicking the word. Click a subhead and type
+the new line where the line is, with bold and italic, instead of hunting for its
+box in the form. Elsewhere in the family the same layer also carries a
+surface/band swatch card off a handle in each section's corner.
+
+### The five mechanics, each of which cost a real bug
+
+1. **A custom overlay component only mounts on a node the schema resolves to a
+   FIELD.** The host builds the resolver context through `getField(node)` and
+   bails on `!field`, and the schema hook resolves no field for a bare array item
+   (`sections[_key=="x"]`) on its own — so the resolver is never called for a
+   section wrapper at all. The first version of this layer put the swatch row
+   there and it never mounted. The fix is to give the control a real field to
+   hang on: the renderer emits a small PREVIEW-ONLY handle inside each
+   band-carrying section whose `data-sanity` names `…[_key=="x"].background`.
+   The bare-item case is deliberately NOT kept as a fallback: it can never fire,
+   and a branch that can never fire is a branch that will one day be trusted.
+2. **Controls open on CLICK, not hover.** `activated` in this host means "in the
+   viewport", so a control drawn on `activated` appears on every matching element
+   on the page at once. Gate on `focused`, which is the click.
+3. **A card must keep its OWN open state.** `focused` is not ours to lean on: the
+   host clears it on `overlay/blur` and RECOMPUTES it on every
+   `presentation/focus` the Studio sends back, keeping it only for the element
+   whose path matches the Studio's focus path exactly. A card gated on `focused`
+   therefore unmounts a beat after opening, while the pointer is still travelling
+   toward it. What the host does NOT do is unmount the component: it renders an
+   element's overlay for `activated || focused`, so the component stays mounted
+   with its state intact. Hence: `focused` turning truthy OPENS the card, and only
+   the close button, Escape, or an outside press may close it. The card also
+   renders FLUSH to its anchor — the six pixels of gap belong to the overlay via
+   `paddingTop` on the anchor box, not to `top: calc(100% + 6px)` — so the pointer
+   never crosses unowned pixels on the way in.
+4. **Gate twice, and the second gate is PER INSTANCE.** Carrying a field is not
+   the same as honouring it. A section whose art-directed band style ignores the
+   colour knob, or which is rendering a coaching placeholder rather than its real
+   markup, must not be offered a control the renderer will ignore. The type check
+   comes from the registry; the instance check reads the section value itself.
+5. **Writes go through `useDocuments` from `@sanity/visual-editing/react`.**
+   `doc.patch()` sends the mutation over the comlink to the parent Studio window,
+   which applies it with the editor's own session exactly as if they had typed in
+   the form. So every write lands in the DRAFT, shows in the unpublished-changes
+   badge, is covered by card 27's undo, and still needs Publish — and the preview
+   island never grows a token or a write client, which it must not, because it is
+   public code in a public bundle.
+
+### Stega, twice
+
+Strip before matching and re-attach when writing. `splitHeadingWords` cleans the
+heading before splitting it, so the words offered are real words rather than
+words wearing an invisible payload, and the value stored is a slice of the CLEAN
+string, which is what `splitHeadingAccent` will later match against. On the
+instant-text side the payload is split off and concatenated back on, so a node
+this layer writes to keeps the stega it arrived with and click-to-edit never
+degrades (card 29).
+
+### The drift gate
+
+`section-fields.ts` duplicates knowledge that really lives in the schema, because
+the overlay runs in the preview iframe and the schema lives in the parent window.
+The duplicate is allowed only because a test measures it: `section-fields.test.ts`
+parses the block libraries and fails if a section gains or loses `headingAccent`
+or a rich twin without the registry being updated. It re-derives the heading FIELD
+NAME too, which is the part a list could not carry — four of this template's five
+accent types call their big line `headline`, not `heading`, and a control that
+assumed `heading` would offer no words at all and never say why.
+
+### The starter carries no band card, and that is the right answer
+
+This is the honest half of the card. `CLAUDE.md` #9 and PORTS card 26: in this
+template a page-builder block carries **no surface or colour field**, because
+`SectionRenderer` owns the alternating band cadence so that reordering a page can
+never break its rhythm. A band card needs a field to write to. Adding one to get
+the control would trade an architectural guarantee for a convenience, so the
+starter's card 28 is deliberately **two controls, not three**, and the drift gate
+now asserts the absence: `no page-builder block carries a surface or colour
+field` fails if anyone ever adds one. Do not "fix" this by adding a tone field.
+
+The band-card STYLES still live in the canonical `overlay/styles.ts`
+(`handleAnchor`, `panel`, `panelHead`, `closeButton`, `optionRow`, `optionDot`,
+`groupLabel`), unused here and tree-shaken out of the bundle, because the
+vocabulary belongs to the family rather than to one site and the next repo should
+inherit it rather than re-derive it. Verified shaken: no string unique to those
+objects survives into the built island.
+
+### One accepted gap, stated plainly
+
+A heading whose accent word HAS matched renders the stega-CLEANED string — that
+is card 26's documented cost — so that element carries no path and the overlay
+offers nothing on it. The picker is therefore the way IN to an accent and the way
+to fix one that does not match (a typo'd accent leaves the heading encoded, so
+the control is still there); changing a word that currently matches is still done
+in the form. Closing that gap means the same preview-only-handle trick mechanic 1
+describes, aimed at the heading rather than the band. It is possible and was not
+done: it would need every section bridge to learn its own edit doc, which is a
+wider change than this card earns.
+
+### Per-repo adaptation, and the seams left for a fold-back
+
+`tool-theme.ts` is the whole per-repo surface of the look: six values — paper,
+ink, muted, line, shadow, font — that `styles.ts` draws everything from. That
+split is new here; presacademy and WCP each bake the palette into their copy of
+`styles.ts`, which is precisely what stopped the file being shared. `sanity-path.ts`
+got the same treatment: presacademy's ancestor baked its two page-builder array
+names into a module constant, so `readSectionPath` now TAKES the names and the
+repo's list lives in `section-fields.ts`. Same move card 22 made on
+`redirects.ts`, for the same reason.
+
+**Left per-repo, with the divergence noted for a later fold-back:** the two card
+components. presacademy and WCP's copies are structurally the same file and differ
+in three ways — the label strings ("Colour a word" / "Underline a word"), the
+selected-state colour, and which registry helper they call
+(`headingAccentFieldFor` + `readSectionPath` on presacademy, a single
+`resolveAccentTarget` on WCP). The starter takes WCP's `resolveAccentTarget`
+shape, which is the more general one: it returns the heading path AND the accent
+path, so a repo whose accent lives inside a nested object needs no second code
+path. Folding the components themselves together would mean passing the two label
+strings and one colour as props; worth doing when a fourth repo wants them,
+not before.
+
+**Applied to:** presacademy yes (origin, reconciled onto the canonical copies
+2026-08-28 - card 28b) / WCP yes (full, band card included; same reconciliation,
+same day) / starter partial by design (see above) / church-starter yes (all three
+controls) / reid-design-site partial (its own two cards, a script-accent picker
+and a layout card, on the canonical hooks and styles) / mas-monograms partial
+(text card only) / 2ndpreschicago pending / nixoncreativestudio n/a.
+
+---
+
 ## Card 29: Instant preview text (2026-08-28)
 
 **Dated 2026-08-28 (presacademy), canonicalized in the starter the same day.**
@@ -1925,6 +2071,177 @@ Neither is enforceable by a test, so they are written here.
    has already put there. The earlier signal already reaches the frame by a different
    road: the Studio relays its own transaction-visibility listen over the comlink, and
    that is what instant text listens to. This one stays slow on purpose.
+
+## Card 28a: Two fixes back from ncs-church-starter (2026-08-28)
+
+Card 28's canonical files were written here and ported into `ncs-church-starter`
+in the same afternoon. Porting them found two things this repo had not, and both
+were fixed HERE and re-synced outwards rather than being patched downstream.
+
+**1. `normalizeRuns` stored a double space across a mark boundary.**
+`src/lib/inline-rich-write.ts`. The merge step collapses `"a "` + `" b"` to one
+space only when the two runs carry the SAME marks, because that is the branch
+that concatenates them. `<b>a </b><i> b</i>` cannot merge, so the collapse never
+saw the pair and the twin stored two spaces. The rule now also applies across a
+boundary, dropping the space from the SECOND run - a leading space inside an
+emphasised span renders as an over-long underline or a wide bold, so it belongs
+to the run that is not emphasised. Covered by a new case in
+`inline-rich-write.test.ts` (418 tests here, was 417).
+
+Church's own copy of the function had reached the same fix independently and by
+a different route: it also pushed an UNMARKED space for a `<br>` inside a
+`<strong>`, which is worse - `<b>a<br>b</b>` then stores three spans instead of
+one. This repo's `pushText(' ')` (which inherits the current marks) is the right
+call and was kept; only the boundary rule was taken.
+
+**2. `styles.ts` gained a `note` style.** A short muted paragraph inside a panel,
+where a group of rows would otherwise be. Church needs it because its surface
+card has to say WHY it is offering nothing on a section with a background photo:
+that section paints white text over the picture and never wears its surface
+classes. Unused here, like `panel`/`optionRow`/`optionDot` and for the same
+stated reason - the vocabulary belongs to the family, and the bundler drops what
+nobody imports.
+
+**Also confirmed from church's side, no change needed:** `readSectionPath`'s new
+`arrayFields` parameter is exactly what church required (it has TWO arrays,
+`flexibleSections` and `sections`), and the `tool-theme.ts` seam let church swap
+in its own six values without touching `styles.ts`. Both generalizations paid for
+themselves on their first port.
+
+**What church does NOT share, correctly:** it has three controls, not two. Card
+26 gave every shell-aware block a `background` object with a `tone` and an
+`accent`, so a surface card there has a real field to write to; this template
+still has none by design (CLAUDE.md #9). `section-fields.ts`, `overlay/index.ts`,
+`overlay/tool-theme.ts` and the card components stay per-repo.
+
+## Card 28b: presacademy and WCP reconciled onto card 28 (2026-08-28)
+
+Card 28 shipped on presacademy and WCP FIRST, and only then were the shared
+pieces canonicalized here. So the two repos that INVENTED the layer were the two
+carrying the only un-canonical copies of it, and `sync-check` could not see them
+at all: 33 marked files in presacademy and 16 in WCP against church's 50. That is
+the shape a library of record is supposed to make impossible, and it is why this
+card exists.
+
+**Canonical after this pass** (marked in the starter, presacademy and WCP):
+`src/lib/sanity-path.ts`, `src/lib/inline-rich.ts`, `src/lib/inline-rich-write.ts`,
+`src/lib/heading-accent.ts`, `src/components/preview/overlay/usePopover.ts`,
+`overlay/useDraftDocument.ts`, `overlay/styles.ts`. Marked counts went 33 -> 42
+(presacademy) and 16 -> 21 (WCP; its two deliberate, self-documenting drifts in
+`UndoRedo.tsx` and `shareDraftLink.tsx` are unchanged and still expected).
+
+### The bug the reconciliation was really for
+
+`normalizeRuns` stored a DOUBLE SPACE across a mark boundary - card 28a, fixed
+here and in church that same afternoon, and still broken in BOTH origin repos
+until now. presacademy's copy had no boundary handling whatsoever.
+
+**WCP shared the bug**, by a different route. Its `normalizeRuns` had been
+rewritten around lines rather than around one merge loop, and the merge inside a
+line still only fired for runs with IDENTICAL marks, so `<b>a </b><i> b</i>`
+walked straight past it exactly as presacademy's did. Neither repo had a case for
+it. Both do now: presacademy took the canonical `inline-rich-write.test.ts`
+verbatim (it runs `node --test`, like the starter), and WCP has its own vitest
+case, `drops a double space that meets ACROSS a mark boundary`, which asserts the
+run list AND the `htmlToRuns` path that produced it.
+
+### WCP's multi-line handling came UP, not away
+
+This is the half that is not tidying. WCP's `emphasis-write.ts` was more capable
+than the canonical file, not less: it was RUN_BREAK-aware, so `bold\nitalic` kept
+its two lines and its two marks. That is not a fork to flatten - `emphasisHtml`
+there joins stored blocks with `<br />`, so a volunteer who typed two lines in
+the form HAS two blocks, and collapsing them would have deleted a line break the
+moment anybody opened the in-canvas card. The starter's one-paragraph rule is
+equally right for the starter, whose reader joins blocks with a space.
+
+So the behaviour became a SEAM rather than a fork, the third one on this card
+after `arrayFields` and `tool-theme.ts`:
+
+- `RUN_BREAK` (a plain `'\n'`) moved into the canonical `inline-rich.ts`, where a
+  reader that emits breaks and a writer that stores them can both see it.
+- `RichWriteOptions.multiline` is **off by default**, so the starter, church,
+  presacademy, reid and mas keep byte-identical behaviour and byte-identical test
+  output. WCP's `TextPopover.tsx` passes `{ multiline: true }` at both call sites.
+- `normalizeRuns` took WCP's line structure and the starter's boundary fix. With
+  no break in the input it is exactly the old single-paragraph function; with
+  breaks it trims each line and drops blank ones.
+- `runsToInlineRich` is now one block per line, which is one block when there is
+  no break. `runsToHtml` renders a break as `<br>`.
+
+**One latent bug was fixed on the way in.** WCP's version SPLIT run text on
+`'\n'`, so a run whose text merely CONTAINED a newline - source formatting
+between two tags, or a pretty-printed Word paste - became two lines. Only a run
+whose WHOLE text is `RUN_BREAK` is a break now, `htmlToRuns` squeezes whitespace
+as it pushes text so it can never accidentally emit one, and the plain-text half
+of a paste goes through a new `textToRuns(text, options)` instead of leaning on
+the collision. Covered in both suites.
+
+### What did NOT move, and why that is the answer
+
+- **The canonical `styles.ts` was not changed at all.** reid-design-site and
+  mas-monograms carry it, `usePopover.ts`, `useDraftDocument.ts` and
+  `sanity-path.ts` too, so any edit to those four would have put five repos into
+  drift to serve two. presacademy and WCP took the canonical copies as they
+  stand, and each got a `tool-theme.ts` holding its own six values. The visible
+  cost is three touches of Studio-only chrome (a selected row's rule, a hover
+  tint, a filled button), which is what the six-value seam is FOR.
+- **WCP's two extras stayed per-repo**, exported from its `tool-theme.ts` and
+  spread onto the canonical styles by its own card components: `TOOL_ACCENT` (the
+  brand navy for a selected state) and `dialogReset` (its cards are real
+  `<dialog open>` elements and reset the user-agent layout). Two repos wanting an
+  accent value is evidence, not a mandate; fold it into `ToolTheme` as an OPTIONAL
+  field the day a third does, so no sibling's `tool-theme.ts` has to change.
+- **`optionDot` kept its canonical `(background, size)` shape.** WCP passed a
+  `{dot, dotDark}` band object; it now computes the split-fill gradient in a local
+  `dotFill()`, which is the move church already made and documented.
+- **WCP's word picker was NOT extracted into `heading-accent.ts`.** It lives in
+  `src/lib/emphasis.ts` beside a `splitHeadingAccent` that is a different function
+  from this repo's (`HeadingAccentParts | null`, and a 24-character cap), rendered
+  through by two public `.astro` components. Splitting that module to share forty
+  lines would have touched PUBLIC OUTPUT, which this pass was not allowed to
+  change. WCP's `splitHeadingWords` is also the better one - it refuses to OFFER a
+  word its own matcher would refuse to match - but that improvement is tied to a
+  cap this template does not have, so porting it up would add a knob nobody here
+  turns. presacademy's `heading-accent.ts` differed only in comments and took the
+  canonical copy.
+
+### The rename, and why it was required rather than tidy
+
+WCP's write half was called `emphasis-write.ts`. `sync-check` matches by PATH, so
+a marked file at a different path reports MISSING-IN-STARTER forever; the file had
+to become `src/lib/inline-rich-write.ts` to be covered at all. The fallout was
+three import sites (`TextPopover.tsx`, `section-fields.ts`, and the test), plus
+one comment in `emphasis.ts` and one link in `docs/PAGE_BUILDER.md`.
+
+The READ half was NOT renamed, and should not be. `emphasis.ts` is imported by
+fourteen files, holds `emphasisHtml` and the heading accents, and is named after
+the schema type (`emphasisText`) that it reads. Instead WCP gained a 40-line
+`src/lib/inline-rich.ts` that re-exports `RUN_BREAK`, `emphasisRuns as
+inlineRichRuns` and `InlineRun` from it, plus the two structural block types.
+That is the specifier the canonical writer imports, so the seam is a rename and
+not a second implementation. It is deliberately UNMARKED: it is an adapter, and
+an adapter claiming to be canonical would report drift forever.
+
+### Tests do not travel, and the docs now say so
+
+The starter and presacademy run `node --test`; WCP runs vitest. So a canonical
+`.test.ts` can be adopted verbatim in presacademy and never in WCP. WCP keeps its
+own suites for `sanity-path` and `inline-rich-write`, unmarked, which is the rule
+its `docs/TESTING.md` already wrote down for the seven `preview-*` suites.
+
+**Verified:** starter `npm test` 418 -> 425, 0 fail; church 449, 0 fail, still
+50 SAME / 0 drift. presacademy `tsc` 8 errors before and after (all pre-existing),
+`npm test` 452 -> 464 0 fail, build green, `page-parity compare` 13/13 PASS,
+sync-check 42 SAME / 0 drift. WCP `tsc` 1 error before and after (pre-existing),
+`npm run test:unit` 709 -> 713 0 fail across 45 files, `npm run check` exit 0,
+`npm run format:check` clean, build green, `page-parity compare` 27/27 PASS,
+sync-check 19 SAME / 2 expected drift. Its preview island
+(`VisualEditingOverlay`) went **23,389 -> 23,604 bytes raw, 8,633 gzipped: +215
+bytes** for the seam, the two new helpers and a `tool-theme.ts` - measured by
+stashing the change, rebuilding, restoring, and rebuilding again. Nobody but an
+editor in draft mode ever downloads it, and 27/27 parity says the public pages
+did not move by a byte.
 
 ## Sync sessions
 
@@ -2600,14 +2917,16 @@ intent THROUGH the match, watch for the flip back to the path we came from, and
 re-issue on that flip - which is a real change to `params.preview`, so the host
 effect does run. Capped at 4 attempts inside a 4s window.
 
-**One real divergence.** presacademy's `useInstantText` reads the draft through
-`overlay/useDraftDocument.ts`, which also carries `setAt`/`setInside`/`unsetAt`
-and a `write()` for the card-28 in-canvas controls, and which imports a
-`src/lib/sanity-path.ts` this repo does not have. The starter has no such
-controls and only ever READS, so the single `getDocument().getSnapshot()` call
-lives inside `useInstantText` itself and `useDraftDocument.ts` was not ported. If
-card 28 is ever canonicalized here, that file arrives with it and the hook should
-be rewired onto it.
+**One real divergence — CLOSED 2026-08-28 by card 28.** presacademy's
+`useInstantText` reads the draft through `overlay/useDraftDocument.ts`, which also
+carries `setAt`/`setInside`/`unsetAt` and a `write()` for the card-28 in-canvas
+controls, and which imports a `src/lib/sanity-path.ts` this repo did not have.
+When cards 29-29d landed here the starter had no such controls and only ever
+READ, so the single `getDocument().getSnapshot()` call lived inside
+`useInstantText` itself and `useDraftDocument.ts` was not ported. Card 28 brought
+both files in the same day, marked canonical, and `useInstantText` now takes
+`readNow` from the shared hook. There is no second door to the optimistic document
+in this repo any more.
 
 **Nothing was skipped for want of a surface.** Everything on the list had an
 equivalent in this repo, including the PreviewLayout chrome fetch (one here,
@@ -2636,3 +2955,110 @@ needed.
 in the canonical file and will stay that way everywhere. It is an arbitrary token
 whose only job is to match at both ends of one repo's postMessage channel;
 renaming it per repo would fork an otherwise identical file for nothing.
+
+### 2026-08-28: card 28 canonicalized here, minus the band card
+
+The floating in-canvas layer, brought from presacademy and cross-read against
+WCP's independent port. Two working implementations of the same idea on two
+different vocabularies is what made the generic/per-repo line easy to draw:
+whatever the two agreed on down to the prose was portable, whatever they spelled
+differently was the repo talking.
+
+**Marked PORTABLE (6 files + 2 suites):** `src/lib/sanity-path.ts`,
+`src/lib/inline-rich-write.ts` and both `.test.ts`; the word-picker half of
+`src/lib/heading-accent.ts` (already canonical, extended in place);
+`src/components/preview/overlay/usePopover.ts`, `overlay/useDraftDocument.ts`,
+`overlay/styles.ts`.
+
+**Left per-repo, unmarked:** `src/lib/section-fields.ts` + its drift gate (the
+registry IS the vocabulary), `overlay/index.ts` (the control map),
+`overlay/tool-theme.ts` (six brand values), and the two card components. The card
+says which seam a later fold-back would cut.
+
+**Two files were genericized on the way in, and neither repo's copy is the one
+that landed.** `sanity-path.ts`'s `readSectionPath` now takes the page-builder
+array names instead of owning them, and `styles.ts` reads its palette from the
+new per-repo `tool-theme.ts` instead of declaring it inline. Both are the card-22
+`redirects.ts` move: keep the arithmetic, hand the vocabulary in. presacademy and
+WCP will both report DRIFT on these two the moment they mark their copies, and
+the resolution is to take the starter's shape, not to fold the constants back.
+
+**What the starter's own doctrine ruled out.** No band card, no surface control,
+no tone field: `CLAUDE.md` #9 and card 26 both say a block here carries no colour
+field, and `SectionRenderer` owns the cadence precisely so reordering cannot break
+the rhythm. That is recorded on the card as the correct outcome rather than a gap,
+and `section-fields.test.ts` now ASSERTS the absence, so the doctrine is a test
+instead of a promise. The band-card styles still ship in the canonical
+`styles.ts`, unused and tree-shaken, for the next repo.
+
+**Vocabulary discovered here:** `headingAccent` on five types (`richTextSection`
+matched against `heading`; `ctaBandSection`, `servicesGridSection`,
+`testimonialsSection` and `faqSection` against `headline`), six `subhead` /
+`subheadRich` twins (the four above minus `richTextSection`, plus `teamSection`
+and `dynamicListSection`), and the two document-level hero strings
+`heroHeadline` / `heroSubhead`, which only the bespoke pages render.
+
+**Verification:** `npx tsc --noEmit` 46 errors before and 46 after, all
+pre-existing and environmental; `npm test` 359 -> 417, 0 fail (58 new: 14 for
+`sanity-path`, 19 for `inline-rich-write`, 17 in the new `section-fields` drift
+gate, and 8 for the word picker); `npm run lint` back to its pre-existing 1 error + 7
+warnings, none in touched files; prettier clean on every touched file;
+`npm run build` clean; `page-parity compare` **10/10** (this whole layer is
+preview-only, so any parity movement would have been a bug); `sync-check`
+self-check 44 -> **51 SAME / 0 drift**; `sync-check ../presacademy` **33 SAME /
+0 drift**.
+
+**One drift introduced, deliberately.** `sync-check ../ncs-church-starter` now
+reports **42 SAME / 1 drifted**: `src/lib/heading-accent.ts`, because the word
+picker was added to the canonical copy and church's copy ends where the file used
+to. It is a pure append — the diff is "site: (end of file)" at line 78 — so the
+resolution is to pull the starter's copy forward at church's next sync session,
+which is also the session where church gets all three controls (it has the full
+card-26 vocabulary, including the surfaces a band card needs). No church file was
+touched here.
+
+**Bundle.** The preview island (`VisualEditingOverlay`) went 10,679 -> 25,426
+bytes raw, 9,546 gzipped. It is loaded `client:only` and only when draft mode is
+on, so no public visitor ever downloads it; the public pages are byte-identical,
+which is what the parity run proves.
+
+**What no test can reach without a Studio open**, and what is now in
+`docs/PENDING.md`: the resolver actually mounting on a heading, the picker writing
+through the comlink into the draft, the paste allow-list against a real Word
+paste, and the "Edit here" card's blur-saves behaviour. This template has no Sanity
+project, so card 28 is proven here only as far as the build and the pure logic go.
+
+### 2026-08-28: presacademy and WCP reconciled onto card 28 (card 28b)
+
+The pass card 28b describes, run as one session over four repos. Nothing was
+committed or pushed in any of them.
+
+**Starter (library of record).** `src/lib/inline-rich.ts` gained `RUN_BREAK`;
+`src/lib/inline-rich-write.ts` gained the `multiline` seam, `textToRuns`, a
+whitespace squeeze in `pushText`, and a line-aware `normalizeRuns` that keeps the
+card 28a boundary fix; `inline-rich-write.test.ts` gained 7 cases. `npm test`
+418 -> 425, 0 fail. `tsc` 46 errors before and after, none in touched files. The
+four files reid-design-site and mas-monograms carry (`styles.ts`, `usePopover.ts`,
+`useDraftDocument.ts`, `sanity-path.ts`) were deliberately NOT touched, so neither
+repo moved.
+
+**ncs-church-starter.** Took the three changed canonical files as a straight copy.
+`npm test` 449, 0 fail; `sync-check` **50 SAME / 0 drift**, unchanged. (Its `tsc`
+has pre-existing `insertMenu.groups` readonly errors in the schema, untouched
+here.)
+
+**presacademy.** Took nine canonical files, gained
+`overlay/tool-theme.ts`, and moved `SECTION_ARRAY_FIELDS` from `sanity-path.ts`
+into `section-fields.ts` (three call sites updated: `section-fields.ts` x2,
+`HeadingAccentPicker.tsx`, `SurfaceChips.tsx`). `sync-check` **33 -> 42 SAME /
+0 drift**.
+
+**WCP.** Same nine minus the two test files (vitest, see card 28b), plus the
+`emphasis-write.ts` -> `inline-rich-write.ts` rename, the new
+`src/lib/inline-rich.ts` adapter and the new `overlay/tool-theme.ts`. `sync-check`
+**16 -> 21 marked, 19 SAME / 2 drifted** - the two drifts are the pre-existing,
+self-documenting ones in `UndoRedo.tsx` and `shareDraftLink.tsx` and are expected.
+
+**All five siblings after the pass:** presacademy 42/0/0, WCP 19/2/0 (both drifts
+expected), ncs-church-starter 50/0/0, reid-design-site 17/0/0, mas-monograms
+25/0/0.

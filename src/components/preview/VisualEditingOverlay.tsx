@@ -4,6 +4,7 @@ import type { HistoryAdapter, HistoryRefresh } from '@sanity/visual-editing';
 import { useCallback, useEffect, useRef } from 'react';
 import { SOFT_REFRESH_EVENT, useInstantText } from './overlay/useInstantText.ts';
 import { startTiming } from './overlay/timing.ts';
+import { inCanvasControls } from './overlay/index.ts';
 import {
   createRefreshState,
   onChange as onRefreshChange,
@@ -71,7 +72,10 @@ const mpaHistory: HistoryAdapter = {
 //  1. <VisualEditing> draws the click-to-edit overlay and opens the comlink to
 //     the parent Studio window. It is also what turns the `data-sanity`
 //     attributes from src/lib/preview-edit-attr.ts into in-canvas section
-//     controls (insert / duplicate / remove / drag), with no extra props.
+//     controls (insert / duplicate / remove / drag), with no extra props. The
+//     `components` prop adds THIS repo's own floating controls on top of that
+//     (PORTS.md card 28): the click-a-word heading accent and the "Edit here"
+//     text card. See ./overlay/index.ts for the four host facts they rely on.
 //  2. Refresh: the content is server-rendered Astro, so we soft-refetch THIS
 //     preview URL and RECONCILE the fresh <main> into the live one. No full
 //     reload, no scroll jump, and click-to-edit keeps working because the
@@ -371,5 +375,7 @@ export default function VisualEditingOverlay({ pageId }: Props) {
     [pageId, softRefresh],
   );
 
-  return <VisualEditing portal refresh={refresh} history={mpaHistory} />;
+  return (
+    <VisualEditing portal refresh={refresh} history={mpaHistory} components={inCanvasControls} />
+  );
 }
