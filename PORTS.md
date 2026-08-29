@@ -702,7 +702,7 @@ per-section-type preview thumbnails, and "duplicate page" in the navigator.
 - **Auto-deploy-from-main repos**: the dashboard deploy command must
   switch to `-c dist/server/wrangler.json` BEFORE the upgrade merges,
   or /studio and /preview 404. Land on a holding branch until the
-  human flips it (mas: modern-stack branch).
+  human flips it (mas: staging branch).
 
 ## Card 18: Chrome options (editable header/footer content)
 
@@ -2338,7 +2338,7 @@ inherit most of this by sync from here rather than by a fresh port.
 
 Every Sanity repo except 2ndpreschicago (parked for DNS cutover) now
 carries the modern stack. "staged" = verified and pushed to a
-modern-stack HOLDING BRANCH because those repos auto-deploy from main
+`staging` HOLDING BRANCH because those repos auto-deploy from main
 via Cloudflare Workers Builds; the dashboard deploy command must
 become `npx wrangler deploy -c dist/server/wrangler.json` BEFORE the
 merge, or every SSR route 404s. reid additions to the lore:
@@ -2353,7 +2353,7 @@ was deliberate and axe-clean).
 
 Two editor reports from presacademy, fixed and rolled to every
 Presentation repo (presacademy, wcp, starter, church-starter [layout
-only - no navigator], reid + mas modern-stack branches):
+only - no navigator], reid + mas staging branches):
 
 1. Edit-mode gate in PreviewLayout's interceptor (see Card 11's
    amendment).
@@ -2383,7 +2383,7 @@ outline as editable surfaces and a click opens the owning document in
 the edit panel. Applied to presacademy (header->title,
 footer->mission), wcp (header->the navigation doc's mainNav,
 footer->siteSettings; its chrome already rendered via linkBase),
-starter, church-starter, reid + mas modern-stack (all
+starter, church-starter, reid + mas staging (all
 header->siteSettings.title, footer->tagline). Headers/Footers accept
 an optional siteSettings prop with clean fallbacks in every repo, so
 a null fetch can never blank the chrome.
@@ -3062,3 +3062,49 @@ self-documenting ones in `UndoRedo.tsx` and `shareDraftLink.tsx` and are expecte
 **All five siblings after the pass:** presacademy 42/0/0, WCP 19/2/0 (both drifts
 expected), ncs-church-starter 50/0/0, reid-design-site 17/0/0, mas-monograms
 25/0/0.
+
+## Card 30: One branch vocabulary across the family (2026-08-29)
+
+Six repos had four conventions between them: this one still on `master`,
+presacademy on `main` + `staging`, wcp and church-starter on `main` alone, and
+reid + mas on `main` + a `modern-stack` holding branch. Every repo is now
+`main` (production) + `staging` (edge preview), and nothing else.
+
+**The renames went through GitHub's rename API, not delete-and-recreate.** That
+API moves open PRs, retargets branch protection, and leaves a redirect for the
+old name, so an old clone or a stale bookmark still resolves instead of 404ing.
+Locally: `git branch -m`, `fetch --prune`, `branch -u`, and for this repo
+`remote set-head origin -a` so `origin/HEAD` follows.
+
+  - ncs-astro-sanity-starter  `master`       -> `main`     (default branch too)
+  - reid-design-site          `modern-stack` -> `staging`
+  - mas-monograms             `modern-stack` -> `staging`
+
+`staging` is not decoration - it is a deploy target. presacademy's
+`deploy-staging.yml` is now in all six, pointed at a `<worker>-staging` Worker
+so production is never touched, and gated on `CLOUDFLARE_API_TOKEN` so it warns
+and skips rather than failing where the secret is absent (same dormant-commit
+pattern as `uptime.yml`). Worker names: `ncs-astro-sanity-starter-staging`,
+`presacademy-staging`, `wcp-website-staging`, `church-starter-staging`,
+`reid-design-site-staging`, `mas-monograms-staging`.
+
+**A bug in the file being ported, found on the way out.** presacademy's
+`deploy-staging.yml` ran `wrangler deploy --name presacademy-staging` - a PLAIN
+deploy, which reads the source `wrangler.jsonc` and knows nothing about the
+adapter's generated asset manifest, so every sub-route 404s on these hybrid
+static+SSR builds. That is the same trap every repo's `npm run deploy` already
+avoids with `-c dist/server/wrangler.json`, and card 18's own note warns about
+it for the Workers Builds dashboard command. Fixed in presacademy and never
+copied: all six now run `deploy -c dist/server/wrangler.json --name <worker>`.
+The preview had presumably never been exercised, or this would have surfaced as
+a staging site whose home page worked and whose every other page did not.
+
+Every `ci.yml` push trigger is now `[main, staging]`. Two of these repos gained
+CI on the branch they were actually working on: reid and mas only ever built on
+`main`, so every `modern-stack` push - including the card 28 one - ran no CI at
+all.
+
+**Still human-side for reid and mas:** both auto-deploy from `main` through
+Cloudflare Workers Builds, and card 18's activation note still stands. Check
+each project's Workers Builds branch configuration after this rename - if it
+names branches explicitly, `modern-stack` no longer exists under that name.

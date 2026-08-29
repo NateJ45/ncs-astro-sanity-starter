@@ -1,0 +1,72 @@
+name: Deploy staging preview
+
+# Deploys the `staging` branch to a SEPARATE Cloudflare Worker (ncs-astro-sanity-starter-staging)
+# so you can verify on the real edge (security headers, the Sanity CDN image
+# pipeline, redirects, real Lighthouse) before it reaches production. The
+# preview lives at https://ncs-astro-sanity-starter-staging.<your-subdomain>.workers.dev.
+#
+# Activates once these repo secrets exist: CLOUDFLARE_API_TOKEN,
+# CLOUDFLARE_ACCOUNT_ID. Until then the gate below skips the deploy with a
+# warning rather than failing the run, so the workflow is safe to commit
+# dormant (same pattern as uptime.yml and sanity-backup.yml).
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::CLOUDFLARE_API_TOKEN not set; skipping staging deploy."
+          fi
+
+  deploy:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Sanity types
+        run: npm run typegen
+
+      - name: Build
+        env:
+          # Real content when these repo VARIABLES are set; otherwise the build
+          # falls back to empty-state pages and the preview still validates the
+          # edge behaviour (headers, image pipeline, routing).
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: npm run build
+
+      # THE CONFIG FLAG IS LOAD-BEARING. This is a hybrid static+SSR build, and
+      # a plain `wrangler deploy` reads the SOURCE wrangler.jsonc, which knows
+      # nothing about the adapter's generated asset manifest — every sub-route
+      # 404s. Deploy the adapter's own config, exactly as `npm run deploy`
+      # does, and override only the Worker name so production is never touched.
+      - name: Deploy to the staging Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy -c dist/server/wrangler.json --name ncs-astro-sanity-starter-staging
