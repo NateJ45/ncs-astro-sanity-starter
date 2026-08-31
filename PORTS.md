@@ -3170,7 +3170,11 @@ editor scrolls past a hundred dead rows to find this week's. The structure
 helper opens such a type as "This school year (YYYY–YY)" — the default pane —
 plus one pane per past year and an Everything list at the bottom. Presentation
 only: nothing moves or archives. School years run Aug 1 – Jul 31, named by
-their fall; undated docs fall back to `_createdAt` so nothing ever hides.
+their fall. Undated documents need a deliberate choice per type: content that
+was WRITTEN at a moment (updates, posts) falls back to `_createdAt`; an
+undated EVENT is an ongoing one ("Monthly info session") and belongs in EVERY
+year pane — bucketing it by creation date empties the default view once the
+creation year's pane ages out (bit presacademy 2026-08-31).
 
 Two invariants: the folder's `.id()` must equal the old flat list's id so
 guide links and bookmarks keep landing; and on a repo with soft-delete
