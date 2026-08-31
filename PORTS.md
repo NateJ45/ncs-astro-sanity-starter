@@ -86,6 +86,10 @@ is installing it as of the date on the card.
 | 29b | Refresh scheduler (single-flight / stale discard / floor)         | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
 | 29c | Preview morph (in-place reconcile)                                | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
 | 29d | Staleness counts every channel                                    | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 |
+| 31  | Studio welcome tour (StudioTour)                                  | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
+| 32  | Branded tool headings (ToolHeading)                               | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
+| 33  | Year-scoped lists for accumulating types                          | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
+| 34  | Studio search weights (__experimental_search)                     | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -3108,3 +3112,89 @@ all.
 Cloudflare Workers Builds, and card 18's activation note still stands. Check
 each project's Workers Builds branch configuration after this rename - if it
 names branches explicitly, `modern-stack` no longer exists under that name.
+
+---
+
+## Card 31: Studio welcome tour (2026-08-31)
+
+**Dated 2026-08-30 (WCP), ported to presacademy 2026-08-31. Canonical copy: not
+in the starter yet — WCP's `src/sanity/components/StudioTour.tsx` is the
+reference.**
+
+A first-visit stepped welcome dialog for the Studio, the same pattern as WCP's
+hub tour: mounted by the custom `studio.components.layout` wrapper every repo
+in this family already has (it loads the brand fonts), shown once per browser
+via a versioned localStorage key, and replayable from the Welcome pane via a
+CustomEvent. Every storage read is try/caught so a blocked localStorage (a
+thumbnail renderer, a locked-down browser) can never take the Studio down.
+
+Why it exists: these Studios are handed to non-technical volunteer editors,
+and the first session decides whether they trust the tool. The tour's steps
+teach the five things every editor needs on day one — nothing is live until
+Publish, click the page to edit it, the ＋ starters, the Media library, and
+where help lives.
+
+**Adapt per site:** the step list (name the site's own tools and guide by
+their real titles), the SEEN_KEY prefix, and (multi-workspace Studios only,
+like WCP) workspace-aware middle steps via `useWorkspace()`. Bump SEEN_KEY
+whenever the steps change enough that returning editors should see them again.
+
+---
+
+## Card 32: Branded tool headings (2026-08-31)
+
+**Dated 2026-08-30 (WCP), ported to presacademy 2026-08-31. Canonical copy:
+not in the starter yet — each site adapts its own logo.**
+
+One `ToolHeading` component — the site's mark beside a display-font heading —
+opens every custom Studio tool (Welcome, Checkup, setup wizard, stats, export,
+cleanup). Before it, each tool hand-rolled a plain `<Heading>`, so the tools
+read as unrelated white panels; after it, they read as one family, and a new
+tool gets the brand moment for free by importing the component.
+
+**Adapt per site:** the mark asset and any chip/backing the mark needs for
+contrast (presacademy reuses StudioLogo's paper chip; WCP uses the sun+cloud
+emblem with a display-font class).
+
+---
+
+## Card 33: Year-scoped lists for accumulating types (2026-08-31)
+
+**Dated 2026-08-31 (WCP), ported to presacademy 2026-08-31. Canonical copy:
+not in the starter yet — WCP's `yearScopedList` in `src/sanity/structure.ts`
+is the reference (presacademy carries the single-type `yearScopedEvents`).**
+
+Types that accumulate forever (updates, events, sign-up sheets, celebrations,
+news, newsletters, hours ledgers) become unusable flat lists by year three: an
+editor scrolls past a hundred dead rows to find this week's. The structure
+helper opens such a type as "This school year (YYYY–YY)" — the default pane —
+plus one pane per past year and an Everything list at the bottom. Presentation
+only: nothing moves or archives. School years run Aug 1 – Jul 31, named by
+their fall; undated docs fall back to `_createdAt` so nothing ever hides.
+
+Two invariants: the folder's `.id()` must equal the old flat list's id so
+guide links and bookmarks keep landing; and on a repo with soft-delete
+(`archived`), every pane's filter must carry NOT_ARCHIVED or archived rows
+resurface only in the year panes.
+
+**Adapt per site:** the type list and each type's date field, the
+FIRST_CONTENT_YEAR floor, and the school-year boundary if the client's year
+is not Aug–Jul.
+
+---
+
+## Card 34: Studio search weights (2026-08-31)
+
+**Dated 2026-08-31 (WCP), ported to presacademy 2026-08-31. Canonical: a
+pattern, not a file.**
+
+`__experimental_search` on the content document types, weighting the fields
+editors actually see — title 5, hero headline / display heading 4, summary or
+SEO description 2 (and `name` 5 / `question` 5 on people/FAQ types). Without
+it the Studio's 🔍 matches internal titles only, and an editor searching the
+words on a page finds nothing. Two lines per type; add them whenever a new
+content type lands.
+
+**Adapt per site:** the field paths per type (page hero fields differ per
+repo — and remember which repos use Sanity's slug TYPE vs plain strings; see
+the d209b1d drift gate).
