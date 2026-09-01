@@ -66,8 +66,9 @@ Default answer: the brand is the brand.
 
 Already built into every repo, worth naming in the offer:
 
-- Nightly dataset backups (sanity-backup.yml + the SANITY_AUTH_TOKEN
-  secret) and uptime checks.
+- Nightly encrypted dataset backups (sanity-backup.yml + the
+  SANITY_AUTH_TOKEN and BACKUP_PASSPHRASE secrets; encrypted because
+  the repos are public -- see PORTS.md card 6) and uptime checks.
 - The parity harness and test suites gating every change.
 - The sync system (PORTS.md): a fix made once in the starter rolls to
   every site.

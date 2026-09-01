@@ -250,15 +250,33 @@ git normalizes, so the check is clean on Linux CI).
 
 ## Card 6: Nightly Sanity backup workflow
 
-**Dated 2026-08-27 (pattern from `presacademy/.github/workflows/sanity-backup.yml`).**
+**Dated 2026-08-27, ENCRYPTION ADDED 2026-09-01 (pattern from
+`presacademy/.github/workflows/sanity-backup.yml`, encryption from
+`wcp-website` commit 73cfe3c).**
 **Canonical:** not yet installed in the starter. Reference implementation is
-presacademy's workflow.
+presacademy's workflow (which now carries the encrypted version); the
+church-starter's template copy was upgraded to the encrypted version the same
+day. wcp-website also runs the encrypted version (it is where the pattern
+landed first, commit 73cfe3c).
 
-A nightly `sanity dataset export` of production (documents plus assets), uploaded as a
-workflow artifact, so a bad mutation or an accidental Studio "Remove field" is always
-recoverable. Structured as a `gate` job that checks whether `SANITY_AUTH_TOKEN` is set
-and an `export` job gated on it, so the workflow is safe to commit before the secret
-exists.
+A nightly `sanity dataset export` of production (documents plus assets), ENCRYPTED,
+then uploaded as a workflow artifact, so a bad mutation or an accidental Studio
+"Remove field" is always recoverable. Structured as a `gate` job that checks whether
+BOTH secrets are set — `SANITY_AUTH_TOKEN` and `BACKUP_PASSPHRASE` — and an `export`
+job gated on it, so the workflow is safe to commit before the secrets exist.
+
+**The encryption is load-bearing on public repos — never port the pre-2026-09-01
+plaintext version.** Workflow artifacts on a PUBLIC repo are downloadable by any
+logged-in GitHub user, and most of this family is public, so an unencrypted dataset
+artifact publishes the client's content (directories, family details, whatever the
+dataset holds). The pattern: the gate refuses to export at all when
+`BACKUP_PASSPHRASE` is missing (warn + skip, never a plaintext upload), and the
+export is encrypted before upload with
+`openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass env:BACKUP_PASSPHRASE`,
+uploading only the `.enc`. Restore prepends one decrypt step (`openssl enc -d` with
+the same flags). The passphrase must ALSO live outside GitHub, somewhere the client
+can find it — GitHub never shows a secret again, and a backup nobody can decrypt is
+no backup.
 
 **The schedule-disabled-until-secret pattern.** presacademy commented its `schedule:`
 block out with the reason preserved in the file: the token was never set, so the daily
@@ -273,8 +291,9 @@ apply to them. Most of this family is public (all eight were confirmed public
 not exist for months; otherwise leave it running.
 
 **Per-site adaptation:** the public Sanity project id and dataset name (the id is not a
-secret, it ships in the client bundle), the retention window, and the restore steps in
-that repo's ops doc.
+secret, it ships in the client bundle), the retention window, the restore steps
+(including the decrypt step) in that repo's ops doc, and where the off-GitHub copy of
+`BACKUP_PASSPHRASE` is kept for that client.
 
 ## Card 7: Uptime workflow
 
