@@ -118,21 +118,35 @@ try {
   // The starter checkout is made by actions/checkout, which persists its own
   // credentials into that clone's config as
   //   http.https://github.com/.extraheader = AUTHORIZATION: basic <GITHUB_TOKEN>
-  // That header OUTRANKS the userinfo in the push URL, so without this the push
-  // authenticates as github-actions[bot] scoped to the SITE repo and the library
-  // answers 403 - in a message about the bot that never mentions the PAT, which
-  // is why it reads like a missing or wrong secret and is not one. Proved on
-  // mas-monograms#36, 2026-09-06: GH_ACTIONS_PAT was present and correct the
-  // whole time and was simply never consulted.
-  for (const key of git(['config', '--local', '--name-only', '--list'], STARTER).split('\n')) {
-    const k = key.trim();
-    if (k.endsWith('.extraheader')) {
-      spawnSync('git', ['config', '--local', '--unset-all', k], { cwd: STARTER });
-    }
+  // That header OUTRANKS the userinfo in the push URL, so the push authenticates
+  // as github-actions[bot] scoped to the SITE repo and the library answers 403 -
+  // in a message about the bot that never mentions the PAT, which is why it
+  // reads like a missing or wrong secret and is not one. On mas-monograms#36
+  // (2026-09-06) GH_ACTIONS_PAT was present and correct throughout and was
+  // simply never consulted.
+  //
+  // Unsetting the key was not enough on its own, so the push also overrides it
+  // for that one command (an empty extraheader sends no header). The keys found
+  // are printed because the first two attempts at this failed silently and
+  // looked identical to a bad secret: if it ever regresses, the log says which
+  // credential was actually in play rather than leaving it to be re-guessed.
+  const names = git(['config', '--local', '--name-only', '--list'], STARTER)
+    .split('\n')
+    .map((k) => k.trim())
+    .filter((k) => k.endsWith('.extraheader'));
+  console.log(`propose-drift: persisted credential keys: ${names.join(', ') || '(none)'}`);
+  for (const k of names) {
+    spawnSync('git', ['config', '--local', '--unset-all', k], { cwd: STARTER });
   }
+  const left = git(['config', '--local', '--name-only', '--list'], STARTER)
+    .split('\n')
+    .filter((k) => k.trim().endsWith('.extraheader'));
+  console.log(`propose-drift: still set after unset: ${left.join(', ') || '(none)'}`);
 
   git(
     [
+      '-c',
+      'http.https://github.com/.extraheader=',
       'push',
       '--force-with-lease',
       `https://x-access-token:${TOKEN}@github.com/${LIBRARY}.git`,
