@@ -37,11 +37,19 @@ dependency-free, so it runs in any repo in the family whatever that repo has ins
 Run it from the starter against itself for a self-check (everything must be `SAME`),
 and from each site during that site's sync session.
 
-**Sites do not have the marker yet.** As of 2026-08-27 only this starter's copies carry
-it, so a cross-check from a site reports "no marked files found" rather than drift.
-Adding the marker line to a site's already-ported copies is the first act of that
+**Most sites do not have the marker yet.** As of 2026-08-27 only this starter's copies
+carried it, so a cross-check from a site reported "no marked files found" rather than
+drift. Adding the marker line to a site's already-ported copies is the first act of that
 site's sync session. presacademy needs one: it is the source of most of these files and
-none of its copies are marked.
+none of its copies are marked. WCP has had its session: 22 marked files as of
+2026-09-06, all `SAME`.
+
+**The marker is opt-in and one-way, so it proves nothing about what it does not cover.**
+A file with no marker is not thereby non-portable; it has simply never been looked at.
+That is what a harvest audit is for: read a site's unmarked files, decide portable /
+site-specific / dead for each, and either port the wins or write down why not. The
+first one (WCP, 2026-09-06) is recorded in the harvest notes under the cards it
+touched.
 
 ---
 
@@ -61,7 +69,7 @@ is installing it as of the date on the card.
 | 6   | Nightly Sanity backup workflow                                    | yes     | yes         | template | yes              | yes           | yes            | template           | n/a                 |
 | 7   | Uptime workflow                                                   | yes     | yes         | template | yes              | yes           | yes            | template           | yes                 |
 | 8   | Playwright + axe + reflow suite                                   | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 |
-| 9   | contrast.ts + theme-token gate                                    | partial | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
+| 9   | contrast.ts + theme-token gate                                    | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
 | 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
 | 11  | Preview click interceptor                                         | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
 | 12  | Parity-gated page-builder conversion                              | partial | yes         | partial  | no               | no            | no             | no                 | no                  |
@@ -361,6 +369,32 @@ or a control edge must be added to the test with `AA_NON_TEXT`.
 **Per-site adaptation:** the token names and the pair list. Also worth carrying: WCP's
 measured accessible "ink" replacement shades, which solved the same problem by moving the
 palette rather than the pairs.
+
+**Harvest note (2026-09-06).** WCP's `src/lib/contrast.ts` is now byte-identical to this
+one and carries the marker, so the matrix row is `yes` rather than `partial`. The audit
+that did that turned up one thing worth writing down, and it is about THIS repo, not WCP.
+
+There are two token extractors in this starter and they are not the same quality. The
+one in `theme-tokens.test.ts` is a single unscoped `matchAll` for `--color-*: #hex`
+across the whole of `globals.css`. It is not scoped to a block, so it keeps the LAST
+declaration of each token wherever it appears, and it cannot see a `var(--other)` alias
+at all. Today it happens to be correct, because all ten hex `--color-*` declarations sit
+inside the one `@theme` block. The day anyone writes a hex `--color-*` into `.dark` or
+`@theme inline`, that test silently starts measuring the dark value and asserting it as
+a light pair, and it will still pass, which is the worst failure mode a gate has.
+
+The extractor in `surfaces.test.ts` is the correct one: brace-counted so a nested rule
+cannot end a block early, `@theme` / `@theme inline` / `:root` read as the light scope
+and `.dark` as the dark one, `var()` aliases followed to a concrete hex. WCP's
+`theme-tokens.test.ts` is the same design and covers both themes, which is why card 26
+rule 2 already describes the technique as if it were universal here. It is not: card 9's
+own file predates it.
+
+The fix is to lift that extractor into one shared helper and have `theme-tokens.test.ts`
+use it, which also lets its light-only scope limitation go away. Deliberately NOT done
+in the audit commit: it is a real change to a gate, the two test files run in different
+runners across the family, and it deserves its own session rather than riding along with
+a marker sync.
 
 ## Card 10: Embedded-studio live-preview stack
 
