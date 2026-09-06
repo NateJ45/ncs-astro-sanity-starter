@@ -3500,3 +3500,24 @@ while the app lives in `site/`. Its build job already sets
 checkout `path:` and `NCS_STARTER_DIR` are both relative to
 `github.workspace` (the repo root), NOT to `site/`. Put the starter checkout at
 `.ncs-starter` at the root and point `NCS_STARTER_DIR` at it there.
+
+## 37. Drift opens its own pull request (2026-09-06)
+
+`sync-check` detects drift and stops the build, but porting the improvement
+up was still an errand you had to remember to start, in another repo, after
+the build that blocked you. `scripts/propose-drift.mjs` closes that: when the
+check fails in a site, CI copies that site's version of the drifted files into
+a `sync/from-<site>` branch here and opens a PR.
+
+It deliberately does **not** merge. Whether a change belongs in the library
+every future project inherits is a judgement, not a diff, and the same file
+can legitimately be an improvement in one site and a fork in another.
+
+The cost of not having it: wcp-website's `preview-morph.ts` carried a
+`data-morph-keep` fix that the other five repos lacked for roughly three
+months, and it only surfaced because a sync session happened to look.
+
+Needs `GH_ACTIONS_PAT` with write access to THIS repo, not only to the site
+repos. Without it the step warns and the build still fails on sync-check, so
+the gate never depends on the automation working.
+
