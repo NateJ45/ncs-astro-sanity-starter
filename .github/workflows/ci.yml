@@ -56,6 +56,18 @@ jobs:
       # while the same command succeeds locally: the classic signature of a
       # Linux CI box with less memory than the dev machine. It is runner flake,
       # not a schema problem, so retry up to three times before calling it red.
+      # What can a stranger read out of this site's dataset? Sanity's free plan
+      # is "2 datasets (public only)", so a public dataset is world readable over
+      # a plain URL with no token, and the project id ships in the page source.
+      # A login in front of a page does not protect the API behind it: on
+      # wcp-website that meant 37 family directory entries - children's names and
+      # home addresses - readable by anyone, behind a correctly built gate.
+      #
+      # Runs anonymously on purpose and needs no secrets, so it works on forks
+      # and PRs. Exceptions live in public-data-policy.json, each with a reason.
+      - name: No personal data is publicly readable
+        run: node scripts/public-data-audit.mjs
+
       - name: Generate Sanity types
         env:
           NODE_OPTIONS: --max-old-space-size=4096
