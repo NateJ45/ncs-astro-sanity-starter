@@ -3339,6 +3339,7 @@ install step, and needs no token: all of these repos are public.
   uses: actions/checkout@v7
   with:
     repository: NateJ45/ncs-astro-sanity-starter
+    ref: ${{ github.ref_name == 'staging' && 'staging' || 'main' }}
     path: .ncs-starter
 
 - name: Canonical files have not drifted
@@ -3349,6 +3350,21 @@ install step, and needs no token: all of these repos are public.
 
 The starter itself runs the SELF-CHECK form instead: no second checkout, just
 `node scripts/sync-check.mjs`, which resolves the library to this repo root.
+
+**The `ref:` line is load-bearing, and it was not in the original sketch.** A
+staging build checks against the starter's `staging`; a main build, and any PR,
+against its `main`. Without it the family's two-branch promotion model cannot
+stage a canonical change AT ALL: this very card is the proof, because the six
+sites were made to match a starter whose fix existed only on staging, so every
+site's staging run would have failed against the starter's main for a reason
+nobody could act on. It also makes the PROMOTION ORDER load-bearing:
+
+> Promote the starter to main FIRST, then the sites. A site on main checks
+> against the starter on main, so a site promoted ahead of the starter goes red
+> until the starter catches up.
+
+That ordering is a real cost of the gate and worth saying out loud rather than
+discovering it on a red main.
 
 **The prettier conflict, and why the ignore lost.** `sync-check.mjs` writes
 `'the site\'s improvement'`; prettier's `singleQuote` rule prefers whichever
