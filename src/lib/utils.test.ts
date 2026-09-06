@@ -26,10 +26,7 @@ test('returns 1 for non-array input', () => {
 });
 
 test('filters out non-block types', () => {
-  const blocks = [
-    { _type: 'image', asset: {} },
-    makeBlock('hello world'),
-  ];
+  const blocks = [{ _type: 'image', asset: {} }, makeBlock('hello world')];
   assert.equal(readingTimeFromPortableText(blocks), 1);
 });
 

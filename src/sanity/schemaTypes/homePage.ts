@@ -49,8 +49,12 @@ export const homePage = defineType({
       title: 'SEO title',
       type: 'string',
       group: 'seo',
-      description: 'Browser tab and Google result title. Aim for 50 to 60 characters. Front-load the location or service.',
-      validation: (Rule) => Rule.max(60).warning('Titles longer than about 60 characters get cut off in Google search results.'),
+      description:
+        'Browser tab and Google result title. Aim for 50 to 60 characters. Front-load the location or service.',
+      validation: (Rule) =>
+        Rule.max(60).warning(
+          'Titles longer than about 60 characters get cut off in Google search results.',
+        ),
     }),
     defineField({
       name: 'seoDescription',
@@ -58,23 +62,33 @@ export const homePage = defineType({
       type: 'text',
       rows: 3,
       group: 'seo',
-      description: 'The sentence under the title in Google results. Aim for 150 to 160 characters. Write it for a person, not a search engine.',
-      validation: (Rule) => Rule.max(160).warning('Descriptions longer than about 160 characters get cut off in Google search results.'),
+      description:
+        'The sentence under the title in Google results. Aim for 150 to 160 characters. Write it for a person, not a search engine.',
+      validation: (Rule) =>
+        Rule.max(160).warning(
+          'Descriptions longer than about 160 characters get cut off in Google search results.',
+        ),
     }),
     defineField({
       name: 'seoImage',
       title: 'Social share image (this page)',
       type: 'image',
       group: 'seo',
-      description: 'Optional. The image shown when this page is shared on social media or in a text. Overrides the site default in Site Settings. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
+      description:
+        'Optional. The image shown when this page is shared on social media or in a text. Overrides the site default in Site Settings. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
       options: { hotspot: true },
-      fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-      ],
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),
 
     // Hero (legacy structured fields — hidden for rollback safety; GROQ still returns them)
-    defineField({ name: 'heroEyebrow', title: 'Hero eyebrow', type: 'string', group: 'hero', hidden: true, readOnly: true }),
+    defineField({
+      name: 'heroEyebrow',
+      title: 'Hero eyebrow',
+      type: 'string',
+      group: 'hero',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'heroHeadline',
       title: 'Hero headline',
@@ -84,7 +98,15 @@ export const homePage = defineType({
       readOnly: true,
       validation: (Rule) => Rule.required(),
     }),
-    defineField({ name: 'heroSubhead', title: 'Hero subhead', type: 'text', rows: 3, group: 'hero', hidden: true, readOnly: true }),
+    defineField({
+      name: 'heroSubhead',
+      title: 'Hero subhead',
+      type: 'text',
+      rows: 3,
+      group: 'hero',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'heroImage',
       title: 'Hero image (legacy)',
@@ -94,7 +116,12 @@ export const homePage = defineType({
       readOnly: true,
       options: { hotspot: true },
       fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          validation: (R) => R.required(),
+        }),
       ],
     }),
     defineField({
@@ -110,14 +137,26 @@ export const homePage = defineType({
         defineArrayMember({
           type: 'image',
           options: { hotspot: true },
-          fields: [
-            defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-          ],
+          fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
         }),
       ],
     }),
-    defineField({ name: 'heroPrimaryCta', title: 'Primary CTA', type: 'ctaBlock', group: 'hero', hidden: true, readOnly: true }),
-    defineField({ name: 'heroSecondaryCta', title: 'Secondary CTA', type: 'ctaBlock', group: 'hero', hidden: true, readOnly: true }),
+    defineField({
+      name: 'heroPrimaryCta',
+      title: 'Primary CTA',
+      type: 'ctaBlock',
+      group: 'hero',
+      hidden: true,
+      readOnly: true,
+    }),
+    defineField({
+      name: 'heroSecondaryCta',
+      title: 'Secondary CTA',
+      type: 'ctaBlock',
+      group: 'hero',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'heroRotatingWords',
       title: 'Rotating first-word swap (optional)',
@@ -150,11 +189,31 @@ export const homePage = defineType({
       readOnly: true,
       options: { hotspot: true },
       fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          validation: (R) => R.required(),
+        }),
       ],
     }),
-    defineField({ name: 'meetFounderEyebrow', title: 'Eyebrow', type: 'string', group: 'meetFounder', hidden: true, readOnly: true, initialValue: 'Meet the Founder.' }),
-    defineField({ name: 'meetFounderHeadline', title: 'Headline', type: 'string', group: 'meetFounder', hidden: true, readOnly: true }),
+    defineField({
+      name: 'meetFounderEyebrow',
+      title: 'Eyebrow',
+      type: 'string',
+      group: 'meetFounder',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'Meet the Founder.',
+    }),
+    defineField({
+      name: 'meetFounderHeadline',
+      title: 'Headline',
+      type: 'string',
+      group: 'meetFounder',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'meetFounderContent',
       title: 'Intro content',
@@ -176,7 +235,14 @@ export const homePage = defineType({
         }),
       ],
     }),
-    defineField({ name: 'meetFounderCta', title: '"Learn About the Founder" CTA', type: 'ctaBlock', group: 'meetFounder', hidden: true, readOnly: true }),
+    defineField({
+      name: 'meetFounderCta',
+      title: '"Learn About the Founder" CTA',
+      type: 'ctaBlock',
+      group: 'meetFounder',
+      hidden: true,
+      readOnly: true,
+    }),
 
     // Featured Work (legacy — hidden for rollback safety)
     defineField({
@@ -261,8 +327,23 @@ export const homePage = defineType({
     }),
 
     // Process preview (legacy — hidden for rollback safety)
-    defineField({ name: 'processPreviewEyebrow', title: 'Eyebrow', type: 'string', group: 'process', hidden: true, readOnly: true, initialValue: 'How It Works.' }),
-    defineField({ name: 'processPreviewHeadline', title: 'Headline', type: 'string', group: 'process', hidden: true, readOnly: true }),
+    defineField({
+      name: 'processPreviewEyebrow',
+      title: 'Eyebrow',
+      type: 'string',
+      group: 'process',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'How It Works.',
+    }),
+    defineField({
+      name: 'processPreviewHeadline',
+      title: 'Headline',
+      type: 'string',
+      group: 'process',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'processPreviewSubhead',
       title: 'Subhead',
@@ -276,7 +357,14 @@ export const homePage = defineType({
       initialValue:
         'No guesswork and no pressure. From our first conversation to the day everything comes together, you will always know exactly where things stand and what happens next.',
     }),
-    defineField({ name: 'processPreviewCta', title: 'Link to full Process page', type: 'ctaBlock', group: 'process', hidden: true, readOnly: true }),
+    defineField({
+      name: 'processPreviewCta',
+      title: 'Link to full Process page',
+      type: 'ctaBlock',
+      group: 'process',
+      hidden: true,
+      readOnly: true,
+    }),
 
     // Testimonials (legacy — hidden for rollback safety)
     defineField({
@@ -289,8 +377,24 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
     }),
-    defineField({ name: 'testimonialsEyebrow', title: 'Eyebrow', type: 'string', group: 'testimonials', hidden: true, readOnly: true, initialValue: 'Kind Words.' }),
-    defineField({ name: 'testimonialsHeadline', title: 'Headline', type: 'string', group: 'testimonials', hidden: true, readOnly: true, initialValue: 'Words from real homes.' }),
+    defineField({
+      name: 'testimonialsEyebrow',
+      title: 'Eyebrow',
+      type: 'string',
+      group: 'testimonials',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'Kind Words.',
+    }),
+    defineField({
+      name: 'testimonialsHeadline',
+      title: 'Headline',
+      type: 'string',
+      group: 'testimonials',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'Words from real homes.',
+    }),
     defineField({
       name: 'testimonialsScriptAccent',
       title: 'Testimonials heading script accent (optional)',
@@ -330,12 +434,28 @@ export const homePage = defineType({
       group: 'testimonials',
       hidden: true,
       readOnly: true,
-      description: 'Optional line under the testimonials grid. Example: "From the studio\'s Facebook recommendations."',
+      description:
+        'Optional line under the testimonials grid. Example: "From the studio\'s Facebook recommendations."',
     }),
 
     // Services grid (legacy — hidden for rollback safety)
-    defineField({ name: 'servicesGridEyebrow', title: 'Eyebrow', type: 'string', group: 'services', hidden: true, readOnly: true, initialValue: 'The Studio.' }),
-    defineField({ name: 'servicesGridHeadline', title: 'Headline', type: 'string', group: 'services', hidden: true, readOnly: true }),
+    defineField({
+      name: 'servicesGridEyebrow',
+      title: 'Eyebrow',
+      type: 'string',
+      group: 'services',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'The Studio.',
+    }),
+    defineField({
+      name: 'servicesGridHeadline',
+      title: 'Headline',
+      type: 'string',
+      group: 'services',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'servicesGridScriptAccent',
       title: 'Services heading script accent (optional)',
@@ -346,8 +466,23 @@ export const homePage = defineType({
       description:
         'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
-    defineField({ name: 'servicesGridSubhead', title: 'Subhead', type: 'text', rows: 2, group: 'services', hidden: true, readOnly: true }),
-    defineField({ name: 'servicesGridCta', title: 'Services grid CTA', type: 'ctaBlock', group: 'services', hidden: true, readOnly: true }),
+    defineField({
+      name: 'servicesGridSubhead',
+      title: 'Subhead',
+      type: 'text',
+      rows: 2,
+      group: 'services',
+      hidden: true,
+      readOnly: true,
+    }),
+    defineField({
+      name: 'servicesGridCta',
+      title: 'Services grid CTA',
+      type: 'ctaBlock',
+      group: 'services',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'servicesGridFootnote',
       title: 'Footnote',
@@ -355,7 +490,8 @@ export const homePage = defineType({
       group: 'services',
       hidden: true,
       readOnly: true,
-      description: 'Small-print line under the services grid. Example: "Final pricing is always discussed before any work begins."',
+      description:
+        'Small-print line under the services grid. Example: "Final pricing is always discussed before any work begins."',
     }),
 
     // Service area cue + final CTA (legacy — hidden for rollback safety)
@@ -368,8 +504,24 @@ export const homePage = defineType({
       readOnly: true,
       description: 'Example: "Serving the greater metro area and surrounding region."',
     }),
-    defineField({ name: 'finalCtaEyebrow', title: 'Final CTA eyebrow', type: 'string', group: 'final', hidden: true, readOnly: true, initialValue: 'Ready to Begin?' }),
-    defineField({ name: 'finalCtaHeadline', title: 'Final CTA headline', type: 'string', group: 'final', hidden: true, readOnly: true, initialValue: 'Ready to Love Your Space?' }),
+    defineField({
+      name: 'finalCtaEyebrow',
+      title: 'Final CTA eyebrow',
+      type: 'string',
+      group: 'final',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'Ready to Begin?',
+    }),
+    defineField({
+      name: 'finalCtaHeadline',
+      title: 'Final CTA headline',
+      type: 'string',
+      group: 'final',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'Ready to Love Your Space?',
+    }),
     defineField({
       name: 'finalCtaScriptAccent',
       title: 'Final CTA heading script accent (optional)',
@@ -380,8 +532,24 @@ export const homePage = defineType({
       description:
         'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
-    defineField({ name: 'finalCtaSubhead', title: 'Final CTA subhead', type: 'text', rows: 2, group: 'final', hidden: true, readOnly: true, initialValue: "Let's start with a conversation." }),
-    defineField({ name: 'finalCta', title: 'Final CTA button', type: 'ctaBlock', group: 'final', hidden: true, readOnly: true }),
+    defineField({
+      name: 'finalCtaSubhead',
+      title: 'Final CTA subhead',
+      type: 'text',
+      rows: 2,
+      group: 'final',
+      hidden: true,
+      readOnly: true,
+      initialValue: "Let's start with a conversation.",
+    }),
+    defineField({
+      name: 'finalCta',
+      title: 'Final CTA button',
+      type: 'ctaBlock',
+      group: 'final',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'finalCtaBackgroundImage',
       title: 'Final CTA background image (optional)',

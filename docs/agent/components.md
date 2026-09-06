@@ -30,24 +30,28 @@ The primary CTA button extends `src/components/ui/button.tsx` with `variant="bra
 The core component set, by role. All in `src/components/` unless noted.
 
 **Page chrome:**
+
 - `Header.astro` -- two-row desktop (eyebrow strip + main nav), single-row mobile. Sticky-with-hide-on-scroll-down behavior wired via `.site-header`. The eyebrow strip carries availability status, email, and phone; on mobile the availability shows a compact pill.
 - `Footer.astro` -- a responsive link grid, brand logo, auto-year copyright, and "Site by..." credit on a thin bottom bar.
 - `MobileNav.tsx` -- shadcn Sheet drawer (`client:only="react"` -- Radix portal can't SSR). Primary CTA, tagline, nav links, email + phone + socials + theme toggle, logo at bottom.
 - `BaseLayout.astro` -- anti-FOUC theme bootstrap, View Transitions, Lenis init, scroll-reveal observer, sticky-header scroll listener.
 
 **Hero + page-top:**
+
 - `Hero.astro` -- image variant (full-bleed photo + gradient overlay) OR text variant (delegates to SectionHeading). Accepts `backgroundImage` for a single Sanity image or `backgroundImages` array for a cross-fading slideshow (falls back to single image for non-home pages). Image variant passes `onDark` to CTAs automatically. On the home page (`size="tall"`) it fills the viewport below the sticky header and shows a soft pulsing scroll cue.
 - `HeroBackground.astro` -- the hero background layer. Renders a single static `SanityImage` for 0-1 images, or a cross-fading Ken Burns slideshow for 2+. Used only by `Hero.astro`.
 - `SectionHeading.astro` -- eyebrow + brand hairline accent + headline + subhead. Used by text-variant Hero and every interior section heading. Supports `tone="inverse"` for dark FinalCta panels. Accepts `scriptAccent?` for the optional calligraphic accent word (see `docs/agent/polish-layer.md`).
 - `ReadingProgress.astro` -- fixed 3px accent track at the top of `<article>`-wrapped pages. Used on journal posts.
 
 **Marketing cards (all share the brand-stripe + resting-shadow rhythm):**
+
 - `ServiceCard.astro` -- service tier (price + features + best-for + CTA).
 - `JournalCard.astro` -- journal index card (featured variant spans 2 cols). Hero image uses `.img-zoom` + `.img-tint-light` hover treatment.
 - `TestimonialCard.astro` -- quote card with monogram fallback when no photo. Renders a project link when `relatedProject` reference is set.
 - `FeaturedTestimonial.astro` -- large editorial pull-quote variant of TestimonialCard.
 
 **Home page featured sections:**
+
 - `FeaturedJournal.astro` -- hero journal entry + companion panel layout. Feeds off `featured: boolean` on `journalEntry`. Queries order `featured desc, publishedAt desc` capped at 4. Suppresses entirely when the collection is empty; degrades to a centered single-hero spread when there is only one item.
 
 **Gotcha -- bottom-anchored overlay vs. image height.** Hero cards that pin title blocks to `absolute bottom-0` of an image will clip the top of the overlay if the overlay content is taller than the image. Two levers: a portrait mobile aspect (`4/5`, never wide) and capping the desktop case at `16/10`. If eyebrow chips vanish above a hero image, this is why.
@@ -60,12 +64,12 @@ The core component set, by role. All in `src/components/` unless noted.
 2. **Cover image** -- `max-w-4xl mx-auto px-m` (~896 px), `<SanityImage width={1800} loading="eager" sizes="(min-width: 920px) 896px, 100vw">`. Reads as an editorial feature, not a billboard.
 3. **Body grid with optional TOC** -- extract h2/h3/h4 headings via `extractHeadings(body)`, set `hasToc = headings.length > 0`, then use this grid template:
    ```astro
-   <div class:list={[
-     'mx-auto max-w-content px-m py-section-lg grid grid-cols-1 gap-section-md lg:justify-center',
-     hasToc
-       ? 'lg:grid-cols-[260px_minmax(0,48rem)]'
-       : 'lg:grid-cols-[minmax(0,48rem)]',
-   ]}>
+   <div
+     class:list={[
+       'mx-auto grid max-w-content grid-cols-1 gap-section-md px-m py-section-lg lg:justify-center',
+       hasToc ? 'lg:grid-cols-[260px_minmax(0,48rem)]' : 'lg:grid-cols-[minmax(0,48rem)]',
+     ]}
+   >
      {hasToc && <CaseStudyTOC client:idle headings={headings} />}
      <article>...</article>
    </div>
@@ -80,11 +84,13 @@ The Portable Text renderer (`JournalPortableText.tsx`) detects image orientation
 **Module-specific detail layouts** (portfolio/case study, before/after, shop, etc.) live under `modules/` and are documented in `docs/modules/`. The long-read grid pattern above is shared between the journal and any module that adds a long-form detail page.
 
 **Contact page pieces:**
+
 - `ContactForm.tsx` -- Name / Email / Phone / Message, plus any project-specific fields. See form section in `docs/agent/sanity.md`.
 - `CopyEmailButton.tsx` -- mailto link + clipboard fallback.
 - `CalendlyInline.tsx` -- click-to-load Calendly iframe placeholder. Heavy widget stays off the budget until the visitor opts in.
 
 **Site-wide affordances:**
+
 - `StickyCTAChip.tsx` -- bottom-floating brand pill that appears past 50% scroll on long pages. Simple threshold-based visibility with a 2% hysteresis band. Positioning: always `bottom-[5.5rem]` (above the BackToTop button at `bottom-6`). Labels are Sanity-editable via the page singleton's `stickyCtaLabel` field; empty string hides the chip.
 - `SectionDivider.astro` -- brand ornament between sections that share a background color (variants: `ornament` (default) / `line` / `dots`).
 - `JournalPortableText.tsx` -- journal body renderer with custom block types (pullQuote, beforeAfter, sourceCard, tipCallout, imageGallery, divider, videoEmbed) + a `sourcedFrom` annotation mark for inline vendor mentions. Adds the `.prose-drop-cap` float cap to the first paragraph and renders blockquotes as `.prose-blockquote`.
@@ -92,6 +98,7 @@ The Portable Text renderer (`JournalPortableText.tsx`) detects image orientation
 - `ThemeToggle.tsx`, `BackToTop.tsx`, `SanityImage.astro`, `CtaLink.astro`.
 
 **Sanity Studio components (in `src/sanity/components/`):**
+
 - `StudioGuide.tsx` -- Panel 1 of the "Start Here" handbook. Fetches content from the `studioGuide` singleton and renders the guide title, intro, site map, how-tos, and tips. Editor-driven: update the handbook text directly in Studio without a code change.
 - `BusinessOverview.tsx` -- Panel 2. Fetches live business facts from Sanity via `useClient` plus the three static sections from the `studioNotes` singleton (business summary, ideal client, voice summary + words to avoid).
 - `BrandKit.tsx` -- Panel 3. Displays the brand color palette (hex values) and font names. **Hardcoded on purpose:** colors and fonts mirror the real `globals.css` tokens. Putting them in Sanity would create a second source of truth that can drift from the live site.
@@ -104,6 +111,7 @@ The desktop nav dropdowns live directly in `Header.astro` as SSR'd `<details>` (
 ### CtaLink `onDark` prop
 
 `src/components/CtaLink.astro` accepts an `onDark?: boolean` prop. When true:
+
 - **Secondary variant** swaps from `border-primary text-link` (brand accent on light) to `border-white/70 text-white hover:bg-white/10` (cream on dark).
 - **Focus ring** offsets against `transparent` instead of `--background` so the ring still reads on photographic surfaces.
 

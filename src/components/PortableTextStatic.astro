@@ -61,38 +61,36 @@ function escapeHtml(str: string): string {
 
 function renderSpans(spans: Span[] | undefined, markDefs: MarkDef[] | undefined): string {
   if (!spans) return '';
-  const defsMap = new Map<string, MarkDef>(
-    (markDefs ?? []).map((d) => [d._key, d]),
-  );
+  const defsMap = new Map<string, MarkDef>((markDefs ?? []).map((d) => [d._key, d]));
 
-  return spans.map((span) => {
-    const text = escapeHtml(span.text ?? '');
-    if (!span.marks || span.marks.length === 0) return text;
+  return spans
+    .map((span) => {
+      const text = escapeHtml(span.text ?? '');
+      if (!span.marks || span.marks.length === 0) return text;
 
-    // Apply marks innermost-first (last in array = innermost wrapper)
-    let result = text;
-    const reversed = [...span.marks].reverse();
-    for (const mark of reversed) {
-      if (mark === 'strong') {
-        result = `<strong class="font-semibold">${result}</strong>`;
-      } else if (mark === 'em') {
-        result = `<em class="italic">${result}</em>`;
-      } else {
-        // Reference mark — look up in markDefs
-        const def = defsMap.get(mark);
-        if (def?._type === 'link') {
-          const href = escapeHtml(def.href ?? '#');
-          const isExternal = /^https?:\/\//.test(def.href ?? '');
-          const newTab = def.openInNewTab || isExternal;
-          const extras = newTab
-            ? ` target="_blank" rel="noopener noreferrer"`
-            : '';
-          result = `<a href="${href}" class="text-link underline underline-offset-2 hover:text-primary transition-colors"${extras}>${result}</a>`;
+      // Apply marks innermost-first (last in array = innermost wrapper)
+      let result = text;
+      const reversed = [...span.marks].reverse();
+      for (const mark of reversed) {
+        if (mark === 'strong') {
+          result = `<strong class="font-semibold">${result}</strong>`;
+        } else if (mark === 'em') {
+          result = `<em class="italic">${result}</em>`;
+        } else {
+          // Reference mark — look up in markDefs
+          const def = defsMap.get(mark);
+          if (def?._type === 'link') {
+            const href = escapeHtml(def.href ?? '#');
+            const isExternal = /^https?:\/\//.test(def.href ?? '');
+            const newTab = def.openInNewTab || isExternal;
+            const extras = newTab ? ` target="_blank" rel="noopener noreferrer"` : '';
+            result = `<a href="${href}" class="text-link underline underline-offset-2 hover:text-primary transition-colors"${extras}>${result}</a>`;
+          }
         }
       }
-    }
-    return result;
-  }).join('');
+      return result;
+    })
+    .join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -169,6 +167,4 @@ while (i < items.length) {
 const rendered = segments.map((s) => s.html).join('');
 ---
 
-{value && value.length > 0 && (
-  <div class={className} set:html={rendered} />
-)}
+{value && value.length > 0 && <div class={className} set:html={rendered} />}

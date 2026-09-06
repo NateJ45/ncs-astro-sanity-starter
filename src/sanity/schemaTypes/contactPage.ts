@@ -21,8 +21,12 @@ export const contactPage = defineType({
       title: 'SEO title',
       type: 'string',
       group: 'seo',
-      description: 'Browser tab and Google result title. Aim for 50 to 60 characters. Front-load the location or service.',
-      validation: (Rule) => Rule.max(60).warning('Titles longer than about 60 characters get cut off in Google search results.'),
+      description:
+        'Browser tab and Google result title. Aim for 50 to 60 characters. Front-load the location or service.',
+      validation: (Rule) =>
+        Rule.max(60).warning(
+          'Titles longer than about 60 characters get cut off in Google search results.',
+        ),
     }),
     defineField({
       name: 'seoDescription',
@@ -30,33 +34,60 @@ export const contactPage = defineType({
       type: 'text',
       rows: 3,
       group: 'seo',
-      description: 'The sentence under the title in Google results. Aim for 150 to 160 characters. Write it for a person, not a search engine.',
-      validation: (Rule) => Rule.max(160).warning('Descriptions longer than about 160 characters get cut off in Google search results.'),
+      description:
+        'The sentence under the title in Google results. Aim for 150 to 160 characters. Write it for a person, not a search engine.',
+      validation: (Rule) =>
+        Rule.max(160).warning(
+          'Descriptions longer than about 160 characters get cut off in Google search results.',
+        ),
     }),
     defineField({
       name: 'seoImage',
       title: 'Social share image (this page)',
       type: 'image',
       group: 'seo',
-      description: 'Optional. The image shown when this page is shared on social media or in a text. Overrides the site default in Site Settings. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
+      description:
+        'Optional. The image shown when this page is shared on social media or in a text. Overrides the site default in Site Settings. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
       options: { hotspot: true },
-      fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-      ],
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),
 
-    defineField({ name: 'heroEyebrow', title: 'Hero eyebrow', type: 'string', group: 'hero', initialValue: 'Request a Consultation.' }),
-    defineField({ name: 'heroHeadline', title: 'Hero headline', type: 'string', group: 'hero', initialValue: 'Start the Conversation.' }),
-    defineField({ name: 'heroSubhead', title: 'Hero subhead', type: 'text', rows: 2, group: 'hero' }),
+    defineField({
+      name: 'heroEyebrow',
+      title: 'Hero eyebrow',
+      type: 'string',
+      group: 'hero',
+      initialValue: 'Request a Consultation.',
+    }),
+    defineField({
+      name: 'heroHeadline',
+      title: 'Hero headline',
+      type: 'string',
+      group: 'hero',
+      initialValue: 'Start the Conversation.',
+    }),
+    defineField({
+      name: 'heroSubhead',
+      title: 'Hero subhead',
+      type: 'text',
+      rows: 2,
+      group: 'hero',
+    }),
     defineField({
       name: 'heroImage',
       title: 'Hero background image',
       type: 'image',
       group: 'hero',
-      description: 'Full-bleed photo behind the hero text. Pick a landscape shot; the page applies a dark gradient over the bottom for readability.',
+      description:
+        'Full-bleed photo behind the hero text. Pick a landscape shot; the page applies a dark gradient over the bottom for readability.',
       options: { hotspot: true },
       fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          validation: (R) => R.required(),
+        }),
       ],
     }),
     defineField({
@@ -81,7 +112,8 @@ export const contactPage = defineType({
       title: 'Project type dropdown options',
       type: 'array',
       group: 'form',
-      description: 'The options shown in the "Project type" dropdown on the contact form. Order matters. Examples: "Single room", "Whole home", "Builder/realtor partnership".',
+      description:
+        'The options shown in the "Project type" dropdown on the contact form. Order matters. Examples: "Single room", "Whole home", "Builder/realtor partnership".',
       of: [defineArrayMember({ type: 'string' })],
     }),
     defineField({
@@ -186,7 +218,8 @@ export const contactPage = defineType({
               name: 'title',
               title: 'Step title',
               type: 'string',
-              description: 'Short heading for this step. Example: "We review your inquiry within 48 hours."',
+              description:
+                'Short heading for this step. Example: "We review your inquiry within 48 hours."',
               validation: (Rule) => Rule.required(),
             }),
             defineField({
@@ -194,13 +227,15 @@ export const contactPage = defineType({
               title: 'Step detail',
               type: 'text',
               rows: 3,
-              description: 'A sentence or two with more detail about what happens in this step. Optional.',
+              description:
+                'A sentence or two with more detail about what happens in this step. Optional.',
             }),
             defineField({
               name: 'timeEstimate',
               title: 'Time estimate (optional)',
               type: 'string',
-              description: 'How long this step typically takes. Example: "Within 48 hours" or "1–2 weeks".',
+              description:
+                'How long this step typically takes. Example: "Within 48 hours" or "1–2 weeks".',
             }),
           ],
           preview: {
@@ -240,7 +275,8 @@ export const contactPage = defineType({
       title: 'Editor note (not shown on the site)',
       type: 'text',
       rows: 3,
-      description: 'Internal-only reminder for editors. Anything you write here stays in Studio and never renders on the live page.',
+      description:
+        'Internal-only reminder for editors. Anything you write here stays in Studio and never renders on the live page.',
     }),
   ],
   preview: { prepare: () => ({ title: 'Contact Page' }) },

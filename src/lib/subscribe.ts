@@ -72,7 +72,10 @@ export async function subscribeEmail(opts: SubscribeOptions): Promise<SubscribeR
 
       const res = await fetch(url.toString(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+        },
         body: body.toString(),
       });
 
@@ -107,8 +110,7 @@ export async function subscribeEmail(opts: SubscribeOptions): Promise<SubscribeR
   if (!WEB3FORMS_KEY) {
     return {
       ok: false,
-      message:
-        "Newsletter signup isn't connected yet. Contact us directly to get on the list.",
+      message: "Newsletter signup isn't connected yet. Contact us directly to get on the list.",
     };
   }
 
@@ -133,7 +135,7 @@ export async function subscribeEmail(opts: SubscribeOptions): Promise<SubscribeR
     return {
       ok: false,
       message:
-        (json as Record<string, unknown>).message as string ||
+        ((json as Record<string, unknown>).message as string) ||
         "Couldn't sign you up right now. Try again, or contact us directly.",
     };
   } catch {

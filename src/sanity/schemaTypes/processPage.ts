@@ -35,7 +35,9 @@ export const processPage = defineType({
       group: 'seo',
       description: 'Browser tab and Google result title. Aim for 50 to 60 characters.',
       validation: (Rule) =>
-        Rule.max(60).warning('Titles longer than about 60 characters get cut off in Google search results.'),
+        Rule.max(60).warning(
+          'Titles longer than about 60 characters get cut off in Google search results.',
+        ),
     }),
     defineField({
       name: 'seoDescription',
@@ -45,19 +47,18 @@ export const processPage = defineType({
       group: 'seo',
       description: 'The sentence under the title in Google results. Aim for 150 to 160 characters.',
       validation: (Rule) =>
-        Rule.max(160).warning('Descriptions longer than about 160 characters get cut off in Google search results.'),
+        Rule.max(160).warning(
+          'Descriptions longer than about 160 characters get cut off in Google search results.',
+        ),
     }),
     defineField({
       name: 'seoImage',
       title: 'Social share image (this page)',
       type: 'image',
       group: 'seo',
-      description:
-        'Optional. Overrides the site default. Wide image, about 1200 x 630 pixels.',
+      description: 'Optional. Overrides the site default. Wide image, about 1200 x 630 pixels.',
       options: { hotspot: true },
-      fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-      ],
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),
   ],
   preview: { prepare: () => ({ title: 'Process Page' }) },

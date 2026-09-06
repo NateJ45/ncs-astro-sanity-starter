@@ -4,8 +4,7 @@ import { classifySections, CONTENT_TYPES, SELF_CONTAINED_TYPES } from './section
 
 // Helpers
 const block = (type: string, extra: Record<string, unknown> = {}) => ({ _type: type, ...extra });
-const surfaces = (rows: ReturnType<typeof classifySections>) =>
-  rows.map((r) => r.surface);
+const surfaces = (rows: ReturnType<typeof classifySections>) => rows.map((r) => r.surface);
 const dividers = (rows: ReturnType<typeof classifySections>) =>
   rows.map((r) => r.insertDividerBefore);
 
@@ -36,17 +35,17 @@ test('self-contained blocks get null surface', () => {
 
 test('self-contained blocks do not advance the content cadence counter', () => {
   const rows = classifySections([
-    block('richTextSection'),  // background (idx 0)
-    block('heroSection'),      // null (self-contained, no counter advance)
-    block('richTextSection'),  // muted (idx 1, counter was not reset)
+    block('richTextSection'), // background (idx 0)
+    block('heroSection'), // null (self-contained, no counter advance)
+    block('richTextSection'), // muted (idx 1, counter was not reset)
   ]);
   assert.deepEqual(surfaces(rows), ['background', null, 'muted']);
 });
 
 test('text hero (no backgroundImage) shifts cadence to start at muted', () => {
   const rows = classifySections([
-    block('heroSection'),      // text hero — no backgroundImage
-    block('richTextSection'),  // should be muted (idx 1 start)
+    block('heroSection'), // text hero — no backgroundImage
+    block('richTextSection'), // should be muted (idx 1 start)
     block('imageTextSection'), // background (idx 2)
   ]);
   assert.deepEqual(surfaces(rows), [null, 'muted', 'background']);
@@ -55,7 +54,7 @@ test('text hero (no backgroundImage) shifts cadence to start at muted', () => {
 test('image hero does not shift cadence', () => {
   const rows = classifySections([
     block('heroSection', { backgroundImage: { asset: { _ref: 'image-abc' } } }),
-    block('richTextSection'),  // background (idx 0)
+    block('richTextSection'), // background (idx 0)
     block('imageTextSection'), // muted (idx 1)
   ]);
   assert.deepEqual(surfaces(rows), [null, 'background', 'muted']);
@@ -63,7 +62,7 @@ test('image hero does not shift cadence', () => {
 
 test('divider inserted between adjacent content blocks of differing surface', () => {
   const rows = classifySections([
-    block('richTextSection'),  // background
+    block('richTextSection'), // background
     block('imageTextSection'), // muted -> divider before this
   ]);
   assert.deepEqual(dividers(rows), [false, true]);
@@ -79,8 +78,8 @@ test('no divider between two blocks with the same surface', () => {
 
 test('no divider between content block and self-contained block', () => {
   const rows = classifySections([
-    block('richTextSection'),  // background
-    block('heroSection'),      // self-contained, no divider
+    block('richTextSection'), // background
+    block('heroSection'), // self-contained, no divider
     block('imageTextSection'), // muted, divider should appear before this (different surface from richText)
   ]);
   assert.deepEqual(dividers(rows), [false, false, true]);
@@ -123,17 +122,17 @@ test('rich CONTENT types get alternating surface', () => {
 
 test('rich content types advance the cadence counter', () => {
   const rows = classifySections([
-    block('storySection'),       // background (idx 0)
+    block('storySection'), // background (idx 0)
     block('serviceAreaSection'), // muted (idx 1)
-    block('guaranteeSection'),   // background (idx 2)
+    block('guaranteeSection'), // background (idx 2)
   ]);
   assert.deepEqual(surfaces(rows), ['background', 'muted', 'background']);
 });
 
 test('rich self-contained types do not advance the cadence counter', () => {
   const rows = classifySections([
-    block('storySection'),       // background (idx 0)
-    block('founderSection'),     // null (self-contained, no advance)
+    block('storySection'), // background (idx 0)
+    block('founderSection'), // null (self-contained, no advance)
     block('serviceAreaSection'), // muted (idx 1)
   ]);
   assert.deepEqual(surfaces(rows), ['background', null, 'muted']);
@@ -141,9 +140,14 @@ test('rich self-contained types do not advance the cadence counter', () => {
 
 test('all 8 new rich types appear in SELF_CONTAINED_TYPES or CONTENT_TYPES', () => {
   const all8 = [
-    'founderSection', 'servicesGridSection', 'testimonialsSection',
-    'storySection', 'valuesSection', 'processSection',
-    'serviceAreaSection', 'guaranteeSection',
+    'founderSection',
+    'servicesGridSection',
+    'testimonialsSection',
+    'storySection',
+    'valuesSection',
+    'processSection',
+    'serviceAreaSection',
+    'guaranteeSection',
   ];
   for (const type of all8) {
     const inSelf = SELF_CONTAINED_TYPES.has(type);
@@ -152,16 +156,13 @@ test('all 8 new rich types appear in SELF_CONTAINED_TYPES or CONTENT_TYPES', () 
       inSelf || inContent,
       `${type} must be classified in SELF_CONTAINED_TYPES or CONTENT_TYPES`,
     );
-    assert.ok(
-      !(inSelf && inContent),
-      `${type} cannot be in both sets`,
-    );
+    assert.ok(!(inSelf && inContent), `${type} cannot be in both sets`);
   }
 });
 
 test('divider inserted between storySection and serviceAreaSection (different surfaces)', () => {
   const rows = classifySections([
-    block('storySection'),       // background
+    block('storySection'), // background
     block('serviceAreaSection'), // muted -> divider before
   ]);
   assert.deepEqual(dividers(rows), [false, true]);
@@ -191,12 +192,12 @@ test('embedSection is SELF_CONTAINED (null surface)', () => {
 
 test('U7 blocks do not advance the content cadence counter', () => {
   const rows = classifySections([
-    block('storySection'),    // background (idx 0)
-    block('faqSection'),      // null — no advance
-    block('logoStripSection'),// null — no advance
-    block('teamSection'),     // null — no advance
-    block('embedSection'),    // null — no advance
-    block('storySection'),    // muted (idx 1)
+    block('storySection'), // background (idx 0)
+    block('faqSection'), // null — no advance
+    block('logoStripSection'), // null — no advance
+    block('teamSection'), // null — no advance
+    block('embedSection'), // null — no advance
+    block('storySection'), // muted (idx 1)
   ]);
   assert.deepEqual(surfaces(rows), ['background', null, null, null, null, 'muted']);
 });
@@ -218,7 +219,7 @@ test('dynamicListSection is SELF_CONTAINED (null surface)', () => {
 
 test('dynamicListSection does not advance the content cadence counter', () => {
   const rows = classifySections([
-    block('storySection'),       // background (idx 0)
+    block('storySection'), // background (idx 0)
     block('dynamicListSection'), // null — self-contained, no advance
     block('serviceAreaSection'), // muted (idx 1)
   ]);
@@ -226,6 +227,12 @@ test('dynamicListSection does not advance the content cadence counter', () => {
 });
 
 test('dynamicListSection appears in SELF_CONTAINED_TYPES and not CONTENT_TYPES', () => {
-  assert.ok(SELF_CONTAINED_TYPES.has('dynamicListSection'), 'dynamicListSection must be in SELF_CONTAINED_TYPES');
-  assert.ok(!CONTENT_TYPES.has('dynamicListSection'), 'dynamicListSection must not be in CONTENT_TYPES');
+  assert.ok(
+    SELF_CONTAINED_TYPES.has('dynamicListSection'),
+    'dynamicListSection must be in SELF_CONTAINED_TYPES',
+  );
+  assert.ok(
+    !CONTENT_TYPES.has('dynamicListSection'),
+    'dynamicListSection must not be in CONTENT_TYPES',
+  );
 });

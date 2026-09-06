@@ -31,7 +31,7 @@ interface Props {
 function makeHeadingId(seen: Map<string, number>, children: any): string {
   const text = Array.isArray(children)
     ? children
-        .map((c) => (typeof c === 'string' ? c : c?.props?.children ?? ''))
+        .map((c) => (typeof c === 'string' ? c : (c?.props?.children ?? '')))
         .join('')
         .trim()
     : String(children ?? '').trim();
@@ -78,21 +78,23 @@ function makeComponents(): PortableTextComponents {
         const isFirst = !firstNormalRendered;
         firstNormalRendered = true;
         return (
-          <p className={`my-m text-foreground/90 leading-relaxed text-lg${isFirst ? ' prose-drop-cap' : ''}`}>
+          <p
+            className={`my-m leading-relaxed text-foreground/90 text-lg${isFirst ? 'prose-drop-cap' : ''}`}
+          >
             {children}
           </p>
         );
       },
       // Lead paragraph — slightly larger, lighter weight, italic-feeling intro.
       lead: ({ children }) => (
-        <p className="my-l text-foreground text-[1.35rem] leading-relaxed font-light first:mt-0">
+        <p className="my-l text-[1.35rem] leading-relaxed font-light text-foreground first:mt-0">
           {children}
         </p>
       ),
       h2: ({ children }) => (
         <h2
           id={makeHeadingId(seen, children)}
-          className="mt-section-lg mb-m font-display text-h2 text-foreground scroll-mt-24"
+          className="mt-section-lg mb-m scroll-mt-24 font-display text-h2 text-foreground"
         >
           {children}
         </h2>
@@ -100,7 +102,7 @@ function makeComponents(): PortableTextComponents {
       h3: ({ children }) => (
         <h3
           id={makeHeadingId(seen, children)}
-          className="mt-section-md mb-s font-display text-h3 text-foreground scroll-mt-24"
+          className="mt-section-md mb-s scroll-mt-24 font-display text-h3 text-foreground"
         >
           {children}
         </h3>
@@ -108,24 +110,26 @@ function makeComponents(): PortableTextComponents {
       h4: ({ children }) => (
         <h4
           id={makeHeadingId(seen, children)}
-          className="mt-l mb-s font-display text-h4 text-foreground scroll-mt-24"
+          className="mt-l mb-s scroll-mt-24 font-display text-h4 text-foreground"
         >
           {children}
         </h4>
       ),
       blockquote: ({ children }) => (
-        <blockquote className="prose-blockquote">
-          {children}
-        </blockquote>
+        <blockquote className="prose-blockquote">{children}</blockquote>
       ),
     },
 
     list: {
       bullet: ({ children }) => (
-        <ul className="my-m list-disc pl-l space-y-2 text-foreground/90 text-lg leading-relaxed">{children}</ul>
+        <ul className="my-m list-disc space-y-2 pl-l text-lg leading-relaxed text-foreground/90">
+          {children}
+        </ul>
       ),
       number: ({ children }) => (
-        <ol className="my-m list-decimal pl-l space-y-2 text-foreground/90 text-lg leading-relaxed">{children}</ol>
+        <ol className="my-m list-decimal space-y-2 pl-l text-lg leading-relaxed text-foreground/90">
+          {children}
+        </ol>
       ),
     },
     listItem: {
@@ -134,12 +138,14 @@ function makeComponents(): PortableTextComponents {
     },
 
     marks: {
-      strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+      strong: ({ children }) => (
+        <strong className="font-semibold text-foreground">{children}</strong>
+      ),
       em: ({ children }) => <em className="italic">{children}</em>,
       underline: ({ children }) => <span className="underline underline-offset-4">{children}</span>,
       // Highlight uses bg-accent (theme-aware) for a subtle warm callout effect.
       highlight: ({ children }) => (
-        <span className="bg-accent/60 px-1 rounded-sm text-foreground">{children}</span>
+        <span className="rounded-sm bg-accent/60 px-1 text-foreground">{children}</span>
       ),
       link: ({ children, value }) => {
         const href = value?.href ?? '#';
@@ -148,7 +154,7 @@ function makeComponents(): PortableTextComponents {
         return (
           <a
             href={href}
-            className="text-link underline underline-offset-4 decoration-primary/40 hover:decoration-primary transition-colors"
+            className="text-link underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary"
             target={newTab ? '_blank' : undefined}
             rel={newTab ? 'noopener noreferrer' : undefined}
           >
@@ -162,10 +168,10 @@ function makeComponents(): PortableTextComponents {
       sourcedFrom: ({ children, value }) => {
         const label = value?.vendor ?? '';
         const inner = (
-          <span className="italic text-foreground/90">
+          <span className="text-foreground/90 italic">
             {children}
             {label && (
-              <span className="ml-1 text-[0.72em] uppercase tracking-[0.15em] text-secondary not-italic align-baseline">
+              <span className="ml-1 align-baseline text-[0.72em] tracking-[0.15em] text-secondary uppercase not-italic">
                 · {label}
               </span>
             )}
@@ -177,7 +183,7 @@ function makeComponents(): PortableTextComponents {
             href={value.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-link decoration-primary/30 underline underline-offset-4 hover:decoration-primary transition-colors"
+            className="text-link underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary"
           >
             {inner}
           </a>
@@ -193,7 +199,11 @@ function makeComponents(): PortableTextComponents {
         const size: 'standard' | 'wide' | 'full' = value.size ?? 'wide';
         const targetWidth = size === 'full' ? 2400 : size === 'wide' ? 1600 : 800;
         const url = urlFor(value).width(targetWidth).quality(75).format('webp').url();
-        const url2x = urlFor(value).width(targetWidth * 2).quality(75).format('webp').url();
+        const url2x = urlFor(value)
+          .width(targetWidth * 2)
+          .quality(75)
+          .format('webp')
+          .url();
         // Intrinsic dimensions from the Sanity asset _ref do two jobs:
         // (1) reserve the aspect-ratio box before the file lands (kills the
         //     CLS Lighthouse used to flag), and (2) let us detect portrait
@@ -209,8 +219,8 @@ function makeComponents(): PortableTextComponents {
           : size === 'full'
             ? '-mx-m md:-mx-section-lg lg:-mx-[8vw] my-section-md'
             : size === 'wide'
-            ? 'my-section-md'
-            : 'my-l max-w-2xl mx-auto';
+              ? 'my-section-md'
+              : 'my-l max-w-2xl mx-auto';
         return (
           <figure className={wrapperClass}>
             <img
@@ -221,10 +231,10 @@ function makeComponents(): PortableTextComponents {
               alt={value.alt ?? ''}
               loading="lazy"
               decoding="async"
-              className="w-full h-auto rounded-md"
+              className="h-auto w-full rounded-md"
             />
             {value.caption && (
-              <figcaption className="mt-s text-sm text-muted-foreground italic text-center">
+              <figcaption className="mt-s text-center text-sm text-muted-foreground italic">
                 {value.caption}
               </figcaption>
             )}
@@ -236,18 +246,18 @@ function makeComponents(): PortableTextComponents {
       pullQuote: ({ value }) => {
         if (!value?.quote) return null;
         return (
-          <figure className="my-section-lg py-section-md border-y border-border-soft text-center">
+          <figure className="my-section-lg border-y border-border-soft py-section-md text-center">
             <span
               aria-hidden="true"
-              className="block font-display text-[clamp(3rem,6vw,5rem)] leading-none text-link/45 select-none mb-[-1.5rem]"
+              className="mb-[-1.5rem] block font-display text-[clamp(3rem,6vw,5rem)] leading-none text-link/45 select-none"
             >
               "
             </span>
-            <blockquote className="font-display text-[clamp(1.5rem,2.4vw,2rem)] leading-snug text-foreground max-w-2xl mx-auto px-m">
+            <blockquote className="mx-auto max-w-2xl px-m font-display text-[clamp(1.5rem,2.4vw,2rem)] leading-snug text-foreground">
               {value.quote}
             </blockquote>
             {value.attribution && (
-              <figcaption className="mt-l text-xs uppercase tracking-widest text-foreground/80">
+              <figcaption className="mt-l text-xs tracking-widest text-foreground/80 uppercase">
                 — {value.attribution}
               </figcaption>
             )}
@@ -259,7 +269,7 @@ function makeComponents(): PortableTextComponents {
       beforeAfter: ({ value }) => {
         if (!value?.beforeImage?.asset || !value?.afterImage?.asset) return null;
         return (
-          <div className="my-section-md -mx-m md:mx-0">
+          <div className="-mx-m my-section-md md:mx-0">
             <BeforeAfterSlider
               beforeImage={value.beforeImage}
               afterImage={value.afterImage}
@@ -274,9 +284,9 @@ function makeComponents(): PortableTextComponents {
         if (!value?.itemName) return null;
         const hasImage = !!value.image?.asset;
         const inner = (
-          <div className="flex gap-l items-start p-l bg-muted rounded-md border border-border-soft">
+          <div className="flex items-start gap-l rounded-md border border-border-soft bg-muted p-l">
             {hasImage && (
-              <div className="shrink-0 w-24 h-24 rounded-md overflow-hidden bg-card">
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-md bg-card">
                 <img
                   src={urlFor(value.image).width(200).quality(75).format('webp').url()}
                   width={96}
@@ -284,19 +294,19 @@ function makeComponents(): PortableTextComponents {
                   alt={value.image.alt ?? ''}
                   loading="lazy"
                   decoding="async"
-                      className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               </div>
             )}
-            <div className="flex-1 min-w-0">
-              <p className="text-xs uppercase tracking-widest text-foreground/80 mb-xs">
-                Source
-              </p>
-              <p className="font-display text-h4 text-foreground leading-tight">{value.itemName}</p>
+            <div className="min-w-0 flex-1">
+              <p className="mb-xs text-xs tracking-widest text-foreground/80 uppercase">Source</p>
+              <p className="font-display text-h4 leading-tight text-foreground">{value.itemName}</p>
               {(value.vendor || value.price) && (
                 <p className="mt-xs text-sm text-foreground/80">
                   {value.vendor}
-                  {value.vendor && value.price && <span className="mx-xs text-muted-foreground">·</span>}
+                  {value.vendor && value.price && (
+                    <span className="mx-xs text-muted-foreground">·</span>
+                  )}
                   {value.price && <span className="font-mono text-link">{value.price}</span>}
                 </p>
               )}
@@ -309,16 +319,19 @@ function makeComponents(): PortableTextComponents {
                     href={value.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center text-xs font-semibold uppercase tracking-widest text-link hover:text-primary-dark"
+                    className="inline-flex items-center text-xs font-semibold tracking-widest text-link uppercase hover:text-primary-dark"
                   >
-                    View source <span aria-hidden="true" className="ml-xs">→</span>
+                    View source{' '}
+                    <span aria-hidden="true" className="ml-xs">
+                      →
+                    </span>
                   </a>
                 </p>
               )}
             </div>
           </div>
         );
-        return <div className="my-l max-w-2xl mx-auto">{inner}</div>;
+        return <div className="mx-auto my-l max-w-2xl">{inner}</div>;
       },
 
       // -- tip callout ----------------------------------------------------
@@ -326,13 +339,13 @@ function makeComponents(): PortableTextComponents {
         if (!value?.content) return null;
         return (
           <aside
-            className="my-section-md p-l border-l-4 border-tertiary bg-muted/70 rounded-r-md"
+            className="my-section-md rounded-r-md border-l-4 border-tertiary bg-muted/70 p-l"
             aria-label={value.label ?? 'Note'}
           >
-            <p className="text-xs uppercase tracking-widest text-foreground/80 font-semibold mb-s">
+            <p className="mb-s text-xs font-semibold tracking-widest text-foreground/80 uppercase">
               {value.label ?? "Designer's note"}
             </p>
-            <div className="text-foreground/90 [&_p]:my-s [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-s [&_ul]:pl-l [&_ul]:list-disc [&_a]:text-link [&_a]:underline [&_a]:underline-offset-2">
+            <div className="text-foreground/90 [&_a]:text-link [&_a]:underline [&_a]:underline-offset-2 [&_p]:my-s [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-s [&_ul]:list-disc [&_ul]:pl-l">
               <PT value={value.content} />
             </div>
           </aside>
@@ -348,8 +361,8 @@ function makeComponents(): PortableTextComponents {
           layout === 'grid3'
             ? 'grid grid-cols-2 md:grid-cols-3 gap-s'
             : layout === 'row'
-            ? 'flex gap-s overflow-x-auto snap-x snap-mandatory pb-s -mx-m px-m md:overflow-visible md:mx-0 md:px-0 md:grid md:grid-cols-3'
-            : 'grid grid-cols-1 md:grid-cols-2 gap-s';
+              ? 'flex gap-s overflow-x-auto snap-x snap-mandatory pb-s -mx-m px-m md:overflow-visible md:mx-0 md:px-0 md:grid md:grid-cols-3'
+              : 'grid grid-cols-1 md:grid-cols-2 gap-s';
         return (
           <figure className="my-section-md">
             <div className={gridClass}>
@@ -362,7 +375,9 @@ function makeComponents(): PortableTextComponents {
                 return (
                   <div
                     key={img._key ?? i}
-                    className={layout === 'row' ? 'snap-start shrink-0 w-[80%] md:w-auto md:shrink' : ''}
+                    className={
+                      layout === 'row' ? 'w-[80%] shrink-0 snap-start md:w-auto md:shrink' : ''
+                    }
                   >
                     <img
                       src={url}
@@ -371,7 +386,7 @@ function makeComponents(): PortableTextComponents {
                       alt={img.alt ?? ''}
                       loading="lazy"
                       decoding="async"
-                              className="w-full h-full object-cover rounded-md aspect-[4/3]"
+                      className="aspect-[4/3] h-full w-full rounded-md object-cover"
                     />
                     {img.caption && (
                       <p className="mt-xs text-xs text-muted-foreground italic">{img.caption}</p>
@@ -381,7 +396,7 @@ function makeComponents(): PortableTextComponents {
               })}
             </div>
             {value.caption && (
-              <figcaption className="mt-s text-sm text-muted-foreground italic text-center">
+              <figcaption className="mt-s text-center text-sm text-muted-foreground italic">
                 {value.caption}
               </figcaption>
             )}
@@ -395,12 +410,15 @@ function makeComponents(): PortableTextComponents {
         if (style === 'space') return <div className="my-section-lg" aria-hidden="true"></div>;
         if (style === 'line') {
           return (
-            <hr className="my-section-lg border-t border-border-soft max-w-md mx-auto" aria-hidden="true" />
+            <hr
+              className="mx-auto my-section-lg max-w-md border-t border-border-soft"
+              aria-hidden="true"
+            />
           );
         }
         return (
           <div className="my-section-lg text-center" aria-hidden="true">
-            <span className="font-display text-2xl text-secondary tracking-[0.5em] pl-[0.5em]">
+            <span className="pl-[0.5em] font-display text-2xl tracking-[0.5em] text-secondary">
               ✺ ✺ ✺
             </span>
           </div>
@@ -413,18 +431,18 @@ function makeComponents(): PortableTextComponents {
         if (!src) return null;
         return (
           <figure className="my-section-md">
-            <div className="relative w-full aspect-video rounded-md overflow-hidden bg-muted">
+            <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
               <iframe
                 src={src}
                 title={value.caption ?? 'Video'}
-                className="absolute inset-0 w-full h-full"
+                className="absolute inset-0 h-full w-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
                 loading="lazy"
               ></iframe>
             </div>
             {value.caption && (
-              <figcaption className="mt-s text-sm text-muted-foreground italic text-center">
+              <figcaption className="mt-s text-center text-sm text-muted-foreground italic">
                 {value.caption}
               </figcaption>
             )}

@@ -1,11 +1,11 @@
-import Dialog from "./Dialog.astro";
-import DialogClose from "./DialogClose.astro";
-import DialogContent from "./DialogContent.astro";
-import DialogDescription from "./DialogDescription.astro";
-import DialogFooter from "./DialogFooter.astro";
-import DialogHeader from "./DialogHeader.astro";
-import DialogTitle from "./DialogTitle.astro";
-import DialogTrigger from "./DialogTrigger.astro";
+import Dialog from './Dialog.astro';
+import DialogClose from './DialogClose.astro';
+import DialogContent from './DialogContent.astro';
+import DialogDescription from './DialogDescription.astro';
+import DialogFooter from './DialogFooter.astro';
+import DialogHeader from './DialogHeader.astro';
+import DialogTitle from './DialogTitle.astro';
+import DialogTrigger from './DialogTrigger.astro';
 import {
   dialogBackdrop,
   dialogCloseButton,
@@ -14,7 +14,7 @@ import {
   dialogFooter,
   dialogHeader,
   dialogTitle,
-} from "./variants";
+} from './variants';
 
 const DialogVariants = {
   dialogBackdrop,

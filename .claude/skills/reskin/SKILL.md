@@ -1,6 +1,6 @@
 ---
 name: reskin
-description: "Use this skill when the user wants to rebrand, reskin, or restyle the project for a new client. Triggers on: rebrand, reskin, restyle, new brand, apply the brand, brand colors, change the palette, change the colors and fonts, swap fonts, new identity, new client brand."
+description: 'Use this skill when the user wants to rebrand, reskin, or restyle the project for a new client. Triggers on: rebrand, reskin, restyle, new brand, apply the brand, brand colors, change the palette, change the colors and fonts, swap fonts, new identity, new client brand.'
 ---
 
 # Reskin -- Apply a New Brand Identity
@@ -55,16 +55,16 @@ Ask for brand inputs. Collect them in this order, one group at a time:
 Choose one of these three paths. Ask which the user prefers before collecting values:
 
 a. **Hex codes directly.** Collect at minimum: `--color-primary` (main brand color),
-   `--color-bg` (light background), `--color-accent` (headings/body text). Derive
-   the remaining `@theme` tokens and all `:root`/`.dark` semantic tokens from these
-   three, using sensible proportional adjustments (dark variant ~15% darker, soft
-   background ~3% darker, dark mode background desaturated and very dark).
+`--color-bg` (light background), `--color-accent` (headings/body text). Derive
+the remaining `@theme` tokens and all `:root`/`.dark` semantic tokens from these
+three, using sensible proportional adjustments (dark variant ~15% darker, soft
+background ~3% darker, dark mode background desaturated and very dark).
 
 b. **Describe a vibe.** Examples: "warm terracotta and cream", "deep navy and gold",
-   "cool sage and ivory". From the description, generate a full palette: all ten
-   `@theme` tokens, all `palette.light` tokens, and all `palette.dark` tokens. Present
-   the result as a table (token, light value, dark value, purpose) and run the WCAG AA
-   contrast check (Step 5) before presenting. Wait for approval before writing.
+"cool sage and ivory". From the description, generate a full palette: all ten
+`@theme` tokens, all `palette.light` tokens, and all `palette.dark` tokens. Present
+the result as a table (token, light value, dark value, purpose) and run the WCAG AA
+contrast check (Step 5) before presenting. Wait for approval before writing.
 
 c. **Keep the neutral default.** Skip palette changes entirely.
 
@@ -151,6 +151,7 @@ npm run apply-brand
 ```
 
 This rewrites:
+
 - `src/styles/globals.css` -- `@theme` palette tokens, font tokens, `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string
 - `src/data/site.ts` -- `name`, `domain`, `brandColors` (derived fields `storageKeyPrefix`, `themeStorageKey`, `studio` are computed automatically -- never stale)
 - `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json; the Studio's colours come from @sanity/ui's built-in light/dark theme and are not brand-driven)
@@ -175,12 +176,12 @@ to visitors and the new version reflects the new brand.
 After `apply-brand` succeeds, verify these foreground/background pairs in BOTH light
 and dark mode. Failing AA is a launch blocker.
 
-| Pair | Minimum ratio |
-|---|---|
-| `--foreground` on `--background` (body text) | 4.5:1 |
-| `--primary` on `--background` (interactive elements) | 3:1 (large/UI) or 4.5:1 (small text) |
-| `--muted-foreground` on `--background` (secondary text) | 4.5:1 |
-| `--primary-foreground` on `--primary` (button label text) | 4.5:1 |
+| Pair                                                      | Minimum ratio                        |
+| --------------------------------------------------------- | ------------------------------------ |
+| `--foreground` on `--background` (body text)              | 4.5:1                                |
+| `--primary` on `--background` (interactive elements)      | 3:1 (large/UI) or 4.5:1 (small text) |
+| `--muted-foreground` on `--background` (secondary text)   | 4.5:1                                |
+| `--primary-foreground` on `--primary` (button label text) | 4.5:1                                |
 
 Compute relative luminance using the WCAG formula:
 

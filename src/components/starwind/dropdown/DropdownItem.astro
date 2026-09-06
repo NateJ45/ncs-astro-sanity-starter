@@ -1,7 +1,7 @@
 ---
-import type { HTMLTag, Polymorphic } from "astro/types";
+import type { HTMLTag, Polymorphic } from 'astro/types';
 
-import { dropdownItem } from "./variants";
+import { dropdownItem } from './variants';
 
 type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
   /**
@@ -14,14 +14,14 @@ type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
   disabled?: boolean;
 };
 
-const { class: className, inset = false, disabled = false, as: Tag = "div", ...rest } = Astro.props;
+const { class: className, inset = false, disabled = false, as: Tag = 'div', ...rest } = Astro.props;
 ---
 
 <Tag
   class={dropdownItem({ inset, disabled, class: className })}
   role="menuitem"
-  tabindex={disabled ? "-1" : "0"}
-  data-disabled={disabled ? "true" : undefined}
+  tabindex={disabled ? '-1' : '0'}
+  data-disabled={disabled ? 'true' : undefined}
   data-slot="dropdown-item"
   {...rest}
 >

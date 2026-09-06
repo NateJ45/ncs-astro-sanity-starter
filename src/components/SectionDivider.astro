@@ -22,28 +22,29 @@ interface Props {
 const { variant = 'ornament', class: extraClass = '' } = Astro.props as Props;
 ---
 
-<div
-  class:list={['mx-auto max-w-content px-m py-m text-center', extraClass]}
-  aria-hidden="true"
->
-  {variant === 'ornament' && (
-    <span class="font-display text-2xl text-link tracking-[0.6em] select-none">
-      ✺
-    </span>
-  )}
+<div class:list={['mx-auto max-w-content px-m py-m text-center', extraClass]} aria-hidden="true">
+  {
+    variant === 'ornament' && (
+      <span class="font-display text-2xl tracking-[0.6em] text-link select-none">✺</span>
+    )
+  }
 
-  {variant === 'line' && (
-    <div class="relative flex items-center justify-center max-w-md mx-auto">
-      <span class="block w-full h-px bg-border-soft" aria-hidden="true"></span>
-      <span class="absolute inline-block w-1.5 h-1.5 rounded-full bg-primary"></span>
-    </div>
-  )}
+  {
+    variant === 'line' && (
+      <div class="relative mx-auto flex max-w-md items-center justify-center">
+        <span class="block h-px w-full bg-border-soft" aria-hidden="true" />
+        <span class="absolute inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+      </div>
+    )
+  }
 
-  {variant === 'dots' && (
-    <span class="inline-flex items-center gap-3 text-link/70 select-none" aria-hidden="true">
-      <span class="inline-block w-1 h-1 rounded-full bg-current"></span>
-      <span class="inline-block w-1 h-1 rounded-full bg-current"></span>
-      <span class="inline-block w-1 h-1 rounded-full bg-current"></span>
-    </span>
-  )}
+  {
+    variant === 'dots' && (
+      <span class="inline-flex items-center gap-3 text-link/70 select-none" aria-hidden="true">
+        <span class="inline-block h-1 w-1 rounded-full bg-current" />
+        <span class="inline-block h-1 w-1 rounded-full bg-current" />
+        <span class="inline-block h-1 w-1 rounded-full bg-current" />
+      </span>
+    )
+  }
 </div>

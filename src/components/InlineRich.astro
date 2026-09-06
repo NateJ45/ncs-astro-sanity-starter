@@ -17,7 +17,9 @@ const runs = inlineRichRuns(value);
 {
   runs.map((r) =>
     r.strong && r.em ? (
-      <strong><em>{r.text}</em></strong>
+      <strong>
+        <em>{r.text}</em>
+      </strong>
     ) : r.strong ? (
       <strong>{r.text}</strong>
     ) : r.em ? (

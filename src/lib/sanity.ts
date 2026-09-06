@@ -38,8 +38,7 @@ const readToken = import.meta.env.SANITY_API_READ_TOKEN as string | undefined;
 
 /** Returns true when no real Sanity project has been configured. */
 const PLACEHOLDER_IDS = new Set(['', 'your-project-id', 'placeholder']);
-export const isSanityUnconfigured =
-  !projectId || PLACEHOLDER_IDS.has(projectId.trim());
+export const isSanityUnconfigured = !projectId || PLACEHOLDER_IDS.has(projectId.trim());
 
 // Warnings below are scoped to server-only (build + SSR pass) so they don't
 // leak into the browser console. The Sanity client module gets imported by

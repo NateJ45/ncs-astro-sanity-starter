@@ -48,69 +48,82 @@ const hasImage = !!service.featuredImage?.asset;
 
 <article
   id={id}
-  class="card-lift group relative flex flex-col h-full bg-card text-card-foreground border border-border-soft rounded-md overflow-hidden transition-colors hover:border-primary/40 scroll-mt-24 shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]"
+  class="card-lift group relative flex h-full scroll-mt-24 flex-col overflow-hidden rounded-md border border-border-soft bg-card text-card-foreground shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] transition-colors hover:border-primary/40"
 >
-  {/* Brand accent stripe — same 2px Warm Bronze signature used at the top of
+  {
+    /* Brand accent stripe — same 2px Warm Bronze signature used at the top of
       the site header, mobile menu, and footer. Gives each service card a
-      distinct "spine" + reinforces brand presence without dominating. */}
+      distinct "spine" + reinforces brand presence without dominating. */
+  }
   <div class="h-0.5 bg-primary" aria-hidden="true"></div>
 
-  {hasImage && (
-    <div class="aspect-[4/3] overflow-hidden bg-muted">
-      <SanityImage
-        source={service.featuredImage}
-        width={640}
-        sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
-        class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]"
-      />
+  {
+    hasImage && (
+      <div class="aspect-[4/3] overflow-hidden bg-muted">
+        <SanityImage
+          source={service.featuredImage}
+          width={640}
+          sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+          class="h-full w-full object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]"
+        />
+      </div>
+    )
+  }
+
+  <div class="flex flex-1 flex-col p-l">
+    <header>
+      <h3 class="font-display text-h3 text-foreground">{service.name}</h3>
+      {
+        service.price && (
+          <p class="mt-xs font-mono text-sm tracking-eyebrow text-link uppercase">
+            {service.price}
+          </p>
+        )
+      }
+    </header>
+
+    {
+      service.shortDescription && (
+        <p class="mt-m text-base leading-relaxed text-foreground/85">{service.shortDescription}</p>
+      )
+    }
+
+    {
+      visibleFeatures.length > 0 && (
+        <ul class="mt-m space-y-1.5 text-sm text-foreground">
+          {visibleFeatures.map((feature) => (
+            <li class="flex items-start gap-s">
+              <span
+                class="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-tertiary"
+                aria-hidden="true"
+              />
+              <span>{feature}</span>
+            </li>
+          ))}
+          {moreCount > 0 && (
+            <li class="text-xs text-muted-foreground italic">+ {moreCount} more</li>
+          )}
+        </ul>
+      )
+    }
+
+    {
+      !compact && service.bestFor && (
+        <div class="mt-m border-t border-border-soft pt-m">
+          <p class="mb-xs text-xs tracking-eyebrow text-foreground/80 uppercase">Best for</p>
+          <p class="text-sm text-foreground/80 italic">{service.bestFor}</p>
+        </div>
+      )
+    }
+
+    <div class="mt-l flex flex-1 items-end pt-m">
+      <a
+        href="/contact"
+        class="inline-flex min-h-[44px] items-center py-s text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:text-primary-dark"
+      >
+        {ctaLabel}
+        <span aria-hidden="true" class="ml-xs">→</span>
+      </a>
     </div>
-  )}
-
-  <div class="flex flex-col flex-1 p-l">
-  <header>
-    <h3 class="font-display text-h3 text-foreground">{service.name}</h3>
-    {service.price && (
-      <p class="mt-xs text-sm font-mono uppercase tracking-eyebrow text-link">
-        {service.price}
-      </p>
-    )}
-  </header>
-
-  {service.shortDescription && (
-    <p class="mt-m text-foreground/85 text-base leading-relaxed">{service.shortDescription}</p>
-  )}
-
-  {visibleFeatures.length > 0 && (
-    <ul class="mt-m space-y-1.5 text-sm text-foreground">
-      {visibleFeatures.map((feature) => (
-        <li class="flex items-start gap-s">
-          <span
-            class="mt-1.5 inline-block w-1.5 h-1.5 rounded-full bg-tertiary shrink-0"
-            aria-hidden="true"
-          ></span>
-          <span>{feature}</span>
-        </li>
-      ))}
-      {moreCount > 0 && (
-        <li class="text-xs text-muted-foreground italic">+ {moreCount} more</li>
-      )}
-    </ul>
-  )}
-
-  {!compact && service.bestFor && (
-    <div class="mt-m pt-m border-t border-border-soft">
-      <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-xs">Best for</p>
-      <p class="text-sm text-foreground/80 italic">{service.bestFor}</p>
-    </div>
-  )}
-
-  <div class="mt-l pt-m flex-1 flex items-end">
-    <a
-      href="/contact"
-      class="inline-flex items-center min-h-[44px] py-s text-xs font-semibold uppercase tracking-eyebrow text-link hover:text-primary-dark transition-colors"
-    >
-      {ctaLabel} <span aria-hidden="true" class="ml-xs">→</span>
-    </a>
-  </div>
   </div>
 </article>

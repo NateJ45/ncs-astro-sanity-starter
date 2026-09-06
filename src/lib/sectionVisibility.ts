@@ -50,15 +50,15 @@ export interface SectionVisibility {
  */
 export function getSectionVisibility(raw?: RawSectionVisibility | null): SectionVisibility {
   return {
-    portfolio:        raw?.showPortfolio        !== false,
-    journal:          raw?.showJournal          !== false,
-    shop:             raw?.showShop             !== false,
-    eDesign:          raw?.showEDesign          !== false,
+    portfolio: raw?.showPortfolio !== false,
+    journal: raw?.showJournal !== false,
+    shop: raw?.showShop !== false,
+    eDesign: raw?.showEDesign !== false,
     giftCertificates: raw?.showGiftCertificates !== false,
-    press:            raw?.showPress            !== false,
-    resources:        raw?.showResources        !== false,
-    guides:           raw?.showGuides           !== false,
-    styleQuiz:        raw?.showStyleQuiz        !== false,
+    press: raw?.showPress !== false,
+    resources: raw?.showResources !== false,
+    guides: raw?.showGuides !== false,
+    styleQuiz: raw?.showStyleQuiz !== false,
     budgetCalculator: raw?.showBudgetCalculator !== false,
   };
 }

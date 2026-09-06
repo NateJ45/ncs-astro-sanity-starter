@@ -37,6 +37,7 @@ These are stable design and system decisions that don't belong in editorial:
 ### The `// Safe to edit by hand` convention
 
 At the top of each component file, a header comment marks it as either:
+
 - `// Safe to edit by hand` -- a project maintainer can make changes here without risk of breaking the underlying architecture.
 - `// Foundation, edit with care` -- changes propagate widely; route through a planned session.
 

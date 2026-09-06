@@ -29,7 +29,7 @@
       "",
       "  initTheme();",
       "  document.addEventListener(\"astro:after-swap\", initTheme);",
-      "</script>"
-    ]
-  }
+      "</script>",
+    ],
+  },
 }

@@ -44,7 +44,7 @@ export default function CopyEmailButton({ email, label, variant = 'link' }: Prop
     return (
       <a
         href={`mailto:${email}`}
-        className="inline-flex items-center gap-2 px-m py-s border border-primary text-link hover:bg-muted transition-colors"
+        className="inline-flex items-center gap-2 border border-primary px-m py-s text-link transition-colors hover:bg-muted"
       >
         <span>{label ?? email}</span>
       </a>
@@ -57,7 +57,7 @@ export default function CopyEmailButton({ email, label, variant = 'link' }: Prop
     <span className="inline-flex items-center gap-1.5 align-middle">
       <a
         href={`mailto:${email}`}
-        className="text-link hover:text-primary-dark underline underline-offset-2 transition-colors"
+        className="text-link underline underline-offset-2 transition-colors hover:text-primary-dark"
       >
         {label ?? email}
       </a>
@@ -66,7 +66,7 @@ export default function CopyEmailButton({ email, label, variant = 'link' }: Prop
         onClick={copyToClipboard}
         aria-label={`Copy ${email} to clipboard`}
         title="Copy email address"
-        className="inline-flex h-7 w-7 items-center justify-center rounded text-foreground/55 hover:text-link hover:bg-accent transition-colors"
+        className="inline-flex h-7 w-7 items-center justify-center rounded text-foreground/55 transition-colors hover:bg-accent hover:text-link"
       >
         {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
       </button>

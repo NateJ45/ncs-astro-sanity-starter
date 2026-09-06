@@ -3096,9 +3096,9 @@ old name, so an old clone or a stale bookmark still resolves instead of 404ing.
 Locally: `git branch -m`, `fetch --prune`, `branch -u`, and for this repo
 `remote set-head origin -a` so `origin/HEAD` follows.
 
-  - ncs-astro-sanity-starter  `master`       -> `main`     (default branch too)
-  - reid-design-site          `modern-stack` -> `staging`
-  - mas-monograms             `modern-stack` -> `staging`
+- ncs-astro-sanity-starter `master` -> `main` (default branch too)
+- reid-design-site `modern-stack` -> `staging`
+- mas-monograms `modern-stack` -> `staging`
 
 `staging` is not decoration - it is a deploy target. presacademy's
 `deploy-staging.yml` is now in all six, pointed at a `<worker>-staging` Worker

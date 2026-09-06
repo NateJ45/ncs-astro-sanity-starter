@@ -42,8 +42,12 @@ export const servicesPage = defineType({
       title: 'SEO title',
       type: 'string',
       group: 'seo',
-      description: 'Browser tab and Google result title. Aim for 50 to 60 characters. Front-load the location or service.',
-      validation: (Rule) => Rule.max(60).warning('Titles longer than about 60 characters get cut off in Google search results.'),
+      description:
+        'Browser tab and Google result title. Aim for 50 to 60 characters. Front-load the location or service.',
+      validation: (Rule) =>
+        Rule.max(60).warning(
+          'Titles longer than about 60 characters get cut off in Google search results.',
+        ),
     }),
     defineField({
       name: 'seoDescription',
@@ -51,25 +55,52 @@ export const servicesPage = defineType({
       type: 'text',
       rows: 3,
       group: 'seo',
-      description: 'The sentence under the title in Google results. Aim for 150 to 160 characters. Write it for a person, not a search engine.',
-      validation: (Rule) => Rule.max(160).warning('Descriptions longer than about 160 characters get cut off in Google search results.'),
+      description:
+        'The sentence under the title in Google results. Aim for 150 to 160 characters. Write it for a person, not a search engine.',
+      validation: (Rule) =>
+        Rule.max(160).warning(
+          'Descriptions longer than about 160 characters get cut off in Google search results.',
+        ),
     }),
     defineField({
       name: 'seoImage',
       title: 'Social share image (this page)',
       type: 'image',
       group: 'seo',
-      description: 'Optional. The image shown when this page is shared on social media or in a text. Overrides the site default in Site Settings. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
+      description:
+        'Optional. The image shown when this page is shared on social media or in a text. Overrides the site default in Site Settings. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
       options: { hotspot: true },
-      fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-      ],
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),
 
     // Hero (legacy structured fields — hidden for rollback safety)
-    defineField({ name: 'heroEyebrow', title: 'Hero eyebrow', type: 'string', group: 'hero', hidden: true, readOnly: true, initialValue: 'What We Offer.' }),
-    defineField({ name: 'heroHeadline', title: 'Hero headline', type: 'string', group: 'hero', hidden: true, readOnly: true, initialValue: 'Design Services for Every Space and Stage.' }),
-    defineField({ name: 'heroSubhead', title: 'Hero subhead', type: 'text', rows: 2, group: 'hero', hidden: true, readOnly: true }),
+    defineField({
+      name: 'heroEyebrow',
+      title: 'Hero eyebrow',
+      type: 'string',
+      group: 'hero',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'What We Offer.',
+    }),
+    defineField({
+      name: 'heroHeadline',
+      title: 'Hero headline',
+      type: 'string',
+      group: 'hero',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'Design Services for Every Space and Stage.',
+    }),
+    defineField({
+      name: 'heroSubhead',
+      title: 'Hero subhead',
+      type: 'text',
+      rows: 2,
+      group: 'hero',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'heroImage',
       title: 'Hero background image',
@@ -77,10 +108,16 @@ export const servicesPage = defineType({
       group: 'hero',
       hidden: true,
       readOnly: true,
-      description: 'Full-bleed photo behind the hero text. Pick a landscape shot; the page applies a dark gradient over the bottom for readability.',
+      description:
+        'Full-bleed photo behind the hero text. Pick a landscape shot; the page applies a dark gradient over the bottom for readability.',
       options: { hotspot: true },
       fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          validation: (R) => R.required(),
+        }),
       ],
     }),
     defineField({
@@ -105,9 +142,32 @@ export const servicesPage = defineType({
     }),
 
     // Services list (legacy — hidden for rollback safety)
-    defineField({ name: 'servicesListEyebrow', title: 'Services list eyebrow', type: 'string', group: 'list', hidden: true, readOnly: true, initialValue: 'The Tiers.' }),
-    defineField({ name: 'servicesListHeadline', title: 'Services list headline', type: 'string', group: 'list', hidden: true, readOnly: true }),
-    defineField({ name: 'servicesListSubhead', title: 'Services list subhead', type: 'text', rows: 2, group: 'list', hidden: true, readOnly: true }),
+    defineField({
+      name: 'servicesListEyebrow',
+      title: 'Services list eyebrow',
+      type: 'string',
+      group: 'list',
+      hidden: true,
+      readOnly: true,
+      initialValue: 'The Tiers.',
+    }),
+    defineField({
+      name: 'servicesListHeadline',
+      title: 'Services list headline',
+      type: 'string',
+      group: 'list',
+      hidden: true,
+      readOnly: true,
+    }),
+    defineField({
+      name: 'servicesListSubhead',
+      title: 'Services list subhead',
+      type: 'text',
+      rows: 2,
+      group: 'list',
+      hidden: true,
+      readOnly: true,
+    }),
 
     // Service area section (legacy — hidden for rollback safety)
     defineField({
@@ -118,7 +178,12 @@ export const servicesPage = defineType({
       hidden: true,
       readOnly: true,
       fields: [
-        defineField({ name: 'eyebrow', title: 'Eyebrow', type: 'string', initialValue: 'Service Area.' }),
+        defineField({
+          name: 'eyebrow',
+          title: 'Eyebrow',
+          type: 'string',
+          initialValue: 'Service Area.',
+        }),
         defineField({
           name: 'headline',
           title: 'Headline',
@@ -136,8 +201,23 @@ export const servicesPage = defineType({
     }),
 
     // Final CTA (legacy — hidden for rollback safety)
-    defineField({ name: 'finalCtaEyebrow', title: 'Final CTA eyebrow', type: 'string', group: 'final', hidden: true, readOnly: true, initialValue: "Let's Talk." }),
-    defineField({ name: 'finalCtaHeadline', title: 'Final CTA headline', type: 'string', group: 'final', hidden: true, readOnly: true }),
+    defineField({
+      name: 'finalCtaEyebrow',
+      title: 'Final CTA eyebrow',
+      type: 'string',
+      group: 'final',
+      hidden: true,
+      readOnly: true,
+      initialValue: "Let's Talk.",
+    }),
+    defineField({
+      name: 'finalCtaHeadline',
+      title: 'Final CTA headline',
+      type: 'string',
+      group: 'final',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'finalCtaScriptAccent',
       title: 'Final CTA heading script accent (optional)',
@@ -148,8 +228,23 @@ export const servicesPage = defineType({
       description:
         'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
-    defineField({ name: 'finalCtaSubhead', title: 'Final CTA subhead', type: 'text', rows: 2, group: 'final', hidden: true, readOnly: true }),
-    defineField({ name: 'finalCta', title: 'Final CTA button', type: 'ctaBlock', group: 'final', hidden: true, readOnly: true }),
+    defineField({
+      name: 'finalCtaSubhead',
+      title: 'Final CTA subhead',
+      type: 'text',
+      rows: 2,
+      group: 'final',
+      hidden: true,
+      readOnly: true,
+    }),
+    defineField({
+      name: 'finalCta',
+      title: 'Final CTA button',
+      type: 'ctaBlock',
+      group: 'final',
+      hidden: true,
+      readOnly: true,
+    }),
     defineField({
       name: 'finalCtaBackgroundImage',
       title: 'Final CTA background image (optional)',
@@ -170,7 +265,8 @@ export const servicesPage = defineType({
       rows: 3,
       hidden: true,
       readOnly: true,
-      description: 'Internal-only reminder for editors. Anything you write here stays in Studio and never renders on the live page.',
+      description:
+        'Internal-only reminder for editors. Anything you write here stays in Studio and never renders on the live page.',
     }),
   ],
   preview: { prepare: () => ({ title: 'Services Page' }) },

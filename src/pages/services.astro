@@ -20,7 +20,7 @@ const [page, siteSettings, servicesForSchema] = await Promise.all([
   getServiceListForSchema().catch(() => []),
 ]);
 
-const title       = page?.seoTitle       ?? `Services & Pricing · ${site.name}`;
+const title = page?.seoTitle ?? `Services & Pricing · ${site.name}`;
 const description = page?.seoDescription ?? 'Design services for every space and stage.';
 
 const sections = page?.pageBuilder?.length ? page.pageBuilder : DEFAULT_SERVICES_SECTIONS;

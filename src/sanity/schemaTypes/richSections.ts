@@ -197,7 +197,12 @@ export const testimonialsSection = defineType({
   icon: StarIcon,
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
-    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({
+      name: 'headline',
+      title: 'Headline',
+      type: 'string',
+      validation: (R) => R.required(),
+    }),
     defineField({
       name: 'scriptAccent',
       title: 'Handwritten accent word (optional)',
@@ -249,7 +254,12 @@ export const storySection = defineType({
   icon: DocumentTextIcon,
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
-    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({
+      name: 'headline',
+      title: 'Headline',
+      type: 'string',
+      validation: (R) => R.required(),
+    }),
     proseBody('content', 'Story text'),
     imageWithAlt('portrait', 'Portrait photo (optional)'),
     defineField({
@@ -293,7 +303,12 @@ export const valuesSection = defineType({
   icon: BulbOutlineIcon,
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
-    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({
+      name: 'headline',
+      title: 'Headline',
+      type: 'string',
+      validation: (R) => R.required(),
+    }),
     columnsField('valuesSection'),
   ],
   preview: {
@@ -360,7 +375,12 @@ export const serviceAreaSection = defineType({
   icon: PinIcon,
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
-    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({
+      name: 'headline',
+      title: 'Headline',
+      type: 'string',
+      validation: (R) => R.required(),
+    }),
     defineField({
       name: 'description',
       title: 'Description',
@@ -427,7 +447,12 @@ export const faqSection = defineType({
   icon: HelpCircleIcon,
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
-    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({
+      name: 'headline',
+      title: 'Headline',
+      type: 'string',
+      validation: (R) => R.required(),
+    }),
     headingAccentField(),
     defineField({
       name: 'subhead',
@@ -470,7 +495,12 @@ export const teamSection = defineType({
   icon: UsersIcon,
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
-    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({
+      name: 'headline',
+      title: 'Headline',
+      type: 'string',
+      validation: (R) => R.required(),
+    }),
     defineField({
       name: 'subhead',
       title: 'Subhead (optional)',
@@ -489,7 +519,12 @@ export const teamSection = defineType({
           type: 'object',
           name: 'teamMember',
           fields: [
-            defineField({ name: 'name', title: 'Name', type: 'string', validation: (R) => R.required() }),
+            defineField({
+              name: 'name',
+              title: 'Name',
+              type: 'string',
+              validation: (R) => R.required(),
+            }),
             defineField({ name: 'role', title: 'Role or title (optional)', type: 'string' }),
             imageWithAlt('photo', 'Photo (optional)'),
             defineField({ name: 'bio', title: 'Short bio (optional)', type: 'text', rows: 2 }),
@@ -502,8 +537,19 @@ export const teamSection = defineType({
                   type: 'object',
                   name: 'socialLink',
                   fields: [
-                    defineField({ name: 'label', title: 'Label', type: 'string', description: 'Examples: LinkedIn, Instagram, Website.', validation: (R) => R.required() }),
-                    defineField({ name: 'url', title: 'URL', type: 'url', validation: (R) => R.required().uri({ scheme: ['http', 'https'] }) }),
+                    defineField({
+                      name: 'label',
+                      title: 'Label',
+                      type: 'string',
+                      description: 'Examples: LinkedIn, Instagram, Website.',
+                      validation: (R) => R.required(),
+                    }),
+                    defineField({
+                      name: 'url',
+                      title: 'URL',
+                      type: 'url',
+                      validation: (R) => R.required().uri({ scheme: ['http', 'https'] }),
+                    }),
                   ],
                   preview: { select: { title: 'label', subtitle: 'url' } },
                 }),
@@ -557,10 +603,16 @@ export const dynamicListSection = defineType({
   title: 'Auto list (latest content)',
   type: 'object',
   icon: SyncIcon,
-  description: 'Pulls the latest items from a collection automatically. Stays fresh on every rebuild without manual curation.',
+  description:
+    'Pulls the latest items from a collection automatically. Stays fresh on every rebuild without manual curation.',
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
-    defineField({ name: 'headline', title: 'Headline', type: 'string', validation: (R) => R.required() }),
+    defineField({
+      name: 'headline',
+      title: 'Headline',
+      type: 'string',
+      validation: (R) => R.required(),
+    }),
     defineField({
       name: 'subhead',
       title: 'Subhead (optional)',

@@ -32,9 +32,5 @@ interface PrimeIslandProps {
  * All styling is applied via the passthrough config.
  */
 export default function PrimeIsland({ children }: PrimeIslandProps) {
-  return (
-    <PrimeReactProvider value={{ unstyled: true }}>
-      {children}
-    </PrimeReactProvider>
-  );
+  return <PrimeReactProvider value={{ unstyled: true }}>{children}</PrimeReactProvider>;
 }

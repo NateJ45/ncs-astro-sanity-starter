@@ -76,156 +76,183 @@ const fallbackLabel: Record<string, string> = {
 };
 ---
 
-{hasItems && (
-  <section class="bg-muted" aria-labelledby={headingId}>
-    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
-      <SectionHeading
-        eyebrow={eyebrow}
-        headline={headline}
-        subhead={subhead}
-        subheadRich={subheadRich}
-        headingId={headingId}
-        align="center"
-        class="mx-auto"
-      />
+{
+  hasItems && (
+    <section class="bg-muted" aria-labelledby={headingId}>
+      <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          subhead={subhead}
+          subheadRich={subheadRich}
+          headingId={headingId}
+          align="center"
+          class="mx-auto"
+        />
 
-      {/* ── Journal cards ────────────────────────────────────────────── */}
-      {source === 'journal' && (
-        <ul class={`mt-section-lg grid grid-cols-1 ${colClass} gap-m list-none p-0`} data-stagger-grid>
-          {items.map((item) => (
-            <li>
-              {item.href ? (
-                <a
-                  href={item.href}
-                  class="card-lift group block h-full rounded-md overflow-hidden bg-card border border-border-soft no-underline hover:border-primary/40 transition-colors"
-                >
-                  {item.coverImage?.asset && (
-                    <div class="aspect-[16/9] overflow-hidden bg-muted">
-                      <SanityImage
-                        source={item.coverImage}
-                        width={800}
-                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                      />
-                    </div>
-                  )}
-                  <div class="p-m">
-                    {item.meta && (
-                      <p class="text-xs uppercase tracking-eyebrow text-foreground/70 mb-xs">
-                        {formatDate(item.meta)}
-                      </p>
+        {/* ── Journal cards ────────────────────────────────────────────── */}
+        {source === 'journal' && (
+          <ul
+            class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
+            data-stagger-grid
+          >
+            {items.map((item) => (
+              <li>
+                {item.href ? (
+                  <a
+                    href={item.href}
+                    class="card-lift group block h-full overflow-hidden rounded-md border border-border-soft bg-card no-underline transition-colors hover:border-primary/40"
+                  >
+                    {item.coverImage?.asset && (
+                      <div class="aspect-[16/9] overflow-hidden bg-muted">
+                        <SanityImage
+                          source={item.coverImage}
+                          width={800}
+                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                          class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                        />
+                      </div>
                     )}
-                    <h3 class="font-display text-h4 text-foreground leading-tight group-hover:text-primary-dark transition-colors line-clamp-2">
+                    <div class="p-m">
+                      {item.meta && (
+                        <p class="mb-xs text-xs tracking-eyebrow text-foreground/70 uppercase">
+                          {formatDate(item.meta)}
+                        </p>
+                      )}
+                      <h3 class="line-clamp-2 font-display text-h4 leading-tight text-foreground transition-colors group-hover:text-primary-dark">
+                        {item.title}
+                      </h3>
+                      {item.summary && (
+                        <p class="mt-xs line-clamp-3 text-sm leading-relaxed text-foreground/80">
+                          {item.summary}
+                        </p>
+                      )}
+                    </div>
+                  </a>
+                ) : (
+                  <div class="h-full rounded-md border border-border-soft bg-card p-m">
+                    <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
+                    {item.summary && (
+                      <p class="mt-xs text-sm leading-relaxed text-foreground/80">{item.summary}</p>
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* ── Service cards ────────────────────────────────────────────── */}
+        {source === 'services' && (
+          <ul
+            class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
+            data-stagger-grid
+          >
+            {items.map((item) => (
+              <li>
+                {item.href ? (
+                  <a
+                    href={item.href}
+                    class="card-lift group block h-full rounded-md border border-border-soft bg-card p-m no-underline transition-colors hover:border-primary/40"
+                  >
+                    <h3 class="font-display text-h4 text-foreground transition-colors group-hover:text-primary-dark">
                       {item.title}
                     </h3>
+                    {item.meta && (
+                      <p class="mt-xs text-xs font-semibold tracking-eyebrow text-link uppercase">
+                        {item.meta}
+                      </p>
+                    )}
                     {item.summary && (
-                      <p class="mt-xs text-sm text-foreground/80 leading-relaxed line-clamp-3">
+                      <p class="mt-s line-clamp-3 text-sm leading-relaxed text-foreground/80">
+                        {item.summary}
+                      </p>
+                    )}
+                  </a>
+                ) : (
+                  <div class="h-full rounded-md border border-border-soft bg-card p-m">
+                    <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
+                    {item.meta && (
+                      <p class="mt-xs text-xs font-semibold tracking-eyebrow text-link uppercase">
+                        {item.meta}
+                      </p>
+                    )}
+                    {item.summary && (
+                      <p class="mt-s line-clamp-3 text-sm leading-relaxed text-foreground/80">
                         {item.summary}
                       </p>
                     )}
                   </div>
-                </a>
-              ) : (
-                <div class="h-full rounded-md border border-border-soft bg-card p-m">
-                  <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
-                  {item.summary && <p class="mt-xs text-sm text-foreground/80 leading-relaxed">{item.summary}</p>}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* ── Service cards ────────────────────────────────────────────── */}
-      {source === 'services' && (
-        <ul class={`mt-section-lg grid grid-cols-1 ${colClass} gap-m list-none p-0`} data-stagger-grid>
-          {items.map((item) => (
-            <li>
-              {item.href ? (
-                <a
-                  href={item.href}
-                  class="card-lift group block h-full rounded-md border border-border-soft bg-card p-m no-underline hover:border-primary/40 transition-colors"
-                >
-                  <h3 class="font-display text-h4 text-foreground group-hover:text-primary-dark transition-colors">
-                    {item.title}
-                  </h3>
-                  {item.meta && (
-                    <p class="mt-xs text-xs font-semibold uppercase tracking-eyebrow text-link">{item.meta}</p>
-                  )}
-                  {item.summary && (
-                    <p class="mt-s text-sm text-foreground/80 leading-relaxed line-clamp-3">{item.summary}</p>
-                  )}
-                </a>
-              ) : (
-                <div class="h-full rounded-md border border-border-soft bg-card p-m">
-                  <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
-                  {item.meta && <p class="mt-xs text-xs font-semibold uppercase tracking-eyebrow text-link">{item.meta}</p>}
-                  {item.summary && <p class="mt-s text-sm text-foreground/80 leading-relaxed line-clamp-3">{item.summary}</p>}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* ── Testimonial cards ────────────────────────────────────────── */}
-      {source === 'testimonials' && (
-        <ul class={`mt-section-lg grid grid-cols-1 ${colClass} gap-m list-none p-0`} data-stagger-grid>
-          {items.map((item) => (
-            <li class="flex">
-              <blockquote class="flex-1 rounded-md border border-border-soft bg-card p-m flex flex-col">
-                {item.summary && (
-                  <p class="flex-1 text-foreground/90 leading-relaxed italic before:content-['“'] after:content-['”']">
-                    {item.summary}
-                  </p>
                 )}
-                <footer class="mt-m">
-                  <cite class="not-italic">
-                    <p class="font-semibold text-sm text-foreground">{item.title}</p>
-                    {item.meta && <p class="text-xs text-foreground/70">{item.meta}</p>}
-                  </cite>
-                </footer>
-              </blockquote>
-            </li>
-          ))}
-        </ul>
-      )}
+              </li>
+            ))}
+          </ul>
+        )}
 
-      {/* ── FAQ items (mini accordion) ───────────────────────────────── */}
-      {source === 'faqs' && (
-        <dl class="mt-section-lg max-w-3xl mx-auto divide-y divide-border-soft">
-          {items.map((item) => (
-            <div class="py-m">
-              <dt class="font-semibold text-foreground leading-snug">{item.title}</dt>
-              {item.summary && (
-                <dd class="mt-xs text-sm text-foreground/80 leading-relaxed">{item.summary}</dd>
-              )}
-              {/* answer is a Portable Text array -- render plain text fallback for
+        {/* ── Testimonial cards ────────────────────────────────────────── */}
+        {source === 'testimonials' && (
+          <ul
+            class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
+            data-stagger-grid
+          >
+            {items.map((item) => (
+              <li class="flex">
+                <blockquote class="flex flex-1 flex-col rounded-md border border-border-soft bg-card p-m">
+                  {item.summary && (
+                    <p class="flex-1 leading-relaxed text-foreground/90 italic before:content-['“'] after:content-['”']">
+                      {item.summary}
+                    </p>
+                  )}
+                  <footer class="mt-m">
+                    <cite class="not-italic">
+                      <p class="text-sm font-semibold text-foreground">{item.title}</p>
+                      {item.meta && <p class="text-xs text-foreground/70">{item.meta}</p>}
+                    </cite>
+                  </footer>
+                </blockquote>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* ── FAQ items (mini accordion) ───────────────────────────────── */}
+        {source === 'faqs' && (
+          <dl class="mx-auto mt-section-lg max-w-3xl divide-y divide-border-soft">
+            {items.map((item) => (
+              <div class="py-m">
+                <dt class="leading-snug font-semibold text-foreground">{item.title}</dt>
+                {item.summary && (
+                  <dd class="mt-xs text-sm leading-relaxed text-foreground/80">{item.summary}</dd>
+                )}
+                {/* answer is a Portable Text array -- render plain text fallback for
                   the inline block. For full rich text the FaqAccordion island is the
                   right component (see /faq page). */}
-              {!item.summary && Array.isArray((item as any).answer) && (item as any).answer.length > 0 && (
-                <dd class="mt-xs text-sm text-foreground/80 leading-relaxed">
-                  {(item as any).answer
-                    .filter((b: any) => b._type === 'block')
-                    .map((b: any) => b.children?.map((c: any) => c.text).join(''))
-                    .filter(Boolean)
-                    .join(' ')}
-                </dd>
-              )}
-            </div>
-          ))}
-        </dl>
-      )}
+                {!item.summary &&
+                  Array.isArray((item as any).answer) &&
+                  (item as any).answer.length > 0 && (
+                    <dd class="mt-xs text-sm leading-relaxed text-foreground/80">
+                      {(item as any).answer
+                        .filter((b: any) => b._type === 'block')
+                        .map((b: any) => b.children?.map((c: any) => c.text).join(''))
+                        .filter(Boolean)
+                        .join(' ')}
+                    </dd>
+                  )}
+              </div>
+            ))}
+          </dl>
+        )}
 
-      {/* CTA button */}
-      <div class="mt-section-lg flex justify-center">
-        <CtaLink
-          cta={cta}
-          variant="secondary"
-          fallbackHref={fallbackHref[source]}
-          fallbackLabel={fallbackLabel[source]}
-        />
+        {/* CTA button */}
+        <div class="mt-section-lg flex justify-center">
+          <CtaLink
+            cta={cta}
+            variant="secondary"
+            fallbackHref={fallbackHref[source]}
+            fallbackLabel={fallbackLabel[source]}
+          />
+        </div>
       </div>
-    </div>
-  </section>
-)}
+    </section>
+  )
+}

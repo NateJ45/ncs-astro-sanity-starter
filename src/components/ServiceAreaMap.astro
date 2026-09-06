@@ -13,7 +13,7 @@
 // minLon=-86.85, maxLon=-85.95 => lonSpread=0.90 (half=0.45)
 // minLat=39.55,  maxLat=39.95  => latSpread=0.40 (half=0.20)
 const HALF_LON = 0.45;
-const HALF_LAT = 0.20;
+const HALF_LAT = 0.2;
 
 interface Props {
   /** Override the visible bbox. Format: minLon,minLat,maxLon,maxLat */
@@ -41,17 +41,19 @@ const {
 } = Astro.props as Props;
 
 // Resolve marker position: explicit markerLat/markerLon override > lat/lng props > hardcoded defaults.
-const markerLat = markerLatProp ?? lat  ?? 39.7042;
-const markerLon = markerLonProp ?? lng  ?? -86.3994;
+const markerLat = markerLatProp ?? lat ?? 39.7042;
+const markerLon = markerLonProp ?? lng ?? -86.3994;
 
 // Derive bbox from marker coords using the same delta spread as the original hardcoded values.
 // Explicit bbox prop always wins; otherwise build from marker coords.
-const bbox = bboxProp ?? [
-  (markerLon - HALF_LON).toFixed(4),
-  (markerLat - HALF_LAT).toFixed(4),
-  (markerLon + HALF_LON).toFixed(4),
-  (markerLat + HALF_LAT).toFixed(4),
-].join(',');
+const bbox =
+  bboxProp ??
+  [
+    (markerLon - HALF_LON).toFixed(4),
+    (markerLat - HALF_LAT).toFixed(4),
+    (markerLon + HALF_LON).toFixed(4),
+    (markerLat + HALF_LAT).toFixed(4),
+  ].join(',');
 
 const src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${markerLat},${markerLon}`;
 const link = `https://www.openstreetmap.org/?mlat=${markerLat}&mlon=${markerLon}#map=10/${markerLat}/${markerLon}`;
@@ -65,14 +67,13 @@ const link = `https://www.openstreetmap.org/?mlat=${markerLat}&mlon=${markerLon}
     style="border: 0; border-radius: 0.5rem;"
     title="Map showing the studio's service area"
     aria-label="Map showing the studio's service area"
-    loading="lazy"
-  ></iframe>
+    loading="lazy"></iframe>
   <figcaption class="mt-xs text-xs text-muted-foreground">
     Studio service area. <a
       href={link}
       target="_blank"
       rel="noopener noreferrer"
-      class="underline hover:text-primary"
-    >View larger map</a>
+      class="underline hover:text-primary">View larger map</a
+    >
   </figcaption>
 </figure>

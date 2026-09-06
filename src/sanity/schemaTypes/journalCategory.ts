@@ -38,7 +38,8 @@ export const journalCategory = defineType({
       title: 'Description',
       type: 'text',
       rows: 2,
-      description: 'Optional. A one-line description of what this category covers. Surfaces as a tooltip on the chip.',
+      description:
+        'Optional. A one-line description of what this category covers. Surfaces as a tooltip on the chip.',
       validation: (Rule) => Rule.max(160),
     }),
   ],

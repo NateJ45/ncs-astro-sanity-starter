@@ -39,7 +39,9 @@ function validateSchema(schema, value, path) {
       errors.push(`${path}: expected one of [${schema.type.join(',')}] but got null`);
       return errors;
     }
-    const nonNullType = schema.type.find(function(t) { return t !== 'null'; });
+    const nonNullType = schema.type.find(function (t) {
+      return t !== 'null';
+    });
     if (nonNullType) {
       const subSchema = Object.assign({}, schema, { type: nonNullType });
       return validateSchema(subSchema, value, path);
@@ -62,7 +64,11 @@ function validateSchema(schema, value, path) {
     if (schema.properties) {
       for (const key of Object.keys(schema.properties)) {
         if (key in value) {
-          const subErrors = validateSchema(schema.properties[key], value[key], path ? `${path}.${key}` : key);
+          const subErrors = validateSchema(
+            schema.properties[key],
+            value[key],
+            path ? `${path}.${key}` : key,
+          );
           for (const e of subErrors) errors.push(e);
         }
       }
@@ -76,7 +82,7 @@ function validateSchema(schema, value, path) {
       return errors;
     }
     if (schema.items) {
-      value.forEach(function(item, i) {
+      value.forEach(function (item, i) {
         const subErrors = validateSchema(schema.items, item, `${path}[${i}]`);
         for (const e of subErrors) errors.push(e);
       });
@@ -166,7 +172,11 @@ function loadConfig() {
     if (schemaErrors.length > 0) {
       throw new Error(
         `apply-brand: brand/brand.config.json failed schema validation:\n` +
-        schemaErrors.map(function(e) { return `  - ${e}`; }).join('\n')
+          schemaErrors
+            .map(function (e) {
+              return `  - ${e}`;
+            })
+            .join('\n'),
       );
     }
   }
@@ -198,8 +208,8 @@ function applySubstitutions(text, substitutions, filePath) {
     if (!pattern.test(result)) {
       throw new Error(
         `apply-brand: token "${label}" not found in ${filePath}\n` +
-        `  Pattern: ${pattern}\n` +
-        `  This usually means the file structure has changed — update the script.`
+          `  Pattern: ${pattern}\n` +
+          `  This usually means the file structure has changed — update the script.`,
       );
     }
     // Always use the function form to prevent $-sequence interpolation
@@ -237,15 +247,17 @@ function esc(s) {
 // ---- Rewrite: src/styles/globals.css ------------------------------------
 
 function rewriteGlobalsCss(config) {
-  rewriteFile(resolve(root, 'src/styles/globals.css'), function(text, filePath) {
+  rewriteFile(resolve(root, 'src/styles/globals.css'), function (text, filePath) {
     let result = text;
 
     // Step 1 — @theme palette tokens
-    const themeSubstitutions = Object.entries(config.palette.theme).map(function([token, value]) {
+    const themeSubstitutions = Object.entries(config.palette.theme).map(function ([token, value]) {
       return {
         label: token,
         pattern: new RegExp('(' + esc(token) + ':\\s*)([^;]+)(;)'),
-        replacer: function(_, g1, _g2, g3) { return g1 + value + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + value + g3;
+        },
       };
     });
     result = applySubstitutions(result, themeSubstitutions, filePath);
@@ -254,24 +266,31 @@ function rewriteGlobalsCss(config) {
     // --font-script is ALWAYS rewritten: config value when non-null, starter
     // default when null, so re-running with script:null after a previous non-null
     // run resets the token correctly instead of leaving a stale family in place.
-    const scriptFamilyValue = config.fonts.script !== null
-      ? config.fonts.script.familyValue
-      : '"Snell Roundhand", "Apple Chancery", cursive';
+    const scriptFamilyValue =
+      config.fonts.script !== null
+        ? config.fonts.script.familyValue
+        : '"Snell Roundhand", "Apple Chancery", cursive';
     const fontSubs = [
       {
         label: '--font-display',
         pattern: /(--font-display:\s*)([^;]+)(;)/,
-        replacer: function(_, g1, _g2, g3) { return g1 + config.fonts.display.familyValue + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + config.fonts.display.familyValue + g3;
+        },
       },
       {
         label: '--font-body',
         pattern: /(--font-body:\s*)([^;]+)(;)/,
-        replacer: function(_, g1, _g2, g3) { return g1 + config.fonts.body.familyValue + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + config.fonts.body.familyValue + g3;
+        },
       },
       {
         label: '--font-script',
         pattern: /(--font-script:\s*)([^;]+)(;)/,
-        replacer: function(_, g1, _g2, g3) { return g1 + scriptFamilyValue + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + scriptFamilyValue + g3;
+        },
       },
     ];
     result = applySubstitutions(result, fontSubs, filePath);
@@ -293,13 +312,17 @@ function rewriteGlobalsCss(config) {
     if (!importBlockPattern.test(result)) {
       throw new Error(
         `apply-brand: @fontsource import block not found in ${filePath}\n` +
-        `  Expected 1+ consecutive @import "@fontsource..." lines.`
+          `  Expected 1+ consecutive @import "@fontsource..." lines.`,
       );
     }
-    result = result.replace(importBlockPattern, function(match, block, trailingBlank) {
+    result = result.replace(importBlockPattern, function (match, block, trailingBlank) {
       // Preserve the line ending style from the original file
       const eol = block.includes('\r\n') ? '\r\n' : '\n';
-      const rebuildBlock = allImports.map(function(imp) { return `@import "${imp}";`; }).join(eol);
+      const rebuildBlock = allImports
+        .map(function (imp) {
+          return `@import "${imp}";`;
+        })
+        .join(eol);
       return rebuildBlock + eol + (trailingBlank || '');
     });
 
@@ -331,11 +354,13 @@ function rewriteGlobalsCss(config) {
       const inner = result.slice(braceOpen + 1, braceClose);
       const after = result.slice(braceClose);
 
-      const lightSubs = Object.entries(config.palette.light).map(function([token, value]) {
+      const lightSubs = Object.entries(config.palette.light).map(function ([token, value]) {
         return {
           label: 'light:' + token,
           pattern: new RegExp('(' + esc(token) + ':\\s*)([^;]+)(;)'),
-          replacer: function(_, g1, _g2, g3) { return g1 + value + g3; },
+          replacer: function (_, g1, _g2, g3) {
+            return g1 + value + g3;
+          },
         };
       });
       result = before + applySubstitutions(inner, lightSubs, filePath + ' [:root]') + after;
@@ -366,11 +391,13 @@ function rewriteGlobalsCss(config) {
       const inner = result.slice(braceOpen + 1, braceClose);
       const after = result.slice(braceClose);
 
-      const darkSubs = Object.entries(config.palette.dark).map(function([token, value]) {
+      const darkSubs = Object.entries(config.palette.dark).map(function ([token, value]) {
         return {
           label: 'dark:' + token,
           pattern: new RegExp('(' + esc(token) + ':\\s*)([^;]+)(;)'),
-          replacer: function(_, g1, _g2, g3) { return g1 + value + g3; },
+          replacer: function (_, g1, _g2, g3) {
+            return g1 + value + g3;
+          },
         };
       });
       result = before + applySubstitutions(inner, darkSubs, filePath + ' [.dark]') + after;
@@ -384,7 +411,9 @@ function rewriteGlobalsCss(config) {
         {
           label: '--radius',
           pattern: /(--radius:\s*)([^;]+)(;)/,
-          replacer: function(_, g1, _g2, g3) { return g1 + config.radius + g3; },
+          replacer: function (_, g1, _g2, g3) {
+            return g1 + config.radius + g3;
+          },
         },
       ];
       result = applySubstitutions(result, radiusSubs, filePath);
@@ -401,7 +430,9 @@ function rewriteGlobalsCss(config) {
         {
           label: 'print-footer',
           pattern: /(body::after\s*\{[\s\S]*?content:\s*")([^"]*?)(")/,
-          replacer: function(_, g1, _g2, g3) { return g1 + footerName + ' · ' + footerDomain + g3; },
+          replacer: function (_, g1, _g2, g3) {
+            return g1 + footerName + ' · ' + footerDomain + g3;
+          },
         },
       ];
       result = applySubstitutions(result, printSubs, filePath);
@@ -414,7 +445,7 @@ function rewriteGlobalsCss(config) {
 // ---- Rewrite: src/data/site.ts ------------------------------------------
 
 function rewriteSiteTs(config) {
-  rewriteFile(resolve(root, 'src/data/site.ts'), function(text, filePath) {
+  rewriteFile(resolve(root, 'src/data/site.ts'), function (text, filePath) {
     const primary = config.palette.theme['--color-primary'];
     const primaryDark = config.palette.theme['--color-primary-dark'];
     const accent = config.palette.theme['--color-accent'];
@@ -431,60 +462,82 @@ function rewriteSiteTs(config) {
       {
         label: 'name',
         pattern: /(const _name\s*=\s*")((?:[^"\\]|\\.)*)(")/,
-        replacer: function(_, g1, _g2, g3) { return g1 + config.name + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + config.name + g3;
+        },
       },
       // domain — matches the _domain private-variable declaration
       {
         label: 'domain',
         pattern: /(const _domain\s*=\s*")((?:[^"\\]|\\.)*)(")/,
-        replacer: function(_, g1, _g2, g3) { return g1 + config.domain + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + config.domain + g3;
+        },
       },
       // brandColors — each key has 4-space indent; match just the quoted value
       // after the key name, leaving comma + comment intact via look-ahead.
       {
         label: 'brandColors.primary',
         pattern: /(    primary:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + primary + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + primary + g3;
+        },
       },
       {
         label: 'brandColors.primaryDark',
         pattern: /(    primaryDark:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + primaryDark + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + primaryDark + g3;
+        },
       },
       {
         label: 'brandColors.accent',
         pattern: /(    accent:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + accent + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + accent + g3;
+        },
       },
       {
         label: 'brandColors.accentDark',
         pattern: /(    accentDark:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + accentDark + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + accentDark + g3;
+        },
       },
       {
         label: 'brandColors.secondary',
         pattern: /(    secondary:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + secondary + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + secondary + g3;
+        },
       },
       {
         label: 'brandColors.tertiary',
         pattern: /(    tertiary:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + tertiary + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + tertiary + g3;
+        },
       },
       {
         label: 'brandColors.bg',
         pattern: /(    bg:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + bg + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + bg + g3;
+        },
       },
       {
         label: 'brandColors.bgSoft',
         pattern: /(    bgSoft:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + bgSoft + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + bgSoft + g3;
+        },
       },
       {
         label: 'brandColors.border',
         pattern: /(    border:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + borderSoft + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + borderSoft + g3;
+        },
       },
     ];
     return applySubstitutions(text, subs, filePath);
@@ -502,7 +555,7 @@ function rewriteSiteTs(config) {
 // AND dark schemes, and the only brand input left is the two font stacks.
 
 function rewriteSanityConfig(config) {
-  rewriteFile(resolve(root, 'sanity.config.ts'), function(text, filePath) {
+  rewriteFile(resolve(root, 'sanity.config.ts'), function (text, filePath) {
     // Both are single-quoted one-line literals so a stack containing double
     // quotes (the usual shape: '"Libre Baskerville", Georgia, serif') drops in
     // verbatim. A stack containing a single quote would break the literal, so
@@ -523,12 +576,16 @@ function rewriteSanityConfig(config) {
       {
         label: 'DISPLAY_STACK',
         pattern: /(const DISPLAY_STACK = ')([^']*)(';)/,
-        replacer: function (_, g1, _g2, g3) { return g1 + config.studio.fonts.display + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + config.studio.fonts.display + g3;
+        },
       },
       {
         label: 'BODY_STACK',
         pattern: /(const BODY_STACK = ')([^']*)(';)/,
-        replacer: function (_, g1, _g2, g3) { return g1 + config.studio.fonts.body + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + config.studio.fonts.body + g3;
+        },
       },
     ];
 
@@ -539,7 +596,7 @@ function rewriteSanityConfig(config) {
 // ---- Rewrite: scripts/generate-og-default.mjs ---------------------------
 
 function rewriteOgDefault(config) {
-  rewriteFile(resolve(root, 'scripts/generate-og-default.mjs'), function(text, filePath) {
+  rewriteFile(resolve(root, 'scripts/generate-og-default.mjs'), function (text, filePath) {
     // Escape single quotes in tagline to avoid breaking the JS single-quoted string
     const safeTagline = config.tagline.replace(/'/g, "\\'");
     const name = config.name;
@@ -547,12 +604,16 @@ function rewriteOgDefault(config) {
       {
         label: 'wordmark',
         pattern: /(wordmark:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function(_, g1, _g2, g3) { return g1 + name + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + name + g3;
+        },
       },
       {
         label: 'tagline',
         pattern: /(tagline:\s*\[')((?:[^'\\]|\\.)*)('\])/,
-        replacer: function(_, g1, _g2, g3) { return g1 + safeTagline + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + safeTagline + g3;
+        },
       },
     ];
     return applySubstitutions(text, subs, filePath);
@@ -562,7 +623,7 @@ function rewriteOgDefault(config) {
 // ---- Rewrite: scripts/lib/render-og.mjs ---------------------------------
 
 function rewriteRenderOg(config) {
-  rewriteFile(resolve(root, 'scripts/lib/render-og.mjs'), function(text, filePath) {
+  rewriteFile(resolve(root, 'scripts/lib/render-og.mjs'), function (text, filePath) {
     const bg = config.palette.light['--background'];
     const primary = config.palette.theme['--color-primary'];
     const primaryDark = config.palette.theme['--color-primary-dark'];
@@ -573,32 +634,44 @@ function rewriteRenderOg(config) {
       {
         label: 'DEFAULTS.bg',
         pattern: /(  bg:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function(_, g1, _g2, g3) { return g1 + bg + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + bg + g3;
+        },
       },
       {
         label: 'DEFAULTS.primary',
         pattern: /(  primary:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function(_, g1, _g2, g3) { return g1 + primary + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + primary + g3;
+        },
       },
       {
         label: 'DEFAULTS.primaryDark',
         pattern: /(  primaryDark:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function(_, g1, _g2, g3) { return g1 + primaryDark + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + primaryDark + g3;
+        },
       },
       {
         label: 'DEFAULTS.accent',
         pattern: /(  accent:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function(_, g1, _g2, g3) { return g1 + accent + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + accent + g3;
+        },
       },
       {
         label: 'DEFAULTS.taupe',
         pattern: /(  taupe:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function(_, g1, _g2, g3) { return g1 + secondary + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + secondary + g3;
+        },
       },
       {
         label: 'DEFAULTS.fontDisplay',
         pattern: /(  fontDisplay:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function(_, g1, _g2, g3) { return g1 + fontDisplay + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + fontDisplay + g3;
+        },
       },
     ];
     return applySubstitutions(text, subs, filePath);
@@ -608,7 +681,7 @@ function rewriteRenderOg(config) {
 // ---- Rewrite: scripts/generate-og-pages.mjs ----------------------------
 
 function rewriteOgPages(config) {
-  rewriteFile(resolve(root, 'scripts/generate-og-pages.mjs'), function(text, filePath) {
+  rewriteFile(resolve(root, 'scripts/generate-og-pages.mjs'), function (text, filePath) {
     const name = config.name;
     const subs = [
       {
@@ -616,7 +689,9 @@ function rewriteOgPages(config) {
         // Matches: const WORDMARK = env.SITE_NAME ?? 'Studio Starter';
         // Captures the fallback string literal only
         pattern: /(const WORDMARK = env\.SITE_NAME \?\? ')((?:[^'\\]|\\.)*)(')/,
-        replacer: function(_, g1, _g2, g3) { return g1 + name + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + name + g3;
+        },
       },
     ];
     return applySubstitutions(text, subs, filePath);
@@ -631,12 +706,14 @@ function rewriteWranglerJsonc(config) {
   if (!config.workerName) return;
 
   const workerName = config.workerName;
-  rewriteFile(resolve(root, 'wrangler.jsonc'), function(text, filePath) {
+  rewriteFile(resolve(root, 'wrangler.jsonc'), function (text, filePath) {
     const subs = [
       {
         label: 'worker name',
         pattern: /("name":\s*")((?:[^"\\]|\\.)*)(")/,
-        replacer: function(_, g1, _g2, g3) { return g1 + workerName + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + workerName + g3;
+        },
       },
     ];
     return applySubstitutions(text, subs, filePath);
@@ -648,12 +725,14 @@ function rewriteAstroConfig(config) {
   if (config.domain === 'example.com') return;
 
   const domain = config.domain;
-  rewriteFile(resolve(root, 'astro.config.mjs'), function(text, filePath) {
+  rewriteFile(resolve(root, 'astro.config.mjs'), function (text, filePath) {
     const subs = [
       {
         label: 'site URL',
         pattern: /(  site:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function(_, g1, _g2, g3) { return g1 + 'https://' + domain + g3; },
+        replacer: function (_, g1, _g2, g3) {
+          return g1 + 'https://' + domain + g3;
+        },
       },
     ];
     return applySubstitutions(text, subs, filePath);
@@ -698,14 +777,54 @@ async function main() {
   }
 
   const steps = [
-    ['globals.css', function() { rewriteGlobalsCss(config); }],
-    ['site.ts', function() { rewriteSiteTs(config); }],
-    ['sanity.config.ts', function() { rewriteSanityConfig(config); }],
-    ['generate-og-default.mjs', function() { rewriteOgDefault(config); }],
-    ['render-og.mjs', function() { rewriteRenderOg(config); }],
-    ['generate-og-pages.mjs', function() { rewriteOgPages(config); }],
-    ['wrangler.jsonc', function() { rewriteWranglerJsonc(config); }],
-    ['astro.config.mjs', function() { rewriteAstroConfig(config); }],
+    [
+      'globals.css',
+      function () {
+        rewriteGlobalsCss(config);
+      },
+    ],
+    [
+      'site.ts',
+      function () {
+        rewriteSiteTs(config);
+      },
+    ],
+    [
+      'sanity.config.ts',
+      function () {
+        rewriteSanityConfig(config);
+      },
+    ],
+    [
+      'generate-og-default.mjs',
+      function () {
+        rewriteOgDefault(config);
+      },
+    ],
+    [
+      'render-og.mjs',
+      function () {
+        rewriteRenderOg(config);
+      },
+    ],
+    [
+      'generate-og-pages.mjs',
+      function () {
+        rewriteOgPages(config);
+      },
+    ],
+    [
+      'wrangler.jsonc',
+      function () {
+        rewriteWranglerJsonc(config);
+      },
+    ],
+    [
+      'astro.config.mjs',
+      function () {
+        rewriteAstroConfig(config);
+      },
+    ],
   ];
 
   for (const [label, fn] of steps) {

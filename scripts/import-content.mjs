@@ -45,8 +45,9 @@ let total = 0;
 for (const file of FILES) {
   const docs = loadDocs(file);
   for (const doc of docs) {
-    if (!doc._type) throw new Error(`Missing _type in ${file}: ${JSON.stringify(doc).slice(0, 80)}…`);
-    if (!doc._id)   throw new Error(`Missing _id in ${file}: ${JSON.stringify(doc).slice(0, 80)}…`);
+    if (!doc._type)
+      throw new Error(`Missing _type in ${file}: ${JSON.stringify(doc).slice(0, 80)}…`);
+    if (!doc._id) throw new Error(`Missing _id in ${file}: ${JSON.stringify(doc).slice(0, 80)}…`);
     lines.push(JSON.stringify(doc));
     total += 1;
   }

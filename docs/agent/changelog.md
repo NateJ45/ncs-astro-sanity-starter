@@ -6,11 +6,11 @@
 > sequence, in prose. The **machine-checkable** record of what is shared across the site
 > family now lives in `PORTS.md` at the repo root: an applied-to matrix (improvement by
 > repo), one dated port card per improvement, and `scripts/sync-check.mjs` to prove a
-> site's canonical copies have not drifted. Something that needs to be *checked* belongs
-> in PORTS.md; something that needs to be *understood in sequence* belongs here. Entries
+> site's canonical copies have not drifted. Something that needs to be _checked_ belongs
+> in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
-*2026-08-28 — The Squarespace-grade editor: Astro 7, Sanity 6.4, embedded single-package Studio, live preview, in-canvas section controls.*
+_2026-08-28 — The Squarespace-grade editor: Astro 7, Sanity 6.4, embedded single-package Studio, live preview, in-canvas section controls._
 
 The template takes the whole modern stack its descendant presacademy pioneered, so every future site is born with it. Four phases, each gated before the next.
 
@@ -32,11 +32,11 @@ Everything **fails closed** without `SANITY_TOKEN`, and legibly. The preview ent
 
 ---
 
-*2026-05-30 — Forked from the Reid Design build; genericized to the ncs-astro-sanity-starter (core foundation + opt-in module library + bootstrap docs). Future projects start their own history from this entry.*
+_2026-05-30 — Forked from the Reid Design build; genericized to the ncs-astro-sanity-starter (core foundation + opt-in module library + bootstrap docs). Future projects start their own history from this entry._
 
 ---
 
-*2026-06-12 — Audit-driven hardening + UI component stack + CI (U1-U10).*
+_2026-06-12 — Audit-driven hardening + UI component stack + CI (U1-U10)._
 
 - **Structured data genericization.** Replaced client-specific nouns in JSON-LD, OG, and page copy with generic tokens. `businessType` field on `siteSettings` drives the schema.org `@type` value.
 - **Robots + RSS endpoints.** `src/pages/robots.txt.ts` generates allow-all + correct sitemap reference at build time; `src/pages/journal/rss.xml.ts` wires `@astrojs/rss` for the journal feed.
@@ -51,7 +51,7 @@ Everything **fails closed** without `SANITY_TOKEN`, and legibly. The preview ent
 
 ---
 
-*2026-06-12 — Page-builder-first upgrade (A through D).*
+_2026-06-12 — Page-builder-first upgrade (A through D)._
 
 **A -- Page-builder core.** `studio/schemaTypes/sections.ts` defines 9 general block types (heroSection, richTextSection, imageTextSection, gallerySection, quoteSection, statSection, ctaBandSection, videoSection, spacerSection), a `SECTION_TYPES` constant as the single source of truth, and `additionalSectionsField` as an append zone any page can import. `src/components/SectionRenderer.astro` maps each block `_type` to a component and owns the alternating-surface cadence (logic extracted to `src/lib/sectionCadence.ts`, unit-tested; blocks carry no color field). A custom `page` document type gives editors free-form pages served by `src/pages/[slug].astro`. Reserved-slug guard lives inside `getStaticPaths` (Astro isolated-scope requirement); shared list at `src/lib/reservedSlugs.ts`, unit-tested. `businessInfo` singleton split out of `siteSettings` (service areas, travel, availability, geo); `getSiteSettings()` merges them back under flat names. GROQ `sectionsProjection()`, `getPage`, `getAllPageSlugs`, and `getNavPages` added to `src/lib/queries.ts`.
 
@@ -65,7 +65,7 @@ Everything **fails closed** without `SANITY_TOKEN`, and legibly. The preview ent
 
 ---
 
-*2026-08-27: This starter becomes the library of record for the site family.*
+_2026-08-27: This starter becomes the library of record for the site family._
 
 Six canonical files were installed at their natural paths, each carrying a first-line
 `PORTABLE:` marker naming this repo as the library of record: `scripts/with-workerd.mjs`

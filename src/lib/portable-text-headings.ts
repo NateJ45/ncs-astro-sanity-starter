@@ -21,7 +21,10 @@ export function extractHeadings(blocks: any): Heading[] {
     const level = styleToLevel[b.style];
     if (!level) continue;
     const text = Array.isArray(b.children)
-      ? b.children.map((c: any) => c?.text ?? '').join('').trim()
+      ? b.children
+          .map((c: any) => c?.text ?? '')
+          .join('')
+          .trim()
       : '';
     if (!text) continue;
     const base = slugify(text);

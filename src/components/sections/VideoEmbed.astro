@@ -39,29 +39,33 @@ function embedUrl(u?: string): string | null {
 const src = embedUrl(url);
 ---
 
-{src && (
-  <section
-    class={bg}
-    aria-labelledby={heading ? headingId : undefined}
-    aria-label={!heading ? 'Video' : undefined}
-  >
-    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
-      {heading && (
-        <SectionHeading headline={heading} headingId={headingId} align="center" class="mx-auto" />
-      )}
-      <div class:list={['mx-auto max-w-4xl', heading && 'mt-section-md']}>
-        <div class="relative w-full overflow-hidden rounded-md" style="aspect-ratio: 16 / 9;">
-          <iframe
-            src={src}
-            title={heading || caption || 'Video'}
-            loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-            allowfullscreen
-            class="absolute inset-0 w-full h-full border-0"
-          ></iframe>
+{
+  src && (
+    <section
+      class={bg}
+      aria-labelledby={heading ? headingId : undefined}
+      aria-label={!heading ? 'Video' : undefined}
+    >
+      <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+        {heading && (
+          <SectionHeading headline={heading} headingId={headingId} align="center" class="mx-auto" />
+        )}
+        <div class:list={['mx-auto max-w-4xl', heading && 'mt-section-md']}>
+          <div class="relative w-full overflow-hidden rounded-md" style="aspect-ratio: 16 / 9;">
+            <iframe
+              src={src}
+              title={heading || caption || 'Video'}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              allowfullscreen
+              class="absolute inset-0 h-full w-full border-0"
+            />
+          </div>
+          {caption && (
+            <p class="mt-s text-center text-sm text-muted-foreground italic">{caption}</p>
+          )}
         </div>
-        {caption && <p class="mt-s text-center text-sm text-muted-foreground italic">{caption}</p>}
       </div>
-    </div>
-  </section>
-)}
+    </section>
+  )
+}

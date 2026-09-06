@@ -34,32 +34,46 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
 
 <section class={bg} aria-labelledby={heading ? headingId : undefined}>
   <div
-    class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-2 gap-l md:gap-section-md items-center"
+    class="mx-auto grid max-w-content grid-cols-1 items-center gap-l px-m py-section-lg md:grid-cols-2 md:gap-section-md"
     data-reveal
   >
     <div class:list={[imageFirst ? 'md:order-1' : 'md:order-2']}>
-      {image?.asset ? (
-        <SanityImage
-          source={image}
-          width={800}
-          sizes="(min-width: 768px) 45vw, 100vw"
-          quality={75}
-          class="w-full h-auto rounded-md"
-        />
-      ) : (
-        <div class="aspect-[4/5] bg-muted rounded-md" aria-hidden="true"></div>
-      )}
+      {
+        image?.asset ? (
+          <SanityImage
+            source={image}
+            width={800}
+            sizes="(min-width: 768px) 45vw, 100vw"
+            quality={75}
+            class="h-auto w-full rounded-md"
+          />
+        ) : (
+          <div class="aspect-[4/5] rounded-md bg-muted" aria-hidden="true" />
+        )
+      }
     </div>
 
     <div class:list={[imageFirst ? 'md:order-2' : 'md:order-1']}>
-      {eyebrow && <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">{eyebrow}</p>}
-      {heading && <h2 id={headingId} class="font-display text-h2 text-foreground">{heading}</h2>}
+      {
+        eyebrow && (
+          <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">{eyebrow}</p>
+        )
+      }
+      {
+        heading && (
+          <h2 id={headingId} class="font-display text-h2 text-foreground">
+            {heading}
+          </h2>
+        )
+      }
       {body && <PortableText value={body} className={bodyClass} />}
-      {cta?.label && (
-        <div class="mt-l">
-          <CtaLink cta={cta} variant="secondary" />
-        </div>
-      )}
+      {
+        cta?.label && (
+          <div class="mt-l">
+            <CtaLink cta={cta} variant="secondary" />
+          </div>
+        )
+      }
     </div>
   </div>
 </section>

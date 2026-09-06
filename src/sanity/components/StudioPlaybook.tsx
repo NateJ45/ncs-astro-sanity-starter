@@ -9,7 +9,10 @@ import React, { useEffect, useState } from 'react';
 import { useClient } from 'sanity';
 import { Box, Card, Container, Heading, Stack, Tab, TabList, Text } from '@sanity/ui';
 
-interface PlaybookLink { label?: string; url?: string }
+interface PlaybookLink {
+  label?: string;
+  url?: string;
+}
 interface PlaybookSection {
   heading?: string;
   tone?: 'default' | 'primary' | 'positive' | 'caution';
@@ -17,14 +20,25 @@ interface PlaybookSection {
   bullets?: string[];
   links?: PlaybookLink[];
 }
-interface PlaybookGuide { title?: string; summary?: string; sections?: PlaybookSection[] }
-interface PlaybookDoc { title?: string; intro?: string; guides?: PlaybookGuide[] }
+interface PlaybookGuide {
+  title?: string;
+  summary?: string;
+  sections?: PlaybookSection[];
+}
+interface PlaybookDoc {
+  title?: string;
+  intro?: string;
+  guides?: PlaybookGuide[];
+}
 
 const QUERY = `*[_type=="studioPlaybook"][0]{title, intro, guides[]{title, summary, sections[]{heading, tone, body, bullets, links[]{label, url}}}}`;
 
 /** Split a text field on blank lines into paragraphs. */
 function paragraphs(text?: string): string[] {
-  return (text ?? '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  return (text ?? '')
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 }
 
 /** One section: heading + paragraphs + bullets + links. Toned sections become callout cards. */
@@ -36,11 +50,21 @@ function SectionView({ section }: { section: PlaybookSection }) {
 
   const inner = (
     <Stack space={3}>
-      <Heading as="h3" size={1}>{section.heading}</Heading>
-      {body.map((p, i) => (<Text key={i} size={1}>{p}</Text>))}
+      <Heading as="h3" size={1}>
+        {section.heading}
+      </Heading>
+      {body.map((p, i) => (
+        <Text key={i} size={1}>
+          {p}
+        </Text>
+      ))}
       {bullets.length > 0 && (
         <Stack as="ul" space={2} style={{ margin: 0, paddingLeft: '1.15rem' }}>
-          {bullets.map((b, i) => (<Text key={i} as="li" size={1}>{b}</Text>))}
+          {bullets.map((b, i) => (
+            <Text key={i} as="li" size={1}>
+              {b}
+            </Text>
+          ))}
         </Stack>
       )}
       {links.length > 0 && (
@@ -79,14 +103,19 @@ export default function StudioPlaybook() {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    client.fetch<PlaybookDoc | null>(QUERY).then((d) => setDoc(d ?? {})).catch(() => setError(true));
+    client
+      .fetch<PlaybookDoc | null>(QUERY)
+      .then((d) => setDoc(d ?? {}))
+      .catch(() => setError(true));
   }, [client]);
 
   if (error) {
     return (
       <Container width={1} padding={4}>
         <Card padding={4} radius={2} shadow={1} tone="caution">
-          <Text size={1}>Could not load the guides right now. Open the Edit tab to see the content.</Text>
+          <Text size={1}>
+            Could not load the guides right now. Open the Edit tab to see the content.
+          </Text>
         </Card>
       </Container>
     );
@@ -94,7 +123,9 @@ export default function StudioPlaybook() {
   if (doc === null) {
     return (
       <Container width={1} padding={4}>
-        <Text size={1} muted>Loading the guides...</Text>
+        <Text size={1} muted>
+          Loading the guides...
+        </Text>
       </Container>
     );
   }
@@ -107,11 +138,17 @@ export default function StudioPlaybook() {
     <Container width={1} padding={4}>
       <Stack space={5}>
         <Box>
-          <Heading as="h1" size={3}>{doc.title ?? 'Grow your studio'}</Heading>
+          <Heading as="h1" size={3}>
+            {doc.title ?? 'Grow your studio'}
+          </Heading>
           {doc.intro && (
             <Box marginTop={3}>
               {paragraphs(doc.intro).map((p, i) => (
-                <Box key={i} marginTop={i === 0 ? 0 : 2}><Text muted size={1}>{p}</Text></Box>
+                <Box key={i} marginTop={i === 0 ? 0 : 2}>
+                  <Text muted size={1}>
+                    {p}
+                  </Text>
+                </Box>
               ))}
             </Box>
           )}
@@ -133,15 +170,16 @@ export default function StudioPlaybook() {
         )}
 
         {activeGuide && (
-          <Box
-            id={`playbook-panel-${activeIndex}`}
-            aria-labelledby={`playbook-tab-${activeIndex}`}
-          >
+          <Box id={`playbook-panel-${activeIndex}`} aria-labelledby={`playbook-tab-${activeIndex}`}>
             <Stack space={5}>
               {activeGuide.summary && (
                 <Card padding={4} radius={2} shadow={1} tone="primary">
                   <Stack space={2}>
-                    {paragraphs(activeGuide.summary).map((p, i) => (<Text key={i} size={1}>{p}</Text>))}
+                    {paragraphs(activeGuide.summary).map((p, i) => (
+                      <Text key={i} size={1}>
+                        {p}
+                      </Text>
+                    ))}
                   </Stack>
                 </Card>
               )}

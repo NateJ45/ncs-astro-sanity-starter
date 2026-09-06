@@ -48,37 +48,40 @@ const {
 const validItems = items.filter((i) => i?.question);
 ---
 
-{validItems.length > 0 && (
-  <section
-    class="bg-background"
-    aria-labelledby={headline ? headingId : undefined}
-    aria-label={!headline ? 'Frequently asked questions' : undefined}
-  >
-    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
-      <SectionHeading
-        eyebrow={eyebrow}
-        headline={headline}
-        subhead={subhead}
-        subheadRich={subheadRich}
-        headingId={headingId}
-        align="center"
-        class="mx-auto"
-        headingAccent={headingAccent}
-      />
-
-      <div class="mt-section-lg max-w-3xl mx-auto">
-        <FaqAccordion
-          client:visible
-          faqs={validItems}
-          idPrefix={headingId}
+{
+  validItems.length > 0 && (
+    <section
+      class="bg-background"
+      aria-labelledby={headline ? headingId : undefined}
+      aria-label={!headline ? 'Frequently asked questions' : undefined}
+    >
+      <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          subhead={subhead}
+          subheadRich={subheadRich}
+          headingId={headingId}
+          align="center"
+          class="mx-auto"
+          headingAccent={headingAccent}
         />
-      </div>
 
-      {cta?.label && (
-        <div class="mt-section-lg flex justify-center">
-          <CtaLink cta={cta} variant="secondary" fallbackHref="/faq" fallbackLabel="See All Questions" />
+        <div class="mx-auto mt-section-lg max-w-3xl">
+          <FaqAccordion client:visible faqs={validItems} idPrefix={headingId} />
         </div>
-      )}
-    </div>
-  </section>
-)}
+
+        {cta?.label && (
+          <div class="mt-section-lg flex justify-center">
+            <CtaLink
+              cta={cta}
+              variant="secondary"
+              fallbackHref="/faq"
+              fallbackLabel="See All Questions"
+            />
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}

@@ -17,7 +17,7 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title       = page?.seoTitle       ?? `Our Process · ${site.name}`;
+const title = page?.seoTitle ?? `Our Process · ${site.name}`;
 const description = page?.seoDescription ?? 'How we work, from first call to final reveal.';
 
 const sections = page?.pageBuilder?.length ? page.pageBuilder : DEFAULT_PROCESS_SECTIONS;

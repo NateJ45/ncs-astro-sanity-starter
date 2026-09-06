@@ -23,80 +23,86 @@ const fallbackPhoto = {
   alt: 'Studio photo.',
 };
 
-const seoTitle       = notFoundPage?.seoTitle       ?? 'Page not found';
-const seoDescription = notFoundPage?.seoDescription ?? 'That page wandered off. Head back to the homepage or get in touch.';
+const seoTitle = notFoundPage?.seoTitle ?? 'Page not found';
+const seoDescription =
+  notFoundPage?.seoDescription ??
+  'That page wandered off. Head back to the homepage or get in touch.';
 
-const eyebrow  = notFoundPage?.eyebrow  ?? '404';
+const eyebrow = notFoundPage?.eyebrow ?? '404';
 const headline = notFoundPage?.headline ?? 'That page wandered off.';
-const body     = notFoundPage?.body     ?? "It happens. Maybe a link is old, maybe the URL has a typo. Either way, here's where to head next.";
+const body =
+  notFoundPage?.body ??
+  "It happens. Maybe a link is old, maybe the URL has a typo. Either way, here's where to head next.";
 
-const primaryLabel    = notFoundPage?.primaryCtaLabel    ?? 'Back home';
-const primaryHref     = notFoundPage?.primaryCtaHref     ?? '/';
-const secondaryLabel  = notFoundPage?.secondaryCtaLabel  ?? 'Browse the portfolio';
-const secondaryHref   = notFoundPage?.secondaryCtaHref   ?? '/portfolio';
-const tertiaryLabel   = notFoundPage?.tertiaryCtaLabel   ?? 'Get in touch';
-const tertiaryHref    = notFoundPage?.tertiaryCtaHref    ?? '/contact';
+const primaryLabel = notFoundPage?.primaryCtaLabel ?? 'Back home';
+const primaryHref = notFoundPage?.primaryCtaHref ?? '/';
+const secondaryLabel = notFoundPage?.secondaryCtaLabel ?? 'Browse the portfolio';
+const secondaryHref = notFoundPage?.secondaryCtaHref ?? '/portfolio';
+const tertiaryLabel = notFoundPage?.tertiaryCtaLabel ?? 'Get in touch';
+const tertiaryHref = notFoundPage?.tertiaryCtaHref ?? '/contact';
 
-const photo   = notFoundPage?.heroImage ?? fallbackPhoto;
+const photo = notFoundPage?.heroImage ?? fallbackPhoto;
 const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
 ---
 
-<BaseLayout
-  title={seoTitle}
-  description={seoDescription}
-  siteSettings={siteSettings}
-  noindex
->
+<BaseLayout title={seoTitle} description={seoDescription} siteSettings={siteSettings} noindex>
   <section
-    class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-section-md items-center"
+    class="mx-auto grid max-w-content grid-cols-1 items-center gap-section-md px-m py-section-lg md:grid-cols-[1fr_1.1fr]"
     aria-labelledby="not-found-heading"
   >
-    {/* Text column. Two clear paths back — no search (there isn't one).
+    {
+      /* Text column. Two clear paths back — no search (there isn't one).
         Centered on mobile so the lone-element page reads as a sympathetic
         "you're off-path" moment; left-aligned on desktop where the
-        two-column layout needs the text anchored beside the photo column. */}
+        two-column layout needs the text anchored beside the photo column. */
+    }
     <div class="text-center md:text-left">
-      <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">{eyebrow}</p>
-      <h1 id="not-found-heading" class="font-display text-h1 text-foreground leading-headline-tight">
+      <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">{eyebrow}</p>
+      <h1
+        id="not-found-heading"
+        class="font-display text-h1 leading-headline-tight text-foreground"
+      >
         {headline}
       </h1>
-      <p class="mt-m max-w-xl mx-auto md:mx-0 text-lg text-foreground/80 leading-relaxed">
+      <p class="mx-auto mt-m max-w-xl text-lg leading-relaxed text-foreground/80 md:mx-0">
         {body}
       </p>
 
-      <div class="mt-l flex flex-wrap gap-m justify-center md:justify-start">
+      <div class="mt-l flex flex-wrap justify-center gap-m md:justify-start">
         <a
           href={primaryHref}
-          class="press-tactile inline-flex items-center px-l py-s bg-primary-dark text-white font-semibold uppercase tracking-eyebrow text-xs rounded-sm hover:bg-accent-dark"
+          class="press-tactile inline-flex items-center rounded-sm bg-primary-dark px-l py-s text-xs font-semibold tracking-eyebrow text-white uppercase hover:bg-accent-dark"
         >
           {primaryLabel}
         </a>
         <a
           href={secondaryHref}
-          class="press-tactile inline-flex items-center px-l py-s border border-primary text-link font-semibold uppercase tracking-eyebrow text-xs rounded-sm hover:bg-accent"
+          class="press-tactile inline-flex items-center rounded-sm border border-primary px-l py-s text-xs font-semibold tracking-eyebrow text-link uppercase hover:bg-accent"
         >
           {secondaryLabel}
         </a>
         <a
           href={tertiaryHref}
-          class="press-tactile inline-flex items-center px-l py-s border border-border-soft text-foreground/85 font-semibold uppercase tracking-eyebrow text-xs rounded-sm hover:border-primary hover:text-primary-dark"
+          class="press-tactile inline-flex items-center rounded-sm border border-border-soft px-l py-s text-xs font-semibold tracking-eyebrow text-foreground/85 uppercase hover:border-primary hover:text-primary-dark"
         >
           {tertiaryLabel}
         </a>
       </div>
     </div>
 
-    {/* Photo column. Stacks above the text on mobile (md:order-2 swaps it on
-        desktop so the eye lands on text first, photo balances right). */}
+    {
+      /* Photo column. Stacks above the text on mobile (md:order-2 swaps it on
+        desktop so the eye lands on text first, photo balances right). */
+    }
     <figure class="order-first md:order-2">
       <SanityImage
         source={photo}
         width={1200}
         sizes="(min-width: 768px) 50vw, 100vw"
         quality={75}
-        class="w-full h-auto rounded-md"
+        class="h-auto w-full rounded-md"
       />
-      <figcaption class="mt-s text-xs uppercase tracking-eyebrow text-foreground/80 text-right">
+      <figcaption class="mt-s text-right text-xs tracking-eyebrow text-foreground/80 uppercase">
         {caption}
       </figcaption>
     </figure>

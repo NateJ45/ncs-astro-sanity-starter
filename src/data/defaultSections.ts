@@ -57,9 +57,27 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
     _type: 'statSection',
     _key: 'default-home-stats',
     stats: [
-      { _type: 'statItem', _key: 'default-home-stat-1', number: 5, suffix: '+', label: 'Years in Business' },
-      { _type: 'statItem', _key: 'default-home-stat-2', number: 50, suffix: '+', label: 'Projects Completed' },
-      { _type: 'statItem', _key: 'default-home-stat-3', number: 100, suffix: '%', label: 'Client Satisfaction' },
+      {
+        _type: 'statItem',
+        _key: 'default-home-stat-1',
+        number: 5,
+        suffix: '+',
+        label: 'Years in Business',
+      },
+      {
+        _type: 'statItem',
+        _key: 'default-home-stat-2',
+        number: 50,
+        suffix: '+',
+        label: 'Projects Completed',
+      },
+      {
+        _type: 'statItem',
+        _key: 'default-home-stat-3',
+        number: 100,
+        suffix: '%',
+        label: 'Client Satisfaction',
+      },
     ],
   },
   {
@@ -136,9 +154,27 @@ export const DEFAULT_ABOUT_SECTIONS: PageBuilderBlock[] = [
     _type: 'statSection',
     _key: 'default-about-stats',
     stats: [
-      { _type: 'statItem', _key: 'default-about-stat-1', number: 5, suffix: '+', label: 'Years in Business' },
-      { _type: 'statItem', _key: 'default-about-stat-2', number: 50, suffix: '+', label: 'Projects Completed' },
-      { _type: 'statItem', _key: 'default-about-stat-3', number: 100, suffix: '%', label: 'Client Satisfaction' },
+      {
+        _type: 'statItem',
+        _key: 'default-about-stat-1',
+        number: 5,
+        suffix: '+',
+        label: 'Years in Business',
+      },
+      {
+        _type: 'statItem',
+        _key: 'default-about-stat-2',
+        number: 50,
+        suffix: '+',
+        label: 'Projects Completed',
+      },
+      {
+        _type: 'statItem',
+        _key: 'default-about-stat-3',
+        number: 100,
+        suffix: '%',
+        label: 'Client Satisfaction',
+      },
     ],
   },
   {
@@ -244,8 +280,7 @@ export const DEFAULT_PROCESS_SECTIONS: PageBuilderBlock[] = [
     _key: 'default-process-hero',
     eyebrow: 'The Process.',
     headline: 'From First Call to Final Reveal.',
-    subhead:
-      'A clear, pressure-free process from the first inquiry through installation day.',
+    subhead: 'A clear, pressure-free process from the first inquiry through installation day.',
     size: 'short',
   },
   {

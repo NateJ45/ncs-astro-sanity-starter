@@ -20,12 +20,14 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title       = page?.seoTitle       ?? `Privacy Policy · ${site.name}`;
-const description = page?.seoDescription ?? 'How we handle the information you share when you reach out or subscribe.';
+const title = page?.seoTitle ?? `Privacy Policy · ${site.name}`;
+const description =
+  page?.seoDescription ??
+  'How we handle the information you share when you reach out or subscribe.';
 
-const heroEyebrow  = page?.heroEyebrow  ?? 'Transparency first.';
+const heroEyebrow = page?.heroEyebrow ?? 'Transparency first.';
 const heroHeadline = page?.heroHeadline ?? 'Privacy Policy';
-const heroSubhead  = page?.heroSubhead  ?? '';
+const heroSubhead = page?.heroSubhead ?? '';
 
 // Format the lastUpdated date from Sanity or fall back to a static string.
 function formatDate(d?: string): string {
@@ -62,77 +64,83 @@ const hasSanityBody = Boolean(page?.body);
 
   <section class="bg-background" aria-label="Privacy policy">
     <div class="mx-auto max-w-3xl px-m py-section-lg">
-      {lastUpdated && (
-        <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-l">
-          Last updated: {lastUpdated}
-        </p>
-      )}
-
-      {hasSanityBody ? (
-        <PortableTextStatic
-          value={page!.body}
-          className="prose-friendly"
-        />
-      ) : (
-        <div class="space-y-l text-foreground leading-relaxed">
-          <p class="text-foreground/80">
-            This is the privacy policy for {site.name}. The goal here is to be
-            straightforward about what information is collected and why.
+      {
+        lastUpdated && (
+          <p class="mb-l text-xs tracking-eyebrow text-foreground/80 uppercase">
+            Last updated: {lastUpdated}
           </p>
+        )
+      }
 
-          <div>
-            <h2 class="font-display text-h3 text-foreground mb-s">What gets collected</h2>
+      {
+        hasSanityBody ? (
+          <PortableTextStatic value={page!.body} className="prose-friendly" />
+        ) : (
+          <div class="space-y-l leading-relaxed text-foreground">
             <p class="text-foreground/80">
-              When you fill out the contact form on this site, you share your name, email address,
-              and whatever details you include in your message. That information is used only to
-              respond to you and to help plan your project. Nothing else.
+              This is the privacy policy for {site.name}. The goal here is to be straightforward
+              about what information is collected and why.
             </p>
-            <p class="mt-s text-foreground/80">
-              If you subscribe to the newsletter, your email address goes to the email marketing
-              provider so occasional studio updates, room ideas, and project previews can reach
-              you. It is not shared with anyone else.
+
+            <div>
+              <h2 class="mb-s font-display text-h3 text-foreground">What gets collected</h2>
+              <p class="text-foreground/80">
+                When you fill out the contact form on this site, you share your name, email address,
+                and whatever details you include in your message. That information is used only to
+                respond to you and to help plan your project. Nothing else.
+              </p>
+              <p class="mt-s text-foreground/80">
+                If you subscribe to the newsletter, your email address goes to the email marketing
+                provider so occasional studio updates, room ideas, and project previews can reach
+                you. It is not shared with anyone else.
+              </p>
+            </div>
+
+            <div>
+              <h2 class="mb-s font-display text-h3 text-foreground">What doesn't happen</h2>
+              <ul class="list-disc space-y-1 pl-l text-foreground/80">
+                <li>Your information is never sold.</li>
+                <li>There is no ad targeting or tracking pixels on this site.</li>
+                <li>
+                  Traffic is measured with Cloudflare Web Analytics, which counts page visits
+                  without setting cookies or identifying individual visitors.
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 class="mb-s font-display text-h3 text-foreground">
+                Unsubscribing from the newsletter
+              </h2>
+              <p class="text-foreground/80">
+                Every email includes an unsubscribe link at the bottom. Click it and you're off the
+                list right away. If you run into any trouble, email directly and it'll be handled
+                promptly.
+              </p>
+            </div>
+
+            <div>
+              <h2 class="mb-s font-display text-h3 text-foreground">Questions or data requests</h2>
+              <p class="text-foreground/80">
+                If you have questions about how your information is handled, or want your data
+                removed, reach out at{' '}
+                <a
+                  href={`mailto:${contactEmail}`}
+                  class="text-link underline underline-offset-2 transition-colors hover:text-primary"
+                >
+                  {contactEmail}
+                </a>
+                . You'll hear back within a few business days.
+              </p>
+            </div>
+
+            <p class="border-t border-border-soft pt-l text-xs text-foreground/60">
+              This policy was last reviewed in May 2026 and will be updated if anything meaningful
+              changes about how this site handles your data.
             </p>
           </div>
-
-          <div>
-            <h2 class="font-display text-h3 text-foreground mb-s">What doesn't happen</h2>
-            <ul class="list-disc pl-l space-y-1 text-foreground/80">
-              <li>Your information is never sold.</li>
-              <li>There is no ad targeting or tracking pixels on this site.</li>
-              <li>Traffic is measured with Cloudflare Web Analytics, which counts page visits without setting cookies or identifying individual visitors.</li>
-            </ul>
-          </div>
-
-          <div>
-            <h2 class="font-display text-h3 text-foreground mb-s">Unsubscribing from the newsletter</h2>
-            <p class="text-foreground/80">
-              Every email includes an unsubscribe link at the bottom. Click it and you're off the
-              list right away. If you run into any trouble, email directly and it'll be handled
-              promptly.
-            </p>
-          </div>
-
-          <div>
-            <h2 class="font-display text-h3 text-foreground mb-s">Questions or data requests</h2>
-            <p class="text-foreground/80">
-              If you have questions about how your information is handled, or want your data
-              removed, reach out at{' '}
-              <a
-                href={`mailto:${contactEmail}`}
-                class="text-link underline underline-offset-2 hover:text-primary transition-colors"
-              >
-                {contactEmail}
-              </a>.
-              You'll hear back within a few business days.
-            </p>
-          </div>
-
-          <p class="text-xs text-foreground/60 border-t border-border-soft pt-l">
-            This policy was last reviewed in May 2026 and will be updated if anything meaningful
-            changes about how this site handles your data.
-          </p>
-        </div>
-      )}
+        )
+      }
     </div>
   </section>
 </BaseLayout>

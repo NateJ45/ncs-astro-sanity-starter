@@ -7,9 +7,19 @@ import React, { useEffect, useState } from 'react';
 import { useClient } from 'sanity';
 import { Box, Card, Container, Heading, Stack, Text } from '@sanity/ui';
 
-interface MapRow { area?: string; description?: string }
-interface HowTo { title?: string; steps?: string[] }
-interface Tip { heading?: string; tone?: 'default' | 'primary' | 'caution' | 'positive'; body?: string }
+interface MapRow {
+  area?: string;
+  description?: string;
+}
+interface HowTo {
+  title?: string;
+  steps?: string[];
+}
+interface Tip {
+  heading?: string;
+  tone?: 'default' | 'primary' | 'caution' | 'positive';
+  body?: string;
+}
 interface GuideDoc {
   guideTitle?: string;
   guideIntro?: string;
@@ -22,7 +32,10 @@ const QUERY = `*[_type=="studioGuide"][0]{guideTitle, guideIntro, studioMap, how
 
 /** Split a text field on blank lines into paragraphs. */
 function paragraphs(text?: string): string[] {
-  return (text ?? '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  return (text ?? '')
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 }
 
 export default function StudioGuide() {
@@ -31,14 +44,19 @@ export default function StudioGuide() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    client.fetch<GuideDoc | null>(QUERY).then((d) => setDoc(d ?? {})).catch(() => setError(true));
+    client
+      .fetch<GuideDoc | null>(QUERY)
+      .then((d) => setDoc(d ?? {}))
+      .catch(() => setError(true));
   }, [client]);
 
   if (error) {
     return (
       <Container width={1} padding={4}>
         <Card padding={4} radius={2} shadow={1} tone="caution">
-          <Text size={1}>Could not load the guide right now. Open the Edit tab to see the content.</Text>
+          <Text size={1}>
+            Could not load the guide right now. Open the Edit tab to see the content.
+          </Text>
         </Card>
       </Container>
     );
@@ -46,7 +64,9 @@ export default function StudioGuide() {
   if (doc === null) {
     return (
       <Container width={1} padding={4}>
-        <Text size={1} muted>Loading the guide...</Text>
+        <Text size={1} muted>
+          Loading the guide...
+        </Text>
       </Container>
     );
   }
@@ -55,11 +75,17 @@ export default function StudioGuide() {
     <Container width={1} padding={4}>
       <Stack space={6}>
         <Box>
-          <Heading as="h1" size={3}>{doc.guideTitle ?? 'How the website works'}</Heading>
+          <Heading as="h1" size={3}>
+            {doc.guideTitle ?? 'How the website works'}
+          </Heading>
           {doc.guideIntro && (
             <Box marginTop={3}>
               {paragraphs(doc.guideIntro).map((p, i) => (
-                <Box key={i} marginTop={i === 0 ? 0 : 2}><Text muted size={1}>{p}</Text></Box>
+                <Box key={i} marginTop={i === 0 ? 0 : 2}>
+                  <Text muted size={1}>
+                    {p}
+                  </Text>
+                </Box>
               ))}
             </Box>
           )}
@@ -68,12 +94,20 @@ export default function StudioGuide() {
         {doc.studioMap && doc.studioMap.length > 0 && (
           <Card padding={4} radius={2} shadow={1} tone="default">
             <Stack space={4}>
-              <Heading as="h2" size={1}>The map: where everything lives</Heading>
+              <Heading as="h2" size={1}>
+                The map: where everything lives
+              </Heading>
               <Stack space={3}>
                 {doc.studioMap.map((row, i) => (
                   <Box key={i}>
-                    <Text size={1} weight="semibold">{row.area}</Text>
-                    <Box marginTop={1}><Text size={1} muted>{row.description}</Text></Box>
+                    <Text size={1} weight="semibold">
+                      {row.area}
+                    </Text>
+                    <Box marginTop={1}>
+                      <Text size={1} muted>
+                        {row.description}
+                      </Text>
+                    </Box>
                   </Box>
                 ))}
               </Stack>
@@ -83,15 +117,21 @@ export default function StudioGuide() {
 
         {doc.howTos && doc.howTos.length > 0 && (
           <Box>
-            <Heading as="h2" size={1} style={{ marginBottom: '1rem' }}>Step-by-step how-tos</Heading>
+            <Heading as="h2" size={1} style={{ marginBottom: '1rem' }}>
+              Step-by-step how-tos
+            </Heading>
             <Stack space={4}>
               {doc.howTos.map((howTo, i) => (
                 <Card key={i} padding={4} radius={2} shadow={1} tone="default">
                   <Stack space={3}>
-                    <Heading as="h3" size={0}>{i + 1}. {howTo.title}</Heading>
+                    <Heading as="h3" size={0}>
+                      {i + 1}. {howTo.title}
+                    </Heading>
                     <Stack space={2}>
                       {(howTo.steps ?? []).map((step, j) => (
-                        <Text key={j} size={1}>{step}</Text>
+                        <Text key={j} size={1}>
+                          {step}
+                        </Text>
                       ))}
                     </Stack>
                   </Stack>
@@ -101,16 +141,22 @@ export default function StudioGuide() {
           </Box>
         )}
 
-        {doc.tips && doc.tips.length > 0 && doc.tips.map((tip, i) => (
-          <Card key={i} padding={4} radius={2} shadow={1} tone={tip.tone ?? 'default'}>
-            <Stack space={3}>
-              <Heading as="h2" size={1}>{tip.heading}</Heading>
-              {paragraphs(tip.body).map((p, j) => (
-                <Text key={j} size={1}>{p}</Text>
-              ))}
-            </Stack>
-          </Card>
-        ))}
+        {doc.tips &&
+          doc.tips.length > 0 &&
+          doc.tips.map((tip, i) => (
+            <Card key={i} padding={4} radius={2} shadow={1} tone={tip.tone ?? 'default'}>
+              <Stack space={3}>
+                <Heading as="h2" size={1}>
+                  {tip.heading}
+                </Heading>
+                {paragraphs(tip.body).map((p, j) => (
+                  <Text key={j} size={1}>
+                    {p}
+                  </Text>
+                ))}
+              </Stack>
+            </Card>
+          ))}
       </Stack>
     </Container>
   );

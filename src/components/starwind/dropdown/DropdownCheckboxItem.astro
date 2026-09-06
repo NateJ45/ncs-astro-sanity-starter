@@ -1,10 +1,10 @@
 ---
-import Check from "@tabler/icons/outline/check.svg";
-import type { HTMLAttributes } from "astro/types";
+import Check from '@tabler/icons/outline/check.svg';
+import type { HTMLAttributes } from 'astro/types';
 
-import { dropdownCheckboxItem } from "./variants";
+import { dropdownCheckboxItem } from './variants';
 
-type Props = Omit<HTMLAttributes<"div">, "aria-checked" | "role"> & {
+type Props = Omit<HTMLAttributes<'div'>, 'aria-checked' | 'role'> & {
   checked?: boolean;
   closeOnClick?: boolean;
   inset?: boolean;
@@ -24,11 +24,11 @@ const {
 <div
   class={dropdownCheckboxItem({ inset, disabled, class: className })}
   role="menuitemcheckbox"
-  aria-checked={checked ? "true" : "false"}
-  aria-disabled={disabled ? "true" : undefined}
-  tabindex={disabled ? "-1" : "0"}
-  data-close-on-click={closeOnClick ? "true" : undefined}
-  data-disabled={disabled ? "true" : undefined}
+  aria-checked={checked ? 'true' : 'false'}
+  aria-disabled={disabled ? 'true' : undefined}
+  tabindex={disabled ? '-1' : '0'}
+  data-close-on-click={closeOnClick ? 'true' : undefined}
+  data-disabled={disabled ? 'true' : undefined}
   data-slot="dropdown-checkbox-item"
   {...rest}
 >

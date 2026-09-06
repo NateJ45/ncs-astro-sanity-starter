@@ -42,7 +42,12 @@ export const studioPlaybook = defineType({
           type: 'object',
           name: 'playbookGuide',
           fields: [
-            defineField({ name: 'title', title: 'Guide title', type: 'string', validation: (R) => R.required() }),
+            defineField({
+              name: 'title',
+              title: 'Guide title',
+              type: 'string',
+              validation: (R) => R.required(),
+            }),
             defineField({
               name: 'summary',
               title: 'Short summary',
@@ -59,14 +64,20 @@ export const studioPlaybook = defineType({
                   type: 'object',
                   name: 'playbookSection',
                   fields: [
-                    defineField({ name: 'heading', title: 'Heading', type: 'string', validation: (R) => R.required() }),
+                    defineField({
+                      name: 'heading',
+                      title: 'Heading',
+                      type: 'string',
+                      validation: (R) => R.required(),
+                    }),
                     defineField({
                       name: 'tone',
                       title: 'Style',
                       type: 'string',
                       options: { list: TONES },
                       initialValue: 'default',
-                      description: 'Default is a plain section. The colored options turn it into a highlighted callout box.',
+                      description:
+                        'Default is a plain section. The colored options turn it into a highlighted callout box.',
                     }),
                     defineField({
                       name: 'body',
@@ -91,8 +102,18 @@ export const studioPlaybook = defineType({
                           type: 'object',
                           name: 'playbookLink',
                           fields: [
-                            defineField({ name: 'label', title: 'Label', type: 'string', validation: (R) => R.required() }),
-                            defineField({ name: 'url', title: 'URL', type: 'url', validation: (R) => R.required() }),
+                            defineField({
+                              name: 'label',
+                              title: 'Label',
+                              type: 'string',
+                              validation: (R) => R.required(),
+                            }),
+                            defineField({
+                              name: 'url',
+                              title: 'URL',
+                              type: 'url',
+                              validation: (R) => R.required(),
+                            }),
                           ],
                           preview: { select: { title: 'label', subtitle: 'url' } },
                         }),

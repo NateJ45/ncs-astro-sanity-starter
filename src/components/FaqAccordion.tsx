@@ -33,7 +33,10 @@ interface Props {
 }
 
 function slugify(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 export default function FaqAccordion({ faqs, categoryOrder, idPrefix = 'faq' }: Props) {
@@ -97,28 +100,26 @@ export default function FaqAccordion({ faqs, categoryOrder, idPrefix = 'faq' }: 
               : { 'aria-label': 'Common questions' })}
           >
             {section.category && (
-              <h2
-                id={`${sectionId}-heading`}
-                className="font-display text-h3 text-foreground mb-m"
-              >
+              <h2 id={`${sectionId}-heading`} className="mb-m font-display text-h3 text-foreground">
                 {section.category}
               </h2>
             )}
-            <Accordion
-              type="multiple"
-              className="border-t border-border-soft"
-            >
+            <Accordion type="multiple" className="border-t border-border-soft">
               {section.items.map((item, i) => {
                 const itemId = `${sectionId}-item-${i}`;
                 return (
-                  <AccordionItem key={itemId} value={itemId} className="border-b border-border-soft">
+                  <AccordionItem
+                    key={itemId}
+                    value={itemId}
+                    className="border-b border-border-soft"
+                  >
                     {/* Question text — bumped to h3 scale (Cormorant) so the
                         question reads as the structural heading it is, not as
                         a button label. Hover stays bronze for affordance. */}
-                    <AccordionTrigger className="py-m text-left font-display text-h3 text-foreground hover:no-underline hover:text-link">
+                    <AccordionTrigger className="py-m text-left font-display text-h3 text-foreground hover:text-link hover:no-underline">
                       {item.question}
                     </AccordionTrigger>
-                    <AccordionContent className="text-foreground/85 text-base leading-relaxed">
+                    <AccordionContent className="text-base leading-relaxed text-foreground/85">
                       <PortableText value={item.answer} />
                     </AccordionContent>
                   </AccordionItem>

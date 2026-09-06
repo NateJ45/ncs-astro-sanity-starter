@@ -41,49 +41,76 @@ const wrapperClass = featured
   ? 'card-lift card-lift-slow group block bg-card border border-border-soft rounded-md overflow-hidden hover:border-primary/40 transition-colors lg:col-span-2 shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]'
   : 'card-lift card-lift-slow group block bg-card border border-border-soft rounded-md overflow-hidden hover:border-primary/40 transition-colors shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)]';
 const aspectClass = featured ? 'aspect-[16/9]' : 'aspect-[4/3]';
-const titleClass = featured ? 'font-display text-h2 text-foreground' : 'font-display text-h3 text-foreground';
+const titleClass = featured
+  ? 'font-display text-h2 text-foreground'
+  : 'font-display text-h3 text-foreground';
 ---
 
 <a href={href} class:list={[wrapperClass]}>
   {/* Brand accent stripe — matches every other marketing card. */}
   <div class="h-0.5 bg-primary" aria-hidden="true"></div>
 
-  <div class:list={[aspectClass, 'overflow-hidden bg-muted relative img-zoom']}>
-    {entry.coverImage?.asset ? (
-      <SanityImage
-        source={entry.coverImage}
-        width={featured ? 1400 : 800}
-        sizes={featured ? '(min-width: 1024px) 66vw, 100vw' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'}
-        class="w-full h-full object-cover"
-      />
-    ) : (
-      <div class="w-full h-full" aria-hidden="true"></div>
-    )}
+  <div class:list={[aspectClass, 'img-zoom relative overflow-hidden bg-muted']}>
+    {
+      entry.coverImage?.asset ? (
+        <SanityImage
+          source={entry.coverImage}
+          width={featured ? 1400 : 800}
+          sizes={
+            featured
+              ? '(min-width: 1024px) 66vw, 100vw'
+              : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
+          }
+          class="h-full w-full object-cover"
+        />
+      ) : (
+        <div class="h-full w-full" aria-hidden="true" />
+      )
+    }
     <div class="img-tint img-tint-light" aria-hidden="true"></div>
-    {entry.featured && (
-      <span class="absolute top-m left-m inline-flex items-center px-s py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] rounded-full bg-primary-dark text-white">
-        ★ Featured
-      </span>
-    )}
+    {
+      entry.featured && (
+        <span class="absolute top-m left-m inline-flex items-center rounded-full bg-primary-dark px-s py-1 text-[0.65rem] font-semibold tracking-[0.2em] text-white uppercase">
+          ★ Featured
+        </span>
+      )
+    }
   </div>
   <div class:list={[featured ? 'p-section-md' : 'p-l']}>
     <div class="flex flex-wrap items-center gap-x-m gap-y-xs">
-      {primaryCategory?.title && (
-        <JournalCategoryChip title={primaryCategory.title} tooltip={primaryCategory.description} />
-      )}
-      {dateLabel && (
-        <time datetime={entry.publishedAt} class="text-xs uppercase tracking-widest text-foreground/80">
-          {dateLabel}
-        </time>
-      )}
+      {
+        primaryCategory?.title && (
+          <JournalCategoryChip
+            title={primaryCategory.title}
+            tooltip={primaryCategory.description}
+          />
+        )
+      }
+      {
+        dateLabel && (
+          <time
+            datetime={entry.publishedAt}
+            class="text-xs tracking-widest text-foreground/80 uppercase"
+          >
+            {dateLabel}
+          </time>
+        )
+      }
     </div>
-    <h3 class:list={[titleClass, 'mt-s group-hover:text-primary-dark transition-colors']}>
+    <h3 class:list={[titleClass, 'mt-s transition-colors group-hover:text-primary-dark']}>
       {entry.title}
     </h3>
-    {entry.excerpt && (
-      <p class:list={[featured ? 'mt-m text-base' : 'mt-s text-sm', 'text-foreground/80 leading-relaxed']}>
-        {entry.excerpt}
-      </p>
-    )}
+    {
+      entry.excerpt && (
+        <p
+          class:list={[
+            featured ? 'mt-m text-base' : 'mt-s text-sm',
+            'leading-relaxed text-foreground/80',
+          ]}
+        >
+          {entry.excerpt}
+        </p>
+      )
+    }
   </div>
 </a>

@@ -22,9 +22,9 @@
     // and hid from every command-line probe. Without the field, asset misses
     // invoke the Worker and Astro renders the 404 page itself.
     "directory": "./dist/client",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
   },
   "observability": {
-    "enabled": true
-  }
+    "enabled": true,
+  },
 }

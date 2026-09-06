@@ -50,7 +50,10 @@ const NOTES_QUERY = `*[_type=="studioNotes"][0]{businessSummary, idealClient, vo
 
 /** Split a text field on blank lines into paragraphs. */
 function paragraphs(text?: string | null): string[] {
-  return (text ?? '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+  return (text ?? '')
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -59,7 +62,9 @@ function paragraphs(text?: string | null): string[] {
 function LoadingCard({ label }: { label: string }) {
   return (
     <Card padding={4} radius={2} shadow={1} tone="transparent">
-      <Text size={1} muted>Loading {label}...</Text>
+      <Text size={1} muted>
+        Loading {label}...
+      </Text>
     </Card>
   );
 }
@@ -103,13 +108,14 @@ export default function BusinessOverview() {
     client
       .fetch<NotesData | null>(NOTES_QUERY)
       .then((data) => setNotes(data ?? null))
-      .catch(() => { /* notes are optional; the live sections still render */ });
+      .catch(() => {
+        /* notes are optional; the live sections still render */
+      });
   }, [client]);
 
   return (
     <Container width={1} padding={4}>
       <Stack space={6}>
-
         {/* Header */}
         <Box>
           <Heading as="h1" size={3}>
@@ -117,8 +123,8 @@ export default function BusinessOverview() {
           </Heading>
           <Box marginTop={3}>
             <Text muted size={1}>
-              The live sections below are pulled directly from your Services and Site Settings,
-              so they are always current. To change anything, edit those documents.
+              The live sections below are pulled directly from your Services and Site Settings, so
+              they are always current. To change anything, edit those documents.
             </Text>
           </Box>
         </Box>
@@ -131,30 +137,40 @@ export default function BusinessOverview() {
             </Heading>
 
             {/* Loading */}
-            {services === null && !servicesError && (
-              <LoadingCard label="services" />
-            )}
+            {services === null && !servicesError && <LoadingCard label="services" />}
 
             {/* Error */}
-            {servicesError && (
-              <ErrorCard label="services" />
-            )}
+            {servicesError && <ErrorCard label="services" />}
 
             {/* Data */}
             {services !== null && services.length === 0 && (
-              <Text size={1} muted>No services found. Add them under Content, Services.</Text>
+              <Text size={1} muted>
+                No services found. Add them under Content, Services.
+              </Text>
             )}
             {services !== null && services.length > 0 && (
               <Stack space={3}>
                 {services.map((svc, i) => (
                   <Card key={i} padding={3} radius={2} tone="transparent" shadow={1}>
                     <Stack space={2}>
-                      <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '4px' }}>
-                        <Text size={1} weight="semibold">{svc.name ?? 'Unnamed service'}</Text>
+                      <Box
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'baseline',
+                          flexWrap: 'wrap',
+                          gap: '4px',
+                        }}
+                      >
+                        <Text size={1} weight="semibold">
+                          {svc.name ?? 'Unnamed service'}
+                        </Text>
                         <Text size={1}>{svc.price ?? '—'}</Text>
                       </Box>
                       {svc.bestFor ? (
-                        <Text size={1} muted>Best for: {svc.bestFor}</Text>
+                        <Text size={1} muted>
+                          Best for: {svc.bestFor}
+                        </Text>
                       ) : null}
                     </Stack>
                   </Card>
@@ -172,22 +188,19 @@ export default function BusinessOverview() {
             </Heading>
 
             {/* Loading */}
-            {settings === null && !settingsError && (
-              <LoadingCard label="site settings" />
-            )}
+            {settings === null && !settingsError && <LoadingCard label="site settings" />}
 
             {/* Error */}
-            {settingsError && (
-              <ErrorCard label="site settings" />
-            )}
+            {settingsError && <ErrorCard label="site settings" />}
 
             {/* Data */}
             {settings !== null && (
               <Stack space={3}>
-
                 {settings.availabilityStatus ? (
                   <Box>
-                    <Text size={1} weight="semibold">Availability</Text>
+                    <Text size={1} weight="semibold">
+                      Availability
+                    </Text>
                     <Box marginTop={1}>
                       <Text size={1}>{settings.availabilityStatus}</Text>
                     </Box>
@@ -196,7 +209,9 @@ export default function BusinessOverview() {
 
                 {settings.email ? (
                   <Box>
-                    <Text size={1} weight="semibold">Email</Text>
+                    <Text size={1} weight="semibold">
+                      Email
+                    </Text>
                     <Box marginTop={1}>
                       <Text size={1}>{settings.email}</Text>
                     </Box>
@@ -205,7 +220,9 @@ export default function BusinessOverview() {
 
                 {settings.phone ? (
                   <Box>
-                    <Text size={1} weight="semibold">Phone</Text>
+                    <Text size={1} weight="semibold">
+                      Phone
+                    </Text>
                     <Box marginTop={1}>
                       <Text size={1}>{settings.phone}</Text>
                     </Box>
@@ -214,7 +231,9 @@ export default function BusinessOverview() {
 
                 {settings.socialInstagram ? (
                   <Box>
-                    <Text size={1} weight="semibold">Instagram</Text>
+                    <Text size={1} weight="semibold">
+                      Instagram
+                    </Text>
                     <Box marginTop={1}>
                       <Text size={1}>{settings.socialInstagram}</Text>
                     </Box>
@@ -223,7 +242,9 @@ export default function BusinessOverview() {
 
                 {settings.socialFacebook ? (
                   <Box>
-                    <Text size={1} weight="semibold">Facebook</Text>
+                    <Text size={1} weight="semibold">
+                      Facebook
+                    </Text>
                     <Box marginTop={1}>
                       <Text size={1}>{settings.socialFacebook}</Text>
                     </Box>
@@ -232,7 +253,9 @@ export default function BusinessOverview() {
 
                 {settings.serviceAreas && settings.serviceAreas.length > 0 ? (
                   <Box>
-                    <Text size={1} weight="semibold">Service areas</Text>
+                    <Text size={1} weight="semibold">
+                      Service areas
+                    </Text>
                     <Box marginTop={1}>
                       <Text size={1}>{settings.serviceAreas.join(', ')}</Text>
                     </Box>
@@ -241,7 +264,9 @@ export default function BusinessOverview() {
 
                 {settings.travelFees && settings.travelFees.length > 0 ? (
                   <Box>
-                    <Text size={1} weight="semibold">Travel fee tiers</Text>
+                    <Text size={1} weight="semibold">
+                      Travel fee tiers
+                    </Text>
                     <Box marginTop={1}>
                       <Stack space={1}>
                         {settings.travelFees.map((tier, i) => (
@@ -253,7 +278,6 @@ export default function BusinessOverview() {
                     </Box>
                   </Box>
                 ) : null}
-
               </Stack>
             )}
           </Stack>
@@ -263,8 +287,14 @@ export default function BusinessOverview() {
         {notes?.businessSummary && (
           <Card padding={4} radius={2} shadow={1} tone="default">
             <Stack space={3}>
-              <Heading as="h2" size={1}>Who you are</Heading>
-              {paragraphs(notes.businessSummary).map((p, i) => (<Text key={i} size={1}>{p}</Text>))}
+              <Heading as="h2" size={1}>
+                Who you are
+              </Heading>
+              {paragraphs(notes.businessSummary).map((p, i) => (
+                <Text key={i} size={1}>
+                  {p}
+                </Text>
+              ))}
             </Stack>
           </Card>
         )}
@@ -273,8 +303,14 @@ export default function BusinessOverview() {
         {notes?.idealClient && (
           <Card padding={4} radius={2} shadow={1} tone="default">
             <Stack space={3}>
-              <Heading as="h2" size={1}>Your ideal client</Heading>
-              {paragraphs(notes.idealClient).map((p, i) => (<Text key={i} size={1}>{p}</Text>))}
+              <Heading as="h2" size={1}>
+                Your ideal client
+              </Heading>
+              {paragraphs(notes.idealClient).map((p, i) => (
+                <Text key={i} size={1}>
+                  {p}
+                </Text>
+              ))}
             </Stack>
           </Card>
         )}
@@ -283,18 +319,25 @@ export default function BusinessOverview() {
         {(notes?.voiceSummary || (notes?.wordsToAvoid && notes.wordsToAvoid.length > 0)) && (
           <Card padding={4} radius={2} shadow={1} tone="default">
             <Stack space={3}>
-              <Heading as="h2" size={1}>Your voice (how you sound in writing)</Heading>
-              {paragraphs(notes?.voiceSummary).map((p, i) => (<Text key={i} size={1}>{p}</Text>))}
+              <Heading as="h2" size={1}>
+                Your voice (how you sound in writing)
+              </Heading>
+              {paragraphs(notes?.voiceSummary).map((p, i) => (
+                <Text key={i} size={1}>
+                  {p}
+                </Text>
+              ))}
               {notes?.wordsToAvoid && notes.wordsToAvoid.length > 0 && (
                 <>
-                  <Text size={1} weight="semibold">Words to skip:</Text>
+                  <Text size={1} weight="semibold">
+                    Words to skip:
+                  </Text>
                   <Text size={1}>{notes.wordsToAvoid.join(', ')}.</Text>
                 </>
               )}
             </Stack>
           </Card>
         )}
-
       </Stack>
     </Container>
   );

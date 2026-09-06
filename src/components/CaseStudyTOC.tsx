@@ -72,9 +72,9 @@ export default function CaseStudyTOC({ headings }: Props) {
   if (headings.length === 0) return null;
 
   return (
-    <nav aria-label="Table of contents" className="hidden lg:block sticky top-24 self-start">
-      <p className="text-xs uppercase tracking-widest text-foreground/80 mb-s">On this page</p>
-      <ul className="space-y-1 text-sm border-l border-border-soft">
+    <nav aria-label="Table of contents" className="sticky top-24 hidden self-start lg:block">
+      <p className="mb-s text-xs tracking-widest text-foreground/80 uppercase">On this page</p>
+      <ul className="space-y-1 border-l border-border-soft text-sm">
         {headings.map((h) => {
           const isActive = h.id === activeId;
           const indent = h.level === 3 ? 'pl-m' : h.level === 4 ? 'pl-l' : 'pl-s';
@@ -84,10 +84,10 @@ export default function CaseStudyTOC({ headings }: Props) {
                 href={`#${h.id}`}
                 onClick={(e) => handleTocClick(e, h.id)}
                 className={[
-                  'block py-1 pr-s -ml-px border-l-2 transition-colors',
+                  '-ml-px block border-l-2 py-1 pr-s transition-colors',
                   indent,
                   isActive
-                    ? 'border-primary text-link font-semibold'
+                    ? 'border-primary font-semibold text-link'
                     : 'border-transparent text-foreground/85 hover:text-foreground',
                 ].join(' ')}
                 aria-current={isActive ? 'location' : undefined}

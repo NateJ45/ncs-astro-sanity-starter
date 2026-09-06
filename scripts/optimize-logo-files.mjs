@@ -38,10 +38,14 @@ async function shrinkLogo(filename) {
 
   const after = statSync(file).size;
   const pct = Math.round((1 - after / before) * 100);
-  console.log(`  ${filename.padEnd(20)} ${before.toLocaleString().padStart(8)} B → ${after.toLocaleString().padStart(8)} B  (-${pct}%)`);
+  console.log(
+    `  ${filename.padEnd(20)} ${before.toLocaleString().padStart(8)} B → ${after.toLocaleString().padStart(8)} B  (-${pct}%)`,
+  );
 }
 
 console.log('Shrinking logo PNGs to height ' + TARGET_HEIGHT + 'px:');
 await shrinkLogo('logo-light.png');
 await shrinkLogo('logo-dark.png');
-console.log('\nDone. Header img tags can keep their current width/height attributes — browser scales the smaller source up to the original aspect ratio at the same render size.');
+console.log(
+  '\nDone. Header img tags can keep their current width/height attributes — browser scales the smaller source up to the original aspect ratio at the same render size.',
+);

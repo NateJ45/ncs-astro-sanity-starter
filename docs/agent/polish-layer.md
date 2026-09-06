@@ -25,7 +25,7 @@ If you add a new card-like component or section that should feel part of the bra
 All marketing cards share a soft resting shadow that deepens on hover via `.card-lift`:
 
 ```html
-<article class="card-lift ... shadow-[0_4px_18px_-14px_rgba(42,45,49,0.18)]">
+<article class="card-lift shadow-[0_4px_18px_-14px_rgba(42,45,49,0.18)] ..."></article>
 ```
 
 The `card-lift` utility class lives in `globals.css`. Defines `:hover { translateY(-2px); box-shadow: 0 16px 34px -18px ... }`. Always-on-card components opt in via the class.
@@ -93,7 +93,9 @@ A `@media print` block in `globals.css` suppresses nav, footer, CTAs, and decora
 Astro View Transitions are wired via `<ClientRouter />` in BaseLayout. Any client-side script that needs to re-run on every navigation must listen to `astro:page-load`:
 
 ```js
-function initThing() { /* ... */ }
+function initThing() {
+  /* ... */
+}
 initThing();
 document.addEventListener('astro:page-load', initThing);
 ```

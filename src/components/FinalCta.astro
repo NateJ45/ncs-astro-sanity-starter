@@ -90,8 +90,12 @@ const {
 const hasBackground = !!backgroundImage?.asset;
 
 // Split the headline around the script-accent word when provided.
-const { found: scriptFound, before: scriptBefore, word: scriptWord, after: scriptAfter } =
-  splitScriptAccent(headline, scriptAccent);
+const {
+  found: scriptFound,
+  before: scriptBefore,
+  word: scriptWord,
+  after: scriptAfter,
+} = splitScriptAccent(headline, scriptAccent);
 
 // The colour accent, only considered when the script accent did not fire.
 const colour = scriptFound
@@ -105,53 +109,76 @@ const richSubhead = hasInlineRich(subheadRich);
   class:list={['bg-accent-dark text-bg', hasBackground && 'relative overflow-hidden']}
   aria-labelledby={headingId}
 >
-  {/* Optional background photo + fixed charcoal scrim. Rendered only when an
+  {
+    /* Optional background photo + fixed charcoal scrim. Rendered only when an
       image is set; otherwise the section stays the solid Charcoal Dark panel.
       The scrim is tuned dark enough that the cream headline and bronze button
       stay readable over any photo. The image is decorative, so it is
-      aria-hidden with empty alt and sits at z-0 behind the stripe + content. */}
-  {hasBackground && (
-    <div class="absolute inset-0 z-0" aria-hidden="true">
-      <SanityImage
-        source={backgroundImage}
-        width={1920}
-        sizes="100vw"
-        loading="lazy"
-        alt=""
-        class="w-full h-full object-cover"
-      />
-      <div class="absolute inset-0 bg-accent-dark/70"></div>
-    </div>
-  )}
+      aria-hidden with empty alt and sits at z-0 behind the stripe + content. */
+  }
+  {
+    hasBackground && (
+      <div class="absolute inset-0 z-0" aria-hidden="true">
+        <SanityImage
+          source={backgroundImage}
+          width={1920}
+          sizes="100vw"
+          loading="lazy"
+          alt=""
+          class="h-full w-full object-cover"
+        />
+        <div class="absolute inset-0 bg-accent-dark/70" />
+      </div>
+    )
+  }
 
-  {/* Bronze accent stripe, same 2px brand signature used at the top of the
+  {
+    /* Bronze accent stripe, same 2px brand signature used at the top of the
       site header, mobile menu, footer, and every marketing card. Softens the
       transition from the previous (usually light) section into this dark
-      panel and ties the close-of-page back into the brand vocabulary. */}
+      panel and ties the close-of-page back into the brand vocabulary. */
+  }
   <div class:list={['h-0.5 bg-primary', hasBackground && 'relative z-10']} aria-hidden="true"></div>
 
-  <div class:list={['mx-auto max-w-content px-m py-section-lg text-center', hasBackground && 'relative z-10']}>
-    {eyebrow && (
-      <p class="text-xs uppercase tracking-[0.22em] text-bg/75">{eyebrow}</p>
-    )}
-    {/* Cream hairline accent beneath the eyebrow that matches SectionHeading's
+  <div
+    class:list={[
+      'mx-auto max-w-content px-m py-section-lg text-center',
+      hasBackground && 'relative z-10',
+    ]}
+  >
+    {eyebrow && <p class="text-xs tracking-[0.22em] text-bg/75 uppercase">{eyebrow}</p>}
+    {
+      /* Cream hairline accent beneath the eyebrow that matches SectionHeading's
         inverse-tone treatment so headings carry the same editorial signature
-        on both light and dark surfaces. */}
-    {eyebrow && (
-      <div class="mt-s mb-m h-px w-12 bg-bg/40 mx-auto" aria-hidden="true"></div>
-    )}
+        on both light and dark surfaces. */
+    }
+    {eyebrow && <div class="mx-auto mt-s mb-m h-px w-12 bg-bg/40" aria-hidden="true" />}
     <h2 id={headingId} class="font-display text-h1 leading-tight text-bg">
-      {scriptFound
-        ? <>{scriptBefore}<span class="font-script">{scriptWord}</span>{scriptAfter}</>
-        : colour.found
-        ? <>{colour.before}<span class="heading-accent">{colour.word}</span>{colour.after}</>
-        : headline}
+      {
+        scriptFound ? (
+          <>
+            {scriptBefore}
+            <span class="font-script">{scriptWord}</span>
+            {scriptAfter}
+          </>
+        ) : colour.found ? (
+          <>
+            {colour.before}
+            <span class="heading-accent">{colour.word}</span>
+            {colour.after}
+          </>
+        ) : (
+          headline
+        )
+      }
     </h2>
-    {(subhead || richSubhead) && (
-      <p class="mt-m text-lg text-bg/85 max-w-2xl mx-auto">
-        {richSubhead ? <InlineRich value={subheadRich} /> : subhead}
-      </p>
-    )}
+    {
+      (subhead || richSubhead) && (
+        <p class="mx-auto mt-m max-w-2xl text-lg text-bg/85">
+          {richSubhead ? <InlineRich value={subheadRich} /> : subhead}
+        </p>
+      )
+    }
     <div class="mt-l flex flex-wrap justify-center gap-s">
       <CtaLink
         cta={cta}
@@ -160,13 +187,7 @@ const richSubhead = hasInlineRich(subheadRich);
         fallbackHref="/contact"
         fallbackLabel={fallbackCtaLabel}
       />
-      {secondaryCta && (
-        <CtaLink
-          cta={secondaryCta}
-          variant="secondary"
-          onDark
-        />
-      )}
+      {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" onDark />}
     </div>
   </div>
 </section>

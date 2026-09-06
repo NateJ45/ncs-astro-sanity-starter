@@ -17,7 +17,7 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title       = page?.seoTitle       ?? `About · ${site.name}`;
+const title = page?.seoTitle ?? `About · ${site.name}`;
 const description = page?.seoDescription ?? `Meet the designer behind ${site.name}.`;
 
 const sections = page?.pageBuilder?.length ? page.pageBuilder : DEFAULT_ABOUT_SECTIONS;

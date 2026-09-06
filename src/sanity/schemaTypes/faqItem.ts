@@ -32,7 +32,7 @@ export const faqItem = defineType({
       options: {
         canvasApp: {
           purpose:
-            'Plain-English answer. Voice: warm, slightly informal, confident about money. Lead with the direct answer; expand if needed. Stop when done — don\'t pad. Banned: transformative, curated, elevated, tailored, investment in your space.',
+            "Plain-English answer. Voice: warm, slightly informal, confident about money. Lead with the direct answer; expand if needed. Stop when done — don't pad. Banned: transformative, curated, elevated, tailored, investment in your space.",
         },
       },
       of: [
@@ -58,7 +58,12 @@ export const faqItem = defineType({
                 title: 'Link',
                 fields: [
                   { name: 'href', type: 'url', title: 'URL' },
-                  { name: 'openInNewTab', type: 'boolean', title: 'Open in new tab', initialValue: false },
+                  {
+                    name: 'openInNewTab',
+                    type: 'boolean',
+                    title: 'Open in new tab',
+                    initialValue: false,
+                  },
                 ],
               },
             ],
@@ -95,7 +100,8 @@ export const faqItem = defineType({
       title: 'Category',
       type: 'reference',
       to: [{ type: 'faqCategory' }],
-      description: 'Which group this question belongs in. Pick from the FAQ Categories list. If left blank, the legacy category value is used instead.',
+      description:
+        'Which group this question belongs in. Pick from the FAQ Categories list. If left blank, the legacy category value is used instead.',
     }),
     defineField({
       name: 'displayOrder',

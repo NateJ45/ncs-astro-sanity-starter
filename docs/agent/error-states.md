@@ -15,6 +15,7 @@ Don't link "Search" (there isn't one). Don't dump a list of random pages.
 ### Form submission failure
 
 The contact form posts to Web3Forms. Three failure modes, each with a distinct user-visible message:
+
 - **Network failure** ("Couldn't send right now. Try again, or email us directly." -- link to the contact email from `siteSettings`.)
 - **Rate limit** (rare, Web3Forms free tier is 250/month): same message, direct email is the failsafe.
 - **Validation rejection** (missing required field, bad email format): inline per-field message, focus moves to the first invalid field, and the error container has `role="alert"` so screen readers announce.

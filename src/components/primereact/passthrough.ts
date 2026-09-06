@@ -28,7 +28,6 @@
 //   text-muted-foreground = --muted-foreground (secondary text)
 
 export const pt = {
-
   // ------------------------------------------------------------------
   // InputText — single-line text input
   // ------------------------------------------------------------------
@@ -104,5 +103,4 @@ export const pt = {
       className: 'flex justify-end gap-2 p-6 pt-0',
     },
   },
-
 } as const;

@@ -189,11 +189,10 @@ const title = `${label} - Preview`;
   {
     !isBuilderPage && (
       <div class="mx-auto max-w-3xl px-4 py-6">
-        <p class="border-border-soft bg-bg-soft text-foreground/80 rounded-md border px-4 py-3 text-sm">
-          This page's middle is drawn in code (the list, form or grid it is built
-          around), so it previews as its editable surface only: the hero above,
-          any page sections below, and the closing call to action. The parts held
-          in code render on the live site.
+        <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
+          This page's middle is drawn in code (the list, form or grid it is built around), so it
+          previews as its editable surface only: the hero above, any page sections below, and the
+          closing call to action. The parts held in code render on the live site.
         </p>
       </div>
     )
@@ -201,10 +200,10 @@ const title = `${label} - Preview`;
   {
     isBuilderPage && sections.length === 0 && (
       <div class="mx-auto max-w-3xl px-4 py-6">
-        <p class="border-border-soft bg-bg-soft text-foreground/80 rounded-md border px-4 py-3 text-sm">
-          This page has no sections yet. Add one from the Page layout field, or
-          right here in the preview with the plus control. The live site falls
-          back to the built-in default sections until you do, so it is not blank.
+        <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
+          This page has no sections yet. Add one from the Page layout field, or right here in the
+          preview with the plus control. The live site falls back to the built-in default sections
+          until you do, so it is not blank.
         </p>
       </div>
     )

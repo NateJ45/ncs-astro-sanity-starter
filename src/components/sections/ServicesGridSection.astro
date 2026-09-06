@@ -55,56 +55,75 @@ const isGrid = variant === 'grid';
       headingAccent={headingAccent}
     />
 
-    {isGrid ? (
-      <>
-        {services.length > 0 && (
-          <div class="mt-section-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-m" data-stagger-grid>
-            {services.slice(0, 4).map((service: any) => (
-              <ServiceCard service={service} compact={true} />
-            ))}
+    {
+      isGrid ? (
+        <>
+          {services.length > 0 && (
+            <div
+              class="mt-section-lg grid grid-cols-1 gap-m md:grid-cols-2 lg:grid-cols-4"
+              data-stagger-grid
+            >
+              {services.slice(0, 4).map((service: any) => (
+                <ServiceCard service={service} compact={true} />
+              ))}
+            </div>
+          )}
+          <div class="mt-section-lg flex justify-center">
+            <CtaLink
+              cta={cta}
+              variant="secondary"
+              fallbackHref="/services"
+              fallbackLabel="See All Services"
+            />
           </div>
-        )}
-        <div class="mt-section-lg flex justify-center">
-          <CtaLink cta={cta} variant="secondary" fallbackHref="/services" fallbackLabel="See All Services" />
-        </div>
-      </>
-    ) : (
-      <>
-        {services.length >= 3 && (
-          <nav class="mt-m flex flex-col items-center gap-s" aria-label="On this page">
-            <p class="text-xs uppercase tracking-eyebrow text-foreground/80">On this page</p>
-            <ul class="flex flex-wrap justify-center gap-xs list-none p-0">
-              {services.map((service: any) =>
-                service.slug?.current ? (
-                  <li>
-                    <a
-                      href={`#${service.slug.current}`}
-                      class="press-tactile inline-flex items-center min-h-[36px] px-s py-1.5 text-xs uppercase tracking-eyebrow text-foreground/85 border border-border-soft rounded-full hover:border-primary hover:text-link transition-colors"
-                    >
-                      {service.name}
-                    </a>
-                  </li>
-                ) : null
-              )}
-            </ul>
-          </nav>
-        )}
-        {services.length > 0 ? (
-          <div class="mt-section-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-l" data-stagger-grid>
-            {services.map((service: any) => (
-              <ServiceCard service={service} withAnchor={true} />
-            ))}
-          </div>
-        ) : (
-          <p class="mt-section-lg text-center text-muted-foreground italic">
-            Services are being updated. <a href="/contact" class="text-link underline underline-offset-2">Get in touch</a> and we will talk through what you need.
-          </p>
-        )}
-      </>
-    )}
+        </>
+      ) : (
+        <>
+          {services.length >= 3 && (
+            <nav class="mt-m flex flex-col items-center gap-s" aria-label="On this page">
+              <p class="text-xs tracking-eyebrow text-foreground/80 uppercase">On this page</p>
+              <ul class="flex list-none flex-wrap justify-center gap-xs p-0">
+                {services.map((service: any) =>
+                  service.slug?.current ? (
+                    <li>
+                      <a
+                        href={`#${service.slug.current}`}
+                        class="press-tactile inline-flex min-h-[36px] items-center rounded-full border border-border-soft px-s py-1.5 text-xs tracking-eyebrow text-foreground/85 uppercase transition-colors hover:border-primary hover:text-link"
+                      >
+                        {service.name}
+                      </a>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+            </nav>
+          )}
+          {services.length > 0 ? (
+            <div
+              class="mt-section-lg grid grid-cols-1 gap-l md:grid-cols-2 lg:grid-cols-3"
+              data-stagger-grid
+            >
+              {services.map((service: any) => (
+                <ServiceCard service={service} withAnchor={true} />
+              ))}
+            </div>
+          ) : (
+            <p class="mt-section-lg text-center text-muted-foreground italic">
+              Services are being updated.{' '}
+              <a href="/contact" class="text-link underline underline-offset-2">
+                Get in touch
+              </a>{' '}
+              and we will talk through what you need.
+            </p>
+          )}
+        </>
+      )
+    }
 
-    {footnote && (
-      <p class="mt-section-md text-center text-sm text-muted-foreground italic">{footnote}</p>
-    )}
+    {
+      footnote && (
+        <p class="mt-section-md text-center text-sm text-muted-foreground italic">{footnote}</p>
+      )
+    }
   </div>
 </section>

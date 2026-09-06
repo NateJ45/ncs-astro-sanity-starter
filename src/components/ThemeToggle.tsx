@@ -54,9 +54,11 @@ export default function ThemeToggle() {
   };
 
   const label =
-    theme === 'light' ? 'Switch to dark mode'
-    : theme === 'dark' ? 'Switch to system theme'
-    : 'Switch to light mode';
+    theme === 'light'
+      ? 'Switch to dark mode'
+      : theme === 'dark'
+        ? 'Switch to system theme'
+        : 'Switch to light mode';
 
   return (
     <button
@@ -64,7 +66,7 @@ export default function ThemeToggle() {
       onClick={cycle}
       aria-label={label}
       title={label}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent transition-colors text-foreground"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent"
     >
       {theme === 'light' && <Sun size={18} />}
       {theme === 'dark' && <Moon size={18} />}

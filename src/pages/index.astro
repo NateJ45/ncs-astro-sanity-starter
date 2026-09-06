@@ -16,7 +16,7 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title       = page?.seoTitle       ?? site.name;
+const title = page?.seoTitle ?? site.name;
 const description = page?.seoDescription ?? 'Your tagline goes here.';
 
 const sections = page?.pageBuilder?.length ? page.pageBuilder : DEFAULT_HOME_SECTIONS;

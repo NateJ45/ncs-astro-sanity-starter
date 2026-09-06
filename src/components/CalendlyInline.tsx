@@ -33,10 +33,7 @@ function toEmbedUrl(url: string): string {
   }
 }
 
-export default function CalendlyInline({
-  url,
-  loadLabel = 'Open the scheduler',
-}: Props) {
+export default function CalendlyInline({ url, loadLabel = 'Open the scheduler' }: Props) {
   const [loaded, setLoaded] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -59,20 +56,26 @@ export default function CalendlyInline({
         <button
           type="button"
           onClick={() => setLoaded(true)}
-          className="press-tactile w-full rounded-md border border-border-soft bg-muted/60 hover:bg-muted px-l py-section-md text-left transition-colors group"
+          className="press-tactile group w-full rounded-md border border-border-soft bg-muted/60 px-l py-section-md text-left transition-colors hover:bg-muted"
         >
-          <p className="text-xs uppercase tracking-eyebrow text-foreground/80 mb-s">
+          <p className="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
             Or pick a time directly
           </p>
-          <p className="font-display text-h3 text-foreground group-hover:text-primary-dark transition-colors">
-            {loadLabel} <span aria-hidden="true" className="ml-xs transition-transform group-hover:translate-x-1 inline-block">→</span>
+          <p className="font-display text-h3 text-foreground transition-colors group-hover:text-primary-dark">
+            {loadLabel}{' '}
+            <span
+              aria-hidden="true"
+              className="ml-xs inline-block transition-transform group-hover:translate-x-1"
+            >
+              →
+            </span>
           </p>
           <p className="mt-xs text-sm text-foreground/80">
             Opens the 20-minute discovery call calendar in place. We don't load it until you ask.
           </p>
         </button>
       ) : (
-        <div className="rounded-md overflow-hidden border border-border-soft bg-card">
+        <div className="overflow-hidden rounded-md border border-border-soft bg-card">
           <iframe
             src={toEmbedUrl(url)}
             title="Schedule a discovery call"

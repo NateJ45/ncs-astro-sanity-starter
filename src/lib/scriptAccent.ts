@@ -25,10 +25,7 @@ export interface ScriptAccentResult {
  *   `word` is the exact slice from `headline` (same chars as `accent`).
  *   `before` + `word` + `after` === `headline`.
  */
-export function splitScriptAccent(
-  headline: string,
-  accent?: string,
-): ScriptAccentResult {
+export function splitScriptAccent(headline: string, accent?: string): ScriptAccentResult {
   const EMPTY: ScriptAccentResult = { found: false, before: '', word: '', after: '' };
 
   if (!accent || accent.length === 0) return EMPTY;

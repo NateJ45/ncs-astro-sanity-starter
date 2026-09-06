@@ -57,8 +57,7 @@ export const businessInfo = defineType({
         'Two-letter state code, like "IN". Feeds the business listing "addressRegion". Must match your Google Business Profile. Leave blank for fully remote businesses.',
       initialValue: 'XX',
       hidden: ({ document }) => document?.businessModel === 'remote',
-      validation: (Rule) =>
-        Rule.length(2).warning('Use the 2-letter state code, like "IN".'),
+      validation: (Rule) => Rule.length(2).warning('Use the 2-letter state code, like "IN".'),
     }),
     defineField({
       name: 'serviceRegion',

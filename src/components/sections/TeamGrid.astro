@@ -47,77 +47,74 @@ const {
 const validMembers = members.filter((m) => m?.name);
 ---
 
-{validMembers.length > 0 && (
-  <section class="bg-background" aria-labelledby={headingId}>
-    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
-      <SectionHeading
-        eyebrow={eyebrow}
-        headline={headline}
-        subhead={subhead}
-        subheadRich={subheadRich}
-        headingId={headingId}
-        align="center"
-        class="mx-auto"
-      />
+{
+  validMembers.length > 0 && (
+    <section class="bg-background" aria-labelledby={headingId}>
+      <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          subhead={subhead}
+          subheadRich={subheadRich}
+          headingId={headingId}
+          align="center"
+          class="mx-auto"
+        />
 
-      <div
-        class="mt-section-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-l"
-        data-stagger-grid
-      >
-        {validMembers.map((member) => (
-          <article class="flex flex-col items-center text-center">
-            {member.photo?.asset ? (
-              <div class="w-full aspect-square overflow-hidden rounded-full mb-m">
-                <SanityImage
-                  source={member.photo}
-                  width={400}
-                  sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 28vw, (min-width: 640px) 45vw, 85vw"
-                  quality={80}
-                  class="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div
-                class="w-full aspect-square bg-muted rounded-full mb-m"
-                aria-hidden="true"
-              ></div>
-            )}
+        <div
+          class="mt-section-lg grid grid-cols-1 gap-l sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          data-stagger-grid
+        >
+          {validMembers.map((member) => (
+            <article class="flex flex-col items-center text-center">
+              {member.photo?.asset ? (
+                <div class="mb-m aspect-square w-full overflow-hidden rounded-full">
+                  <SanityImage
+                    source={member.photo}
+                    width={400}
+                    sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 28vw, (min-width: 640px) 45vw, 85vw"
+                    quality={80}
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div class="mb-m aspect-square w-full rounded-full bg-muted" aria-hidden="true" />
+              )}
 
-            <h3 class="font-display text-h3 text-foreground">{member.name}</h3>
+              <h3 class="font-display text-h3 text-foreground">{member.name}</h3>
 
-            {member.role && (
-              <p class="mt-xs text-sm uppercase tracking-eyebrow text-foreground/70">
-                {member.role}
-              </p>
-            )}
+              {member.role && (
+                <p class="mt-xs text-sm tracking-eyebrow text-foreground/70 uppercase">
+                  {member.role}
+                </p>
+              )}
 
-            {member.bio && (
-              <p class="mt-s text-foreground/80 text-base leading-relaxed">
-                {member.bio}
-              </p>
-            )}
+              {member.bio && (
+                <p class="mt-s text-base leading-relaxed text-foreground/80">{member.bio}</p>
+              )}
 
-            {member.socialLinks && member.socialLinks.length > 0 && (
-              <ul class="mt-s flex flex-wrap gap-s justify-center" role="list">
-                {member.socialLinks.map((link) =>
-                  link?.url && link?.label ? (
-                    <li>
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-xs text-link hover:underline underline-offset-2"
-                      >
-                        {link.label}
-                      </a>
-                    </li>
-                  ) : null
-                )}
-              </ul>
-            )}
-          </article>
-        ))}
+              {member.socialLinks && member.socialLinks.length > 0 && (
+                <ul class="mt-s flex flex-wrap justify-center gap-s" role="list">
+                  {member.socialLinks.map((link) =>
+                    link?.url && link?.label ? (
+                      <li>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="text-xs text-link underline-offset-2 hover:underline"
+                        >
+                          {link.label}
+                        </a>
+                      </li>
+                    ) : null,
+                  )}
+                </ul>
+              )}
+            </article>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-)}
+    </section>
+  )
+}

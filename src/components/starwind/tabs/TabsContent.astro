@@ -1,9 +1,9 @@
 ---
-import type { HTMLAttributes } from "astro/types";
+import type { HTMLAttributes } from 'astro/types';
 
-import { tabsContent } from "./variants";
+import { tabsContent } from './variants';
 
-interface Props extends Omit<HTMLAttributes<"div">, "id" | "role" | "tabindex" | "hidden"> {
+interface Props extends Omit<HTMLAttributes<'div'>, 'id' | 'role' | 'tabindex' | 'hidden'> {
   value: string;
 }
 

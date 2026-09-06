@@ -43,17 +43,19 @@ const proseClass = ['text-foreground/85 text-lg leading-relaxed', heading ? 'mt-
 
 <section class={bg} aria-labelledby={heading ? headingId : undefined}>
   <div class:list={['mx-auto px-m py-section-lg', widthClass]} data-reveal>
-    {heading && (
-      <SectionHeading
-        eyebrow={eyebrow}
-        headline={heading}
-        headingId={headingId}
-        align={align}
-        scriptAccent={scriptAccent}
-        headingAccent={headingAccent}
-        class={align === 'center' ? 'mx-auto' : ''}
-      />
-    )}
+    {
+      heading && (
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={heading}
+          headingId={headingId}
+          align={align}
+          scriptAccent={scriptAccent}
+          headingAccent={headingAccent}
+          class={align === 'center' ? 'mx-auto' : ''}
+        />
+      )
+    }
     {body && <PortableText value={body} className={proseClass} />}
   </div>
 </section>

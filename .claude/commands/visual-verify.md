@@ -1,6 +1,6 @@
 ---
 description: Screenshot-verify UI changes in both themes and both viewports
-argument-hint: "[route, e.g. / or /about]"
+argument-hint: '[route, e.g. / or /about]'
 ---
 
 Run the visual verification loop from CLAUDE.md against $ARGUMENTS (default:
@@ -18,9 +18,11 @@ every page touched by the current change). No UI change ships without this.
    until the IntersectionObserver fires, so a fullPage screenshot taken
    straight after load shows large blank regions. Before every screenshot,
    force-reveal all of them:
+
    ```js
-   document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('is-visible'))
+   document.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-visible'));
    ```
+
    If a screenshot shows big empty bands, suspect this before suspecting the
    layout.
 

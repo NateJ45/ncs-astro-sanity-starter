@@ -1,19 +1,19 @@
 ---
-import type { HTMLAttributes } from "astro/types";
+import type { HTMLAttributes } from 'astro/types';
 
-import { dropdownContent } from "./variants";
+import { dropdownContent } from './variants';
 
-type Props = HTMLAttributes<"div"> & {
+type Props = HTMLAttributes<'div'> & {
   /**
    * Side of the dropdown
    * @default bottom
    */
-  side?: "top" | "bottom" | "left" | "right";
+  side?: 'top' | 'bottom' | 'left' | 'right';
   /**
    * Alignment of the dropdown
    * @default start
    */
-  align?: "start" | "center" | "end";
+  align?: 'start' | 'center' | 'end';
   /**
    * Offset distance in pixels
    * @default 4
@@ -28,8 +28,8 @@ type Props = HTMLAttributes<"div"> & {
 
 const {
   class: className,
-  side = "bottom",
-  align = "start",
+  side = 'bottom',
+  align = 'start',
   sideOffset = 4,
   animationDuration = 150,
   ...rest
@@ -46,7 +46,7 @@ const {
   tabindex="-1"
   aria-orientation="vertical"
   style={{
-    display: "none",
+    display: 'none',
     animationDuration: `${animationDuration}ms`,
   }}
   {...rest}

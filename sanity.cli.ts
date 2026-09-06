@@ -23,8 +23,7 @@ import { defineCliConfig } from 'sanity/cli';
 export default defineCliConfig({
   api: {
     projectId: process.env.SANITY_STUDIO_PROJECT_ID || process.env.PUBLIC_SANITY_PROJECT_ID,
-    dataset:
-      process.env.SANITY_STUDIO_DATASET || process.env.PUBLIC_SANITY_DATASET || 'production',
+    dataset: process.env.SANITY_STUDIO_DATASET || process.env.PUBLIC_SANITY_DATASET || 'production',
   },
   // The embedded Studio is served at /studio (set by @sanity/astro's
   // studioBasePath in astro.config.mjs). Mirror it here so standalone CLI

@@ -12,18 +12,27 @@ const { quote, attribution, detail, surface = 'background' } = Astro.props as Pr
 const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
 ---
 
-{quote && (
-  <section class:list={['surface-warm', bg]}>
-    <div class="mx-auto max-w-content px-m py-section-lg text-center" data-reveal>
-      <span class="font-display text-2xl text-link tracking-[0.6em] select-none" aria-hidden="true">✺</span>
-      <blockquote class="mt-m mx-auto max-w-3xl font-display text-h3 md:text-h2 leading-snug text-foreground italic">
-        {quote}
-      </blockquote>
-      {(attribution || detail) && (
-        <p class="mt-l text-sm uppercase tracking-eyebrow text-foreground/80">
-          {attribution}{attribution && detail ? ' · ' : ''}{detail}
-        </p>
-      )}
-    </div>
-  </section>
-)}
+{
+  quote && (
+    <section class:list={['surface-warm', bg]}>
+      <div class="mx-auto max-w-content px-m py-section-lg text-center" data-reveal>
+        <span
+          class="font-display text-2xl tracking-[0.6em] text-link select-none"
+          aria-hidden="true"
+        >
+          ✺
+        </span>
+        <blockquote class="mx-auto mt-m max-w-3xl font-display text-h3 leading-snug text-foreground italic md:text-h2">
+          {quote}
+        </blockquote>
+        {(attribution || detail) && (
+          <p class="mt-l text-sm tracking-eyebrow text-foreground/80 uppercase">
+            {attribution}
+            {attribution && detail ? ' · ' : ''}
+            {detail}
+          </p>
+        )}
+      </div>
+    </section>
+  )
+}

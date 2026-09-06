@@ -14,25 +14,25 @@ Performance is a UX feature, not a vanity score. Lighthouse 100 on Performance i
 
 ### Bundle budgets
 
-| Slot | Target |
-|---|---|
-| Total JS on home page (compressed) | < 100KB |
-| Largest single React island bundle (compressed) | < 50KB |
-| Total CSS (compressed) | < 30KB |
-| Hero image (any viewport) | < 200KB |
+| Slot                                            | Target  |
+| ----------------------------------------------- | ------- |
+| Total JS on home page (compressed)              | < 100KB |
+| Largest single React island bundle (compressed) | < 50KB  |
+| Total CSS (compressed)                          | < 30KB  |
+| Hero image (any viewport)                       | < 200KB |
 
 If a new dependency pushes a budget, that's a discussion before merging. Some are worth it (Lenis adds smooth scroll, motion is the interaction language); some aren't (a 60KB icon library when three lucide-react icons would cover it).
 
 ### Image weight by slot
 
-| Slot | Display max | SanityImage props | Notes |
-|---|---|---|---|
-| Home hero (full-bleed) | viewport | `width={2400} sizes="100vw" loading="eager" fetchpriority="high" quality={70}` | LCP element |
-| Portfolio/Journal cover | ~896px | `width={1800} sizes="(min-width: 920px) 896px, 100vw" loading="eager"` | Capped at `max-w-4xl` |
-| Project gallery thumbnail | viewport-dependent | `width={900} quality={75}` (via `urlFor`) | Lightbox loads larger on tap |
-| Project gallery fullscreen | viewport | passed to `yet-another-react-lightbox` directly | |
-| Testimonial avatar | 120x120 | `urlFor(...).width(120).height(120).fit('crop')` | Static thumbnail |
-| OG image (committed) | 1200x630 | n/a, generated once via `npm run og` | Per-page via `scripts/generate-og-pages.mjs` |
+| Slot                       | Display max        | SanityImage props                                                              | Notes                                        |
+| -------------------------- | ------------------ | ------------------------------------------------------------------------------ | -------------------------------------------- |
+| Home hero (full-bleed)     | viewport           | `width={2400} sizes="100vw" loading="eager" fetchpriority="high" quality={70}` | LCP element                                  |
+| Portfolio/Journal cover    | ~896px             | `width={1800} sizes="(min-width: 920px) 896px, 100vw" loading="eager"`         | Capped at `max-w-4xl`                        |
+| Project gallery thumbnail  | viewport-dependent | `width={900} quality={75}` (via `urlFor`)                                      | Lightbox loads larger on tap                 |
+| Project gallery fullscreen | viewport           | passed to `yet-another-react-lightbox` directly                                |                                              |
+| Testimonial avatar         | 120x120            | `urlFor(...).width(120).height(120).fit('crop')`                               | Static thumbnail                             |
+| OG image (committed)       | 1200x630           | n/a, generated once via `npm run og`                                           | Per-page via `scripts/generate-og-pages.mjs` |
 
 Use `<SanityImage />`'s `width` prop to drive these. **Never request larger than the slot renders at.** Format defaults to `auto` (AVIF / WebP / JPEG fallback), quality to 75 -- drop to 65 for big hero photos.
 
@@ -48,6 +48,7 @@ Use `<SanityImage />`'s `width` prop to drive these. **Never request larger than
 Target: 100 on all four categories (Performance, Accessibility, Best Practices, SEO) for all core routes on both mobile and desktop. Measure on the deployed Cloudflare URL via Chrome DevTools' bundled Lighthouse, not the dev server.
 
 **Levers that achieve this -- preserve unless you have a stronger reason than "I want to simplify":**
+
 - All islands hydrate at `client:idle` or `client:visible` except `MobileNav` (Radix Sheet portal requires `client:only="react"`)
 - Lenis init wrapped in `requestIdleCallback`
 - Logo PNGs moved from `public/` to `src/assets/` so Astro emits WebPs
@@ -60,14 +61,14 @@ Target: 100 on all four categories (Performance, Accessibility, Best Practices, 
 
 ### Hydration strategy
 
-| Component | Directive | Why |
-|---|---|---|
-| `ThemeToggle` | `client:idle` | Anti-FOUC inline script in `BaseLayout` already applies the correct theme class before first paint, so the React island only needs to hydrate by the time the visitor moves to click it. Demoting from `client:load` shaves real TBT off mobile Lighthouse runs. |
-| `MobileNav` | `client:only="react"` | Radix Sheet portal can't SSR |
-| `ContactForm` | `client:visible` | Below the fold on most pages |
-| `BackToTop` | `client:idle` | Doesn't appear until the visitor scrolls 600px, so the JS doesn't need to race first paint |
-| `Toaster` (Sonner) | `client:idle` | Region only -- toast calls fire from elsewhere, plenty of time for the region to mount |
-| `FaqAccordion` | `client:visible` | Interactive but not critical-path |
+| Component          | Directive             | Why                                                                                                                                                                                                                                                              |
+| ------------------ | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ThemeToggle`      | `client:idle`         | Anti-FOUC inline script in `BaseLayout` already applies the correct theme class before first paint, so the React island only needs to hydrate by the time the visitor moves to click it. Demoting from `client:load` shaves real TBT off mobile Lighthouse runs. |
+| `MobileNav`        | `client:only="react"` | Radix Sheet portal can't SSR                                                                                                                                                                                                                                     |
+| `ContactForm`      | `client:visible`      | Below the fold on most pages                                                                                                                                                                                                                                     |
+| `BackToTop`        | `client:idle`         | Doesn't appear until the visitor scrolls 600px, so the JS doesn't need to race first paint                                                                                                                                                                       |
+| `Toaster` (Sonner) | `client:idle`         | Region only -- toast calls fire from elsewhere, plenty of time for the region to mount                                                                                                                                                                           |
+| `FaqAccordion`     | `client:visible`      | Interactive but not critical-path                                                                                                                                                                                                                                |
 
 Default to `client:visible` or `client:idle` for anything not immediately above the fold. Astro ships less JS up front. `client:load` is reserved for islands that genuinely must be live before first interaction -- and even then, ask twice whether `client:idle` is acceptable.
 

@@ -24,8 +24,8 @@ const root = resolve(__dirname, '..');
 
 const env = loadEnv(root);
 const projectId = env.PUBLIC_SANITY_PROJECT_ID;
-const dataset   = env.PUBLIC_SANITY_DATASET ?? 'production';
-const token     = env.SANITY_API_WRITE_TOKEN;
+const dataset = env.PUBLIC_SANITY_DATASET ?? 'production';
+const token = env.SANITY_API_WRITE_TOKEN;
 
 if (!projectId) {
   console.log('PUBLIC_SANITY_PROJECT_ID is not set. Configure your .env and re-run.');
@@ -131,7 +131,8 @@ docs.push({
     showStyleQuiz: true,
     showBudgetCalculator: true,
   },
-  satisfactionGuarantee: 'We stand behind every project. If something is not right, we make it right.',
+  satisfactionGuarantee:
+    'We stand behind every project. If something is not right, we make it right.',
 });
 
 // ── 2. homePage (singleton) ───────────────────────────────────────────────
@@ -155,40 +156,50 @@ docs.push({
   _id: 'homePage',
   _type: 'homePage',
   seoTitle: 'Studio Starter - Interior Design',
-  seoDescription: 'A design studio for people who want their home to feel finished and lived-in, not staged.',
+  seoDescription:
+    'A design studio for people who want their home to feel finished and lived-in, not staged.',
 
   heroEyebrow: 'Welcome.',
   heroHeadline: 'Design That Feels Like You.',
-  heroSubhead: 'We help people create spaces that work as hard as they do and feel good to come home to.',
+  heroSubhead:
+    'We help people create spaces that work as hard as they do and feel good to come home to.',
   heroPrimaryCta: cta('Start a Conversation', '/contact'),
   heroSecondaryCta: cta('See Our Work', '/portfolio'),
 
   meetFounderEyebrow: 'Meet the Founder.',
   meetFounderHeadline: 'Good design starts with a real conversation.',
   meetFounderContent: [
-    pt('Every project starts the same way: a conversation about how you actually use your space, not just how you want it to look. That conversation shapes everything that follows.'),
-    pt('Replace this placeholder with your own story. Tell visitors who you are, what drives your work, and why they should trust you with their home.'),
+    pt(
+      'Every project starts the same way: a conversation about how you actually use your space, not just how you want it to look. That conversation shapes everything that follows.',
+    ),
+    pt(
+      'Replace this placeholder with your own story. Tell visitors who you are, what drives your work, and why they should trust you with their home.',
+    ),
   ],
   meetFounderCta: cta('Learn More About the Studio', '/about'),
 
   featuredWorkEyebrow: 'Recent Work.',
   featuredWorkHeadline: 'Rooms that feel finished.',
-  featuredWorkSubhead: 'A look at recent projects. Each one starts with a conversation about how the space actually needs to function, then the design follows from there.',
+  featuredWorkSubhead:
+    'A look at recent projects. Each one starts with a conversation about how the space actually needs to function, then the design follows from there.',
   featuredWorkCta: cta('See All Work', '/portfolio'),
 
   featuredJournalEyebrow: 'From the Journal.',
   featuredJournalHeadline: 'How we think about design.',
-  featuredJournalSubhead: 'Posts on the design moves that change a room, source roundups behind specific projects, and the occasional honest note about process.',
+  featuredJournalSubhead:
+    'Posts on the design moves that change a room, source roundups behind specific projects, and the occasional honest note about process.',
   featuredJournalCta: cta('Read the Journal', '/journal'),
 
   processPreviewEyebrow: 'How It Works.',
   processPreviewHeadline: 'A clear process, start to finish.',
-  processPreviewSubhead: 'No guesswork and no pressure. From your first inquiry to the day everything comes together, you will always know exactly where things stand and what happens next.',
+  processPreviewSubhead:
+    'No guesswork and no pressure. From your first inquiry to the day everything comes together, you will always know exactly where things stand and what happens next.',
   processPreviewCta: cta('See the Full Process', '/services'),
 
   testimonialsEyebrow: 'Kind Words.',
   testimonialsHeadline: 'Words from real homes.',
-  testimonialsSubhead: 'The part that matters most: how it felt to work together, and how each space holds up to everyday life.',
+  testimonialsSubhead:
+    'The part that matters most: how it felt to work together, and how each space holds up to everyday life.',
   testimonialsToShow: [
     { _type: 'reference', _key: key(), _ref: 'testimonial-1' },
     { _type: 'reference', _key: key(), _ref: 'testimonial-2' },
@@ -197,14 +208,16 @@ docs.push({
 
   servicesGridEyebrow: 'The Studio.',
   servicesGridHeadline: 'Design Services for Every Space.',
-  servicesGridSubhead: 'Whether you need a fresh set of eyes or a full room overhaul, there is a tier designed for where you are.',
+  servicesGridSubhead:
+    'Whether you need a fresh set of eyes or a full room overhaul, there is a tier designed for where you are.',
   servicesGridCta: cta('See All Services', '/services'),
   servicesGridFootnote: 'Final pricing is always discussed before any work begins.',
 
   serviceAreaCue: 'Serving the greater metro area and surrounding region.',
   finalCtaEyebrow: 'Ready to Begin?',
   finalCtaHeadline: 'Ready to Love Your Space?',
-  finalCtaSubhead: "Let's start with a conversation. Fill out the form and we'll be in touch within two business days.",
+  finalCtaSubhead:
+    "Let's start with a conversation. Fill out the form and we'll be in touch within two business days.",
   finalCta: cta('Start a Conversation', '/contact'),
 
   // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
@@ -219,7 +232,8 @@ docs.push({
       _key: key(),
       eyebrow: 'Welcome.',
       headline: 'Design That Feels Like You.',
-      subhead: 'We help people create spaces that work as hard as they do and feel good to come home to.',
+      subhead:
+        'We help people create spaces that work as hard as they do and feel good to come home to.',
       size: 'tall',
       primaryCta: cta('Start a Conversation', '/contact'),
       secondaryCta: cta('See Our Work', '/portfolio'),
@@ -230,8 +244,12 @@ docs.push({
       eyebrow: 'Meet the Founder.',
       headline: 'Good design starts with a real conversation.',
       content: [
-        pt('Every project starts the same way: a conversation about how you actually use your space, not just how you want it to look.'),
-        pt('Replace this placeholder with your own story. Tell visitors who you are, what drives your work, and why they should trust you with their home.'),
+        pt(
+          'Every project starts the same way: a conversation about how you actually use your space, not just how you want it to look.',
+        ),
+        pt(
+          'Replace this placeholder with your own story. Tell visitors who you are, what drives your work, and why they should trust you with their home.',
+        ),
       ],
       cta: cta('Learn More About the Studio', '/about'),
     },
@@ -261,7 +279,8 @@ docs.push({
       _key: key(),
       eyebrow: 'The Studio.',
       headline: 'Design Services for Every Space.',
-      subhead: 'Whether you need a fresh set of eyes or a full room overhaul, there is a tier for you.',
+      subhead:
+        'Whether you need a fresh set of eyes or a full room overhaul, there is a tier for you.',
       cta: cta('See All Services', '/services'),
       footnote: 'Final pricing is always discussed before any work begins.',
       variant: 'grid',
@@ -271,7 +290,8 @@ docs.push({
       _key: key(),
       eyebrow: 'Service Area.',
       headline: 'Where We Work.',
-      description: 'We serve the greater metro area and surrounding region. Travel fees for out-of-area projects are always quoted upfront.',
+      description:
+        'We serve the greater metro area and surrounding region. Travel fees for out-of-area projects are always quoted upfront.',
       showTravelFees: true,
     },
     {
@@ -299,7 +319,8 @@ docs.push({
   _id: 'aboutPage',
   _type: 'aboutPage',
   seoTitle: 'About Studio Starter - Interior Design',
-  seoDescription: 'Learn about the studio, the founder, and the philosophy behind every project we take on.',
+  seoDescription:
+    'Learn about the studio, the founder, and the philosophy behind every project we take on.',
 
   heroEyebrow: 'The Designer.',
   heroHeadline: 'People Hire People.',
@@ -308,8 +329,12 @@ docs.push({
   storyEyebrow: 'My Story.',
   storyHeadline: 'Why I Started This Studio.',
   storyContent: [
-    pt('Replace this with your real origin story. Tell visitors what led you to design, what you noticed was missing in the industry, and what you set out to do differently.'),
-    pt('Be specific. The more concrete you are about where you came from and what you stand for, the more easily the right clients will recognize themselves in your work.'),
+    pt(
+      'Replace this with your real origin story. Tell visitors what led you to design, what you noticed was missing in the industry, and what you set out to do differently.',
+    ),
+    pt(
+      'Be specific. The more concrete you are about where you came from and what you stand for, the more easily the right clients will recognize themselves in your work.',
+    ),
   ],
   founderAttribution: 'Your Name, Founder of Studio Starter',
   backgroundLine: 'Your credentials, training, or experience in one plain sentence.',
@@ -322,20 +347,56 @@ docs.push({
   personalHeadline: 'A little more about me.',
   personalIntro: 'Design is what I do, but it is not all I am.',
   currentlyList: [
-    { _type: 'currentlyRow', _key: key(), label: 'Reading', value: 'Add the book you are reading right now' },
-    { _type: 'currentlyRow', _key: key(), label: 'Listening to', value: 'Add your current playlist or podcast' },
-    { _type: 'currentlyRow', _key: key(), label: 'Obsessed with', value: 'Add something you keep recommending to people' },
+    {
+      _type: 'currentlyRow',
+      _key: key(),
+      label: 'Reading',
+      value: 'Add the book you are reading right now',
+    },
+    {
+      _type: 'currentlyRow',
+      _key: key(),
+      label: 'Listening to',
+      value: 'Add your current playlist or podcast',
+    },
+    {
+      _type: 'currentlyRow',
+      _key: key(),
+      label: 'Obsessed with',
+      value: 'Add something you keep recommending to people',
+    },
   ],
   rapidFire: [
     { _type: 'rapidFireRow', _key: key(), prompt: 'Coffee order', answer: 'Black, always' },
-    { _type: 'rapidFireRow', _key: key(), prompt: 'Favorite room to design', answer: 'Living rooms -- the hardest to get right' },
-    { _type: 'rapidFireRow', _key: key(), prompt: 'Renovate or decorate', answer: 'Decorate first, then renovate if you still need to' },
+    {
+      _type: 'rapidFireRow',
+      _key: key(),
+      prompt: 'Favorite room to design',
+      answer: 'Living rooms -- the hardest to get right',
+    },
+    {
+      _type: 'rapidFireRow',
+      _key: key(),
+      prompt: 'Renovate or decorate',
+      answer: 'Decorate first, then renovate if you still need to',
+    },
   ],
   localSpots: [
-    { _type: 'localSpotRow', _key: key(), name: 'Your Favorite Coffee Shop', note: 'Best place to think' },
-    { _type: 'localSpotRow', _key: key(), name: 'Your Favorite Furniture Store', note: 'For when clients need to see things in person' },
+    {
+      _type: 'localSpotRow',
+      _key: key(),
+      name: 'Your Favorite Coffee Shop',
+      note: 'Best place to think',
+    },
+    {
+      _type: 'localSpotRow',
+      _key: key(),
+      name: 'Your Favorite Furniture Store',
+      note: 'For when clients need to see things in person',
+    },
   ],
-  beyondDesign: 'Replace this with a short paragraph about life outside work. What do you care about beyond design? Family, community, hobbies. Write the way you actually talk.',
+  beyondDesign:
+    'Replace this with a short paragraph about life outside work. What do you care about beyond design? Family, community, hobbies. Write the way you actually talk.',
 
   stats: [
     { _type: 'statItem', _key: key(), number: 5, suffix: '+', label: 'Years in Business' },
@@ -368,7 +429,9 @@ docs.push({
       eyebrow: 'My Story.',
       headline: 'Why I Started This Studio.',
       content: [
-        pt('Replace this with your real origin story. Tell visitors what led you to design, what you noticed was missing, and what you set out to do differently.'),
+        pt(
+          'Replace this with your real origin story. Tell visitors what led you to design, what you noticed was missing, and what you set out to do differently.',
+        ),
       ],
       attribution: 'Your Name, Founder',
       credentialLine: 'Your credentials or training in one plain sentence.',
@@ -411,25 +474,30 @@ docs.push({
   _id: 'servicesPage',
   _type: 'servicesPage',
   seoTitle: 'Interior Design Services - Studio Starter',
-  seoDescription: 'Design services for every space and stage. From a single room consultation to a full project, we have a tier for where you are.',
+  seoDescription:
+    'Design services for every space and stage. From a single room consultation to a full project, we have a tier for where you are.',
 
   heroEyebrow: 'What We Offer.',
   heroHeadline: 'Design Services for Every Space and Stage.',
-  heroSubhead: 'Whether you need a fresh perspective or want to hand the whole project over, there is a service for you.',
+  heroSubhead:
+    'Whether you need a fresh perspective or want to hand the whole project over, there is a service for you.',
 
   servicesListEyebrow: 'The Tiers.',
   servicesListHeadline: 'Find the right fit.',
-  servicesListSubhead: 'Each service is priced to match the scope. Everything is discussed before any work begins.',
+  servicesListSubhead:
+    'Each service is priced to match the scope. Everything is discussed before any work begins.',
 
   serviceAreaSection: {
     eyebrow: 'Service Area.',
     headline: 'Based Locally, Available Regionally.',
-    description: 'We serve the greater metro area and surrounding region. Travel fees for out-of-area projects are always quoted upfront before any work begins.',
+    description:
+      'We serve the greater metro area and surrounding region. Travel fees for out-of-area projects are always quoted upfront before any work begins.',
   },
 
   finalCtaEyebrow: "Let's Talk.",
   finalCtaHeadline: 'Not sure which service is right?',
-  finalCtaSubhead: 'Send a message with a few details about your space. We will point you toward the best fit, no pressure.',
+  finalCtaSubhead:
+    'Send a message with a few details about your space. We will point you toward the best fit, no pressure.',
   finalCta: cta('Start a Conversation', '/contact'),
 
   // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
@@ -441,7 +509,8 @@ docs.push({
       _key: key(),
       eyebrow: 'What We Offer.',
       headline: 'Design Services for Every Space and Stage.',
-      subhead: 'Whether you need a fresh perspective or want to hand the whole project over, there is a service for you.',
+      subhead:
+        'Whether you need a fresh perspective or want to hand the whole project over, there is a service for you.',
       size: 'short',
     },
     {
@@ -449,7 +518,8 @@ docs.push({
       _key: key(),
       eyebrow: 'The Tiers.',
       headline: 'Find the right fit.',
-      subhead: 'Each service is priced to match the scope. Everything is discussed before any work begins.',
+      subhead:
+        'Each service is priced to match the scope. Everything is discussed before any work begins.',
       variant: 'list',
     },
     {
@@ -457,7 +527,8 @@ docs.push({
       _key: key(),
       eyebrow: 'Service Area.',
       headline: 'Based Locally, Available Regionally.',
-      description: 'We serve the greater metro area and surrounding region. Travel fees are quoted upfront.',
+      description:
+        'We serve the greater metro area and surrounding region. Travel fees are quoted upfront.',
       showTravelFees: true,
     },
     {
@@ -469,7 +540,8 @@ docs.push({
       _key: key(),
       eyebrow: "Let's Talk.",
       headline: 'Not sure which service is right?',
-      subhead: 'Send a message with a few details about your space. We will point you toward the best fit.',
+      subhead:
+        'Send a message with a few details about your space. We will point you toward the best fit.',
       cta: cta('Start a Conversation', '/contact'),
     },
   ],
@@ -487,7 +559,8 @@ docs.push({
   slug: { _type: 'slug', current: 'consultation' },
   price: '$150',
   priceNumeric: 150,
-  shortDescription: 'A two-hour in-home session to work through what is not working, prioritize what to tackle first, and leave with a clear action list.',
+  shortDescription:
+    'A two-hour in-home session to work through what is not working, prioritize what to tackle first, and leave with a clear action list.',
   features: [
     '2-hour in-home session',
     'Room-by-room walkthrough',
@@ -507,7 +580,8 @@ docs.push({
   slug: { _type: 'slug', current: 'single-room-design' },
   price: 'Starting at $650',
   priceNumeric: 650,
-  shortDescription: 'Full design for one room: a concept board, sourcing list, and layout plan you can hand off to a contractor or shop yourself.',
+  shortDescription:
+    'Full design for one room: a concept board, sourcing list, and layout plan you can hand off to a contractor or shop yourself.',
   features: [
     'In-home discovery session',
     'Concept board with color story',
@@ -520,7 +594,9 @@ docs.push({
   showOnHomepage: true,
   ctaLabel: 'Start a Conversation',
   longDescription: [
-    pt('We start with an in-home session to understand how the room is used, what is not working, and what you want it to feel like when it is finished. From there we build a concept, source everything, and hand you a plan you can execute on your own timeline.'),
+    pt(
+      'We start with an in-home session to understand how the room is used, what is not working, and what you want it to feel like when it is finished. From there we build a concept, source everything, and hand you a plan you can execute on your own timeline.',
+    ),
   ],
 });
 
@@ -530,7 +606,8 @@ docs.push({
   name: 'Full Project Design',
   slug: { _type: 'slug', current: 'full-project-design' },
   price: 'Custom quote',
-  shortDescription: 'Whole-home or multi-room design with full project management, contractor coordination, and installation oversight.',
+  shortDescription:
+    'Whole-home or multi-room design with full project management, contractor coordination, and installation oversight.',
   features: [
     'Full discovery session',
     'Concept and color story for each space',
@@ -544,7 +621,9 @@ docs.push({
   showOnHomepage: true,
   ctaLabel: 'Get a Quote',
   longDescription: [
-    pt('This is the full service. We handle everything from the initial concept through installation day. You make the decisions; we handle the logistics, the sourcing, the contractor communication, and the final styling.'),
+    pt(
+      'This is the full service. We handle everything from the initial concept through installation day. You make the decisions; we handle the logistics, the sourcing, the contractor communication, and the final styling.',
+    ),
     pt('Pricing is based on scope and is always discussed in detail before any work begins.'),
   ],
 });
@@ -557,7 +636,8 @@ docs.push({
   _id: 'processPage',
   _type: 'processPage',
   seoTitle: 'Our Process - Studio Starter Interior Design',
-  seoDescription: 'From the first conversation to the final reveal, here is exactly how our process works.',
+  seoDescription:
+    'From the first conversation to the final reveal, here is exactly how our process works.',
 
   pageBuilder: [
     {
@@ -594,7 +674,8 @@ docs.push({
   stepNumber: 1,
   title: 'Initial Inquiry',
   timeEstimate: '2 business days',
-  shortDescription: 'Fill out the contact form with a few details about your project. We review every inquiry personally and reply within two business days.',
+  shortDescription:
+    'Fill out the contact form with a few details about your project. We review every inquiry personally and reply within two business days.',
   features: [
     'Tell us about your space',
     'Share your goals and timeline',
@@ -609,7 +690,8 @@ docs.push({
   stepNumber: 2,
   title: 'Discovery Call',
   timeEstimate: '20 minutes',
-  shortDescription: 'A short call to talk through your project, figure out which service is the best fit, and answer any questions before we start.',
+  shortDescription:
+    'A short call to talk through your project, figure out which service is the best fit, and answer any questions before we start.',
   features: [
     'Review your goals and budget',
     'Determine the right service tier',
@@ -624,7 +706,8 @@ docs.push({
   stepNumber: 3,
   title: 'Design & Sourcing',
   timeEstimate: '2 to 3 weeks',
-  shortDescription: 'We build your concept, source every piece, and hand you a complete plan you can act on.',
+  shortDescription:
+    'We build your concept, source every piece, and hand you a complete plan you can act on.',
   features: [
     'In-home session to assess the space',
     'Concept board with color story',
@@ -640,12 +723,9 @@ docs.push({
   stepNumber: 4,
   title: 'Installation & Reveal',
   timeEstimate: 'One day',
-  shortDescription: 'We coordinate delivery, direct placement, and add the final styling details. You walk in at the end of the day to a finished room.',
-  features: [
-    'Delivery and placement coordination',
-    'Final styling',
-    'Walkthrough and care notes',
-  ],
+  shortDescription:
+    'We coordinate delivery, direct placement, and add the final styling details. You walk in at the end of the day to a finished room.',
+  features: ['Delivery and placement coordination', 'Final styling', 'Walkthrough and care notes'],
   orderRank: 'a3',
 });
 
@@ -659,11 +739,13 @@ docs.push({
   _id: 'faqPage',
   _type: 'faqPage',
   seoTitle: 'FAQ - Studio Starter Interior Design',
-  seoDescription: 'Answers to the most common questions about our design services, pricing, process, and service area.',
+  seoDescription:
+    'Answers to the most common questions about our design services, pricing, process, and service area.',
 
   heroEyebrow: 'Common Questions.',
   heroHeadline: 'Everything You Want to Know.',
-  heroSubhead: 'If your question is not here, just ask. We respond to every message within two business days.',
+  heroSubhead:
+    'If your question is not here, just ask. We respond to every message within two business days.',
 
   categoryOrder: ['Pricing & Cost', 'The Process', 'Logistics', 'Service Area', 'Getting Started'],
 
@@ -682,7 +764,9 @@ docs.push({
   _type: 'faqItem',
   question: 'How much does it cost to work with you?',
   answer: [
-    pt('Consultations are $150 for a two-hour in-home session. Single room design starts at $650. Full-project work is custom quoted based on scope.'),
+    pt(
+      'Consultations are $150 for a two-hour in-home session. Single room design starts at $650. Full-project work is custom quoted based on scope.',
+    ),
     pt('We always discuss pricing in detail before any work begins. No surprises.'),
   ],
   category: 'Pricing & Cost',
@@ -695,8 +779,12 @@ docs.push({
   _type: 'faqItem',
   question: 'How long does a typical project take?',
   answer: [
-    pt('A consultation takes two hours. Single-room design plans are usually ready within two to three weeks. Full projects vary based on scope, contractor availability, and lead times on furniture.'),
-    pt('We will give you a realistic timeline at the start of every project so you can plan accordingly.'),
+    pt(
+      'A consultation takes two hours. Single-room design plans are usually ready within two to three weeks. Full projects vary based on scope, contractor availability, and lead times on furniture.',
+    ),
+    pt(
+      'We will give you a realistic timeline at the start of every project so you can plan accordingly.',
+    ),
   ],
   category: 'The Process',
   displayOrder: 1,
@@ -708,7 +796,9 @@ docs.push({
   _type: 'faqItem',
   question: 'Do you work outside the immediate area?',
   answer: [
-    pt('Yes. We serve the greater metro area and surrounding region. For out-of-area projects, travel fees are quoted upfront based on drive time. Nothing is charged without your approval first.'),
+    pt(
+      'Yes. We serve the greater metro area and surrounding region. For out-of-area projects, travel fees are quoted upfront based on drive time. Nothing is charged without your approval first.',
+    ),
   ],
   category: 'Service Area',
   displayOrder: 1,
@@ -720,7 +810,9 @@ docs.push({
   _type: 'faqItem',
   question: 'How do I get started?',
   answer: [
-    pt('Fill out the contact form with a few details about your space and what you are hoping to do. We will review your inquiry and follow up within two business days to talk through your project and figure out which service is the best fit.'),
+    pt(
+      'Fill out the contact form with a few details about your space and what you are hoping to do. We will review your inquiry and follow up within two business days to talk through your project and figure out which service is the best fit.',
+    ),
   ],
   category: 'Getting Started',
   displayOrder: 1,
@@ -739,11 +831,13 @@ docs.push({
   _id: 'contactPage',
   _type: 'contactPage',
   seoTitle: 'Contact Studio Starter - Start a Conversation',
-  seoDescription: 'Tell us about your project. We respond to every inquiry within two business days.',
+  seoDescription:
+    'Tell us about your project. We respond to every inquiry within two business days.',
 
   heroEyebrow: 'Request a Consultation.',
   heroHeadline: 'Start the Conversation.',
-  heroSubhead: "Tell us a little about your space. We'll be back in touch within two business days.",
+  heroSubhead:
+    "Tell us a little about your space. We'll be back in touch within two business days.",
 
   formIntroNote: 'No automated sequences and no sales calls. Just a real reply from a real person.',
   formProjectTypeOptions: [
@@ -763,7 +857,13 @@ docs.push({
     '$25,000+',
     'Not sure yet',
   ],
-  formTimelineOptions: ['As soon as possible', '1 to 3 months', '3 to 6 months', '6 months or more', 'Flexible'],
+  formTimelineOptions: [
+    'As soon as possible',
+    '1 to 3 months',
+    '3 to 6 months',
+    '6 months or more',
+    'Flexible',
+  ],
   formSourceOptions: [
     'Google search',
     'Instagram',
@@ -778,8 +878,12 @@ docs.push({
   whatToExpectEyebrow: 'What to Expect.',
   whatToExpectHeadline: 'When you submit this form...',
   whatToExpectContent: [
-    pt('A real person reads every inquiry. No automated follow-up sequences, no sales calls. We review your message, look at your project details, and reply personally within two business days.'),
-    pt('If we are a good fit, we will set up a brief call to talk through your space, your goals, and which service makes sense for where you are. If we are not the right fit, we will say so and point you in a better direction.'),
+    pt(
+      'A real person reads every inquiry. No automated follow-up sequences, no sales calls. We review your message, look at your project details, and reply personally within two business days.',
+    ),
+    pt(
+      'If we are a good fit, we will set up a brief call to talk through your space, your goals, and which service makes sense for where you are. If we are not the right fit, we will say so and point you in a better direction.',
+    ),
   ],
   postInquiryRoadmap: [
     {
@@ -822,7 +926,8 @@ docs.push({
 docs.push({
   _id: 'testimonial-1',
   _type: 'testimonial',
-  quote: 'Working with this studio changed how I feel about coming home. Our living room finally makes sense. Replace this with a real client quote.',
+  quote:
+    'Working with this studio changed how I feel about coming home. Our living room finally makes sense. Replace this with a real client quote.',
   attribution: 'Happy Client',
   date: '2025-01-15',
   source: 'Google',
@@ -834,7 +939,8 @@ docs.push({
 docs.push({
   _id: 'testimonial-2',
   _type: 'testimonial',
-  quote: 'I kept putting off dealing with our dining room because it felt too hard. One consultation and a clear plan later, we finally did it. Replace this with a real client quote.',
+  quote:
+    'I kept putting off dealing with our dining room because it felt too hard. One consultation and a clear plan later, we finally did it. Replace this with a real client quote.',
   attribution: 'Satisfied Client',
   date: '2025-03-20',
   source: 'Facebook',
@@ -846,7 +952,8 @@ docs.push({
 docs.push({
   _id: 'testimonial-3',
   _type: 'testimonial',
-  quote: 'The process was clear from start to finish and the result is exactly what we hoped for. Replace this with a real client quote.',
+  quote:
+    'The process was clear from start to finish and the result is exactly what we hoped for. Replace this with a real client quote.',
   attribution: 'Returning Client',
   date: '2025-06-01',
   source: 'Direct (email or text)',
@@ -862,7 +969,8 @@ docs.push({
   _id: 'philosophy-1',
   _type: 'philosophyPoint',
   title: 'Your Vision First',
-  description: 'Good design starts by listening. We learn how you live before we suggest how anything should look.',
+  description:
+    'Good design starts by listening. We learn how you live before we suggest how anything should look.',
   displayOrder: 1,
 });
 
@@ -870,7 +978,8 @@ docs.push({
   _id: 'philosophy-2',
   _type: 'philosophyPoint',
   title: 'Honest About Money',
-  description: 'Pricing is always discussed before any work begins. We give you real numbers up front so you can decide with confidence.',
+  description:
+    'Pricing is always discussed before any work begins. We give you real numbers up front so you can decide with confidence.',
   displayOrder: 2,
 });
 
@@ -878,7 +987,8 @@ docs.push({
   _id: 'philosophy-3',
   _type: 'philosophyPoint',
   title: 'Clear All the Way Through',
-  description: 'You will always know where your project stands and what comes next. No radio silence, no guesswork.',
+  description:
+    'You will always know where your project stands and what comes next. No radio silence, no guesswork.',
   displayOrder: 3,
 });
 
@@ -911,11 +1021,13 @@ docs.push({
   _id: 'journalPage',
   _type: 'journalPage',
   seoTitle: 'Journal - Studio Starter',
-  seoDescription: 'Project walkthroughs, design thinking, and practical notes from the studio. Written between projects.',
+  seoDescription:
+    'Project walkthroughs, design thinking, and practical notes from the studio. Written between projects.',
 
   heroEyebrow: 'The Journal.',
   heroHeadline: 'Notes from the studio.',
-  heroSubhead: 'Project walkthroughs, design thinking, and the occasional opinion. Written between projects.',
+  heroSubhead:
+    'Project walkthroughs, design thinking, and the occasional opinion. Written between projects.',
   stickyCtaLabel: 'Have a room in mind?',
 
   finalCtaHeadline: 'Got a project of your own?',
@@ -933,19 +1045,24 @@ docs.push({
   _type: 'journalEntry',
   title: 'Welcome to the Journal',
   slug: { _type: 'slug', current: 'welcome-to-the-journal' },
-  excerpt: 'This is a placeholder post. Replace it with your first real journal entry once the site is live.',
+  excerpt:
+    'This is a placeholder post. Replace it with your first real journal entry once the site is live.',
   author: 'Studio Starter',
   publishedAt: '2025-06-01T12:00:00.000Z',
   featured: true,
-  categories: [
-    { _type: 'reference', _key: key(), _ref: 'journal-category-design-notes' },
-  ],
+  categories: [{ _type: 'reference', _key: key(), _ref: 'journal-category-design-notes' }],
   body: [
     pt('This is a placeholder journal entry. Replace this content with your first real post.'),
-    pt('The journal is a good place to share project walkthroughs, design tips, and honest notes about your process. Write the way you talk. Be specific.'),
+    pt(
+      'The journal is a good place to share project walkthroughs, design tips, and honest notes about your process. Write the way you talk. Be specific.',
+    ),
     ptH2('What to write about'),
-    pt('Start with a recent project. Walk readers through the brief, the challenges, and the decisions you made. Specific detail is more interesting than general advice.'),
-    pt('Once you have a few project posts, mix in shorter notes: a product you keep recommending, a paint color worth knowing about, a sourcing find that changed the way you approach a common problem.'),
+    pt(
+      'Start with a recent project. Walk readers through the brief, the challenges, and the decisions you made. Specific detail is more interesting than general advice.',
+    ),
+    pt(
+      'Once you have a few project posts, mix in shorter notes: a product you keep recommending, a paint color worth knowing about, a sourcing find that changed the way you approach a common problem.',
+    ),
   ],
 });
 
@@ -954,23 +1071,32 @@ docs.push({
   _type: 'journalEntry',
   title: 'How to Get the Most Out of a Design Consultation',
   slug: { _type: 'slug', current: 'how-to-get-the-most-out-of-a-design-consultation' },
-  excerpt: 'A consultation works best when you come prepared. Here is what to gather, what questions to have ready, and what to expect when we walk through your space.',
+  excerpt:
+    'A consultation works best when you come prepared. Here is what to gather, what questions to have ready, and what to expect when we walk through your space.',
   author: 'Studio Starter',
   publishedAt: '2025-05-15T12:00:00.000Z',
   featured: false,
-  categories: [
-    { _type: 'reference', _key: key(), _ref: 'journal-category-design-notes' },
-  ],
+  categories: [{ _type: 'reference', _key: key(), _ref: 'journal-category-design-notes' }],
   body: [
-    pt('Replace this with your own content. This placeholder post is here to give the journal index page something to show on launch.'),
+    pt(
+      'Replace this with your own content. This placeholder post is here to give the journal index page something to show on launch.',
+    ),
     ptH2('Before the session'),
-    pt('Walk through the room and take note of what bothers you most. You do not need to know why -- just what. That is a good starting point for the conversation.'),
+    pt(
+      'Walk through the room and take note of what bothers you most. You do not need to know why -- just what. That is a good starting point for the conversation.',
+    ),
     ptH2('During the session'),
-    pt('Ask every question you have. There are no obvious ones. The more honest you are about how the space is actually used, the more useful the recommendations will be.'),
+    pt(
+      'Ask every question you have. There are no obvious ones. The more honest you are about how the space is actually used, the more useful the recommendations will be.',
+    ),
     ptH3('What to bring'),
-    pt('Any inspiration images you have saved, even if you are not sure exactly what you like about them. Patterns in your taste are useful information.'),
+    pt(
+      'Any inspiration images you have saved, even if you are not sure exactly what you like about them. Patterns in your taste are useful information.',
+    ),
     ptH2('After the session'),
-    pt('You will leave with a written action list. Start with the lowest-cost, highest-impact items first. Quick wins build momentum.'),
+    pt(
+      'You will leave with a written action list. Start with the lowest-cost, highest-impact items first. Quick wins build momentum.',
+    ),
   ],
 });
 
@@ -1005,7 +1131,8 @@ docs.push({
   _id: 'privacyPage',
   _type: 'privacyPage',
   seoTitle: 'Privacy Policy - Studio Starter',
-  seoDescription: 'How Studio Starter collects, uses, and protects information submitted through this website.',
+  seoDescription:
+    'How Studio Starter collects, uses, and protects information submitted through this website.',
 
   heroEyebrow: 'Studio Starter.',
   heroHeadline: 'Privacy Policy',
@@ -1013,31 +1140,49 @@ docs.push({
 
   body: [
     ptH2('1. Information We Collect'),
-    pt('When you submit the contact form on this website, we collect the information you provide: your name, email address, and any details about your project. We do not collect information automatically beyond standard server logs.'),
+    pt(
+      'When you submit the contact form on this website, we collect the information you provide: your name, email address, and any details about your project. We do not collect information automatically beyond standard server logs.',
+    ),
 
     ptH2('2. How We Use Your Information'),
-    pt('We use the information you provide solely to respond to your inquiry and, if you become a client, to manage your project. We do not sell, share, or rent your information to third parties.'),
+    pt(
+      'We use the information you provide solely to respond to your inquiry and, if you become a client, to manage your project. We do not sell, share, or rent your information to third parties.',
+    ),
 
     ptH2('3. Email Communications'),
-    pt('If you subscribe to a newsletter or mailing list through this site, we use your email address only to send the communications you signed up for. You can unsubscribe at any time by clicking the unsubscribe link in any message.'),
+    pt(
+      'If you subscribe to a newsletter or mailing list through this site, we use your email address only to send the communications you signed up for. You can unsubscribe at any time by clicking the unsubscribe link in any message.',
+    ),
 
     ptH2('4. Cookies and Analytics'),
-    pt('This site may use basic analytics to understand how visitors find and use the site. This data is aggregated and anonymous. We do not use cookies to track you across other websites.'),
+    pt(
+      'This site may use basic analytics to understand how visitors find and use the site. This data is aggregated and anonymous. We do not use cookies to track you across other websites.',
+    ),
 
     ptH2('5. Data Security'),
-    pt('We take reasonable precautions to protect your information. Contact form submissions are transmitted over encrypted connections. We do not store payment information on this site.'),
+    pt(
+      'We take reasonable precautions to protect your information. Contact form submissions are transmitted over encrypted connections. We do not store payment information on this site.',
+    ),
 
     ptH2('6. Third-Party Services'),
-    pt('This site is hosted on Cloudflare. Contact form submissions may be processed through a third-party form service. Each of these providers has its own privacy policy governing the data they handle.'),
+    pt(
+      'This site is hosted on Cloudflare. Contact form submissions may be processed through a third-party form service. Each of these providers has its own privacy policy governing the data they handle.',
+    ),
 
     ptH2('7. Your Rights'),
-    pt('You may request a copy of any personal information we hold about you, or ask us to delete it, by emailing hello@example.com. We will respond within 30 days.'),
+    pt(
+      'You may request a copy of any personal information we hold about you, or ask us to delete it, by emailing hello@example.com. We will respond within 30 days.',
+    ),
 
     ptH2('8. Changes to This Policy'),
-    pt('We may update this policy from time to time. The date at the top of this page reflects when it was last revised. Continued use of the site after a change constitutes acceptance of the updated policy.'),
+    pt(
+      'We may update this policy from time to time. The date at the top of this page reflects when it was last revised. Continued use of the site after a change constitutes acceptance of the updated policy.',
+    ),
 
     ptH2('9. Contact'),
-    pt('Questions about this policy? Email hello@example.com. Replace this address with your actual contact email once the site is configured.'),
+    pt(
+      'Questions about this policy? Email hello@example.com. Replace this address with your actual contact email once the site is configured.',
+    ),
   ],
 });
 
@@ -1049,61 +1194,71 @@ docs.push({
   _id: 'studioGuide',
   _type: 'studioGuide',
   guideTitle: 'How the website works',
-  guideIntro: 'Welcome to Studio Starter. This guide walks you through where everything lives in Sanity and how to make changes to the site without breaking anything.',
+  guideIntro:
+    'Welcome to Studio Starter. This guide walks you through where everything lives in Sanity and how to make changes to the site without breaking anything.',
   studioMap: [
     {
       _type: 'mapRow',
       _key: key(),
       area: 'Site Settings',
-      description: 'Your business name, tagline, email, phone, service areas, travel fees, social links, and newsletter settings. Start here after setup.',
+      description:
+        'Your business name, tagline, email, phone, service areas, travel fees, social links, and newsletter settings. Start here after setup.',
     },
     {
       _type: 'mapRow',
       _key: key(),
       area: 'Preview (the tool with the page list)',
-      description: 'The live editing view. Pick a page from the list on the left and it appears on the right exactly as visitors will see it, including changes you have not published yet. Click any text on the page to jump straight to the field that holds it.',
+      description:
+        'The live editing view. Pick a page from the list on the left and it appears on the right exactly as visitors will see it, including changes you have not published yet. Click any text on the page to jump straight to the field that holds it.',
     },
     {
       _type: 'mapRow',
       _key: key(),
       area: 'Home Page',
-      description: 'The headline, hero text, section copy, and CTA buttons on the homepage. Images are uploaded separately and referenced here.',
+      description:
+        'The headline, hero text, section copy, and CTA buttons on the homepage. Images are uploaded separately and referenced here.',
     },
     {
       _type: 'mapRow',
       _key: key(),
       area: 'About Page',
-      description: 'Your story, philosophy, personal section, and stats. Replace the placeholder text with your real content.',
+      description:
+        'Your story, philosophy, personal section, and stats. Replace the placeholder text with your real content.',
     },
     {
       _type: 'mapRow',
       _key: key(),
       area: 'Services + Service docs',
-      description: 'The Services page controls the hero and section copy. Individual Service documents control each service card: name, price, features, and description.',
+      description:
+        'The Services page controls the hero and section copy. Individual Service documents control each service card: name, price, features, and description.',
     },
     {
       _type: 'mapRow',
       _key: key(),
       area: 'FAQ Page + FAQ Items',
-      description: 'The FAQ page controls the hero. Individual FAQ Item documents hold each question and answer, organized by category.',
+      description:
+        'The FAQ page controls the hero. Individual FAQ Item documents hold each question and answer, organized by category.',
     },
     {
       _type: 'mapRow',
       _key: key(),
       area: 'Journal Page + Journal Entries',
-      description: 'The Journal page controls the index hero. Individual Journal Entry documents are your blog posts.',
+      description:
+        'The Journal page controls the index hero. Individual Journal Entry documents are your blog posts.',
     },
     {
       _type: 'mapRow',
       _key: key(),
       area: 'Testimonials',
-      description: 'Individual Testimonial documents. Add them here, then reference them from the Home Page to control which ones appear and in what order.',
+      description:
+        'Individual Testimonial documents. Add them here, then reference them from the Home Page to control which ones appear and in what order.',
     },
     {
       _type: 'mapRow',
       _key: key(),
       area: 'Philosophy Points',
-      description: 'The three values shown on the About page. Edit the title and description for each.',
+      description:
+        'The three values shown on the About page. Edit the title and description for each.',
     },
   ],
   howTos: [
@@ -1225,9 +1380,12 @@ docs.push({
 docs.push({
   _id: 'studioNotes',
   _type: 'studioNotes',
-  businessSummary: 'Studio Starter is a placeholder business description. Replace this with a clear, plain-English description of your studio: what you do, where you work, and what makes your approach different.',
-  idealClient: 'Replace this with a description of your ideal client. Be specific. The more clearly you can picture who you are designing for, the easier it is to write copy that speaks to them.',
-  voiceSummary: 'Replace this with a description of your voice. Plain-spoken and warm? Confident and direct? A little irreverent? Pick a lane and describe it in a sentence or two so anyone writing for the site stays consistent.',
+  businessSummary:
+    'Studio Starter is a placeholder business description. Replace this with a clear, plain-English description of your studio: what you do, where you work, and what makes your approach different.',
+  idealClient:
+    'Replace this with a description of your ideal client. Be specific. The more clearly you can picture who you are designing for, the easier it is to write copy that speaks to them.',
+  voiceSummary:
+    'Replace this with a description of your voice. Plain-spoken and warm? Confident and direct? A little irreverent? Pick a lane and describe it in a sentence or two so anyone writing for the site stays consistent.',
   wordsToAvoid: [
     'transformative',
     'curated',
@@ -1249,13 +1407,15 @@ docs.push({
   _id: 'studioPlaybook',
   _type: 'studioPlaybook',
   title: 'Grow your studio',
-  intro: 'Practical guides for expanding what this site can do for your business. Each tab covers one area of growth.',
+  intro:
+    'Practical guides for expanding what this site can do for your business. Each tab covers one area of growth.',
   guides: [
     {
       _type: 'playbookGuide',
       _key: key(),
       title: 'Photograph Your Work',
-      summary: 'Good photos are the single highest-leverage investment for a design studio website. Here is how to approach it without a professional crew.',
+      summary:
+        'Good photos are the single highest-leverage investment for a design studio website. Here is how to approach it without a professional crew.',
       sections: [
         {
           _type: 'playbookSection',
@@ -1290,7 +1450,8 @@ docs.push({
       _type: 'playbookGuide',
       _key: key(),
       title: 'Build Your Sourcing Toolkit',
-      summary: 'Access to trade pricing and professional sourcing makes your service more valuable and your margins better. Here is where to apply.',
+      summary:
+        'Access to trade pricing and professional sourcing makes your service more valuable and your margins better. Here is where to apply.',
       sections: [
         {
           _type: 'playbookSection',
@@ -1326,7 +1487,8 @@ docs.push({
       _type: 'playbookGuide',
       _key: key(),
       title: 'Add E-Design',
-      summary: 'E-design (remote design delivered as a PDF package) lets you serve clients outside your local area at a lower price point.',
+      summary:
+        'E-design (remote design delivered as a PDF package) lets you serve clients outside your local area at a lower price point.',
       sections: [
         {
           _type: 'playbookSection',
@@ -1362,7 +1524,8 @@ docs.push({
       _type: 'playbookGuide',
       _key: key(),
       title: 'Get Set Up with Trade Sourcing',
-      summary: 'A step-by-step checklist for getting your business set up to buy at trade pricing and manage client orders.',
+      summary:
+        'A step-by-step checklist for getting your business set up to buy at trade pricing and manage client orders.',
       sections: [
         {
           _type: 'playbookSection',
