@@ -62,7 +62,14 @@ const hasSanityBody = Boolean(page?.body);
     size="short"
   />
 
-  <section class="bg-background" aria-label="Privacy policy">
+  {
+    /* The label has to differ from the hero's heading ("Privacy Policy"), which
+      labels the hero's own region landmark. Two region landmarks with the same
+      accessible name fail axe's landmark-unique rule and, more to the point,
+      give a screen-reader user two identically named stops in the landmark
+      list with no way to tell them apart. */
+  }
+  <section class="bg-background" aria-label="Policy text">
     <div class="mx-auto max-w-3xl px-m py-section-lg">
       {
         lastUpdated && (
@@ -134,7 +141,7 @@ const hasSanityBody = Boolean(page?.body);
               </p>
             </div>
 
-            <p class="border-t border-border-soft pt-l text-xs text-foreground/60">
+            <p class="border-t border-border-soft pt-l text-xs text-foreground/80">
               This policy was last reviewed in May 2026 and will be updated if anything meaningful
               changes about how this site handles your data.
             </p>
