@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Generates public/llms-full.txt — the expanded companion to llms.txt. It
 // inlines the substantive site content (services and prices, the process,
 // FAQs, service area and contact, plus the current portfolio, journal, and

@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Safe to edit by hand
 // Walks Sanity Portable Text blocks and returns a flat list of headings with
 // deterministic anchor IDs. The PortableText renderer uses the same slugify()

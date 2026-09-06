@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { slugify } from './slugify.ts';

@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Safe to edit by hand
 // Shared client-safe email-capture helper used by NewsletterSignup, LeadMagnetForm,
 // the style quiz gate, and the budget calculator gate.

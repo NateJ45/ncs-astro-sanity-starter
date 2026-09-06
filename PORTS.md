@@ -3520,3 +3520,96 @@ months, and it only surfaced because a sync session happened to look.
 Needs `GH_ACTIONS_PAT` with write access to THIS repo, not only to the site
 repos. Without it the step warns and the build still fails on sync-check, so
 the gate never depends on the automation working.
+
+## 38. presacademy harvest audit, and eleven files that were already the same (2026-09-06)
+
+The second harvest audit of the family (WCP was card 35's neighbour) went
+through `src/lib/**` and `scripts/**` in presacademy. presacademy is the
+ANCESTOR of most of this library, so the expectation going in was byte drift
+on files the starter had generalised after copying them. What it actually
+found was that the drift is almost entirely legitimate: the two repos have
+different singleton sets, different brand colours and a different section
+model, and the files that carry any of those cannot be byte-identical.
+
+Eleven files were already identical and are now marked in both repos:
+
+    scripts/generate-llms-full.mjs
+    src/lib/phone.ts
+    src/lib/portable-text-headings.ts
+    src/lib/reading-time.ts
+    src/lib/scriptAccent.ts
+    src/lib/slugify.ts
+    src/lib/slugify.test.ts
+    src/lib/subscribe.ts
+    src/lib/utils.ts
+    src/lib/utils.test.ts
+
+plus `scripts/lib/loadEnv.mjs`, which was already marked here and merely
+lacked the header in presacademy.
+
+Two of those needed a change first, and both went UP.
+
+**`scripts/generate-llms-full.mjs`.** presacademy still carried its own
+inlined `loadEnv()`, an eleven-line copy predating `scripts/lib/loadEnv.mjs`.
+The shared loader is strictly better: it strips inline `#` comments outside
+quotes, takes quoted values literally, and tolerates leading whitespace on the
+key. presacademy now imports it, which is what made the file identical.
+
+**`src/lib/utils.test.ts`.** The library's copy named three tests wrong. When
+the empty-array case was corrected from "returns 0" to "returns 1", the two
+neighbouring cases were renamed with it, so the library shipped
+`test('returns 1 for null/undefined input')` asserting `0`, and the same for
+non-array input. presacademy had two of the three right. The names now say
+what each branch does, with a comment recording WHY the branches disagree:
+`readingTimeFromPortableText` floors an ARRAY at one minute, and returns a
+bare `0` for anything that is not an array so the caller can hide the label.
+Nothing about the assertions changed; the test file was lying about itself.
+
+DELIBERATELY NOT MARKED, with the reason, because a marker is a promise to
+keep two files byte-identical forever and an unactionable red check is how a
+checker gets ignored:
+
+- `src/lib/nav-href.ts` - the singleton-to-route table is per-site by
+  definition. The starter also has an `pageArchived` guard presacademy has
+  no `archived` field to use.
+- `src/lib/preview-auth.ts` - identical but for the `VERSION` namespace
+  constant, which is deliberately per-site so a shared token yields a
+  different cookie fingerprint on each. The file's own comment says
+  "rename this on a fork".
+- `src/lib/sanity.ts`, `queries.ts`, `schemas.ts`, `siteSettings.ts`,
+  `section-fields.ts`, `surfaces.ts`, `layout-variants.ts`,
+  `sectionVisibility.ts` - all carry the site's own document types,
+  section list or token set.
+- `scripts/lib/render-og.mjs`, `scripts/generate-og-*.mjs` - brand
+  typography and layout.
+- `scripts/generate-logo-variants.mjs`, `scripts/optimize-logo-files.mjs` -
+  identical today, but both hard-code the brand ink hexes (`#3D3D3D`,
+  `#F5F0EB`). Marking them would turn the first rebrand into a CI failure
+  in a repo that did nothing wrong.
+- `scripts/page-parity.mjs` - already carries a header explaining that it
+  is a PATTERN, not a canonical file, and that the starter's copy is the
+  parameterized descendant. That header is the convention working.
+
+### Two places presacademy is still ahead, both blocked on a consumer here
+
+**`sectionFieldEditAttr` (`src/lib/preview-edit-attr.ts`).** presacademy
+exports a second attribute builder that targets a FIELD inside a section
+(`pageBuilder[_key=="..."].background`) rather than the bare array item. The
+distinction is load-bearing and was learned in a deployed Studio: the overlay
+will outline a node whose attribute names an array item, which is what gives
+the section its insert/duplicate/drag menu, but a custom overlay COMPONENT
+only mounts on a node the Studio schema resolves to a FIELD. An array item is
+not one, so `getField` returns nothing and the component resolver is never
+called. That is the whole reason presacademy's in-canvas background swatch
+row can get on screen. The library has no in-canvas field control yet, so it
+has nowhere to put the function; port it the day it grows one.
+
+**Vertical centring in `scripts/lib/render-og.mjs`.** The library composites
+the wordmark at `top: 200`, the rule at `y: 330` and the first tagline line at
+`top: 360`, all fixed. presacademy measures the rendered wordmark and tagline,
+sums the group height and centres it, so a card with one tagline line and a
+card with three are both balanced. The library's numbers are tuned for two
+lines and only for two. The port is real but not a copy: presacademy's version
+is entangled with its three-part wordmark ("The Presbyterian / Academy",
+keyword in green), so adopting it means separating the centring math from the
+wordmark parsing first.

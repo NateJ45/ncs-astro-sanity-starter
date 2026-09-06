@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readingTimeFromPortableText, formatReadingTime } from './reading-time.ts';
@@ -12,16 +13,20 @@ function makeBlock(text: string) {
   };
 }
 
+// The two branches disagree on purpose, so the names have to say which is
+// which: an ARRAY is floored at one minute (`Math.max(1, ...)`, so even an
+// empty one reads as "1 min"), while a NON-array is not a document at all and
+// returns a bare 0 for the caller to hide the label entirely.
 test('returns 1 for empty array', () => {
   assert.equal(readingTimeFromPortableText([]), 1);
 });
 
-test('returns 1 for null/undefined input', () => {
+test('returns 0 for null/undefined input', () => {
   assert.equal(readingTimeFromPortableText(null), 0);
   assert.equal(readingTimeFromPortableText(undefined), 0);
 });
 
-test('returns 1 for non-array input', () => {
+test('returns 0 for non-array input', () => {
   assert.equal(readingTimeFromPortableText('not an array'), 0);
 });
 
