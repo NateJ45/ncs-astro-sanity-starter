@@ -3597,6 +3597,44 @@ Needs `GH_ACTIONS_PAT` with write access to THIS repo, not only to the site
 repos. Without it the step warns and the build still fails on sync-check, so
 the gate never depends on the automation working.
 
+### The push needs `-c http.<host>.extraheader=`, and this card was wrong without it
+
+This card described a working mechanism for several hours before one existed.
+Written is not verified: the step was wired into six repos, all of them green,
+and it had never once opened a PR.
+
+The acceptance test that settled it (mas-monograms#36): drift a canonical file
+on purpose, push it, and watch for a PR appearing HERE that nobody started.
+Anything weaker tests that the code is present, not that it works.
+
+Attempts one and two failed identically:
+
+```
+remote: Permission to NateJ45/ncs-astro-sanity-starter.git denied to github-actions[bot].
+fatal: ... The requested URL returned error: 403
+```
+
+which reads exactly like a missing or wrong `GH_ACTIONS_PAT` and is not that.
+The PAT was present and correct throughout and was never consulted. The push
+needs `-c http.https://github.com/.extraheader=`: an empty extraheader sends no
+header, and `-c` overrides every config scope for that one command.
+
+Resist the obvious explanation. "actions/checkout persisted its credentials
+into the clone" is wrong, and attempt two was built on it: unsetting the key at
+`--local` scope fixed nothing, because the run that finally worked printed
+`persisted credential keys: (none)`. The header comes from a scope `--local`
+does not list. That one print is the only reason the false diagnosis died
+instead of shipping with a confident comment explaining it.
+
+Two lessons, both earned the expensive way:
+
+- A step that exits 0 so it cannot mask the real failure equally cannot report
+  its own. Give it diagnostics or its breakage is silent forever.
+- When a fix is reasoned rather than observed, test the mechanism directly
+  before spending a CI round trip. The precedence question here took about a
+  minute locally with a deliberately bogus header: the push fails without the
+  override and succeeds with it.
+
 ## 38. presacademy harvest audit, and eleven files that were already the same (2026-09-06)
 
 The second harvest audit of the family (WCP was card 35's neighbour) went

@@ -115,21 +115,25 @@ try {
     ['commit', '-m', `Drift from ${SITE}: ${drifted.length} canonical file(s)`, '-m', body],
     STARTER,
   );
-  // The starter checkout is made by actions/checkout, which persists its own
-  // credentials into that clone's config as
-  //   http.https://github.com/.extraheader = AUTHORIZATION: basic <GITHUB_TOKEN>
-  // That header OUTRANKS the userinfo in the push URL, so the push authenticates
-  // as github-actions[bot] scoped to the SITE repo and the library answers 403 -
-  // in a message about the bot that never mentions the PAT, which is why it
-  // reads like a missing or wrong secret and is not one. On mas-monograms#36
-  // (2026-09-06) GH_ACTIONS_PAT was present and correct throughout and was
-  // simply never consulted.
+  // In CI a plain push to the library authenticates as github-actions[bot] and
+  // gets 403, however good GH_ACTIONS_PAT is. `-c http.<host>.extraheader=` on
+  // the push is what fixes it: an empty extraheader sends no header, and -c
+  // overrides EVERY config scope for that one command.
   //
-  // Unsetting the key was not enough on its own, so the push also overrides it
-  // for that one command (an empty extraheader sends no header). The keys found
-  // are printed because the first two attempts at this failed silently and
-  // looked identical to a bad secret: if it ever regresses, the log says which
-  // credential was actually in play rather than leaving it to be re-guessed.
+  // Be careful with the explanation, because the obvious one is wrong. Verified
+  // on mas-monograms#36 (2026-09-06) across three runs:
+  //   - the PAT is present and correct throughout, and is not the problem;
+  //   - unsetting the key at --local scope changes nothing, because there is
+  //     nothing there: the run that finally worked printed "(none)", so
+  //     actions/checkout is NOT persisting a credential into this clone. The
+  //     header comes from a scope --local does not list.
+  // The unset loop below is therefore a no-op in CI today and is kept only for
+  // the case where a checkout does persist one; the -c override is the fix. If
+  // this ever needs revisiting, `git config --show-origin --get-urlmatch
+  // http.extraheader https://github.com/` in the runner names the file.
+  //
+  // The keys are printed because the two failed attempts were indistinguishable
+  // from a missing secret, and it was that print which disproved the diagnosis.
   const names = git(['config', '--local', '--name-only', '--list'], STARTER)
     .split('\n')
     .map((k) => k.trim())
