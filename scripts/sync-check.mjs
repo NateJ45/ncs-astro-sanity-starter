@@ -78,6 +78,13 @@ const SKIP_DIRS = new Set([
   'coverage',
   'build',
   'worktrees', // .claude/worktrees, and any other worktrees/ pile
+  // The CI gate (PORTS.md card 36) checks the library of record out INTO the
+  // site repo, at .ncs-starter, because actions/checkout refuses a path
+  // outside the workspace. Without this the walker finds the library's own
+  // marked files and reports the starter against itself: at best 57 phantom
+  // rows, at worst a MISSING-IN-STARTER for any marked file whose path does
+  // not survive the one-segment strip below.
+  '.ncs-starter',
 ]);
 
 /** Extensions worth opening. A marker only ever lives in a text source file. */
