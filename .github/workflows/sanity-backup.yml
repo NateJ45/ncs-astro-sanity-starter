@@ -1,0 +1,149 @@
+name: Sanity dataset backup
+
+# Nightly export of the production Sanity dataset (documents + assets) so a bad
+# mutation, a bad seed script, or an accidental "Remove field" in Studio is
+# always recoverable. CLAUDE.md's first hard rule warns that "Remove field"
+# deletes that field's data across every document and cannot be undone without
+# a dataset restore; this workflow is what makes that restore possible.
+#
+# PORTS.md card 6. Harvested into the starter on 2026-09-06 from
+# ncs-church-starter, which is being retired, with the two fixes the client
+# repos had already earned: the encrypt-before-upload step (wcp-website 73cfe3c
+# / presacademy) and the `--project-id` flag on the export (reid-design-site,
+# 2026-09-05).
+#
+# ── THIS REPO IS A TEMPLATE ──────────────────────────────────────────────────
+# ncs-astro-sanity-starter ships no Sanity project of its own, so there is
+# nothing here worth backing up and the schedule is COMMENTED OUT (same stance
+# as publish-due.yml). It is committed anyway so a FORK inherits a working
+# backup on day one.
+#
+# To enable in a fork, per site:
+#   1. Set the SANITY_AUTH_TOKEN repo secret (a READ token is enough).
+#   2. Set the BACKUP_PASSPHRASE repo secret (a long random passphrase, e.g.
+#      `openssl rand -base64 32`). It encrypts the artifact, see the warning
+#      below. Store a copy OUTSIDE GitHub, somewhere the client can find it:
+#      GitHub never shows a secret again, and a backup nobody can decrypt is no
+#      backup.
+#   3. Set the SANITY_PROJECT_ID repo variable to that site's Sanity project id.
+#      It is NOT a secret (it ships in the client bundle and appears in every
+#      GROQ request URL) but it is a repo variable rather than a hardcoded
+#      literal precisely because this file is a template.
+#   4. Uncomment the `schedule:` block below.
+# GitHub Actions minutes are free on public repositories, so a public fork can
+# leave the schedule on permanently. On a private fork, weigh the daily minute.
+#
+# WARNING: the export is ENCRYPTED before upload, and that is load-bearing.
+# On a PUBLIC repo any logged-in GitHub user can download workflow artifacts,
+# and a dataset can hold contact submissions or member content that must not be
+# public. A plaintext artifact publishes all of it. That is why the gate
+# refuses to export when BACKUP_PASSPHRASE is missing: skipping a backup is
+# recoverable, publishing the dataset is not. Never upload the tarball without
+# the openssl step.
+#
+# RESTORE: download the artifact, decrypt it,
+#   BACKUP_PASSPHRASE=*** openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+#     -in sanity-backup-<date>.tar.gz.enc -out sanity-backup-<date>.tar.gz \
+#     -pass env:BACKUP_PASSPHRASE
+# then import against a scratch dataset first if you are not certain,
+#   npx sanity dataset import sanity-backup-<date>.tar.gz production --replace
+#
+# The two-job gate below is the load-bearing part: with a secret or the
+# variable missing, the workflow logs a warning and skips rather than failing.
+# That is what makes it safe to commit before any of them exist.
+# workflow_dispatch stays on, so a manual run always works.
+
+on:
+  # schedule:
+  #   - cron: '0 7 * * *' # daily 07:00 UTC
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        # A secret cannot be read in an `if:` expression, so the check has to
+        # happen in a step. This job deliberately does not check out the repo:
+        # it needs nothing but the secrets' presence.
+        env:
+          TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$PROJECT_ID" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SANITY_AUTH_TOKEN secret and/or SANITY_PROJECT_ID variable not set; skipping backup. Expected in the unforked template."
+          elif [ -z "$PASSPHRASE" ]; then
+            # No passphrase means the artifact would upload as PLAINTEXT on a
+            # public repo. Refuse to export at all rather than publish the
+            # dataset. See the header warning.
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::BACKUP_PASSPHRASE not set; skipping backup so the dataset never uploads unencrypted. See the header of sanity-backup.yml."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  export:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      # The sanity CLI comes from the ROOT install: the Studio folded into the
+      # root package on 2026-08-28 (PORTS.md card 10), so there is no
+      # `npm ci --prefix studio` step any more.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Export production dataset
+        env:
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          # This site's PUBLIC Sanity id (not a secret; it ships in the client
+          # bundle). A repo variable, not a literal, because this file is a
+          # template. See the header.
+          SANITY_STUDIO_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          SANITY_STUDIO_DATASET: production
+        run: |
+          STAMP=$(date -u +%Y-%m-%d)
+          # --project-id is required. The sanity CLI walks cwd upward looking
+          # for sanity.cli.ts to infer the project, and on a repo that still
+          # nests the CLI under studio/ that discovery fails from the repo root
+          # (reid-design-site, 2026-09-05: the first real run after
+          # SANITY_AUTH_TOKEN was set died with ProjectRootNotFoundError until
+          # the flag was added). Harmless here too, where the CLI already lives
+          # at the root. Called by path rather than through npx so the export
+          # runs from the repo root and writes the tarball there.
+          ./node_modules/.bin/sanity dataset export production "sanity-backup-$STAMP.tar.gz" \
+            --project-id "$SANITY_STUDIO_PROJECT_ID"
+
+      # Encrypt BEFORE upload, see the header warning. AES-256-CBC with a
+      # PBKDF2-stretched passphrase; openssl ships on every runner and every
+      # laptop a restore would happen on.
+      - name: Encrypt the export
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          for f in sanity-backup-*.tar.gz; do
+            openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt \
+              -in "$f" -out "$f.enc" -pass env:BACKUP_PASSPHRASE
+            rm "$f"
+          done
+          ls -lh sanity-backup-*.tar.gz.enc
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: sanity-backup
+          path: sanity-backup-*.tar.gz.enc
+          # GitHub keeps artifacts 90 days. For longer or off-site retention,
+          # push the tarball to R2 here instead.
+          retention-days: 90

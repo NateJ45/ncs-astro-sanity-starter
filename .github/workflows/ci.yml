@@ -1,18 +1,30 @@
+# PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+# The one thing expected to differ per site: the `env:` block. This repo ships
+# no Sanity project of its own, so there is nothing to pin and the build takes
+# the credential-less fallback path. A client repo sets its PUBLIC_SANITY_*
+# identifiers here (they are public, they appear in every GROQ request URL) so
+# CI and the test job run against the REAL content.
 name: CI
 
 on:
   push:
     branches: [main, staging]
   pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch obsoletes the in-flight run; cancel it
+# instead of paying for both.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -23,17 +35,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # NODE_OPTIONS raises the heap for this step only. `sanity schema extract`
+      # bundles the whole Studio config and its import graph, and on the hosted
+      # runners it intermittently dies with "Aborted (core dumped)" (exit 134)
+      # while the same command succeeds locally: the classic signature of a
+      # Linux CI box with less memory than the dev machine. It is runner flake,
+      # not a schema problem, so retry up to three times before calling it red.
       - name: Generate Sanity types
-        run: npm run typegen
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          for attempt in 1 2 3; do
+            if npm run typegen; then exit 0; fi
+            echo "::warning::typegen attempt $attempt failed (runner flake?) - retrying"
+            sleep 15
+          done
+          echo "::error::typegen failed three times"
+          exit 1
 
       - name: Fail if committed Sanity types are stale
-        # Added 2026-08-27 (ported from presacademy; see PORTS.md).
-        # `npm run build` does NOT run typegen, so src/lib/sanity.types.ts is
-        # committed by hand after every schema change. If regenerating it in the
-        # step above produces a diff, the commit was stale (exactly the bug that
-        # shipped from presacademy on 2026-06-14: types describing a schema that
-        # no longer existed, with a green build). Catch it here, not in
-        # production.
+        # Added 2026-08-27 (PORTS.md card 5). `npm run build` does NOT chain
+        # typegen: it consumes the already-committed src/lib/sanity.types.ts,
+        # and `astro build` does not run `astro check`, so stale types never
+        # fail a build. They just drift silently until the types describe a
+        # schema that no longer exists. presacademy shipped exactly that on a
+        # green build (2026-06-14). CI already regenerates the file in the step
+        # above, so the guard is four lines: if that regeneration produced a
+        # diff, the commit was stale.
         run: |
           if ! git diff --quiet -- src/lib/sanity.types.ts; then
             echo "::error::src/lib/sanity.types.ts is out of date. Run 'npm run typegen' and commit the result."
@@ -41,11 +69,42 @@ jobs:
             exit 1
           fi
 
-      - name: Build Astro (includes the embedded /studio)
+      - name: Type check (astro check)
+        run: npx astro check
+
+      - name: Lint (eslint)
+        run: npm run lint
+
+      - name: Format check (prettier)
+        run: npm run format:check
+
+      # node --test over src/lib/*.test.ts. Three of these are GATES rather
+      # than ordinary suites: theme-tokens (contrast over the @theme palette),
+      # layout-variants (re-derives each grid's base columns from the .astro
+      # source) and section-fields (fails when a block gains or loses a
+      # headingAccent or a rich twin without the in-canvas registry agreeing,
+      # and when a block grows a colour field). Nothing else in this pipeline
+      # can catch a palette edit that pushes body text under threshold.
+      - name: Unit tests
+        run: npm run test:unit
+
+      # `astro build` builds the embedded Studio at /studio as part of the
+      # site, so there is no separate `sanity build` step. Do NOT add one back:
+      # `sanity build` writes to ./dist by default and would clobber the Astro
+      # output.
+      - name: Build (site + embedded Studio)
         run: npm run build
 
-      - name: Run tests
-        run: npm test
+      # linkinator over dist/client. The skip pattern is
+      # `^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])`, which excludes external
+      # links and NOTHING else. WCP's older `^(?!http://localhost)` also matched
+      # linkinator's own 127.0.0.1 seed, so every green run for months had
+      # scanned zero links. Read the log: it must say "scanned N links" with N
+      # greater than zero. The SSR-only routes (/studio, /preview/**,
+      # /api/draft-mode/*) are skipped in the script: they are not in
+      # dist/client and would report as broken for the wrong reason.
+      - name: Check internal links
+        run: npm run check:links
 
       # NOTE: `npm run parity compare` is deliberately NOT a CI step. The
       # baselines in scripts/.parity/ are captured on a developer machine and
@@ -53,3 +112,39 @@ jobs:
       # byte-for-byte. Parity is a local gate, run by hand on any change that is
       # meant to be render-neutral (PORTS.md card 3). Wire it in here only after
       # proving a CI capture matches a local one.
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Both projects in playwright.config.ts: chromium (desktop) AND
+      # webkit-iphone (iPhone 14). Installing only chromium makes every webkit
+      # test die with "Executable doesn't exist".
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
+
+      # smoke (every route 200s and carries the site name in its title), axe in
+      # light, axe in dark as a separate sweep plus a focus-indicator check (a
+      # theme swap is a different resting DOM), and reflow at 320/768/1024/1440
+      # (WCAG 1.4.10 starts at 320, not 375). The config's webServer runs
+      # `npm run build` itself and serves dist/client. The html reporter is
+      # added on the command line so local runs keep the quiet `list` output
+      # while CI still produces the report artifact below.
+      - name: Run tests (smoke, a11y light + dark, reflow)
+        run: npm test -- --reporter=github,html
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
