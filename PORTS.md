@@ -401,17 +401,33 @@ stateless so duplication is harmless, and deduping them broke the build on a mis
 ### Hard warning 2: exact resolved versions, and the family's version skew
 
 The Sanity stack is pinned to a combination known to work **together**, and bumping one
-in isolation breaks it. The working set: `sanity` 6.4.0, `@sanity/ui` **3.3.5**,
-`styled-components` 6.4.3, `react` / `react-dom` / `react-is` 19.2.7, plus
-`sanity-plugin-media` 5.0.11, `sanity-plugin-utils` 2.0.6 (pinned through `overrides`;
-the default 2.0.17 drags in `@sanity/ui` v4) and `sanity-plugin-asset-source-unsplash`
-7.0.15.
+in isolation breaks it. The working set as of the phase-1 migration (2026-09-06): `sanity`
+6.9.1, `@sanity/vision` 6.9.1, `@sanity/ui` **3.5.4**, `@sanity/client` 7.26.2,
+`@sanity/visual-editing` 5.7.3, `@sanity/preview-url-secret` 4.1.5, `styled-components`
+6.4.3, `react` / `react-dom` / `react-is` 19.2.7, plus `sanity-plugin-media` 5.0.11,
+`sanity-plugin-utils` 2.0.6 (pinned through `overrides`; the default 2.0.17 drags in
+`@sanity/ui` v4) and `sanity-plugin-asset-source-unsplash` 7.0.15.
 
-"Latest v3" is not close enough. Pinning `@sanity/ui` to 3.5.3 instead of 3.3.5 cleared
-error #18 and then failed differently, `TypeError: Cannot read properties of undefined
-(reading 'v2')` from inside styled-components' `generateAndInjectStyles`, because `sanity`
-6.4.0 expects the 3.3.x theme shape. Any Sanity dependency change must be checked against
-a sibling repo's **resolved** versions, not its semver ranges.
+**`sanity` 6.9.2 is the wall.** A PATCH release moved the core to `@sanity/ui` 4, which is
+a genuine migration (ESM only, a required `@sanity/ui/styles.css` import, heavy components
+moved to subpaths, deprecated props removed). Phase 1 stops at 6.9.1 on purpose. The exact
+pins in `package.json` are what stop npm resolving straight through that boundary.
+
+"Latest v3" is not close enough on the OLD core either. Pinning `@sanity/ui` to 3.5.3
+against `sanity` 6.4.0 cleared error #18 and then failed differently, `TypeError: Cannot
+read properties of undefined (reading 'v2')` from inside styled-components'
+`generateAndInjectStyles`, because 6.4.0 expected the 3.3.x theme shape. That pairing is
+now history (the core moved with the UI), but the lesson stands: any Sanity dependency
+change must be checked against a sibling repo's **resolved** versions, not its semver
+ranges.
+
+Phase-1 notes worth carrying to the next repo. `@sanity/visual-editing` appears as a
+dependency AND in `overrides`; edit both in the same pass or npm refuses the whole install
+with `EOVERRIDE`. `@sanity/preview-url-secret` has to move to 4.1.5, because 5.7.3 and
+6.9.1 both want `^4.1.2` and 4.0.8 would nest a second copy. `@sanity/ui` 3.5.4 nests its
+own `@sanity/icons` 5 where 3.3.5 used the hoisted 3.8; harmless, leave it. And 3.5.4
+still exports only `.`, `./_visual-editing`, `./theme` and `./package.json`, so plugin
+bumps that want `@sanity/ui/tooltip` stay blocked until phase 2.
 
 Related: `@sanity/ui` v3 has no subpath exports beyond `./theme`, so
 `import { useToast } from '@sanity/ui/toast'` is v4-only syntax and fails
