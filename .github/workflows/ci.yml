@@ -40,6 +40,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The library of record checks ITSELF: run from the starter, sync-check
+      # resolves the starter to this repo root, so site and library are the
+      # same tree and every marked file must report SAME. That is a real gate,
+      # not a tautology - it fails the moment a canonical file is edited into a
+      # state the walker cannot read, or a marker is added to a path the site
+      # repos cannot mirror. The site repos run the same script against a
+      # checkout of this repo (see any client ci.yml).
+      - name: Canonical files have not drifted (self-check)
+        run: node scripts/sync-check.mjs
+
       # NODE_OPTIONS raises the heap for this step only. `sanity schema extract`
       # bundles the whole Studio config and its import graph, and on the hosted
       # runners it intermittently dies with "Aborted (core dumped)" (exit 134)
