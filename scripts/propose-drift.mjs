@@ -115,6 +115,22 @@ try {
     ['commit', '-m', `Drift from ${SITE}: ${drifted.length} canonical file(s)`, '-m', body],
     STARTER,
   );
+  // The starter checkout is made by actions/checkout, which persists its own
+  // credentials into that clone's config as
+  //   http.https://github.com/.extraheader = AUTHORIZATION: basic <GITHUB_TOKEN>
+  // That header OUTRANKS the userinfo in the push URL, so without this the push
+  // authenticates as github-actions[bot] scoped to the SITE repo and the library
+  // answers 403 - in a message about the bot that never mentions the PAT, which
+  // is why it reads like a missing or wrong secret and is not one. Proved on
+  // mas-monograms#36, 2026-09-06: GH_ACTIONS_PAT was present and correct the
+  // whole time and was simply never consulted.
+  for (const key of git(['config', '--local', '--name-only', '--list'], STARTER).split('\n')) {
+    const k = key.trim();
+    if (k.endsWith('.extraheader')) {
+      spawnSync('git', ['config', '--local', '--unset-all', k], { cwd: STARTER });
+    }
+  }
+
   git(
     [
       'push',
