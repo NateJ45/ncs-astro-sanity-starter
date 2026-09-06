@@ -3345,8 +3345,26 @@ install step, and needs no token: all of these repos are public.
 - name: Canonical files have not drifted
   env:
     NCS_STARTER_DIR: ${{ github.workspace }}/.ncs-starter
-  run: node scripts/sync-check.mjs
+  run: |
+    node scripts/sync-check.mjs
+    rm -rf "$NCS_STARTER_DIR"
 ```
+
+**The `rm -rf` is not tidiness, it is required.** `actions/checkout` refuses a
+path outside the workspace, so the library lands INSIDE the repo, and every
+whole-tree tool further down the build job then sweeps it. mas-monograms found
+this within a minute of the first push: `prettier --check .` tried to format
+the library's `astro.config.mjs` using mas's node_modules and died resolving
+`@fontsource/libre-baskerville`. `eslint .` (presacademy, reid-design-site)
+would have done the same. Deleting the checkout the moment the check passes
+beats adding `.ncs-starter` to a `.prettierignore`, a `.gitignore` and an
+eslint config in six repos, because that list has to be remembered again for
+the next whole-tree tool anyone adds. Same reasoning as dropping the
+`.prettierignore` entries above: prefer the fix that cannot be forgotten.
+
+The walker skips `.ncs-starter` by name as well. That is belt and braces on
+purpose: the skip covers a LOCAL run against a checkout someone left in place,
+the `rm -rf` covers the rest of the CI job.
 
 The starter itself runs the SELF-CHECK form instead: no second checkout, just
 `node scripts/sync-check.mjs`, which resolves the library to this repo root.
