@@ -3391,7 +3391,34 @@ Do not re-add the ignore lines.
 **wcp.** The repo the whole family copied from had no `scripts/sync-check.mjs`,
 so it was the one repo that could not say when it had drifted. It now carries
 the canonical copy at `site/scripts/sync-check.mjs`, next to its siblings, and
-the NESTED-APP RULE is what makes the nested path resolve.
+the NESTED-APP RULE is what makes the nested path resolve. Its first run ever
+checked 22 marked files and found three drifts, all three real:
+
+- **`src/lib/preview-morph.ts` had a fix nobody else had.** wcp added a
+  KEEP-AS-IS SUBTREE guard on 2026-08-30: an element carrying `data-morph-keep`
+  is not morphed, because a `server:defer` island streams its real body through
+  inline scripts that a `DOMParser` parse never runs, so the FETCHED tree still
+  holds the fallback skeleton and morphing it in swapped a live widget for its
+  skeleton on every soft refresh. That is the hub preview's "widgets disappear"
+  bug. Ported UP into the canonical copy here and out to presacademy,
+  reid-design-site and mas-monograms. It is inert where the attribute is never
+  set: the guard requires it on BOTH trees. Card 29c's file, so no new row.
+- **`src/sanity/components/UndoRedo.tsx` and
+  `src/sanity/components/shareDraftLink.tsx` are a genuine fork**, and the
+  MARKER WAS DROPPED in wcp rather than either copy being changed. wcp resolves
+  `@sanity/icons` 5.2.1 (transitively, it has no direct dependency); the starter
+  and every other site pin 3.8.0. The 5.x barrel stopped re-exporting each icon,
+  so wcp imports `@sanity/icons/Undo` where the canonical copy imports from the
+  package root. Neither copy can adopt the other without breaking a build, so
+  this is the case the drift rule reserves for dropping the marker and writing
+  the fork down. Both files now carry a FORKED header saying what differs, why,
+  and what to do when the starter moves to icons 5: re-mark and take the
+  starter's copy. Nothing else in either file differs.
+
+wcp's remaining 20 marked files were already byte-exact, which is the useful
+half of the result: the drift that had accumulated in the repo nobody could
+check was three files, and two of them were a dependency-version fork rather
+than rot.
 
 **Also folded in:** `ncs-church-starter` was archived on 2026-09-06, so the
 header comment in `sync-check.mjs` (canonical, hence one edit here that
