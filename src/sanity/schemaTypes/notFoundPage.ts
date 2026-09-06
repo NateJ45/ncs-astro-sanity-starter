@@ -110,14 +110,16 @@ export const notFoundPage = defineType({
       title: 'Secondary CTA label',
       type: 'string',
       group: 'ctas',
-      initialValue: 'Browse the portfolio',
+      initialValue: 'Browse our services',
     }),
     defineField({
       name: 'secondaryCtaHref',
       title: 'Secondary CTA destination',
       type: 'string',
       group: 'ctas',
-      initialValue: '/portfolio',
+      // A core route. /portfolio comes from an opt-in module and is not built
+      // unless a project enables it.
+      initialValue: '/services',
     }),
     defineField({
       name: 'tertiaryCtaLabel',

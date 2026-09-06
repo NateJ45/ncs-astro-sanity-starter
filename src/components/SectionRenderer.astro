@@ -111,9 +111,7 @@ const wrapAttrs = (key: string | undefined) =>
           s.variant === 'space' ? (
             <div class="py-section-md" aria-hidden="true" />
           ) : (
-            <SectionDivider
-              variant={s.variant === 'line' ? 'line' : s.variant === 'dots' ? 'dots' : 'ornament'}
-            />
+            <SectionDivider variant={s.variant === 'line' ? 'line' : 'ornament'} />
           )
         ) : s._type === 'richTextSection' ? (
           <RichTextSection
@@ -297,7 +295,14 @@ const wrapAttrs = (key: string | undefined) =>
           // Unknown block type: render nothing, log in dev.
           import.meta.env.DEV &&
           console.warn(
-            `[SectionRenderer] Unknown block type: "${s._type}". Add a mapping in SectionRenderer.astro.`,
+            // `s` is `never` here: every member of PageBuilderBlock is handled
+            // above, which is exactly what this branch exists to prove. The cast
+            // is only so the runtime warning can name the type Sanity actually
+            // sent when a NEW block ships without a mapping. Written as a
+            // Record rather than an inline object type on purpose: a brace
+            // inside an .astro template expression ends that expression, even
+            // inside a comment, so an inline object type breaks the parse.
+            `[SectionRenderer] Unknown block type: "${(s as Record<string, unknown>)._type}". Add a mapping in SectionRenderer.astro.`,
           )
         )}
       </Wrap>

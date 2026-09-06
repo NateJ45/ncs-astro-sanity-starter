@@ -11,10 +11,10 @@
 import PortableText from '@/components/PortableText';
 import ProcessStepIllustration from '@/components/ProcessStepIllustration.astro';
 
-interface PortableTextBlock {
-  _type?: string;
-  [key: string]: any;
-}
+// The real Portable Text block type, not a local `{ _type?: string }` stand-in:
+// the stand-in did not satisfy the `value` prop on PortableText.tsx, which takes
+// @portabletext/types' PortableTextBlock (children is required there).
+import type { PortableTextBlock } from '@portabletext/types';
 
 interface Props {
   step: {

@@ -64,6 +64,33 @@ export interface ProjectedImage {
   [key: string]: unknown;
 }
 
+/**
+ * The image shape every component that renders a Sanity image should accept.
+ *
+ * Nine components used to redeclare their own `interface SanityImageObject`
+ * with `asset?: { _ref?: string; _id?: string }` and REQUIRED hotspot/crop
+ * numbers. None of those matched `ProjectedImage`, which is what the GROQ
+ * projection actually returns: `asset->` resolves to a whole asset document
+ * (extra keys, and `null` when the reference is broken) and Sanity marks every
+ * hotspot and crop number optional. `astro check` reported eight assignment
+ * errors along that seam the first time it ran here, 2026-09-06. Every one was
+ * the prop contract being narrower than the data, not the data being wrong.
+ *
+ * `_type` is optional because the code-defined fallbacks in
+ * src/data/defaultSections.ts build image objects without it.
+ */
+export interface SanityImageObject extends Omit<ProjectedImage, '_type'> {
+  // Spelled out rather than written as `Omit<ProjectedImage, '_type'>` alone:
+  // ProjectedImage carries an index signature, and Omit over an index signature
+  // drops every named property with it, which would leave `.alt` typed `{}`.
+  _type?: string;
+  asset?: ProjectedImage['asset'];
+  alt?: string;
+  hotspot?: { x?: number; y?: number; height?: number; width?: number };
+  crop?: { top?: number; bottom?: number; left?: number; right?: number };
+  caption?: string;
+}
+
 /** CTA block after `internalLink->{ _type, "slug": slug.current }` projection. */
 export interface ProjectedCtaBlock {
   _type: 'ctaBlock';
@@ -244,14 +271,18 @@ export interface ProjectedFaqSection {
   _key: string;
   eyebrow?: string;
   headline?: string;
+  /** Word in `headline` rendered in the script accent face. */
+  headingAccent?: string;
   subhead?: string;
+  /** Portable Text twin of `subhead` (bold / italic only). */
+  subheadRich?: unknown;
   /** faqItem refs resolved to { question, answer, category, displayOrder }. */
   items?: ProjectedFaqItem[];
   cta?: ProjectedCtaBlock | null;
 }
 
 /** A single logo image inside logoStripSection, after asset-> projection. */
-export interface ProjectedLogoStripLogo extends ProjectedImage {}
+export type ProjectedLogoStripLogo = ProjectedImage;
 
 /**
  * logoStripSection — grayscale logo row or grid.
@@ -287,6 +318,8 @@ export interface ProjectedTeamSection {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  /** Portable Text twin of `subhead` (bold / italic only). */
+  subheadRich?: unknown;
   members?: ProjectedTeamMember[];
 }
 
@@ -341,6 +374,9 @@ export interface ProjectedDynamicListSection {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  /** Portable Text twin of `subhead` (bold / italic only). */
+  subheadRich?: unknown;
+  columns?: 2 | 3;
   source?: 'journal' | 'services' | 'testimonials' | 'faqs';
   limit?: number;
   items?: ProjectedDynamicListItem[];

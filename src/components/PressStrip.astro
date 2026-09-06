@@ -9,14 +9,12 @@
 // break the strip.
 
 import SanityImage from '@/components/SanityImage.astro';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
 
 interface PressItem {
   _id?: string;
   outlet?: string;
-  logo?: {
-    asset?: { _ref?: string; _id?: string };
-    alt?: string;
-  } | null;
+  logo?: SanityImageObject | null;
   url?: string;
 }
 

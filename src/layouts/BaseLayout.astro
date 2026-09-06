@@ -302,8 +302,9 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
           // Expose the instance so in-page controls (e.g. the homepage hero
           // scroll cue) can trigger a smooth programmatic scroll through Lenis
           // instead of fighting it with a native scrollTo.
-          (window as Window & { lenis?: typeof lenis }).lenis = lenis;
-          function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+          // Through `unknown`: lenis declares its own `window.lenis` global.
+          (window as unknown as { lenis?: typeof lenis }).lenis = lenis;
+          function raf(time: number) { lenis.raf(time); requestAnimationFrame(raf); }
           requestAnimationFrame(raf);
 
           // Astro View Transitions reuse this single Lenis instance across

@@ -36,6 +36,12 @@ const SANITY_CONFIGURED =
 
 /** One GROQ query against the Sanity HTTP API. Returns `fallback` on anything
  *  that is not a clean 200. */
+/**
+ * @template T
+ * @param {string} query GROQ.
+ * @param {T} fallback Returned on any non-200 or when Sanity is unconfigured.
+ * @returns {Promise<T>}
+ */
 async function cmsQuery(query, fallback) {
   if (!SANITY_CONFIGURED) return fallback;
   try {
@@ -74,8 +80,8 @@ const hiddenPagePaths = new Set(
       [],
     )
   )
-    .filter((slug) => typeof slug === 'string' && slug)
-    .map((slug) => `/${slug}`),
+    .filter((/** @type {unknown} */ slug) => typeof slug === 'string' && slug)
+    .map((/** @type {string} */ slug) => `/${slug}`),
 );
 
 // https://astro.build/config

@@ -36,8 +36,12 @@ const body =
 
 const primaryLabel = notFoundPage?.primaryCtaLabel ?? 'Back home';
 const primaryHref = notFoundPage?.primaryCtaHref ?? '/';
-const secondaryLabel = notFoundPage?.secondaryCtaLabel ?? 'Browse the portfolio';
-const secondaryHref = notFoundPage?.secondaryCtaHref ?? '/portfolio';
+// A CORE route, not /portfolio: the portfolio is an opt-in module that a fresh
+// clone does not build, so the old default shipped a 404 page whose own button
+// 404s. A project that turns the module on can point this at /portfolio in the
+// Studio.
+const secondaryLabel = notFoundPage?.secondaryCtaLabel ?? 'Browse our services';
+const secondaryHref = notFoundPage?.secondaryCtaHref ?? '/services';
 const tertiaryLabel = notFoundPage?.tertiaryCtaLabel ?? 'Get in touch';
 const tertiaryHref = notFoundPage?.tertiaryCtaHref ?? '/contact';
 

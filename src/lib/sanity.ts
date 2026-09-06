@@ -29,7 +29,11 @@
 
 import { createClient, type SanityClient } from '@sanity/client';
 import { createImageUrlBuilder } from '@sanity/image-url';
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types';
+// From the package ROOT, not the old `@sanity/image-url/lib/types/types` deep
+// path: v2 declares `exports` and only publishes `.`, `./signed` and
+// `./package.json`, so the deep import resolves at runtime through bundler
+// leniency while `astro check` reports it as a missing module.
+import type { SanityImageSource } from '@sanity/image-url';
 
 const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
 const dataset = import.meta.env.PUBLIC_SANITY_DATASET ?? 'production';
@@ -87,7 +91,47 @@ export const client: SanityClient = createClient({
  * than crashing the build.
  *
  * All query helpers in queries.ts route through this function.
+ *
+ * ── WHY THE TWO EMPTY-SHAPE OVERLOADS ─────────────────────────────────────
+ * Nearly every helper in queries.ts passes an EMPTY fallback: `null` for a
+ * singleton that may not exist yet, `[]` for a collection that may be empty.
+ * With a single signature TypeScript infers T from that argument, so those
+ * calls resolve to `Promise<null>` and `Promise<never[]>`, and then every
+ * property read downstream reports "does not exist on type 'never'". That is
+ * not type safety, it is the type system having been handed no information:
+ * `astro check` produced 163 of those errors on this repo the first time it
+ * ran (2026-09-06). The GROQ shapes are not generated (typegen emits schema
+ * types, and these queries are plain template literals rather than
+ * `defineQuery` calls), so the honest description of what comes back is
+ * "a Sanity result object", not `never`.
+ *
+ * The overloads say exactly that, and they leave the explicit-generic path
+ * intact: `sanityFetch<MyType>(query, {}, null)` still returns `MyType | null`.
+ * Making these queries genuinely typed means moving them to `defineQuery` so
+ * typegen can read them, which is its own job.
  */
+
+/** What an untyped GROQ projection returns: an object with unknown keys. */
+export type SanityResult = Record<string, any>;
+
+// Singleton with a `null` fallback: the document, or null when it is absent.
+export async function sanityFetch<T = SanityResult>(
+  query: string,
+  params: Record<string, unknown> | undefined,
+  fallback: null,
+): Promise<T | null>;
+// Collection with an empty-array fallback: the rows, or an empty list.
+export async function sanityFetch<T = SanityResult>(
+  query: string,
+  params: Record<string, unknown> | undefined,
+  fallback: never[],
+): Promise<T[]>;
+// Anything with a real fallback value keeps that value's type.
+export async function sanityFetch<T>(
+  query: string,
+  params: Record<string, unknown> | undefined,
+  fallback: T,
+): Promise<T>;
 export async function sanityFetch<T>(
   query: string,
   params: Record<string, unknown> = {},
@@ -109,8 +153,11 @@ const builder = createImageUrlBuilder({
   dataset,
 });
 
-export function urlFor(source: SanityImageSource) {
-  return builder.image(source);
+export function urlFor(source: SanityImageSource | null | undefined) {
+  // `null` / `undefined` are accepted so callers do not each have to guard.
+  // The builder itself tolerates a missing source and produces no URL; every
+  // caller already checks for an asset before rendering an <img>.
+  return builder.image(source as SanityImageSource);
 }
 
 /**
@@ -129,7 +176,10 @@ export function urlFor(source: SanityImageSource) {
  * project + journal detail pages.
  */
 export function parseSanityAssetDimensions(
-  source: { asset?: { _ref?: string; _id?: string } } | null | undefined,
+  // Deliberately loose: callers pass the GROQ-projected image, whose `asset`
+  // is a whole resolved asset document (and can be null on a broken ref), not
+  // the two-key reference this used to name. Only `_ref` / `_id` are read.
+  source: { asset?: { _ref?: string; _id?: string } | null } | null | undefined,
 ): { width: number; height: number } | null {
   const ref = source?.asset?._ref ?? source?.asset?._id;
   if (!ref) return null;

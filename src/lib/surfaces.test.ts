@@ -192,7 +192,9 @@ describe('the heading accent word', () => {
     // The rule is what makes the measurement above true on the live page. A
     // silent delete would leave the theme-aware token flipping with the
     // READER's page theme instead of with the band it is sitting on.
-    assert.match(css, /\.bg-accent-dark\s*\{[^}]*--section-accent:\s*#8A96A6/);
+    // Case-insensitive: prettier's CSS pass lowercases hex literals, and the
+    // colour is the assertion here, not its spelling.
+    assert.match(css, /\.bg-accent-dark\s*\{[^}]*--section-accent:\s*#8A96A6/i);
     assert.match(css, /\.heading-accent\s*\{[^}]*var\(--section-accent,\s*var\(--primary\)\)/);
   });
 });

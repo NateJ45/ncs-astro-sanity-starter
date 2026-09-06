@@ -8,10 +8,9 @@
 import SanityImage from '@/components/SanityImage.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 
-interface Logo {
-  asset?: { _ref?: string; _id?: string; url?: string };
-  alt?: string;
-}
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+type Logo = SanityImageObject;
 
 interface Props {
   eyebrow?: string;

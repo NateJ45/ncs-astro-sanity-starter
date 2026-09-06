@@ -24,7 +24,10 @@ function handleTocClick(event: MouseEvent<HTMLAnchorElement>, id: string) {
 
   event.preventDefault();
 
-  const lenis = (window as Window & { lenis?: { scrollTo: (t: HTMLElement) => void } }).lenis;
+  // Through `unknown`: the Lenis package ships its own global `window.lenis`
+  // declaration with the full instance type, so a direct cast to this narrow
+  // shape is rejected as insufficiently overlapping.
+  const lenis = (window as unknown as { lenis?: { scrollTo: (t: HTMLElement) => void } }).lenis;
 
   if (lenis) {
     lenis.scrollTo(target);

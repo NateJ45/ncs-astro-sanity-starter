@@ -7,12 +7,7 @@
 
 import SanityImage from '@/components/SanityImage.astro';
 
-interface SanityImageObject {
-  asset?: { _ref?: string; _id?: string };
-  alt?: string;
-  hotspot?: { x: number; y: number; height: number; width: number };
-  crop?: { top: number; bottom: number; left: number; right: number };
-}
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
 
 interface Props {
   testimonial: {

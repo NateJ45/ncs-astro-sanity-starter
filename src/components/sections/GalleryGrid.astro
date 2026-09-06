@@ -6,11 +6,9 @@ import SectionHeading from '@/components/SectionHeading.astro';
 import { columnsClass } from '@/lib/layout-variants';
 import { surfaceClass } from '@/lib/surfaces';
 
-interface GalleryImage {
-  asset?: { _ref?: string; _id?: string };
-  alt?: string;
-  caption?: string;
-}
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+type GalleryImage = SanityImageObject;
 
 interface Props {
   heading?: string;

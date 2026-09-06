@@ -12,7 +12,7 @@
 // blocks a page-builder array accepts. Use it everywhere a pageBuilder array is
 // defined so every builder offers the same library.
 
-import { defineType, defineField, defineArrayMember } from 'sanity';
+import { defineType, defineField, defineArrayMember, type ArrayOptions } from 'sanity';
 import {
   BlockElementIcon,
   ImageIcon,
@@ -589,7 +589,7 @@ export const SECTION_TYPES = pageSectionSchemas.map((s) => ({ type: s.name }));
 // types are all absent from a given array simply does not appear, which is what
 // lets one config serve the curated per-page lists in richSections.ts. Any type
 // not named in a group falls under "All".
-export const SECTION_INSERT_MENU = {
+export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
   filter: true,
   groups: [
     {
@@ -630,10 +630,10 @@ export const SECTION_INSERT_MENU = {
       ],
     },
   ],
-} as const;
+};
 
 /** The `options` block every pageBuilder array should carry. */
-export const sectionArrayOptions = { insertMenu: SECTION_INSERT_MENU };
+export const sectionArrayOptions: ArrayOptions = { insertMenu: SECTION_INSERT_MENU };
 
 // Reusable "extra sections" field for pages that keep their own structure but
 // want an append zone for library blocks. The consuming schema must declare an
