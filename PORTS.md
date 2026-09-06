@@ -3727,3 +3727,46 @@ lines and only for two. The port is real but not a copy: presacademy's version
 is entangled with its three-part wordmark ("The Presbyterian / Academy",
 keyword in green), so adopting it means separating the centring math from the
 wordmark parsing first.
+
+## 39. The restore drill, and an off-site copy of the backup (2026-09-06)
+
+`sanity-backup.yml` had been green nightly on all five Sanity sites for months
+(presacademy alone: 33 successful runs, a 28.8 MB encrypted tarball). Nobody
+had ever restored one. Those runs prove the export and encrypt steps work and
+say nothing about whether a client's content can be recovered, which is the
+only property the backup exists for. Same shape as card 37 and as the link
+checker that scanned nothing: green means no test failed, not that a test would
+have failed.
+
+Two things close it.
+
+**`scripts/restore-dataset.mjs`** does decrypt, import and a document count in
+one command. The count is the point: a restore that imports 0 documents exits 0
+just as loudly as one that imports 4,000, so the script prints what it ended up
+with and tells you to compare it against production. It refuses to target
+`production` without `--i-understand-this-overwrites-production` - no short
+form, no env var - because the realistic disaster is not a corrupt tarball, it
+is someone restoring three-week-old content over a live site at 9pm while
+fixing something smaller. It deletes the decrypted plaintext afterwards, since
+an unencrypted dataset in a working copy is the leak the workflow's encrypt
+step exists to prevent.
+
+It resolves the CLI as `sanity.cmd` on win32. The workflow can hardcode
+`./node_modules/.bin/sanity` because it only runs on Ubuntu; this script runs on
+whoever's laptop, and a restore is not the moment to discover that path does not
+exist on Windows.
+
+**An R2 copy in the workflow.** Actions artifacts expire at 90 days and live in
+the same GitHub account as the repo they protect, so one lost account loses the
+site and its backups together. The step reuses `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID`, which every site already has - but the token needs
+"Workers R2 Storage: Edit" added, and a deploy-only token will 403. Gated on a
+`BACKUP_R2_BUCKET` variable and skips with a warning when unset: a missing
+off-site copy must never fail a backup that is otherwise working. Keyed by repo
+and date so one bucket holds the family and no upload overwrites an earlier
+good copy.
+
+`docs/RESTORE-DRILL.md` is the ten-minute exercise. Run it at launch and after
+any change to the workflow, the CLI major version or the passphrase, then log
+the date - an untested backup and one tested eleven months ago are different
+things and only the log tells them apart.
