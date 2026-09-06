@@ -41,7 +41,7 @@ and from each site during that site's sync session.
 carried it, so a cross-check from a site reported "no marked files found" rather than
 drift. Adding the marker line to a site's already-ported copies is the first act of that
 site's sync session. presacademy needs one: it is the source of most of these files and
-none of its copies are marked. WCP has had its session: 22 marked files as of
+none of its copies are marked. WCP has had its session: 23 marked files as of
 2026-09-06, all `SAME`.
 
 **The marker is opt-in and one-way, so it proves nothing about what it does not cover.**
@@ -336,8 +336,8 @@ that waits out animation before an axe pass.
 
 **Dated 2026-08-27 (from presacademy `src/lib/contrast.ts`, itself the port of a WCP
 gate).**
-**Canonical:** `src/lib/contrast.ts`, with `src/lib/theme-tokens.test.ts` as the
-starter's own application of it.
+**Canonical:** `src/lib/contrast.ts` (the maths) and `src/lib/css-tokens.ts` (the
+reading), with `src/lib/theme-tokens.test.ts` as the starter's own application of them.
 
 WCAG 2.x contrast math as a tiny unit-testable module: `hexToRgb`, `relativeLuminance`,
 `contrastRatio`, `flatten` (compositing a translucent colour over its real backdrop,
@@ -391,10 +391,77 @@ rule 2 already describes the technique as if it were universal here. It is not: 
 own file predates it.
 
 The fix is to lift that extractor into one shared helper and have `theme-tokens.test.ts`
-use it, which also lets its light-only scope limitation go away. Deliberately NOT done
-in the audit commit: it is a real change to a gate, the two test files run in different
-runners across the family, and it deserves its own session rather than riding along with
-a marker sync.
+use it. Deliberately NOT done in the audit commit: it is a real change to a gate, the two
+test files run in different runners across the family, and it deserves its own session
+rather than riding along with a marker sync.
+
+### The reader is one module now (2026-09-06)
+
+**Canonical:** `src/lib/css-tokens.ts`. `theme-tokens.test.ts` and `surfaces.test.ts`
+both import it, and so does WCP's Vitest fork.
+
+**The bug was demonstrated before it was fixed, because "it passes" is not evidence a
+gate works.** With `--color-primary-dark: #2a2d31` planted in the `.dark` block of
+`globals.css`, the old file passed 12 of 12 while silently measuring the dark value:
+`--color-primary-dark` on `--color-bg` read 13.36:1 instead of 8.17:1, on
+`--color-bg-soft` 12.54:1 instead of 7.67:1, and white on `--color-primary-dark` 13.83:1
+instead of 8.46:1. Three asserted numbers wrong, build green. The same plant now fails
+the new gate by name. Not a hypothetical, and not a proof anyone should skip: the
+one-line reproduction is the whole reason this card is trustworthy.
+
+**Scope is the caller's choice, not the module's.** There is no single right answer to
+"the light scope" in this stylesheet, which is why the two gates cannot simply share one
+reader with one built-in scope. `BRAND_SCOPE` is a bare `@theme`: the brand palette
+`apply-brand` rewrites, and the only thing this card's gate asks about. `LIGHT_SCOPE`
+adds `@theme inline` and `:root`: what a shadcn semantic token actually resolves to on
+the page, which is what card 26's `surfaces.test.ts` asks about. They genuinely differ,
+because `@theme inline` re-points `--color-accent` at `var(--accent)` on purpose, so
+bare `text-accent` is theme-aware and is NOT the palette ink. A shared reader that
+silently picked one of those would have re-created the same class of bug in a new place.
+
+**Light-only stays deliberate and is no longer a limitation of the reader.** The pairs
+this gate asserts are unchanged, and every asserted value is unchanged; the dark half of
+the question is already measured, in both themes, by `surfaces.test.ts`.
+
+**Three of the new tests measure no colour at all.** They assert the scope premise: that
+the `@theme` block was found and holds the palette, that `.dark` declares none of the
+names this gate measures as light, and that the only later light-scope override of an
+asserted token is the recorded `--color-accent` one. A gate that can be wrong about
+WHICH declaration it read has to check that first, before any threshold means anything.
+
+**Family status of the extractor, audited 2026-09-06.** Every repo has a theme-token
+gate; they are not the same gate. `shared` means it imports `css-tokens.ts`.
+
+| repo                | theme-tokens.test.ts        | surfaces.test.ts |
+| ------------------- | --------------------------- | ---------------- |
+| starter             | shared                      | shared           |
+| wcp                 | shared (Vitest, own pairs)  | n/a              |
+| presacademy         | own copy, scoped + aliases  | own copy, same   |
+| ncs-church-starter  | unscoped hex-only (the bug) | scoped + aliases |
+| mas-monograms       | unscoped hex-only (the bug) | n/a              |
+| 2ndpreschicago      | unscoped hex-only (the bug) | n/a              |
+| reid-design-site    | per-block, but hex-only     | n/a              |
+| nixoncreativestudio | per-block, but hex-only     | n/a              |
+
+Three repos carry the exact silent-failure this session fixed. Two more are scoped
+correctly but alias-blind, which is the failure WCP's own gate was bitten by and records
+in its header: a `.dark` block that re-points a token with `var(--other)` is invisible to
+them, so they fall through to the light value and measure the wrong colour in dark.
+presacademy has the good logic twice and needs consolidating, not fixing.
+
+Those five ports are NOT done here, and the reason is specific rather than a shrug. Each
+site's `globals.css` puts its palette in a different place, so choosing `BRAND_SCOPE`
+against `LIGHT_SCOPE` per gate is a judgement per repo, and getting it wrong is exactly
+the silent failure being fixed. `ncs-church-starter`'s `staging` is also behind its
+`main`, so the family's staging-only push rule does not currently hold there. Do them a
+repo at a time, and plant the declaration and watch the old gate pass before replacing
+it: that is the acceptance test for this card.
+
+**Do not chase byte-identity on the test files.** `css-tokens.ts` is canonical and
+marked. `theme-tokens.test.ts` is not, in any repo: the runner (`node --test` here,
+Vitest in WCP and reid) and the pairs are legitimately per-site, and WCP's fork carries
+its own documented rationale in its header. Sharing the reader is the whole of what
+travels.
 
 ## Card 10: Embedded-studio live-preview stack
 
@@ -1386,6 +1453,15 @@ half: how many cards across, and which side the picture is on.
    also pins the literal hexes the Studio draws with to the resolved tokens, so
    a rebrand cannot leave the swatch row showing colours the site abandoned.
    **If a pair fails, fix the pair. Never lower a threshold.**
+
+   This rule described `surfaces.test.ts` and, until 2026-09-06, ONLY
+   `surfaces.test.ts`. It was written as though the technique were universal in
+   this repo; it was not, and card 9's own gate was reading tokens with a single
+   unscoped `matchAll` that could silently measure the dark value and assert it
+   as a light pair. The reader now lives in `src/lib/css-tokens.ts` and both
+   gates import it, so the rule is true of both. The scope each gate passes it
+   still differs on purpose: see card 9.
+
 3. **The default emits NO class.** The house accent returns `null` from
    `accentClass()` and the original tone values emit exactly the strings they
    always did, so every already-published section renders byte-identical HTML.
