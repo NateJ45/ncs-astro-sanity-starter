@@ -1,0 +1,33 @@
+{
+  "_comment": [
+    "Read by scripts/public-data-audit.mjs. On the Sanity free plan a dataset is",
+    "PUBLIC: anyone can read every published document over a plain URL, with no",
+    "token, and the project id ships in the page source. This file records what we",
+    "have deliberately decided is fine to publish, and why.",
+    "",
+    "Every entry needs a reason. The point is that the judgement gets made once,",
+    "in daylight, rather than by whoever is looking at a red build at 9pm.",
+    "",
+    "blockedTypes: never public, whatever fields they carry. Use for anything",
+    "holding member or family data - the audit fails if even one is readable.",
+    "allowedTypes: a type that trips the personal-data heuristics but is genuinely",
+    "publishable, listing the exact fields that are allowed."
+  ],
+
+  "blockedTypes": ["directoryEntry", "familyRecord", "student", "enrollment", "formSubmission"],
+
+  "allowedTypes": {
+    "staff": {
+      "fields": ["<email>"],
+      "reason": "Staff contact addresses are published on the public About page on purpose."
+    },
+    "siteSettings": {
+      "fields": ["phone", "address", "<email>", "<street-address>"],
+      "reason": "The organisation's own postal address and phone, printed in the site footer."
+    },
+    "legalPage": {
+      "fields": ["<email>"],
+      "reason": "Privacy and terms pages carry a contact address by law."
+    }
+  }
+}

@@ -3770,3 +3770,87 @@ good copy.
 any change to the workflow, the CLI major version or the passphrase, then log
 the date - an untested backup and one tested eleven months ago are different
 things and only the log tells them apart.
+
+### What the first real drill found (presacademy, 2026-09-06)
+
+**The backup was fine. The script was not.** It took four attempts, and every
+failure was in the recovery path rather than in the data - which is exactly the
+part that had never been exercised. Each one would otherwise have landed during
+an actual incident:
+
+1. **It read only `process.env`.** The passphrase was in `.env` the whole time,
+   where every other script in this family looks. Now uses `loadEnv`.
+2. **It preferred `SANITY_AUTH_TOKEN` over `SANITY_API_WRITE_TOKEN`.** A machine
+   with both would have handed the import the backup's READ token and failed on
+   permissions, looking exactly like a broken backup. Write wins now.
+3. **It shelled out to `openssl`.** Fine on a runner; on Windows openssl usually
+   exists only via Git's `mingw64\bin` and is often not on PATH. A recovery tool
+   must not depend on a binary the recovering machine may lack, so the decrypt
+   is now pure Node - verified byte-identical to openssl's output on a real
+   27.5 MB backup (both produce 28,792,515 bytes).
+4. **It spawned `node_modules/.bin/sanity.cmd`.** Since the fix for
+   CVE-2024-27980 Node refuses to spawn a `.cmd` without `shell: true`, failing
+   as a bare `EINVAL`. It now runs the CLI's own JS entry through
+   `process.execPath`: no shell, and so no quoting question when `count(*)` is
+   passed as an argument.
+5. **It swallowed a failed `dataset create`,** so the import died later with
+   "Dataset not found" and a twenty-line client stack trace pointing at the
+   wrong thing entirely. It now verifies the dataset exists and names the real
+   cause.
+
+And a sixth, caught before it shipped: the check in (5) first called `die()`,
+which uses `process.exit()` and therefore SKIPS the `finally` block. It would
+have printed "the decrypted tarball has been removed" while leaving 28 MB of
+client content in plaintext on disk - the error path reintroducing the very leak
+the encrypt step exists to prevent. It throws now, and cleanup always runs.
+
+Also learned: `sanity dataset create` needs a project-admin grant that a content
+write token does not carry, so the scratch dataset is created by hand first.
+
+Result: 112 documents restored against 113 in production, and the one difference
+was `_.schemas.churchstarter`, a schema manifest rather than content. Established
+by diffing the id sets, not by assuming a single missing document was drift.
+
+## 40. The public-data audit: what can a stranger read? (2026-09-06)
+
+Sanity's free plan is "2 datasets (public only)". A public dataset is readable
+by anyone over a plain URL with no token, and the project id is not a secret -
+it appears in every image URL in the page source (51 times on wcp-website's
+homepage). `?query=*` needs no knowledge of the schema.
+
+wcp-website had 37 family directory entries public: 40 children's names, 71
+parents, 33 home addresses. The Family Hub gate in front of them is correctly
+built - shared password reduced to a fingerprint in server-side KV, fails
+closed, rotation logs everyone out. It protects the PAGE. The Content Lake API
+is a second door and it was open.
+
+The root cause was a written assumption. `src/sanity/env.ts` said "The dataset
+is PRIVATE, so all reads happen server-side" - a comment, never checked, that
+the whole design rested on. Nothing in the new-project checklist said a public
+dataset is public, so nothing caught it for months.
+
+`scripts/public-data-audit.mjs` queries each site's dataset **anonymously** -
+the absence of a token is the whole point - and fails when personal data comes
+back. `public-data-policy.json` holds the exceptions, each with a reason, so the
+judgement is made once in daylight rather than against a red build at 9pm.
+
+Three design decisions worth keeping:
+
+- **It never prints values.** These repos are public, so the build log is as
+  public as the dataset. A checker that pasted the exposed data into a world
+  readable log would be a worse leak than the one it reports.
+- **Personal field NAMES fail; personal-looking VALUES only notify.** An email
+  in a privacy policy is deliberate publishing. Failing builds over it teaches
+  everyone to add blanket allows, and then the check protects nothing.
+- **It refuses to skip.** The first version could not find wcp-website's project
+  id (hardcoded in src/sanity/env.ts, not an env var) and exited 0 with a pass
+  over 37 exposed families. It now reads the source too, and a repo that depends
+  on Sanity with no resolvable id FAILS rather than reporting a pass it did not
+  earn. Same trap as cards 37 and 39: green means no test failed, not that a
+  test would have failed.
+
+Tuning that mattered: `children` is Portable Text's field name for spans AND a
+nav submenu AND actual children, so it is flagged only when the contents look
+like people. Verified in both directions - wcp-website fails on
+`directoryEntry: 37 documents`, presacademy passes with its legal-page contact
+emails correctly reported as notices rather than failures.

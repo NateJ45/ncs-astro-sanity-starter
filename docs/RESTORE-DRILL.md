@@ -13,8 +13,28 @@ about ten minutes and touches nothing live.
 
 - `BACKUP_PASSPHRASE` for that site (the copy stored **outside** GitHub — GitHub
   never shows a secret twice, and a backup nobody can decrypt is no backup)
-- `SANITY_AUTH_TOKEN` with **write** access (the backup itself only needs read)
+- A **write** token, as `SANITY_API_WRITE_TOKEN` or `SANITY_AUTH_TOKEN`. The
+  backup itself only needs read, so the workflow's secret may not be enough.
 - The site's Sanity project id
+
+Both are read from `.env` at the repo root; nothing needs exporting.
+
+**Create the scratch dataset by hand first.** Creating a dataset is a
+project-admin action (`sanity.project.datasets/create`) and a content write
+token does not carry it, so `--create` will fail with "Unauthorized - missing
+required grant". Make it once at https://www.sanity.io/manage and then omit
+`--create`. The script checks the dataset exists before importing and says so
+plainly rather than letting the import fail later with "Dataset not found".
+
+**On a plan without private datasets**, the scratch dataset will be public.
+That is fine only when the site's production dataset is already public and holds
+nothing but website content — presacademy, for instance, exposes the same 51
+published documents either way, and drafts stay protected in both. It is NOT
+fine for a dataset holding form submissions or member records: a public dataset
+is readable by anyone with the project id (which ships in your JS bundle) over a
+plain URL, and every field of a published document comes back, including the
+ones your templates never render. Drill those against a separate throwaway
+project instead.
 
 ## The drill
 
@@ -29,12 +49,7 @@ gh run download <run-id> --name sanity-backup
 production without a deliberately long flag, and this drill never uses it:
 
 ```bash
-BACKUP_PASSPHRASE='...' SANITY_AUTH_TOKEN='...' \
-  node scripts/restore-dataset.mjs \
-  --file sanity-backup-<date>.tar.gz.enc \
-  --project <projectId> \
-  --dataset restore-drill \
-  --create
+node scripts/restore-dataset.mjs --file sanity-backup-<date>.tar.gz.enc --project <projectId> --dataset restore-drill
 ```
 
 **3. Check the number, not the exit code.** The script prints the document
@@ -48,6 +63,18 @@ They should be close. Exactly equal is unlikely and not required — the backup
 is a snapshot from 07:00 UTC and editors have worked since. A count that is
 **zero, or an order of magnitude off, is a failed drill** even though every
 command exited 0. That is the entire point of the exercise.
+
+Better than eyeballing the totals, diff the ids and look at what is actually
+missing, so a small gap is explained rather than assumed to be drift:
+
+```
+*._id     // run against both datasets, with your token, and compare the sets
+```
+
+The first drill (presacademy, 2026-09-06) came back 112 against 113. The single
+missing document was `_.schemas.churchstarter`, a deployed-schema manifest
+rather than content: every content document restored and nothing spurious
+appeared. That is a pass. "One off, near enough" would have been a guess.
 
 **4. Look at the content.** Point a Studio at the scratch dataset, or query a
 document you recognise. Assets are the part most likely to be quietly missing:
