@@ -64,7 +64,9 @@ console.log(`propose-drift: ${drifted.length} drifted file(s):`);
 for (const f of drifted) console.log(`  ${f}`);
 
 if (!TOKEN) {
-  warn('GH_TOKEN is not set, so no PR was opened. Add GH_ACTIONS_PAT with write access to the library.');
+  warn(
+    'GH_TOKEN is not set, so no PR was opened. Add GH_ACTIONS_PAT with write access to the library.',
+  );
   process.exit(0);
 }
 
@@ -79,7 +81,10 @@ try {
   for (const rel of drifted) {
     const from = resolve(process.cwd(), rel);
     const to = join(STARTER, rel);
-    if (!existsSync(from)) { warn(`${rel} vanished locally; skipped.`); continue; }
+    if (!existsSync(from)) {
+      warn(`${rel} vanished locally; skipped.`);
+      continue;
+    }
     mkdirSync(dirname(to), { recursive: true });
     copyFileSync(from, to);
   }
@@ -106,18 +111,65 @@ try {
     'add a PORTS.md card in the same commit.',
   ].join('\n');
 
-  git(['commit', '-m', `Drift from ${SITE}: ${drifted.length} canonical file(s)`, '-m', body], STARTER);
-  git(['push', '--force-with-lease', `https://x-access-token:${TOKEN}@github.com/${LIBRARY}.git`, `HEAD:refs/heads/${branch}`], STARTER);
+  git(
+    ['commit', '-m', `Drift from ${SITE}: ${drifted.length} canonical file(s)`, '-m', body],
+    STARTER,
+  );
+  git(
+    [
+      'push',
+      '--force-with-lease',
+      `https://x-access-token:${TOKEN}@github.com/${LIBRARY}.git`,
+      `HEAD:refs/heads/${branch}`,
+    ],
+    STARTER,
+  );
 
-  const existing = spawnSync('gh', ['pr', 'list', '--repo', LIBRARY, '--head', branch, '--state', 'open', '--json', 'number', '--jq', '.[0].number'], { encoding: 'utf8', env: { ...process.env, GH_TOKEN: TOKEN } });
+  const existing = spawnSync(
+    'gh',
+    [
+      'pr',
+      'list',
+      '--repo',
+      LIBRARY,
+      '--head',
+      branch,
+      '--state',
+      'open',
+      '--json',
+      'number',
+      '--jq',
+      '.[0].number',
+    ],
+    { encoding: 'utf8', env: { ...process.env, GH_TOKEN: TOKEN } },
+  );
   const num = (existing.stdout || '').trim();
   if (num) {
     console.log(`propose-drift: updated existing PR #${num} on ${LIBRARY}.`);
   } else {
-    const created = spawnSync('gh', ['pr', 'create', '--repo', LIBRARY, '--head', branch, '--base', 'main', '--title', `Drift from ${SITE}`, '--body', body], { encoding: 'utf8', env: { ...process.env, GH_TOKEN: TOKEN } });
+    const created = spawnSync(
+      'gh',
+      [
+        'pr',
+        'create',
+        '--repo',
+        LIBRARY,
+        '--head',
+        branch,
+        '--base',
+        'main',
+        '--title',
+        `Drift from ${SITE}`,
+        '--body',
+        body,
+      ],
+      { encoding: 'utf8', env: { ...process.env, GH_TOKEN: TOKEN } },
+    );
     console.log((created.stdout || created.stderr || '').trim() || 'propose-drift: PR created.');
   }
 } catch (err) {
-  warn(`could not open the PR (${String(err.message || err).slice(0, 160)}). The sync-check failure still stands.`);
+  warn(
+    `could not open the PR (${String(err.message || err).slice(0, 160)}). The sync-check failure still stands.`,
+  );
 }
 process.exit(0);

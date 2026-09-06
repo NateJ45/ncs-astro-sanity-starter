@@ -3520,4 +3520,3 @@ months, and it only surfaced because a sync session happened to look.
 Needs `GH_ACTIONS_PAT` with write access to THIS repo, not only to the site
 repos. Without it the step warns and the build still fails on sync-check, so
 the gate never depends on the automation working.
-
