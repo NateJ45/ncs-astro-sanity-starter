@@ -300,9 +300,10 @@ Banned vocabulary: "transformative," "curated experience," "investment in your s
 
 Added 2026-08-27. This repo is not only a starting point for new projects, it is the
 **library of record** for improvements shared across the site family (wcp, presacademy,
-reid-design-site, mas-monograms, 2ndpreschicago, ncs-church-starter, nixoncreativestudio).
-When a fix stops being about one client and becomes a technique, its canonical copy lives
-here.
+reid-design-site, mas-monograms, 2ndpreschicago, nixoncreativestudio). When a fix stops
+being about one client and becomes a technique, its canonical copy lives here.
+`ncs-church-starter` was a seventh member until it was archived on 2026-09-06; PORTS.md
+still carries its column and its historical cards, but nothing syncs to it any more.
 
 - **`PORTS.md`** (repo root) is the registry: a short intro, an applied-to matrix (one row
   per shared improvement, one column per repo), then one dated **port card** per

@@ -91,6 +91,7 @@ is installing it as of the date on the card.
 | 33  | Year-scoped lists for accumulating types                          | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
 | 34  | Studio search weights (__experimental_search)                     | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
 | 35  | The family test standard (gates, suites, budgets)                 | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 |
+| 36  | sync-check as a CI gate                                           | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -3307,10 +3308,10 @@ group, the linkinator skip, and lighthouserc.json's `assert` block. `.prettierrc
 is identical family-wide but is plain JSON with no comment syntax, so it cannot
 carry a first-line marker; `.prettierignore` is legitimately per-site (each repo
 ignores a different set of unparseable templates). Two of this repo's own
-PORTABLE scripts, `sync-check.mjs` and `page-parity.mjs`, are listed in
-`.prettierignore` here: formatting them would rewrite their quoting and put four
-sibling repos into DRIFT on the next check. Reformat those in a deliberate
-family-wide pass that lands everywhere at once.
+PORTABLE scripts, `sync-check.mjs` and `page-parity.mjs`, were listed in
+`.prettierignore` here, because formatting them would rewrite their quoting and
+put sibling repos into DRIFT on the next check. That family-wide pass happened
+on 2026-09-06: see card 36. They are formatted and no longer ignored anywhere.
 
 **Adapt per site:** `tests/routes.ts` (derive from `src/pages` and check each
 path against the built `dist/client`), the `url` list in `lighthouserc.json`,
@@ -3319,3 +3320,88 @@ layer gates on something else, and whether `a11y-dark` applies at all (a site
 with no dark theme skips it). The Playwright port is 4321 by default and
 overridable with `PLAYWRIGHT_PORT`, so a run can share a machine with a dev
 server or another repo's suite.
+
+---
+
+## Card 36: sync-check as a CI gate (2026-09-06)
+
+**Dated 2026-09-06. `scripts/sync-check.mjs` runs in every repo's `ci.yml`
+instead of only ever by hand. Two canonical scripts were formatted family-wide
+in the same pass so prettier can never reopen a drift. wcp got its first copy
+of the script at all.**
+
+Card 28 gave the family a drift check. It found drift months late, because
+nothing ran it. The gate is five lines of YAML in the build job, after the
+install step, and needs no token: all of these repos are public.
+
+```yaml
+- name: Check out the library of record
+  uses: actions/checkout@v7
+  with:
+    repository: NateJ45/ncs-astro-sanity-starter
+    path: .ncs-starter
+
+- name: Canonical files have not drifted
+  env:
+    NCS_STARTER_DIR: ${{ github.workspace }}/.ncs-starter
+  run: node scripts/sync-check.mjs
+```
+
+The starter itself runs the SELF-CHECK form instead: no second checkout, just
+`node scripts/sync-check.mjs`, which resolves the library to this repo root.
+
+**The prettier conflict, and why the ignore lost.** `sync-check.mjs` writes
+`'the site\'s improvement'`; prettier's `singleQuote` rule prefers whichever
+quote needs fewer escapes and rewrites it to `"the site's improvement"`. The
+same is true of `page-parity.mjs`, plus four over-long template literals it
+would rewrap. The old defence was to list both files in the starter's
+`.prettierignore`. It did not work, and could not:
+
+- The ignore entries were never propagated. As of 2026-09-06 the starter and
+  2ndpreschicago ignored both, reid-design-site and nixoncreativestudio ignored
+  only `sync-check.mjs`, and wcp, presacademy and mas-monograms ignored
+  neither. So a `prettier --write` during the card 35 rollout reformatted
+  presacademy's and mas-monograms' copies, and the check went red in exactly
+  the repos the ignore was supposed to protect.
+- An ignore is a standing obligation on seven files nobody reads. Formatting is
+  a one-time cost with a fixed point: once the canonical bytes ARE prettier's
+  output, `prettier --write` is a no-op forever and `format:check` becomes a
+  SECOND guard on the canonical text rather than a threat to it.
+
+So both files were formatted here, dropped from every `.prettierignore` that
+listed them, and the formatted bytes were copied into all six site repos in the
+same pass. The change is quoting and line wrapping only; no behaviour changed.
+Do not re-add the ignore lines.
+
+**Two things the pass turned up.**
+
+- `scripts/page-parity.mjs` is marked `PORTABLE` HERE but carries no marker in
+  any of the six site repos, so sync-check has never checked it anywhere. The
+  starter's `.prettierignore` comment claimed it was "carried BYTE-EXACT by
+  reid-design-site, mas-monograms and presacademy"; it is not. Card 3 says the
+  harness is shared, and the matrix says `yes` for every repo, but the file has
+  genuinely diverged (each site has its own PAGES list) and is a fork in
+  practice. Either mark it and reconcile, or write the fork down. Left alone
+  here on purpose: it is a bigger decision than a formatting pass.
+- nixoncreativestudio and 2ndpreschicago were not carrying a quoting drift at
+  all. Their `sync-check.mjs` predated card 28a's NESTED-APP RULE (2026-08-28),
+  the one that lets wcp's `site/scripts/foo.mjs` match the starter's
+  `scripts/foo.mjs`. They took the current copy forward.
+
+**wcp.** The repo the whole family copied from had no `scripts/sync-check.mjs`,
+so it was the one repo that could not say when it had drifted. It now carries
+the canonical copy at `site/scripts/sync-check.mjs`, next to its siblings, and
+the NESTED-APP RULE is what makes the nested path resolve.
+
+**Also folded in:** `ncs-church-starter` was archived on 2026-09-06, so the
+header comment in `sync-check.mjs` (canonical, hence one edit here that
+propagates), this repo's `CLAUDE.md` and 2ndpreschicago's README stopped
+describing it as a live peer. PORTS.md keeps its column and its historical
+cards: those are a record of what happened, not a claim about today.
+
+**Adapt per site:** nothing, except wcp, whose workflows sit at the repo root
+while the app lives in `site/`. Its build job already sets
+`defaults.run.working-directory: site`, so the `run:` line is unchanged, but the
+checkout `path:` and `NCS_STARTER_DIR` are both relative to
+`github.workspace` (the repo root), NOT to `site/`. Put the starter checkout at
+`.ncs-starter` at the root and point `NCS_STARTER_DIR` at it there.

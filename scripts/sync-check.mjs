@@ -6,11 +6,12 @@
 // WHY THIS EXISTS
 //
 // The site family (wcp, presacademy, reid-design-site, mas-monograms,
-// 2ndpreschicago, ncs-church-starter, nixoncreativestudio) shares a growing
-// set of build/QA plumbing: the parity harness, the Sanity seed library, the
-// contrast math, the workerd wrapper. Copies drift silently. A bug fixed in
-// one repo stays broken in five, and nobody finds out until the same evening
-// is lost twice.
+// 2ndpreschicago, nixoncreativestudio) shares a growing set of build/QA
+// plumbing: the parity harness, the Sanity seed library, the contrast math,
+// the workerd wrapper. Copies drift silently. A bug fixed in one repo stays
+// broken in five, and nobody finds out until the same evening is lost twice.
+// (ncs-church-starter was a seventh member until it was archived on
+// 2026-09-06; it is no longer synced.)
 //
 // This starter is the LIBRARY OF RECORD. Every canonical file carries a
 // first-line marker:
@@ -280,9 +281,9 @@ console.log(
 
 if (failed) {
   console.log('');
-  console.log('DRIFT: reconcile before shipping. Either port the site\'s improvement');
+  console.log("DRIFT: reconcile before shipping. Either port the site's improvement");
   console.log('back into the starter (and add a PORTS.md card in the same commit), or');
-  console.log('pull the starter\'s copy forward into the site.');
+  console.log("pull the starter's copy forward into the site.");
   console.log('MISSING-IN-STARTER: the file is marked canonical but the starter has no');
   console.log('copy at that path. Install it in the starter, or fix the path.');
   process.exit(1);
