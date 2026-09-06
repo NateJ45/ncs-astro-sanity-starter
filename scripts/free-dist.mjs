@@ -4,6 +4,9 @@
 // =============================================================================
 // WHY THIS EXISTS (ported into the starter 2026-08-27; original 2026-08-26)
 //
+// DRIFT PROBE 2026-09-06: a deliberate one-line divergence, to prove the
+// propose-drift CI step actually opens the port-up PR. Reverted immediately.
+//
 // A still-running `wrangler dev` / `astro preview` / `http-server` keeps a
 // handle on dist/ (or dist/client). Astro empties dist at the start of every
 // build, so the next `npm run build` (and therefore `npm run deploy`) dies
