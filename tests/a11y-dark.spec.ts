@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { routes } from './routes';
+import { routes, FORM_ROUTES } from './routes';
 import { settle } from './helpers';
 import { site } from '../src/data/site';
 
@@ -72,9 +72,9 @@ test.describe('Accessibility (dark mode): no axe violations', () => {
 // box-shadow on them, so a <select> with `focus:outline-none` plus a ring has
 // no focus indicator at all on Safari and iOS while Chromium looks fine.
 // WebKit is where that bug lives, so it is where the check has to run.
+//
+// Which routes have a form is per-site, so FORM_ROUTES lives in routes.ts.
 // =============================================================================
-
-const FORM_ROUTES = ['/contact'];
 
 test.describe('Focus indicators are visible in dark mode', () => {
   for (const route of FORM_ROUTES) {

@@ -1,7 +1,8 @@
-# PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-# Expected to differ per site: the `env:` block (this repo ships no Sanity
-# project, so there are no PUBLIC_SANITY_* identifiers to pin) and the `url`
-# list inside lighthouserc.json, which names the pages that repo builds.
+# The family test standard's Lighthouse workflow (PORTS.md card 35).
+# Deliberately NOT marked PORTABLE: like ci.yml it carries a per-site `env:`
+# block, and the `url` list in lighthouserc.json names the pages a given repo
+# builds. The ASSERTIONS in lighthouserc.json are the part that must not
+# diverge. Copy the shape, not the bytes.
 name: Lighthouse
 
 on:

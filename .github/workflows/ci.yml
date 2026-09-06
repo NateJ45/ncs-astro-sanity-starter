@@ -1,9 +1,14 @@
-# PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-# The one thing expected to differ per site: the `env:` block. This repo ships
-# no Sanity project of its own, so there is nothing to pin and the build takes
-# the credential-less fallback path. A client repo sets its PUBLIC_SANITY_*
-# identifiers here (they are public, they appear in every GROQ request URL) so
-# CI and the test job run against the REAL content.
+# The family test standard's CI workflow (PORTS.md card 35). Deliberately NOT
+# marked PORTABLE: it carries a per-site `env:` block, so a byte-exact drift
+# check would fail forever on every repo. Copy the SHAPE from here, and keep
+# the step list, the concurrency group and the linkinator skip identical.
+#
+# This repo ships no Sanity project of its own, so there is nothing to pin and
+# the build takes the credential-less fallback path. A client repo sets its
+# PUBLIC_SANITY_* identifiers in an `env:` block here (they are public, they
+# appear in every GROQ request URL) so the build and the test job run against
+# the REAL content, which is what decides whether a page is a real render or a
+# hidden-section stub.
 name: CI
 
 on:

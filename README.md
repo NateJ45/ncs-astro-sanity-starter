@@ -49,6 +49,30 @@ A fresh clone builds and runs with no Sanity project at all: pages render their 
 
 Without steps 2 and 3 the public site is unaffected; only the embedded Studio and the preview are off, and the preview routes say so instead of erroring.
 
+## Quality gates
+
+Every site in this family runs the same checks, and a fork inherits them (PORTS.md card 35).
+
+```sh
+npm run check        # astro check + eslint
+npm run check:full   # typegen + build + unit tests
+npm run format:check # prettier
+npm run check:links  # linkinator over dist/client
+npm test             # Playwright: smoke, axe light, axe dark, reflow
+npx lhci autorun     # Lighthouse against the built dist/client
+```
+
+`ci.yml` runs the first five in two parallel jobs on every push and PR; `lighthouse.yml`
+runs the audit separately. Accessibility is a hard gate at 100, LCP 4500ms and CLS 0.1
+are hard, performance / SEO / best-practices are warnings. The Playwright suites run on
+Chromium and a real WebKit iPhone profile, because that is where a Tailwind focus ring
+on a `<select>` turns out to be invisible.
+
+Two more workflows ship dormant, gated on repo secrets and variables that do not exist
+in the template: `sanity-backup.yml` (nightly encrypted dataset export) and `uptime.yml`
+(hourly 200 check on four key pages). Set the secrets and uncomment the schedule to turn
+either on. `deploy-staging.yml` and `publish-due.yml` work the same way.
+
 ---
 
 Maintained by [Nixon Creative Studio](https://nixoncreativestudio.com).

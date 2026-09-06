@@ -38,3 +38,13 @@ export const hiddenRoutes: string[] = [];
 
 /** Every route that should return HTTP 200, whether or not it renders content. */
 export const allRoutes: string[] = [...routes, ...hiddenRoutes];
+
+/**
+ * Prerendered routes that carry a form, for the focus-indicator check in
+ * a11y-dark.spec.ts. It lives here rather than in that spec so the spec stays
+ * byte-identical across the family; only this file knows which pages a given
+ * site puts a form on. /contact is the starter's only one. A project that
+ * enables the lead-magnet module gets a form on /guides/[slug]; add it here
+ * once a guide is published and that route builds.
+ */
+export const FORM_ROUTES: string[] = ['/contact'];

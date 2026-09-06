@@ -76,7 +76,13 @@ Blocks carry no background color field. `SectionRenderer` owns the alternating s
 Any change to `src/sanity/schemaTypes/` must follow this sequence before committing:
 
 1. Edit the schema file in `src/sanity/schemaTypes/`.
-2. Run `npm run check` -- the one-command gate: typegen, the build (which includes the embedded Studio), and all 94 unit tests. Fix any failures before continuing. (Individual steps: `npm run typegen`, `npm run build`, `npm test`.) If the change could alter rendered markup, also run `npm run parity compare`.
+2. Run the gate. `npm run check` is the fast half (`astro check` + eslint) and
+   `npm run check:full` is typegen, the build (which includes the embedded Studio) and
+   the 432 unit tests. Add `npm run format:check`, `npm run check:links` and `npm test`
+   (the Playwright suites: smoke, axe light, axe dark, reflow, on chromium and WebKit)
+   for the whole thing, which is exactly what CI runs. Fix any failures before
+   continuing. If the change could alter rendered markup, also run
+   `npm run parity compare`.
    2b. If you added a dropdown/radio field whose exact value drives rendering, add its name to `NON_STEGA_FIELDS` in `src/lib/cms-preview.ts` in the same commit. Miss it and the block renders the wrong branch in the live preview only.
 3. Commit the schema file AND the regenerated `src/lib/sanity.types.ts` together.
 4. Deploy the site (`npm run deploy`). The Studio is embedded, so deploying the site publishes the schema with it; there is no separate Studio deploy step. Until the deploy lands, the live Studio shows "unknown fields" next to a "Remove field" prompt. **Never click "Remove field"** -- it deletes that field's data across every document, and it cannot be undone without a dataset restore.

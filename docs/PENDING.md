@@ -56,6 +56,25 @@ carry a verified-in-anger note rather than an installed-and-gated one.
 
 ---
 
+### 1a. Sign in to a Studio built on the phase-1 Sanity set
+
+**Blocker: no agent can do this, and this template has no Sanity project.**
+
+2026-09-06 moved this repo onto the family's phase-1 Sanity set (`sanity` 6.9.1,
+`@sanity/ui` 3.5.4, `@sanity/client` 7.26.2, `@sanity/visual-editing` 5.7.3). Every
+automated gate is green and the single-instance invariant holds on disk and in the
+lockfile, but the login screen is core code and renders fine even when the
+styled-components theme context is broken. The set is already human-verified on
+presacademy, reid-design-site and mas-monograms, so the risk here is low; what is
+unverified is this repo's own custom Studio panes and the in-canvas overlay against it.
+Whoever forks this next should sign in, open the desk, and drive the Presentation tool
+until an in-canvas control draws and writes back, then note it here.
+
+Do NOT take `sanity` 6.9.2: that PATCH release crosses to `@sanity/ui` 4, which is a real
+migration (PORTS.md card 10, phase 2).
+
+---
+
 ## Known gaps, deliberately open
 
 ### 2. `npm run parity compare` is not a CI step
@@ -81,14 +100,34 @@ Drop it during a slop sweep (card 16) if it is still unused then.
 Revisit when a newer adapter's peer range and emitted config are both checked by hand
 against a real `wrangler dev` and a real deploy.
 
-### 5. `npm run lint` has one pre-existing error
+### 5. Seven eslint warnings, all unused bindings
 
-`src/lib/pageBuilder.types.ts:266` -- `interface ProjectedLogoStripLogo extends
-ProjectedImage {}` trips `@typescript-eslint/no-empty-object-type`. It predates the
-2026-08-28 upgrade (the file was not touched by it) and lint is not wired into
-`npm run check` or CI, so it has been failing quietly. Either give the interface a member,
-make it a type alias, or wire lint into the gate and fix it then. Do not do the last one
-without also triaging the seven warnings alongside it.
+`npm run lint` is a CI step now (2026-09-06) and exits clean, but it still prints seven
+`@typescript-eslint/no-unused-vars` warnings: unused imports in `Footer.astro`,
+`BusinessOverview.tsx`, the journal index and a couple of others, plus one unused
+`SHOW_THRESHOLD` in `BaseLayout.astro`. Warnings do not fail the run. Triage them in a
+slop sweep (card 16); each is either a dead import to delete or a binding that was meant
+to be used and is not, which is the more interesting kind.
+
+### 7. Two PORTABLE scripts are excluded from prettier
+
+`scripts/sync-check.mjs` and `scripts/page-parity.mjs` are the only marked files whose
+quoting `prettier --write` would rewrite, and reid-design-site, mas-monograms and
+presacademy carry them byte-exact. Formatting them here would put four repos into DRIFT
+the moment anyone runs `npm run sync-check`. They are in `.prettierignore` with that
+reason inline. To close: format them in ONE pass that lands in every repo in the family
+at the same time.
+
+### 8. The sibling repos will report DRIFT on the new test files
+
+The family test standard's six canonical files were written here on 2026-09-06
+(`playwright.config.ts` and five of the six files in `tests/`). The client repos got the
+same standard the same day, but their copies were written against their own sites and
+carry different comments and, in `a11y-dark.spec.ts`, an inline `FORM_ROUTES` that has
+been moved out to `routes.ts` here. So the first `npm run sync-check <repo>` after this
+lands will report DRIFT on those files. That is the library of record working as
+designed, not a bug: the next sync session pushes this repo's copies out. Do the sync
+before treating any drift report from those paths as meaningful.
 
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 

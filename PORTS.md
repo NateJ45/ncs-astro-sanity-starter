@@ -58,9 +58,9 @@ is installing it as of the date on the card.
 | 3   | page-parity harness                                               | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
 | 4   | sanity-lib seed/patch plumbing                                    | partial | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 |
 | 5   | stale-types CI guard                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 |
-| 6   | Nightly Sanity backup workflow                                    | yes     | yes         | no       | yes              | yes           | yes            | template           | n/a                 |
-| 7   | Uptime workflow                                                   | yes     | yes         | no       | yes              | yes           | yes            | template           | yes                 |
-| 8   | Playwright + axe + reflow suite                                   | yes     | yes         | no       | yes              | no            | no             | no                 | no                  |
+| 6   | Nightly Sanity backup workflow                                    | yes     | yes         | template | yes              | yes           | yes            | template           | n/a                 |
+| 7   | Uptime workflow                                                   | yes     | yes         | template | yes              | yes           | yes            | template           | yes                 |
+| 8   | Playwright + axe + reflow suite                                   | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 |
 | 9   | contrast.ts + theme-token gate                                    | partial | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
 | 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
 | 11  | Preview click interceptor                                         | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
@@ -90,6 +90,7 @@ is installing it as of the date on the card.
 | 32  | Branded tool headings (ToolHeading)                               | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
 | 33  | Year-scoped lists for accumulating types                          | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
 | 34  | Studio search weights (__experimental_search)                     | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
+| 35  | The family test standard (gates, suites, budgets)                 | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -3218,3 +3219,103 @@ content type lands.
 **Adapt per site:** the field paths per type (page hero fields differ per
 repo — and remember which repos use Sanity's slug TYPE vs plain strings; see
 the d209b1d drift gate).
+
+---
+
+## Card 35: The family test standard (2026-09-06)
+
+**Dated 2026-09-06. Every Astro site in the studio runs the same quality gates.
+WCP was the reference implementation; presacademy, reid-design-site,
+mas-monograms, 2ndpreschicago and nixoncreativestudio were brought up to it on
+2026-09-06, and this starter on the same day. Canonical copies live here.**
+
+Card 8 was the Playwright half of this. Card 35 is the whole thing, because the
+suites are only as good as the gates around them: `astro check` had never run on
+several of these repos and found 242 real type errors on presacademy, 222 here,
+19 on reid, 16 on mas and 13 on 2nd Pres, including two sites whose Studio logo
+rendered `src="[object Object]"` in production.
+
+**The gates.** `ci.yml`, on push to `main` and `staging` plus every PR, two
+parallel jobs:
+
+- **build**: `npm ci`, Sanity typegen with a three-attempt retry loop (runner
+  flake, see card 5), the stale-types guard, `npx astro check`, `npm run lint`,
+  `npm run format:check`, `npm run test:unit`, `npm run build`,
+  `npm run check:links`.
+- **test**: `npx playwright install --with-deps chromium webkit`, then the
+  suites, with `playwright-report/` uploaded as an artifact for 14 days.
+
+`lighthouse.yml` is a SEPARATE workflow, not a step inside CI, so a slow audit
+never delays the build verdict and a repo can re-run it alone.
+`lighthouserc.json` carries an EXPLICIT `url` list: with `staticDistDir` alone
+lhci auto-discovers pages and caps at five, so it audits a near-random subset.
+Accessibility is a hard gate at 1.0, LCP 4500ms and CLS 0.1 are hard,
+performance / SEO / best-practices are warnings so ordinary CI variance does not
+block a PR.
+
+**The suites**, in `tests/`: `smoke` (every route 200s and carries the site name
+in its title), `a11y` (axe, light, zero violations), `a11y-dark` (axe again
+after forcing the theme, plus a focus-indicator check), `reflow` (no horizontal
+overflow at 320, 768, 1024, 1440). Chromium runs everything; a real WebKit
+iPhone 14 profile runs smoke and both axe sweeps. Visual regression is
+deliberately NOT part of this: it belongs only where a site has a fixture-driven
+`/styleguide` route with fixed data (WCP, presacademy). Screenshotting
+CMS-driven pages flakes with content.
+
+**Five things this standard exists to stop, each one a real incident:**
+
+- **The linkinator skip pattern.** WCP's `--skip "^(?!http://localhost)"`
+  matched linkinator's own 127.0.0.1 seed, so every green CI run for months had
+  scanned ZERO links. The correct pattern is
+  `^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])`, and the check is to read the
+  log: it must say "scanned N links" with N greater than zero. On this repo the
+  first honest run found 135 broken internal links across ten pages.
+- **A prettier pass can silently eat a meaningful space** in an Astro template,
+  and `prettier-plugin-astro` cannot parse a `<script>` nested inside a template
+  expression at all (it reads the script body's braces as expression delimiters
+  and throws). Ignore those files or move the script into its own component, and
+  diff the built HTML TEXT before and after the format commit. This repo has
+  `npm run parity` for exactly that; elsewhere, do it by hand.
+- **A Tailwind `focus:ring` is a box-shadow**, and WebKit renders native form
+  controls itself and DROPS box-shadow on them. A `<select>` carrying
+  `focus:outline-none` plus a ring has no focus indicator at all on Safari and
+  iOS while Chromium looks perfect. Selects need `outline`. Six of them here.
+- **A WebM-first `<video>` never fires `load` in WebKit.** Navigate with
+  `waitUntil: 'domcontentloaded'`; with `'load'` the run hangs until the test
+  times out and the report says nothing useful.
+- **axe has no rule for focus-indicator contrast**, and an axe sweep only ever
+  audits the resting DOM. That blind spot is how WCP shipped eight forms whose
+  dark-mode focus ring measured 1.13:1, on a green build with Lighthouse at 100.
+  `a11y-dark.spec.ts` asserts the indicator EXISTS; `theme-tokens.test.ts` pins
+  its contrast.
+
+**What is canonical here and what is not.** Marked `PORTABLE` and byte-exact
+across the family: `playwright.config.ts`, `tests/helpers.ts`,
+`tests/smoke.spec.ts`, `tests/a11y.spec.ts`, `tests/a11y-dark.spec.ts`,
+`tests/reflow.spec.ts`. Every per-site list was pushed OUT of them into
+`tests/routes.ts`, which is the seam: the route list, the hidden-route list, and
+`FORM_ROUTES`. `smoke.spec.ts` reads the title from `src/data/site.ts` rather
+than a literal, so `npm run apply-brand` cannot leave it asserting the previous
+project's name.
+
+Deliberately NOT marked, and the reason matters: `ci.yml` and `lighthouse.yml`
+carry a per-site `env:` block of PUBLIC_SANITY_\* identifiers, and
+`lighthouserc.json` carries a per-site `url` list, so a byte-exact drift check
+would fail forever on every repo and teach everyone to ignore it. Copy their
+SHAPE; the parts that must not diverge are ci.yml's step list, its concurrency
+group, the linkinator skip, and lighthouserc.json's `assert` block. `.prettierrc`
+is identical family-wide but is plain JSON with no comment syntax, so it cannot
+carry a first-line marker; `.prettierignore` is legitimately per-site (each repo
+ignores a different set of unparseable templates). Two of this repo's own
+PORTABLE scripts, `sync-check.mjs` and `page-parity.mjs`, are listed in
+`.prettierignore` here: formatting them would rewrite their quoting and put four
+sibling repos into DRIFT on the next check. Reformat those in a deliberate
+family-wide pass that lands everywhere at once.
+
+**Adapt per site:** `tests/routes.ts` (derive from `src/pages` and check each
+path against the built `dist/client`), the `url` list in `lighthouserc.json`,
+the `env:` blocks, the reveal selectors in `tests/helpers.ts` if a site's polish
+layer gates on something else, and whether `a11y-dark` applies at all (a site
+with no dark theme skips it). The Playwright port is 4321 by default and
+overridable with `PLAYWRIGHT_PORT`, so a run can share a machine with a dev
+server or another repo's suite.
