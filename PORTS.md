@@ -3785,6 +3785,42 @@ off-site copy must never fail a backup that is otherwise working. Keyed by repo
 and date so one bucket holds the family and no upload overwrites an earlier
 good copy.
 
+**What the first real drill found (2026-09-07, wcp-website).** The drill passed
+— 370 documents restored against production's 371, the one difference being
+`_.schemas.wcp`, a system document Sanity's export excludes by design — but it
+could not be run as written, and three separate things had to be fixed first.
+Every one of them was an instruction that had been committed and never
+executed:
+
+- **The passphrase was unrecoverable.** `docs/SANITY.md` told you to create it
+  with `openssl rand -base64 32 | gh secret set BACKUP_PASSPHRASE ...`, then
+  added "(store the value before piping it away)" — which that command makes
+  impossible. GitHub never shows a secret again. Every encrypted backup since
+  the secret was set was undecryptable: green runs, a proper `Salted__`
+  tarball, an off-site copy, and nothing openable. Generate and READ it, save
+  it, then set it — two steps, never one.
+- **The off-site step was truncated.** The `for` loop had no closing `done` in
+  all five ported repos, while the starter's copy was correct. It passed only
+  because the guard's `exit 0` ran before bash reached the malformed loop; the
+  moment `BACKUP_R2_BUCKET` was set it died with "syntax error: unexpected end
+  of file". Following this card's own instruction would have turned five green
+  backups red.
+- **The token lookup and `--create` were both wrong for a real repo.** The
+  script checked `SANITY_API_WRITE_TOKEN` and `SANITY_AUTH_TOKEN`;
+  wcp-website's `.dev.vars` uses `SANITY_TOKEN` and nothing else, so the drill
+  stopped with "No write token found" while a valid write token sat in the
+  file. And `--create` cannot work with any content token: creating a dataset
+  needs the project-admin grant `sanity.project.datasets/create`. Create the
+  scratch dataset under your own CLI login (`npx sanity dataset create
+  restore-drill -p <projectId>` — `-p`, not `--project`, which prints the whole
+  help text and reads like a different error), then run without `--create`.
+
+The lesson is the card's own thesis turned on the card: writing the drill is
+not running it, and a script that has never been run is a backup that has never
+been restored. Two sites (2ndpreschicago, mas-monograms) turned out to have no
+backup at all — the export job skips without `SANITY_AUTH_TOKEN` and reports
+success.
+
 `docs/RESTORE-DRILL.md` is the ten-minute exercise. Run it at launch and after
 any change to the workflow, the CLI major version or the passphrase, then log
 the date - an untested backup and one tested eleven months ago are different

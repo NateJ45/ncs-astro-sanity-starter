@@ -32,10 +32,20 @@
 //                 the only way to target `production`. There is no short flag
 //                 and no env var on purpose.
 //
-// Reads BACKUP_PASSPHRASE, and a WRITE token from either
-// SANITY_API_WRITE_TOKEN (preferred) or SANITY_AUTH_TOKEN, from the environment
-// or .env. The backup itself only needs a READ token, so the workflow's secret
-// may not be enough to import.
+// Reads BACKUP_PASSPHRASE, and a WRITE token from SANITY_API_WRITE_TOKEN,
+// SANITY_AUTH_TOKEN or SANITY_TOKEN (in that order), from the environment or
+// .env/.dev.vars. The backup itself only needs a READ token, so the workflow's
+// secret may not be enough to import.
+//
+// --create NEEDS AN ADMIN TOKEN, and a content token is not one. Creating a
+// dataset is a project-admin action (the grant is sanity.project.datasets/create),
+// so with an ordinary write token the flag fails. Create the scratch dataset
+// once with your own CLI login instead, which has your account's rights:
+//
+//   npx sanity dataset create restore-drill -p <projectId>
+//
+// then run this without --create. (Note `-p`, not `--project`: the CLI prints
+// its whole help text for an unknown flag, which reads like a different error.)
 //
 // WHAT IT WILL NOT DO
 //
@@ -69,7 +79,12 @@ const env = loadEnv(process.cwd());
 // exactly that) preferring SANITY_AUTH_TOKEN would hand the import a read token
 // and fail on permissions - looking for all the world like a broken backup.
 // Prefer the one that says write.
-const AUTH_TOKEN = env.SANITY_API_WRITE_TOKEN || env.SANITY_AUTH_TOKEN;
+// SANITY_TOKEN is last but it MATTERS: wcp-website's .dev.vars uses that name
+// and nothing else, so the documented drill stopped dead on that repo with "No
+// write token found" while a perfectly good write token sat in the file
+// (2026-09-07, the first time anyone ran this here). Last in the order because
+// the name says nothing about write access - it is a fallback, not a preference.
+const AUTH_TOKEN = env.SANITY_API_WRITE_TOKEN || env.SANITY_AUTH_TOKEN || env.SANITY_TOKEN;
 
 const argv = process.argv.slice(2);
 const flag = (name) => argv.includes(name);
@@ -99,9 +114,10 @@ if (!passphrase)
   );
 if (!AUTH_TOKEN)
   die(
-    'No write token found. Set SANITY_AUTH_TOKEN or SANITY_API_WRITE_TOKEN, in the\n' +
-      '  environment or in .env. Note the backup only needs a READ token, so the one\n' +
-      '  in the workflow secret may not be enough to import.',
+    'No write token found. Set SANITY_API_WRITE_TOKEN, SANITY_AUTH_TOKEN or\n' +
+      '  SANITY_TOKEN, in the environment or in .env / .dev.vars. Note the backup\n' +
+      '  only needs a READ token, so the one in the workflow secret may not be\n' +
+      '  enough to import.',
   );
 
 if (dataset === 'production' && !flag('--i-understand-this-overwrites-production')) {
