@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// DRIFT PROBE 2026-09-07: deliberate one-line drift, to prove propose-drift can
+// still push and open a PR with the replacement GH_ACTIONS_PAT. Reverted immediately.
 // =============================================================================
 // restore-dataset.mjs - decrypt a nightly backup and put it back
 // =============================================================================
