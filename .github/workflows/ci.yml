@@ -66,6 +66,13 @@ jobs:
       # Runs anonymously on purpose and needs no secrets, so it works on forks
       # and PRs. Exceptions live in public-data-policy.json, each with a reason.
       - name: No personal data is publicly readable
+        # The project id is PUBLIC (it ships in every image URL in the page
+        # source) but it still has to be handed to this step: there is no .env
+        # on a runner, and the audit refuses to skip when it cannot find one -
+        # it would rather fail than report a pass it did not earn.
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
         run: node scripts/public-data-audit.mjs
 
       - name: Generate Sanity types
