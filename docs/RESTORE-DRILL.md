@@ -1,3 +1,5 @@
+<!-- PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file -->
+
 # Restore drill
 
 **A backup nobody has restored is not a backup.** The nightly
@@ -56,8 +58,12 @@ node scripts/restore-dataset.mjs --file sanity-backup-<date>.tar.gz.enc --projec
 count it ended up with. Compare it against production:
 
 ```bash
-./node_modules/.bin/sanity documents query 'count(*)' --project-id <projectId> --dataset production
+node node_modules/sanity/bin/sanity documents query 'count(*)' --project-id <projectId> --dataset production
 ```
+
+(`node node_modules/sanity/bin/sanity`, not `./node_modules/.bin/sanity`: the
+latter is a POSIX-only path, and on Windows npm writes a `.cmd` shim there that
+Node has refused to spawn since the CVE-2024-27980 fix.)
 
 They should be close. Exactly equal is unlikely and not required — the backup
 is a snapshot from 07:00 UTC and editors have worked since. A count that is
@@ -80,14 +86,14 @@ appeared. That is a pass. "One off, near enough" would have been a guess.
 document you recognise. Assets are the part most likely to be quietly missing:
 
 ```bash
-./node_modules/.bin/sanity documents query '*[_type=="sanity.imageAsset"][0..2]{url}' \
+node node_modules/sanity/bin/sanity documents query '*[_type=="sanity.imageAsset"][0..2]{url}' \
   --project-id <projectId> --dataset restore-drill
 ```
 
 **5. Clean up.**
 
 ```bash
-./node_modules/.bin/sanity dataset delete restore-drill --project-id <projectId>
+node node_modules/sanity/bin/sanity dataset delete restore-drill --project-id <projectId>
 ```
 
 **6. Record it.** Add the date to the client note's decision log. An untested
