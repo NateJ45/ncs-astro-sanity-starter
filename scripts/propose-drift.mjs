@@ -37,7 +37,32 @@ const REPO = process.env.GITHUB_REPOSITORY || '(local)';
 const SITE = REPO.split('/')[1] || 'site';
 const LIBRARY = 'NateJ45/ncs-astro-sanity-starter';
 
-const warn = (m) => console.log(`::warning::propose-drift: ${m}`);
+/**
+ * Strip anything that looks like a credential BEFORE it can be printed.
+ *
+ * On 2026-09-07 this script printed a GitHub PAT in full, in the CI log of a
+ * PUBLIC repo. The push URL embeds the token (`x-access-token:<pat>@github.com`),
+ * execSync puts the whole failed command in err.message, and the catch below
+ * printed it.
+ *
+ * GitHub masks secret values in logs and did not catch this, for a reason worth
+ * remembering: the message was passed through `.slice(0, 160)` first, which cut
+ * the token part-way. Masking is an exact-substring match, so a TRUNCATED secret
+ * does not match the secret and is printed verbatim. Truncating a string that
+ * might contain a credential defeats the very protection you are relying on.
+ *
+ * So: redact first, slice second, and do it in the sink rather than at each call
+ * site — every future message through warn() is covered without anyone
+ * remembering to think about it.
+ */
+const redact = (m) =>
+  String(m)
+    // https://x-access-token:<anything>@host  ->  keep the shape, lose the secret
+    .replace(/\/\/[^/@\s]*:[^/@\s]*@/g, '//***:***@')
+    // bare tokens, in case one reaches us another way
+    .replace(/\b(github_pat_|ghp_|ghs_|gho_|ghu_|ghr_)[A-Za-z0-9_]+/g, '$1***');
+
+const warn = (m) => console.log(`::warning::propose-drift: ${redact(m)}`);
 
 if (!STARTER || !existsSync(STARTER)) {
   warn('NCS_STARTER_DIR is not set or does not exist; nothing proposed.');
@@ -202,8 +227,10 @@ try {
     console.log((created.stdout || created.stderr || '').trim() || 'propose-drift: PR created.');
   }
 } catch (err) {
+  // redact() runs inside warn(), so the slice below can never cut through a
+  // live credential — the secret is already gone by the time it is shortened.
   warn(
-    `could not open the PR (${String(err.message || err).slice(0, 160)}). The sync-check failure still stands.`,
+    `could not open the PR (${redact(err.message || err).slice(0, 160)}). The sync-check failure still stands.`,
   );
 }
 process.exit(0);
