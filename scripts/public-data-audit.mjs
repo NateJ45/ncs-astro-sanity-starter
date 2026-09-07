@@ -224,11 +224,20 @@ const main = async () => {
     (t) => !String(t).startsWith('sanity.') && !String(t).startsWith('system.'),
   )) {
     if (policy.blockedTypes?.includes(type)) {
-      const n = (await query(`count(*[_type=="${type}"])`)).result ?? 0;
-      if (n > 0)
+      // Count documents that actually CARRY something, not documents that
+      // exist. After wcp-website's directory moved to KV its 37 documents were
+      // emptied rather than deleted (four roleHolder references would have
+      // blocked a delete), leaving shells with no fields at all. Failing on
+      // those would be measuring the schema instead of the exposure - and a
+      // gate that stays red after the fix is a gate people learn to ignore.
+      const docs = (await query(`*[_type=="${type}"][0..99]`)).result || [];
+      const carrying = docs.filter((d) =>
+        Object.keys(d || {}).some((k) => !k.startsWith('_')),
+      ).length;
+      if (carrying > 0)
         violations.push({
           type,
-          count: n,
+          count: `${carrying} of ${docs.length} documents still carry fields`,
           why: 'type is listed in blockedTypes and must never be public',
         });
       continue;
@@ -285,7 +294,7 @@ const main = async () => {
 
   console.log('\n::error::public-data-audit: personal data is readable by anyone, with no token.');
   for (const v of violations) {
-    const what = v.count !== undefined ? `${v.count} documents` : v.found.join(', ');
+    const what = v.count !== undefined ? String(v.count) : v.found.join(', ');
     console.log(`  ${v.type}: ${what}  (${v.why})`);
   }
   console.log(
