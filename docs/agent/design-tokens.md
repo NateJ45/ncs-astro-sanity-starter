@@ -26,14 +26,14 @@ Both are declared in `src/styles/globals.css` via `@utility`. Don't replace with
 
 Fluid spacing is declared in the `@theme` block in `src/styles/globals.css`:
 
-| Token | Value | Notes |
-|---|---|---|
-| `--spacing-xs` | `clamp(0.25rem, 0.5vw, 0.5rem)` | Tightest paddings, icon gaps |
-| `--spacing-s` | `clamp(0.5rem, 1vw, 1rem)` | Small UI gaps |
-| `--spacing-m` | `clamp(1rem, 2vw, 1.5rem)` | Default content padding |
-| `--spacing-l` | `clamp(2rem, 4vw, 3rem)` | Card padding, larger gaps |
-| `--spacing-section-md` | `clamp(3rem, 6vw, 5rem)` | Section-internal padding |
-| `--spacing-section-lg` | `clamp(4rem, 8vw, 7rem)` | Section block padding (top/bottom of major sections) |
+| Token                  | Value                           | Notes                                                |
+| ---------------------- | ------------------------------- | ---------------------------------------------------- |
+| `--spacing-xs`         | `clamp(0.25rem, 0.5vw, 0.5rem)` | Tightest paddings, icon gaps                         |
+| `--spacing-s`          | `clamp(0.5rem, 1vw, 1rem)`      | Small UI gaps                                        |
+| `--spacing-m`          | `clamp(1rem, 2vw, 1.5rem)`      | Default content padding                              |
+| `--spacing-l`          | `clamp(2rem, 4vw, 3rem)`        | Card padding, larger gaps                            |
+| `--spacing-section-md` | `clamp(3rem, 6vw, 5rem)`        | Section-internal padding                             |
+| `--spacing-section-lg` | `clamp(4rem, 8vw, 7rem)`        | Section block padding (top/bottom of major sections) |
 
 Utility classes follow the standard Tailwind pattern: `p-l`, `py-section-lg`, `gap-m`, `mt-section-md`, `space-y-section-lg`, and so on.
 

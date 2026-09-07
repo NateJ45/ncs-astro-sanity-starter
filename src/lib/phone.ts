@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Safe to edit by hand
 // Turns a display phone string from Sanity (siteSettings.phone, e.g.
 // "(931) 539-5255") into a tel: href. Strips formatting; a US 10-digit

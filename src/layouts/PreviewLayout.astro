@@ -120,7 +120,7 @@ const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
   </head>
   <body class="relative bg-background text-foreground">
     <div
-      class="border-border-soft bg-card text-foreground/70 flex items-center justify-between gap-4 border-b px-4 py-1.5 text-xs"
+      class="flex items-center justify-between gap-4 border-b border-border-soft bg-card px-4 py-1.5 text-xs text-foreground/70"
     >
       <span data-connected-note
         >Draft preview. Click the header or footer to edit Site settings.</span
@@ -129,9 +129,11 @@ const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
         >Draft session ended. Reload the Studio browser tab to reconnect the preview.</span
       >
     </div>
-    {/* The real site chrome, draft-aware, each piece an editable surface. The
+    {
+      /* The real site chrome, draft-aware, each piece an editable surface. The
         wrapper divs are REAL block boxes on purpose: the overlay outlines the
-        element's rect (same rule as sectionEditAttr). */}
+        element's rect (same rule as sectionEditAttr). */
+    }
     <div data-sanity={headerAttr}>
       <Header siteSettings={chromeSettings} />
     </div>
@@ -140,14 +142,16 @@ const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
       <Footer siteSettings={chromeSettings} />
     </div>
 
-    {/* The motion system's END states, forced. BaseLayout's IntersectionObserver
+    {
+      /* The motion system's END states, forced. BaseLayout's IntersectionObserver
         script is not loaded here (this shell is deliberately minimal), and the
         reveal and stagger entrances hide content at opacity 0 until it runs, so
         without this block the preview would render INVISIBLE sections. Keep it
         in step with the motion vocabulary in src/styles/globals.css: today that
         is [data-reveal], [data-stagger-grid] and .hero-entry-stagger. Looping
         keyframe effects (the Ken Burns hero) are left running: they need no JS
-        and reach a visible state on their own. */}
+        and reach a visible state on their own. */
+    }
     <style is:global>
       [data-reveal] {
         opacity: 1 !important;
@@ -171,7 +175,7 @@ const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
           <a
             href="/api/draft-mode/disable"
             data-exit-preview
-            class="bg-primary text-primary-foreground hover:bg-primary-dark fixed right-4 bottom-4 z-50 rounded-full px-4 py-2 text-sm font-bold shadow-lg"
+            class="fixed right-4 bottom-4 z-50 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-lg hover:bg-primary-dark"
           >
             Exit preview
           </a>

@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Safe to edit by hand
 // Estimates reading time from a Sanity Portable Text block array.
 // Walks the blocks, sums the text content's word count, divides by an

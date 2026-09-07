@@ -68,13 +68,13 @@ async function render(slug, tagline) {
 // These are the core routes every starter project ships with. Add rows for any
 // additional page singletons you define in your Sanity schema.
 const SINGLETONS = [
-  { type: 'homePage',     slug: 'home',     defaultTitle: 'Welcome' },
-  { type: 'aboutPage',    slug: 'about',    defaultTitle: 'About us' },
+  { type: 'homePage', slug: 'home', defaultTitle: 'Welcome' },
+  { type: 'aboutPage', slug: 'about', defaultTitle: 'About us' },
   { type: 'servicesPage', slug: 'services', defaultTitle: 'Services' },
-  { type: 'faqPage',      slug: 'faq',      defaultTitle: 'Frequently asked questions' },
-  { type: 'contactPage',  slug: 'contact',  defaultTitle: 'Get in touch' },
-  { type: 'journalPage',  slug: 'journal',  defaultTitle: 'Journal' },
-  { type: 'privacyPage',  slug: 'privacy',  defaultTitle: 'Privacy policy' },
+  { type: 'faqPage', slug: 'faq', defaultTitle: 'Frequently asked questions' },
+  { type: 'contactPage', slug: 'contact', defaultTitle: 'Get in touch' },
+  { type: 'journalPage', slug: 'journal', defaultTitle: 'Journal' },
+  { type: 'privacyPage', slug: 'privacy', defaultTitle: 'Privacy policy' },
 ];
 
 for (const page of SINGLETONS) {

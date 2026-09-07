@@ -6,11 +6,9 @@ import SectionHeading from '@/components/SectionHeading.astro';
 import { columnsClass } from '@/lib/layout-variants';
 import { surfaceClass } from '@/lib/surfaces';
 
-interface GalleryImage {
-  asset?: { _ref?: string; _id?: string };
-  alt?: string;
-  caption?: string;
-}
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+type GalleryImage = SanityImageObject;
 
 interface Props {
   heading?: string;
@@ -20,7 +18,13 @@ interface Props {
   headingId: string;
 }
 
-const { heading, images = [], columns = 3, surface = 'background', headingId } = Astro.props as Props;
+const {
+  heading,
+  images = [],
+  columns = 3,
+  surface = 'background',
+  headingId,
+} = Astro.props as Props;
 
 // The surface classes come from src/lib/surfaces.ts, which is where the
 // contrast gate measures this pair; the column classes from
@@ -31,32 +35,39 @@ const pics = (images ?? []).filter((i) => i?.asset);
 const colClass = columnsClass('gallerySection', columns);
 ---
 
-{pics.length > 0 && (
-  <section
-    class={bg}
-    aria-labelledby={heading ? headingId : undefined}
-    aria-label={!heading ? 'Photo gallery' : undefined}
-  >
-    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
-      {heading && (
-        <SectionHeading headline={heading} headingId={headingId} align="center" class="mx-auto" />
-      )}
-      <div class:list={['grid grid-cols-1 gap-m', colClass, heading && 'mt-section-md']} data-stagger-grid>
-        {pics.map((img) => (
-          <figure class="overflow-hidden rounded-md">
-            <SanityImage
-              source={img}
-              width={800}
-              sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
-              quality={75}
-              class="w-full h-auto"
-            />
-            {img.caption && (
-              <figcaption class="mt-xs text-sm text-muted-foreground italic">{img.caption}</figcaption>
-            )}
-          </figure>
-        ))}
+{
+  pics.length > 0 && (
+    <section
+      class={bg}
+      aria-labelledby={heading ? headingId : undefined}
+      aria-label={!heading ? 'Photo gallery' : undefined}
+    >
+      <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+        {heading && (
+          <SectionHeading headline={heading} headingId={headingId} align="center" class="mx-auto" />
+        )}
+        <div
+          class:list={['grid grid-cols-1 gap-m', colClass, heading && 'mt-section-md']}
+          data-stagger-grid
+        >
+          {pics.map((img) => (
+            <figure class="overflow-hidden rounded-md">
+              <SanityImage
+                source={img}
+                width={800}
+                sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
+                quality={75}
+                class="h-auto w-full"
+              />
+              {img.caption && (
+                <figcaption class="mt-xs text-sm text-muted-foreground italic">
+                  {img.caption}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-)}
+    </section>
+  )
+}

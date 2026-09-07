@@ -26,31 +26,41 @@ const {
 ---
 
 <section class="bg-background" aria-labelledby={headingId}>
-  <div data-reveal class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-2 gap-l md:gap-section-md items-center">
-    {portrait?.asset ? (
-      <div class="order-1 md:order-1">
-        <SanityImage
-          source={portrait}
-          width={800}
-          sizes="(min-width: 768px) 45vw, 100vw"
-          quality={75}
-          class="w-full h-auto rounded-md"
-        />
-      </div>
-    ) : (
-      <div class="order-1 md:order-1 aspect-[4/5] bg-muted rounded-md" aria-hidden="true"></div>
-    )}
+  <div
+    data-reveal
+    class="mx-auto grid max-w-content grid-cols-1 items-center gap-l px-m py-section-lg md:grid-cols-2 md:gap-section-md"
+  >
+    {
+      portrait?.asset ? (
+        <div class="order-1 md:order-1">
+          <SanityImage
+            source={portrait}
+            width={800}
+            sizes="(min-width: 768px) 45vw, 100vw"
+            quality={75}
+            class="h-auto w-full rounded-md"
+          />
+        </div>
+      ) : (
+        <div class="order-1 aspect-[4/5] rounded-md bg-muted md:order-1" aria-hidden="true" />
+      )
+    }
 
     <div class="order-2 md:order-2">
-      <p class="text-xs uppercase tracking-[0.22em] text-foreground/80 mb-s">{eyebrow}</p>
+      <p class="mb-s text-xs tracking-[0.22em] text-foreground/80 uppercase">{eyebrow}</p>
       <h2 id={headingId} class="font-display text-h2 text-foreground">{headline}</h2>
-      {content ? (
-        <PortableText value={content} className="mt-m text-foreground/85 text-lg leading-relaxed" />
-      ) : (
-        <p class="mt-m text-foreground/85 text-lg leading-relaxed">
-          Add your founder intro in Sanity Studio under the Founder Bio section.
-        </p>
-      )}
+      {
+        content ? (
+          <PortableText
+            value={content}
+            className="mt-m text-foreground/85 text-lg leading-relaxed"
+          />
+        ) : (
+          <p class="mt-m text-lg leading-relaxed text-foreground/85">
+            Add your founder intro in Sanity Studio under the Founder Bio section.
+          </p>
+        )
+      }
       <div class="mt-l flex justify-center md:justify-start">
         <CtaLink cta={cta} variant="secondary" fallbackHref="/about" fallbackLabel="Learn More" />
       </div>

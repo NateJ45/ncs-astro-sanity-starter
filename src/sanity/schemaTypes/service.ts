@@ -28,7 +28,8 @@ export const service = defineType({
       name: 'price',
       title: 'Price display',
       type: 'string',
-      description: 'How the price reads on the card. Examples: "$150" / "starting at $650" / "Custom quote".',
+      description:
+        'How the price reads on the card. Examples: "$150" / "starting at $650" / "Custom quote".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -46,7 +47,7 @@ export const service = defineType({
       options: {
         canvasApp: {
           purpose:
-            'One or two sentences for the service tier card. Voice: warm, plain-spoken, confident about money. Be specific about what\'s included (concrete verbs over abstract benefits). Banned: transformative, curated, elevated, tailored, investment in your space.',
+            "One or two sentences for the service tier card. Voice: warm, plain-spoken, confident about money. Be specific about what's included (concrete verbs over abstract benefits). Banned: transformative, curated, elevated, tailored, investment in your space.",
         },
       },
       validation: (Rule) => Rule.required().max(200),
@@ -81,7 +82,12 @@ export const service = defineType({
         'Small image at the top of the service card. Use a finished-room photo that represents this tier. Cards without an image render gracefully.',
       options: { hotspot: true },
       fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (R) => R.required() }),
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          validation: (R) => R.required(),
+        }),
       ],
     }),
     defineField({

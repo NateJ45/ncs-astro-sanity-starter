@@ -32,38 +32,52 @@ const isFull = variant === 'full';
 const bg = isFull ? 'bg-background' : 'bg-muted';
 ---
 
-{steps.length > 0 && (
-  <section class={bg} aria-labelledby={isFull ? undefined : headingId} aria-label={isFull ? 'Process step by step' : undefined}>
-    <div class={`mx-auto max-w-content px-m py-section-lg${isFull ? ' space-y-section-lg' : ''}`} data-reveal>
-      {!isFull && (
-        <SectionHeading
-          eyebrow={eyebrow}
-          headline={headline}
-          subhead={subhead}
-          headingId={headingId}
-          align="center"
-          class="mx-auto"
-        />
-      )}
+{
+  steps.length > 0 && (
+    <section
+      class={bg}
+      aria-labelledby={isFull ? undefined : headingId}
+      aria-label={isFull ? 'Process step by step' : undefined}
+    >
+      <div
+        class={`mx-auto max-w-content px-m py-section-lg${isFull ? ' space-y-section-lg' : ''}`}
+        data-reveal
+      >
+        {!isFull && (
+          <SectionHeading
+            eyebrow={eyebrow}
+            headline={headline}
+            subhead={subhead}
+            headingId={headingId}
+            align="center"
+            class="mx-auto"
+          />
+        )}
 
-      {isFull ? (
-        steps.map((step: any, i: number) => (
-          <div class={i > 0 ? 'pt-section-lg border-t border-border-soft' : ''}>
-            <ProcessStep step={step} variant="full" isLast={i === steps.length - 1} />
-          </div>
-        ))
-      ) : (
-        <>
-          <div class="mt-section-lg grid grid-cols-1 md:grid-cols-2 gap-section-md">
-            {steps.slice(0, 4).map((step: any, i: number, arr: any[]) => (
-              <ProcessStep step={step} variant="preview" isLast={i === arr.length - 1} />
-            ))}
-          </div>
-          <div class="mt-section-lg flex justify-center">
-            <CtaLink cta={cta} variant="secondary" fallbackHref="/process" fallbackLabel="See the Full Process" />
-          </div>
-        </>
-      )}
-    </div>
-  </section>
-)}
+        {isFull ? (
+          steps.map((step: any, i: number) => (
+            <div class={i > 0 ? 'border-t border-border-soft pt-section-lg' : ''}>
+              <ProcessStep step={step} variant="full" isLast={i === steps.length - 1} />
+            </div>
+          ))
+        ) : (
+          <>
+            <div class="mt-section-lg grid grid-cols-1 gap-section-md md:grid-cols-2">
+              {steps.slice(0, 4).map((step: any, i: number, arr: any[]) => (
+                <ProcessStep step={step} variant="preview" isLast={i === arr.length - 1} />
+              ))}
+            </div>
+            <div class="mt-section-lg flex justify-center">
+              <CtaLink
+                cta={cta}
+                variant="secondary"
+                fallbackHref="/process"
+                fallbackLabel="See the Full Process"
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  )
+}

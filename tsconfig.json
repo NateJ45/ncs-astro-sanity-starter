@@ -1,13 +1,16 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [
-    ".astro/types.d.ts",
-    "**/*",
-    "./worker-configuration.d.ts"
-  ],
-  "exclude": [
-    "dist"
-  ],
+  "include": [".astro/types.d.ts", "**/*"],
+  // `modules/` is STAGED, not compiled. Each opt-in module imports its page,
+  // islands and queries through `@/...` paths that only resolve once the folder
+  // has been copied into src/, so type checking it in place reports 30 "cannot
+  // find module" errors for code that is working exactly as designed. It gets
+  // checked the moment a project enables it and the files land under src/.
+  // `worker-configuration.d.ts` is what `npm run generate-types` writes. It
+  // redeclares `cloudflare:workers` with `export =`, which cannot coexist with
+  // the minimal ambient declaration in src/cloudflare-workers.d.ts, so it is
+  // excluded (and gitignored) and running that script stays harmless.
+  "exclude": ["dist", ".studio-dist", "modules", "worker-configuration.d.ts"],
   "compilerOptions": {
     "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",

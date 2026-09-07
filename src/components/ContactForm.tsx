@@ -32,10 +32,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { site } from '@/data/site';
-import {
-  parseCustomFieldEntries,
-  type CustomFormField,
-} from '@/lib/custom-form-fields';
+import { parseCustomFieldEntries, type CustomFormField } from '@/lib/custom-form-fields';
 
 const DRAFT_KEY = `${site.storageKeyPrefix}-contact-draft`;
 const WEB3FORMS_ENDPOINT = 'https://api.web3forms.com/submit';
@@ -55,23 +52,19 @@ const DEFAULT_PROJECT_TYPES = [
 // Map ?type= URL param values to dropdown option labels.
 // Defensive: unrecognised values produce undefined, which leaves the default blank.
 const TYPE_PARAM_MAP: Record<string, string> = {
-  'consultation': 'In-Home Consultation',
-  'e-design':     'E-Design',
-  'full-room':    'Full Room Design',
-  'styling':      'Full Room Design + Styling',
-  'shopping':     'Shopping & Sourcing',
+  consultation: 'In-Home Consultation',
+  'e-design': 'E-Design',
+  'full-room': 'Full Room Design',
+  styling: 'Full Room Design + Styling',
+  shopping: 'Shopping & Sourcing',
   'builder-realtor': 'Builder or Realtor Partnership',
   'gift-certificate': 'Gift Certificate',
   // quiz: map to the catch-all so the user sees a reasonable default
-  'quiz':         "Not sure yet, let's chat",
+  quiz: "Not sure yet, let's chat",
 };
 
 // Service-area cities — replace with your actual service area before launch.
-const LOCATION_OPTIONS = [
-  'My City',
-  'Nearby City',
-  'Outside the area',
-] as const;
+const LOCATION_OPTIONS = ['My City', 'Nearby City', 'Outside the area'] as const;
 
 // Budget brackets — adjust to your studio's actual price points before launch.
 // The "Not sure yet" option keeps the form approachable.
@@ -81,7 +74,7 @@ const BUDGET_OPTIONS = [
   '$10K – $30K (multiple rooms or styling)',
   '$30K – $75K (whole-home design)',
   '$75K+ (major project)',
-  "Not sure yet, happy to talk it through",
+  'Not sure yet, happy to talk it through',
 ] as const;
 
 // Timeline buckets cover the realistic spread for residential design work.
@@ -207,7 +200,9 @@ export default function ContactForm({
       if (preselectedType && !projectTypeOptions.includes(preselectedType)) {
         preselectedType = '';
       }
-    } catch { /* ignore — SSR / non-browser environment */ }
+    } catch {
+      /* ignore — SSR / non-browser environment */
+    }
 
     // Restore saved draft, then override projectType if the URL param matched.
     try {
@@ -238,7 +233,9 @@ export default function ContactForm({
     if (!hasContent) return;
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-    } catch { /* localStorage may be full or disabled */ }
+    } catch {
+      /* localStorage may be full or disabled */
+    }
   }, [draft]);
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
@@ -297,7 +294,11 @@ export default function ContactForm({
     if (draft.zip) {
       // Pretend success so the bot moves on; don't actually submit.
       setStatus('success');
-      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {
+        /* ignore */
+      }
       return;
     }
 
@@ -318,7 +319,9 @@ export default function ContactForm({
     if (!ACCESS_KEY) {
       setStatus('error');
       setErrorMessage(
-        "The form isn't connected yet (missing Web3Forms key). Please email " + site.name + " directly."
+        "The form isn't connected yet (missing Web3Forms key). Please email " +
+          site.name +
+          ' directly.',
       );
       return;
     }
@@ -367,21 +370,22 @@ export default function ContactForm({
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.success !== false) {
         setStatus('success');
-        try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+        try {
+          localStorage.removeItem(DRAFT_KEY);
+        } catch {
+          /* ignore */
+        }
         setDraft(EMPTY);
         setCustomValues({});
       } else {
         setStatus('error');
         setErrorMessage(
-          json.message ||
-            "Couldn't send right now. Try again in a minute, or contact us directly."
+          json.message || "Couldn't send right now. Try again in a minute, or contact us directly.",
         );
       }
     } catch {
       setStatus('error');
-      setErrorMessage(
-        "Couldn't send right now. Check your connection, or contact us directly."
-      );
+      setErrorMessage("Couldn't send right now. Check your connection, or contact us directly.");
     }
   }
 
@@ -394,23 +398,36 @@ export default function ContactForm({
       >
         <h3 className="font-display text-h3 text-foreground">Thanks, your note's on its way.</h3>
         <p className="mt-s text-foreground/80">
-          We read everything personally and get back within a couple of business days.
-          If your project's time-sensitive, mention that when you reply.
+          We read everything personally and get back within a couple of business days. If your
+          project's time-sensitive, mention that when you reply.
         </p>
       </div>
     );
   }
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} noValidate className="space-y-m" aria-busy={status === 'submitting'}>
+    <form
+      ref={formRef}
+      onSubmit={onSubmit}
+      noValidate
+      className="space-y-m"
+      aria-busy={status === 'submitting'}
+    >
       {errorMessage && (
-        <div role="alert" aria-live="polite" className="rounded-md border border-destructive bg-destructive/10 p-m text-foreground">
+        <div
+          role="alert"
+          aria-live="polite"
+          className="rounded-md border border-destructive bg-destructive/10 p-m text-foreground"
+        >
           {errorMessage}
         </div>
       )}
 
       {/* Honeypot: bots fill this; humans can't see it. */}
-      <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
+      <div
+        aria-hidden="true"
+        style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}
+      >
         <label>
           ZIP code (leave blank)
           <input
@@ -425,7 +442,9 @@ export default function ContactForm({
       </div>
 
       <div>
-        <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-1">Name</label>
+        <label htmlFor="name" className="mb-1 block text-sm font-semibold text-foreground">
+          Name
+        </label>
         <input
           id="name"
           name="name"
@@ -436,14 +455,25 @@ export default function ContactForm({
           onChange={(e) => update('name', e.target.value)}
           aria-invalid={!!errors.name}
           aria-describedby={errors.name ? 'name-error' : undefined}
-          className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
         />
-        {errors.name && <p id="name-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">{errors.name}</p>}
+        {errors.name && (
+          <p
+            id="name-error"
+            role="alert"
+            aria-live="polite"
+            className="mt-xs text-sm text-destructive"
+          >
+            {errors.name}
+          </p>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-m">
+      <div className="grid grid-cols-1 gap-m md:grid-cols-2">
         <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-1">Email</label>
+          <label htmlFor="email" className="mb-1 block text-sm font-semibold text-foreground">
+            Email
+          </label>
           <input
             id="email"
             name="email"
@@ -454,14 +484,23 @@ export default function ContactForm({
             onChange={(e) => update('email', e.target.value)}
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'email-error' : undefined}
-            className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
           />
-          {errors.email && <p id="email-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">{errors.email}</p>}
+          {errors.email && (
+            <p
+              id="email-error"
+              role="alert"
+              aria-live="polite"
+              className="mt-xs text-sm text-destructive"
+            >
+              {errors.email}
+            </p>
+          )}
         </div>
 
         <div>
-          <label htmlFor="phone" className="block text-sm font-semibold text-foreground mb-1">
-            Phone <span className="text-muted-foreground font-normal">(optional)</span>
+          <label htmlFor="phone" className="mb-1 block text-sm font-semibold text-foreground">
+            Phone <span className="font-normal text-muted-foreground">(optional)</span>
           </label>
           <input
             id="phone"
@@ -470,7 +509,7 @@ export default function ContactForm({
             autoComplete="tel"
             value={draft.phone}
             onChange={(e) => update('phone', e.target.value)}
-            className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
           />
         </div>
       </div>
@@ -479,158 +518,223 @@ export default function ContactForm({
           questionnaire. An editor who writes their own questions replaces this
           whole middle, never the name/email/phone block above it. */}
       {!useCustom && (
-      <>
-      {/* Location + project type — paired row. Location is asked first so the
+        <>
+          {/* Location + project type — paired row. Location is asked first so the
           studio can mentally bucket the lead before reading the rest. */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-m">
-        <div>
-          <label htmlFor="location" className="block text-sm font-semibold text-foreground mb-1">
-            Where's the project?
-          </label>
-          <select
-            id="location"
-            name="location"
-            required
-            value={draft.location}
-            onChange={(e) => update('location', e.target.value)}
-            aria-invalid={!!errors.location}
-            aria-describedby={errors.location ? 'location-error location-hint' : 'location-hint'}
-            className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="">Pick the closest area</option>
-            {locationOptions.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-          {errors.location ? (
-            <p id="location-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">{errors.location}</p>
-          ) : (
-            <p id="location-hint" className="mt-xs text-sm text-muted-foreground">
-              Pick the closest match to your project location.
-            </p>
-          )}
-        </div>
+          <div className="grid grid-cols-1 gap-m md:grid-cols-2">
+            <div>
+              <label
+                htmlFor="location"
+                className="mb-1 block text-sm font-semibold text-foreground"
+              >
+                Where's the project?
+              </label>
+              <select
+                id="location"
+                name="location"
+                required
+                value={draft.location}
+                onChange={(e) => update('location', e.target.value)}
+                aria-invalid={!!errors.location}
+                aria-describedby={
+                  errors.location ? 'location-error location-hint' : 'location-hint'
+                }
+                className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+              >
+                <option value="">Pick the closest area</option>
+                {locationOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              {errors.location ? (
+                <p
+                  id="location-error"
+                  role="alert"
+                  aria-live="polite"
+                  className="mt-xs text-sm text-destructive"
+                >
+                  {errors.location}
+                </p>
+              ) : (
+                <p id="location-hint" className="mt-xs text-sm text-muted-foreground">
+                  Pick the closest match to your project location.
+                </p>
+              )}
+            </div>
 
-        <div>
-          <label htmlFor="projectType" className="block text-sm font-semibold text-foreground mb-1">Project type</label>
-          <select
-            id="projectType"
-            name="projectType"
-            required
-            value={draft.projectType}
-            onChange={(e) => update('projectType', e.target.value)}
-            aria-invalid={!!errors.projectType}
-            aria-describedby={errors.projectType ? 'projectType-error' : undefined}
-            className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="">Pick the closest match</option>
-            {projectTypeOptions.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-          {errors.projectType && <p id="projectType-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">{errors.projectType}</p>}
-        </div>
-      </div>
+            <div>
+              <label
+                htmlFor="projectType"
+                className="mb-1 block text-sm font-semibold text-foreground"
+              >
+                Project type
+              </label>
+              <select
+                id="projectType"
+                name="projectType"
+                required
+                value={draft.projectType}
+                onChange={(e) => update('projectType', e.target.value)}
+                aria-invalid={!!errors.projectType}
+                aria-describedby={errors.projectType ? 'projectType-error' : undefined}
+                className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+              >
+                <option value="">Pick the closest match</option>
+                {projectTypeOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              {errors.projectType && (
+                <p
+                  id="projectType-error"
+                  role="alert"
+                  aria-live="polite"
+                  className="mt-xs text-sm text-destructive"
+                >
+                  {errors.projectType}
+                </p>
+              )}
+            </div>
+          </div>
 
-      {/* Budget + timeline — paired row. Budget phrasing is deliberate ("rough"
+          {/* Budget + timeline — paired row. Budget phrasing is deliberate ("rough"
           + "no judgment" hint) so the question doesn't feel transactional. The
           "Not sure yet" option in BUDGET_OPTIONS keeps the form approachable
           for people who genuinely don't know what room design costs. */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-m">
-        <div>
-          <label htmlFor="budget" className="block text-sm font-semibold text-foreground mb-1">
-            Rough budget range
-          </label>
-          <select
-            id="budget"
-            name="budget"
-            required
-            value={draft.budget}
-            onChange={(e) => update('budget', e.target.value)}
-            aria-invalid={!!errors.budget}
-            aria-describedby={errors.budget ? 'budget-error budget-hint' : 'budget-hint'}
-            className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="">Pick a bracket</option>
-            {budgetOptions.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-          {errors.budget ? (
-            <p id="budget-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">{errors.budget}</p>
-          ) : (
-            <p id="budget-hint" className="mt-xs text-sm text-muted-foreground">
-              No judgment — this helps us suggest the right tier.
-            </p>
-          )}
-        </div>
+          <div className="grid grid-cols-1 gap-m md:grid-cols-2">
+            <div>
+              <label htmlFor="budget" className="mb-1 block text-sm font-semibold text-foreground">
+                Rough budget range
+              </label>
+              <select
+                id="budget"
+                name="budget"
+                required
+                value={draft.budget}
+                onChange={(e) => update('budget', e.target.value)}
+                aria-invalid={!!errors.budget}
+                aria-describedby={errors.budget ? 'budget-error budget-hint' : 'budget-hint'}
+                className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+              >
+                <option value="">Pick a bracket</option>
+                {budgetOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              {errors.budget ? (
+                <p
+                  id="budget-error"
+                  role="alert"
+                  aria-live="polite"
+                  className="mt-xs text-sm text-destructive"
+                >
+                  {errors.budget}
+                </p>
+              ) : (
+                <p id="budget-hint" className="mt-xs text-sm text-muted-foreground">
+                  No judgment — this helps us suggest the right tier.
+                </p>
+              )}
+            </div>
 
-        <div>
-          <label htmlFor="timeline" className="block text-sm font-semibold text-foreground mb-1">
-            Timeline
-          </label>
-          <select
-            id="timeline"
-            name="timeline"
-            required
-            value={draft.timeline}
-            onChange={(e) => update('timeline', e.target.value)}
-            aria-invalid={!!errors.timeline}
-            aria-describedby={errors.timeline ? 'timeline-error' : undefined}
-            className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="">When do you want to start?</option>
-            {timelineOptions.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-          {errors.timeline && <p id="timeline-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">{errors.timeline}</p>}
-        </div>
-      </div>
+            <div>
+              <label
+                htmlFor="timeline"
+                className="mb-1 block text-sm font-semibold text-foreground"
+              >
+                Timeline
+              </label>
+              <select
+                id="timeline"
+                name="timeline"
+                required
+                value={draft.timeline}
+                onChange={(e) => update('timeline', e.target.value)}
+                aria-invalid={!!errors.timeline}
+                aria-describedby={errors.timeline ? 'timeline-error' : undefined}
+                className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+              >
+                <option value="">When do you want to start?</option>
+                {timelineOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              {errors.timeline && (
+                <p
+                  id="timeline-error"
+                  role="alert"
+                  aria-live="polite"
+                  className="mt-xs text-sm text-destructive"
+                >
+                  {errors.timeline}
+                </p>
+              )}
+            </div>
+          </div>
 
-      <div>
-        <label htmlFor="message" className="block text-sm font-semibold text-foreground mb-1">Tell us about the space</label>
-        <textarea
-          id="message"
-          name="message"
-          required
-          rows={6}
-          value={draft.message}
-          onChange={(e) => update('message', e.target.value)}
-          aria-invalid={!!errors.message}
-          aria-describedby={errors.message ? 'message-error message-hint' : 'message-hint'}
-          className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-        {errors.message ? (
-          <p id="message-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">{errors.message}</p>
-        ) : (
-          <p id="message-hint" className="mt-xs text-sm text-muted-foreground">
-            What room or rooms? What's not working? Any photos you can describe in words?
-          </p>
-        )}
-      </div>
+          <div>
+            <label htmlFor="message" className="mb-1 block text-sm font-semibold text-foreground">
+              Tell us about the space
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              required
+              rows={6}
+              value={draft.message}
+              onChange={(e) => update('message', e.target.value)}
+              aria-invalid={!!errors.message}
+              aria-describedby={errors.message ? 'message-error message-hint' : 'message-hint'}
+              className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+            />
+            {errors.message ? (
+              <p
+                id="message-error"
+                role="alert"
+                aria-live="polite"
+                className="mt-xs text-sm text-destructive"
+              >
+                {errors.message}
+              </p>
+            ) : (
+              <p id="message-hint" className="mt-xs text-sm text-muted-foreground">
+                What room or rooms? What's not working? Any photos you can describe in words?
+              </p>
+            )}
+          </div>
 
-      {/* Optional lead-source. Quiet UI — small, no error state, no hint text.
+          {/* Optional lead-source. Quiet UI — small, no error state, no hint text.
           Marketing intelligence accrues over time without making the form
           longer to fill out. */}
-      <div>
-        <label htmlFor="source" className="block text-sm font-semibold text-foreground mb-1">
-          How did you hear about us? <span className="text-muted-foreground font-normal">(optional)</span>
-        </label>
-        <select
-          id="source"
-          name="source"
-          value={draft.source}
-          onChange={(e) => update('source', e.target.value)}
-          className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          <option value="">Skip if you'd rather not say</option>
-          {sourceOptions.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
-      </div>
-      </>
+          <div>
+            <label htmlFor="source" className="mb-1 block text-sm font-semibold text-foreground">
+              How did you hear about us?{' '}
+              <span className="font-normal text-muted-foreground">(optional)</span>
+            </label>
+            <select
+              id="source"
+              name="source"
+              value={draft.source}
+              onChange={(e) => update('source', e.target.value)}
+              className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+            >
+              <option value="">Skip if you'd rather not say</option>
+              {sourceOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
       )}
 
       {/* Editor-written questions (contactPage.formFields). Native `required`
@@ -643,12 +747,23 @@ export default function ContactForm({
         const value = customValues[i];
         const set = (v: string | boolean) => setCustomValues((m) => ({ ...m, [i]: v }));
         const cue = f.required ? (
-          <span className="text-destructive" aria-hidden="true"> *</span>
+          <span className="text-destructive" aria-hidden="true">
+            {' '}
+            *
+          </span>
         ) : (
-          <span className="text-muted-foreground font-normal"> (optional)</span>
+          <span className="font-normal text-muted-foreground"> (optional)</span>
         );
+        // A <select> gets an OUTLINE, everything else keeps the ring. A
+        // Tailwind `focus:ring` is a box-shadow, and WebKit renders native
+        // form controls itself and drops box-shadow on them, so a select
+        // carrying `focus:outline-none` plus a ring has NO focus indicator at
+        // all on Safari and iOS. Caught by tests/a11y-dark.spec.ts on the
+        // webkit-iphone project, 2026-09-06.
         const cls =
-          'w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring';
+          f.kind === 'select'
+            ? 'w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-2 focus:outline-offset-2 focus:outline-ring'
+            : 'w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring';
 
         if (f.kind === 'checkbox') {
           return (
@@ -666,7 +781,12 @@ export default function ContactForm({
               />
               <label htmlFor={id} className="text-sm text-foreground">
                 {f.label}
-                {f.required && <span className="text-destructive" aria-hidden="true"> *</span>}
+                {f.required && (
+                  <span className="text-destructive" aria-hidden="true">
+                    {' '}
+                    *
+                  </span>
+                )}
               </label>
             </div>
           );
@@ -674,7 +794,7 @@ export default function ContactForm({
 
         return (
           <div key={id}>
-            <label htmlFor={id} className="block text-sm font-semibold text-foreground mb-1">
+            <label htmlFor={id} className="mb-1 block text-sm font-semibold text-foreground">
               {f.label}
               {cue}
             </label>
@@ -704,7 +824,9 @@ export default function ContactForm({
               >
                 <option value="">Select an option</option>
                 {f.options.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
                 ))}
               </select>
             ) : (
@@ -729,7 +851,7 @@ export default function ContactForm({
       <button
         type="submit"
         disabled={status === 'submitting'}
-        className="inline-flex items-center px-l py-s bg-primary-dark text-white font-semibold uppercase tracking-widest text-sm hover:bg-accent-dark disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        className="inline-flex items-center bg-primary-dark px-l py-s text-sm font-semibold tracking-widest text-white uppercase transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
       >
         {status === 'submitting' ? 'Sending…' : 'Send message'}
       </button>

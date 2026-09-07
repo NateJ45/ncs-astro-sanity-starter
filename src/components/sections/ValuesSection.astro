@@ -33,28 +33,30 @@ const {
 const colClass = columnsClass('valuesSection', columns);
 ---
 
-{points.length > 0 && (
-  <section class="bg-muted" aria-labelledby={headingId}>
-    <div class="mx-auto max-w-content px-m py-section-lg">
-      <SectionHeading
-        eyebrow={eyebrow}
-        headline={headline}
-        headingId={headingId}
-        align="center"
-        class="mx-auto"
-      />
+{
+  points.length > 0 && (
+    <section class="bg-muted" aria-labelledby={headingId}>
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          headingId={headingId}
+          align="center"
+          class="mx-auto"
+        />
 
-      <div class={`mt-section-lg grid grid-cols-1 ${colClass} gap-l`} data-stagger-grid>
-        {points.map((point, idx) => (
-          <article class="bg-card p-l rounded-md border border-border-soft">
-            <p class="font-display text-h2 text-link/85 leading-none mb-s" aria-hidden="true">
-              {String(idx + 1).padStart(2, '0')}
-            </p>
-            <h3 class="font-display text-h3 text-foreground">{point.title}</h3>
-            <p class="mt-s text-foreground/85 leading-relaxed">{point.description}</p>
-          </article>
-        ))}
+        <div class={`mt-section-lg grid grid-cols-1 ${colClass} gap-l`} data-stagger-grid>
+          {points.map((point, idx) => (
+            <article class="rounded-md border border-border-soft bg-card p-l">
+              <p class="mb-s font-display text-h2 leading-none text-link/85" aria-hidden="true">
+                {String(idx + 1).padStart(2, '0')}
+              </p>
+              <h3 class="font-display text-h3 text-foreground">{point.title}</h3>
+              <p class="mt-s leading-relaxed text-foreground/85">{point.description}</p>
+            </article>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-)}
+    </section>
+  )
+}

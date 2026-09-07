@@ -20,14 +20,29 @@ export async function getStaticPaths() {
   // a custom page can never shadow a built-in route. Keep in sync with
   // src/lib/reservedSlugs.ts (same set, duplicated by Astro isolation necessity).
   const RESERVED = new Set([
-    'about', 'services', 'process', 'portfolio', 'faq', 'contact', 'journal',
-    'e-design', 'shop', 'gift-certificates', 'quiz', 'calculator', 'resources',
-    'guides', 'press', 'privacy', '404', 'sitemap-index.xml', 'og', '_astro',
+    'about',
+    'services',
+    'process',
+    'portfolio',
+    'faq',
+    'contact',
+    'journal',
+    'e-design',
+    'shop',
+    'gift-certificates',
+    'quiz',
+    'calculator',
+    'resources',
+    'guides',
+    'press',
+    'privacy',
+    '404',
+    'sitemap-index.xml',
+    'og',
+    '_astro',
   ]);
   const slugs = await getAllPageSlugs().catch(() => [] as string[]);
-  return slugs
-    .filter((slug) => !RESERVED.has(slug))
-    .map((slug) => ({ params: { slug } }));
+  return slugs.filter((slug) => !RESERVED.has(slug)).map((slug) => ({ params: { slug } }));
 }
 
 const { slug } = Astro.params;

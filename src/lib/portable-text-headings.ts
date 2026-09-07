@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Safe to edit by hand
 // Walks Sanity Portable Text blocks and returns a flat list of headings with
 // deterministic anchor IDs. The PortableText renderer uses the same slugify()
@@ -21,7 +22,10 @@ export function extractHeadings(blocks: any): Heading[] {
     const level = styleToLevel[b.style];
     if (!level) continue;
     const text = Array.isArray(b.children)
-      ? b.children.map((c: any) => c?.text ?? '').join('').trim()
+      ? b.children
+          .map((c: any) => c?.text ?? '')
+          .join('')
+          .trim()
       : '';
     if (!text) continue;
     const base = slugify(text);

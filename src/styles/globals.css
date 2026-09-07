@@ -3,12 +3,12 @@
    onto shadcn's semantic tokens (:root / .dark) so brand identity
    carries everywhere the design system is referenced. */
 
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "@fontsource/libre-baskerville/400.css";
-@import "@fontsource/libre-baskerville/700.css";
-@import "@fontsource-variable/inter";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource/libre-baskerville/400.css';
+@import '@fontsource/libre-baskerville/700.css';
+@import '@fontsource-variable/inter';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -18,36 +18,36 @@
 
 @theme {
   /* Brand palette — neutral Slate default. Swap per project. */
-  --color-primary:      #586577; /* Slate */
-  --color-primary-dark: #434E5C; /* Slate Dark — body anchor text */
-  --color-accent:       #2A2D31; /* Ink — headings + body */
-  --color-accent-dark:  #1E2024; /* Ink Dark — dark surfaces */
-  --color-secondary:    #AAB0B8; /* Cool Gray — borders, eyebrows */
-  --color-tertiary:     #9DB0A6; /* Muted Sage — sparingly */
-  --color-bg:           #FBFBFA; /* Paper — primary surface */
-  --color-bg-soft:      #F3F4F2; /* Soft Paper — alternating surface */
-  --color-border-soft:  #E6E7E5; /* Faint dividers */
-  --color-white-pure:   #FFFFFF;
+  --color-primary: #586577; /* Slate */
+  --color-primary-dark: #434e5c; /* Slate Dark — body anchor text */
+  --color-accent: #2a2d31; /* Ink — headings + body */
+  --color-accent-dark: #1e2024; /* Ink Dark — dark surfaces */
+  --color-secondary: #aab0b8; /* Cool Gray — borders, eyebrows */
+  --color-tertiary: #9db0a6; /* Muted Sage — sparingly */
+  --color-bg: #fbfbfa; /* Paper — primary surface */
+  --color-bg-soft: #f3f4f2; /* Soft Paper — alternating surface */
+  --color-border-soft: #e6e7e5; /* Faint dividers */
+  --color-white-pure: #ffffff;
 
   /* Fonts */
-  --font-display: "Libre Baskerville", Georgia, "Times New Roman", serif;
-  --font-body:    "Inter Variable", system-ui, -apple-system, sans-serif;
-  --font-mono:    ui-monospace, "SF Mono", Consolas, monospace;
-  --font-script:  "Snell Roundhand", "Apple Chancery", cursive;
+  --font-display: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
+  --font-script: 'Snell Roundhand', 'Apple Chancery', cursive;
 
   /* Fluid heading sizes */
   --text-h6: 1rem;
   --text-h5: clamp(1.125rem, 1.5vw, 1.25rem);
-  --text-h4: clamp(1.25rem,  2vw,   1.5rem);
-  --text-h3: clamp(1.5rem,   2.5vw, 2rem);
-  --text-h2: clamp(2rem,     4vw,   3rem);
-  --text-h1: clamp(2.5rem,   6vw,   5rem);
+  --text-h4: clamp(1.25rem, 2vw, 1.5rem);
+  --text-h3: clamp(1.5rem, 2.5vw, 2rem);
+  --text-h2: clamp(2rem, 4vw, 3rem);
+  --text-h1: clamp(2.5rem, 6vw, 5rem);
 
   /* Typographic micro-rules. Codified so usage stays consistent across
      components — drift from ad-hoc arbitrary values (tracking-[0.22em],
      leading-[1.05]) into shared tokens. */
-  --leading-headline-tight: 1.05;   /* Hero H1 and any oversized display type */
-  --tracking-eyebrow:       0.18em; /* Uppercase eyebrow labels above headings */
+  --leading-headline-tight: 1.05; /* Hero H1 and any oversized display type */
+  --tracking-eyebrow: 0.18em; /* Uppercase eyebrow labels above headings */
 
   /* Fluid spacing.
      Note: the larger section-padding sizes use a `--spacing-section-*`
@@ -58,12 +58,12 @@
      site-wide (they'd inherit the fluid clamp instead of the container
      width). Section utilities are now `py-section-lg`, `mt-section-md`,
      etc. — Tailwind containers stay safe. */
-  --spacing-xs:           clamp(0.25rem, 0.5vw, 0.5rem);
-  --spacing-s:            clamp(0.5rem,  1vw,   1rem);
-  --spacing-m:            clamp(1rem,    2vw,   1.5rem);
-  --spacing-l:            clamp(2rem,    4vw,   3rem);
-  --spacing-section-md:   clamp(3rem,    6vw,   5rem); /* was --spacing-xl */
-  --spacing-section-lg:   clamp(4rem,    8vw,   7rem); /* was --spacing-2xl */
+  --spacing-xs: clamp(0.25rem, 0.5vw, 0.5rem);
+  --spacing-s: clamp(0.5rem, 1vw, 1rem);
+  --spacing-m: clamp(1rem, 2vw, 1.5rem);
+  --spacing-l: clamp(2rem, 4vw, 3rem);
+  --spacing-section-md: clamp(3rem, 6vw, 5rem); /* was --spacing-xl */
+  --spacing-section-lg: clamp(4rem, 8vw, 7rem); /* was --spacing-2xl */
 
   --container-content: 82.5rem;
 
@@ -80,37 +80,37 @@
 /* ---------- shadcn semantic token map (added by CLI, preserved) ------- */
 
 @theme inline {
-    --font-heading: var(--font-display);
-    --font-sans: var(--font-body);
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    /* IMPORTANT: bg-accent must be theme-aware (shadcn convention — soft hover
+  --font-heading: var(--font-display);
+  --font-sans: var(--font-body);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  /* IMPORTANT: bg-accent must be theme-aware (shadcn convention — soft hover
        surface, Cream in light / darker warm in dark). The @theme block above
        declares --color-accent as static Charcoal for legacy brand-palette
        reasons, but every component that uses bg-accent (ThemeToggle hover,
@@ -120,34 +120,48 @@
        because @theme inline is declared after @theme. Side effect: text-accent
        is now theme-aware too (Cream in light, darker in dark) — fine because
        no component uses bare text-accent (use text-foreground for body text). */
-    --color-accent: var(--accent);
-    /* Dark-mode-aware brand link/anchor color: Bronze Dark in light mode,
+  --color-accent: var(--accent);
+  /* Dark-mode-aware brand link/anchor color: Bronze Dark in light mode,
        lifted Bronze in dark mode. Use text-link for inline links and bronze
        link-style buttons that need to read in both modes. */
-    --color-link: var(--link);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
-    --animate-marquee:          marquee var(--duration) infinite linear;
-    --animate-marquee-vertical:  marquee-vertical var(--duration) linear infinite;
-    --animate-spotlight:         spotlight 2s ease 0.75s 1 forwards;
+  --color-link: var(--link);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
 
-    @keyframes marquee {
-      from { transform: translateX(0); }
-      to   { transform: translateX(calc(-100% - var(--gap))); }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
     }
-    @keyframes marquee-vertical {
-      from { transform: translateY(0); }
-      to   { transform: translateY(calc(-100% - var(--gap))); }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
     }
-    @keyframes spotlight {
-      0%   { opacity: 0; transform: translate(-72%, -62%) scale(0.5); }
-      100% { opacity: 1; transform: translate(-50%, -40%) scale(1); }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
     }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes spotlight {
+    0% {
+      opacity: 0;
+      transform: translate(-72%, -62%) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -40%) scale(1);
+    }
+  }
 }
 
 /* ---------- Typographic utilities ------------------------------------- */
@@ -183,70 +197,70 @@
 /* ---------- Light mode (overrides shadcn defaults) -------------------- */
 
 :root {
-    /* Surfaces */
-    --background: #FBFBFA;
-    --foreground: #2A2D31;
-    --card: #FFFFFF;
-    --card-foreground: #2A2D31;
-    --popover: #FFFFFF;
-    --popover-foreground: #2A2D31;
+  /* Surfaces */
+  --background: #fbfbfa;
+  --foreground: #2a2d31;
+  --card: #ffffff;
+  --card-foreground: #2a2d31;
+  --popover: #ffffff;
+  --popover-foreground: #2a2d31;
 
-    /* Brand */
-    --primary: #586577;
-    --primary-foreground: #FFFFFF;
-    --secondary: #AAB0B8;
-    --secondary-foreground: #2A2D31;
+  /* Brand */
+  --primary: #586577;
+  --primary-foreground: #ffffff;
+  --secondary: #aab0b8;
+  --secondary-foreground: #2a2d31;
 
-    /* Quiet surfaces / muted text */
-    --muted: #F3F4F2;
-    --muted-foreground: #5F6469;    /* ~5.6:1 on #FBFBFA — passes AA */
+  /* Quiet surfaces / muted text */
+  --muted: #f3f4f2;
+  --muted-foreground: #5f6469; /* ~5.6:1 on #FBFBFA — passes AA */
 
-    /* Accent */
-    --accent: #E8E9E7;
-    --accent-foreground: #2A2D31;
+  /* Accent */
+  --accent: #e8e9e7;
+  --accent-foreground: #2a2d31;
 
-    /* States */
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: #E6E7E5;
-    --input: #E6E7E5;
-    --ring: #586577;
-    --link: #434E5C;                /* ~8:1 on #FBFBFA — passes AA */
+  /* States */
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #e6e7e5;
+  --input: #e6e7e5;
+  --ring: #586577;
+  --link: #434e5c; /* ~8:1 on #FBFBFA — passes AA */
 
-    /* Charts (kept neutral, not used at launch) */
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
+  /* Charts (kept neutral, not used at launch) */
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
 
-    --radius: 0.5rem;
+  --radius: 0.5rem;
 
-    /* Sidebar (reserved for Studio-style admin contexts, not used on site) */
-    --sidebar: #FBFBFA;
-    --sidebar-foreground: #2A2D31;
-    --sidebar-primary: #586577;
-    --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #F3F4F2;
-    --sidebar-accent-foreground: #2A2D31;
-    --sidebar-border: #E6E7E5;
-    --sidebar-ring: #586577;
+  /* Sidebar (reserved for Studio-style admin contexts, not used on site) */
+  --sidebar: #fbfbfa;
+  --sidebar-foreground: #2a2d31;
+  --sidebar-primary: #586577;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f3f4f2;
+  --sidebar-accent-foreground: #2a2d31;
+  --sidebar-border: #e6e7e5;
+  --sidebar-ring: #586577;
 
-    --tint-rgb: 88, 101, 119;
+  --tint-rgb: 88, 101, 119;
 
-    /* Starwind UI extra semantic tokens — not in shadcn's default set.
+  /* Starwind UI extra semantic tokens — not in shadcn's default set.
        Values are harmonized to the existing neutral palette so the starter
        renders sensibly out of the box. apply-brand rewrites these. */
-    --primary-accent: #434E5C;        /* darker shade of --primary for hover states */
-    --secondary-accent: #2A2D31;      /* dark ink — active/pressed secondary */
-    --info: #93C5FD;                  /* soft blue, harmonized with slate primary */
-    --info-foreground: #1E3A5F;       /* deep blue for text on info surfaces */
-    --success: #86EFAC;               /* soft green */
-    --success-foreground: #14532D;    /* deep green for text on success surfaces */
-    --warning: #FDE68A;               /* soft amber */
-    --warning-foreground: #713F12;    /* deep amber for text on warning surfaces */
-    --error: oklch(0.577 0.245 27.325); /* matches --destructive */
-    --error-foreground: #FFFFFF;
-    --outline: #586577;               /* matches --ring */
+  --primary-accent: #434e5c; /* darker shade of --primary for hover states */
+  --secondary-accent: #2a2d31; /* dark ink — active/pressed secondary */
+  --info: #93c5fd; /* soft blue, harmonized with slate primary */
+  --info-foreground: #1e3a5f; /* deep blue for text on info surfaces */
+  --success: #86efac; /* soft green */
+  --success-foreground: #14532d; /* deep green for text on success surfaces */
+  --warning: #fde68a; /* soft amber */
+  --warning-foreground: #713f12; /* deep amber for text on warning surfaces */
+  --error: oklch(0.577 0.245 27.325); /* matches --destructive */
+  --error-foreground: #ffffff;
+  --outline: #586577; /* matches --ring */
 }
 
 /* ---------- Dark mode --------------------------------------------------
@@ -254,59 +268,59 @@
    Slate and Ink hold their identity; surfaces flip to deep cool grays. */
 
 .dark {
-    --background: #17191C;
-    --foreground: #F2F3F2;
-    --card: #202327;
-    --card-foreground: #F2F3F2;
-    --popover: #202327;
-    --popover-foreground: #F2F3F2;
+  --background: #17191c;
+  --foreground: #f2f3f2;
+  --card: #202327;
+  --card-foreground: #f2f3f2;
+  --popover: #202327;
+  --popover-foreground: #f2f3f2;
 
-    --primary: #8A96A6;
-    --primary-foreground: #17191C;
-    --secondary: #5A6068;
-    --secondary-foreground: #F2F3F2;
+  --primary: #8a96a6;
+  --primary-foreground: #17191c;
+  --secondary: #5a6068;
+  --secondary-foreground: #f2f3f2;
 
-    --muted: #202327;
-    --muted-foreground: #AAB0B8;
+  --muted: #202327;
+  --muted-foreground: #aab0b8;
 
-    --accent: #2C3036;
-    --accent-foreground: #F2F3F2;
+  --accent: #2c3036;
+  --accent-foreground: #f2f3f2;
 
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 12%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: #8A96A6;
-    --link: #8A96A6;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: #8a96a6;
+  --link: #8a96a6;
 
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
 
-    --sidebar: #202327;
-    --sidebar-foreground: #F2F3F2;
-    --sidebar-primary: #8A96A6;
-    --sidebar-primary-foreground: #17191C;
-    --sidebar-accent: #2C3036;
-    --sidebar-accent-foreground: #F2F3F2;
-    --sidebar-border: oklch(1 0 0 / 12%);
-    --sidebar-ring: #8A96A6;
+  --sidebar: #202327;
+  --sidebar-foreground: #f2f3f2;
+  --sidebar-primary: #8a96a6;
+  --sidebar-primary-foreground: #17191c;
+  --sidebar-accent: #2c3036;
+  --sidebar-accent-foreground: #f2f3f2;
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: #8a96a6;
 
-    --tint-rgb: 138, 150, 166;
+  --tint-rgb: 138, 150, 166;
 
-    /* Starwind UI extra semantic tokens — dark mode variants. */
-    --primary-accent: #8A96A6;        /* lifted primary for dark hover states */
-    --secondary-accent: #F2F3F2;      /* near-white for dark active secondary */
-    --info: #93C5FD;                  /* same soft blue works on dark surfaces */
-    --info-foreground: #1E3A5F;
-    --success: #86EFAC;
-    --success-foreground: #14532D;
-    --warning: #FDE68A;
-    --warning-foreground: #713F12;
-    --error: oklch(0.704 0.191 22.216); /* matches dark --destructive */
-    --error-foreground: #FFFFFF;
-    --outline: #8A96A6;               /* matches dark --ring */
+  /* Starwind UI extra semantic tokens — dark mode variants. */
+  --primary-accent: #8a96a6; /* lifted primary for dark hover states */
+  --secondary-accent: #f2f3f2; /* near-white for dark active secondary */
+  --info: #93c5fd; /* same soft blue works on dark surfaces */
+  --info-foreground: #1e3a5f;
+  --success: #86efac;
+  --success-foreground: #14532d;
+  --warning: #fde68a;
+  --warning-foreground: #713f12;
+  --error: oklch(0.704 0.191 22.216); /* matches dark --destructive */
+  --error-foreground: #ffffff;
+  --outline: #8a96a6; /* matches dark --ring */
 }
 
 /* ---------- Base resets and defaults ---------------------------------- */
@@ -324,14 +338,24 @@
   body {
     @apply bg-background text-foreground;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     font-weight: 500;
     color: var(--color-accent);
     line-height: 1.1;
     letter-spacing: -0.01em;
   }
-  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6 {
     color: var(--foreground);
   }
 }
@@ -347,8 +371,8 @@
   /* Use --primary-dark (Bronze Dark) instead of --primary (Warm Bronze) so
      white-on-bronze contrast lands at 5.5:1 instead of 4.06:1. The skip-link
      is small semibold text, which falls under the AA 4.5:1 body-text rule. */
-  background: var(--primary-dark, #434E5C);
-  color: #FFFFFF;
+  background: var(--primary-dark, #434e5c);
+  color: #ffffff;
   text-decoration: none;
   font-weight: 600;
 }
@@ -392,7 +416,7 @@
   position: relative;
 }
 .nav-underline::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 50%;
   bottom: -0.35rem;
@@ -405,7 +429,7 @@
 }
 .nav-underline:hover::after,
 .nav-underline:focus-visible::after,
-.nav-underline[aria-current="page"]::after {
+.nav-underline[aria-current='page']::after {
   transform: translateX(-50%) scaleX(1);
 }
 
@@ -440,7 +464,7 @@
   transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 }
-.site-header[data-state="hidden"] {
+.site-header[data-state='hidden'] {
   transform: translateY(-100%);
 }
 
@@ -496,7 +520,7 @@
 .dark .surface-warm {
   background-image: radial-gradient(
     ellipse 70% 60% at 50% 0%,
-    rgba(var(--tint-rgb), 0.10),
+    rgba(var(--tint-rgb), 0.1),
     transparent 70%
   );
 }
@@ -521,7 +545,7 @@
    with the READER's page theme rather than with the band it is sitting on, so
    pin it to the lifted slate that reads on near-black in either theme. */
 .bg-accent-dark {
-  --section-accent: #8A96A6;
+  --section-accent: #8a96a6;
 }
 
 /* Tactile press on primary CTAs. Tap/click depresses ~1px so the press
@@ -549,10 +573,11 @@
   input,
   select,
   textarea,
-  [role="button"],
-  [role="tab"] {
-    transition-property: color, background-color, border-color, outline-color,
-      text-decoration-color, fill, stroke, box-shadow, transform, opacity;
+  [role='button'],
+  [role='tab'] {
+    transition-property:
+      color, background-color, border-color, outline-color, text-decoration-color, fill, stroke,
+      box-shadow, transform, opacity;
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
     transition-duration: 440ms;
   }
@@ -590,18 +615,34 @@
    Reduced-motion users get the final state instantly — no animation, no
    stagger, content visible at full opacity. */
 @keyframes hero-fade-up {
-  from { opacity: 0; transform: translateY(0.5rem); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .hero-entry-stagger > * {
   opacity: 0;
   animation: hero-fade-up 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-.hero-entry-stagger > *:nth-child(1) { animation-delay:   0ms; }
-.hero-entry-stagger > *:nth-child(2) { animation-delay: 120ms; }
-.hero-entry-stagger > *:nth-child(3) { animation-delay: 240ms; }
-.hero-entry-stagger > *:nth-child(4) { animation-delay: 360ms; }
-.hero-entry-stagger > *:nth-child(5) { animation-delay: 480ms; }
+.hero-entry-stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.hero-entry-stagger > *:nth-child(2) {
+  animation-delay: 120ms;
+}
+.hero-entry-stagger > *:nth-child(3) {
+  animation-delay: 240ms;
+}
+.hero-entry-stagger > *:nth-child(4) {
+  animation-delay: 360ms;
+}
+.hero-entry-stagger > *:nth-child(5) {
+  animation-delay: 480ms;
+}
 @media (prefers-reduced-motion: reduce) {
   .hero-entry-stagger > * {
     opacity: 1 !important;
@@ -617,7 +658,10 @@
    component <style>, because the slides are rendered by the child SanityImage
    component and would not carry HeroBackground's scope attribute. Reduced-motion
    users keep the first slide static. ---- */
-.hero-slideshow { position: absolute; inset: 0; }
+.hero-slideshow {
+  position: absolute;
+  inset: 0;
+}
 .hero-slide {
   position: absolute;
   inset: 0;
@@ -630,15 +674,31 @@
   animation: hero-kb 16s ease-in-out infinite alternate;
   will-change: opacity, transform;
 }
-.hero-slide.is-active { opacity: 1; }
-.hero-slide:nth-child(3n + 2) { transform-origin: top left; animation-duration: 18s; }
-.hero-slide:nth-child(3n + 3) { transform-origin: bottom right; animation-duration: 20s; }
+.hero-slide.is-active {
+  opacity: 1;
+}
+.hero-slide:nth-child(3n + 2) {
+  transform-origin: top left;
+  animation-duration: 18s;
+}
+.hero-slide:nth-child(3n + 3) {
+  transform-origin: bottom right;
+  animation-duration: 20s;
+}
 @keyframes hero-kb {
-  from { transform: scale(1); }
-  to   { transform: scale(1.07); }
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.07);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-slide { transition: none; animation: none; transform: none; }
+  .hero-slide {
+    transition: none;
+    animation: none;
+    transform: none;
+  }
 }
 
 /* ---- Drop cap -- float cap on the first paragraph of every journal post.
@@ -705,9 +765,13 @@
   transform: scale(1.06);
 }
 .group:hover .img-zoom .img-tint,
-.img-zoom:hover .img-tint                  { background: rgba(var(--tint-rgb), 0.15); }
+.img-zoom:hover .img-tint {
+  background: rgba(var(--tint-rgb), 0.15);
+}
 .group:hover .img-zoom .img-tint.img-tint-light,
-.img-zoom:hover .img-tint.img-tint-light   { background: rgba(var(--tint-rgb), 0.08); }
+.img-zoom:hover .img-tint.img-tint-light {
+  background: rgba(var(--tint-rgb), 0.08);
+}
 
 /* ---- Grid stagger entrance. Add data-stagger-grid to any card grid container.
    The BaseLayout observer adds .is-staggered on intersection. ---- */
@@ -730,11 +794,21 @@
    The hover properties (transform, box-shadow, border-color) keep a 0ms delay,
    so hovering a later card responds instantly instead of waiting out its
    entrance stagger. The five values map to transition-property order above. */
-[data-stagger-grid].is-staggered > *:nth-child(1)   { transition-delay:   0ms,   0ms, 0ms, 0ms, 0ms; }
-[data-stagger-grid].is-staggered > *:nth-child(2)   { transition-delay: 100ms, 100ms, 0ms, 0ms, 0ms; }
-[data-stagger-grid].is-staggered > *:nth-child(3)   { transition-delay: 200ms, 200ms, 0ms, 0ms, 0ms; }
-[data-stagger-grid].is-staggered > *:nth-child(4)   { transition-delay: 300ms, 300ms, 0ms, 0ms, 0ms; }
-[data-stagger-grid].is-staggered > *:nth-child(n+5) { transition-delay: 400ms, 400ms, 0ms, 0ms, 0ms; }
+[data-stagger-grid].is-staggered > *:nth-child(1) {
+  transition-delay: 0ms, 0ms, 0ms, 0ms, 0ms;
+}
+[data-stagger-grid].is-staggered > *:nth-child(2) {
+  transition-delay: 100ms, 100ms, 0ms, 0ms, 0ms;
+}
+[data-stagger-grid].is-staggered > *:nth-child(3) {
+  transition-delay: 200ms, 200ms, 0ms, 0ms, 0ms;
+}
+[data-stagger-grid].is-staggered > *:nth-child(4) {
+  transition-delay: 300ms, 300ms, 0ms, 0ms, 0ms;
+}
+[data-stagger-grid].is-staggered > *:nth-child(n + 5) {
+  transition-delay: 400ms, 400ms, 0ms, 0ms, 0ms;
+}
 
 /* Portfolio filter override: re-assert .is-filtered-out at specificity (0,2,0)
    so it beats the [data-stagger-grid].is-staggered > * rule (also 0,2,0 but
@@ -786,7 +860,7 @@
   margin: 0 auto;
 }
 .step-connector::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   background: var(--primary);
@@ -802,20 +876,38 @@
    Header and footer are named and pinned with animation: none so they stay
    put during the swap. Astro's ClientRouter is already wired in BaseLayout.
    Astro respects prefers-reduced-motion automatically — no extra rule needed. ---- */
-main#main           { view-transition-name: main-content; }
-.site-header        { view-transition-name: site-header; }
-footer              { view-transition-name: site-footer; }
+main#main {
+  view-transition-name: main-content;
+}
+.site-header {
+  view-transition-name: site-header;
+}
+footer {
+  view-transition-name: site-footer;
+}
 
 @keyframes vt-fade-out {
-  from { opacity: 1; }
-  to   { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 @keyframes vt-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
-::view-transition-old(main-content) { animation: vt-fade-out 150ms ease forwards; }
-::view-transition-new(main-content) { animation: vt-fade-in  200ms ease forwards; }
+::view-transition-old(main-content) {
+  animation: vt-fade-out 150ms ease forwards;
+}
+::view-transition-new(main-content) {
+  animation: vt-fade-in 200ms ease forwards;
+}
 
 ::view-transition-old(site-header),
 ::view-transition-new(site-header),
@@ -829,7 +921,7 @@ footer              { view-transition-name: site-footer; }
    negative z-index inside the page wrapper. Visible enough to add tactile
    warmth to large flat surfaces, quiet enough not to read as a pattern. */
 body::before {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -857,7 +949,9 @@ body::before {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  html { scroll-behavior: auto !important; }
+  html {
+    scroll-behavior: auto !important;
+  }
   /* Polish layer: kill the start-hidden state so content stays visible without
      waiting on the reveal animation. */
   [data-reveal] {
@@ -871,9 +965,14 @@ body::before {
     translate: none !important;
   }
   /* Curtain: skip the reveal entirely — image always visible */
-  .img-curtain { display: none !important; }
+  .img-curtain {
+    display: none !important;
+  }
   /* Connector: skip the draw animation — Gray track always visible */
-  .step-connector::after { transform: scaleY(1) !important; transition: none !important; }
+  .step-connector::after {
+    transform: scaleY(1) !important;
+    transition: none !important;
+  }
 }
 
 /* ---------- Print stylesheet ------------------------------------------ */
@@ -891,27 +990,30 @@ body::before {
     --muted: white;
     --border: #d4d4d4;
   }
-  html, body {
+  html,
+  body {
     background: white !important;
     color: black !important;
     font-size: 11pt;
   }
-  body::before { display: none !important; } /* kill the paper-grain overlay */
+  body::before {
+    display: none !important;
+  } /* kill the paper-grain overlay */
 
   /* Hide site chrome + interactive elements that don't translate to paper. */
   .site-header,
   footer,
-  nav[aria-label="More projects"],
-  nav[aria-label="More journal posts"],
+  nav[aria-label='More projects'],
+  nav[aria-label='More journal posts'],
   .reading-progress,
   [data-back-to-top],
-  [data-portfolio-cursor-zone] ~ * [aria-label="View →"],
+  [data-portfolio-cursor-zone] ~ * [aria-label='View →'],
   .no-print {
     display: none !important;
   }
 
   /* Sticky CTA chip, BackToTop button, custom cursor — all fixed elements. */
-  [class*="fixed"] {
+  [class*='fixed'] {
     display: none !important;
   }
 
@@ -920,28 +1022,42 @@ body::before {
     color: black !important;
     text-decoration: underline;
   }
-  a[href^="http"]::after {
-    content: " (" attr(href) ")";
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
     font-size: 9pt;
     color: #666;
     text-decoration: none;
   }
   /* Don't print appended URLs on internal anchors or mailto/tel — too noisy. */
-  a[href^="/"]::after,
-  a[href^="#"]::after,
-  a[href^="mailto:"]::after,
-  a[href^="tel:"]::after { content: ""; }
+  a[href^='/']::after,
+  a[href^='#']::after,
+  a[href^='mailto:']::after,
+  a[href^='tel:']::after {
+    content: '';
+  }
 
   /* Headings shouldn't break across pages. */
-  h1, h2, h3, h4 { page-break-after: avoid; }
-  figure, .card-lift { page-break-inside: avoid; }
+  h1,
+  h2,
+  h3,
+  h4 {
+    page-break-after: avoid;
+  }
+  figure,
+  .card-lift {
+    page-break-inside: avoid;
+  }
 
   /* Images — preserve aspect ratio, cap height so they fit on a printed page. */
-  img { max-width: 100%; max-height: 8in; height: auto; }
+  img {
+    max-width: 100%;
+    max-height: 8in;
+    height: auto;
+  }
 
   /* Print-only header + footer injected into every page. */
   body::after {
-    content: "Studio Starter · example.com";
+    content: 'Studio Starter · example.com';
     display: block;
     margin-top: 0.5in;
     padding-top: 0.25in;

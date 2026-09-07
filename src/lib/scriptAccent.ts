@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Safe to edit by hand
 // Shared utility for splitting a headline around a script-font accent word.
 // Used by Hero.astro and SectionHeading.astro so both surfaces apply exactly
@@ -25,10 +26,7 @@ export interface ScriptAccentResult {
  *   `word` is the exact slice from `headline` (same chars as `accent`).
  *   `before` + `word` + `after` === `headline`.
  */
-export function splitScriptAccent(
-  headline: string,
-  accent?: string,
-): ScriptAccentResult {
+export function splitScriptAccent(headline: string, accent?: string): ScriptAccentResult {
   const EMPTY: ScriptAccentResult = { found: false, before: '', word: '', after: '' };
 
   if (!accent || accent.length === 0) return EMPTY;

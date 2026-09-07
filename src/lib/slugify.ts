@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // Deterministic slug from arbitrary text. Used to derive heading anchors
 // in case study Portable Text so the TOC links match the rendered headings.

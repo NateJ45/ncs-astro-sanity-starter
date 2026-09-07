@@ -14,7 +14,7 @@ export const testimonial = defineType({
       name: 'quote',
       title: 'Quote',
       type: 'text',
-      description: "What the client said. Keep their punctuation.",
+      description: 'What the client said. Keep their punctuation.',
       rows: 4,
       validation: (Rule) => Rule.required(),
     }),
@@ -60,9 +60,7 @@ export const testimonial = defineType({
       type: 'image',
       description: 'Optional photo of the client. Get permission before adding.',
       options: { hotspot: true },
-      fields: [
-        defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
-      ],
+      fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),
     defineField({
       name: 'featured',
@@ -76,7 +74,8 @@ export const testimonial = defineType({
       name: 'sourceType',
       title: 'Source type',
       type: 'string',
-      description: 'Where this review was originally posted. Used to show a source badge on the testimonial card.',
+      description:
+        'Where this review was originally posted. Used to show a source badge on the testimonial card.',
       options: {
         list: [
           { title: 'Google', value: 'Google' },

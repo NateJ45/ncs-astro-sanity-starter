@@ -55,12 +55,9 @@ export default function NewsletterSignup({ newsletter, source = 'newsletter' }: 
     newsletter.blurb ??
     'Design ideas, project notes, and the occasional resource. No noise — just good reads when they land.';
   const buttonLabel = newsletter.buttonLabel ?? 'Subscribe';
-  const successMessage =
-    newsletter.successMessage ??
-    "You're on the list. Good things incoming.";
+  const successMessage = newsletter.successMessage ?? "You're on the list. Good things incoming.";
   const consentNote =
-    newsletter.consentNote ??
-    'No spam. Unsubscribe any time. Read the privacy policy.';
+    newsletter.consentNote ?? 'No spam. Unsubscribe any time. Read the privacy policy.';
 
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState(''); // honeypot
@@ -117,12 +114,10 @@ export default function NewsletterSignup({ newsletter, source = 'newsletter' }: 
   return (
     <div className="rounded-md border border-border bg-card p-l">
       {/* Brand accent stripe at the top — matches card grammar. */}
-      <div className="h-0.5 bg-primary mb-l" aria-hidden="true"></div>
+      <div className="mb-l h-0.5 bg-primary" aria-hidden="true"></div>
 
       <h3 className="font-display text-h3 text-foreground">{heading}</h3>
-      {blurb && (
-        <p className="mt-s text-sm text-foreground/80 leading-relaxed">{blurb}</p>
-      )}
+      {blurb && <p className="mt-s text-sm leading-relaxed text-foreground/80">{blurb}</p>}
 
       <form
         onSubmit={onSubmit}
@@ -160,7 +155,10 @@ export default function NewsletterSignup({ newsletter, source = 'newsletter' }: 
         )}
 
         <div>
-          <label htmlFor="newsletter-email" className="block text-sm font-semibold text-foreground mb-1">
+          <label
+            htmlFor="newsletter-email"
+            className="mb-1 block text-sm font-semibold text-foreground"
+          >
             Email address
           </label>
           <input
@@ -178,10 +176,15 @@ export default function NewsletterSignup({ newsletter, source = 'newsletter' }: 
             aria-invalid={!!errorMsg}
             aria-describedby={errorMsg ? 'newsletter-email-error' : undefined}
             placeholder="you@example.com"
-            className="w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring min-h-[44px]"
+            className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
           />
           {errorMsg && (
-            <p id="newsletter-email-error" role="alert" aria-live="polite" className="mt-xs text-sm text-destructive">
+            <p
+              id="newsletter-email-error"
+              role="alert"
+              aria-live="polite"
+              className="mt-xs text-sm text-destructive"
+            >
               {errorMsg}
             </p>
           )}
@@ -190,18 +193,21 @@ export default function NewsletterSignup({ newsletter, source = 'newsletter' }: 
         <button
           type="submit"
           disabled={status === 'submitting'}
-          className="inline-flex items-center justify-center min-h-[44px] w-full px-l py-s bg-primary-dark text-white font-semibold uppercase tracking-widest text-xs hover:bg-accent-dark disabled:opacity-60 disabled:cursor-not-allowed transition-colors rounded-sm press-tactile"
+          className="press-tactile inline-flex min-h-[44px] w-full items-center justify-center rounded-sm bg-primary-dark px-l py-s text-xs font-semibold tracking-widest text-white uppercase transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === 'submitting' ? 'Subscribing…' : buttonLabel}
         </button>
       </form>
 
       {/* Consent / privacy note. Parses the privacy link pattern for the /privacy page. */}
-      <p className="mt-s text-xs text-foreground/70 leading-relaxed">
+      <p className="mt-s text-xs leading-relaxed text-foreground/70">
         {consentNote.includes('privacy policy') ? (
           <>
             {consentNote.replace('privacy policy', '').trimEnd()}{' '}
-            <a href="/privacy" className="underline underline-offset-2 hover:text-link transition-colors">
+            <a
+              href="/privacy"
+              className="underline underline-offset-2 transition-colors hover:text-link"
+            >
               privacy policy
             </a>
             .

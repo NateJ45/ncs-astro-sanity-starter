@@ -1,11 +1,7 @@
 import type { APIRoute } from 'astro';
 import { validatePreviewUrl } from '@sanity/preview-url-secret';
 import { perspectiveCookieName } from '@sanity/preview-url-secret/constants';
-import {
-  getPreviewClient,
-  previewConfig,
-  previewUnconfiguredResponse,
-} from '@/lib/cms-preview';
+import { getPreviewClient, previewConfig, previewUnconfiguredResponse } from '@/lib/cms-preview';
 import { previewCookieValue } from '@/lib/preview-auth';
 
 export const prerender = false;

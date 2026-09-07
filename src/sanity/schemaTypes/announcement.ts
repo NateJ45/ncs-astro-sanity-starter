@@ -33,21 +33,24 @@ export const announcement = defineType({
       name: 'internalTitle',
       title: 'Internal name',
       type: 'string',
-      description: 'For your reference in the Studio only. Not shown on the site. Example: "Summer hours notice".',
+      description:
+        'For your reference in the Studio only. Not shown on the site. Example: "Summer hours notice".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'message',
       title: 'Message',
       type: 'string',
-      description: 'The text shown in the banner. Keep it short (under 160 characters). Example: "We are closed 26 Dec through 1 Jan. Replies will be slower than usual."',
+      description:
+        'The text shown in the banner. Keep it short (under 160 characters). Example: "We are closed 26 Dec through 1 Jan. Replies will be slower than usual."',
       validation: (Rule) => Rule.required().max(160),
     }),
     defineField({
       name: 'style',
       title: 'Style',
       type: 'string',
-      description: 'Info = calm muted background (neutral updates). Highlight = brand primary (good news, promotions). Urgent = red (closures, important warnings).',
+      description:
+        'Info = calm muted background (neutral updates). Highlight = brand primary (good news, promotions). Urgent = red (closures, important warnings).',
       options: {
         list: [
           { title: 'Info (neutral, muted background)', value: 'info' },
@@ -83,19 +86,22 @@ export const announcement = defineType({
       name: 'startDate',
       title: 'Show from (optional)',
       type: 'datetime',
-      description: 'Leave blank to show immediately when enabled. Set a date to schedule the banner ahead of time. Evaluated at build time -- set up a scheduled rebuild if you need precise timing.',
+      description:
+        'Leave blank to show immediately when enabled. Set a date to schedule the banner ahead of time. Evaluated at build time -- set up a scheduled rebuild if you need precise timing.',
     }),
     defineField({
       name: 'endDate',
       title: 'Hide after (optional)',
       type: 'datetime',
-      description: 'Leave blank to keep showing until you disable it. Set a date to auto-expire the banner. Evaluated at build time -- a rebuild is needed for the banner to disappear.',
+      description:
+        'Leave blank to keep showing until you disable it. Set a date to auto-expire the banner. Evaluated at build time -- a rebuild is needed for the banner to disappear.',
     }),
     defineField({
       name: 'enabled',
       title: 'Enabled',
       type: 'boolean',
-      description: 'Master on/off switch. When off, this announcement never shows regardless of dates.',
+      description:
+        'Master on/off switch. When off, this announcement never shows regardless of dates.',
       initialValue: true,
     }),
   ],

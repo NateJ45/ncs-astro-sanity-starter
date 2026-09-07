@@ -80,178 +80,187 @@ function formatDate(d?: string): string {
 const heroDate = formatDate(hero?.publishedAt);
 ---
 
-{hasEntries && (
-  <section class="surface-warm bg-muted" aria-labelledby={headingId}>
-    <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
-      <SectionHeading
-        eyebrow={eyebrow}
-        headline={headline}
-        subhead={subhead}
-        headingId={headingId}
-        align="center"
-        class="mx-auto"
-      />
+{
+  hasEntries && (
+    <section class="surface-warm bg-muted" aria-labelledby={headingId}>
+      <div data-reveal class="mx-auto max-w-content px-m py-section-lg">
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          subhead={subhead}
+          headingId={headingId}
+          align="center"
+          class="mx-auto"
+        />
 
-      <div
-        class:list={[
-          'mt-section-lg',
-          hasCompanions
-            ? 'grid grid-cols-1 lg:grid-cols-[1.55fr_1fr] gap-l lg:gap-section-md'
-            : 'mx-auto max-w-4xl',
-        ]}
-      >
-        {/* ------- Hero entry — full-bleed editorial card ------------------ */}
-        {/* Cover image fills the card with a bottom gradient. Category +
+        <div
+          class:list={[
+            'mt-section-lg',
+            hasCompanions
+              ? 'grid grid-cols-1 gap-l lg:grid-cols-[1.55fr_1fr] lg:gap-section-md'
+              : 'mx-auto max-w-4xl',
+          ]}
+        >
+          {/* ------- Hero entry — full-bleed editorial card ------------------ */}
+          {/* Cover image fills the card with a bottom gradient. Category +
             date eyebrow, title, and lede excerpt overlay on the gradient.
             Same treatment as the Work hero so the two sections feel paired. */}
-        <a
-          href={heroHref}
-          class="card-lift card-lift-slow group relative block rounded-md overflow-hidden bg-card border border-border-soft hover:border-primary/40 transition-colors shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] lg:h-full"
-        >
-          <div class="absolute top-0 left-0 right-0 h-0.5 bg-primary z-20" aria-hidden="true"></div>
-
-          <div
-            class:list={[
-              'overflow-hidden bg-muted relative',
-              heroAspectClass,
-            ]}
+          <a
+            href={heroHref}
+            class="card-lift card-lift-slow group relative block overflow-hidden rounded-md border border-border-soft bg-card shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] transition-colors hover:border-primary/40 lg:h-full"
           >
-            {hero?.coverImage?.asset ? (
-              <SanityImage
-                source={hero.coverImage}
-                width={1600}
-                sizes={hasCompanions ? '(min-width: 1024px) 60vw, 100vw' : '(min-width: 1024px) 56rem, 100vw'}
-                class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]"
-              />
-            ) : (
-              <div class="w-full h-full" aria-hidden="true"></div>
-            )}
+            <div class="absolute top-0 right-0 left-0 z-20 h-0.5 bg-primary" aria-hidden="true" />
 
-            {/* Full-height gradient so overlay text reads on any image —
+            <div class:list={['relative overflow-hidden bg-muted', heroAspectClass]}>
+              {hero?.coverImage?.asset ? (
+                <SanityImage
+                  source={hero.coverImage}
+                  width={1600}
+                  sizes={
+                    hasCompanions
+                      ? '(min-width: 1024px) 60vw, 100vw'
+                      : '(min-width: 1024px) 56rem, 100vw'
+                  }
+                  class="h-full w-full object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]"
+                />
+              ) : (
+                <div class="h-full w-full" aria-hidden="true" />
+              )}
+
+              {/* Full-height gradient so overlay text reads on any image —
                 strong at the bottom for the title block, with a subtle
                 ~20% wash across the rest of the image to handle bright
                 window light or pale wall tones intersecting the title. */}
-            <div
-              class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/20 pointer-events-none"
-              aria-hidden="true"
-            ></div>
-
-            {hero?.featured && (
-              <span
-                class="absolute top-m right-m inline-flex items-center gap-1 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-eyebrow rounded-full bg-primary-dark text-white"
+              <div
+                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/20"
                 aria-hidden="true"
-              >
-                ★ Featured
-              </span>
-            )}
+              />
 
-            {/* Editorial text overlay — pinned to bottom. Cream chip styles
+              {hero?.featured && (
+                <span
+                  class="absolute top-m right-m inline-flex items-center gap-1 rounded-full bg-primary-dark px-2.5 py-1 text-[0.65rem] font-semibold tracking-eyebrow text-white uppercase"
+                  aria-hidden="true"
+                >
+                  ★ Featured
+                </span>
+              )}
+
+              {/* Editorial text overlay — pinned to bottom. Cream chip styles
                 are inverted on the dark gradient to preserve legibility.
                 Right padding (`pr-28 md:pr-36`) reserves a corridor for the
                 ★ Featured pill at top-right so a long title never wraps
                 into the pill's column. */}
-            <div class="absolute inset-x-0 bottom-0 p-l md:p-section-md pr-28 md:pr-36">
-              <div class="flex flex-wrap items-center gap-x-m gap-y-xs">
-                {heroPrimaryCategory?.title && (
-                  <span class="inline-flex items-center px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-eyebrow rounded-full bg-bg/85 text-primary-dark backdrop-blur-sm">
-                    {heroPrimaryCategory.title}
-                  </span>
-                )}
-                {heroDate && (
-                  <time datetime={hero?.publishedAt} class="text-xs uppercase tracking-widest text-white/85">
-                    {heroDate}
-                  </time>
-                )}
-              </div>
+              <div class="absolute inset-x-0 bottom-0 p-l pr-28 md:p-section-md md:pr-36">
+                <div class="flex flex-wrap items-center gap-x-m gap-y-xs">
+                  {heroPrimaryCategory?.title && (
+                    <span class="inline-flex items-center rounded-full bg-bg/85 px-2.5 py-1 text-[0.65rem] font-semibold tracking-eyebrow text-primary-dark uppercase backdrop-blur-sm">
+                      {heroPrimaryCategory.title}
+                    </span>
+                  )}
+                  {heroDate && (
+                    <time
+                      datetime={hero?.publishedAt}
+                      class="text-xs tracking-widest text-white/85 uppercase"
+                    >
+                      {heroDate}
+                    </time>
+                  )}
+                </div>
 
-              {/* Mobile uses h3 sizing because journal titles can run long;
+                {/* Mobile uses h3 sizing because journal titles can run long;
                   desktop steps up to h2 for editorial impact. line-clamp-3
                   is a safety net so unusually long titles never blow out
                   the overlay area on small viewports. */}
-              <h3 class="mt-s font-display text-h3 md:text-h2 leading-tight text-white drop-shadow-sm max-w-2xl line-clamp-3">
-                {hero?.title}
-              </h3>
+                <h3 class="mt-s line-clamp-3 max-w-2xl font-display text-h3 leading-tight text-white drop-shadow-sm md:text-h2">
+                  {hero?.title}
+                </h3>
 
-              {hero?.excerpt && (
-                <p class="mt-s text-white/90 text-sm md:text-base leading-relaxed max-w-prose line-clamp-3">
-                  {hero.excerpt}
-                </p>
-              )}
+                {hero?.excerpt && (
+                  <p class="mt-s line-clamp-3 max-w-prose text-sm leading-relaxed text-white/90 md:text-base">
+                    {hero.excerpt}
+                  </p>
+                )}
 
-              <span class="mt-m inline-flex items-center text-sm font-semibold uppercase tracking-eyebrow text-white group-hover:text-primary transition-colors">
-                Read the article
-                <span class="ml-2 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">→</span>
-              </span>
+                <span class="mt-m inline-flex items-center text-sm font-semibold tracking-eyebrow text-white uppercase transition-colors group-hover:text-primary">
+                  Read the article
+                  <span
+                    class="ml-2 transition-transform duration-300 group-hover:translate-x-1"
+                    aria-hidden="true"
+                  >
+                    →
+                  </span>
+                </span>
+              </div>
             </div>
-          </div>
-        </a>
+          </a>
 
-        {/* ------- Companion entries — one cohesive panel -----------------
+          {/* ------- Companion entries — one cohesive panel -----------------
             Same pattern as FeaturedWork: the companions share a SINGLE card
             (one bronze stripe, one border, one shadow) with each entry as a
             row split by hairline dividers, so the right column reads as one
             held-together unit. Fills the grid-stretched column on lg+ and
             distributes rows with `lg:flex-1` so it lines up with the hero. */}
-        {hasCompanions && (
-          <div class="card-lift card-lift-slow flex flex-col rounded-md overflow-hidden bg-card border border-border-soft shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] lg:h-full">
-            {/* One brand accent stripe for the whole panel. */}
-            <div class="h-0.5 bg-primary" aria-hidden="true"></div>
+          {hasCompanions && (
+            <div class="card-lift card-lift-slow flex flex-col overflow-hidden rounded-md border border-border-soft bg-card shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] lg:h-full">
+              {/* One brand accent stripe for the whole panel. */}
+              <div class="h-0.5 bg-primary" aria-hidden="true" />
 
-            {companions.map((p, i) => {
-              const cHref = p.slug?.current ? `/journal/${p.slug.current}` : '#';
-              const cCat = p.categories?.[0];
-              const cDate = formatDate(p.publishedAt);
-              return (
-                <a
-                  href={cHref}
-                  class:list={[
-                    'group/row flex items-stretch gap-m flex-1 min-h-[8.5rem] transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                    i > 0 && 'border-t border-border-soft',
-                  ]}
-                >
-                  <div class="relative w-28 sm:w-36 lg:w-40 xl:w-44 aspect-square lg:aspect-auto shrink-0 overflow-hidden bg-muted self-stretch">
-                    {p.coverImage?.asset ? (
-                      <SanityImage
-                        source={p.coverImage}
-                        width={500}
-                        sizes="(min-width: 1280px) 176px, (min-width: 1024px) 160px, (min-width: 640px) 144px, 112px"
-                        class="w-full h-full object-cover transition-transform duration-[1500ms] group-hover/row:scale-[1.04]"
-                      />
-                    ) : (
-                      <div class="w-full h-full" aria-hidden="true"></div>
-                    )}
-                  </div>
+              {companions.map((p, i) => {
+                const cHref = p.slug?.current ? `/journal/${p.slug.current}` : '#';
+                const cCat = p.categories?.[0];
+                const cDate = formatDate(p.publishedAt);
+                return (
+                  <a
+                    href={cHref}
+                    class:list={[
+                      'group/row flex min-h-[8.5rem] flex-1 items-stretch gap-m transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
+                      i > 0 && 'border-t border-border-soft',
+                    ]}
+                  >
+                    <div class="relative aspect-square w-28 shrink-0 self-stretch overflow-hidden bg-muted sm:w-36 lg:aspect-auto lg:w-40 xl:w-44">
+                      {p.coverImage?.asset ? (
+                        <SanityImage
+                          source={p.coverImage}
+                          width={500}
+                          sizes="(min-width: 1280px) 176px, (min-width: 1024px) 160px, (min-width: 640px) 144px, 112px"
+                          class="h-full w-full object-cover transition-transform duration-[1500ms] group-hover/row:scale-[1.04]"
+                        />
+                      ) : (
+                        <div class="h-full w-full" aria-hidden="true" />
+                      )}
+                    </div>
 
-                  <div class="flex-1 min-w-0 py-m pr-m flex flex-col justify-center">
-                    {cCat?.title && (
-                      <p class="text-[0.65rem] font-semibold uppercase tracking-eyebrow text-link truncate">
-                        {cCat.title}
-                      </p>
-                    )}
-                    <h4 class="mt-1 font-display text-h4 leading-tight text-foreground group-hover/row:text-primary-dark transition-colors line-clamp-2">
-                      {p.title}
-                    </h4>
-                    {cDate && (
-                      <p class="mt-1 text-xs uppercase tracking-widest text-foreground/80 truncate">
-                        {cDate}
-                      </p>
-                    )}
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        )}
+                    <div class="flex min-w-0 flex-1 flex-col justify-center py-m pr-m">
+                      {cCat?.title && (
+                        <p class="truncate text-[0.65rem] font-semibold tracking-eyebrow text-link uppercase">
+                          {cCat.title}
+                        </p>
+                      )}
+                      <h4 class="mt-1 line-clamp-2 font-display text-h4 leading-tight text-foreground transition-colors group-hover/row:text-primary-dark">
+                        {p.title}
+                      </h4>
+                      {cDate && (
+                        <p class="mt-1 truncate text-xs tracking-widest text-foreground/80 uppercase">
+                          {cDate}
+                        </p>
+                      )}
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div class="mt-section-lg flex justify-center">
+          <CtaLink
+            cta={cta}
+            variant="secondary"
+            fallbackHref="/journal"
+            fallbackLabel="Read more from the journal"
+          />
+        </div>
       </div>
-
-      <div class="mt-section-lg flex justify-center">
-        <CtaLink
-          cta={cta}
-          variant="secondary"
-          fallbackHref="/journal"
-          fallbackLabel="Read more from the journal"
-        />
-      </div>
-    </div>
-  </section>
-)}
+    </section>
+  )
+}

@@ -29,7 +29,8 @@ function maxLenFromValidation(schemaType: unknown): number | undefined {
     const validation = (schemaType as { validation?: unknown })?.validation;
     const rules = Array.isArray(validation) ? validation : validation ? [validation] : [];
     for (const rule of rules) {
-      const specs = (rule as { _rules?: Array<{ flag?: string; constraint?: unknown }> })?._rules ?? [];
+      const specs =
+        (rule as { _rules?: Array<{ flag?: string; constraint?: unknown }> })?._rules ?? [];
       for (const spec of specs) {
         if (spec?.flag === 'max' && typeof spec.constraint === 'number') {
           return spec.constraint;

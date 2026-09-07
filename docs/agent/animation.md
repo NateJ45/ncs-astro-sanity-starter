@@ -19,6 +19,7 @@ In-page anchor navigation routes through the persistent `window.lenis` instance 
 Because the single Lenis instance persists, any in-flight scroll momentum carries across a View Transitions swap. While Lenis is actively smoothing it ignores the router's scroll-to-top reset, so a link clicked mid-scroll would open the next page partway down (the stale scroll target clamps to the new, often shorter, page's maximum).
 
 The fix lives in the Lenis init block:
+
 - An `astro:after-swap` listener calls `lenis.scrollTo(0, { immediate: true, force: true })` (cancels momentum and resets to top) plus `lenis.resize()`.
 - It runs on **forward navigations only**: the listener reads `navigationType` off the `astro:before-swap` event and skips the reset when that is `traverse`, so browser back/forward keeps Astro's built-in scroll restoration.
 
@@ -71,6 +72,7 @@ The home hero can be a single static image (default) or a slow cross-fading slid
 **Why the slide CSS lives in `globals.css` (not a scoped component style):** the slides are rendered by the child `SanityImage` component and would not inherit a scoped style. Same reasoning as `.img-zoom` and `.hero-entry-stagger`.
 
 Each slide is `position: absolute`, `opacity: 0` with a `1.5s` opacity transition; the active slide is `opacity: 1` and all slides run a gentle continuous Ken Burns (`scale(1)` to `scale(1.07)`, alternating origin and duration). A small `<script is:inline>` in HeroBackground advances the active slide every 4500ms (3s hold + 1.5s fade):
+
 - Uses a single `window`-scoped timer that is cleared on every re-init.
 - Pauses while the tab is hidden (`visibilitychange`).
 - Re-registers once on `astro:page-load` (guarded by a `window.__heroSlideshowBound` flag).
@@ -93,13 +95,15 @@ The `@utility font-script` declaration and `--font-script` CSS custom property e
 ### How to enable the script accent
 
 1. **Choose a script typeface** and install its `@fontsource` package, for example:
+
    ```
    npm install @fontsource/dancing-script
    ```
 
 2. **Add the import** near the top of `src/styles/globals.css`, after the other `@fontsource` imports:
+
    ```css
-   @import "@fontsource/dancing-script/400.css";
+   @import '@fontsource/dancing-script/400.css';
    ```
 
 3. **Point `--font-script` at the family** in the `@theme` block in `globals.css`:

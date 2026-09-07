@@ -37,11 +37,19 @@ dependency-free, so it runs in any repo in the family whatever that repo has ins
 Run it from the starter against itself for a self-check (everything must be `SAME`),
 and from each site during that site's sync session.
 
-**Sites do not have the marker yet.** As of 2026-08-27 only this starter's copies carry
-it, so a cross-check from a site reports "no marked files found" rather than drift.
-Adding the marker line to a site's already-ported copies is the first act of that
+**Most sites do not have the marker yet.** As of 2026-08-27 only this starter's copies
+carried it, so a cross-check from a site reported "no marked files found" rather than
+drift. Adding the marker line to a site's already-ported copies is the first act of that
 site's sync session. presacademy needs one: it is the source of most of these files and
-none of its copies are marked.
+none of its copies are marked. WCP has had its session: 23 marked files as of
+2026-09-06, all `SAME`.
+
+**The marker is opt-in and one-way, so it proves nothing about what it does not cover.**
+A file with no marker is not thereby non-portable; it has simply never been looked at.
+That is what a harvest audit is for: read a site's unmarked files, decide portable /
+site-specific / dead for each, and either port the wins or write down why not. The
+first one (WCP, 2026-09-06) is recorded in the harvest notes under the cards it
+touched.
 
 ---
 
@@ -58,10 +66,10 @@ is installing it as of the date on the card.
 | 3   | page-parity harness                                               | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
 | 4   | sanity-lib seed/patch plumbing                                    | partial | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 |
 | 5   | stale-types CI guard                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 |
-| 6   | Nightly Sanity backup workflow                                    | yes     | yes         | no       | yes              | yes           | yes            | template           | n/a                 |
-| 7   | Uptime workflow                                                   | yes     | yes         | no       | yes              | yes           | yes            | template           | yes                 |
-| 8   | Playwright + axe + reflow suite                                   | yes     | yes         | no       | yes              | no            | no             | no                 | no                  |
-| 9   | contrast.ts + theme-token gate                                    | partial | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
+| 6   | Nightly Sanity backup workflow                                    | yes     | yes         | template | yes              | yes           | yes            | template           | n/a                 |
+| 7   | Uptime workflow                                                   | yes     | yes         | template | yes              | yes           | yes            | template           | yes                 |
+| 8   | Playwright + axe + reflow suite                                   | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 |
+| 9   | contrast.ts + theme-token gate                                    | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 |
 | 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
 | 11  | Preview click interceptor                                         | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 |
 | 12  | Parity-gated page-builder conversion                              | partial | yes         | partial  | no               | no            | no             | no                 | no                  |
@@ -90,6 +98,8 @@ is installing it as of the date on the card.
 | 32  | Branded tool headings (ToolHeading)                               | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
 | 33  | Year-scoped lists for accumulating types                          | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
 | 34  | Studio search weights (__experimental_search)                     | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 |
+| 35  | The family test standard (gates, suites, budgets)                 | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 |
+| 36  | sync-check as a CI gate                                           | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -345,8 +355,8 @@ that waits out animation before an axe pass.
 
 **Dated 2026-08-27 (from presacademy `src/lib/contrast.ts`, itself the port of a WCP
 gate).**
-**Canonical:** `src/lib/contrast.ts`, with `src/lib/theme-tokens.test.ts` as the
-starter's own application of it.
+**Canonical:** `src/lib/contrast.ts` (the maths) and `src/lib/css-tokens.ts` (the
+reading), with `src/lib/theme-tokens.test.ts` as the starter's own application of them.
 
 WCAG 2.x contrast math as a tiny unit-testable module: `hexToRgb`, `relativeLuminance`,
 `contrastRatio`, `flatten` (compositing a translucent colour over its real backdrop,
@@ -378,6 +388,99 @@ or a control edge must be added to the test with `AA_NON_TEXT`.
 **Per-site adaptation:** the token names and the pair list. Also worth carrying: WCP's
 measured accessible "ink" replacement shades, which solved the same problem by moving the
 palette rather than the pairs.
+
+**Harvest note (2026-09-06).** WCP's `src/lib/contrast.ts` is now byte-identical to this
+one and carries the marker, so the matrix row is `yes` rather than `partial`. The audit
+that did that turned up one thing worth writing down, and it is about THIS repo, not WCP.
+
+There are two token extractors in this starter and they are not the same quality. The
+one in `theme-tokens.test.ts` is a single unscoped `matchAll` for `--color-*: #hex`
+across the whole of `globals.css`. It is not scoped to a block, so it keeps the LAST
+declaration of each token wherever it appears, and it cannot see a `var(--other)` alias
+at all. Today it happens to be correct, because all ten hex `--color-*` declarations sit
+inside the one `@theme` block. The day anyone writes a hex `--color-*` into `.dark` or
+`@theme inline`, that test silently starts measuring the dark value and asserting it as
+a light pair, and it will still pass, which is the worst failure mode a gate has.
+
+The extractor in `surfaces.test.ts` is the correct one: brace-counted so a nested rule
+cannot end a block early, `@theme` / `@theme inline` / `:root` read as the light scope
+and `.dark` as the dark one, `var()` aliases followed to a concrete hex. WCP's
+`theme-tokens.test.ts` is the same design and covers both themes, which is why card 26
+rule 2 already describes the technique as if it were universal here. It is not: card 9's
+own file predates it.
+
+The fix is to lift that extractor into one shared helper and have `theme-tokens.test.ts`
+use it. Deliberately NOT done in the audit commit: it is a real change to a gate, the two
+test files run in different runners across the family, and it deserves its own session
+rather than riding along with a marker sync.
+
+### The reader is one module now (2026-09-06)
+
+**Canonical:** `src/lib/css-tokens.ts`. `theme-tokens.test.ts` and `surfaces.test.ts`
+both import it, and so does WCP's Vitest fork.
+
+**The bug was demonstrated before it was fixed, because "it passes" is not evidence a
+gate works.** With `--color-primary-dark: #2a2d31` planted in the `.dark` block of
+`globals.css`, the old file passed 12 of 12 while silently measuring the dark value:
+`--color-primary-dark` on `--color-bg` read 13.36:1 instead of 8.17:1, on
+`--color-bg-soft` 12.54:1 instead of 7.67:1, and white on `--color-primary-dark` 13.83:1
+instead of 8.46:1. Three asserted numbers wrong, build green. The same plant now fails
+the new gate by name. Not a hypothetical, and not a proof anyone should skip: the
+one-line reproduction is the whole reason this card is trustworthy.
+
+**Scope is the caller's choice, not the module's.** There is no single right answer to
+"the light scope" in this stylesheet, which is why the two gates cannot simply share one
+reader with one built-in scope. `BRAND_SCOPE` is a bare `@theme`: the brand palette
+`apply-brand` rewrites, and the only thing this card's gate asks about. `LIGHT_SCOPE`
+adds `@theme inline` and `:root`: what a shadcn semantic token actually resolves to on
+the page, which is what card 26's `surfaces.test.ts` asks about. They genuinely differ,
+because `@theme inline` re-points `--color-accent` at `var(--accent)` on purpose, so
+bare `text-accent` is theme-aware and is NOT the palette ink. A shared reader that
+silently picked one of those would have re-created the same class of bug in a new place.
+
+**Light-only stays deliberate and is no longer a limitation of the reader.** The pairs
+this gate asserts are unchanged, and every asserted value is unchanged; the dark half of
+the question is already measured, in both themes, by `surfaces.test.ts`.
+
+**Three of the new tests measure no colour at all.** They assert the scope premise: that
+the `@theme` block was found and holds the palette, that `.dark` declares none of the
+names this gate measures as light, and that the only later light-scope override of an
+asserted token is the recorded `--color-accent` one. A gate that can be wrong about
+WHICH declaration it read has to check that first, before any threshold means anything.
+
+**Family status of the extractor, audited 2026-09-06.** Every repo has a theme-token
+gate; they are not the same gate. `shared` means it imports `css-tokens.ts`.
+
+| repo                | theme-tokens.test.ts        | surfaces.test.ts |
+| ------------------- | --------------------------- | ---------------- |
+| starter             | shared                      | shared           |
+| wcp                 | shared (Vitest, own pairs)  | n/a              |
+| presacademy         | own copy, scoped + aliases  | own copy, same   |
+| ncs-church-starter  | unscoped hex-only (the bug) | scoped + aliases |
+| mas-monograms       | unscoped hex-only (the bug) | n/a              |
+| 2ndpreschicago      | unscoped hex-only (the bug) | n/a              |
+| reid-design-site    | per-block, but hex-only     | n/a              |
+| nixoncreativestudio | per-block, but hex-only     | n/a              |
+
+Three repos carry the exact silent-failure this session fixed. Two more are scoped
+correctly but alias-blind, which is the failure WCP's own gate was bitten by and records
+in its header: a `.dark` block that re-points a token with `var(--other)` is invisible to
+them, so they fall through to the light value and measure the wrong colour in dark.
+presacademy has the good logic twice and needs consolidating, not fixing.
+
+Those five ports are NOT done here, and the reason is specific rather than a shrug. Each
+site's `globals.css` puts its palette in a different place, so choosing `BRAND_SCOPE`
+against `LIGHT_SCOPE` per gate is a judgement per repo, and getting it wrong is exactly
+the silent failure being fixed. `ncs-church-starter`'s `staging` is also behind its
+`main`, so the family's staging-only push rule does not currently hold there. Do them a
+repo at a time, and plant the declaration and watch the old gate pass before replacing
+it: that is the acceptance test for this card.
+
+**Do not chase byte-identity on the test files.** `css-tokens.ts` is canonical and
+marked. `theme-tokens.test.ts` is not, in any repo: the runner (`node --test` here,
+Vitest in WCP and reid) and the pairs are legitimately per-site, and WCP's fork carries
+its own documented rationale in its header. Sharing the reader is the whole of what
+travels.
 
 ## Card 10: Embedded-studio live-preview stack
 
@@ -420,17 +523,33 @@ stateless so duplication is harmless, and deduping them broke the build on a mis
 ### Hard warning 2: exact resolved versions, and the family's version skew
 
 The Sanity stack is pinned to a combination known to work **together**, and bumping one
-in isolation breaks it. The working set: `sanity` 6.4.0, `@sanity/ui` **3.3.5**,
-`styled-components` 6.4.3, `react` / `react-dom` / `react-is` 19.2.7, plus
-`sanity-plugin-media` 5.0.11, `sanity-plugin-utils` 2.0.6 (pinned through `overrides`;
-the default 2.0.17 drags in `@sanity/ui` v4) and `sanity-plugin-asset-source-unsplash`
-7.0.15.
+in isolation breaks it. The working set as of the phase-1 migration (2026-09-06): `sanity`
+6.9.1, `@sanity/vision` 6.9.1, `@sanity/ui` **3.5.4**, `@sanity/client` 7.26.2,
+`@sanity/visual-editing` 5.7.3, `@sanity/preview-url-secret` 4.1.5, `styled-components`
+6.4.3, `react` / `react-dom` / `react-is` 19.2.7, plus `sanity-plugin-media` 5.0.11,
+`sanity-plugin-utils` 2.0.6 (pinned through `overrides`; the default 2.0.17 drags in
+`@sanity/ui` v4) and `sanity-plugin-asset-source-unsplash` 7.0.15.
 
-"Latest v3" is not close enough. Pinning `@sanity/ui` to 3.5.3 instead of 3.3.5 cleared
-error #18 and then failed differently, `TypeError: Cannot read properties of undefined
-(reading 'v2')` from inside styled-components' `generateAndInjectStyles`, because `sanity`
-6.4.0 expects the 3.3.x theme shape. Any Sanity dependency change must be checked against
-a sibling repo's **resolved** versions, not its semver ranges.
+**`sanity` 6.9.2 is the wall.** A PATCH release moved the core to `@sanity/ui` 4, which is
+a genuine migration (ESM only, a required `@sanity/ui/styles.css` import, heavy components
+moved to subpaths, deprecated props removed). Phase 1 stops at 6.9.1 on purpose. The exact
+pins in `package.json` are what stop npm resolving straight through that boundary.
+
+"Latest v3" is not close enough on the OLD core either. Pinning `@sanity/ui` to 3.5.3
+against `sanity` 6.4.0 cleared error #18 and then failed differently, `TypeError: Cannot
+read properties of undefined (reading 'v2')` from inside styled-components'
+`generateAndInjectStyles`, because 6.4.0 expected the 3.3.x theme shape. That pairing is
+now history (the core moved with the UI), but the lesson stands: any Sanity dependency
+change must be checked against a sibling repo's **resolved** versions, not its semver
+ranges.
+
+Phase-1 notes worth carrying to the next repo. `@sanity/visual-editing` appears as a
+dependency AND in `overrides`; edit both in the same pass or npm refuses the whole install
+with `EOVERRIDE`. `@sanity/preview-url-secret` has to move to 4.1.5, because 5.7.3 and
+6.9.1 both want `^4.1.2` and 4.0.8 would nest a second copy. `@sanity/ui` 3.5.4 nests its
+own `@sanity/icons` 5 where 3.3.5 used the hoisted 3.8; harmless, leave it. And 3.5.4
+still exports only `.`, `./_visual-editing`, `./theme` and `./package.json`, so plugin
+bumps that want `@sanity/ui/tooltip` stay blocked until phase 2.
 
 Related: `@sanity/ui` v3 has no subpath exports beyond `./theme`, so
 `import { useToast } from '@sanity/ui/toast'` is v4-only syntax and fails
@@ -1353,6 +1472,15 @@ half: how many cards across, and which side the picture is on.
    also pins the literal hexes the Studio draws with to the resolved tokens, so
    a rebrand cannot leave the swatch row showing colours the site abandoned.
    **If a pair fails, fix the pair. Never lower a threshold.**
+
+   This rule described `surfaces.test.ts` and, until 2026-09-06, ONLY
+   `surfaces.test.ts`. It was written as though the technique were universal in
+   this repo; it was not, and card 9's own gate was reading tokens with a single
+   unscoped `matchAll` that could silently measure the dark value and assert it
+   as a light pair. The reader now lives in `src/lib/css-tokens.ts` and both
+   gates import it, so the rule is true of both. The scope each gate passes it
+   still differs on purpose: see card 9.
+
 3. **The default emits NO class.** The house accent returns `null` from
    `accentClass()` and the original tone values emit exactly the strings they
    always did, so every already-published section renders byte-identical HTML.
@@ -3099,9 +3227,9 @@ old name, so an old clone or a stale bookmark still resolves instead of 404ing.
 Locally: `git branch -m`, `fetch --prune`, `branch -u`, and for this repo
 `remote set-head origin -a` so `origin/HEAD` follows.
 
-  - ncs-astro-sanity-starter  `master`       -> `main`     (default branch too)
-  - reid-design-site          `modern-stack` -> `staging`
-  - mas-monograms             `modern-stack` -> `staging`
+- ncs-astro-sanity-starter `master` -> `main` (default branch too)
+- reid-design-site `modern-stack` -> `staging`
+- mas-monograms `modern-stack` -> `staging`
 
 `staging` is not decoration - it is a deploy target. presacademy's
 `deploy-staging.yml` is now in all six, pointed at a `<worker>-staging` Worker
@@ -3221,3 +3349,527 @@ content type lands.
 **Adapt per site:** the field paths per type (page hero fields differ per
 repo — and remember which repos use Sanity's slug TYPE vs plain strings; see
 the d209b1d drift gate).
+
+---
+
+## Card 35: The family test standard (2026-09-06)
+
+**Dated 2026-09-06. Every Astro site in the studio runs the same quality gates.
+WCP was the reference implementation; presacademy, reid-design-site,
+mas-monograms, 2ndpreschicago and nixoncreativestudio were brought up to it on
+2026-09-06, and this starter on the same day. Canonical copies live here.**
+
+Card 8 was the Playwright half of this. Card 35 is the whole thing, because the
+suites are only as good as the gates around them: `astro check` had never run on
+several of these repos and found 242 real type errors on presacademy, 222 here,
+19 on reid, 16 on mas and 13 on 2nd Pres, including two sites whose Studio logo
+rendered `src="[object Object]"` in production.
+
+**The gates.** `ci.yml`, on push to `main` and `staging` plus every PR, two
+parallel jobs:
+
+- **build**: `npm ci`, Sanity typegen with a three-attempt retry loop (runner
+  flake, see card 5), the stale-types guard, `npx astro check`, `npm run lint`,
+  `npm run format:check`, `npm run test:unit`, `npm run build`,
+  `npm run check:links`.
+- **test**: `npx playwright install --with-deps chromium webkit`, then the
+  suites, with `playwright-report/` uploaded as an artifact for 14 days.
+
+`lighthouse.yml` is a SEPARATE workflow, not a step inside CI, so a slow audit
+never delays the build verdict and a repo can re-run it alone.
+`lighthouserc.json` carries an EXPLICIT `url` list: with `staticDistDir` alone
+lhci auto-discovers pages and caps at five, so it audits a near-random subset.
+Accessibility is a hard gate at 1.0, LCP 4500ms and CLS 0.1 are hard,
+performance / SEO / best-practices are warnings so ordinary CI variance does not
+block a PR.
+
+**The suites**, in `tests/`: `smoke` (every route 200s and carries the site name
+in its title), `a11y` (axe, light, zero violations), `a11y-dark` (axe again
+after forcing the theme, plus a focus-indicator check), `reflow` (no horizontal
+overflow at 320, 768, 1024, 1440). Chromium runs everything; a real WebKit
+iPhone 14 profile runs smoke and both axe sweeps. Visual regression is
+deliberately NOT part of this: it belongs only where a site has a fixture-driven
+`/styleguide` route with fixed data (WCP, presacademy). Screenshotting
+CMS-driven pages flakes with content.
+
+**Five things this standard exists to stop, each one a real incident:**
+
+- **The linkinator skip pattern.** WCP's `--skip "^(?!http://localhost)"`
+  matched linkinator's own 127.0.0.1 seed, so every green CI run for months had
+  scanned ZERO links. The correct pattern is
+  `^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])`, and the check is to read the
+  log: it must say "scanned N links" with N greater than zero. On this repo the
+  first honest run found 135 broken internal links across ten pages.
+- **A prettier pass can silently eat a meaningful space** in an Astro template,
+  and `prettier-plugin-astro` cannot parse a `<script>` nested inside a template
+  expression at all (it reads the script body's braces as expression delimiters
+  and throws). Ignore those files or move the script into its own component, and
+  diff the built HTML TEXT before and after the format commit. This repo has
+  `npm run parity` for exactly that; elsewhere, do it by hand.
+- **A Tailwind `focus:ring` is a box-shadow**, and WebKit renders native form
+  controls itself and DROPS box-shadow on them. A `<select>` carrying
+  `focus:outline-none` plus a ring has no focus indicator at all on Safari and
+  iOS while Chromium looks perfect. Selects need `outline`. Six of them here.
+- **A WebM-first `<video>` never fires `load` in WebKit.** Navigate with
+  `waitUntil: 'domcontentloaded'`; with `'load'` the run hangs until the test
+  times out and the report says nothing useful.
+- **axe has no rule for focus-indicator contrast**, and an axe sweep only ever
+  audits the resting DOM. That blind spot is how WCP shipped eight forms whose
+  dark-mode focus ring measured 1.13:1, on a green build with Lighthouse at 100.
+  `a11y-dark.spec.ts` asserts the indicator EXISTS; `theme-tokens.test.ts` pins
+  its contrast.
+
+**What is canonical here and what is not.** Marked `PORTABLE` and byte-exact
+across the family: `playwright.config.ts`, `tests/helpers.ts`,
+`tests/smoke.spec.ts`, `tests/a11y.spec.ts`, `tests/a11y-dark.spec.ts`,
+`tests/reflow.spec.ts`. Every per-site list was pushed OUT of them into
+`tests/routes.ts`, which is the seam: the route list, the hidden-route list, and
+`FORM_ROUTES`. `smoke.spec.ts` reads the title from `src/data/site.ts` rather
+than a literal, so `npm run apply-brand` cannot leave it asserting the previous
+project's name.
+
+Deliberately NOT marked, and the reason matters: `ci.yml` and `lighthouse.yml`
+carry a per-site `env:` block of PUBLIC_SANITY_\* identifiers, and
+`lighthouserc.json` carries a per-site `url` list, so a byte-exact drift check
+would fail forever on every repo and teach everyone to ignore it. Copy their
+SHAPE; the parts that must not diverge are ci.yml's step list, its concurrency
+group, the linkinator skip, and lighthouserc.json's `assert` block. `.prettierrc`
+is identical family-wide but is plain JSON with no comment syntax, so it cannot
+carry a first-line marker; `.prettierignore` is legitimately per-site (each repo
+ignores a different set of unparseable templates). Two of this repo's own
+PORTABLE scripts, `sync-check.mjs` and `page-parity.mjs`, were listed in
+`.prettierignore` here, because formatting them would rewrite their quoting and
+put sibling repos into DRIFT on the next check. That family-wide pass happened
+on 2026-09-06: see card 36. They are formatted and no longer ignored anywhere.
+
+**Adapt per site:** `tests/routes.ts` (derive from `src/pages` and check each
+path against the built `dist/client`), the `url` list in `lighthouserc.json`,
+the `env:` blocks, the reveal selectors in `tests/helpers.ts` if a site's polish
+layer gates on something else, and whether `a11y-dark` applies at all (a site
+with no dark theme skips it). The Playwright port is 4321 by default and
+overridable with `PLAYWRIGHT_PORT`, so a run can share a machine with a dev
+server or another repo's suite.
+
+---
+
+## Card 36: sync-check as a CI gate (2026-09-06)
+
+**Dated 2026-09-06. `scripts/sync-check.mjs` runs in every repo's `ci.yml`
+instead of only ever by hand. Two canonical scripts were formatted family-wide
+in the same pass so prettier can never reopen a drift. wcp got its first copy
+of the script at all.**
+
+Card 28 gave the family a drift check. It found drift months late, because
+nothing ran it. The gate is five lines of YAML in the build job, after the
+install step, and needs no token: all of these repos are public.
+
+```yaml
+- name: Check out the library of record
+  uses: actions/checkout@v7
+  with:
+    repository: NateJ45/ncs-astro-sanity-starter
+    ref: ${{ github.ref_name == 'staging' && 'staging' || 'main' }}
+    path: .ncs-starter
+
+- name: Canonical files have not drifted
+  env:
+    NCS_STARTER_DIR: ${{ github.workspace }}/.ncs-starter
+  run: |
+    node scripts/sync-check.mjs
+    rm -rf "$NCS_STARTER_DIR"
+```
+
+**The `rm -rf` is not tidiness, it is required.** `actions/checkout` refuses a
+path outside the workspace, so the library lands INSIDE the repo, and every
+whole-tree tool further down the build job then sweeps it. mas-monograms found
+this within a minute of the first push: `prettier --check .` tried to format
+the library's `astro.config.mjs` using mas's node_modules and died resolving
+`@fontsource/libre-baskerville`. `eslint .` (presacademy, reid-design-site)
+would have done the same. Deleting the checkout the moment the check passes
+beats adding `.ncs-starter` to a `.prettierignore`, a `.gitignore` and an
+eslint config in six repos, because that list has to be remembered again for
+the next whole-tree tool anyone adds. Same reasoning as dropping the
+`.prettierignore` entries above: prefer the fix that cannot be forgotten.
+
+The walker skips `.ncs-starter` by name as well. That is belt and braces on
+purpose: the skip covers a LOCAL run against a checkout someone left in place,
+the `rm -rf` covers the rest of the CI job.
+
+The starter itself runs the SELF-CHECK form instead: no second checkout, just
+`node scripts/sync-check.mjs`, which resolves the library to this repo root.
+
+**The `ref:` line is load-bearing, and it was not in the original sketch.** A
+staging build checks against the starter's `staging`; a main build, and any PR,
+against its `main`. Without it the family's two-branch promotion model cannot
+stage a canonical change AT ALL: this very card is the proof, because the six
+sites were made to match a starter whose fix existed only on staging, so every
+site's staging run would have failed against the starter's main for a reason
+nobody could act on. It also makes the PROMOTION ORDER load-bearing:
+
+> Promote the starter to main FIRST, then the sites. A site on main checks
+> against the starter on main, so a site promoted ahead of the starter goes red
+> until the starter catches up.
+
+That ordering is a real cost of the gate and worth saying out loud rather than
+discovering it on a red main.
+
+**The prettier conflict, and why the ignore lost.** `sync-check.mjs` writes
+`'the site\'s improvement'`; prettier's `singleQuote` rule prefers whichever
+quote needs fewer escapes and rewrites it to `"the site's improvement"`. The
+same is true of `page-parity.mjs`, plus four over-long template literals it
+would rewrap. The old defence was to list both files in the starter's
+`.prettierignore`. It did not work, and could not:
+
+- The ignore entries were never propagated. As of 2026-09-06 the starter and
+  2ndpreschicago ignored both, reid-design-site and nixoncreativestudio ignored
+  only `sync-check.mjs`, and wcp, presacademy and mas-monograms ignored
+  neither. So a `prettier --write` during the card 35 rollout reformatted
+  presacademy's and mas-monograms' copies, and the check went red in exactly
+  the repos the ignore was supposed to protect.
+- An ignore is a standing obligation on seven files nobody reads. Formatting is
+  a one-time cost with a fixed point: once the canonical bytes ARE prettier's
+  output, `prettier --write` is a no-op forever and `format:check` becomes a
+  SECOND guard on the canonical text rather than a threat to it.
+
+So both files were formatted here, dropped from every `.prettierignore` that
+listed them, and the formatted bytes were copied into all six site repos in the
+same pass. The change is quoting and line wrapping only; no behaviour changed.
+Do not re-add the ignore lines.
+
+**Two things the pass turned up.**
+
+- `scripts/page-parity.mjs` is marked `PORTABLE` HERE but carries no marker in
+  any of the six site repos, so sync-check has never checked it anywhere. The
+  starter's `.prettierignore` comment claimed it was "carried BYTE-EXACT by
+  reid-design-site, mas-monograms and presacademy"; it is not. Card 3 says the
+  harness is shared, and the matrix says `yes` for every repo, but the file has
+  genuinely diverged (each site has its own PAGES list) and is a fork in
+  practice. Either mark it and reconcile, or write the fork down. Left alone
+  here on purpose: it is a bigger decision than a formatting pass.
+- nixoncreativestudio and 2ndpreschicago were not carrying a quoting drift at
+  all. Their `sync-check.mjs` predated card 28a's NESTED-APP RULE (2026-08-28),
+  the one that lets wcp's `site/scripts/foo.mjs` match the starter's
+  `scripts/foo.mjs`. They took the current copy forward.
+
+**wcp.** The repo the whole family copied from had no `scripts/sync-check.mjs`,
+so it was the one repo that could not say when it had drifted. It now carries
+the canonical copy at `site/scripts/sync-check.mjs`, next to its siblings, and
+the NESTED-APP RULE is what makes the nested path resolve. Its first run ever
+checked 22 marked files and found three drifts, all three real:
+
+- **`src/lib/preview-morph.ts` had a fix nobody else had.** wcp added a
+  KEEP-AS-IS SUBTREE guard on 2026-08-30: an element carrying `data-morph-keep`
+  is not morphed, because a `server:defer` island streams its real body through
+  inline scripts that a `DOMParser` parse never runs, so the FETCHED tree still
+  holds the fallback skeleton and morphing it in swapped a live widget for its
+  skeleton on every soft refresh. That is the hub preview's "widgets disappear"
+  bug. Ported UP into the canonical copy here and out to presacademy,
+  reid-design-site and mas-monograms. It is inert where the attribute is never
+  set: the guard requires it on BOTH trees. Card 29c's file, so no new row.
+- **`src/sanity/components/UndoRedo.tsx` and
+  `src/sanity/components/shareDraftLink.tsx` are a genuine fork**, and the
+  MARKER WAS DROPPED in wcp rather than either copy being changed. wcp resolves
+  `@sanity/icons` 5.2.1 (transitively, it has no direct dependency); the starter
+  and every other site pin 3.8.0. The 5.x barrel stopped re-exporting each icon,
+  so wcp imports `@sanity/icons/Undo` where the canonical copy imports from the
+  package root. Neither copy can adopt the other without breaking a build, so
+  this is the case the drift rule reserves for dropping the marker and writing
+  the fork down. Both files now carry a FORKED header saying what differs, why,
+  and what to do when the starter moves to icons 5: re-mark and take the
+  starter's copy. Nothing else in either file differs.
+
+wcp's remaining 20 marked files were already byte-exact, which is the useful
+half of the result: the drift that had accumulated in the repo nobody could
+check was three files, and two of them were a dependency-version fork rather
+than rot.
+
+**Also folded in:** `ncs-church-starter` was archived on 2026-09-06, so the
+header comment in `sync-check.mjs` (canonical, hence one edit here that
+propagates), this repo's `CLAUDE.md` and 2ndpreschicago's README stopped
+describing it as a live peer. PORTS.md keeps its column and its historical
+cards: those are a record of what happened, not a claim about today.
+
+**Adapt per site:** nothing, except wcp, whose workflows sit at the repo root
+while the app lives in `site/`. Its build job already sets
+`defaults.run.working-directory: site`, so the `run:` line is unchanged, but the
+checkout `path:` and `NCS_STARTER_DIR` are both relative to
+`github.workspace` (the repo root), NOT to `site/`. Put the starter checkout at
+`.ncs-starter` at the root and point `NCS_STARTER_DIR` at it there.
+
+## 37. Drift opens its own pull request (2026-09-06)
+
+`sync-check` detects drift and stops the build, but porting the improvement
+up was still an errand you had to remember to start, in another repo, after
+the build that blocked you. `scripts/propose-drift.mjs` closes that: when the
+check fails in a site, CI copies that site's version of the drifted files into
+a `sync/from-<site>` branch here and opens a PR.
+
+It deliberately does **not** merge. Whether a change belongs in the library
+every future project inherits is a judgement, not a diff, and the same file
+can legitimately be an improvement in one site and a fork in another.
+
+The cost of not having it: wcp-website's `preview-morph.ts` carried a
+`data-morph-keep` fix that the other five repos lacked for roughly three
+months, and it only surfaced because a sync session happened to look.
+
+Needs `GH_ACTIONS_PAT` with write access to THIS repo, not only to the site
+repos. Without it the step warns and the build still fails on sync-check, so
+the gate never depends on the automation working.
+
+### The push needs `-c http.<host>.extraheader=`, and this card was wrong without it
+
+This card described a working mechanism for several hours before one existed.
+Written is not verified: the step was wired into six repos, all of them green,
+and it had never once opened a PR.
+
+The acceptance test that settled it (mas-monograms#36): drift a canonical file
+on purpose, push it, and watch for a PR appearing HERE that nobody started.
+Anything weaker tests that the code is present, not that it works.
+
+Attempts one and two failed identically:
+
+```
+remote: Permission to NateJ45/ncs-astro-sanity-starter.git denied to github-actions[bot].
+fatal: ... The requested URL returned error: 403
+```
+
+which reads exactly like a missing or wrong `GH_ACTIONS_PAT` and is not that.
+The PAT was present and correct throughout and was never consulted. The push
+needs `-c http.https://github.com/.extraheader=`: an empty extraheader sends no
+header, and `-c` overrides every config scope for that one command.
+
+Resist the obvious explanation. "actions/checkout persisted its credentials
+into the clone" is wrong, and attempt two was built on it: unsetting the key at
+`--local` scope fixed nothing, because the run that finally worked printed
+`persisted credential keys: (none)`. The header comes from a scope `--local`
+does not list. That one print is the only reason the false diagnosis died
+instead of shipping with a confident comment explaining it.
+
+Two lessons, both earned the expensive way:
+
+- A step that exits 0 so it cannot mask the real failure equally cannot report
+  its own. Give it diagnostics or its breakage is silent forever.
+- When a fix is reasoned rather than observed, test the mechanism directly
+  before spending a CI round trip. The precedence question here took about a
+  minute locally with a deliberately bogus header: the push fails without the
+  override and succeeds with it.
+
+## 38. presacademy harvest audit, and eleven files that were already the same (2026-09-06)
+
+The second harvest audit of the family (WCP was card 35's neighbour) went
+through `src/lib/**` and `scripts/**` in presacademy. presacademy is the
+ANCESTOR of most of this library, so the expectation going in was byte drift
+on files the starter had generalised after copying them. What it actually
+found was that the drift is almost entirely legitimate: the two repos have
+different singleton sets, different brand colours and a different section
+model, and the files that carry any of those cannot be byte-identical.
+
+Eleven files were already identical and are now marked in both repos:
+
+    scripts/generate-llms-full.mjs
+    src/lib/phone.ts
+    src/lib/portable-text-headings.ts
+    src/lib/reading-time.ts
+    src/lib/scriptAccent.ts
+    src/lib/slugify.ts
+    src/lib/slugify.test.ts
+    src/lib/subscribe.ts
+    src/lib/utils.ts
+    src/lib/utils.test.ts
+
+plus `scripts/lib/loadEnv.mjs`, which was already marked here and merely
+lacked the header in presacademy.
+
+Two of those needed a change first, and both went UP.
+
+**`scripts/generate-llms-full.mjs`.** presacademy still carried its own
+inlined `loadEnv()`, an eleven-line copy predating `scripts/lib/loadEnv.mjs`.
+The shared loader is strictly better: it strips inline `#` comments outside
+quotes, takes quoted values literally, and tolerates leading whitespace on the
+key. presacademy now imports it, which is what made the file identical.
+
+**`src/lib/utils.test.ts`.** The library's copy named three tests wrong. When
+the empty-array case was corrected from "returns 0" to "returns 1", the two
+neighbouring cases were renamed with it, so the library shipped
+`test('returns 1 for null/undefined input')` asserting `0`, and the same for
+non-array input. presacademy had two of the three right. The names now say
+what each branch does, with a comment recording WHY the branches disagree:
+`readingTimeFromPortableText` floors an ARRAY at one minute, and returns a
+bare `0` for anything that is not an array so the caller can hide the label.
+Nothing about the assertions changed; the test file was lying about itself.
+
+DELIBERATELY NOT MARKED, with the reason, because a marker is a promise to
+keep two files byte-identical forever and an unactionable red check is how a
+checker gets ignored:
+
+- `src/lib/nav-href.ts` - the singleton-to-route table is per-site by
+  definition. The starter also has an `pageArchived` guard presacademy has
+  no `archived` field to use.
+- `src/lib/preview-auth.ts` - identical but for the `VERSION` namespace
+  constant, which is deliberately per-site so a shared token yields a
+  different cookie fingerprint on each. The file's own comment says
+  "rename this on a fork".
+- `src/lib/sanity.ts`, `queries.ts`, `schemas.ts`, `siteSettings.ts`,
+  `section-fields.ts`, `surfaces.ts`, `layout-variants.ts`,
+  `sectionVisibility.ts` - all carry the site's own document types,
+  section list or token set.
+- `scripts/lib/render-og.mjs`, `scripts/generate-og-*.mjs` - brand
+  typography and layout.
+- `scripts/generate-logo-variants.mjs`, `scripts/optimize-logo-files.mjs` -
+  identical today, but both hard-code the brand ink hexes (`#3D3D3D`,
+  `#F5F0EB`). Marking them would turn the first rebrand into a CI failure
+  in a repo that did nothing wrong.
+- `scripts/page-parity.mjs` - already carries a header explaining that it
+  is a PATTERN, not a canonical file, and that the starter's copy is the
+  parameterized descendant. That header is the convention working.
+
+### Two places presacademy is still ahead, both blocked on a consumer here
+
+**`sectionFieldEditAttr` (`src/lib/preview-edit-attr.ts`).** presacademy
+exports a second attribute builder that targets a FIELD inside a section
+(`pageBuilder[_key=="..."].background`) rather than the bare array item. The
+distinction is load-bearing and was learned in a deployed Studio: the overlay
+will outline a node whose attribute names an array item, which is what gives
+the section its insert/duplicate/drag menu, but a custom overlay COMPONENT
+only mounts on a node the Studio schema resolves to a FIELD. An array item is
+not one, so `getField` returns nothing and the component resolver is never
+called. That is the whole reason presacademy's in-canvas background swatch
+row can get on screen. The library has no in-canvas field control yet, so it
+has nowhere to put the function; port it the day it grows one.
+
+**Vertical centring in `scripts/lib/render-og.mjs`.** The library composites
+the wordmark at `top: 200`, the rule at `y: 330` and the first tagline line at
+`top: 360`, all fixed. presacademy measures the rendered wordmark and tagline,
+sums the group height and centres it, so a card with one tagline line and a
+card with three are both balanced. The library's numbers are tuned for two
+lines and only for two. The port is real but not a copy: presacademy's version
+is entangled with its three-part wordmark ("The Presbyterian / Academy",
+keyword in green), so adopting it means separating the centring math from the
+wordmark parsing first.
+
+## 39. The restore drill, and an off-site copy of the backup (2026-09-06)
+
+`sanity-backup.yml` had been green nightly on all five Sanity sites for months
+(presacademy alone: 33 successful runs, a 28.8 MB encrypted tarball). Nobody
+had ever restored one. Those runs prove the export and encrypt steps work and
+say nothing about whether a client's content can be recovered, which is the
+only property the backup exists for. Same shape as card 37 and as the link
+checker that scanned nothing: green means no test failed, not that a test would
+have failed.
+
+Two things close it.
+
+**`scripts/restore-dataset.mjs`** does decrypt, import and a document count in
+one command. The count is the point: a restore that imports 0 documents exits 0
+just as loudly as one that imports 4,000, so the script prints what it ended up
+with and tells you to compare it against production. It refuses to target
+`production` without `--i-understand-this-overwrites-production` - no short
+form, no env var - because the realistic disaster is not a corrupt tarball, it
+is someone restoring three-week-old content over a live site at 9pm while
+fixing something smaller. It deletes the decrypted plaintext afterwards, since
+an unencrypted dataset in a working copy is the leak the workflow's encrypt
+step exists to prevent.
+
+It resolves the CLI as `sanity.cmd` on win32. The workflow can hardcode
+`./node_modules/.bin/sanity` because it only runs on Ubuntu; this script runs on
+whoever's laptop, and a restore is not the moment to discover that path does not
+exist on Windows.
+
+**An R2 copy in the workflow.** Actions artifacts expire at 90 days and live in
+the same GitHub account as the repo they protect, so one lost account loses the
+site and its backups together. The step reuses `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID`, which every site already has - but the token needs
+"Workers R2 Storage: Edit" added, and a deploy-only token will 403. Gated on a
+`BACKUP_R2_BUCKET` variable and skips with a warning when unset: a missing
+off-site copy must never fail a backup that is otherwise working. Keyed by repo
+and date so one bucket holds the family and no upload overwrites an earlier
+good copy.
+
+`docs/RESTORE-DRILL.md` is the ten-minute exercise. Run it at launch and after
+any change to the workflow, the CLI major version or the passphrase, then log
+the date - an untested backup and one tested eleven months ago are different
+things and only the log tells them apart.
+
+### What the first real drill found (presacademy, 2026-09-06)
+
+**The backup was fine. The script was not.** It took four attempts, and every
+failure was in the recovery path rather than in the data - which is exactly the
+part that had never been exercised. Each one would otherwise have landed during
+an actual incident:
+
+1. **It read only `process.env`.** The passphrase was in `.env` the whole time,
+   where every other script in this family looks. Now uses `loadEnv`.
+2. **It preferred `SANITY_AUTH_TOKEN` over `SANITY_API_WRITE_TOKEN`.** A machine
+   with both would have handed the import the backup's READ token and failed on
+   permissions, looking exactly like a broken backup. Write wins now.
+3. **It shelled out to `openssl`.** Fine on a runner; on Windows openssl usually
+   exists only via Git's `mingw64\bin` and is often not on PATH. A recovery tool
+   must not depend on a binary the recovering machine may lack, so the decrypt
+   is now pure Node - verified byte-identical to openssl's output on a real
+   27.5 MB backup (both produce 28,792,515 bytes).
+4. **It spawned `node_modules/.bin/sanity.cmd`.** Since the fix for
+   CVE-2024-27980 Node refuses to spawn a `.cmd` without `shell: true`, failing
+   as a bare `EINVAL`. It now runs the CLI's own JS entry through
+   `process.execPath`: no shell, and so no quoting question when `count(*)` is
+   passed as an argument.
+5. **It swallowed a failed `dataset create`,** so the import died later with
+   "Dataset not found" and a twenty-line client stack trace pointing at the
+   wrong thing entirely. It now verifies the dataset exists and names the real
+   cause.
+
+And a sixth, caught before it shipped: the check in (5) first called `die()`,
+which uses `process.exit()` and therefore SKIPS the `finally` block. It would
+have printed "the decrypted tarball has been removed" while leaving 28 MB of
+client content in plaintext on disk - the error path reintroducing the very leak
+the encrypt step exists to prevent. It throws now, and cleanup always runs.
+
+Also learned: `sanity dataset create` needs a project-admin grant that a content
+write token does not carry, so the scratch dataset is created by hand first.
+
+Result: 112 documents restored against 113 in production, and the one difference
+was `_.schemas.churchstarter`, a schema manifest rather than content. Established
+by diffing the id sets, not by assuming a single missing document was drift.
+
+## 40. The public-data audit: what can a stranger read? (2026-09-06)
+
+Sanity's free plan is "2 datasets (public only)". A public dataset is readable
+by anyone over a plain URL with no token, and the project id is not a secret -
+it appears in every image URL in the page source (51 times on wcp-website's
+homepage). `?query=*` needs no knowledge of the schema.
+
+wcp-website had 37 family directory entries public: 40 children's names, 71
+parents, 33 home addresses. The Family Hub gate in front of them is correctly
+built - shared password reduced to a fingerprint in server-side KV, fails
+closed, rotation logs everyone out. It protects the PAGE. The Content Lake API
+is a second door and it was open.
+
+The root cause was a written assumption. `src/sanity/env.ts` said "The dataset
+is PRIVATE, so all reads happen server-side" - a comment, never checked, that
+the whole design rested on. Nothing in the new-project checklist said a public
+dataset is public, so nothing caught it for months.
+
+`scripts/public-data-audit.mjs` queries each site's dataset **anonymously** -
+the absence of a token is the whole point - and fails when personal data comes
+back. `public-data-policy.json` holds the exceptions, each with a reason, so the
+judgement is made once in daylight rather than against a red build at 9pm.
+
+Three design decisions worth keeping:
+
+- **It never prints values.** These repos are public, so the build log is as
+  public as the dataset. A checker that pasted the exposed data into a world
+  readable log would be a worse leak than the one it reports.
+- **Personal field NAMES fail; personal-looking VALUES only notify.** An email
+  in a privacy policy is deliberate publishing. Failing builds over it teaches
+  everyone to add blanket allows, and then the check protects nothing.
+- **It refuses to skip.** The first version could not find wcp-website's project
+  id (hardcoded in src/sanity/env.ts, not an env var) and exited 0 with a pass
+  over 37 exposed families. It now reads the source too, and a repo that depends
+  on Sanity with no resolvable id FAILS rather than reporting a pass it did not
+  earn. Same trap as cards 37 and 39: green means no test failed, not that a
+  test would have failed.
+
+Tuning that mattered: `children` is Portable Text's field name for spans AND a
+nav submenu AND actual children, so it is flagged only when the contents look
+like people. Verified in both directions - wcp-website fails on
+`directoryEntry: 37 documents`, presacademy passes with its legal-page contact
+emails correctly reported as notices rather than failures.

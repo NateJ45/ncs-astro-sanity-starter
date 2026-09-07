@@ -1,9 +1,9 @@
 ---
-import type { HTMLAttributes } from "astro/types";
+import type { HTMLAttributes } from 'astro/types';
 
-import { dropdownContent } from "./variants";
+import { dropdownContent } from './variants';
 
-type Props = HTMLAttributes<"div"> & {
+type Props = HTMLAttributes<'div'> & {
   sideOffset?: number;
   /**
    * Open and close animation duration in milliseconds
@@ -17,9 +17,9 @@ const { class: className, sideOffset = 0, animationDuration = 150, ...rest } = A
 
 <div
   class={dropdownContent({
-    side: "right",
-    align: "start",
-    class: ["starwind-dropdown-sub-content", className],
+    side: 'right',
+    align: 'start',
+    class: ['starwind-dropdown-sub-content', className],
   })}
   data-sub-content
   data-side-offset={sideOffset}
@@ -28,7 +28,7 @@ const { class: className, sideOffset = 0, animationDuration = 150, ...rest } = A
   tabindex="-1"
   aria-orientation="vertical"
   style={{
-    display: "none",
+    display: 'none',
     animationDuration: `${animationDuration}ms`,
   }}
   {...rest}

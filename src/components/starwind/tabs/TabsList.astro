@@ -1,9 +1,9 @@
 ---
-import type { HTMLAttributes } from "astro/types";
+import type { HTMLAttributes } from 'astro/types';
 
-import { tabsList } from "./variants";
+import { tabsList } from './variants';
 
-type Props = Omit<HTMLAttributes<"div">, "role">;
+type Props = Omit<HTMLAttributes<'div'>, 'role'>;
 
 const { class: className, ...rest } = Astro.props;
 ---

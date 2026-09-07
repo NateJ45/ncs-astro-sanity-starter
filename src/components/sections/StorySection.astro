@@ -34,47 +34,64 @@ const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
 ---
 
 <section class={bg} aria-labelledby={headingId}>
-  <div class="mx-auto max-w-content px-m py-section-lg grid grid-cols-1 md:grid-cols-[1fr_1.2fr] gap-l md:gap-section-md items-start">
+  <div
+    class="mx-auto grid max-w-content grid-cols-1 items-start gap-l px-m py-section-lg md:grid-cols-[1fr_1.2fr] md:gap-section-md"
+  >
     <div class="md:sticky md:top-section-lg">
-      {portrait?.asset ? (
-        <SanityImage
-          source={portrait}
-          width={900}
-          sizes="(min-width: 768px) 40vw, 100vw"
-          quality={75}
-          class="w-full h-auto rounded-md"
-        />
-      ) : (
-        <div class="aspect-[4/5] bg-muted rounded-md" aria-hidden="true"></div>
-      )}
-      {attribution && (
-        <p class="mt-s text-xs uppercase tracking-widest text-foreground/80">{attribution}</p>
-      )}
+      {
+        portrait?.asset ? (
+          <SanityImage
+            source={portrait}
+            width={900}
+            sizes="(min-width: 768px) 40vw, 100vw"
+            quality={75}
+            class="h-auto w-full rounded-md"
+          />
+        ) : (
+          <div class="aspect-[4/5] rounded-md bg-muted" aria-hidden="true" />
+        )
+      }
+      {
+        attribution && (
+          <p class="mt-s text-xs tracking-widest text-foreground/80 uppercase">{attribution}</p>
+        )
+      }
     </div>
 
     <div>
       <SectionHeading eyebrow={eyebrow} headline={headline} headingId={headingId} />
 
-      {content && (
-        <PortableText value={content} className="mt-l text-foreground/85 text-lg leading-relaxed" />
-      )}
+      {
+        content && (
+          <PortableText
+            value={content}
+            className="mt-l text-foreground/85 text-lg leading-relaxed"
+          />
+        )
+      }
 
-      {(credentialLine || serviceAreaLine) && (
-        <div class="mt-section-md pt-l border-t border-border-soft space-y-m text-foreground/80">
-          {credentialLine && (
-            <p>
-              <span class="block text-xs uppercase tracking-widest text-foreground/80 mb-xs">Background</span>
-              {credentialLine}
-            </p>
-          )}
-          {serviceAreaLine && (
-            <p>
-              <span class="block text-xs uppercase tracking-widest text-foreground/80 mb-xs">Service area</span>
-              {serviceAreaLine}
-            </p>
-          )}
-        </div>
-      )}
+      {
+        (credentialLine || serviceAreaLine) && (
+          <div class="mt-section-md space-y-m border-t border-border-soft pt-l text-foreground/80">
+            {credentialLine && (
+              <p>
+                <span class="mb-xs block text-xs tracking-widest text-foreground/80 uppercase">
+                  Background
+                </span>
+                {credentialLine}
+              </p>
+            )}
+            {serviceAreaLine && (
+              <p>
+                <span class="mb-xs block text-xs tracking-widest text-foreground/80 uppercase">
+                  Service area
+                </span>
+                {serviceAreaLine}
+              </p>
+            )}
+          </div>
+        )
+      }
     </div>
   </div>
 </section>

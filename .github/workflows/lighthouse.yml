@@ -1,0 +1,47 @@
+# The family test standard's Lighthouse workflow (PORTS.md card 35).
+# Deliberately NOT marked PORTABLE: like ci.yml it carries a per-site `env:`
+# block, and the `url` list in lighthouserc.json names the pages a given repo
+# builds. The ASSERTIONS in lighthouserc.json are the part that must not
+# diverge. Copy the shape, not the bytes.
+name: Lighthouse
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+  # Dispatchable so a staging tip can be re-audited on demand, without pushing
+  # an empty commit.
+  workflow_dispatch:
+
+# A newer push to the same branch obsoletes the in-flight run; cancel it
+# instead of paying for both.
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Same build ci.yml runs: consumes the committed src/lib/sanity.types.ts,
+      # emits dist/client (audited here) and dist/server (the SSR bundle for
+      # /studio and /preview, which lhci never sees).
+      - name: Build
+        run: npm run build
+
+      # Accessibility is a hard gate (minScore 1) in lighthouserc.json, as are
+      # LCP 4500ms and CLS 0.1; performance, best-practices and SEO are
+      # warnings so normal CI variance does not block a PR.
+      - name: Lighthouse CI
+        run: npx lhci autorun

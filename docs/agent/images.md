@@ -25,6 +25,7 @@ Files live in `src/assets/` (NOT `public/`). The `src/assets/` location is what 
 **Always pull alt text from the Sanity image field**, not from page-level fields. Editors set alt text once on the image and it carries everywhere the image is used.
 
 **Props:**
+
 - `width` (required) -- maximum width the image will ever render at. Caps the srcset ladder. Don't request larger than the slot displays at -- that's wasted bytes.
 - `height` (optional) -- only set when you need a specific aspect-ratio crop. Otherwise the wrapper derives height from the asset's intrinsic dimensions via `parseSanityAssetDimensions()` and writes both width + height to the `<img>` (kills CLS).
 - `sizes` (recommended) -- the `sizes` attribute. If omitted, defaults to `(max-width: {width}px) 100vw, {width}px`. Pass an accurate value for layouts where the image doesn't fill the viewport on mobile (e.g., a 2-column layout would want `(min-width: 768px) 45vw, 100vw`).
@@ -34,9 +35,11 @@ Files live in `src/assets/` (NOT `public/`). The `src/assets/` location is what 
 - `fetchpriority` -- pass `"high"` on the page's LCP image so the browser fetches it ahead of other resources. `Hero.astro` does this on the eager background image.
 
 **Responsive srcset ladder** (hardcoded in `SanityImage.astro`):
+
 ```
 [400, 600, 700, 800, 900, 1200, 1600, 2400]
 ```
+
 Each entry is a width. The wrapper filters this down to entries <= requested `width` and always includes the explicit `width` as the largest. The 700 entry closes the mobile-retina gap (DPR 1.875 needs ~713 effective px) -- without it, mobile rounds up to 800 unnecessarily.
 
 **Hotspot and crop.** Enable `hotspot: true` on every Sanity image field. Editors can then click to set the focal point, and the URL builder passes that hotspot to Sanity so crops at smaller sizes keep the right part of the image in frame. Faces, key visual elements, anything that matters when the image gets cropped down.

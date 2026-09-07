@@ -242,6 +242,23 @@ function morphElement(
   context: MorphContext,
 ): void {
   if (depth > context.limits.maxDepth) throw new MorphAbort('too deep');
+  // KEEP-AS-IS SUBTREES (2026-08-30, from wcp). An element marked
+  // data-morph-keep holds client-completed content the server's HTML does not:
+  // a server island (server:defer) streams its real body via inline scripts
+  // that a DOMParser parse never executes, so the FETCHED tree still holds the
+  // fallback skeleton. Morphing it in would swap a live widget for its skeleton
+  // on every soft refresh, which was the hub preview's "widgets disappear" bug.
+  // The marked element is not editable content, so keeping the live version
+  // loses nothing. Attributes still sync (they carry no island state); children
+  // are left alone. Inert in a repo that never sets the attribute: the guard
+  // needs it on BOTH trees.
+  if (
+    from.getAttribute('data-morph-keep') !== null &&
+    to.getAttribute('data-morph-keep') !== null
+  ) {
+    syncAttributes(from, to, imageSourceUnchanged(from, to));
+    return;
+  }
   syncAttributes(from, to, imageSourceUnchanged(from, to));
   morphChildren(from, to, depth, context);
 }

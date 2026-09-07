@@ -5,6 +5,7 @@
 PrimeReact is the sanctioned escape hatch for complex behavior-heavy widgets that have no Radix UI / shadcn equivalent and where building from scratch would cost significant time.
 
 Good candidates:
+
 - Rich data table with sorting, filtering, and pagination (`DataTable`)
 - Tree select / cascading select (`TreeSelect`, `CascadeSelect`)
 - File upload with progress and drag-drop zone (`FileUpload`)
@@ -12,6 +13,7 @@ Good candidates:
 - Complex multi-step wizard / stepper (`Steps`)
 
 Do NOT use PrimeReact for:
+
 - Accordions, dialogs, dropdowns, tabs, tooltips -- Radix + shadcn or Starwind cover these at near-zero JS cost
 - Marketing layout blocks -- copy from shadcnblocks, Tailark, or HyperUI
 - Anything a static Astro component can render without JS

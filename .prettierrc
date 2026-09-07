@@ -4,5 +4,9 @@
   "trailingComma": "all",
   "printWidth": 100,
   "tabWidth": 2,
-  "useTabs": false
+  "useTabs": false,
+  "tailwindStylesheet": "./src/styles/globals.css",
+  "tailwindFunctions": ["cn", "cva", "clsx", "twMerge"],
+  "plugins": ["prettier-plugin-astro", "prettier-plugin-tailwindcss"],
+  "overrides": [{ "files": "*.astro", "options": { "parser": "astro" } }]
 }

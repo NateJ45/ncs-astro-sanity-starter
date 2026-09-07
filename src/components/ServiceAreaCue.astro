@@ -25,38 +25,38 @@ const cityList = Array.isArray(cities) ? cities.filter(Boolean) : [];
 const cue = text ?? 'Serving your city and the surrounding area.';
 ---
 
-<div class="bg-muted border-y border-border-soft">
+<div class="border-y border-border-soft bg-muted">
   <div class="mx-auto max-w-content px-m py-section-md text-center">
-    {cityList.length > 0 ? (
-      <>
-        <p class="text-xs uppercase tracking-eyebrow text-foreground/80 mb-m">{eyebrow}</p>
-        <p
-          class="font-display text-h3 leading-snug flex flex-wrap items-baseline justify-center gap-x-s gap-y-xs"
-          aria-label={`Service area: ${cityList.join(', ')}`}
-        >
-          {cityList.map((city, i) => (
-            <>
-              <span
-                class:list={[
-                  i === 0
-                    ? 'text-link font-medium'
-                    : 'text-foreground/85 font-normal',
-                ]}
-              >
-                {city}
-              </span>
-              {i < cityList.length - 1 && (
-                <span class="text-foreground/40 font-normal" aria-hidden="true">·</span>
-              )}
-            </>
-          ))}
-        </p>
-        {text && (
-          <p class="mt-m text-sm text-foreground/85 italic max-w-2xl mx-auto">{text}</p>
-        )}
-      </>
-    ) : (
-      <p class="text-sm text-foreground/75 italic">{cue}</p>
-    )}
+    {
+      cityList.length > 0 ? (
+        <>
+          <p class="mb-m text-xs tracking-eyebrow text-foreground/80 uppercase">{eyebrow}</p>
+          <p
+            class="flex flex-wrap items-baseline justify-center gap-x-s gap-y-xs font-display text-h3 leading-snug"
+            aria-label={`Service area: ${cityList.join(', ')}`}
+          >
+            {cityList.map((city, i) => (
+              <>
+                <span
+                  class:list={[
+                    i === 0 ? 'font-medium text-link' : 'font-normal text-foreground/85',
+                  ]}
+                >
+                  {city}
+                </span>
+                {i < cityList.length - 1 && (
+                  <span class="font-normal text-foreground/40" aria-hidden="true">
+                    ·
+                  </span>
+                )}
+              </>
+            ))}
+          </p>
+          {text && <p class="mx-auto mt-m max-w-2xl text-sm text-foreground/85 italic">{text}</p>}
+        </>
+      ) : (
+        <p class="text-sm text-foreground/75 italic">{cue}</p>
+      )
+    }
   </div>
 </div>

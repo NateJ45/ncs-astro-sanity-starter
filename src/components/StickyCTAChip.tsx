@@ -21,11 +21,7 @@ interface Props {
 
 const SESSION_KEY = 'sticky-cta-dismissed';
 
-export default function StickyCTAChip({
-  label,
-  href = '/contact',
-  threshold = 0.5,
-}: Props) {
+export default function StickyCTAChip({ label, href = '/contact', threshold = 0.5 }: Props) {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
@@ -116,13 +112,11 @@ export default function StickyCTAChip({
       // transform, so combining -translate-x-1/2 with the show/hide
       // translate-y states works correctly.
       className={[
-        'fixed z-40 bottom-[5.5rem]',
+        'fixed bottom-[5.5rem] z-40',
         'left-1/2 -translate-x-1/2',
-        'sm:left-auto sm:translate-x-0 sm:right-m',
+        'sm:right-m sm:left-auto sm:translate-x-0',
         'transition-all duration-300 ease-out',
-        visible
-          ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-4 pointer-events-none',
+        visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0',
       ].join(' ')}
       aria-hidden={!visible}
     >
@@ -133,24 +127,31 @@ export default function StickyCTAChip({
              labels. Past that, truncate kicks in as a safety net.
           Left padding reduced from pl-l to pl-m so more room goes to the
           label text instead of the bronze gutter. */}
-      <div className="relative flex items-center gap-1 bg-primary-dark text-white pl-m pr-s py-s rounded-full shadow-lg shadow-foreground/15 max-w-[min(92vw,28rem)]">
+      <div className="relative flex max-w-[min(92vw,28rem)] items-center gap-1 rounded-full bg-primary-dark py-s pr-s pl-m text-white shadow-lg shadow-foreground/15">
         <a
           href={href}
           tabIndex={visible ? 0 : -1}
-          className="press-tactile flex items-center gap-2 min-w-0 text-xs font-semibold uppercase tracking-eyebrow"
+          className="press-tactile flex min-w-0 items-center gap-2 text-xs font-semibold tracking-eyebrow uppercase"
         >
           <span className="truncate">{label}</span>
-          <span aria-hidden="true" className="shrink-0 text-base leading-none">→</span>
+          <span aria-hidden="true" className="shrink-0 text-base leading-none">
+            →
+          </span>
         </a>
         <button
           type="button"
           onClick={dismiss}
           tabIndex={visible ? 0 : -1}
           aria-label="Dismiss"
-          className="shrink-0 inline-flex items-center justify-center w-11 h-11 -mr-1 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+          className="-mr-1 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            <path
+              d="M3 3l10 10M13 3L3 13"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
       </div>

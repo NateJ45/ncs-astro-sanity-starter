@@ -42,28 +42,47 @@ export function pathForDoc(schemaType: string, doc: any): string | null {
   const slug = doc?.slug?.current;
   switch (schemaType) {
     // Core page singletons
-    case 'homePage':      return '/';
-    case 'aboutPage':     return '/about';
-    case 'servicesPage':  return '/services';
-    case 'processPage':   return '/process';
-    case 'faqPage':       return '/faq';
-    case 'contactPage':   return '/contact';
-    case 'journalPage':   return '/journal';
-    case 'privacyPage':   return '/privacy';
-    case 'notFoundPage':  return '/404';
+    case 'homePage':
+      return '/';
+    case 'aboutPage':
+      return '/about';
+    case 'servicesPage':
+      return '/services';
+    case 'processPage':
+      return '/process';
+    case 'faqPage':
+      return '/faq';
+    case 'contactPage':
+      return '/contact';
+    case 'journalPage':
+      return '/journal';
+    case 'privacyPage':
+      return '/privacy';
+    case 'notFoundPage':
+      return '/404';
     // Collections with their own detail route
-    case 'journalEntry':  return slug ? `/journal/${slug}` : '/journal';
+    case 'journalEntry':
+      return slug ? `/journal/${slug}` : '/journal';
     // Collections that render inside a parent page
-    case 'service':         return '/services';
-    case 'processStep':     return '/process';
-    case 'philosophyPoint': return '/about';
-    case 'testimonial':     return '/';
-    case 'faqItem':         return '/faq';
-    case 'faqCategory':     return '/faq';
-    case 'journalCategory': return '/journal';
+    case 'service':
+      return '/services';
+    case 'processStep':
+      return '/process';
+    case 'philosophyPoint':
+      return '/about';
+    case 'testimonial':
+      return '/';
+    case 'faqItem':
+      return '/faq';
+    case 'faqCategory':
+      return '/faq';
+    case 'journalCategory':
+      return '/journal';
     // Generic custom pages live at /<slug>.
-    case 'page':          return slug ? `/${slug}` : null;
-    default:              return null;
+    case 'page':
+      return slug ? `/${slug}` : null;
+    default:
+      return null;
   }
 }
 

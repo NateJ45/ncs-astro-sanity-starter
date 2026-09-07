@@ -1,6 +1,6 @@
 ---
 description: Read-only content gap report for the Sanity dataset
-argument-hint: "[--fields | --doc <id>]"
+argument-hint: '[--fields | --doc <id>]'
 ---
 
 Run the read-only dataset audit and interpret the results for the user.

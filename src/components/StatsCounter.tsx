@@ -14,7 +14,12 @@ function easeOutQuart(t: number): number {
   return 1 - Math.pow(1 - t, 4);
 }
 
-function AnimatedNumber({ target, suffix, duration, run }: {
+function AnimatedNumber({
+  target,
+  suffix,
+  duration,
+  run,
+}: {
   target: number;
   suffix?: string;
   duration: number;
@@ -24,13 +29,17 @@ function AnimatedNumber({ target, suffix, duration, run }: {
   const rafRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
   const hasStarted = useRef(false);
-  const reduceMotion = typeof window !== 'undefined'
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    : false;
+  const reduceMotion =
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false;
 
   useEffect(() => {
     if (!run) return;
-    if (reduceMotion) { setValue(target); return; }
+    if (reduceMotion) {
+      setValue(target);
+      return;
+    }
     if (hasStarted.current) return;
     hasStarted.current = true;
 
@@ -50,9 +59,7 @@ function AnimatedNumber({ target, suffix, duration, run }: {
   return (
     <span>
       {value}
-      {suffix && (
-        <span className="text-[0.6em] align-super text-secondary">{suffix}</span>
-      )}
+      {suffix && <span className="align-super text-[0.6em] text-secondary">{suffix}</span>}
     </span>
   );
 }
@@ -86,10 +93,7 @@ export default function StatsCounter({ stats }: Props) {
       {stats.map((stat, i) => (
         <React.Fragment key={stat.label}>
           {i > 0 && (
-            <div
-              className="hidden md:block w-px bg-border self-stretch my-2"
-              aria-hidden="true"
-            />
+            <div className="my-2 hidden w-px self-stretch bg-border md:block" aria-hidden="true" />
           )}
           <div className="text-center">
             <span className="block font-display text-[clamp(2.5rem,6vw,3.5rem)] leading-none font-normal text-primary">
@@ -100,7 +104,7 @@ export default function StatsCounter({ stats }: Props) {
                 run={visible}
               />
             </span>
-            <span className="block mt-2 text-[0.62rem] uppercase tracking-eyebrow text-muted-foreground">
+            <span className="mt-2 block text-[0.62rem] tracking-eyebrow text-muted-foreground uppercase">
               {stat.label}
             </span>
           </div>

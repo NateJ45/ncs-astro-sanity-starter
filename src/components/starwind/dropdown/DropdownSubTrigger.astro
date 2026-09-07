@@ -1,10 +1,10 @@
 ---
-import ChevronRight from "@tabler/icons/outline/chevron-right.svg";
-import type { HTMLAttributes } from "astro/types";
+import ChevronRight from '@tabler/icons/outline/chevron-right.svg';
+import type { HTMLAttributes } from 'astro/types';
 
-import { dropdownItem } from "./variants";
+import { dropdownItem } from './variants';
 
-type Props = HTMLAttributes<"div"> & {
+type Props = HTMLAttributes<'div'> & {
   /**
    * Whether the item is inset (has left padding)
    */
@@ -19,12 +19,12 @@ const { class: className, inset = false, disabled = false, ...rest } = Astro.pro
 ---
 
 <div
-  class={dropdownItem({ inset, disabled, class: ["starwind-dropdown-sub-trigger", className] })}
+  class={dropdownItem({ inset, disabled, class: ['starwind-dropdown-sub-trigger', className] })}
   role="menuitem"
   aria-haspopup="true"
   aria-expanded="false"
-  tabindex={disabled ? "-1" : "0"}
-  data-disabled={disabled ? "true" : undefined}
+  tabindex={disabled ? '-1' : '0'}
+  data-disabled={disabled ? 'true' : undefined}
   data-sub-trigger
   {...rest}
   data-slot="dropdown-item"

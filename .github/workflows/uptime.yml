@@ -1,0 +1,76 @@
+name: Uptime check
+
+# A lightweight safety net: hourly, confirm the live site's key pages return
+# 200. A failed run notifies through GitHub.
+#
+# PORTS.md card 7. Harvested into the starter on 2026-09-06 from
+# ncs-church-starter, which is being retired, with reid-design-site's
+# trailing-slash fix folded in.
+#
+# ── THIS REPO IS A TEMPLATE ──────────────────────────────────────────────────
+# ncs-astro-sanity-starter is not deployed anywhere, so there is nothing to
+# ping and the schedule is COMMENTED OUT. It is committed anyway so a FORK
+# inherits a working uptime check on day one.
+#
+# To enable in a fork, per site:
+#   1. Set the SITE_URL repo variable to the live origin
+#      (e.g. https://www.example.com). A variable, not a secret: an origin is
+#      not sensitive, and a variable is readable in the log, which is what you
+#      want when a check fails.
+#   2. Adjust ROUTES below to that site's real paths, if any were renamed or if
+#      a module route is worth watching.
+#   3. Uncomment the `schedule:` block.
+# GitHub Actions minutes are free on public repositories, so a public fork can
+# leave the schedule on permanently.
+#
+# With SITE_URL unset the job logs a warning and exits 0, so it never
+# false-alarms before the DNS cutover. workflow_dispatch stays on, so a manual
+# run always works.
+#
+# GitHub's scheduler is best-effort and can be delayed under load, so treat
+# this as a safety net rather than monitoring. For real monitoring point a
+# dedicated service at the homepage; UptimeRobot's free tier is enough.
+
+on:
+  # schedule:
+  #   - cron: '17 * * * *' # hourly, offset off the top of the hour
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check key pages return 200
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        # THE TRAILING SLASHES ARE LOAD-BEARING. This is a static Astro build
+        # served by Cloudflare Workers, and a request for /services answers 307
+        # to /services/. curl does not follow redirects by default, so a path
+        # written without its slash makes this check fail forever on a
+        # perfectly healthy site. Measured on reid-design-site 2026-08-27:
+        # /services -> 307, /services/ -> 200.
+        #
+        # Route choice follows card 7: four DIFFERENT data paths, not four
+        # variations of the homepage. / is the home singleton rendered through
+        # the page builder, /services/ is a page doc plus the service
+        # collection, /faq/ is a collection grouped by category, and /privacy/
+        # renders from a hardcoded fallback when its Sanity doc is absent, so
+        # it fails only if the deploy itself is broken. If Sanity goes down,
+        # /privacy/ still answers and the diff in the log says where the
+        # failure actually is.
+        run: |
+          if [ -z "$SITE_URL" ]; then
+            echo "::warning::SITE_URL variable not set; skipping uptime check. Expected in the unforked template."
+            exit 0
+          fi
+          base="${SITE_URL%/}"
+          fail=0
+          for path in "/" "/services/" "/faq/" "/privacy/"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 25 "${base}${path}")
+            echo "${code}  ${base}${path}"
+            if [ "$code" != "200" ]; then fail=1; fi
+          done
+          if [ "$fail" = "1" ]; then
+            echo "::error::One or more key pages did not return HTTP 200."
+            exit 1
+          fi

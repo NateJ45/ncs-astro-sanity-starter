@@ -16,19 +16,26 @@ interface Props {
 const { title, href, tooltip, tone = 'default' } = Astro.props as Props;
 if (!title) return null;
 
-const base = 'inline-flex items-center px-s py-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] rounded-full';
+const base =
+  'inline-flex items-center px-s py-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] rounded-full';
 const toneClass =
   tone === 'inverse'
     ? 'bg-bg/15 text-bg border border-bg/25'
     : 'bg-muted text-foreground/80 border border-border-soft';
 ---
 
-{href ? (
-  <a href={href} class:list={[base, toneClass, 'hover:bg-accent hover:text-foreground transition-colors']} title={tooltip}>
-    {title}
-  </a>
-) : (
-  <span class:list={[base, toneClass]} title={tooltip}>
-    {title}
-  </span>
-)}
+{
+  href ? (
+    <a
+      href={href}
+      class:list={[base, toneClass, 'transition-colors hover:bg-accent hover:text-foreground']}
+      title={tooltip}
+    >
+      {title}
+    </a>
+  ) : (
+    <span class:list={[base, toneClass]} title={tooltip}>
+      {title}
+    </span>
+  )
+}

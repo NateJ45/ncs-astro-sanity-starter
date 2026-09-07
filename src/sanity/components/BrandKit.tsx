@@ -32,31 +32,63 @@ const colorGroups: ColorGroup[] = [
   {
     label: 'Primary and links',
     colors: [
-      { name: 'Slate', hex: '#586577', note: 'Buttons, primary CTAs, links, and accent elements throughout the site.' },
-      { name: 'Slate Dark', hex: '#434E5C', note: 'Button hover state. Also used for link text in body copy.' },
+      {
+        name: 'Slate',
+        hex: '#586577',
+        note: 'Buttons, primary CTAs, links, and accent elements throughout the site.',
+      },
+      {
+        name: 'Slate Dark',
+        hex: '#434E5C',
+        note: 'Button hover state. Also used for link text in body copy.',
+      },
     ],
   },
   {
     label: 'Text',
     colors: [
-      { name: 'Ink', hex: '#2A2D31', note: 'Primary text color for headings and body copy on light backgrounds.' },
-      { name: 'Ink Dark', hex: '#1E2024', note: 'Footer background and occasional dark section panels.' },
+      {
+        name: 'Ink',
+        hex: '#2A2D31',
+        note: 'Primary text color for headings and body copy on light backgrounds.',
+      },
+      {
+        name: 'Ink Dark',
+        hex: '#1E2024',
+        note: 'Footer background and occasional dark section panels.',
+      },
     ],
   },
   {
     label: 'Surfaces',
     colors: [
       { name: 'Paper', hex: '#FBFBFA', note: 'The main page background. A clean near-white.' },
-      { name: 'Soft Paper', hex: '#F3F4F2', note: 'Alternating section background. Slightly cooler than Paper.' },
-      { name: 'White', hex: '#FFFFFF', note: 'Text overlaid on dark or photographic surfaces. Hero text, button labels.' },
+      {
+        name: 'Soft Paper',
+        hex: '#F3F4F2',
+        note: 'Alternating section background. Slightly cooler than Paper.',
+      },
+      {
+        name: 'White',
+        hex: '#FFFFFF',
+        note: 'Text overlaid on dark or photographic surfaces. Hero text, button labels.',
+      },
     ],
   },
   {
     label: 'Accents and lines',
     colors: [
       { name: 'Cool Gray', hex: '#AAB0B8', note: 'Borders, dividers, and eyebrow labels.' },
-      { name: 'Muted Sage', hex: '#9DB0A6', note: 'Used sparingly for process step icons and occasional tag accents.' },
-      { name: 'Faint Divider', hex: '#E6E7E5', note: 'Input field underlines and the lightest dividers.' },
+      {
+        name: 'Muted Sage',
+        hex: '#9DB0A6',
+        note: 'Used sparingly for process step icons and occasional tag accents.',
+      },
+      {
+        name: 'Faint Divider',
+        hex: '#E6E7E5',
+        note: 'Input field underlines and the lightest dividers.',
+      },
     ],
   },
 ];
@@ -124,7 +156,6 @@ export default function BrandKit() {
   return (
     <Container width={1} padding={4}>
       <Stack space={6}>
-
         {/* Header */}
         <Box>
           <Heading as="h1" size={3}>
@@ -132,8 +163,8 @@ export default function BrandKit() {
           </Heading>
           <Box marginTop={3}>
             <Text muted size={1}>
-              Colors and fonts for Studio Starter. Built so you can copy values directly
-              into Canva when you need to make a social graphic or marketing material.
+              Colors and fonts for Studio Starter. Built so you can copy values directly into Canva
+              when you need to make a social graphic or marketing material.
             </Text>
           </Box>
         </Box>
@@ -170,8 +201,12 @@ export default function BrandKit() {
             {fonts.map((font) => (
               <Card key={font.name} padding={4} radius={2} shadow={1} tone="default">
                 <Stack space={2}>
-                  <Text size={1} weight="semibold">{font.name}</Text>
-                  <Text size={1} muted>Role: {font.role}</Text>
+                  <Text size={1} weight="semibold">
+                    {font.name}
+                  </Text>
+                  <Text size={1} muted>
+                    Role: {font.role}
+                  </Text>
                   <Text size={1}>{font.note}</Text>
                 </Stack>
               </Card>
@@ -191,22 +226,19 @@ export default function BrandKit() {
               Using this in Canva
             </Heading>
             <Text size={1}>
-              In your Canva Brand Kit, add the hex codes above as your brand colors.
-              Then search each font name in Canva's font picker and save them as your
-              brand fonts.
+              In your Canva Brand Kit, add the hex codes above as your brand colors. Then search
+              each font name in Canva's font picker and save them as your brand fonts.
             </Text>
             <Text size={1}>
-              The quick reference: Libre Baskerville for headings, Inter for body text and
-              labels, Slate (#586577) for buttons and accents, Ink (#2A2D31) for text,
-              Paper (#FBFBFA) for backgrounds.
+              The quick reference: Libre Baskerville for headings, Inter for body text and labels,
+              Slate (#586577) for buttons and accents, Ink (#2A2D31) for text, Paper (#FBFBFA) for
+              backgrounds.
             </Text>
             <Text size={1}>
-              When in doubt, Slate + Ink + Paper is the full Studio Starter palette in
-              three colors.
+              When in doubt, Slate + Ink + Paper is the full Studio Starter palette in three colors.
             </Text>
           </Stack>
         </Card>
-
       </Stack>
     </Container>
   );

@@ -25,20 +25,22 @@ const [page, siteSettings] = await Promise.all([
   getSiteSettings().catch(() => null),
 ]);
 
-const title       = page?.seoTitle       ?? `Frequently Asked Questions · ${site.name}`;
-const description = page?.seoDescription ?? 'Pricing, process, logistics, and service area — everything visitors ask before reaching out.';
+const title = page?.seoTitle ?? `Frequently Asked Questions · ${site.name}`;
+const description =
+  page?.seoDescription ??
+  'Pricing, process, logistics, and service area — everything visitors ask before reaching out.';
 
-const heroEyebrow  = page?.heroEyebrow  ?? 'Common Questions.';
+const heroEyebrow = page?.heroEyebrow ?? 'Common Questions.';
 const heroHeadline = page?.heroHeadline ?? 'Everything You Want to Know.';
-const heroSubhead  = page?.heroSubhead  ?? '';
+const heroSubhead = page?.heroSubhead ?? '';
 
 const categoryOrder = page?.categoryOrder ?? [];
-const faqs          = page?.faqs ?? [];
+const faqs = page?.faqs ?? [];
 
 const schemas = [
   breadcrumbSchema([
     { name: 'Home', url: site.url },
-    { name: 'FAQ',  url: `${site.url}/faq` },
+    { name: 'FAQ', url: `${site.url}/faq` },
   ]),
   faqPageSchema(faqs),
 ];
@@ -57,24 +59,27 @@ const schemas = [
   />
 
   {/* ------- 2. FAQ accordion (grouped by category) ------------------------- */}
-  <section
-    class="bg-background"
-    aria-label="Frequently asked questions"
-  >
+  <section class="bg-background" aria-label="Frequently asked questions">
     <div class="mx-auto max-w-content px-m py-section-lg">
-      <div class="max-w-3xl mx-auto">
-        {faqs.length > 0 ? (
-          <FaqAccordion
-            client:visible
-            faqs={faqs}
-            categoryOrder={categoryOrder}
-            idPrefix="faq-page"
-          />
-        ) : (
-          <p class="text-center text-muted-foreground italic">
-            FAQ content is being updated. <a href="/contact" class="text-link underline underline-offset-2">Ask anything</a> in the meantime.
-          </p>
-        )}
+      <div class="mx-auto max-w-3xl">
+        {
+          faqs.length > 0 ? (
+            <FaqAccordion
+              client:visible
+              faqs={faqs}
+              categoryOrder={categoryOrder}
+              idPrefix="faq-page"
+            />
+          ) : (
+            <p class="text-center text-muted-foreground italic">
+              FAQ content is being updated.{' '}
+              <a href="/contact" class="text-link underline underline-offset-2">
+                Ask anything
+              </a>{' '}
+              in the meantime.
+            </p>
+          )
+        }
       </div>
     </div>
   </section>

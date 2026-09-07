@@ -42,9 +42,7 @@ const assetsDir = resolve(root, 'src', 'assets');
 // there before running. SVG-only logos do not go through this script — they are
 // used directly by Header.astro / Footer.astro.
 const sourceArg = process.argv[2];
-const src = sourceArg
-  ? resolve(process.cwd(), sourceArg)
-  : resolve(assetsDir, 'logo-source.jpg');
+const src = sourceArg ? resolve(process.cwd(), sourceArg) : resolve(assetsDir, 'logo-source.jpg');
 const sourceFile = src.split(/[\\/]/).pop();
 console.log(`Source logo: ${src}`);
 
@@ -88,8 +86,16 @@ async function makeVariant(inkColor, outputPath, label) {
 
 // Charcoal #3D3D3D for light-mode surfaces, Cream #F5F0EB for dark-mode surfaces.
 // These match the brand tokens declared in src/styles/globals.css.
-await makeVariant({ r: 0x3d, g: 0x3d, b: 0x3d }, resolve(assetsDir, 'logo-light.png'), 'logo-light.png (Charcoal)');
-await makeVariant({ r: 0xf5, g: 0xf0, b: 0xeb }, resolve(assetsDir, 'logo-dark.png'), 'logo-dark.png (Cream)');
+await makeVariant(
+  { r: 0x3d, g: 0x3d, b: 0x3d },
+  resolve(assetsDir, 'logo-light.png'),
+  'logo-light.png (Charcoal)',
+);
+await makeVariant(
+  { r: 0xf5, g: 0xf0, b: 0xeb },
+  resolve(assetsDir, 'logo-dark.png'),
+  'logo-dark.png (Cream)',
+);
 
 console.log('\nDone. Header.astro / Footer.astro import these directly via @/assets/.');
 console.log('Optionally run an image-optimizer script on these PNGs before committing.');

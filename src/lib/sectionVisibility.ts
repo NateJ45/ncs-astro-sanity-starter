@@ -1,8 +1,9 @@
 // Safe to edit by hand
 // Normalizes the sectionVisibility object from siteSettings into a flat set of
-// booleans. The critical rule: an UNSET field (undefined or null) counts as
-// VISIBLE — only an explicit `false` hides a section. This means the live site
-// is completely unchanged until the editor explicitly turns something off in Studio.
+// booleans. Two rules, one per kind of route: a CORE route (journal) is visible
+// unless an editor sets its toggle to false, and a MODULE route is hidden
+// unless an editor sets its toggle to true. See the doc comment on
+// getSectionVisibility below for why they differ.
 //
 // Usage:
 //   import { getSectionVisibility } from '@/lib/sectionVisibility';
@@ -41,24 +42,34 @@ export interface SectionVisibility {
  * Convert the raw Sanity sectionVisibility object into a normalized map.
  * Pass `siteSettings?.sectionVisibility` directly.
  *
- * Rule: `value !== false`  =>  visible
- *   - undefined / null / true  =>  visible (true)
- *   - explicit false           =>  hidden  (false)
+ * TWO DEFAULTS, because this starter has two kinds of route.
  *
- * This guarantees the live site is unaffected until the editor explicitly sets a
- * toggle to off in Studio.
+ * CORE routes ship in src/pages and always build, so they follow the original
+ * rule: `value !== false` means visible, and only an explicit `false` hides
+ * one. The live site is unaffected until an editor turns something off.
+ *
+ * MODULE routes come from the staged `modules/` folder and are OFF by default
+ * (CLAUDE.md, "Routes summary"). A fresh clone builds none of them, so `unset`
+ * has to mean HIDDEN there: `value === true` is what turns one on. Under the
+ * old single rule the footer and the nav rendered a link to all nine of them
+ * on a fresh clone, and `npm run check:links` found 135 broken internal links
+ * across ten pages the first time it ran here (2026-09-06). Turning a module
+ * on is a two-part act anyway, copy the folder into src/ AND flip the toggle;
+ * this makes the toggle mean the same thing the folder does.
  */
 export function getSectionVisibility(raw?: RawSectionVisibility | null): SectionVisibility {
   return {
-    portfolio:        raw?.showPortfolio        !== false,
-    journal:          raw?.showJournal          !== false,
-    shop:             raw?.showShop             !== false,
-    eDesign:          raw?.showEDesign          !== false,
-    giftCertificates: raw?.showGiftCertificates !== false,
-    press:            raw?.showPress            !== false,
-    resources:        raw?.showResources        !== false,
-    guides:           raw?.showGuides           !== false,
-    styleQuiz:        raw?.showStyleQuiz        !== false,
-    budgetCalculator: raw?.showBudgetCalculator !== false,
+    // Core route: on unless switched off.
+    journal: raw?.showJournal !== false,
+    // Module routes: off unless switched on.
+    portfolio: raw?.showPortfolio === true,
+    shop: raw?.showShop === true,
+    eDesign: raw?.showEDesign === true,
+    giftCertificates: raw?.showGiftCertificates === true,
+    press: raw?.showPress === true,
+    resources: raw?.showResources === true,
+    guides: raw?.showGuides === true,
+    styleQuiz: raw?.showStyleQuiz === true,
+    budgetCalculator: raw?.showBudgetCalculator === true,
   };
 }

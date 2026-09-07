@@ -92,8 +92,7 @@ export function classifySections<T extends { _type: string }>(
   // content cadence on muted so the first section contrasts.
   const first = list[0];
   const opensWithTextHero =
-    first?._type === 'heroSection' &&
-    !(first as Record<string, unknown>)?.backgroundImage;
+    first?._type === 'heroSection' && !(first as Record<string, unknown>)?.backgroundImage;
 
   let contentIdx = opensWithTextHero ? 1 : 0;
   let prevContentSurface: 'background' | 'muted' | null = null;
@@ -112,9 +111,7 @@ export function classifySections<T extends { _type: string }>(
     // Self-contained blocks neither trigger nor suppress dividers between
     // adjacent content blocks.
     const insertDividerBefore =
-      surface !== null &&
-      prevContentSurface !== null &&
-      surface !== prevContentSurface;
+      surface !== null && prevContentSurface !== null && surface !== prevContentSurface;
 
     if (surface !== null) {
       prevContentSurface = surface;

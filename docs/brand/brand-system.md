@@ -132,17 +132,17 @@ The shipped `brand/brand.config.json` encodes the neutral starter defaults. Runn
 
 The script (`scripts/apply-brand.mjs`) targets comment-delimited regions in each output file. It rewrites those regions and leaves everything else untouched.
 
-| Output file | What changes |
-|---|---|
-| `src/styles/globals.css` | `@theme` color tokens, `@theme` font tokens (including `--font-script` always), `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string |
-| `src/data/site.ts` | `name`, `domain`, `brandColors` (`storageKeyPrefix`, `themeStorageKey`, and `studio` are computed from `name` -- never rewritten) |
-| `sanity.config.ts` | Studio theme font stacks (`DISPLAY_STACK` / `BODY_STACK`, from `studio.fonts`) |
-| `scripts/generate-og-default.mjs` | `wordmark`, `tagline` in the script's inputs block |
-| `scripts/lib/render-og.mjs` | `DEFAULTS` object (colors and font stack) |
-| `scripts/generate-og-pages.mjs` | `WORDMARK` fallback string |
-| `wrangler.jsonc` | `"name"` field -- ONLY when `config.workerName` is non-null |
-| `astro.config.mjs` | `site:` URL -- ONLY when `config.domain` is not `"example.com"` |
-| `public/og-default.png` | Regenerated from the updated inputs via `npm run og` |
+| Output file                       | What changes                                                                                                                                                                                        |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/styles/globals.css`          | `@theme` color tokens, `@theme` font tokens (including `--font-script` always), `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string |
+| `src/data/site.ts`                | `name`, `domain`, `brandColors` (`storageKeyPrefix`, `themeStorageKey`, and `studio` are computed from `name` -- never rewritten)                                                                   |
+| `sanity.config.ts`                | Studio theme font stacks (`DISPLAY_STACK` / `BODY_STACK`, from `studio.fonts`)                                                                                                                      |
+| `scripts/generate-og-default.mjs` | `wordmark`, `tagline` in the script's inputs block                                                                                                                                                  |
+| `scripts/lib/render-og.mjs`       | `DEFAULTS` object (colors and font stack)                                                                                                                                                           |
+| `scripts/generate-og-pages.mjs`   | `WORDMARK` fallback string                                                                                                                                                                          |
+| `wrangler.jsonc`                  | `"name"` field -- ONLY when `config.workerName` is non-null                                                                                                                                         |
+| `astro.config.mjs`                | `site:` URL -- ONLY when `config.domain` is not `"example.com"`                                                                                                                                     |
+| `public/og-default.png`           | Regenerated from the updated inputs via `npm run og`                                                                                                                                                |
 
 **Idempotent.** Running `apply-brand` twice with the same config produces no diff. The script does not accumulate duplicate declarations.
 
@@ -208,6 +208,7 @@ The skill lives at `.claude/skills/reskin/SKILL.md`. It orchestrates the full ne
 ## Out-of-the-box state
 
 The neutral starter defaults ship as the initial state of `brand/brand.config.json`:
+
 - **Identity:** `"Studio Starter"`, domain `"example.com"`, tagline `"Your tagline goes here."`.
 - **Palette:** stone/ink/paper (warm neutral grays, near-black for text, restrained slate accent). Both light and dark defined with the full token set.
 - **Fonts:** Libre Baskerville (display) + Inter Variable (body). Both `@fontsource` packages are in `package.json`. Script accent slot is `null`.

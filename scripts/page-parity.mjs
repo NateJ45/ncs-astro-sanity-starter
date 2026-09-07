@@ -91,14 +91,7 @@
  * commit message.
  */
 
-import {
-  readFileSync,
-  writeFileSync,
-  mkdirSync,
-  existsSync,
-  statSync,
-  readdirSync,
-} from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -273,7 +266,9 @@ function requireDist() {
   const age = Date.now() - statSync(marker).mtimeMs;
   if (age > STALE_MS) {
     const hours = (age / 3600000).toFixed(1);
-    console.warn(`WARNING: ${DIST_LABEL} was built ${hours}h ago. It may not reflect your working tree.`);
+    console.warn(
+      `WARNING: ${DIST_LABEL} was built ${hours}h ago. It may not reflect your working tree.`,
+    );
   }
 }
 
@@ -387,10 +382,14 @@ function capture(only) {
     const out = join(SNAP_DIR, snapFile(name));
     writeFileSync(out, html + '\n', 'utf8');
     const kb = (Buffer.byteLength(html, 'utf8') / 1024).toFixed(1);
-    console.log(`  SAVE  ${name.padEnd(20)} ${kb.padStart(7)} KB  -> scripts/.parity/${snapFile(name)}`);
+    console.log(
+      `  SAVE  ${name.padEnd(20)} ${kb.padStart(7)} KB  -> scripts/.parity/${snapFile(name)}`,
+    );
     written++;
   }
-  console.log(`\n${written} snapshot(s) written${missing ? `, ${missing} page(s) missing from ${DIST_LABEL}` : ''}.`);
+  console.log(
+    `\n${written} snapshot(s) written${missing ? `, ${missing} page(s) missing from ${DIST_LABEL}` : ''}.`,
+  );
   console.log('Commit scripts/.parity/*.html: they are the parity baseline.');
   if (missing) process.exit(1);
 }
@@ -443,7 +442,9 @@ function compare(only) {
 function list() {
   const pages = getPages();
   console.log(`html root: ${DIST_LABEL}`);
-  console.log(`${pages.length} route(s)${PAGES.length ? ' (fixed PAGES list)' : ' (auto-discovered)'}:`);
+  console.log(
+    `${pages.length} route(s)${PAGES.length ? ' (fixed PAGES list)' : ' (auto-discovered)'}:`,
+  );
   for (const [name, file] of pages) console.log(`  ${name.padEnd(20)} ${file}`);
 }
 

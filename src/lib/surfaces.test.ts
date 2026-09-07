@@ -2,6 +2,13 @@ import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { AA_BODY_TEXT, AA_LARGE_TEXT, contrastRatio } from './contrast.ts';
+import {
+  DARK_SCOPE,
+  LIGHT_SCOPE,
+  normalizeHex as norm,
+  scopeReader,
+  tokensIn,
+} from './css-tokens.ts';
 import { HEADING_ACCENT, SECTION_SURFACES, surfaceClass } from './surfaces.ts';
 import { CONTENT_TYPES } from './sectionCadence.ts';
 
@@ -31,48 +38,19 @@ import { CONTENT_TYPES } from './sectionCadence.ts';
 
 const css = readFileSync(new URL('../styles/globals.css', import.meta.url), 'utf8');
 
-/** Brace-counted extraction of `--name: #hex | var(--other)` from matching blocks. */
-function tokensMatching(header: RegExp): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const m of css.matchAll(header)) {
-    let depth = 0;
-    let i = css.indexOf('{', m.index);
-    if (i === -1) continue;
-    const open = i;
-    for (; i < css.length; i++) {
-      if (css[i] === '{') depth++;
-      else if (css[i] === '}' && --depth === 0) break;
-    }
-    const decl = /(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{3,8}|var\(\s*--[\w-]+\s*\))\s*;/g;
-    for (const d of css.slice(open, i).matchAll(decl)) out[d[1]] = d[2];
-  }
-  return out;
-}
-
-// `@theme`, `@theme inline` and `:root` are all the light scope. `.dark` is the
-// dark scope, and the header pattern deliberately requires `{` right after the
-// class so the `.dark .surface-warm` style rules further down are not swept in.
-const light = tokensMatching(/(?:^|\n)\s*(?:@theme[^{]*|:root)\s*\{/g);
-const dark = tokensMatching(/(?:^|\n)\s*\.dark\s*\{/g);
-
-function resolve(value: string | undefined, scope: Record<string, string>, seen = 0): string {
-  if (!value) throw new Error('Token has no value');
-  if (seen > 5) throw new Error(`Alias loop resolving "${value}"`);
-  const alias = value.match(/^var\(\s*(--[\w-]+)\s*\)$/);
-  if (!alias) return value;
-  return resolve(scope[alias[1]] ?? light[alias[1]], scope, seen + 1);
-}
+// `@theme`, `@theme inline` and `:root` are all the light scope, `.dark` is the
+// dark scope, and a dark block overrides only some tokens so the rest fall back
+// to light. The brace-counted, alias-following reader that resolves them lives
+// in src/lib/css-tokens.ts, shared with theme-tokens.test.ts: it used to exist
+// twice, in two different qualities, and the weaker copy was silently reading
+// the wrong declaration. See that file's header.
+const light = tokensIn(css, LIGHT_SCOPE);
+const dark = tokensIn(css, DARK_SCOPE);
 
 const themes = [
-  ['light', (n: string) => resolve(light[n], light)],
-  ['dark', (n: string) => resolve(dark[n] ?? light[n], dark)],
+  ['light', scopeReader(light)],
+  ['dark', scopeReader(dark, light)],
 ] as const;
-
-/** #FFF and #ffffff are the same colour; compare on the expanded lowercase form. */
-function norm(hex: string): string {
-  const h = hex.trim().replace(/^#/, '').toLowerCase();
-  return `#${h.length === 3 ? h.replace(/./g, (c) => c + c) : h}`;
-}
 
 describe('surface pairs resolve', () => {
   it('every surface names tokens that exist in globals.css', () => {
@@ -192,7 +170,9 @@ describe('the heading accent word', () => {
     // The rule is what makes the measurement above true on the live page. A
     // silent delete would leave the theme-aware token flipping with the
     // READER's page theme instead of with the band it is sitting on.
-    assert.match(css, /\.bg-accent-dark\s*\{[^}]*--section-accent:\s*#8A96A6/);
+    // Case-insensitive: prettier's CSS pass lowercases hex literals, and the
+    // colour is the assertion here, not its spelling.
+    assert.match(css, /\.bg-accent-dark\s*\{[^}]*--section-accent:\s*#8A96A6/i);
     assert.match(css, /\.heading-accent\s*\{[^}]*var\(--section-accent,\s*var\(--primary\)\)/);
   });
 });

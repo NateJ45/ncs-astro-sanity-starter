@@ -1,3 +1,4 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Generates public/llms-full.txt — the expanded companion to llms.txt. It
 // inlines the substantive site content (services and prices, the process,
 // FAQs, service area and contact, plus the current portfolio, journal, and
@@ -28,7 +29,9 @@ if (!projectId) {
   process.exit(1);
 }
 if (!readToken) {
-  console.warn('[warn] No SANITY_API_READ_TOKEN / WRITE token set; collection content (services, FAQ, projects, etc.) will be empty.');
+  console.warn(
+    '[warn] No SANITY_API_READ_TOKEN / WRITE token set; collection content (services, FAQ, projects, etc.) will be empty.',
+  );
 }
 
 const client = createClient({
@@ -56,13 +59,35 @@ function ptToPlainText(blocks) {
 const SITE = env.PUBLIC_SITE_URL ?? env.SITE_URL ?? 'https://example.com';
 
 const [settings, services, steps, faqs, projects, journal, guides] = await Promise.all([
-  client.fetch(`*[_type=="siteSettings"][0]{ email, phone, serviceAreas, availabilityStatus }`).catch(() => null),
-  client.fetch(`*[_type=="service"]|order(orderRank){ name, price, shortDescription, features, bestFor }`).catch(() => []),
-  client.fetch(`*[_type=="processStep"]|order(stepNumber asc){ stepNumber, title, timeEstimate, shortDescription }`).catch(() => []),
+  client
+    .fetch(`*[_type=="siteSettings"][0]{ email, phone, serviceAreas, availabilityStatus }`)
+    .catch(() => null),
+  client
+    .fetch(
+      `*[_type=="service"]|order(orderRank){ name, price, shortDescription, features, bestFor }`,
+    )
+    .catch(() => []),
+  client
+    .fetch(
+      `*[_type=="processStep"]|order(stepNumber asc){ stepNumber, title, timeEstimate, shortDescription }`,
+    )
+    .catch(() => []),
   client.fetch(`*[_type=="faqItem"]{ question, answer }`).catch(() => []),
-  client.fetch(`*[_type=="project" && defined(slug.current)]|order(coalesce(year, 0) desc){ title, location, year, briefSummary, "slug": slug.current }`).catch(() => []),
-  client.fetch(`*[_type=="journalEntry" && defined(slug.current)]|order(publishedAt desc){ title, excerpt, "slug": slug.current }`).catch(() => []),
-  client.fetch(`*[_type=="leadMagnet" && published==true && defined(slug.current)]|order(orderRank){ title, summary, "slug": slug.current }`).catch(() => []),
+  client
+    .fetch(
+      `*[_type=="project" && defined(slug.current)]|order(coalesce(year, 0) desc){ title, location, year, briefSummary, "slug": slug.current }`,
+    )
+    .catch(() => []),
+  client
+    .fetch(
+      `*[_type=="journalEntry" && defined(slug.current)]|order(publishedAt desc){ title, excerpt, "slug": slug.current }`,
+    )
+    .catch(() => []),
+  client
+    .fetch(
+      `*[_type=="leadMagnet" && published==true && defined(slug.current)]|order(orderRank){ title, summary, "slug": slug.current }`,
+    )
+    .catch(() => []),
 ]);
 
 const lines = [];
@@ -74,7 +99,9 @@ const siteName = env.SITE_NAME ?? 'Studio Starter';
 
 p(`# ${siteName} — Full Site Content`);
 p('');
-p(`> This is the expanded companion to /llms.txt for ${siteName}. It inlines the substantive content of the site pulled from Sanity so a language model can answer questions about this business from a single document. For the short link map, see /llms.txt.`);
+p(
+  `> This is the expanded companion to /llms.txt for ${siteName}. It inlines the substantive content of the site pulled from Sanity so a language model can answer questions about this business from a single document. For the short link map, see /llms.txt.`,
+);
 p('');
 
 if (Array.isArray(services) && services.length) {
@@ -98,7 +125,12 @@ if (Array.isArray(steps) && steps.length) {
   p('');
   for (const st of steps) {
     if (!st?.title) continue;
-    p(`### Step ${st.stepNumber ?? ''}: ${st.title}${st.timeEstimate ? ` (${st.timeEstimate})` : ''}`.replace('Step : ', 'Step: '));
+    p(
+      `### Step ${st.stepNumber ?? ''}: ${st.title}${st.timeEstimate ? ` (${st.timeEstimate})` : ''}`.replace(
+        'Step : ',
+        'Step: ',
+      ),
+    );
     if (st.shortDescription) p(st.shortDescription);
     p('');
   }
@@ -119,7 +151,8 @@ if (Array.isArray(faqs) && faqs.length) {
 if (settings) {
   p('## Service area and contact');
   p('');
-  if (Array.isArray(settings.serviceAreas) && settings.serviceAreas.length) p(`- Serving: ${settings.serviceAreas.join(', ')}`);
+  if (Array.isArray(settings.serviceAreas) && settings.serviceAreas.length)
+    p(`- Serving: ${settings.serviceAreas.join(', ')}`);
   if (settings.email) p(`- Email: ${settings.email}`);
   if (settings.phone) p(`- Phone: ${settings.phone}`);
   if (settings.availabilityStatus) p(`- Availability: ${settings.availabilityStatus}`);
@@ -132,7 +165,9 @@ if (Array.isArray(projects) && projects.length) {
   for (const pr of projects) {
     if (!pr?.title) continue;
     const meta = [pr.location, pr.year].filter(Boolean).join(', ');
-    p(`- [${pr.title}](${SITE}/portfolio/${pr.slug}/)${meta ? ` (${meta})` : ''}${pr.briefSummary ? `: ${pr.briefSummary}` : ''}`);
+    p(
+      `- [${pr.title}](${SITE}/portfolio/${pr.slug}/)${meta ? ` (${meta})` : ''}${pr.briefSummary ? `: ${pr.briefSummary}` : ''}`,
+    );
   }
   p('');
 }
@@ -157,7 +192,11 @@ if (Array.isArray(guides) && guides.length) {
   p('');
 }
 
-const out = lines.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+const out =
+  lines
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trimEnd() + '\n';
 writeFileSync(resolve(root, 'public/llms-full.txt'), out, 'utf-8');
 console.log(
   `[ok] wrote public/llms-full.txt — ${out.length} bytes (` +

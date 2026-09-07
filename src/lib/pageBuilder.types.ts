@@ -64,6 +64,33 @@ export interface ProjectedImage {
   [key: string]: unknown;
 }
 
+/**
+ * The image shape every component that renders a Sanity image should accept.
+ *
+ * Nine components used to redeclare their own `interface SanityImageObject`
+ * with `asset?: { _ref?: string; _id?: string }` and REQUIRED hotspot/crop
+ * numbers. None of those matched `ProjectedImage`, which is what the GROQ
+ * projection actually returns: `asset->` resolves to a whole asset document
+ * (extra keys, and `null` when the reference is broken) and Sanity marks every
+ * hotspot and crop number optional. `astro check` reported eight assignment
+ * errors along that seam the first time it ran here, 2026-09-06. Every one was
+ * the prop contract being narrower than the data, not the data being wrong.
+ *
+ * `_type` is optional because the code-defined fallbacks in
+ * src/data/defaultSections.ts build image objects without it.
+ */
+export interface SanityImageObject extends Omit<ProjectedImage, '_type'> {
+  // Spelled out rather than written as `Omit<ProjectedImage, '_type'>` alone:
+  // ProjectedImage carries an index signature, and Omit over an index signature
+  // drops every named property with it, which would leave `.alt` typed `{}`.
+  _type?: string;
+  asset?: ProjectedImage['asset'];
+  alt?: string;
+  hotspot?: { x?: number; y?: number; height?: number; width?: number };
+  crop?: { top?: number; bottom?: number; left?: number; right?: number };
+  caption?: string;
+}
+
 /** CTA block after `internalLink->{ _type, "slug": slug.current }` projection. */
 export interface ProjectedCtaBlock {
   _type: 'ctaBlock';
@@ -89,34 +116,31 @@ export type ProjectedHeroSection = { _key: string } & Omit<
   _HeroSection,
   'backgroundImage' | 'primaryCta' | 'secondaryCta'
 > & {
-  backgroundImage?: ProjectedImage | null;
-  primaryCta?: ProjectedCtaBlock | null;
-  secondaryCta?: ProjectedCtaBlock | null;
-};
+    backgroundImage?: ProjectedImage | null;
+    primaryCta?: ProjectedCtaBlock | null;
+    secondaryCta?: ProjectedCtaBlock | null;
+  };
 
 export type ProjectedRichTextSection = { _key: string } & _RichTextSection & {
-  /** Non-schema extra field present in some defaultSections entries. */
-  cta?: ProjectedCtaBlock | null;
-  [key: string]: unknown;
-};
+    /** Non-schema extra field present in some defaultSections entries. */
+    cta?: ProjectedCtaBlock | null;
+    [key: string]: unknown;
+  };
 
 export type ProjectedImageTextSection = { _key: string } & Omit<
   _ImageTextSection,
   'image' | 'cta'
 > & {
-  image?: ProjectedImage | null;
-  cta?: ProjectedCtaBlock | null;
-  /** Non-schema alias for imageSide present in some defaultSections entries. */
-  imagePosition?: 'left' | 'right';
-  [key: string]: unknown;
-};
+    image?: ProjectedImage | null;
+    cta?: ProjectedCtaBlock | null;
+    /** Non-schema alias for imageSide present in some defaultSections entries. */
+    imagePosition?: 'left' | 'right';
+    [key: string]: unknown;
+  };
 
-export type ProjectedGallerySection = { _key: string } & Omit<
-  _GallerySection,
-  'images'
-> & {
-  images?: ProjectedImage[];
-};
+export type ProjectedGallerySection = { _key: string } & Omit<_GallerySection, 'images'> & {
+    images?: ProjectedImage[];
+  };
 
 export type ProjectedQuoteSection = { _key: string } & _QuoteSection;
 
@@ -126,48 +150,45 @@ export type ProjectedCtaBandSection = { _key: string } & Omit<
   _CtaBandSection,
   'backgroundImage' | 'cta'
 > & {
-  backgroundImage?: ProjectedImage | null;
-  cta?: ProjectedCtaBlock | null;
-};
+    backgroundImage?: ProjectedImage | null;
+    cta?: ProjectedCtaBlock | null;
+  };
 
 export type ProjectedVideoSection = { _key: string } & _VideoSection;
 
 export type ProjectedSpacerSection = { _key: string } & _SpacerSection & {
-  /** Non-schema size field present in some defaultSections entries. */
-  size?: string;
-  [key: string]: unknown;
-};
+    /** Non-schema size field present in some defaultSections entries. */
+    size?: string;
+    [key: string]: unknown;
+  };
 
 export type ProjectedFounderSection = { _key: string } & Omit<
   _FounderSection,
   'portrait' | 'cta'
 > & {
-  portrait?: ProjectedImage | null;
-  cta?: ProjectedCtaBlock | null;
-};
+    portrait?: ProjectedImage | null;
+    cta?: ProjectedCtaBlock | null;
+  };
 
 /** servicesGridSection adds a `services` array resolved from the collection. */
-export type ProjectedServicesGridSection = { _key: string } & Omit<
-  _ServicesGridSection,
-  'cta'
-> & {
-  cta?: ProjectedCtaBlock | null;
-  /** Resolved service documents from `*[_type == "service"]`. */
-  services?: Array<{
-    _id?: string;
-    _type?: string;
-    name?: string;
-    slug?: { current?: string };
-    price?: string;
-    priceNumeric?: number;
-    shortDescription?: string;
-    features?: string[];
-    bestFor?: string;
-    featuredImage?: ProjectedImage;
-    ctaLabel?: string;
-    [key: string]: unknown;
-  }>;
-};
+export type ProjectedServicesGridSection = { _key: string } & Omit<_ServicesGridSection, 'cta'> & {
+    cta?: ProjectedCtaBlock | null;
+    /** Resolved service documents from `*[_type == "service"]`. */
+    services?: Array<{
+      _id?: string;
+      _type?: string;
+      name?: string;
+      slug?: { current?: string };
+      price?: string;
+      priceNumeric?: number;
+      shortDescription?: string;
+      features?: string[];
+      bestFor?: string;
+      featuredImage?: ProjectedImage;
+      ctaLabel?: string;
+      [key: string]: unknown;
+    }>;
+  };
 
 /** Testimonial shape after dereffing in the projection. */
 interface ProjectedTestimonial {
@@ -184,51 +205,45 @@ export type ProjectedTestimonialsSection = { _key: string } & Omit<
   _TestimonialsSection,
   'featuredQuote' | 'testimonialsToShow'
 > & {
-  featuredQuote?: ProjectedTestimonial | null;
-  testimonialsToShow?: ProjectedTestimonial[];
-};
+    featuredQuote?: ProjectedTestimonial | null;
+    testimonialsToShow?: ProjectedTestimonial[];
+  };
 
-export type ProjectedStorySection = { _key: string } & Omit<
-  _StorySection,
-  'portrait'
-> & {
-  portrait?: ProjectedImage | null;
-};
+export type ProjectedStorySection = { _key: string } & Omit<_StorySection, 'portrait'> & {
+    portrait?: ProjectedImage | null;
+  };
 
 /** valuesSection adds a `points` array resolved from the collection. */
 export type ProjectedValuesSection = { _key: string } & _ValuesSection & {
-  points?: Array<{
-    title?: string;
-    description?: string;
-    displayOrder?: number;
-  }>;
-};
+    points?: Array<{
+      title?: string;
+      description?: string;
+      displayOrder?: number;
+    }>;
+  };
 
 /** processSection adds a `steps` array resolved from the collection + cta projection. */
-export type ProjectedProcessSection = { _key: string } & Omit<
-  _ProcessSection,
-  'cta'
-> & {
-  cta?: ProjectedCtaBlock | null;
-  steps?: Array<{
-    stepNumber?: number;
-    title?: string;
-    timeEstimate?: string;
-    shortDescription?: string;
-    features?: string[];
-    tierNote?: string;
-  }>;
-};
+export type ProjectedProcessSection = { _key: string } & Omit<_ProcessSection, 'cta'> & {
+    cta?: ProjectedCtaBlock | null;
+    steps?: Array<{
+      stepNumber?: number;
+      title?: string;
+      timeEstimate?: string;
+      shortDescription?: string;
+      features?: string[];
+      tierNote?: string;
+    }>;
+  };
 
 /** serviceAreaSection adds `travelFees` resolved from businessInfo. */
 export type ProjectedServiceAreaSection = { _key: string } & _ServiceAreaSection & {
-  travelFees?: Array<{ distanceLabel?: string; fee?: string }>;
-};
+    travelFees?: Array<{ distanceLabel?: string; fee?: string }>;
+  };
 
 /** guaranteeSection adds `siteSettingsText` resolved from siteSettings. */
 export type ProjectedGuaranteeSection = { _key: string } & _GuaranteeSection & {
-  siteSettingsText?: string;
-};
+    siteSettingsText?: string;
+  };
 
 // ---------------------------------------------------------------------------
 // U7 new blocks — hand-authored projected types (typegen will regenerate
@@ -256,14 +271,18 @@ export interface ProjectedFaqSection {
   _key: string;
   eyebrow?: string;
   headline?: string;
+  /** Word in `headline` rendered in the script accent face. */
+  headingAccent?: string;
   subhead?: string;
+  /** Portable Text twin of `subhead` (bold / italic only). */
+  subheadRich?: unknown;
   /** faqItem refs resolved to { question, answer, category, displayOrder }. */
   items?: ProjectedFaqItem[];
   cta?: ProjectedCtaBlock | null;
 }
 
 /** A single logo image inside logoStripSection, after asset-> projection. */
-export interface ProjectedLogoStripLogo extends ProjectedImage {}
+export type ProjectedLogoStripLogo = ProjectedImage;
 
 /**
  * logoStripSection — grayscale logo row or grid.
@@ -299,6 +318,8 @@ export interface ProjectedTeamSection {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  /** Portable Text twin of `subhead` (bold / italic only). */
+  subheadRich?: unknown;
   members?: ProjectedTeamMember[];
 }
 
@@ -353,6 +374,9 @@ export interface ProjectedDynamicListSection {
   eyebrow?: string;
   headline?: string;
   subhead?: string;
+  /** Portable Text twin of `subhead` (bold / italic only). */
+  subheadRich?: unknown;
+  columns?: 2 | 3;
   source?: 'journal' | 'services' | 'testimonials' | 'faqs';
   limit?: number;
   items?: ProjectedDynamicListItem[];

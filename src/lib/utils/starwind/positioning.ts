@@ -1,5 +1,5 @@
-export type FloatingSide = "top" | "bottom" | "left" | "right";
-export type FloatingAlign = "start" | "center" | "end";
+export type FloatingSide = 'top' | 'bottom' | 'left' | 'right';
+export type FloatingAlign = 'start' | 'center' | 'end';
 
 interface Placement {
   side: FloatingSide;
@@ -40,25 +40,25 @@ export interface ResolvePlacementResult {
 
 function getOppositeSide(side: FloatingSide): FloatingSide {
   switch (side) {
-    case "top":
-      return "bottom";
-    case "bottom":
-      return "top";
-    case "left":
-      return "right";
-    case "right":
-      return "left";
+    case 'top':
+      return 'bottom';
+    case 'bottom':
+      return 'top';
+    case 'left':
+      return 'right';
+    case 'right':
+      return 'left';
   }
 }
 
 function getOppositeAlign(align: FloatingAlign): FloatingAlign {
   switch (align) {
-    case "start":
-      return "end";
-    case "end":
-      return "start";
-    case "center":
-      return "center";
+    case 'start':
+      return 'end';
+    case 'end':
+      return 'start';
+    case 'center':
+      return 'center';
   }
 }
 
@@ -80,20 +80,20 @@ function getPlacementCandidates(side: FloatingSide, align: FloatingAlign): Place
 
   pushUnique({ side, align });
   pushUnique({ side: oppositeSide, align });
-  pushUnique({ side, align: "center" });
-  pushUnique({ side: oppositeSide, align: "center" });
+  pushUnique({ side, align: 'center' });
+  pushUnique({ side: oppositeSide, align: 'center' });
   pushUnique({ side, align: oppositeAlign });
   pushUnique({ side: oppositeSide, align: oppositeAlign });
 
-  if (side === "top" || side === "bottom") {
-    for (const fallbackAlign of ["start", "center", "end"] as const) {
-      pushUnique({ side: "right", align: fallbackAlign });
-      pushUnique({ side: "left", align: fallbackAlign });
+  if (side === 'top' || side === 'bottom') {
+    for (const fallbackAlign of ['start', 'center', 'end'] as const) {
+      pushUnique({ side: 'right', align: fallbackAlign });
+      pushUnique({ side: 'left', align: fallbackAlign });
     }
   } else {
-    for (const fallbackAlign of ["start", "center", "end"] as const) {
-      pushUnique({ side: "bottom", align: fallbackAlign });
-      pushUnique({ side: "top", align: fallbackAlign });
+    for (const fallbackAlign of ['start', 'center', 'end'] as const) {
+      pushUnique({ side: 'bottom', align: fallbackAlign });
+      pushUnique({ side: 'top', align: fallbackAlign });
     }
   }
 
@@ -110,28 +110,28 @@ function getPlacementPosition(
   let top = 0;
   let left = 0;
 
-  if (placement.side === "bottom" || placement.side === "top") {
+  if (placement.side === 'bottom' || placement.side === 'top') {
     top =
-      placement.side === "bottom"
+      placement.side === 'bottom'
         ? triggerRect.bottom + sideOffset
         : triggerRect.top - contentHeight - sideOffset;
 
-    if (placement.align === "start") {
+    if (placement.align === 'start') {
       left = triggerRect.left;
-    } else if (placement.align === "end") {
+    } else if (placement.align === 'end') {
       left = triggerRect.right - contentWidth;
     } else {
       left = triggerRect.left + (triggerRect.width - contentWidth) / 2;
     }
   } else {
     left =
-      placement.side === "right"
+      placement.side === 'right'
         ? triggerRect.right + sideOffset
         : triggerRect.left - contentWidth - sideOffset;
 
-    if (placement.align === "start") {
+    if (placement.align === 'start') {
       top = triggerRect.top;
-    } else if (placement.align === "end") {
+    } else if (placement.align === 'end') {
       top = triggerRect.bottom - contentHeight;
     } else {
       top = triggerRect.top + (triggerRect.height - contentHeight) / 2;
@@ -182,7 +182,7 @@ function getMainAxisShift(
   preferredPosition: Position,
   clampedPosition: Position,
 ): number {
-  if (side === "top" || side === "bottom") {
+  if (side === 'top' || side === 'bottom') {
     return Math.abs(clampedPosition.top - preferredPosition.top);
   }
 
@@ -194,7 +194,7 @@ function getCrossAxisShift(
   preferredPosition: Position,
   clampedPosition: Position,
 ): number {
-  if (side === "top" || side === "bottom") {
+  if (side === 'top' || side === 'bottom') {
     return Math.abs(clampedPosition.left - preferredPosition.left);
   }
 
@@ -304,15 +304,15 @@ export function resolvePlacement(options: ResolvePlacementOptions): ResolvePlace
  * Returns a transform-origin value that matches the resolved placement.
  */
 export function getTransformOrigin(side: FloatingSide, align: FloatingAlign): string {
-  if (side === "top" || side === "bottom") {
-    const vertical = side === "bottom" ? "top" : "bottom";
-    const horizontal = align === "start" ? "left" : align === "end" ? "right" : "center";
+  if (side === 'top' || side === 'bottom') {
+    const vertical = side === 'bottom' ? 'top' : 'bottom';
+    const horizontal = align === 'start' ? 'left' : align === 'end' ? 'right' : 'center';
 
     return `${horizontal} ${vertical}`;
   }
 
-  const horizontal = side === "right" ? "left" : "right";
-  const vertical = align === "start" ? "top" : align === "end" ? "bottom" : "center";
+  const horizontal = side === 'right' ? 'left' : 'right';
+  const vertical = align === 'start' ? 'top' : align === 'end' ? 'bottom' : 'center';
 
   return `${horizontal} ${vertical}`;
 }

@@ -1,9 +1,9 @@
 ---
-import type { HTMLAttributes } from "astro/types";
+import type { HTMLAttributes } from 'astro/types';
 
-import { dropdownTrigger } from "./variants";
+import { dropdownTrigger } from './variants';
 
-type Props = Omit<HTMLAttributes<"button">, "role" | "type"> & {
+type Props = Omit<HTMLAttributes<'button'>, 'role' | 'type'> & {
   /**
    * When true, the component will render its child element with a simple wrapper instead of a button component
    */
@@ -14,7 +14,7 @@ const { class: className, asChild = false, ...rest } = Astro.props;
 
 // Get the first child element if asChild is true
 let hasChildren = false;
-if (Astro.slots.has("default")) {
+if (Astro.slots.has('default')) {
   hasChildren = true;
 }
 ---
@@ -22,7 +22,7 @@ if (Astro.slots.has("default")) {
 {
   asChild && hasChildren ? (
     <div
-      class:list={["starwind-dropdown-trigger", className]}
+      class:list={['starwind-dropdown-trigger', className]}
       data-as-child
       {...rest}
       data-slot="dropdown-trigger"

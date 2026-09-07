@@ -1,0 +1,74 @@
+{
+  "//": "The `assert` block below is the family test standard (PORTS.md card 35) and must not diverge between repos. The `url` list above it is EXPECTED TO DIFFER: it names the pages this repo builds. Lighthouse CI runs against the built static output (dist/client) so dev-server quirks never affect scores. The url list is EXPLICIT on purpose: with staticDistDir alone, lhci auto-discovers pages but caps at 5, testing a near-random subset. Listing URLs covers every distinct template and skips non-page stubs. Accessibility is a HARD gate (must hold 100); performance / best-practices / SEO are warnings so normal CI variance does not block a PR. Not listed, on purpose: /studio, /preview/** and /api/draft-mode/* are SSR-only and never emitted into dist/client; /[slug] and /journal/[slug] build zero paths with no Sanity project configured; the nine module routes under modules/ are staged, not built. Add a representative URL per template as a project brings those online. Run locally: npm run build && npx lhci autorun",
+  "ci": {
+    "collect": {
+      "staticDistDir": "./dist/client",
+      "url": [
+        "http://localhost/index.html",
+        "http://localhost/about/index.html",
+        "http://localhost/services/index.html",
+        "http://localhost/process/index.html",
+        "http://localhost/faq/index.html",
+        "http://localhost/contact/index.html",
+        "http://localhost/journal/index.html",
+        "http://localhost/privacy/index.html",
+        "http://localhost/404.html"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "skipAudits": ["uses-http2", "canonical"]
+      }
+    },
+    "assert": {
+      "//": "numberOfRuns is 3 and assertions use the MEDIAN, not a single sample. With one run, largest-contentful-paint as a hard error measures the CI runner as much as the site: on 2026-09-06 the identical commit passed on staging and failed on main at 6779ms against a 4500 budget, on a commit that only touched a workflow file. A gate that cries wolf gets ignored, and an ignored gate is worse than none. Three runs cost roughly 3x the job time, which is the price of the timing assertions being trustworthy.",
+      "aggregationMethod": "median",
+      "assertions": {
+        "categories:accessibility": [
+          "error",
+          {
+            "minScore": 1
+          }
+        ],
+        "categories:best-practices": [
+          "warn",
+          {
+            "minScore": 0.95
+          }
+        ],
+        "categories:seo": [
+          "warn",
+          {
+            "minScore": 0.95
+          }
+        ],
+        "categories:performance": [
+          "warn",
+          {
+            "minScore": 0.85
+          }
+        ],
+        "largest-contentful-paint": [
+          "error",
+          {
+            "maxNumericValue": 4500
+          }
+        ],
+        "cumulative-layout-shift": [
+          "error",
+          {
+            "maxNumericValue": 0.1
+          }
+        ],
+        "total-byte-weight": [
+          "warn",
+          {
+            "maxNumericValue": 3000000
+          }
+        ]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
