@@ -63,6 +63,14 @@ const fromSource = () => {
   return null;
 };
 
+// ---------------------------------------------------------------------------
+// Policy
+// ---------------------------------------------------------------------------
+const policyPath = join(HERE, '..', 'public-data-policy.json');
+const policy = existsSync(policyPath)
+  ? JSON.parse(readFileSync(policyPath, 'utf8'))
+  : { allowedTypes: {}, blockedTypes: [] };
+
 const PROJECT =
   env.PUBLIC_SANITY_PROJECT_ID ||
   env.SANITY_STUDIO_PROJECT_ID ||
@@ -76,6 +84,16 @@ if (!PROJECT || PROJECT === 'placeholder-project-id') {
   // Sanity but we could not find its id, that is a broken check rather than a
   // clean site, and it must fail loudly: the whole point is to not hand back a
   // pass we did not earn.
+  // The one legitimate exception is THIS repo: a template ships the Sanity
+  // dependencies and no project of its own, so "uses Sanity but has no id" is
+  // its normal state rather than a broken check. It has to be declared in the
+  // policy file, not inferred, so a real site cannot fall into it by accident.
+  if (policy.noDataset === true) {
+    console.log(
+      'public-data-audit: policy says this repo has no dataset of its own; nothing to audit.',
+    );
+    process.exit(0);
+  }
   const pkgPath = resolve(process.cwd(), 'package.json');
   const usesSanity =
     existsSync(pkgPath) && /"(sanity|@sanity\/[a-z-]+)"\s*:/.test(readFileSync(pkgPath, 'utf8'));
@@ -88,14 +106,6 @@ if (!PROJECT || PROJECT === 'placeholder-project-id') {
   console.log('::warning::public-data-audit: no Sanity project here; nothing to audit.');
   process.exit(0);
 }
-
-// ---------------------------------------------------------------------------
-// Policy
-// ---------------------------------------------------------------------------
-const policyPath = join(HERE, '..', 'public-data-policy.json');
-const policy = existsSync(policyPath)
-  ? JSON.parse(readFileSync(policyPath, 'utf8'))
-  : { allowedTypes: {}, blockedTypes: [] };
 
 // Field names that are personal data almost wherever they appear. Matched on
 // the field NAME, case-insensitively, anywhere in the document tree - a nested

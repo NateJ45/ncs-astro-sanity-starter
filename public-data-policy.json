@@ -14,6 +14,9 @@
     "publishable, listing the exact fields that are allowed."
   ],
 
+  "noDataset": true,
+  "_noDatasetWhy": "This repo is the TEMPLATE. It ships the Sanity dependencies but owns no project, so 'uses Sanity, has no project id' is normal here and not a broken check. A FORK must delete this line - without it the audit would skip on a real site, and a check that skips reports success.",
+
   "blockedTypes": ["directoryEntry", "familyRecord", "student", "enrollment", "formSubmission"],
 
   "allowedTypes": {
