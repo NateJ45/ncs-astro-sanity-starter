@@ -3812,7 +3812,7 @@ executed:
   file. And `--create` cannot work with any content token: creating a dataset
   needs the project-admin grant `sanity.project.datasets/create`. Create the
   scratch dataset under your own CLI login (`npx sanity dataset create
-  restore-drill -p <projectId>` — `-p`, not `--project`, which prints the whole
+restore-drill -p <projectId>` — `-p`, not `--project`, which prints the whole
   help text and reads like a different error), then run without `--create`.
 
 The lesson is the card's own thesis turned on the card: writing the drill is
