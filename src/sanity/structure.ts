@@ -42,7 +42,6 @@ import {
   PresentationIcon,
   ThumbsUpIcon,
   ColorWheelIcon,
-  RocketIcon,
   OlistIcon,
   ArrowRightIcon,
 } from '@sanity/icons';
@@ -51,7 +50,6 @@ import { guides, GUIDE_CATEGORIES } from './guides/content';
 import StudioGuide from './components/StudioGuide';
 import BusinessOverview from './components/BusinessOverview';
 import BrandKit from './components/BrandKit';
-import StudioPlaybook from './components/StudioPlaybook';
 
 const SINGLETON_TYPES = [
   'siteSettings',
@@ -68,7 +66,6 @@ const SINGLETON_TYPES = [
   'privacyPage',
   'studioGuide',
   'studioNotes',
-  'studioPlaybook',
 ] as const;
 
 const ORDERABLE_TYPES = ['service', 'philosophyPoint', 'processStep'] as const;
@@ -199,18 +196,6 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 .title('Brand kit')
                 .icon(ColorWheelIcon)
                 .child(S.component(BrandKit).title('Brand kit')),
-              S.listItem()
-                .title('Grow your studio')
-                .icon(RocketIcon)
-                .child(
-                  S.document()
-                    .schemaType('studioPlaybook')
-                    .documentId('studioPlaybook')
-                    .views([
-                      S.view.component(StudioPlaybook).title('Guides'),
-                      S.view.form().title('Edit'),
-                    ]),
-                ),
             ]),
         ),
 

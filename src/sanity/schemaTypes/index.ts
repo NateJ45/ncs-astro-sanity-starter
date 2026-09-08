@@ -30,7 +30,6 @@ import { servicesPage } from './servicesPage';
 import { siteSettings } from './siteSettings';
 import { studioGuide } from './studioGuide';
 import { studioNotes } from './studioNotes';
-import { studioPlaybook } from './studioPlaybook';
 import { testimonial } from './testimonial';
 
 export const schemaTypes = [
@@ -60,7 +59,6 @@ export const schemaTypes = [
   // Start Here editable singletons
   studioGuide,
   studioNotes,
-  studioPlaybook,
 
   // Reusable content collections
   announcement, // site-wide banner collection (enabled + date-windowed)

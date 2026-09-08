@@ -1,0 +1,26 @@
+# Line endings. Added 2026-09-08, copied from wcp-website.
+#
+# Without this, a Windows checkout produces CRLF working files while git stores
+# LF, and Checking formatting... (prettier defaults to endOfLine: lf) fails on
+# 16 files nobody has touched. CI is Linux and passes, so the gate is red
+# locally and green remotely, which is the fastest way to teach a team to
+# ignore it. Every  also warned about the conversion, all session.
+#
+# Normalize all text files to LF line endings on commit, regardless of OS.
+# Stops CRLF warnings on Windows and keeps diffs clean across machines.
+* text=auto eol=lf
+
+# Binary assets: never normalize, never diff as text.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.avif   binary
+*.ico    binary
+*.pdf    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.otf    binary
+*.xlsx   binary

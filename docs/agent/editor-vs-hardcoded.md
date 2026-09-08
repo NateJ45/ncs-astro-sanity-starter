@@ -20,7 +20,6 @@
 - **Privacy page** -- `privacyPage` singleton (body Portable Text, lastUpdated). A plain static fallback renders before the doc exists.
 - **Start Here guide** -- `studioGuide` singleton: the "How the website works" handbook panel in Studio. Update the site map, how-tos, and tips without a code change.
 - **Start Here business notes** -- `studioNotes` singleton: the three static positioning sections in the "Your business at a glance" panel.
-- **Grow your studio guides** -- `studioPlaybook` singleton: the professional-development guides in the "Grow your studio" panel. Editable in Studio.
 
 **Module-specific editor fields** are documented per module under `docs/modules/`. Examples: portfolio projects, process steps, press items, lead magnets, shop collections, style quiz questions, budget calculator options.
 

@@ -43,7 +43,7 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 
 - `homePage`, `aboutPage`, `servicesPage`, `processPage` — each has a `pageBuilder` array field using its page-specific section type list, plus SEO fields. Renders from `src/data/defaultSections.ts` when `pageBuilder` is empty.
 - `faqPage`, `contactPage`, `journalPage` + `journalEntry` + `journalCategory`, `privacyPage`, `notFoundPage` — these pages keep their own structured fields (they are not fully section-driven).
-- `studioGuide`, `studioNotes`, `studioPlaybook` — in-Studio editor handbook singletons (protected, Canvas-excluded, plain text throughout).
+- `studioGuide`, `studioNotes` — in-Studio editor handbook singletons (protected, Canvas-excluded, plain text throughout). The prose handbook itself lives in `src/sanity/guides/content.ts` as repo data, not as documents.
 
 **Reusable collections:**
 
@@ -177,7 +177,7 @@ Two schema-level controls govern what Canvas sees:
 
 - All page singletons -- marketing copy is structural; edit fields directly in Studio.
 - `siteSettings` -- configuration, not prose.
-- `studioGuide`, `studioNotes`, `studioPlaybook` -- Studio handbook content.
+- `studioGuide`, `studioNotes` -- Studio handbook content.
 - `testimonial` -- verbatim quotes; AI must not "improve" them.
 - `philosophyPoint` -- short, locked structural content.
 - `journalCategory` -- taxonomy, not content.

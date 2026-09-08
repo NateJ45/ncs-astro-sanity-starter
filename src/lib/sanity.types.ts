@@ -291,36 +291,6 @@ export type Announcement = {
   enabled?: boolean;
 };
 
-export type StudioPlaybook = {
-  _id: string;
-  _type: 'studioPlaybook';
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  intro?: string;
-  guides?: Array<{
-    title?: string;
-    summary?: string;
-    sections?: Array<{
-      heading?: string;
-      tone?: 'default' | 'primary' | 'positive' | 'caution';
-      body?: string;
-      bullets?: Array<string>;
-      links?: Array<{
-        label?: string;
-        url?: string;
-        _type: 'playbookLink';
-        _key: string;
-      }>;
-      _type: 'playbookSection';
-      _key: string;
-    }>;
-    _type: 'playbookGuide';
-    _key: string;
-  }>;
-};
-
 export type StudioNotes = {
   _id: string;
   _type: 'studioNotes';
@@ -2190,7 +2160,6 @@ export type AllSanitySchemaTypes =
   | FaqItem
   | FaqCategory
   | Announcement
-  | StudioPlaybook
   | StudioNotes
   | StudioGuide
   | NotFoundPage

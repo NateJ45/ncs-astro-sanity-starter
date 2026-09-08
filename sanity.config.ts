@@ -254,5 +254,4 @@ const SINGLETON_TYPES = new Set<string>([
   'privacyPage',
   'studioGuide',
   'studioNotes',
-  'studioPlaybook',
 ]);
