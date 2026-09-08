@@ -4194,6 +4194,16 @@ leaves a real background (including a card's own photograph) painting exactly as
 Any repo with tracked-out or per-character display type will meet this the first time
 that type sits over media.
 
+**An element with its own opaque background is its OWN backdrop (2026-09-08).**
+Checked BEFORE the media test, not after. Pixel sampling works by hiding the
+element and photographing what is behind it, which for a solid button
+photographs the page UNDER the button rather than the button. It surfaced the
+first time a decorative layer was allowed to run beneath the site chrome:
+stonesteps-50k's Register plate is cream on rust sitting over the hero's mud,
+and the gate reported it as cream on cream at 1.09:1. Alarming, and false. Any
+repo that puts a solid button over a photograph or a marked texture layer meets
+this immediately.
+
 **What axe still cannot see, and the design consequence.** axe reads element background
 COLOURS; it has no idea a CSS mask makes a layer 95% transparent. Four stacked mask
 layers at 26% alpha therefore model as a 57% veil across a whole band, and axe will fail

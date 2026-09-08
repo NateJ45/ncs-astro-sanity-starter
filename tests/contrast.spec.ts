@@ -157,6 +157,17 @@ async function measure(page: Parameters<typeof settle>[0], selectors: string[]) 
 
     /** The first ancestor that actually paints, or null when an image gets in the way. */
     const backdrop = (el: Element): { colour: string | null; image: boolean } => {
+      // AN ELEMENT THAT PAINTS ITS OWN OPAQUE BACKGROUND IS ITS OWN BACKDROP,
+      // whatever it happens to sit over. Pixel sampling works by hiding the
+      // element and photographing what is behind it, which for a solid button
+      // photographs the page UNDER the button rather than the button. The
+      // header's Register plate is cream on rust sitting over the hero's mud:
+      // measured that way it came back as cream on cream at 1.09:1, which is
+      // both alarming and false. Checked before the media test, because the
+      // media test is the one that would otherwise win.
+      const own = getComputedStyle(el).backgroundColor;
+      if (opaqueEnough(own)) return { colour: own, image: false };
+
       if (overlapsMedia((el as HTMLElement).getBoundingClientRect()))
         return { colour: null, image: true };
       let node: Element | null = el;
