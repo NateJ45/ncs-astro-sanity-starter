@@ -107,6 +107,7 @@ is installing it as of the date on the card.
 | 41  | Guide handbook held as repo data                                  | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 42  | External link health, on its own schedule                         | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 43  | Contrast for what axe declines to judge                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 44  | Fork residue audit                                                | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -4160,3 +4161,57 @@ component, the same defect, neither caught by anything else. Any fork made befor
 **Per-site adaptation.** None to the file, which is why it is canonical. It reads
 `routes` from the site's own `tests/routes.ts` and the theme key from `src/data/site.ts`,
 the same two seams `a11y-dark.spec.ts` already uses.
+
+## Card 44: Fork residue, and the audit that finds it (2026-09-08)
+
+**What it is.** A named failure mode rather than a file: **a template forked from a
+finished client build keeps that client's specifics, and each one stays invisible until a
+new project ships it.** This starter was forked from the Reid Design build, and building
+stonesteps-50k on it surfaced four separate pieces of residue, none of which any test,
+type check or lint could see.
+
+**The four, as found.**
+
+1. **A real client's logo.** `src/assets/logo-{light,dark}.png` were the Reid Design
+   wordmark and `Footer.astro` imported them, so every project put another client's mark
+   at the bottom of every page. It reached a live site. The header had always used the
+   neutral placeholder SVGs, which is exactly why nobody noticed: the two chrome
+   components disagreed, and only one of them is ever looked at during a build.
+2. **Another business's content.** The `studioPlaybook` singleton was seeded with
+   interior-design guidance: photographing finished rooms, before-and-after pairs, trade
+   sourcing accounts. Every fork inherited a playbook for a business it is not.
+3. **A hardcoded palette in a panel nothing rewrites.** `BrandKit.tsx` listed the
+   starter's slate-and-ink hexes. `apply-brand` rewrites the stylesheet, the identity
+   constants and the Studio theme, and had no idea this file existed, so a rebranded
+   project shipped a "Brand kit" confidently naming the wrong colours.
+4. **The template's own name in a deploy command.** `deploy-staging.yml` said
+   `--name ncs-astro-sanity-starter-staging`, so the first fork to set its Cloudflare
+   secrets and push a staging branch would have deployed its site under the template's
+   name.
+
+**Why none of it was caught.** Every one is CORRECT CODE containing the WRONG NOUN. Types
+pass, tests pass, lint passes, the build is green, and the page renders. The only detector
+is a person recognising a name that does not belong, which happens by luck and late.
+
+**The audit, worth running on any template before a fork and after one.**
+
+- `grep -ri "<origin client name>"` across the whole repo, including seed scripts, docs and
+  binary asset filenames. Then look at every image in `src/assets` and `public` with your
+  eyes, because a logo is not greppable.
+- Diff what the header uses against what the footer uses. Chrome components that disagree
+  about an asset are the classic tell.
+- List every file `apply-brand` (or the equivalent rebrand script) rewrites, then list
+  every file containing a brand hex, a brand font name or the site name. Anything in the
+  second list and not the first will drift silently on the next project.
+- Grep the workflows for the template's own repo or Worker name.
+- Read the seeded content, not just the schema. Placeholder text should say "replace
+  this"; if it says something specific and plausible, it belongs to somebody.
+
+**The rule that prevents the recurrence.** A template's placeholder content must be
+OBVIOUSLY placeholder. `studioNotes` survived this audit untouched because its seeded text
+reads "Replace this with a description of your ideal client"; `studioPlaybook` did not,
+because its text was real advice for a real trade. Plausible placeholder content is worse
+than none, since it gets shipped rather than replaced.
+
+**Related.** Card 43 is the same shape one level down: correct code, wrong colour, and no
+gate that could see it.
