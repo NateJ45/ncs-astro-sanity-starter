@@ -42,6 +42,13 @@ import { site } from '../src/data/site';
 // WCAG AA thresholds (3:1 large, 4.5:1 otherwise) are applied inside the
 // browser evaluation below, where the font size and weight are readable.
 
+interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 interface Checked {
   selector: string;
   text: string;
@@ -50,6 +57,8 @@ interface Checked {
   ratio: number;
   required: number;
   undetermined: boolean;
+  /** Present only for elements measured against a photograph or gradient. */
+  box?: Box;
 }
 
 /**
@@ -114,8 +123,31 @@ async function measure(page: Parameters<typeof settle>[0], selectors: string[]) 
       return !!v && v[3] > 0.99;
     };
 
+    // Every painted media box on the page, in viewport coordinates.
+    //
+    // WALKING ANCESTORS FOR A CSS background-image IS NOT ENOUGH. A hero
+    // photograph is almost always an <img> ELEMENT with the type positioned
+    // over it, not a background on an ancestor, so an ancestor walk sails
+    // straight past it and measures the section's background colour instead.
+    // A deliberately poor label placed over the hero proved exactly that: the
+    // gate reported it against the page cream and never looked at the photo.
+    // Anything whose box overlaps a media box is measured from pixels.
+    // RASTER MEDIA ONLY, deliberately. Including <svg> swept in the decorative
+    // topo overlay, which spans whole sections, so every element in them became
+    // "over media" and the run hit its measurement cap. The topo is a low-opacity
+    // vector over a solid background, and the colour path judges that correctly.
+    const mediaBoxes = [...document.querySelectorAll('img,video,canvas,picture')]
+      .map((m) => (m as HTMLElement).getBoundingClientRect())
+      .filter((r) => r.width > 8 && r.height > 8);
+    const overlapsMedia = (r: DOMRect) =>
+      mediaBoxes.some(
+        (m) => !(r.right <= m.left || r.left >= m.right || r.bottom <= m.top || r.top >= m.bottom),
+      );
+
     /** The first ancestor that actually paints, or null when an image gets in the way. */
     const backdrop = (el: Element): { colour: string | null; image: boolean } => {
+      if (overlapsMedia((el as HTMLElement).getBoundingClientRect()))
+        return { colour: null, image: true };
       let node: Element | null = el;
       while (node && node !== document.documentElement) {
         const cs = getComputedStyle(node);
@@ -157,6 +189,10 @@ async function measure(page: Parameters<typeof settle>[0], selectors: string[]) 
       const required = px >= 24 || (px >= 18.66 && bold) ? 3 : 4.5;
 
       if (back.image || back.colour === null) {
+        // Measured in a second pass, from the rendered pixels. Recorded here
+        // with the box so the caller can screenshot behind it. See
+        // measureOverImages().
+        const r = (el as HTMLElement).getBoundingClientRect();
         out.push({
           selector: sel,
           text: text.slice(0, 40),
@@ -165,6 +201,12 @@ async function measure(page: Parameters<typeof settle>[0], selectors: string[]) 
           ratio: 0,
           required,
           undetermined: true,
+          box: {
+            x: Math.max(0, Math.floor(r.left + window.scrollX)),
+            y: Math.max(0, Math.floor(r.top + window.scrollY)),
+            width: Math.max(1, Math.ceil(r.width)),
+            height: Math.max(1, Math.ceil(r.height)),
+          },
         });
         continue;
       }
@@ -194,6 +236,155 @@ async function measure(page: Parameters<typeof settle>[0], selectors: string[]) 
   }, selectors);
 }
 
+/**
+ * Measure text that sits over a photograph or a gradient, from the pixels.
+ *
+ * THIS IS THE PART THAT MAKES AMBITIOUS BACKGROUNDS SAFE. The first version of
+ * this suite skipped these elements, on the reasoning that a single colour is
+ * not an honest answer behind an image. That is true, and it left a hole
+ * exactly where the risk is highest: type over a photograph is the classic way
+ * to ship unreadable text, and it is what the texture work introduces.
+ *
+ * The method, per element:
+ *   1. Hide the element, so the camera sees only what is BEHIND it.
+ *   2. Screenshot its box.
+ *   3. Send the PNG back into the page and read it through a canvas, so the
+ *      browser does the decoding and no image library is needed.
+ *   4. Build a luminance histogram of the real background pixels.
+ *   5. Report the ratio that holds for 95% of them.
+ *
+ * THE 95% IS DELIBERATE. WCAG has no rule for text on an image, and a strict
+ * worst-pixel test fails on a single stray highlight, which would make the gate
+ * unusable and therefore ignored. Requiring the ratio to hold across all but the
+ * worst 5% of the area is the practical reading, and it still catches the real
+ * failure: type laid over a busy or badly-chosen part of a photograph.
+ */
+async function measureOverImages(
+  page: Parameters<typeof settle>[0],
+  rows: Checked[],
+): Promise<Checked[]> {
+  const out: Checked[] = [];
+  // Bounded on purpose: this costs a screenshot per element, and a page that
+  // puts a hundred labels on a photograph has a design problem the gate should
+  // report rather than spend five minutes measuring.
+  const MAX = 25;
+  let done = 0;
+
+  for (const row of rows) {
+    if (!row.box || done >= MAX) {
+      out.push(row);
+      continue;
+    }
+    done += 1;
+
+    // Hide just this element. visibility:hidden removes it and its background
+    // from the paint while keeping layout identical, so nothing behind it
+    // shifts between the measurement and the real render.
+    await page.evaluate((sel) => {
+      const el = document.querySelector(sel) as HTMLElement | null;
+      if (el) el.style.visibility = 'hidden';
+    }, row.selector);
+
+    let shot: string | null = null;
+    try {
+      // fullPage, because row.box is in PAGE coordinates. A viewport screenshot
+      // would clip the same numbers against the viewport origin, so anything
+      // below the fold came back as the wrong region entirely: the first run
+      // reported dark ink at 1.05:1 against a slice of a different section.
+      const buf = await page.screenshot({ clip: row.box, fullPage: true });
+      shot = buf.toString('base64');
+    } catch {
+      // A box that is off-screen or zero-area cannot be photographed. Leave the
+      // row undetermined rather than inventing a number for it.
+    }
+
+    await page.evaluate((sel) => {
+      const el = document.querySelector(sel) as HTMLElement | null;
+      if (el) el.style.visibility = '';
+    }, row.selector);
+
+    if (!shot) {
+      out.push(row);
+      continue;
+    }
+
+    const result = await page.evaluate(
+      async ([b64, fgColour]: [string, string]) => {
+        const img = new Image();
+        img.src = 'data:image/png;base64,' + b64;
+        await img.decode();
+        const c = document.createElement('canvas');
+        c.width = img.width;
+        c.height = img.height;
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        if (!ctx) return null;
+        ctx.drawImage(img, 0, 0);
+        const data = ctx.getImageData(0, 0, c.width, c.height).data;
+
+        const lin = (v: number) => {
+          const n = v / 255;
+          return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
+        };
+        const lumOf = (r: number, g: number, b: number) =>
+          0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+
+        // The text colour, resolved the same way the rest of the suite does it.
+        const probe = document.createElement('canvas');
+        probe.width = probe.height = 1;
+        const pctx = probe.getContext('2d', { willReadFrequently: true });
+        if (!pctx) return null;
+        pctx.fillStyle = '#010203';
+        pctx.fillStyle = fgColour;
+        pctx.fillRect(0, 0, 1, 1);
+        const fp = pctx.getImageData(0, 0, 1, 1).data;
+        const fgLum = lumOf(fp[0], fp[1], fp[2]);
+
+        // Histogram the background, then find the ratio that 95% of it meets.
+        const BUCKETS = 128;
+        const hist = new Array(BUCKETS).fill(0);
+        let total = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          const l = lumOf(data[i], data[i + 1], data[i + 2]);
+          hist[Math.min(BUCKETS - 1, Math.floor(l * BUCKETS))] += 1;
+          total += 1;
+        }
+        if (!total) return null;
+
+        const ratios: { ratio: number; count: number }[] = [];
+        for (let i = 0; i < BUCKETS; i += 1) {
+          if (!hist[i]) continue;
+          const l = (i + 0.5) / BUCKETS;
+          const ratio = (Math.max(fgLum, l) + 0.05) / (Math.min(fgLum, l) + 0.05);
+          ratios.push({ ratio, count: hist[i] });
+        }
+        ratios.sort((a, b) => a.ratio - b.ratio);
+
+        // Walk from the worst ratio up until 5% of the area is behind us; the
+        // ratio there is the one that holds for the remaining 95%.
+        let seen = 0;
+        for (const r of ratios) {
+          seen += r.count;
+          if (seen / total >= 0.05) return Math.round(r.ratio * 100) / 100;
+        }
+        return Math.round(ratios[ratios.length - 1].ratio * 100) / 100;
+      },
+      [shot, row.fg] as [string, string],
+    );
+
+    if (result === null) {
+      out.push(row);
+      continue;
+    }
+    out.push({
+      ...row,
+      bg: 'photograph or gradient, measured',
+      ratio: result,
+      undetermined: false,
+    });
+  }
+  return out;
+}
+
 async function sweep(page: Parameters<typeof settle>[0], route: string) {
   await page.goto(route, { waitUntil: 'domcontentloaded' });
   await settle(page);
@@ -206,7 +397,10 @@ async function sweep(page: Parameters<typeof settle>[0], route: string) {
   ];
   if (selectors.length === 0) return { failures: [] as Checked[], undetermined: 0, checked: 0 };
 
-  const rows = (await measure(page, selectors)) as Checked[];
+  const first = (await measure(page, selectors)) as Checked[];
+  // Second pass: anything the colour maths could not judge, because it sits on
+  // a photograph or a gradient, is measured from the rendered pixels instead.
+  const rows = await measureOverImages(page, first);
   return {
     failures: rows.filter((r) => !r.undetermined && r.ratio < r.required),
     undetermined: rows.filter((r) => r.undetermined).length,
@@ -248,9 +442,9 @@ for (const theme of ['light', 'dark'] as const) {
         // Printed rather than asserted: a background image is not a bug, and
         // a rising count is worth seeing without going red for it.
         if (undetermined > 0) {
-          console.log(
-            `  ${route} (${theme}): ${undetermined} of ${checked} sit on an image or gradient, not judged`,
-          );
+          // Only elements that could not be photographed at all reach here now:
+          // off-screen boxes, zero-area boxes, or the overflow past the cap.
+          console.log(`  ${route} (${theme}): ${undetermined} of ${checked} could not be measured`);
         }
 
         expect(failures, failures.length ? report(route, theme, failures) : undefined).toEqual([]);
