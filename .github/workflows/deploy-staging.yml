@@ -64,9 +64,31 @@ jobs:
       # nothing about the adapter's generated asset manifest — every sub-route
       # 404s. Deploy the adapter's own config, exactly as `npm run deploy`
       # does, and override only the Worker name so production is never touched.
+      # THE STAGING NAME IS DERIVED, NOT HARDCODED.
+      #
+      # It was `--name ncs-astro-sanity-starter-staging` until 2026-09-08, so
+      # the first fork to set its Cloudflare secrets and push a staging branch
+      # would have deployed ITS site under the STARTER'S name, clobbering
+      # whatever was there. stonesteps-50k carried that line unchanged for a
+      # day before anyone noticed, and it had no way to notice until it fired.
+      #
+      # wrangler.jsonc's "name" is what `npm run apply-brand` already rewrites
+      # from brand.config.json, so reading it here means a fork gets a correct
+      # staging name for free and there is no second place to remember.
+      - name: Work out the staging Worker name
+        id: worker
+        run: |
+          NAME=$(node scripts/worker-name.mjs)
+          if [ -z "$NAME" ]; then
+            echo "::error::Could not read the Worker name from wrangler.jsonc."
+            exit 1
+          fi
+          echo "name=${NAME}-staging" >> "$GITHUB_OUTPUT"
+          echo "Staging Worker: ${NAME}-staging"
+
       - name: Deploy to the staging Worker
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy -c dist/server/wrangler.json --name ncs-astro-sanity-starter-staging
+          command: deploy -c dist/server/wrangler.json --name ${{ steps.worker.outputs.name }}

@@ -255,7 +255,7 @@ function rewriteGlobalsCss(config) {
       return {
         label: token,
         pattern: new RegExp('(' + esc(token) + ':\\s*)([^;]+)(;)'),
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + value + g3;
         },
       };
@@ -274,21 +274,21 @@ function rewriteGlobalsCss(config) {
       {
         label: '--font-display',
         pattern: /(--font-display:\s*)([^;]+)(;)/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + config.fonts.display.familyValue + g3;
         },
       },
       {
         label: '--font-body',
         pattern: /(--font-body:\s*)([^;]+)(;)/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + config.fonts.body.familyValue + g3;
         },
       },
       {
         label: '--font-script',
         pattern: /(--font-script:\s*)([^;]+)(;)/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + scriptFamilyValue + g3;
         },
       },
@@ -308,7 +308,15 @@ function rewriteGlobalsCss(config) {
     // the block so we can restore them and keep the file structure intact.
     // Pattern: 1+ consecutive @fontsource import lines, then the trailing newline(s).
     // (Was {2,} — relaxed to {1,} so single-import setups are handled correctly.)
-    const importBlockPattern = /((?:@import "@fontsource[^"]*";\r?\n){1,})(\r?\n)?/;
+    //
+    // EITHER QUOTE STYLE. This matched only DOUBLE quotes until 2026-09-08
+    // while globals.css ships single quotes, which is what Prettier writes, so
+    // `npm run apply-brand` failed on globals.css and refused to write it. Same
+    // root cause as the site.ts patterns above: the script was authored against
+    // double-quoted source and the repo is Prettier-formatted. Fixing the
+    // patterns is right; reformatting the source to suit a script would be a
+    // trap waiting for the next `prettier --write`.
+    const importBlockPattern = /((?:@import ['"]@fontsource[^'"]*['"];\r?\n){1,})(\r?\n)?/;
     if (!importBlockPattern.test(result)) {
       throw new Error(
         `apply-brand: @fontsource import block not found in ${filePath}\n` +
@@ -358,7 +366,7 @@ function rewriteGlobalsCss(config) {
         return {
           label: 'light:' + token,
           pattern: new RegExp('(' + esc(token) + ':\\s*)([^;]+)(;)'),
-          replacer: function (_, g1, _g2, g3) {
+          replacer: function (_, g1, _quote, g3) {
             return g1 + value + g3;
           },
         };
@@ -395,7 +403,7 @@ function rewriteGlobalsCss(config) {
         return {
           label: 'dark:' + token,
           pattern: new RegExp('(' + esc(token) + ':\\s*)([^;]+)(;)'),
-          replacer: function (_, g1, _g2, g3) {
+          replacer: function (_, g1, _quote, g3) {
             return g1 + value + g3;
           },
         };
@@ -411,7 +419,7 @@ function rewriteGlobalsCss(config) {
         {
           label: '--radius',
           pattern: /(--radius:\s*)([^;]+)(;)/,
-          replacer: function (_, g1, _g2, g3) {
+          replacer: function (_, g1, _quote, g3) {
             return g1 + config.radius + g3;
           },
         },
@@ -429,8 +437,10 @@ function rewriteGlobalsCss(config) {
       const printSubs = [
         {
           label: 'print-footer',
-          pattern: /(body::after\s*\{[\s\S]*?content:\s*")([^"]*?)(")/,
-          replacer: function (_, g1, _g2, g3) {
+          // Either quote style, same reason as the patterns above: Prettier
+          // writes single quotes into globals.css and this matched only double.
+          pattern: /(body::after\s*\{[\s\S]*?content:\s*(['"]))(?:(?!\2).)*(\2)/,
+          replacer: function (_, g1, _quote, g3) {
             return g1 + footerName + ' · ' + footerDomain + g3;
           },
         },
@@ -459,18 +469,31 @@ function rewriteSiteTs(config) {
       // name — matches the _name private-variable declaration
       // (derived fields storageKeyPrefix, themeStorageKey, studio are computed
       //  from _name at runtime, so the script never needs to rewrite them)
+      //
+      // EITHER QUOTE STYLE, and that is not fussiness. These two patterns
+      // required a DOUBLE quote until 2026-09-08, while src/data/site.ts has
+      // always shipped single quotes because that is what Prettier writes.
+      // Since this script is all-or-nothing per file, the mismatch made
+      // `npm run apply-brand` fail with `token "name" not found` and skip
+      // site.ts ENTIRELY: a rebrand silently left the site name, the domain and
+      // the brand-colour mirrors as the starter's. It was a known landmine,
+      // documented in CLAUDE.md and worked around by hand on every project,
+      // when it should simply have been fixed.
+      //
+      // The `\2` backreference matches whichever quote opened the string, so a
+      // stray `prettier --write` can never break the rebrand again.
       {
         label: 'name',
-        pattern: /(const _name\s*=\s*")((?:[^"\\]|\\.)*)(")/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(const _name\s*=\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + config.name + g3;
         },
       },
       // domain — matches the _domain private-variable declaration
       {
         label: 'domain',
-        pattern: /(const _domain\s*=\s*")((?:[^"\\]|\\.)*)(")/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(const _domain\s*=\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + config.domain + g3;
         },
       },
@@ -478,64 +501,64 @@ function rewriteSiteTs(config) {
       // after the key name, leaving comma + comment intact via look-ahead.
       {
         label: 'brandColors.primary',
-        pattern: /(    primary:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(    primary:\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)(?=[^a-z])/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + primary + g3;
         },
       },
       {
         label: 'brandColors.primaryDark',
-        pattern: /(    primaryDark:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(    primaryDark:\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)(?=[^a-z])/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + primaryDark + g3;
         },
       },
       {
         label: 'brandColors.accent',
-        pattern: /(    accent:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(    accent:\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)(?=[^a-z])/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + accent + g3;
         },
       },
       {
         label: 'brandColors.accentDark',
-        pattern: /(    accentDark:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(    accentDark:\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)(?=[^a-z])/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + accentDark + g3;
         },
       },
       {
         label: 'brandColors.secondary',
-        pattern: /(    secondary:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(    secondary:\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)(?=[^a-z])/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + secondary + g3;
         },
       },
       {
         label: 'brandColors.tertiary',
-        pattern: /(    tertiary:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(    tertiary:\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)(?=[^a-z])/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + tertiary + g3;
         },
       },
       {
         label: 'brandColors.bg',
-        pattern: /(    bg:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(    bg:\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)(?=[^a-z])/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + bg + g3;
         },
       },
       {
         label: 'brandColors.bgSoft',
-        pattern: /(    bgSoft:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(    bgSoft:\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)(?=[^a-z])/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + bgSoft + g3;
         },
       },
       {
         label: 'brandColors.border',
-        pattern: /(    border:\s*")((?:[^"\\]|\\.)*)(")(?=[^a-z])/,
-        replacer: function (_, g1, _g2, g3) {
+        pattern: /(    border:\s*(['"]))(?:(?!\2)[^\\]|\\.)*(\2)(?=[^a-z])/,
+        replacer: function (_, g1, _quote, g3) {
           return g1 + borderSoft + g3;
         },
       },
@@ -576,14 +599,14 @@ function rewriteSanityConfig(config) {
       {
         label: 'DISPLAY_STACK',
         pattern: /(const DISPLAY_STACK = ')([^']*)(';)/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + config.studio.fonts.display + g3;
         },
       },
       {
         label: 'BODY_STACK',
         pattern: /(const BODY_STACK = ')([^']*)(';)/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + config.studio.fonts.body + g3;
         },
       },
@@ -604,14 +627,14 @@ function rewriteOgDefault(config) {
       {
         label: 'wordmark',
         pattern: /(wordmark:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + name + g3;
         },
       },
       {
         label: 'tagline',
         pattern: /(tagline:\s*\[')((?:[^'\\]|\\.)*)('\])/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + safeTagline + g3;
         },
       },
@@ -634,42 +657,42 @@ function rewriteRenderOg(config) {
       {
         label: 'DEFAULTS.bg',
         pattern: /(  bg:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + bg + g3;
         },
       },
       {
         label: 'DEFAULTS.primary',
         pattern: /(  primary:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + primary + g3;
         },
       },
       {
         label: 'DEFAULTS.primaryDark',
         pattern: /(  primaryDark:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + primaryDark + g3;
         },
       },
       {
         label: 'DEFAULTS.accent',
         pattern: /(  accent:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + accent + g3;
         },
       },
       {
         label: 'DEFAULTS.taupe',
         pattern: /(  taupe:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + secondary + g3;
         },
       },
       {
         label: 'DEFAULTS.fontDisplay',
         pattern: /(  fontDisplay:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + fontDisplay + g3;
         },
       },
@@ -689,7 +712,7 @@ function rewriteOgPages(config) {
         // Matches: const WORDMARK = env.SITE_NAME ?? 'Studio Starter';
         // Captures the fallback string literal only
         pattern: /(const WORDMARK = env\.SITE_NAME \?\? ')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + name + g3;
         },
       },
@@ -711,7 +734,7 @@ function rewriteWranglerJsonc(config) {
       {
         label: 'worker name',
         pattern: /("name":\s*")((?:[^"\\]|\\.)*)(")/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + workerName + g3;
         },
       },
@@ -730,7 +753,7 @@ function rewriteAstroConfig(config) {
       {
         label: 'site URL',
         pattern: /(  site:\s*')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _g2, g3) {
+        replacer: function (_, g1, _quote, g3) {
           return g1 + 'https://' + domain + g3;
         },
       },

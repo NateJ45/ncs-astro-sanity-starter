@@ -41,22 +41,30 @@ import { Mail, Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import { getAllProjects, type CoreProjectCard } from '@/lib/queries';
-import logoLightAsset from '@/assets/logo-light.png';
-import logoDarkAsset from '@/assets/logo-dark.png';
+// THE SVG, NOT A PNG, and the same files the header uses.
+//
+// Until 2026-09-08 this imported logo-{light,dark}.png, which were a REAL
+// CLIENT'S wordmark left in the starter from the build it was forked from.
+// Every project made from this starter therefore shipped somebody else's logo
+// in its footer, and at least one of them reached a live site that way. The
+// header had always used the neutral placeholder SVGs; only the footer was
+// wrong, because nobody scrolls to the bottom of a page they are building.
+//
+// Keep both chrome components on the SAME asset. If they ever diverge again,
+// this is the failure mode.
+import logoLightAsset from '@/assets/logo-light.svg';
+import logoDarkAsset from '@/assets/logo-dark.svg';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
 
-// Pre-render the four footer-logo variants (1x + 2x for each theme) so we
-// can ship ONE img tag with data-attribute URLs and let the BaseLayout
-// anti-FOUC script pick the right variant — same trick as the header.
-// Footer logo displays at h-16 (64 px tall); the 96w/192w pair still covers retina.
-const footerLogoLight1x = await getImage({ src: logoLightAsset, format: 'webp', width: 96 });
-const footerLogoLight2x = await getImage({ src: logoLightAsset, format: 'webp', width: 192 });
-const footerLogoDark1x = await getImage({ src: logoDarkAsset, format: 'webp', width: 96 });
-const footerLogoDark2x = await getImage({ src: logoDarkAsset, format: 'webp', width: 192 });
-const footerLogoLightSrcset = `${footerLogoLight1x.src} 1x, ${footerLogoLight2x.src} 2x`;
-const footerLogoDarkSrcset = `${footerLogoDark1x.src} 1x, ${footerLogoDark2x.src} 2x`;
+// One themed pair, passed through Astro's pipeline for a cache-busted URL. No
+// width variants and no webp conversion: these are SVGs, so one file is sharp
+// at every size and asking the optimizer to rasterise them would be a
+// downgrade. The BaseLayout anti-FOUC script swaps src on a theme change, the
+// same as it does for the header.
+const footerLogoLight = await getImage({ src: logoLightAsset });
+const footerLogoDark = await getImage({ src: logoDarkAsset });
 
 interface NewsletterConfig {
   enabled?: boolean;
@@ -461,18 +469,24 @@ const latestProjects = allProjects.slice(0, 3);
       aria-label={`${brandName} home`}
       class="inline-block transition-opacity hover:opacity-80"
     >
+      {/* Sized by WIDTH: the placeholder mark is a wide lockup (280x60), not
+          the square badge the old PNG was. An unloaded lazy image with
+          width:auto shrink-wraps to 0x0, never intersects the viewport and so
+          never loads, which is a real bug this family has hit more than once.
+          Give it real dimensions. */}
       <img
         alt={brandName}
-        width={96}
-        height={102}
-        class="h-20 w-auto"
+        width={280}
+        height={60}
+        class="h-14 w-auto"
         loading="lazy"
         decoding="async"
         data-theme-logo
-        data-logo-light-src={footerLogoLight1x.src}
-        data-logo-light-srcset={footerLogoLightSrcset}
-        data-logo-dark-src={footerLogoDark1x.src}
-        data-logo-dark-srcset={footerLogoDarkSrcset}
+        src={footerLogoLight.src}
+        data-logo-light-src={footerLogoLight.src}
+        data-logo-light-srcset={footerLogoLight.src}
+        data-logo-dark-src={footerLogoDark.src}
+        data-logo-dark-srcset={footerLogoDark.src}
       />
     </a>
     {
