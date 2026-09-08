@@ -15,6 +15,7 @@
     "generate-types": "wrangler types",
     "typegen": "sanity schema extract --force && sanity typegen generate",
     "og": "node scripts/generate-og-default.mjs",
+    "contact:migration": "node --experimental-strip-types scripts/gen-contact-migration.mjs",
     "og:pages": "node scripts/generate-og-pages.mjs",
     "apply-brand": "node scripts/apply-brand.mjs",
     "llms:full": "node scripts/generate-llms-full.mjs",

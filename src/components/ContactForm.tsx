@@ -31,6 +31,7 @@
 // lines, so Web3Forms and the studio inbox need no change at all.
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { sendContactSubmission } from '@/lib/contact-transport';
 import { site } from '@/data/site';
 import { parseCustomFieldEntries, type CustomFormField } from '@/lib/custom-form-fields';
 
@@ -179,6 +180,10 @@ export default function ContactForm({
   const [errors, setErrors] = useState<Partial<Record<keyof Draft, string>>>({});
   const [errorMessage, setErrorMessage] = useState('');
   const formRef = useRef<HTMLFormElement | null>(null);
+  // When this form was rendered. The endpoint uses it to reject a submission
+  // that arrived faster than a person could have typed it; a ref rather than
+  // state because reading it must never trigger a re-render.
+  const renderedAtRef = useRef<number>(Date.now());
   const restoredOnce = useRef(false);
 
   // Restore draft on mount, then apply ?type= URL param if present.
@@ -316,59 +321,85 @@ export default function ContactForm({
     // downstream has to learn about editor-written questions.
     const message = useCustom ? parsed.lines.join('\n') : draft.message;
 
-    if (!ACCESS_KEY) {
-      setStatus('error');
-      setErrorMessage(
-        "The form isn't connected yet (missing Web3Forms key). Please email " +
-          site.name +
-          ' directly.',
-      );
-      return;
-    }
+    // NO KEY CHECK HERE any more. The site's own /api/contact endpoint needs no
+    // client-side key, so a missing Web3Forms key is only fatal when there is
+    // also no endpoint to post to. sendContactSubmission() works that out by
+    // trying, and says so in the message it returns.
 
     setStatus('submitting');
     try {
-      const res = await fetch(WEB3FORMS_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          access_key: ACCESS_KEY,
-          // Subject line front-loads project type + location for easy inbox
-          // triage. With editor-written questions there is no project type or
-          // location, so the subject falls back to the visitor's name.
-          subject: useCustom
-            ? `Inquiry from ${draft.name}`
-            : `Inquiry: ${draft.projectType} in ${draft.location} (${draft.name})`,
-          from_name: `${site.name} website`,
+      const subject = useCustom
+        ? `Inquiry from ${draft.name}`
+        : `Inquiry: ${draft.projectType} in ${draft.location} (${draft.name})`;
+
+      // The site's own endpoint first; the Web3Forms request below is used only
+      // when there is no endpoint to post to. See src/lib/contact-transport.ts.
+      const result = await sendContactSubmission(
+        {
           name: draft.name,
           email: draft.email,
-          phone: draft.phone || undefined,
-          // The built-in project fields only exist on the built-in form. Omit
-          // them entirely when the editor wrote their own questions, so the
-          // notification email has no empty rows.
-          location: useCustom ? undefined : draft.location,
-          project_type: useCustom ? undefined : draft.projectType,
-          budget_range: useCustom ? undefined : draft.budget,
-          timeline: useCustom ? undefined : draft.timeline,
           message,
-          // Lead source is optional; omit from the payload when blank so it
-          // doesn't add a "Source: " line to the notification email for no reason.
-          source: (useCustom ? '' : draft.source) || undefined,
-          // Web3Forms autoresponder fields. When these are set, Web3Forms
-          // sends a confirmation email to the visitor in addition to the
-          // notification email to the studio. The reply-to_email key is
-          // documented at https://docs.web3forms.com/#autoresponder.
-          // The autoresponder must be enabled in the Web3Forms dashboard
-          // for this project's access key.
-          replyto: draft.email,
-          autoresponse: true,
-          autoresponse_from: `${site.name} <noreply@${site.domain}>`,
-          autoresponse_subject: `Got your note. We'll be in touch soon.`,
-          autoresponse_message: `Hi ${draft.name},\n\nThank you for reaching out! We read every inquiry personally and will get back to you within a couple of business days.\n\nIf your project is time-sensitive, just mention that in your reply to this email and we'll prioritize accordingly.\n\n${site.name}\n${site.domain}`,
-        }),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (res.ok && json.success !== false) {
+          subject,
+          company: draft.zip,
+          renderedAt: renderedAtRef.current,
+        },
+        async () => {
+          if (!ACCESS_KEY) {
+            return {
+              ok: false,
+              error: `This form is not connected yet. Please email ${site.name} directly.`,
+            };
+          }
+          const res = await fetch(WEB3FORMS_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+              access_key: ACCESS_KEY,
+              // Subject line front-loads project type + location for easy inbox
+              // triage. With editor-written questions there is no project type or
+              // location, so the subject falls back to the visitor's name.
+              subject,
+              from_name: `${site.name} website`,
+              name: draft.name,
+              email: draft.email,
+              phone: draft.phone || undefined,
+              // The built-in project fields only exist on the built-in form. Omit
+              // them entirely when the editor wrote their own questions, so the
+              // notification email has no empty rows.
+              location: useCustom ? undefined : draft.location,
+              project_type: useCustom ? undefined : draft.projectType,
+              budget_range: useCustom ? undefined : draft.budget,
+              timeline: useCustom ? undefined : draft.timeline,
+              message,
+              // Lead source is optional; omit from the payload when blank so it
+              // doesn't add a "Source: " line to the notification email for no reason.
+              source: (useCustom ? '' : draft.source) || undefined,
+              // Web3Forms autoresponder fields. When these are set, Web3Forms
+              // sends a confirmation email to the visitor in addition to the
+              // notification email to the studio. The reply-to_email key is
+              // documented at https://docs.web3forms.com/#autoresponder.
+              // The autoresponder must be enabled in the Web3Forms dashboard
+              // for this project's access key.
+              replyto: draft.email,
+              autoresponse: true,
+              autoresponse_from: `${site.name} <noreply@${site.domain}>`,
+              autoresponse_subject: `Got your note. We'll be in touch soon.`,
+              autoresponse_message: `Hi ${draft.name},\n\nThank you for reaching out! We read every inquiry personally and will get back to you within a couple of business days.\n\nIf your project is time-sensitive, just mention that in your reply to this email and we'll prioritize accordingly.\n\n${site.name}\n${site.domain}`,
+            }),
+          });
+          const body = await res.json().catch(() => ({}));
+          return res.ok && body.success !== false
+            ? { ok: true }
+            : {
+                ok: false,
+                error:
+                  body.message ||
+                  "Couldn't send right now. Try again in a minute, or contact us directly.",
+              };
+        },
+      );
+
+      if (result.ok) {
         setStatus('success');
         try {
           localStorage.removeItem(DRAFT_KEY);
@@ -379,8 +410,9 @@ export default function ContactForm({
         setCustomValues({});
       } else {
         setStatus('error');
+        if (result.errors) setErrors(result.errors as Partial<Record<keyof Draft, string>>);
         setErrorMessage(
-          json.message || "Couldn't send right now. Try again in a minute, or contact us directly.",
+          result.error ?? "Couldn't send right now. Try again in a minute, or contact us directly.",
         );
       }
     } catch {

@@ -8,6 +8,41 @@
   // request time. global_fetch_strictly_public predates it.
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "name": "ncs-astro-sanity-starter",
+
+  // ── The contact endpoint's bindings (src/pages/api/contact.ts) ────────────
+  // COMMENTED OUT ON PURPOSE. A fresh clone must build and deploy with no
+  // Cloudflare resources of its own; an active binding with a placeholder id
+  // fails the deploy for anyone who has not created the database yet.
+  //
+  // To turn the contact endpoint on for a site:
+  //
+  //   1. npx wrangler d1 create <site>-contact
+  //   2. Paste the returned database_id below and uncomment the block.
+  //   3. npx wrangler d1 migrations apply <site>-contact --remote
+  //   4. Set the recipient and sender, both as plain vars:
+  //        npx wrangler secret put CONTACT_TO      (verified destination address)
+  //        npx wrangler secret put CONTACT_FROM    (an address on a sending domain)
+  //   5. Optional: TURNSTILE_SECRET, and PUBLIC_TURNSTILE_SITE_KEY in .env.
+  //   6. Optional fallback for sites with no email binding:
+  //        npx wrangler secret put WEB3FORMS_KEY
+  //
+  // LOCAL D1 STATE IS KEYED PER CONFIG PATH. `wrangler dev` runs against
+  // dist/server/wrangler.json, so a migration applied with the root config goes
+  // to a DIFFERENT local database and the endpoint reports "no such table".
+  // Apply it the same way you run it:
+  //   npx wrangler d1 migrations apply <db> --local -c dist/server/wrangler.json
+  //
+  // "d1_databases": [
+  //   { "binding": "CONTACT_DB", "database_name": "<site>-contact", "database_id": "<id>" }
+  // ],
+  //
+  // Email Sending needs the Workers Paid plan and a domain onboarded for
+  // sending. Sends to a VERIFIED DESTINATION address are free and do not count
+  // against the monthly quota, which is the case a contact form is.
+  // "send_email": [
+  //   { "name": "EMAIL", "destination_address": "<owner>@example.com" }
+  // ],
+
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     // @astrojs/cloudflare v14 splits the build into dist/client (static assets)

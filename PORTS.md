@@ -4216,6 +4216,73 @@ blends what the browser blends.
 `routes` from the site's own `tests/routes.ts` and the theme key from `src/data/site.ts`,
 the same two seams `a11y-dark.spec.ts` already uses.
 
+## Card 45: The site's own contact endpoint (2026-09-08)
+
+**What it is.** `src/pages/api/contact.ts` plus `src/lib/contact-submission.ts` (pure,
+unit-tested), `src/lib/contact-transport.ts` (which transport the browser uses) and a
+generated D1 migration. The contact form posts to the SITE'S OWN Worker instead of a
+form service.
+
+**The premise that stopped being true.** A purely static site has nowhere to run code, so
+a form needs somebody else's backend: that is why this family shipped Web3Forms, and the
+only recorded reason for it was "NCS standard pattern". But every site here ships a
+Cloudflare Worker anyway, because the live preview and the SSR routes require one. The
+constraint that justified outsourcing the form has not applied for a long time, and
+nobody revisited it after the fork. Card 44's failure mode exactly: inherited assumption,
+correct code, nothing to flag it.
+
+**What owning it buys, in order of how much it matters.**
+
+1. **STORE FIRST, NOTIFY SECOND.** With a form service the email IS the record, so a
+   message that bounces, gets spam-filtered or is deleted never existed and nobody knows.
+   The endpoint writes the row before it tries to send. Verified under `wrangler dev` with
+   no email transport configured at all: the visitor gets HTTP 200, and the row lands with
+   `notified = 0` and `notify_error = "no notification transport configured"`. That is a
+   repairable problem instead of a lost customer.
+2. **The key leaves the client bundle.** A Web3Forms access key is public by design and
+   scrapeable from the built JS.
+3. **No monthly ceiling.** Web3Forms' free tier is 250 submissions a month.
+
+**Do NOT store submissions in Sanity.** The obvious idea, and wrong: a free-plan dataset
+is `aclMode: "public"`, so every document is readable by anyone with the project id and
+no token. Contact submissions are names, addresses and messages. Checked on
+stonesteps-50k before building anything, and it is why this uses D1.
+
+**The Cloudflare email rules, from the docs rather than from memory.** These decide what
+is possible per client, and two of them are easy to get wrong:
+
+- **Email Routing** (inbound, free) puts MX on the ROOT domain. The docs are explicit:
+  _"Cannot use Email Routing with external mail servers."_ Any client already on Google
+  Workspace or Microsoft 365 is out.
+- **Email Sending** (outbound) puts MX only on a `cf-bounce` subdomain, so it coexists
+  with an existing mail provider. It needs the **Workers Paid** plan: 3,000 emails a
+  month included per ACCOUNT, then $0.35 per 1,000.
+- **Sends to a verified destination address are free on any plan** and do not count
+  against the quota, which is exactly what a contact form notifying the site owner is.
+  The catch: _"You can only send from your routing domains."_
+- **Cloudflare DNS is required either way.** A client whose DNS is at their registrar
+  (stonesteps-50k is at GoDaddy) cannot use it at all without moving.
+
+For an agency hosting many client sites on one paid account, the workable shape is ONE
+sending domain you own, with every client site's Worker sending from it and `Reply-To`
+set to the visitor. That needs nothing from the client's DNS.
+
+**Per-site adaptation.** The bindings, and only the bindings. `wrangler.jsonc` carries the
+enable-it checklist commented out, because a fresh clone must build and deploy with no
+Cloudflare resources of its own, and an active binding with a placeholder id fails the
+deploy for anyone who has not created the database.
+
+**A gotcha that costs an hour.** Local D1 state is keyed PER CONFIG PATH. `wrangler dev`
+runs against `dist/server/wrangler.json`, so a migration applied with the root config
+lands in a different local database and the endpoint reports `no such table`. Apply it
+the way you run it: `--local -c dist/server/wrangler.json`.
+
+**Still unverified.** Nobody has watched an email actually arrive: that needs a paid
+account with an onboarded sending domain, which no site in the family has yet. The
+storage path, the validation, the honeypot, the timing check and the degraded answers are
+all verified end to end under `wrangler dev`. `Reply-To` is sent as a custom header with a
+retry without it, because the exact field name is not confirmed against a live send.
+
 ## Card 44: Fork residue, and the audit that finds it (2026-09-08)
 
 **What it is.** A named failure mode rather than a file: **a template forked from a

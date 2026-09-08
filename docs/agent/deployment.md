@@ -55,7 +55,23 @@ Set in Cloudflare -> **Workers & Pages -> your-project -> Settings -> Variables*
 - `PUBLIC_SANITY_DATASET` -- `production` (or your dataset name). Same graceful-empty behavior as above.
 - `PUBLIC_SANITY_API_VERSION` -- pinned ISO date like `2026-05-01`. Bump deliberately.
 - `SANITY_API_READ_TOKEN` -- only if any page needs to read draft content (typically not, since published content is publicly readable). Mark as Secret.
-- `PUBLIC_WEB3FORMS_KEY` -- contact form access key from [web3forms.com](https://web3forms.com/). Without it the contact form falls back to a no-op action and shows an inline notice.
+- `PUBLIC_WEB3FORMS_KEY` -- LEGACY, and only needed for a build with no Worker. The contact form now posts to the site's own `/api/contact` endpoint first and only falls back to Web3Forms when that endpoint is not there (see PORTS.md card 45). On a Workers deploy, prefer the server-side `WEB3FORMS_KEY` secret below, which keeps the key out of the client bundle.
+
+### The contact endpoint (`/api/contact`)
+
+All of these are OPTIONAL. With none of them set the route still exists, still validates, and answers a visitor honestly; it just has nowhere to put the message. Set them as Worker secrets, not `.env`:
+
+| Name               | What it does                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `CONTACT_TO`       | Where notifications go. On the free path this must be a **verified destination address** in the Cloudflare account. |
+| `CONTACT_FROM`     | Who they come from. Must belong to a domain onboarded for Email Sending.                                            |
+| `TURNSTILE_SECRET` | Turns on Turnstile verification. Skipped entirely when unset.                                                       |
+| `WEB3FORMS_KEY`    | Server-side fallback, used only when there is no `EMAIL` binding.                                                   |
+
+Bindings (`CONTACT_DB` for D1, `EMAIL` for Email Sending) are configured in `wrangler.jsonc`, which carries the full enable-it checklist as a comment.
+
+**Store first, notify second.** The endpoint writes the submission to D1 before it tries to email anything, so a message survives a bounce, a spam filter, or a missing transport. A row with `notified = 0` and a `notify_error` is a repairable problem; with a form service the same event is a lost customer and nobody knows.
+
 - `PUBLIC_CF_ANALYTICS_TOKEN` -- Cloudflare Web Analytics token. Without it the analytics beacon doesn't render.
 - `PUBLIC_CALENDLY_URL` -- optional. Booking link for the discovery call CTA.
 - `PUBLIC_NEWSLETTER_FORM_ACTION` -- optional. Build-time override for the ESP form-action endpoint.
