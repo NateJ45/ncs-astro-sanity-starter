@@ -4110,10 +4110,26 @@ declined to judge, so the two suites can never disagree about the same element, 
 existing suites keep owning violations. A parallel contrast implementation would drift
 from axe and produce arguments about which one is right.
 
-**What it deliberately does not fail on.** Elements over a background image or gradient,
-where one colour is not the honest answer. Those are counted and printed so a growing
-pile stays visible, but they do not go red. A gate that fails on something nobody can fix
-gets muted, and a muted gate is worse than none.
+**Elements over a photograph are MEASURED, not excused (2026-09-08).** The first version
+counted and printed them and never went red, on the reasoning that one colour is not an
+honest answer over an image. That is true and it was still a hole, because the moment a
+design puts type over photography or texture the exemption covers the riskiest text on
+the page. The gate now hides the element, photographs the region behind it, and builds a
+128-bucket luminance histogram of what is really there. It reports the ratio that holds
+for **95% of the area**, so a single bright pixel in a leaf cannot fail an otherwise
+sound label, and a genuinely busy background still does. Only a box that cannot be
+photographed at all stays undetermined.
+
+Two bugs found by deliberately injecting bad contrast, both worth knowing before trusting
+the numbers:
+
+- **The media check needs the element boxes, not an ancestor walk.** A hero photograph is
+  almost always an `<img>` with the type positioned over it, not a `background-image` on
+  an ancestor, so an ancestor walk sails past it and measures the section's flat colour.
+  Anything whose box OVERLAPS a media box is measured from pixels.
+- **The screenshot clip is in page coordinates, so it needs `fullPage: true`.** Without
+  it the same numbers are clipped against the viewport origin and anything below the fold
+  comes back as a slice of a different section entirely.
 
 **Two false alarms to expect, both already fixed in the canonical copy.** Any repo
 adopting this will meet them, and either one alone would have discredited the suite on
@@ -4157,6 +4173,34 @@ can reach it. Unlike stonesteps, this repo's `.dark` HAD lightened its shadcn `-
 correctly, so the palette was fine and only the component was wrong. Two repos, one shared
 component, the same defect, neither caught by anything else. Any fork made before
 2026-09-08 carries it.
+
+**`data-contrast-media`: the opt-in for dense vector layers (2026-09-08).** Pixel
+measurement is triggered by RASTER media only. Including `<svg>` swept in decorative
+topographic overlays that span whole sections, so every element inside them became "over
+media" and the run hit its measurement cap; the topo is a low-opacity vector over a solid
+colour and the ordinary colour path judges it correctly. But some vector layers really do
+change what is behind the type: stonesteps-50k's hero now wears a mud field dense enough
+to matter. Such a layer marks itself `data-contrast-media` and is measured like a
+photograph. Deliberately opt-in, because "measure every SVG" is the rule that broke, and
+the author of the layer is the one who knows whether it is dense enough to count.
+
+**The sampling bug that opt-in exposed, and the one to expect (2026-09-08).** Sampling
+hid only the element being measured. Any OTHER text overlapping its box therefore stayed
+in the photograph and was measured **as if it were the background**. A per-letter
+headline proved it: with one letter hidden its neighbours leaned into the gap, and the
+letter was reported at 1.05:1 against what was really the letter next to it. The gate now
+hides overlapping LEAF text elements too, which never takes out a whole section and
+leaves a real background (including a card's own photograph) painting exactly as it does.
+Any repo with tracked-out or per-character display type will meet this the first time
+that type sits over media.
+
+**What axe still cannot see, and the design consequence.** axe reads element background
+COLOURS; it has no idea a CSS mask makes a layer 95% transparent. Four stacked mask
+layers at 26% alpha therefore model as a 57% veil across a whole band, and axe will fail
+small text under them, correctly by its own lights. Two takeaways: keep a decorative
+overlay to ONE element wherever small text sits under it, and put the transparency in the
+colour (`color-mix(... transparent)`) rather than in an `opacity` on a wrapper, so axe
+blends what the browser blends.
 
 **Per-site adaptation.** None to the file, which is why it is canonical. It reads
 `routes` from the site's own `tests/routes.ts` and the theme key from `src/data/site.ts`,

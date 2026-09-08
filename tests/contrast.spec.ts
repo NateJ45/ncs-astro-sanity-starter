@@ -136,7 +136,18 @@ async function measure(page: Parameters<typeof settle>[0], selectors: string[]) 
     // topo overlay, which spans whole sections, so every element in them became
     // "over media" and the run hit its measurement cap. The topo is a low-opacity
     // vector over a solid background, and the colour path judges that correctly.
-    const mediaBoxes = [...document.querySelectorAll('img,video,canvas,picture')]
+    //
+    // `[data-contrast-media]` IS THE OPT-IN FOR EVERYTHING ELSE. A vector layer
+    // dense enough to change what is behind the type (a spatter field, a heavy
+    // pattern) marks itself with that attribute and gets measured from pixels
+    // like a photograph. This is deliberately opt-in rather than automatic:
+    // "measure every SVG" is the rule that broke, and a decorative hairline
+    // asking to be measured is a false alarm the whole suite pays for. The
+    // attribute means "I am dense enough to matter", and the author of the
+    // layer is the one who knows that.
+    const mediaBoxes = [
+      ...document.querySelectorAll('img,video,canvas,picture,[data-contrast-media]'),
+    ]
       .map((m) => (m as HTMLElement).getBoundingClientRect())
       .filter((r) => r.width > 8 && r.height > 8);
     const overlapsMedia = (r: DOMRect) =>
@@ -277,12 +288,37 @@ async function measureOverImages(
     }
     done += 1;
 
-    // Hide just this element. visibility:hidden removes it and its background
-    // from the paint while keeping layout identical, so nothing behind it
-    // shifts between the measurement and the real render.
+    // Hide this element, AND any other text sitting inside its box.
+    //
+    // visibility:hidden removes an element and its background from the paint
+    // while keeping layout identical, so nothing behind it shifts between the
+    // measurement and the real render.
+    //
+    // WHY THE NEIGHBOURS GO TOO. Hiding only the target leaves any text that
+    // overlaps its box in the photograph, and that ink is then sampled AS IF IT
+    // WERE THE BACKGROUND. A per-letter headline proved it: with one letter
+    // hidden, its neighbours leaned into the gap and the letter was reported at
+    // 1.05:1 against what was really the letter next to it. Only leaf elements
+    // are hidden, so this never takes out a section and the real background
+    // (including a card's own photograph) is left exactly as it paints.
     await page.evaluate((sel) => {
       const el = document.querySelector(sel) as HTMLElement | null;
-      if (el) el.style.visibility = 'hidden';
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const also: HTMLElement[] = [];
+      for (const other of document.querySelectorAll<HTMLElement>('body *')) {
+        if (other === el || other.contains(el) || el.contains(other)) continue;
+        if (other.children.length > 0) continue;
+        if (!other.textContent || !other.textContent.trim()) continue;
+        const o = other.getBoundingClientRect();
+        if (o.right <= r.left || o.left >= r.right || o.bottom <= r.top || o.top >= r.bottom) {
+          continue;
+        }
+        also.push(other);
+      }
+      el.style.visibility = 'hidden';
+      for (const a of also) a.style.visibility = 'hidden';
+      (window as unknown as { __contrastHidden?: HTMLElement[] }).__contrastHidden = also;
     }, row.selector);
 
     let shot: string | null = null;
@@ -301,6 +337,9 @@ async function measureOverImages(
     await page.evaluate((sel) => {
       const el = document.querySelector(sel) as HTMLElement | null;
       if (el) el.style.visibility = '';
+      const w = window as unknown as { __contrastHidden?: HTMLElement[] };
+      for (const a of w.__contrastHidden ?? []) a.style.visibility = '';
+      w.__contrastHidden = [];
     }, row.selector);
 
     if (!shot) {
