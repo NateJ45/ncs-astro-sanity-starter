@@ -106,6 +106,7 @@ is installing it as of the date on the card.
 | 40  | Studio Welcome pane (task cards)                                  | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 41  | Guide handbook held as repo data                                  | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 42  | External link health, on its own schedule                         | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 43  | Contrast for what axe declines to judge                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -4069,3 +4070,77 @@ fail the run. The first version conflated the two and would have cried wolf on i
 scheduled run.
 
 **Needs no secrets** when the dataset is public.
+
+## Card 43: Contrast for the elements axe declines to judge (2026-09-08)
+
+**What it is.** `tests/contrast.spec.ts`: a Playwright suite that runs axe for
+colour-contrast, takes the INCOMPLETE list rather than the violations, and measures each
+of those elements itself. Canonical copy in this starter, first built in stonesteps-50k.
+
+**The hole it fills, which is in a file every repo here already runs.** axe reports three
+outcomes per rule, not two: violations, passes, and incomplete. `a11y.spec.ts` and
+`a11y-dark.spec.ts` both assert `results.violations` is empty. That is the correct
+assertion, and it means an incomplete passes in silence. axe returns incomplete for
+colour-contrast whenever it cannot determine the background, and the commonest reason by
+a distance is **"this element uses complex text shadows"**.
+
+**The measurement that prompted it.** On stonesteps-50k, across five routes in two
+themes: **466 incomplete contrast nodes, 205 unique elements**. Effectively every display
+heading on the site, because the design system puts a `text-shadow` on all of them. The
+contrast gate had never evaluated one of them. Two real contrast bugs shipped through a
+green axe run as a direct result, one of them a base-layer rule that made every heading
+in light mode cream-on-cream site-wide.
+
+Every repo in this family asserts on violations only. Checked 2026-09-08: none of
+wcp-website, presacademy, mas-monograms, nixoncreativestudio, this starter or
+stonesteps-50k handled incompletes. The blind spot is universal; only its size differs,
+and it scales with how much the design uses text-shadow.
+
+**Why it completes axe rather than replacing it.** It only ever looks at what axe
+declined to judge, so the two suites can never disagree about the same element, and the
+existing suites keep owning violations. A parallel contrast implementation would drift
+from axe and produce arguments about which one is right.
+
+**What it deliberately does not fail on.** Elements over a background image or gradient,
+where one colour is not the honest answer. Those are counted and printed so a growing
+pile stays visible, but they do not go red. A gate that fails on something nobody can fix
+gets muted, and a muted gate is worse than none.
+
+**Two false alarms to expect, both already fixed in the canonical copy.** Any repo
+adopting this will meet them, and either one alone would have discredited the suite on
+its first run.
+
+1. **Resolve colours through a canvas, not a regex.** `getComputedStyle` does not promise
+   `rgb()`. Tailwind 4 emits oklch/oklab and Chromium hands it straight back, so
+   `oklab(0.944 0.002 0.065 / 0.8)` read as rgb() gives a luminance of nearly nothing and
+   a confident 1.17:1 for text that is fine. Painting one pixel and reading it back makes
+   the browser do the colour maths, so every syntax resolves and the alpha comes with it.
+2. **Skip outlined text.** Text drawn with `color: transparent` plus a
+   `-webkit-text-stroke` has no fill to measure; the stroke is what you see. Measuring the
+   fill reports a legible glyph as invisible.
+
+**Alpha is composited, not ignored.** `text-foreground/80` and its friends are only as
+readable as what shows through them, so the foreground is blended over the resolved
+background before measuring. Opacity utilities diluting a token past AA is a mistake this
+family has now made five times.
+
+**The bug it found on its first run, and what it says about dark palettes.** The home
+page's stat numbers measured 2.84:1 on the dark ground, under the 3:1 large text needs.
+Two separate causes, both worth checking in any repo:
+
+- **The `.dark` block had never lightened `--primary`.** It lightened `--link` and
+  `--ring` and left `--primary` a byte-for-byte copy of the light theme's brand rust. A
+  dark palette that copies a value across is not a dark palette for that value.
+- **`text-primary` maps to the `@theme` brand token, not the theme-aware shadcn one.**
+  The brand token is one constant for both themes by design, so no `.dark` override can
+  reach a component using the utility. Components rendering brand-coloured TEXT on a
+  surface that flips must use `text-[color:var(--primary)]`.
+
+Fixing the first is a seesaw worth measuring rather than guessing: on this palette
+`#b8462f` was the only value that both cleared 3:1 as text on bark and kept the cream
+button labels sitting ON it above 4.5:1. Anything lighter fixed the text and broke the
+buttons.
+
+**Per-site adaptation.** None to the file, which is why it is canonical. It reads
+`routes` from the site's own `tests/routes.ts` and the theme key from `src/data/site.ts`,
+the same two seams `a11y-dark.spec.ts` already uses.
