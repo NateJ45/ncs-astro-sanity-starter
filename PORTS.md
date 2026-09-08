@@ -104,7 +104,7 @@ is installing it as of the date on the card.
 | 38  | Studio Checkup (what needs attention)                             | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 39  | Year-rollover wizard                                              | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 40  | Studio Welcome pane (task cards)                                  | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
-| 41  | Guide handbook held as repo data                                  | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 41  | Guide handbook held as repo data                                  | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 42  | External link health, on its own schedule                         | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 43  | Contrast for what axe declines to judge                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 
@@ -4041,6 +4041,14 @@ clickable part), `_italics_` for an aside. Nothing else.
 slugs, every guide in a category the desk actually renders, no empty categories, every
 "See also" naming a real guide, and no em-dashes. Prose is exactly the kind of content
 nothing else checks.
+
+**Installed in the starter 2026-09-08, ADDITIVELY.** Help & Guide sits above the
+existing "Start Here" rather than replacing it. Start Here is three editable
+singletons and works well in a project that seeds them; a repo-data handbook cannot go
+empty. Shipping both lets a project keep whichever suits it and delete the other, which
+is a better default than the starter choosing for every future fork. The shipped guide
+set is deliberately GENERIC and is meant to be rewritten per project; stonesteps-50k is
+the worked example.
 
 **The trap this replaced.** The starter ships a "Start Here" panel written for a design
 studio ("Your business at a glance", "Brand kit", "Grow your studio"). In a fork whose

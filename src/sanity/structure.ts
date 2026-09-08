@@ -46,6 +46,8 @@ import {
   OlistIcon,
   ArrowRightIcon,
 } from '@sanity/icons';
+import { makeGuideView } from './components/GuideView';
+import { guides, GUIDE_CATEGORIES } from './guides/content';
 import StudioGuide from './components/StudioGuide';
 import BusinessOverview from './components/BusinessOverview';
 import BrandKit from './components/BrandKit';
@@ -111,7 +113,54 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
   S.list()
     .title('Studio Starter')
     .items([
-      // Start Here — three-panel handbook for the editor. First item so it is always visible.
+      // HELP & GUIDE — the handbook, first so it is always in reach.
+      //
+      // PORTS.md card 41. The guides are DATA in src/sanity/guides/content.ts,
+      // held in the repo rather than in Sanity, so they cannot be deleted by
+      // the person who most needs them and every fork inherits them with the
+      // code. THE SHIPPED SET IS GENERIC ON PURPOSE and is meant to be
+      // rewritten per project; see that file's header.
+      //
+      // It sits ABOVE "Start Here" rather than replacing it. Start Here is
+      // three editable singletons and works well when a project seeds them,
+      // but a fork that skips `npm run seed` gets four panes that open EMPTY,
+      // which is what happened in stonesteps-50k. A repo-data handbook cannot
+      // do that. A project that wants only one of the two should delete the
+      // other rather than ship both.
+      S.listItem()
+        .id('help-and-guide')
+        .title('Help & Guide')
+        .icon(InfoOutlineIcon)
+        .child(
+          S.list()
+            .id('help-and-guide-list')
+            .title('Help & Guide')
+            .items(
+              GUIDE_CATEGORIES.flatMap((category) => {
+                const mine = guides.filter((g) => g.category === category);
+                return mine.length === 0
+                  ? []
+                  : [
+                      S.divider().title(category),
+                      ...mine.map((g) =>
+                        S.listItem()
+                          .id(`guide-${g.slug}`)
+                          .title(g.title)
+                          .icon(() => g.icon)
+                          .child(
+                            S.component(makeGuideView(g.slug) as never)
+                              .id(`guide-view-${g.slug}`)
+                              .title(g.title),
+                          ),
+                      ),
+                    ];
+              }),
+            ),
+        ),
+
+      S.divider(),
+
+      // Start Here — three-panel handbook for the editor.
       // Panel 1: how the Studio works and step-by-step how-tos (static).
       // Panel 2: live business overview (services + site settings fetched from Sanity).
       // Panel 3: brand kit — colors + fonts for Canva (static).
