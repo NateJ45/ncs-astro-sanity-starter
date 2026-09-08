@@ -4149,6 +4149,14 @@ Fixing the first is a seesaw worth measuring rather than guessing: on this palet
 button labels sitting ON it above 4.5:1. Anything lighter fixed the text and broke the
 buttons.
 
+**It found the same bug in this starter, on its first CI run.** The stat numbers on the
+home page measured 2.97:1 in dark mode, under the 3:1 large text needs. Same second cause
+as stonesteps: `text-primary` maps to the `@theme` brand token, and no `.dark` override
+can reach it. Unlike stonesteps, this repo's `.dark` HAD lightened its shadcn `--primary`
+correctly, so the palette was fine and only the component was wrong. Two repos, one shared
+component, the same defect, neither caught by anything else. Any fork made before
+2026-09-08 carries it.
+
 **Per-site adaptation.** None to the file, which is why it is canonical. It reads
 `routes` from the site's own `tests/routes.ts` and the theme key from `src/data/site.ts`,
 the same two seams `a11y-dark.spec.ts` already uses.

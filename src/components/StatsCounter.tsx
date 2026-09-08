@@ -96,7 +96,16 @@ export default function StatsCounter({ stats }: Props) {
             <div className="my-2 hidden w-px self-stretch bg-border md:block" aria-hidden="true" />
           )}
           <div className="text-center">
-            <span className="block font-display text-[clamp(2.5rem,6vw,3.5rem)] leading-none font-normal text-primary">
+            {/* text-[color:var(--primary)], NOT text-primary. The Tailwind utility
+                maps to the @theme brand token, which is ONE constant for both
+                themes by design; the shadcn --primary is the theme-aware one
+                and .dark already lightens it. These numbers sit on the page
+                ground, which flips, so the brand constant measured 2.97:1 here
+                in dark mode, just under the 3:1 large text requires. Caught by
+                tests/contrast.spec.ts (PORTS card 43) on its first CI run.
+                Any component rendering brand-coloured TEXT on a surface that
+                flips needs the theme-aware token. */}
+            <span className="block font-display text-[clamp(2.5rem,6vw,3.5rem)] leading-none font-normal text-[color:var(--primary)]">
               <AnimatedNumber
                 target={stat.number}
                 suffix={stat.suffix}
