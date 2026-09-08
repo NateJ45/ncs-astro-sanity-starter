@@ -6,9 +6,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import "@fontsource/libre-baskerville/400.css";
-@import "@fontsource/libre-baskerville/700.css";
-@import "@fontsource-variable/inter";
+@import '@fontsource/libre-baskerville/400.css';
+@import '@fontsource/libre-baskerville/700.css';
+@import '@fontsource-variable/inter';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -19,21 +19,21 @@
 @theme {
   /* Brand palette — neutral Slate default. Swap per project. */
   --color-primary: #586577; /* Slate */
-  --color-primary-dark: #434E5C; /* Slate Dark — body anchor text */
-  --color-accent: #2A2D31; /* Ink — headings + body */
-  --color-accent-dark: #1E2024; /* Ink Dark — dark surfaces */
-  --color-secondary: #AAB0B8; /* Cool Gray — borders, eyebrows */
-  --color-tertiary: #9DB0A6; /* Muted Sage — sparingly */
-  --color-bg: #FBFBFA; /* Paper — primary surface */
-  --color-bg-soft: #F3F4F2; /* Soft Paper — alternating surface */
-  --color-border-soft: #E6E7E5; /* Faint dividers */
-  --color-white-pure: #FFFFFF;
+  --color-primary-dark: #434e5c; /* Slate Dark — body anchor text */
+  --color-accent: #2a2d31; /* Ink — headings + body */
+  --color-accent-dark: #1e2024; /* Ink Dark — dark surfaces */
+  --color-secondary: #aab0b8; /* Cool Gray — borders, eyebrows */
+  --color-tertiary: #9db0a6; /* Muted Sage — sparingly */
+  --color-bg: #fbfbfa; /* Paper — primary surface */
+  --color-bg-soft: #f3f4f2; /* Soft Paper — alternating surface */
+  --color-border-soft: #e6e7e5; /* Faint dividers */
+  --color-white-pure: #ffffff;
 
   /* Fonts */
-  --font-display: "Libre Baskerville", Georgia, "Times New Roman", serif;
-  --font-body: "Inter Variable", system-ui, -apple-system, sans-serif;
+  --font-display: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter Variable', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
-  --font-script: "Snell Roundhand", "Apple Chancery", cursive;
+  --font-script: 'Snell Roundhand', 'Apple Chancery', cursive;
 
   /* Fluid heading sizes */
   --text-h6: 1rem;
@@ -198,33 +198,33 @@
 
 :root {
   /* Surfaces */
-  --background: #FBFBFA;
-  --foreground: #2A2D31;
-  --card: #FFFFFF;
-  --card-foreground: #2A2D31;
-  --popover: #FFFFFF;
-  --popover-foreground: #2A2D31;
+  --background: #fbfbfa;
+  --foreground: #2a2d31;
+  --card: #ffffff;
+  --card-foreground: #2a2d31;
+  --popover: #ffffff;
+  --popover-foreground: #2a2d31;
 
   /* Brand */
   --primary: #586577;
-  --primary-foreground: #FFFFFF;
-  --secondary: #AAB0B8;
-  --secondary-foreground: #2A2D31;
+  --primary-foreground: #ffffff;
+  --secondary: #aab0b8;
+  --secondary-foreground: #2a2d31;
 
   /* Quiet surfaces / muted text */
-  --muted: #F3F4F2;
-  --muted-foreground: #5F6469; /* ~5.6:1 on #FBFBFA — passes AA */
+  --muted: #f3f4f2;
+  --muted-foreground: #5f6469; /* ~5.6:1 on #FBFBFA — passes AA */
 
   /* Accent */
-  --accent: #E8E9E7;
-  --accent-foreground: #2A2D31;
+  --accent: #e8e9e7;
+  --accent-foreground: #2a2d31;
 
   /* States */
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #E6E7E5;
-  --input: #E6E7E5;
+  --border: #e6e7e5;
+  --input: #e6e7e5;
   --ring: #586577;
-  --link: #434E5C; /* ~8:1 on #FBFBFA — passes AA */
+  --link: #434e5c; /* ~8:1 on #FBFBFA — passes AA */
 
   /* Charts (kept neutral, not used at launch) */
   --chart-1: oklch(0.87 0 0);
@@ -236,13 +236,13 @@
   --radius: 0.5rem;
 
   /* Sidebar (reserved for Studio-style admin contexts, not used on site) */
-  --sidebar: #FBFBFA;
-  --sidebar-foreground: #2A2D31;
+  --sidebar: #fbfbfa;
+  --sidebar-foreground: #2a2d31;
   --sidebar-primary: #586577;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F3F4F2;
-  --sidebar-accent-foreground: #2A2D31;
-  --sidebar-border: #E6E7E5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f3f4f2;
+  --sidebar-accent-foreground: #2a2d31;
+  --sidebar-border: #e6e7e5;
   --sidebar-ring: #586577;
 
   --tint-rgb: 88, 101, 119;
@@ -250,16 +250,16 @@
   /* Starwind UI extra semantic tokens — not in shadcn's default set.
        Values are harmonized to the existing neutral palette so the starter
        renders sensibly out of the box. apply-brand rewrites these. */
-  --primary-accent: #434E5C; /* darker shade of --primary for hover states */
-  --secondary-accent: #2A2D31; /* dark ink — active/pressed secondary */
-  --info: #93C5FD; /* soft blue, harmonized with slate primary */
-  --info-foreground: #1E3A5F; /* deep blue for text on info surfaces */
-  --success: #86EFAC; /* soft green */
-  --success-foreground: #14532D; /* deep green for text on success surfaces */
-  --warning: #FDE68A; /* soft amber */
-  --warning-foreground: #713F12; /* deep amber for text on warning surfaces */
+  --primary-accent: #434e5c; /* darker shade of --primary for hover states */
+  --secondary-accent: #2a2d31; /* dark ink — active/pressed secondary */
+  --info: #93c5fd; /* soft blue, harmonized with slate primary */
+  --info-foreground: #1e3a5f; /* deep blue for text on info surfaces */
+  --success: #86efac; /* soft green */
+  --success-foreground: #14532d; /* deep green for text on success surfaces */
+  --warning: #fde68a; /* soft amber */
+  --warning-foreground: #713f12; /* deep amber for text on warning surfaces */
   --error: oklch(0.577 0.245 27.325); /* matches --destructive */
-  --error-foreground: #FFFFFF;
+  --error-foreground: #ffffff;
   --outline: #586577; /* matches --ring */
 }
 
@@ -268,29 +268,29 @@
    Slate and Ink hold their identity; surfaces flip to deep cool grays. */
 
 .dark {
-  --background: #17191C;
-  --foreground: #F2F3F2;
+  --background: #17191c;
+  --foreground: #f2f3f2;
   --card: #202327;
-  --card-foreground: #F2F3F2;
+  --card-foreground: #f2f3f2;
   --popover: #202327;
-  --popover-foreground: #F2F3F2;
+  --popover-foreground: #f2f3f2;
 
-  --primary: #8A96A6;
-  --primary-foreground: #17191C;
-  --secondary: #5A6068;
-  --secondary-foreground: #F2F3F2;
+  --primary: #8a96a6;
+  --primary-foreground: #17191c;
+  --secondary: #5a6068;
+  --secondary-foreground: #f2f3f2;
 
   --muted: #202327;
-  --muted-foreground: #AAB0B8;
+  --muted-foreground: #aab0b8;
 
-  --accent: #2C3036;
-  --accent-foreground: #F2F3F2;
+  --accent: #2c3036;
+  --accent-foreground: #f2f3f2;
 
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: #8A96A6;
-  --link: #8A96A6;
+  --ring: #8a96a6;
+  --link: #8a96a6;
 
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
@@ -299,28 +299,28 @@
   --chart-5: oklch(0.269 0 0);
 
   --sidebar: #202327;
-  --sidebar-foreground: #F2F3F2;
-  --sidebar-primary: #8A96A6;
-  --sidebar-primary-foreground: #17191C;
-  --sidebar-accent: #2C3036;
-  --sidebar-accent-foreground: #F2F3F2;
+  --sidebar-foreground: #f2f3f2;
+  --sidebar-primary: #8a96a6;
+  --sidebar-primary-foreground: #17191c;
+  --sidebar-accent: #2c3036;
+  --sidebar-accent-foreground: #f2f3f2;
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: #8A96A6;
+  --sidebar-ring: #8a96a6;
 
   --tint-rgb: 138, 150, 166;
 
   /* Starwind UI extra semantic tokens — dark mode variants. */
-  --primary-accent: #8A96A6; /* lifted primary for dark hover states */
-  --secondary-accent: #F2F3F2; /* near-white for dark active secondary */
-  --info: #93C5FD; /* same soft blue works on dark surfaces */
-  --info-foreground: #1E3A5F;
-  --success: #86EFAC;
-  --success-foreground: #14532D;
-  --warning: #FDE68A;
-  --warning-foreground: #713F12;
+  --primary-accent: #8a96a6; /* lifted primary for dark hover states */
+  --secondary-accent: #f2f3f2; /* near-white for dark active secondary */
+  --info: #93c5fd; /* same soft blue works on dark surfaces */
+  --info-foreground: #1e3a5f;
+  --success: #86efac;
+  --success-foreground: #14532d;
+  --warning: #fde68a;
+  --warning-foreground: #713f12;
   --error: oklch(0.704 0.191 22.216); /* matches dark --destructive */
-  --error-foreground: #FFFFFF;
-  --outline: #8A96A6; /* matches dark --ring */
+  --error-foreground: #ffffff;
+  --outline: #8a96a6; /* matches dark --ring */
 }
 
 /* ---------- Base resets and defaults ---------------------------------- */

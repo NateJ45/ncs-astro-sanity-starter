@@ -469,11 +469,13 @@ const latestProjects = allProjects.slice(0, 3);
       aria-label={`${brandName} home`}
       class="inline-block transition-opacity hover:opacity-80"
     >
-      {/* Sized by WIDTH: the placeholder mark is a wide lockup (280x60), not
+      {
+        /* Sized by WIDTH: the placeholder mark is a wide lockup (280x60), not
           the square badge the old PNG was. An unloaded lazy image with
           width:auto shrink-wraps to 0x0, never intersects the viewport and so
           never loads, which is a real bug this family has hit more than once.
-          Give it real dimensions. */}
+          Give it real dimensions. */
+      }
       <img
         alt={brandName}
         width={280}
