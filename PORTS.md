@@ -4212,6 +4212,34 @@ overlay to ONE element wherever small text sits under it, and put the transparen
 colour (`color-mix(... transparent)`) rather than in an `opacity` on a wrapper, so axe
 blends what the browser blends.
 
+**Update 2026-09-08: the incidental-decoration exemption.** The gate measured any element
+with text in it, which is stricter than WCAG and stricter than axe. WCAG 1.4.3 excludes
+"Incidental" text: text that is pure decoration carries no contrast requirement, and axe
+already skips it, because it does not evaluate aria-hidden text at all. Stone Steps hit
+this with oversized watermarks (a course record and a loop count set at 15rem behind their
+own bands at 6.5% ink), which are decoration by any reading and which the page states in
+full a few hundred pixels away.
+
+The exemption is `data-contrast-decorative` AND an aria-hidden ancestor. **Both halves are
+required on purpose.** The attribute says the author meant it; the aria-hidden proves the
+text really is out of the accessibility tree rather than merely inconvenient to fix. The
+attribute alone would be a one-word way to silence any failure, and a gate with a loophole
+is a gate that stops being trusted. Verified on the calling site by removing only the
+aria-hidden: all four contrast tests go red again.
+
+**Update 2026-09-08: `settle()` and animated overflow (`tests/helpers.ts`,
+`tests/reflow.spec.ts`).** Not this card's file, but the same session and the same lesson
+about a gate that cannot see what it is meant to catch. `settle()` injects
+`animation: none !important` before measuring, which is right for axe and for screenshots,
+where a half-played transition is flake, and precisely wrong for reflow: a transform does
+not affect layout, so an element animating past its container widens the DOCUMENT without
+changing anything visible standing still, and freezing it first snaps every such element
+back inside its box. A hero slideshow animating to `scale(1.09)` put a horizontal
+scrollbar on every page of Stone Steps while the reflow gate stayed green at four widths
+on every route. `settle()` now takes `freezeAnimations`, reflow opts out, and it samples
+the document across 2.4s and asserts on the WIDEST reading, because a looping animation is
+only over its container for part of its cycle.
+
 **Per-site adaptation.** None to the file, which is why it is canonical. It reads
 `routes` from the site's own `tests/routes.ts` and the theme key from `src/data/site.ts`,
 the same two seams `a11y-dark.spec.ts` already uses.
