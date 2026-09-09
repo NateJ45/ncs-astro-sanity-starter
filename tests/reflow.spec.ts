@@ -15,16 +15,28 @@ for (const route of routes) {
     test(`reflow: ${route} has no horizontal overflow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: VIEWPORT_HEIGHT });
       await page.goto(route, { waitUntil: 'domcontentloaded' });
-      await settle(page);
+      // ANIMATIONS STAY RUNNING FOR THIS ONE. See SettleOptions: freezing them
+      // is right for axe and wrong here, because the widest the document ever
+      // gets is the number that decides whether there is a scrollbar, and an
+      // element only reaches its widest mid-animation.
+      await settle(page, { freezeAnimations: false });
 
-      const { scrollWidth, clientWidth } = await page.evaluate(() => ({
-        scrollWidth: document.documentElement.scrollWidth,
-        clientWidth: document.documentElement.clientWidth,
-      }));
+      // Sampled across a couple of seconds rather than measured once. A looping
+      // animation is only over its container for part of its cycle, and a
+      // single reading lands wherever the test happened to arrive.
+      const { widest, clientWidth } = await page.evaluate(async () => {
+        const clientWidth = document.documentElement.clientWidth;
+        let widest = 0;
+        for (let i = 0; i < 24; i++) {
+          widest = Math.max(widest, document.documentElement.scrollWidth);
+          await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 100)));
+        }
+        return { widest, clientWidth };
+      });
 
       expect(
-        scrollWidth,
-        `${route} at ${width}px: scrollWidth ${scrollWidth} > clientWidth ${clientWidth} (horizontal overflow)`,
+        widest,
+        `${route} at ${width}px: widest scrollWidth ${widest} > clientWidth ${clientWidth} (horizontal overflow)`,
       ).toBeLessThanOrEqual(clientWidth);
     });
   }

@@ -196,6 +196,22 @@ async function measure(page: Parameters<typeof settle>[0], selectors: string[]) 
       const text = (el.textContent ?? '').trim();
       if (!text) continue;
 
+      // PURE DECORATION IS EXEMPT, AND THIS IS THE ONLY WAY TO CLAIM IT.
+      // WCAG 1.4.3 excludes "Incidental" text: text that is pure decoration
+      // carries no contrast requirement. An oversized watermark of a value the
+      // page already states in full is exactly that, and axe agrees, because it
+      // does not evaluate aria-hidden text either.
+      //
+      // The claim needs BOTH halves. `data-contrast-decorative` says the author
+      // meant it, and aria-hidden proves the text is genuinely out of the
+      // accessibility tree rather than merely inconvenient to fix: the
+      // attribute on its own is a loophole, and a gate with a loophole is a
+      // gate that stops being trusted. Anything failing the second half is
+      // still measured, and still fails.
+      if (el.hasAttribute('data-contrast-decorative') && el.closest('[aria-hidden="true"]')) {
+        continue;
+      }
+
       // OUTLINED TEXT HAS NO FILL COLOUR TO MEASURE. The logo's lowercase k
       // is drawn with `color: transparent` and a -webkit-text-stroke, so what
       // you see is the stroke. Measuring the fill returns 1:1 and reports a
