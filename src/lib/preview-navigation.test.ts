@@ -185,3 +185,79 @@ test('two clicks end to end: the second one wins', () => {
   assert.deepEqual(issued, ['/preview/faq'], 'the swallowed click was re-issued exactly once');
   assert.equal(pending?.sawTarget, true, 'and it arrived');
 });
+
+// -----------------------------------------------------------------------------
+// The deployed Studio reports ABSOLUTE urls (2026-09-12)
+// -----------------------------------------------------------------------------
+// Nathan's repro, again: one click, a pause, the highlight snaps back, a second
+// click works. The machine above was fine; what it was FED was not. On the
+// deployed Studio `params.preview` is the absolute url with the perspective
+// query on the end, and every comparison here is strict equality against a
+// root-relative row href, so the target was never "seen" and the bounce was
+// waited out instead of answered. toPreviewPath is what makes the two sides
+// comparable, and this is the test that would have caught it.
+
+import { toPreviewPath } from './preview-navigation.ts';
+
+test('toPreviewPath reduces whatever the host stores to a root-relative path', () => {
+  assert.equal(
+    toPreviewPath(
+      'https://stonesteps-50k.example.workers.dev/preview/course?sanity-preview-perspective=drafts',
+    ),
+    '/preview/course',
+  );
+  assert.equal(toPreviewPath('https://example.com/preview'), '/preview');
+  assert.equal(toPreviewPath('/preview/records?x=1'), '/preview/records');
+  assert.equal(toPreviewPath('/preview'), '/preview');
+  assert.equal(toPreviewPath(''), '', 'the empty param before the first frame report');
+  assert.equal(toPreviewPath(undefined), '');
+});
+
+test('the deployed timeline, absolute urls and all, still gets its automatic second attempt', () => {
+  const origin = 'https://stonesteps-50k.example.workers.dev';
+  const q = '?sanity-preview-perspective=drafts';
+  // What params.preview actually reported, in order: home, the target, the
+  // bounce back to home, the target for real.
+  const reported = [
+    `${origin}/preview${q}`,
+    `${origin}/preview/course${q}`,
+    `${origin}/preview${q}`,
+    `${origin}/preview/course${q}`,
+  ];
+
+  // With normalisation: exactly one re-issue, as the relative-path test above.
+  let pending: PendingNav | null = startNav(
+    '/preview/course',
+    'page',
+    'page-course',
+    toPreviewPath(reported[0]),
+    T0,
+  );
+  const issued: string[] = [];
+  reported.forEach((raw, i) => {
+    if (!pending) return;
+    const step = stepNav(pending, toPreviewPath(raw), T0 + (i + 1) * 100);
+    if (step.action === 'retry' && step.pending) issued.push(step.pending.href);
+    pending = step.pending;
+  });
+  assert.deepEqual(issued, ['/preview/course'], 'the bounce is answered');
+  assert.equal(pending?.sawTarget, true);
+
+  // Without it, which is what shipped: the target is never sighted, so the
+  // bounce is treated as "still where we started" and merely waited on.
+  let raw: PendingNav | null = startNav(
+    '/preview/course',
+    'page',
+    'page-course',
+    reported[0].split('?')[0],
+    T0,
+  );
+  const issuedRaw: string[] = [];
+  reported.forEach((r, i) => {
+    if (!raw) return;
+    const step = stepNav(raw, r.split('?')[0], T0 + (i + 1) * 100);
+    if (step.action === 'retry' && step.pending) issuedRaw.push(step.pending.href);
+    raw = step.pending;
+  });
+  assert.deepEqual(issuedRaw, [], 'the old comparison never retried: this is the bug');
+});

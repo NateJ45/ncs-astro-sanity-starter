@@ -185,10 +185,21 @@ Neither mode builds. The caller builds; the script reads existing output. That k
 fast to re-run, keeps build noise out of the diff, and lets capture and compare be
 pointed at the same artifacts while debugging the normalizer itself.
 
-The normalizer strips exactly four classes of build-varying value and leaves everything
+The normalizer strips exactly five classes of build-varying value and leaves everything
 else byte-faithful: `/_astro/` content hashes, Astro's generated `data-astro-cid-*` and
-transition-scope hashes, the `<astro-island>` render-order `prefix`, and whitespace
-between tags. Text, classes, ids, aria, inline styles and JSON-LD are all compared.
+transition-scope hashes, the `<astro-island>` render-order `prefix`, the contents and
+accessible name of an element with `role="timer"`, and whitespace between tags. Text,
+classes, ids, aria, inline styles and JSON-LD are otherwise all compared.
+
+**Rule 5 added 2026-09-12 (stonesteps-50k), ported here the same day.** An element with
+`role="timer"` is by definition a value that counts, and a countdown server-rendered so the
+block never appears empty is computed from the clock AT BUILD TIME. Two identical rebuilds
+minutes apart therefore differ, and stonesteps' home page failed parity on every single
+build, which is how a gate teaches everyone to ignore it. Both the digits and the element's
+own `aria-label` are normalised to `TIMER`; the element, its other attributes and its
+structure are still compared. Nothing site-specific: `role="timer"` is the standard ARIA
+role for exactly this case. The scan is brace-balanced rather than a regex, because a
+timer's markup nests and a non-greedy `[\s\S]*?</div>` stops at the first inner close.
 
 **Parameterization done on the port:** the built-HTML root is auto-detected
 (`dist/client` when it holds an index.html, which is the adapter 14 shape, else `dist`,
@@ -3047,6 +3058,16 @@ are pure: no DOM, no Sanity client, no repo names. `preview-morph` and
 `preview-text-nodes` are written against minimal structural interfaces
 (`MorphElement`, `TextLike`) precisely so they can be tested under `node:test`,
 which has no DOM. 110 assertions came with them; the suites ported verbatim.
+
+**preview-navigation.ts, 2026-09-12 (stonesteps-50k, ported here the same day):** gained
+`toPreviewPath`. The bounce machine compares with strict equality, and on a DEPLOYED Studio
+`params.preview` is the absolute url with `?sanity-preview-perspective=drafts` on the end,
+while every row href is root-relative. So the target was never sighted, the bounce was
+waited out instead of answered, and the two-clicks bug this file exists to remove was back,
+only on deployed Studios. `PreviewNavigator.tsx` now runs `params.preview` through
+`toPreviewPath` before anything compares it (and its row highlight lost the `endsWith`
+workaround that was the same mismatch patched in one place). The test file carries the
+absolute-url timeline that would have caught it.
 
 **Left per-repo (adapted, no marker):** `VisualEditingOverlay.tsx` (the scheduler
 loop, the morph and fast-path branch, `noteInstantChange`, the bfcache

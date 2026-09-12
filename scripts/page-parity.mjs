@@ -73,6 +73,9 @@
  *      rule 2: a generated identity derived from source layout. The
  *      <astro-island> tag itself, its component-url and its serialized props
  *      are all still compared, so a real island change still shows up.
+ *   4. The digits inside an element with role="timer". A countdown rendered at
+ *      build time is computed from the clock, so two identical rebuilds differ.
+ *      See stripTimerText for the full argument.
  *   4. Whitespace runs BETWEEN tags (>   < becomes ><) and trailing whitespace
  *      on every line, plus CRLF -> LF. Astro's indentation shifts when markup
  *      is nested one level deeper inside a section wrapper; the browser does not
@@ -207,6 +210,59 @@ function stripAstroCids(html) {
   );
 }
 
+/**
+ * Rule 4: the contents of an ARIA live timer.
+ *
+ * An element with `role="timer"` is, by definition, a value that counts. When
+ * one is server-rendered so the block never appears empty or shifts layout, its
+ * digits are computed from the clock AT BUILD TIME, so two identical rebuilds
+ * minutes apart produce different HTML and parity can never pass twice on that
+ * page. Stone Steps' countdown made the home snapshot fail on every build
+ * (2026-09-12).
+ *
+ * Nothing here is site-specific: `role="timer"` is the standard ARIA role for
+ * exactly this, and any page that renders one at build time has the same
+ * problem. The element, its attributes and its structure are all still
+ * compared, so markup drift inside a timer still shows up; only the digits go.
+ */
+function stripTimerText(html) {
+  // BALANCED SCAN, NOT A REGEX. A timer's markup nests (the digits sit in
+  // spans inside a flex row), and a non-greedy `[\s\S]*?</div>` stops at the
+  // first inner close rather than the element's own, so the first version of
+  // this rule matched nothing and parity kept failing (2026-09-12).
+  const open = /<([a-z]+)\b[^>]*\brole="timer"[^>]*>/gi;
+  let out = '';
+  let cursor = 0;
+  let m;
+  while ((m = open.exec(html)) !== null) {
+    const tag = m[1].toLowerCase();
+    const bodyStart = m.index + m[0].length;
+    // Walk forward, counting this tag's own opens and closes.
+    const step = new RegExp(`<(/?)${tag}\b[^>]*>`, 'gi');
+    step.lastIndex = bodyStart;
+    let depth = 1;
+    let bodyEnd = html.length;
+    let t;
+    while ((t = step.exec(html)) !== null) {
+      depth += t[1] === '/' ? -1 : 1;
+      if (depth === 0) {
+        bodyEnd = t.index;
+        break;
+      }
+    }
+    const body = html.slice(bodyStart, bodyEnd);
+    // The accessible NAME of a timer is its value too ("3711193 seconds
+    // remaining"), so the opening tag varies with the build just as the digits
+    // do. Normalising only the text left exactly one line differing, which is
+    // the most annoying kind of almost-working.
+    const openTag = m[0].replace(/\saria-label="[^"]*"/i, ' aria-label="TIMER"');
+    out += html.slice(cursor, m.index) + openTag + body.replace(/>([^<]*\d[^<]*)</g, '>TIMER<');
+    cursor = bodyEnd;
+    open.lastIndex = bodyEnd;
+  }
+  return out + html.slice(cursor);
+}
+
 /** Rule 3: the render-order counter in an island's hydration prefix. */
 function stripIslandPrefixes(html) {
   return html.replace(/(<astro-island\b[^>]*?)\sprefix="r\d+"/g, '$1 prefix="rN"');
@@ -238,7 +294,7 @@ function stripGeneratorMeta(html) {
 
 export function normalize(html) {
   return collapseWhitespace(
-    stripIslandPrefixes(stripAstroCids(stripAssetHashes(stripGeneratorMeta(html)))),
+    stripTimerText(stripIslandPrefixes(stripAstroCids(stripAssetHashes(stripGeneratorMeta(html))))),
   );
 }
 

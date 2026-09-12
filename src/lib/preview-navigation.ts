@@ -50,6 +50,36 @@
 // call, and every rule below is covered in preview-navigation.test.ts.
 // =============================================================================
 
+/**
+ * The preview param, as a root-relative path.
+ *
+ * EVERY COMPARISON IN THIS FILE IS STRICT EQUALITY, so both sides have to be
+ * spelled the same way, and they were not. The rows' hrefs are root-relative
+ * ("/preview/course"). `params.preview`, which is what `current` is read from,
+ * is whatever the host last stored, and on a deployed Studio that is the
+ * ABSOLUTE url ("https://…/preview/course?sanity-preview-perspective=drafts"):
+ * the host rewrites it to the frame's reported origin the first time the frame
+ * reports in. So `current === pending.href` was never true, `sawTarget` never
+ * flipped, the bounce came, the machine saw `current === from` without a
+ * sighting of the target and simply waited out its window. Which is the exact
+ * two-clicks symptom this file exists to remove, back again, and only on the
+ * deployed Studio, where nobody had run it with the console open
+ * (2026-09-12).
+ *
+ * Path and search only; the query string is dropped because the host appends
+ * `sanity-preview-perspective` to it and the rows never carry one. A value
+ * that is not a url at all (the empty string before the first frame report)
+ * comes back as given, so the `from` of a first click is still comparable.
+ */
+export function toPreviewPath(value: string | null | undefined): string {
+  if (!value) return '';
+  try {
+    return new URL(value, 'http://preview.invalid').pathname;
+  } catch {
+    return value.split('?')[0];
+  }
+}
+
 /** How long one click's intent stays armed, waiting for a bounce. */
 export const NAV_WINDOW_MS = 4000;
 
