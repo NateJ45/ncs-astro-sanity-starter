@@ -24,7 +24,7 @@ export const SINGLETON_LIVE_PATHS: Record<string, string> = {
   homePage: '/',
   aboutPage: '/about',
   servicesPage: '/services',
-  processPage: '/process',
+  processPage: '/process', // scaffold: process
   faqPage: '/faq',
   contactPage: '/contact',
   journalPage: '/journal',

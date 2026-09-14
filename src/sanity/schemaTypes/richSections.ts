@@ -317,6 +317,7 @@ export const valuesSection = defineType({
   },
 });
 
+// scaffold: process
 // ── 6. processSection ────────────────────────────────────────────────────────
 // Ordered process steps. Auto-populates from the processStep collection.
 // Two variants: 'full' (all steps, large cards) and 'preview' (first 4, compact grid).
@@ -364,6 +365,7 @@ export const processSection = defineType({
     }),
   },
 });
+// scaffold:end
 
 // ── 7. serviceAreaSection ────────────────────────────────────────────────────
 // Two-column service area info + optional travel fee table (from businessInfo).
@@ -665,7 +667,7 @@ export const richSectionSchemas = [
   testimonialsSection,
   storySection,
   valuesSection,
-  processSection,
+  processSection, // scaffold: process
   serviceAreaSection,
   guaranteeSection,
   faqSection,
@@ -689,7 +691,7 @@ export const HOME_SECTION_TYPES = [
   { type: 'founderSection' },
   { type: 'servicesGridSection' },
   { type: 'testimonialsSection' },
-  { type: 'processSection' },
+  { type: 'processSection' }, // scaffold: process
   { type: 'faqSection' },
   { type: 'teamSection' },
   { type: 'dynamicListSection' },
@@ -714,6 +716,6 @@ export const SERVICES_SECTION_TYPES = [
 
 export const PROCESS_SECTION_TYPES = [
   ...SECTION_TYPES,
-  { type: 'processSection' },
+  { type: 'processSection' }, // scaffold: process
   { type: 'faqSection' },
 ];

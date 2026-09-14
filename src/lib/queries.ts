@@ -81,6 +81,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         title, description, displayOrder
       }
     },
+    // scaffold: process
     _type == "processSection" => {
       ...,
       cta${CTA_PROJECTION},
@@ -88,6 +89,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         stepNumber, title, timeEstimate, shortDescription, features, tierNote
       }
     },
+    // scaffold:end
     _type == "serviceAreaSection" => {
       ...,
       "travelFees": *[_type == "businessInfo"][0].travelFees
@@ -343,6 +345,7 @@ export async function getServiceListForSchema() {
   );
 }
 
+// scaffold: process
 // ---- Process page -----------------------------------------------------------
 
 export async function getProcessPage() {
@@ -357,6 +360,7 @@ export async function getProcessPage() {
     null,
   );
 }
+// scaffold:end
 
 // ---- FAQ page -------------------------------------------------------------
 

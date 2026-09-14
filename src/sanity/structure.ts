@@ -42,7 +42,7 @@ import {
   PresentationIcon,
   ThumbsUpIcon,
   ColorWheelIcon,
-  OlistIcon,
+  OlistIcon, // scaffold: process
   ArrowRightIcon,
 } from '@sanity/icons';
 import { makeGuideView } from './components/GuideView';
@@ -58,7 +58,7 @@ const SINGLETON_TYPES = [
   'homePage',
   'aboutPage',
   'servicesPage',
-  'processPage',
+  'processPage', // scaffold: process
   'faqPage',
   'contactPage',
   'journalPage',
@@ -68,7 +68,11 @@ const SINGLETON_TYPES = [
   'studioNotes',
 ] as const;
 
-const ORDERABLE_TYPES = ['service', 'philosophyPoint', 'processStep'] as const;
+const ORDERABLE_TYPES = [
+  'service',
+  'philosophyPoint',
+  'processStep', // scaffold: process
+] as const;
 
 const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...SINGLETON_TYPES,
@@ -86,7 +90,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   // (the "Media" tool in the top sidebar is where tags belong).
   'media.tag',
   // processStep is placed explicitly under Content → Process Steps
-  'processStep',
+  'processStep', // scaffold: process
 ]);
 
 /**
@@ -217,7 +221,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               singletonWithPreview(S, 'homePage', 'Home', HomeIcon),
               singletonWithPreview(S, 'aboutPage', 'About', UserIcon),
               singletonWithPreview(S, 'servicesPage', 'Services', PackageIcon),
-              singletonWithPreview(S, 'processPage', 'Process', OlistIcon),
+              singletonWithPreview(S, 'processPage', 'Process', OlistIcon), // scaffold: process
               singletonWithPreview(S, 'faqPage', 'FAQ', HelpCircleIcon),
               singletonWithPreview(S, 'contactPage', 'Contact', EnvelopeIcon),
               singletonWithPreview(S, 'journalPage', 'Journal (index page)', BookIcon),
@@ -289,6 +293,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 S,
                 context,
               }),
+              // scaffold: process
               orderableDocumentListDeskItem({
                 type: 'processStep',
                 title: 'Process Steps',
@@ -296,6 +301,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 S,
                 context,
               }),
+              // scaffold:end
               S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon),
               S.documentTypeListItem('faqCategory').title('FAQ Categories').icon(TagIcon),
               S.documentTypeListItem('faqItem').title('FAQ Items').icon(HelpCircleIcon),

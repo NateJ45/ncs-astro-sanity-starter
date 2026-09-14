@@ -104,7 +104,7 @@ test('rich SELF_CONTAINED types get null surface', () => {
     'servicesGridSection',
     'testimonialsSection',
     'valuesSection',
-    'processSection',
+    'processSection', // scaffold: process
   ];
   for (const type of richSelf) {
     const rows = classifySections([block(type)]);
@@ -145,7 +145,7 @@ test('all 8 new rich types appear in SELF_CONTAINED_TYPES or CONTENT_TYPES', () 
     'testimonialsSection',
     'storySection',
     'valuesSection',
-    'processSection',
+    'processSection', // scaffold: process
     'serviceAreaSection',
     'guaranteeSection',
   ];

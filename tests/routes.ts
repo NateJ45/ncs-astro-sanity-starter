@@ -19,7 +19,7 @@ export const routes: string[] = [
   '/',
   '/about',
   '/services',
-  '/process',
+  '/process', // scaffold: process
   '/faq',
   '/contact',
   '/journal',

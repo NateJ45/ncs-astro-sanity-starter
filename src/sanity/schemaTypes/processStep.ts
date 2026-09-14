@@ -1,3 +1,4 @@
+// scaffold-file: process
 // Foundation, edit with care
 // Process step document. Each step is an ordered item in the process collection.
 // Steps are listed in Studio under Content → Process Steps and can be dragged

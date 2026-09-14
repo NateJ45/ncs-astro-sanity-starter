@@ -21,8 +21,8 @@ import { richSectionSchemas } from './richSections';
 import { notFoundPage } from './notFoundPage';
 import { philosophyPoint } from './philosophyPoint';
 import { privacyPage } from './privacyPage';
-import { processPage } from './processPage';
-import { processStep } from './processStep';
+import { processPage } from './processPage'; // scaffold: process
+import { processStep } from './processStep'; // scaffold: process
 import { redirect } from './redirect';
 import { sectionPreset } from './sectionPreset';
 import { service } from './service';
@@ -50,7 +50,7 @@ export const schemaTypes = [
   homePage,
   aboutPage,
   servicesPage,
-  processPage,
+  processPage, // scaffold: process
   faqPage,
   contactPage,
   journalPage,
@@ -67,7 +67,7 @@ export const schemaTypes = [
   faqItem,
   philosophyPoint,
   service,
-  processStep,
+  processStep, // scaffold: process
   journalCategory,
   journalEntry,
   // Custom pages built from the section library (multi-instance, not a singleton)

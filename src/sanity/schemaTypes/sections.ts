@@ -619,7 +619,7 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
       title: 'About the business',
       of: [
         'servicesGridSection',
-        'processSection',
+        'processSection', // scaffold: process
         'storySection',
         'valuesSection',
         'founderSection',

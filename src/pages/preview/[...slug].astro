@@ -61,7 +61,7 @@ const SINGLETON_BY_PATH: Record<string, string> = {
   '': 'homePage',
   about: 'aboutPage',
   services: 'servicesPage',
-  process: 'processPage',
+  process: 'processPage', // scaffold: process
   faq: 'faqPage',
   contact: 'contactPage',
   journal: 'journalPage',
@@ -72,7 +72,12 @@ const SINGLETON_BY_PATH: Record<string, string> = {
 // The types whose whole body is the pageBuilder array. Everything else previews
 // as its editable surface only. `page` (custom pages) is a builder type too and
 // is handled by the slug branch below.
-const BUILDER_SINGLETONS = new Set(['homePage', 'aboutPage', 'servicesPage', 'processPage']);
+const BUILDER_SINGLETONS = new Set([
+  'homePage',
+  'aboutPage',
+  'servicesPage',
+  'processPage', // scaffold: process
+]);
 
 // The heading-id prefix each live page passes to SectionRenderer. Matching it
 // here keeps generated ids identical to the live page, so an in-page anchor an
@@ -81,7 +86,7 @@ const ID_PREFIX: Record<string, string> = {
   homePage: 'home',
   aboutPage: 'about',
   servicesPage: 'services',
-  processPage: 'process',
+  processPage: 'process', // scaffold: process
 };
 
 // Every hero / builder / CTA field any of the page types may carry. Absent

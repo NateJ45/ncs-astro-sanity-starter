@@ -24,7 +24,7 @@ import ServicesGridSection from '@/components/sections/ServicesGridSection.astro
 import TestimonialsSection from '@/components/sections/TestimonialsSection.astro';
 import StorySection from '@/components/sections/StorySection.astro';
 import ValuesSection from '@/components/sections/ValuesSection.astro';
-import ProcessSection from '@/components/sections/ProcessSection.astro';
+import ProcessSection from '@/components/sections/ProcessSection.astro'; // scaffold: process
 import ServiceAreaSection from '@/components/sections/ServiceAreaSection.astro';
 import GuaranteeSection from '@/components/sections/GuaranteeSection.astro';
 import FaqSection from '@/components/sections/FaqSection.astro';
@@ -215,7 +215,8 @@ const wrapAttrs = (key: string | undefined) =>
             columns={s.columns}
             headingId={headingId}
           />
-        ) : s._type === 'processSection' ? (
+        ) : // scaffold: process
+        s._type === 'processSection' ? (
           <ProcessSection
             eyebrow={s.eyebrow}
             headline={s.headline}
@@ -225,7 +226,8 @@ const wrapAttrs = (key: string | undefined) =>
             cta={s.cta}
             headingId={headingId}
           />
-        ) : s._type === 'serviceAreaSection' ? (
+        ) : // scaffold:end
+        s._type === 'serviceAreaSection' ? (
           <ServiceAreaSection
             eyebrow={s.eyebrow}
             headline={s.headline}

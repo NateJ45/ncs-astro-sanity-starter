@@ -30,7 +30,7 @@ import type {
   TestimonialsSection as _TestimonialsSection,
   StorySection as _StorySection,
   ValuesSection as _ValuesSection,
-  ProcessSection as _ProcessSection,
+  ProcessSection as _ProcessSection, // scaffold: process
   ServiceAreaSection as _ServiceAreaSection,
   GuaranteeSection as _GuaranteeSection,
   // U7 new blocks — hand-authored below since typegen has not run yet
@@ -222,6 +222,7 @@ export type ProjectedValuesSection = { _key: string } & _ValuesSection & {
     }>;
   };
 
+// scaffold: process
 /** processSection adds a `steps` array resolved from the collection + cta projection. */
 export type ProjectedProcessSection = { _key: string } & Omit<_ProcessSection, 'cta'> & {
     cta?: ProjectedCtaBlock | null;
@@ -234,6 +235,7 @@ export type ProjectedProcessSection = { _key: string } & Omit<_ProcessSection, '
       tierNote?: string;
     }>;
   };
+// scaffold:end
 
 /** serviceAreaSection adds `travelFees` resolved from businessInfo. */
 export type ProjectedServiceAreaSection = { _key: string } & _ServiceAreaSection & {
@@ -402,7 +404,7 @@ export type PageBuilderBlock =
   | ProjectedTestimonialsSection
   | ProjectedStorySection
   | ProjectedValuesSection
-  | ProjectedProcessSection
+  | ProjectedProcessSection // scaffold: process
   | ProjectedServiceAreaSection
   | ProjectedGuaranteeSection
   // U7 new blocks

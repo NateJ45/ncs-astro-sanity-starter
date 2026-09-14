@@ -25,7 +25,7 @@ import type { DocumentBadgeComponent, DocumentBadgeProps } from 'sanity';
 const SEO_PAGE_TYPES = new Set<string>([
   'homePage',
   'aboutPage',
-  'processPage',
+  'processPage', // scaffold: process
   'servicesPage',
   'portfolioPage',
   'faqPage',

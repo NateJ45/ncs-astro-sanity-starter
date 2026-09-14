@@ -1,3 +1,4 @@
+// scaffold-file: process
 // Foundation, edit with care
 // Process page singleton. Process steps auto-populate from the processStep
 // collection. The page is fully section-driven via pageBuilder.

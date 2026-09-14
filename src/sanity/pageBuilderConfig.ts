@@ -29,7 +29,7 @@ export const SECTION_HOST_TYPES: Readonly<Record<string, string>> = {
   homePage: 'pageBuilder',
   aboutPage: 'pageBuilder',
   servicesPage: 'pageBuilder',
-  processPage: 'pageBuilder',
+  processPage: 'pageBuilder', // scaffold: process
 };
 
 /** The same list as a set, for the document-actions resolver. */
@@ -49,7 +49,7 @@ const SELF_FILLING_SECTIONS = [
   'faqSection',
   'guaranteeSection',
   'logoStripSection',
-  'processSection',
+  'processSection', // scaffold: process
   'serviceAreaSection',
   'servicesGridSection',
   'spacerSection',

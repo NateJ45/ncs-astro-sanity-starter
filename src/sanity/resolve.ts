@@ -34,7 +34,7 @@ export const SINGLETON_PREVIEW_PATHS: Record<string, string> = {
   homePage: '/preview',
   aboutPage: '/preview/about',
   servicesPage: '/preview/services',
-  processPage: '/preview/process',
+  processPage: '/preview/process', // scaffold: process
   faqPage: '/preview/faq',
   contactPage: '/preview/contact',
   journalPage: '/preview/journal',
@@ -78,7 +78,7 @@ export const resolve: PresentationPluginOptions['resolve'] = {
       message: 'Journal entry pages preview on the live site after publish.',
     },
     service: { locations: [{ title: 'Services', href: '/preview/services' }] },
-    processStep: { locations: [{ title: 'Process', href: '/preview/process' }] },
+    processStep: { locations: [{ title: 'Process', href: '/preview/process' }] }, // scaffold: process
     philosophyPoint: { locations: [{ title: 'About', href: '/preview/about' }] },
     testimonial: { locations: [{ title: 'Home', href: '/preview' }] },
     faqItem: { locations: [{ title: 'FAQ', href: '/preview/faq' }] },
