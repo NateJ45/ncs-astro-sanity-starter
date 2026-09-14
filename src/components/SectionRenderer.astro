@@ -20,7 +20,7 @@ import GalleryGrid from '@/components/sections/GalleryGrid.astro';
 import QuoteBlock from '@/components/sections/QuoteBlock.astro';
 import VideoEmbed from '@/components/sections/VideoEmbed.astro';
 import FounderSection from '@/components/sections/FounderSection.astro';
-import ServicesGridSection from '@/components/sections/ServicesGridSection.astro';
+import ServicesGridSection from '@/components/sections/ServicesGridSection.astro'; // scaffold: services
 import TestimonialsSection from '@/components/sections/TestimonialsSection.astro';
 import StorySection from '@/components/sections/StorySection.astro';
 import ValuesSection from '@/components/sections/ValuesSection.astro';
@@ -168,7 +168,8 @@ const wrapAttrs = (key: string | undefined) =>
             cta={s.cta}
             headingId={headingId}
           />
-        ) : s._type === 'servicesGridSection' ? (
+        ) : // scaffold-branch: services
+        s._type === 'servicesGridSection' ? (
           <ServicesGridSection
             eyebrow={s.eyebrow}
             headline={s.headline}

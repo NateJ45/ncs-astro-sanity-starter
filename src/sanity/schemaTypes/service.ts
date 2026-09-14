@@ -1,3 +1,4 @@
+// scaffold-file: services
 // Paid offerings — Consultation, Full Room Design, Styling, Shopping, B&R Partnerships.
 // Used by both the Services page and the homepage services grid.
 

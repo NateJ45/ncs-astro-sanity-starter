@@ -1,3 +1,4 @@
+// scaffold-file: services
 // Services page singleton. Embeds serviceAreaSection.
 // Services list auto-populates from service collection.
 //

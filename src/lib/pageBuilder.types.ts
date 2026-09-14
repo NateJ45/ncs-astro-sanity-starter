@@ -26,7 +26,7 @@ import type {
   VideoSection as _VideoSection,
   SpacerSection as _SpacerSection,
   FounderSection as _FounderSection,
-  ServicesGridSection as _ServicesGridSection,
+  ServicesGridSection as _ServicesGridSection, // scaffold: services
   TestimonialsSection as _TestimonialsSection,
   StorySection as _StorySection,
   ValuesSection as _ValuesSection,
@@ -170,6 +170,7 @@ export type ProjectedFounderSection = { _key: string } & Omit<
     cta?: ProjectedCtaBlock | null;
   };
 
+// scaffold: services
 /** servicesGridSection adds a `services` array resolved from the collection. */
 export type ProjectedServicesGridSection = { _key: string } & Omit<_ServicesGridSection, 'cta'> & {
     cta?: ProjectedCtaBlock | null;
@@ -189,6 +190,7 @@ export type ProjectedServicesGridSection = { _key: string } & Omit<_ServicesGrid
       [key: string]: unknown;
     }>;
   };
+// scaffold:end
 
 /** Testimonial shape after dereffing in the projection. */
 interface ProjectedTestimonial {
@@ -400,7 +402,7 @@ export type PageBuilderBlock =
   | ProjectedVideoSection
   | ProjectedSpacerSection
   | ProjectedFounderSection
-  | ProjectedServicesGridSection
+  | ProjectedServicesGridSection // scaffold: services
   | ProjectedTestimonialsSection
   | ProjectedStorySection
   | ProjectedValuesSection

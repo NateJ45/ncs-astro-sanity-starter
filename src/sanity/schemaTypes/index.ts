@@ -25,8 +25,8 @@ import { processPage } from './processPage'; // scaffold: process
 import { processStep } from './processStep'; // scaffold: process
 import { redirect } from './redirect';
 import { sectionPreset } from './sectionPreset';
-import { service } from './service';
-import { servicesPage } from './servicesPage';
+import { service } from './service'; // scaffold: services
+import { servicesPage } from './servicesPage'; // scaffold: services
 import { siteSettings } from './siteSettings';
 import { studioGuide } from './studioGuide';
 import { studioNotes } from './studioNotes';
@@ -49,7 +49,7 @@ export const schemaTypes = [
   businessInfo, // Content-side singleton: service areas, travel fees, availability, geo
   homePage,
   aboutPage,
-  servicesPage,
+  servicesPage, // scaffold: services
   processPage, // scaffold: process
   faqPage,
   contactPage,
@@ -66,7 +66,7 @@ export const schemaTypes = [
   faqCategory,
   faqItem,
   philosophyPoint,
-  service,
+  service, // scaffold: services
   processStep, // scaffold: process
   journalCategory,
   journalEntry,

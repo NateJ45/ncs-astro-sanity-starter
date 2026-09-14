@@ -27,7 +27,7 @@ export const SELF_CONTAINED_TYPES = new Set([
   'spacerSection',
   // Rich section types — phase B
   'founderSection',
-  'servicesGridSection',
+  'servicesGridSection', // scaffold: services
   'testimonialsSection',
   'valuesSection',
   'processSection', // scaffold: process

@@ -618,7 +618,7 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
       name: 'business',
       title: 'About the business',
       of: [
-        'servicesGridSection',
+        'servicesGridSection', // scaffold: services
         'processSection', // scaffold: process
         'storySection',
         'valuesSection',

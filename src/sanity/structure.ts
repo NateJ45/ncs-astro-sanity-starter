@@ -57,7 +57,7 @@ const SINGLETON_TYPES = [
   // Core pages
   'homePage',
   'aboutPage',
-  'servicesPage',
+  'servicesPage', // scaffold: services
   'processPage', // scaffold: process
   'faqPage',
   'contactPage',
@@ -69,7 +69,7 @@ const SINGLETON_TYPES = [
 ] as const;
 
 const ORDERABLE_TYPES = [
-  'service',
+  'service', // scaffold: services
   'philosophyPoint',
   'processStep', // scaffold: process
 ] as const;
@@ -220,7 +220,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
             .items([
               singletonWithPreview(S, 'homePage', 'Home', HomeIcon),
               singletonWithPreview(S, 'aboutPage', 'About', UserIcon),
-              singletonWithPreview(S, 'servicesPage', 'Services', PackageIcon),
+              singletonWithPreview(S, 'servicesPage', 'Services', PackageIcon), // scaffold: services
               singletonWithPreview(S, 'processPage', 'Process', OlistIcon), // scaffold: process
               singletonWithPreview(S, 'faqPage', 'FAQ', HelpCircleIcon),
               singletonWithPreview(S, 'contactPage', 'Contact', EnvelopeIcon),
@@ -279,6 +279,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
 
               S.divider(),
 
+              // scaffold: services
               orderableDocumentListDeskItem({
                 type: 'service',
                 title: 'Services',
@@ -286,6 +287,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 S,
                 context,
               }),
+              // scaffold:end
               orderableDocumentListDeskItem({
                 type: 'philosophyPoint',
                 title: 'Philosophy Values',

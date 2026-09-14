@@ -59,11 +59,13 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       portrait${IMAGE_PROJECTION}
     },
+    // scaffold: services
     _type == "servicesGridSection" => {
       ...,
       cta${CTA_PROJECTION},
       "services": *[_type == "service"] | order(orderRank asc, displayOrder asc)
     },
+    // scaffold:end
     _type == "testimonialsSection" => {
       ...,
       "featuredQuote": featuredQuote->{
@@ -129,10 +131,12 @@ export function sectionsProjection(field = 'pageBuilder'): string {
           "href": "/journal/" + slug.current,
           "coverImage": coverImage${IMAGE_PROJECTION}
         },
+        // scaffold: services
         source == "services" => *[_type == "service"] | order(orderRank asc, displayOrder asc)[0...limit]{
           _id, "title": name, "meta": price, "summary": shortDescription,
           "href": "/services#" + slug.current
         },
+        // scaffold:end
         source == "testimonials" => *[_type == "testimonial"] | order(_createdAt desc)[0...limit]{
           _id, "title": attribution, "meta": detail, "summary": quote, "href": null
         },
@@ -321,6 +325,7 @@ export async function getAboutPage() {
 
 // ---- Services page --------------------------------------------------------
 
+// scaffold: services
 export async function getServicesPage() {
   return sanityFetch(
     `*[_type == "servicesPage"][0]{
@@ -333,8 +338,10 @@ export async function getServicesPage() {
     null,
   );
 }
+// scaffold:end
 
 // Minimal service list for JSON-LD on the services page.
+// scaffold: services
 export async function getServiceListForSchema() {
   return sanityFetch(
     `*[_type == "service"] | order(orderRank asc, displayOrder asc){
@@ -344,6 +351,7 @@ export async function getServiceListForSchema() {
     [],
   );
 }
+// scaffold:end
 
 // scaffold: process
 // ---- Process page -----------------------------------------------------------

@@ -28,7 +28,7 @@ export const SECTION_HOST_TYPES: Readonly<Record<string, string>> = {
   page: 'pageBuilder',
   homePage: 'pageBuilder',
   aboutPage: 'pageBuilder',
-  servicesPage: 'pageBuilder',
+  servicesPage: 'pageBuilder', // scaffold: services
   processPage: 'pageBuilder', // scaffold: process
 };
 
@@ -51,7 +51,7 @@ const SELF_FILLING_SECTIONS = [
   'logoStripSection',
   'processSection', // scaffold: process
   'serviceAreaSection',
-  'servicesGridSection',
+  'servicesGridSection', // scaffold: services
   'spacerSection',
   'testimonialsSection',
   'valuesSection',

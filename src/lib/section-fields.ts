@@ -66,7 +66,7 @@ export const SECTION_ARRAY_FIELDS: readonly string[] = ['pageBuilder', 'addition
 export const HEADING_ACCENT_FIELDS: Readonly<Record<string, string>> = {
   richTextSection: 'heading',
   ctaBandSection: 'headline',
-  servicesGridSection: 'headline',
+  servicesGridSection: 'headline', // scaffold: services
   testimonialsSection: 'headline',
   faqSection: 'headline',
 };
@@ -94,7 +94,7 @@ export interface RichTwin {
  */
 export const RICH_TWINS: Readonly<Record<string, RichTwin>> = {
   ctaBandSection: { plain: 'subhead', rich: 'subheadRich' },
-  servicesGridSection: { plain: 'subhead', rich: 'subheadRich' },
+  servicesGridSection: { plain: 'subhead', rich: 'subheadRich' }, // scaffold: services
   testimonialsSection: { plain: 'subhead', rich: 'subheadRich' },
   faqSection: { plain: 'subhead', rich: 'subheadRich' },
   teamSection: { plain: 'subhead', rich: 'subheadRich' },

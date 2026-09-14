@@ -125,6 +125,7 @@ export const founderSection = defineType({
   },
 });
 
+// scaffold: services
 // ── 2. servicesGridSection ───────────────────────────────────────────────────
 // Services grid. Auto-populates from the service collection at query time.
 // Editor controls heading copy; service cards come from the service docs.
@@ -185,6 +186,7 @@ export const servicesGridSection = defineType({
     prepare: ({ title }) => ({ title: title || 'Services grid', subtitle: 'Services grid' }),
   },
 });
+// scaffold:end
 
 // ── 3. testimonialsSection ───────────────────────────────────────────────────
 // Testimonial grid with an optional featured pull-quote above.
@@ -663,7 +665,7 @@ export const dynamicListSection = defineType({
 
 export const richSectionSchemas = [
   founderSection,
-  servicesGridSection,
+  servicesGridSection, // scaffold: services
   testimonialsSection,
   storySection,
   valuesSection,
@@ -689,7 +691,7 @@ export const RICH_SECTION_TYPES = richSectionSchemas.map((s) => ({ type: s.name 
 export const HOME_SECTION_TYPES = [
   ...SECTION_TYPES,
   { type: 'founderSection' },
-  { type: 'servicesGridSection' },
+  { type: 'servicesGridSection' }, // scaffold: services
   { type: 'testimonialsSection' },
   { type: 'processSection' }, // scaffold: process
   { type: 'faqSection' },
@@ -708,7 +710,7 @@ export const ABOUT_SECTION_TYPES = [
 
 export const SERVICES_SECTION_TYPES = [
   ...SECTION_TYPES,
-  { type: 'servicesGridSection' },
+  { type: 'servicesGridSection' }, // scaffold: services
   { type: 'serviceAreaSection' },
   { type: 'guaranteeSection' },
   { type: 'faqSection' },

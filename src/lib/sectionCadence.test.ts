@@ -101,7 +101,7 @@ test('unknown _type gets null surface (treated as unknown, not content)', () => 
 test('rich SELF_CONTAINED types get null surface', () => {
   const richSelf = [
     'founderSection',
-    'servicesGridSection',
+    'servicesGridSection', // scaffold: services
     'testimonialsSection',
     'valuesSection',
     'processSection', // scaffold: process
@@ -141,7 +141,7 @@ test('rich self-contained types do not advance the cadence counter', () => {
 test('all 8 new rich types appear in SELF_CONTAINED_TYPES or CONTENT_TYPES', () => {
   const all8 = [
     'founderSection',
-    'servicesGridSection',
+    'servicesGridSection', // scaffold: services
     'testimonialsSection',
     'storySection',
     'valuesSection',

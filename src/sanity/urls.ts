@@ -46,8 +46,10 @@ export function pathForDoc(schemaType: string, doc: any): string | null {
       return '/';
     case 'aboutPage':
       return '/about';
+    // scaffold: services
     case 'servicesPage':
       return '/services';
+    // scaffold:end
     // scaffold: process
     case 'processPage':
       return '/process';
@@ -66,8 +68,10 @@ export function pathForDoc(schemaType: string, doc: any): string | null {
     case 'journalEntry':
       return slug ? `/journal/${slug}` : '/journal';
     // Collections that render inside a parent page
+    // scaffold: services
     case 'service':
       return '/services';
+    // scaffold:end
     // scaffold: process
     case 'processStep':
       return '/process';

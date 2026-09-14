@@ -18,7 +18,7 @@
 export const routes: string[] = [
   '/',
   '/about',
-  '/services',
+  '/services', // scaffold: services
   '/process', // scaffold: process
   '/faq',
   '/contact',

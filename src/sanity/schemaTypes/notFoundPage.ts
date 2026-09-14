@@ -119,7 +119,7 @@ export const notFoundPage = defineType({
       group: 'ctas',
       // A core route. /portfolio comes from an opt-in module and is not built
       // unless a project enables it.
-      initialValue: '/services',
+      initialValue: '/',
     }),
     defineField({
       name: 'tertiaryCtaLabel',

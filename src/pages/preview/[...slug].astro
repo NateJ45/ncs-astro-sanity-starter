@@ -60,7 +60,7 @@ const slug = (Astro.params.slug as string | undefined) || '';
 const SINGLETON_BY_PATH: Record<string, string> = {
   '': 'homePage',
   about: 'aboutPage',
-  services: 'servicesPage',
+  services: 'servicesPage', // scaffold: services
   process: 'processPage', // scaffold: process
   faq: 'faqPage',
   contact: 'contactPage',
@@ -75,7 +75,7 @@ const SINGLETON_BY_PATH: Record<string, string> = {
 const BUILDER_SINGLETONS = new Set([
   'homePage',
   'aboutPage',
-  'servicesPage',
+  'servicesPage', // scaffold: services
   'processPage', // scaffold: process
 ]);
 
@@ -85,7 +85,7 @@ const BUILDER_SINGLETONS = new Set([
 const ID_PREFIX: Record<string, string> = {
   homePage: 'home',
   aboutPage: 'about',
-  servicesPage: 'services',
+  servicesPage: 'services', // scaffold: services
   processPage: 'process', // scaffold: process
 };
 

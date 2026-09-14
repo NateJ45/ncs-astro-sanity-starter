@@ -26,7 +26,7 @@ const SEO_PAGE_TYPES = new Set<string>([
   'homePage',
   'aboutPage',
   'processPage', // scaffold: process
-  'servicesPage',
+  'servicesPage', // scaffold: services
   'portfolioPage',
   'faqPage',
   'contactPage',
