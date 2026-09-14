@@ -41,12 +41,24 @@
 //      That line is removed. Use it for entries in an array, a map or an import
 //      list.
 //
-//   3. A BLOCK. On its own line, closed by `scaffold:end`:
+//   3. A BLOCK. A marker whose NEXT marker is `scaffold:end`:
 //          // scaffold: journal
 //          case 'journalEntry':
 //            return `/journal/${slug}`;
 //          // scaffold:end
 //      Everything between them, inclusive, is removed.
+//
+//   4. ONE BRANCH OF A JSX TERNARY CHAIN, which SectionRenderer is built from:
+//          ) : // scaffold-branch: journal
+//          s._type === 'journalSection' ? (
+//            <JournalSection ... />
+//      Removal runs from that line to the line before the next `) :`, so the
+//      boundary that opens the following branch survives and the chain stays
+//      whole. It has no end marker BECAUSE IT CANNOT HAVE ONE: prettier pulls a
+//      comment written above a `) :` onto the end of the line before it, so an
+//      opener and a closer would each absorb a `) :` and removal would delete
+//      two branch boundaries while removing one branch. A trailing comment on
+//      the branch line is already where the formatter wants it, so it stays put.
 //
 // A capability name is a bare word: journal, services, process, faq, about.
 //
@@ -56,6 +68,14 @@
 // list items; `npm run parity compare` caught it, which is exactly the job that
 // gate exists for. Inside a JSX expression (`{cond ? (...) : (...)}`) the `//`
 // form is fine, because that region really is JavaScript.
+//
+// AND PAIRING IS WHAT MAKES A BLOCK, NOT INDENTATION. This used to ask whether
+// the marker sat alone on its line, which a FORMATTER CAN CHANGE: prettier
+// moves a comment written above a `) :` continuation onto the end of the line
+// before it, so an opener became `) : // scaffold: process`, was then read as a
+// trailing marker, and removal deleted the `) :` while leaving the branch body.
+// Write the marker wherever the formatter will leave it and close it with
+// `scaffold:end`; the pair is what counts.
 //
 // -----------------------------------------------------------------------------
 // WHAT IT DELIBERATELY DOES NOT DO
@@ -88,8 +108,29 @@ const EXTENSIONS = new Set(['.ts', '.tsx', '.astro', '.mjs', '.js', '.json', '.c
 const SELF = resolve(__dirname, 'scaffold.mjs');
 
 const FILE_MARKER = /scaffold-file:\s*([a-z0-9-]+)/i;
+// A whole branch of a JSX ternary chain. See the note in the header on why this
+// cannot be expressed as a paired block.
+const BRANCH_MARKER = /scaffold-branch:\s*([a-z0-9-]+)/i;
+// The line that begins the NEXT branch, which is where a branch ends.
+const BRANCH_BOUNDARY = /^\s*\)\s*:/;
 const LINE_OR_BLOCK = /scaffold:\s*([a-z0-9-]+)/i;
 const BLOCK_END = /scaffold:\s*end\b/i;
+
+/**
+ * Does the marker on `lines[i]` open a block?
+ *
+ * Yes when the very next marker of ANY kind is a `scaffold:end`. Stopping at
+ * any marker rather than only at one for the same capability is deliberate:
+ * blocks never nest here, so the nearest marker is always the one that answers
+ * the question, and a capability cannot accidentally adopt another's end.
+ */
+function opensBlock(lines, i) {
+  for (let j = i + 1; j < lines.length; j++) {
+    if (BLOCK_END.test(lines[j])) return true;
+    if (LINE_OR_BLOCK.test(lines[j]) || FILE_MARKER.test(lines[j])) return false;
+  }
+  return false;
+}
 
 function walk(dir, out = []) {
   let entries;
@@ -135,11 +176,27 @@ function plan(capability) {
       continue;
     }
 
-    // 2 and 3. Line and block markers.
+    // 2, 3 and 4. Branch, line and block markers.
     const drop = [];
     let inBlock = false;
+    let branchEnd = -1;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
+      if (i <= branchEnd) {
+        drop.push(i);
+        continue;
+      }
+      const bm = BRANCH_MARKER.exec(line);
+      if (bm && bm[1].toLowerCase() === capability) {
+        // Runs to the line before the next branch boundary, so the `) :` that
+        // opens the FOLLOWING branch survives and the chain stays whole.
+        let j = i + 1;
+        while (j < lines.length && !BRANCH_BOUNDARY.test(lines[j])) j++;
+        branchEnd = j - 1;
+        drop.push(i);
+        continue;
+      }
+      if (bm) continue; // another capability's branch
       if (inBlock) {
         drop.push(i);
         if (BLOCK_END.test(line)) inBlock = false;
@@ -148,10 +205,20 @@ function plan(capability) {
       if (FILE_MARKER.test(line)) continue; // another capability's file marker
       const m = LINE_OR_BLOCK.exec(line);
       if (!m || m[1].toLowerCase() !== capability) continue;
-      // A marker alone on its line opens a block; a trailing one takes the line.
-      const isOwnLine = /^\s*(\/\/|\/\*|\{\s*\/\*|<!--|#)/.test(line);
       drop.push(i);
-      if (isOwnLine) inBlock = true;
+      // PAIRING DECIDES, NOT INDENTATION. A marker opens a block when a
+      // `scaffold:end` follows it before the next marker for this capability,
+      // and otherwise takes only its own line.
+      //
+      // It used to decide by asking whether the marker sat alone on its line,
+      // and PRETTIER BROKE THAT. A comment written above a `) :` continuation in
+      // a JSX ternary is moved by the formatter onto the end of the previous
+      // line, so `// scaffold: process` became `) : // scaffold: process`: no
+      // longer alone, therefore read as a trailing marker, so removal deleted
+      // the `) :` and left the branch body behind. The build then failed with
+      // thirty-six type errors in a file nobody had edited. Pairing cannot be
+      // moved by a formatter, because it is two facts and not one position.
+      if (opensBlock(lines, i)) inBlock = true;
     }
     if (inBlock) {
       throw new Error(`${relative(root, file)}: "scaffold: ${capability}" block is never closed`);
@@ -183,6 +250,11 @@ function listCapabilities() {
         continue;
       }
       if (BLOCK_END.test(lines[i])) continue;
+      const bm = BRANCH_MARKER.exec(lines[i]);
+      if (bm) {
+        note(bm[1].toLowerCase(), file);
+        continue;
+      }
       const m = LINE_OR_BLOCK.exec(lines[i]);
       if (m) note(m[1].toLowerCase(), file);
     }

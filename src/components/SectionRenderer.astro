@@ -215,7 +215,7 @@ const wrapAttrs = (key: string | undefined) =>
             columns={s.columns}
             headingId={headingId}
           />
-        ) : // scaffold: process
+        ) : // scaffold-branch: process
         s._type === 'processSection' ? (
           <ProcessSection
             eyebrow={s.eyebrow}
@@ -226,8 +226,7 @@ const wrapAttrs = (key: string | undefined) =>
             cta={s.cta}
             headingId={headingId}
           />
-        ) : // scaffold:end
-        s._type === 'serviceAreaSection' ? (
+        ) : s._type === 'serviceAreaSection' ? (
           <ServiceAreaSection
             eyebrow={s.eyebrow}
             headline={s.headline}
