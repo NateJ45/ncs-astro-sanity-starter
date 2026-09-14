@@ -238,7 +238,20 @@ function stripTimerText(html) {
     const tag = m[1].toLowerCase();
     const bodyStart = m.index + m[0].length;
     // Walk forward, counting this tag's own opens and closes.
-    const step = new RegExp(`<(/?)${tag}\b[^>]*>`, 'gi');
+    //
+    // `\\b`, NOT `\b`. Inside a TEMPLATE LITERAL `\b` is a backspace character
+    // rather than a word boundary, so this pattern was `<(/?)div[^>]*>`
+    // and matched nothing at all. The walk then never found a closing tag,
+    // bodyEnd fell through to the end of the document, and the FIRST timer on a
+    // page swallowed everything after it.
+    //
+    // With one timer per page that still normalised consistently, which is why
+    // it survived. With two (a race clock in the hero and another in the
+    // footer) the second timer's OPENING TAG sat inside that swallowed body,
+    // where only text nodes are rewritten, so its `aria-label="N seconds
+    // remaining"` went through untouched and parity failed on every rebuild
+    // (2026-09-13).
+    const step = new RegExp(`<(/?)${tag}\\b[^>]*>`, 'gi');
     step.lastIndex = bodyStart;
     let depth = 1;
     let bodyEnd = html.length;

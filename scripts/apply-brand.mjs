@@ -643,6 +643,39 @@ function rewriteOgDefault(config) {
   });
 }
 
+// ---- Rewrite: src/layouts/BaseLayout.astro ------------------------------
+// The two `theme-color` metas: the colour a phone browser paints its own chrome
+// with. A meta tag cannot read a CSS custom property, so these have to be
+// literals, which means apply-brand has to own them or they stay the starter's
+// forever. Until 2026-09-13 nothing rewrote them and every fork shipped the
+// starter's pair, which did not even match the starter's own brand.config.json.
+
+function rewriteBaseLayout(config) {
+  rewriteFile(resolve(root, 'src/layouts/BaseLayout.astro'), function (text, filePath) {
+    const light = config.palette.light['--background'];
+    const dark = config.palette.dark['--background'];
+    const subs = [
+      {
+        label: 'theme-color (light)',
+        pattern:
+          /(<meta name="theme-color" content=")([^"]*)("\s+media="\(prefers-color-scheme: light\)")/,
+        replacer: function (_, g1, _old, g3) {
+          return g1 + light + g3;
+        },
+      },
+      {
+        label: 'theme-color (dark)',
+        pattern:
+          /(<meta name="theme-color" content=")([^"]*)("\s+media="\(prefers-color-scheme: dark\)")/,
+        replacer: function (_, g1, _old, g3) {
+          return g1 + dark + g3;
+        },
+      },
+    ];
+    return applySubstitutions(text, subs, filePath);
+  });
+}
+
 // ---- Rewrite: scripts/lib/render-og.mjs ---------------------------------
 
 function rewriteRenderOg(config) {
@@ -816,6 +849,12 @@ async function main() {
       'sanity.config.ts',
       function () {
         rewriteSanityConfig(config);
+      },
+    ],
+    [
+      'BaseLayout.astro',
+      function () {
+        rewriteBaseLayout(config);
       },
     ],
     [

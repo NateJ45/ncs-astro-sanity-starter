@@ -108,4 +108,10 @@ for (const col of COLLECTIONS) {
   }
 }
 
+// Not optional: the renderer holds one chromium open for the whole run and the
+// process cannot exit until it is closed. Without this the script writes every
+// card correctly, prints the line below, and then hangs forever. See the note
+// on closeRenderer in scripts/lib/render-og.mjs.
+await closeRenderer();
+
 console.log(`\nDone. ${count} OG images written to ${outDir}`);

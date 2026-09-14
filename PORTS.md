@@ -108,6 +108,8 @@ is installing it as of the date on the card.
 | 42  | External link health, on its own schedule                         | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 43  | Contrast for what axe declines to judge                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 44  | Fork residue audit                                                | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 46  | Share cards in the brand's real typeface                          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 47  | The icon set, from one drawing                                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -200,6 +202,19 @@ own `aria-label` are normalised to `TIMER`; the element, its other attributes an
 structure are still compared. Nothing site-specific: `role="timer"` is the standard ARIA
 role for exactly this case. The scan is brace-balanced rather than a regex, because a
 timer's markup nests and a non-greedy `[\s\S]*?</div>` stops at the first inner close.
+
+**And rule 5 had a bug for a day, fixed 2026-09-13 (stonesteps-50k), pulled forward here.**
+That brace-balanced scan built its walk pattern inside a TEMPLATE LITERAL, where `\b` is a
+backspace character and not a word boundary. The pattern was therefore
+`<(/?)div<backspace>[^>]*>`, which matches nothing, so the walk never found a closing tag,
+the body end fell through to the end of the document, and the first timer on a page
+swallowed everything after it. With one timer per page that still normalised
+_consistently_, which is why it survived; with two (a hero clock and a footer clock) the
+second timer's opening tag sat inside the swallowed region, where only text nodes are
+rewritten, so its `aria-label` went through untouched and the page failed parity on every
+rebuild. It is `\\b` now. Worth remembering generally: a regex built in a template literal
+needs its backslashes doubled, and the failure is silent because an unmatched pattern is
+not an error.
 
 **Parameterization done on the port:** the built-HTML root is auto-detected
 (`dist/client` when it holds an index.html, which is the adapter 14 shape, else `dist`,
@@ -4385,3 +4400,86 @@ than none, since it gets shipped rather than replaced.
 
 **Related.** Card 43 is the same shape one level down: correct code, wrong colour, and no
 gate that could see it.
+
+---
+
+## Card 46: The share card was never in the brand's typeface (2026-09-13)
+
+**Canonical:** `scripts/lib/render-og.mjs`
+**Applies to:** every repo in the family. All of them generate OG cards, all of them
+load their faces from `@fontsource` packages, so all of them have shipped this.
+
+**The bug.** `render-og.mjs` drew through sharp's Pango bindings and asked for the
+brand's display face by NAME. Pango resolves fonts through **fontconfig**, which knows
+about fonts INSTALLED ON THE MACHINE and nothing whatsoever about `node_modules`. Every
+face in this family comes from an `@fontsource` package. So the request always missed and
+Pango silently fell back to whatever the build box had, on every build, on every fork.
+
+The file's own header admitted it and mis-sized it: "Pango falls back to a system serif
+if Libre Baskerville isn't installed on the build machine. Close enough for a
+social-preview thumbnail; the brand wordmark + colors carry the recognition." That is
+backwards. The typeface IS the recognition, and the fallback was not an edge case, it was
+the only case. Found on stonesteps-50k, where the cards were additionally still the
+starter's placeholder layout; the typeface half is the part that generalises.
+
+**The fix.** Render the card in headless chromium and `@font-face` the real woff2 as a
+data URI, resolved out of `node_modules` from the `fonts.display.imports` already in
+`brand.config.json`. No new configuration: the one place that names the face keeps naming
+it. Playwright is already a devDependency for the test suite.
+
+**What to keep when porting.**
+
+- The generators run BY HAND and the PNGs are committed, so CI still needs no browser.
+  If a repo ever generates them in CI it needs `npx playwright install chromium`.
+- `await page.evaluate(() => document.fonts.ready)` before the screenshot. Without it the
+  card can be photographed before the face decodes, which reproduces the exact bug.
+- One browser for the whole run, and **`closeRenderer()` at the end of every generator**.
+  A browser Playwright has not been told to close keeps the event loop alive forever, so
+  the script does all its work, writes every file, prints its last line and then hangs.
+  That looks exactly like a slow render; it cost two ten-minute timeouts before anyone
+  suspected the exit rather than the work.
+- `apply-brand` rewrites the `DEFAULTS` block by regex on two-space indentation and single
+  quotes. Keep that shape or a rebrand silently skips the file.
+- Resolution falls back to the CSS stack when no package is found, and warns. A card in
+  the wrong serif is worse than the right one and far better than no card.
+
+**The general lesson.** A build-time renderer that resolves fonts BY NAME will fail
+quietly and produce something plausible. Anything generated outside the browser needs the
+font handed to it as bytes.
+
+---
+
+## Card 47: The icon set, from one drawing (2026-09-13)
+
+**Canonical:** `scripts/generate-favicons.mjs`, `npm run favicon`
+**Applies to:** every repo. None of them shipped an apple-touch-icon or a manifest.
+
+**What was missing.** The starter shipped `favicon.svg` and a stale `favicon.ico` and
+nothing else: no `apple-touch-icon.png`, so an iOS home-screen shortcut got a browser-drawn
+default; no manifest; and no way to regenerate any of it when the mark changed. The two
+`theme-color` metas in `BaseLayout.astro` were hardcoded and **not rewritten by
+apply-brand**, so every fork painted its phone browser chrome in a palette it had
+otherwise replaced. On the starter itself those values did not even match its own
+`brand.config.json`.
+
+**The fix.** One script renders `favicon.ico` (16+32+48), `apple-touch-icon.png`,
+`icon-192`, `icon-512` and `site.webmanifest` from `public/favicon.svg` plus
+`brand.config.json`, and `apply-brand` gained a `BaseLayout.astro` step for the two
+theme colours.
+
+**Three things that are not obvious.**
+
+- **No transparency on the touch icons.** iOS composites its own background (white) behind
+  a transparent home-screen icon and then applies its own radius, so a transparent one
+  arrives as the mark floating on white with the brand's ground gone.
+- **No `purpose: maskable` entry** unless the artwork was drawn for it: a maskable icon
+  needs its mark inside the middle 80%, and a mark that fills its square gets cropped.
+- **The ICO is PNG-in-ICO.** The format allows a whole PNG per entry and every browser in
+  use has accepted that for over a decade, so the encoder is a 6-byte header plus a
+  16-byte directory entry per size. No dependency needed.
+
+**The rule this exists to enforce, and the reason it is in the script's header.** A
+FAVICON IS A MARK, NOT A SIGNATURE. On stonesteps-50k the favicon was the client's full
+four-line painted logo, 48KB of base64 PNG inside an SVG, and an unreadable smudge at the
+16 pixels a browser actually draws. Check legibility at 16 before shipping; if the logo
+has more than one word in it, draw a separate mark.
