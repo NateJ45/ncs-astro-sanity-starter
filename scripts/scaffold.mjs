@@ -165,7 +165,19 @@ function plan(capability) {
   const edits = new Map();
 
   for (const file of files) {
-    const text = readFileSync(file, 'utf8');
+    // A file an EARLIER capability already deleted. The list is built once, at
+    // module load, so removing two capabilities in one run walks paths that no
+    // longer exist. Without this the second pass threw ENOENT and the run
+    // stopped after the first capability, HAVING ALREADY REPORTED SUCCESS for
+    // it: `--remove services,process` removed services, left process entirely
+    // in place, and exited non-zero in a way that is easy to blame on the
+    // command after it in a pipeline.
+    let text;
+    try {
+      text = readFileSync(file, 'utf8');
+    } catch {
+      continue;
+    }
     const lines = text.split('\n');
 
     // 1. Whole-file marker, near the top.
@@ -242,7 +254,14 @@ function listCapabilities() {
     found.get(name).add(relative(root, file));
   };
   for (const file of files) {
-    const lines = readFileSync(file, 'utf8').split('\n');
+    // Same tolerance as plan(): the file list is a snapshot, and a capability
+    // removed earlier in this run has already taken some of it away.
+    let lines;
+    try {
+      lines = readFileSync(file, 'utf8').split('\n');
+    } catch {
+      continue;
+    }
     for (let i = 0; i < lines.length; i++) {
       const fm = i < 8 ? FILE_MARKER.exec(lines[i]) : null;
       if (fm) {
