@@ -1,3 +1,4 @@
+// scaffold-file: journal
 // Journal/blog post. Designed to handle every kind of post the founder might write:
 // project walkthroughs, style guides, behind-the-scenes, source roundups,
 // process explainers, opinion pieces, announcements. The body field accepts

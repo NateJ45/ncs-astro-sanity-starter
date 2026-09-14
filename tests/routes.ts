@@ -22,7 +22,7 @@ export const routes: string[] = [
   '/process', // scaffold: process
   '/faq',
   '/contact',
-  '/journal',
+  '/journal', // scaffold: journal
   '/privacy',
 ];
 

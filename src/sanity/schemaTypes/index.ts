@@ -11,9 +11,9 @@ import { faqItem } from './faqItem';
 import { faqPage } from './faqPage';
 import { formQuestion } from './formQuestion';
 import { homePage } from './homePage';
-import { journalCategory } from './journalCategory';
-import { journalEntry } from './journalEntry';
-import { journalPage } from './journalPage';
+import { journalCategory } from './journalCategory'; // scaffold: journal
+import { journalEntry } from './journalEntry'; // scaffold: journal
+import { journalPage } from './journalPage'; // scaffold: journal
 import { navLink } from './navLink';
 import { page } from './page';
 import { pageSectionSchemas } from './sections';
@@ -53,7 +53,7 @@ export const schemaTypes = [
   processPage, // scaffold: process
   faqPage,
   contactPage,
-  journalPage,
+  journalPage, // scaffold: journal
   notFoundPage,
   privacyPage,
   // Start Here editable singletons
@@ -68,8 +68,8 @@ export const schemaTypes = [
   philosophyPoint,
   service, // scaffold: services
   processStep, // scaffold: process
-  journalCategory,
-  journalEntry,
+  journalCategory, // scaffold: journal
+  journalEntry, // scaffold: journal
   // Custom pages built from the section library (multi-instance, not a singleton)
   page,
   // One saved section, kept for reuse on other pages. Not content: nothing

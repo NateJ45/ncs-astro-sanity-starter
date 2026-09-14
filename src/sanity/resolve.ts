@@ -37,7 +37,7 @@ export const SINGLETON_PREVIEW_PATHS: Record<string, string> = {
   processPage: '/preview/process', // scaffold: process
   faqPage: '/preview/faq',
   contactPage: '/preview/contact',
-  journalPage: '/preview/journal',
+  journalPage: '/preview/journal', // scaffold: journal
   privacyPage: '/preview/privacy',
   notFoundPage: '/preview/404',
 };
@@ -73,17 +73,19 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     }),
     // Collection docs have no draft-preview route of their own. Send each to
     // the page it renders on, with a note when a detail page exists live.
+    // scaffold: journal
     journalEntry: {
       locations: [{ title: 'Journal', href: '/preview/journal' }],
       message: 'Journal entry pages preview on the live site after publish.',
     },
+    // scaffold:end
     service: { locations: [{ title: 'Services', href: '/preview/services' }] }, // scaffold: services
     processStep: { locations: [{ title: 'Process', href: '/preview/process' }] }, // scaffold: process
     philosophyPoint: { locations: [{ title: 'About', href: '/preview/about' }] },
     testimonial: { locations: [{ title: 'Home', href: '/preview' }] },
     faqItem: { locations: [{ title: 'FAQ', href: '/preview/faq' }] },
     faqCategory: { locations: [{ title: 'FAQ', href: '/preview/faq' }] },
-    journalCategory: { locations: [{ title: 'Journal', href: '/preview/journal' }] },
+    journalCategory: { locations: [{ title: 'Journal', href: '/preview/journal' }] }, // scaffold: journal
     announcement: { locations: [{ title: 'Home', href: '/preview' }] },
     siteSettings: { locations: [{ title: 'Home', href: '/preview' }] },
     businessInfo: { locations: [{ title: 'Contact', href: '/preview/contact' }] },

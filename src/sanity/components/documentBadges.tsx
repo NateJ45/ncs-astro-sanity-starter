@@ -30,7 +30,7 @@ const SEO_PAGE_TYPES = new Set<string>([
   'portfolioPage',
   'faqPage',
   'contactPage',
-  'journalPage',
+  'journalPage', // scaffold: journal
   'eDesignPage',
   'shopPage',
   'giftPage',
@@ -43,7 +43,7 @@ const SEO_PAGE_TYPES = new Set<string>([
 // name to check on each.
 const PHOTO_FIELD: Record<string, string> = {
   project: 'heroImage',
-  journalEntry: 'coverImage',
+  journalEntry: 'coverImage', // scaffold: journal
 };
 
 // The live document being edited: prefer the draft, fall back to the published

@@ -63,13 +63,13 @@ function formatDate(d?: string | null): string {
 
 // Source-specific fallback CTA link if no cta prop provided.
 const fallbackHref: Record<string, string> = {
-  journal: '/journal',
+  journal: '/journal', // scaffold: journal
   services: '/services', // scaffold: services
   testimonials: '/',
   faqs: '/faq',
 };
 const fallbackLabel: Record<string, string> = {
-  journal: 'Read all posts',
+  journal: 'Read all posts', // scaffold: journal
   services: 'See all services',
   testimonials: 'See all reviews',
   faqs: 'Browse all FAQs',
@@ -90,6 +90,7 @@ const fallbackLabel: Record<string, string> = {
           class="mx-auto"
         />
 
+        {/* scaffold: journal */}
         {/* ── Journal cards ────────────────────────────────────────────── */}
         {source === 'journal' && (
           <ul
@@ -141,6 +142,7 @@ const fallbackLabel: Record<string, string> = {
             ))}
           </ul>
         )}
+        {/* scaffold:end */}
 
         {/* ── Service cards ────────────────────────────────────────────── */}
         {source === 'services' && (

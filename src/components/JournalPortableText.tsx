@@ -1,3 +1,4 @@
+// scaffold-file: journal
 // Safe to edit by hand
 // Renders a journal entry body. Handles standard Portable Text blocks plus
 // seven custom inline types defined in studio/schemaTypes/journalEntry.ts:

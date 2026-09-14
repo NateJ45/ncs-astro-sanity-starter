@@ -27,7 +27,7 @@ export const SINGLETON_LIVE_PATHS: Record<string, string> = {
   processPage: '/process', // scaffold: process
   faqPage: '/faq',
   contactPage: '/contact',
-  journalPage: '/journal',
+  journalPage: '/journal', // scaffold: journal
   privacyPage: '/privacy',
   notFoundPage: '/404',
 };

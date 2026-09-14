@@ -133,7 +133,9 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {/* scaffold: journal */}
     <link rel="alternate" type="application/rss+xml" title={`${site.name} Journal`} href="/journal/rss.xml" />
+    {/* scaffold:end */}
     {noindex && <meta name="robots" content="noindex, follow" />}
 
     {/* Mobile browser UI chrome colour: the page's own ground in each theme.

@@ -1,3 +1,4 @@
+// scaffold-file: journal
 // Safe to edit by hand
 // Journal RSS feed. Uses @astrojs/rss (already a project dependency).
 // Respects the sectionVisibility.showJournal gate — returns an empty item

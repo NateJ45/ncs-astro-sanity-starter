@@ -61,7 +61,7 @@ const SINGLETON_TYPES = [
   'processPage', // scaffold: process
   'faqPage',
   'contactPage',
-  'journalPage',
+  'journalPage', // scaffold: journal
   'notFoundPage',
   'privacyPage',
   'studioGuide',
@@ -81,8 +81,8 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'testimonial',
   'faqItem',
   'faqCategory',
-  'journalEntry',
-  'journalCategory',
+  'journalEntry', // scaffold: journal
+  'journalCategory', // scaffold: journal
   'page', // custom pages, placed explicitly under "Pages"
   'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
@@ -224,7 +224,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               singletonWithPreview(S, 'processPage', 'Process', OlistIcon), // scaffold: process
               singletonWithPreview(S, 'faqPage', 'FAQ', HelpCircleIcon),
               singletonWithPreview(S, 'contactPage', 'Contact', EnvelopeIcon),
-              singletonWithPreview(S, 'journalPage', 'Journal (index page)', BookIcon),
+              singletonWithPreview(S, 'journalPage', 'Journal (index page)', BookIcon), // scaffold: journal
               singletonWithPreview(S, 'notFoundPage', '404 Page', DocumentTextIcon),
 
               S.divider(),
@@ -320,6 +320,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
 
       S.divider(),
 
+      // scaffold: journal
       // Journal — its own section so the editor can find posts + categories at a glance
       S.listItem()
         .title('Journal')
@@ -332,6 +333,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
               S.documentTypeListItem('journalCategory').title('Categories').icon(TagIcon),
             ]),
         ),
+      // scaffold:end
 
       // Safety net: surface any document type we have NOT explicitly placed above
       // (and keep the hidden set, including media.tag, out of the desk root).

@@ -61,7 +61,7 @@ const TYPE_TO_PATH: Record<string, string> = {
   servicesPage: '/services', // scaffold: services
   faqPage: '/faq',
   contactPage: '/contact',
-  journalPage: '/journal',
+  journalPage: '/journal', // scaffold: journal
 };
 
 function resolveHref(c?: CtaBlock | null): string {
@@ -71,9 +71,11 @@ function resolveHref(c?: CtaBlock | null): string {
       const t = c.internalLink?._type;
       if (!t) return fallbackHref;
       // Slug-based types need the slug appended. Singletons use a fixed path.
+      // scaffold: journal
       if (t === 'journalEntry' && c.internalLink?.slug) {
         return `/journal/${c.internalLink.slug}`;
       }
+      // scaffold:end
       // Custom pages (type 'page') route via /[slug].astro.
       if (t === 'page' && c.internalLink?.slug) {
         return `/${c.internalLink.slug}`;

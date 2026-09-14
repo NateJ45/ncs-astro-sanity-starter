@@ -22,27 +22,29 @@ const MODULE_KEYS = [
 
 test('null input: the core route is on, every module route is off', () => {
   const v = getSectionVisibility(null);
-  assert.equal(v.journal, true);
+  assert.equal(v.journal, true); // scaffold: journal
   for (const key of MODULE_KEYS) assert.equal(v[key], false, `${key} should default off`);
 });
 
 test('undefined input behaves the same as null', () => {
   const v = getSectionVisibility(undefined);
-  assert.equal(v.journal, true);
+  assert.equal(v.journal, true); // scaffold: journal
   assert.equal(v.portfolio, false);
 });
 
 test('empty object: unset means on for core, off for modules', () => {
   const v = getSectionVisibility({});
-  assert.equal(v.journal, true);
+  assert.equal(v.journal, true); // scaffold: journal
   assert.equal(v.portfolio, false);
   assert.equal(v.shop, false);
 });
 
+// scaffold: journal
 test('explicit false hides the core route', () => {
   const v = getSectionVisibility({ showJournal: false });
   assert.equal(v.journal, false);
 });
+// scaffold:end
 
 test('explicit true shows a module route', () => {
   const v = getSectionVisibility({ showShop: true });
@@ -62,15 +64,17 @@ test('a null field value is not `true`, so a module route stays off', () => {
   assert.equal(v.portfolio, false);
 });
 
+// scaffold: journal
 test('a null field value is not `false`, so the core route stays on', () => {
   const v = getSectionVisibility({ showJournal: null });
   assert.equal(v.journal, true);
 });
+// scaffold:end
 
 test('all ten fields map correctly when every one is set on', () => {
   const v = getSectionVisibility({
     showPortfolio: true,
-    showJournal: true,
+    showJournal: true, // scaffold: journal
     showShop: true,
     showEDesign: true,
     showGiftCertificates: true,
@@ -80,14 +84,14 @@ test('all ten fields map correctly when every one is set on', () => {
     showStyleQuiz: true,
     showBudgetCalculator: true,
   });
-  assert.equal(v.journal, true);
+  assert.equal(v.journal, true); // scaffold: journal
   for (const key of MODULE_KEYS) assert.equal(v[key], true, `${key} should be on`);
 });
 
 test('all ten fields map correctly when every one is set off', () => {
   const v = getSectionVisibility({
     showPortfolio: false,
-    showJournal: false,
+    showJournal: false, // scaffold: journal
     showShop: false,
     showEDesign: false,
     showGiftCertificates: false,
@@ -97,6 +101,6 @@ test('all ten fields map correctly when every one is set off', () => {
     showStyleQuiz: false,
     showBudgetCalculator: false,
   });
-  assert.equal(v.journal, false);
+  assert.equal(v.journal, false); // scaffold: journal
   for (const key of MODULE_KEYS) assert.equal(v[key], false, `${key} should be off`);
 });

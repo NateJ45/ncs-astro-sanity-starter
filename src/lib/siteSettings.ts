@@ -115,7 +115,7 @@ export function fallbackNavItems(visible: SectionVisibility): NavItem[] {
     { kind: 'flat', label: 'About', href: '/about' },
     { kind: 'flat', label: 'Services', href: '/services' }, // scaffold: services
     { kind: 'flat', label: 'FAQ', href: '/faq' },
-    ...(visible.journal ? [{ kind: 'flat' as const, label: 'Journal', href: '/journal' }] : []),
+    ...(visible.journal ? [{ kind: 'flat' as const, label: 'Journal', href: '/journal' }] : []), // scaffold: journal
   ];
 }
 

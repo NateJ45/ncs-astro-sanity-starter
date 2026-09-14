@@ -75,7 +75,7 @@ const MAIN_PAGES: { type: string; label: string }[] = [
   { type: 'aboutPage', label: 'About' },
   { type: 'servicesPage', label: 'Services' }, // scaffold: services
   { type: 'processPage', label: 'Process' }, // scaffold: process
-  { type: 'journalPage', label: 'Journal' },
+  { type: 'journalPage', label: 'Journal' }, // scaffold: journal
   { type: 'faqPage', label: 'FAQ' },
   { type: 'contactPage', label: 'Contact' },
   { type: 'privacyPage', label: 'Privacy' },

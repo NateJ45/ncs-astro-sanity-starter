@@ -1,3 +1,4 @@
+// scaffold-file: journal
 // Journal category taxonomy. Lightweight — a category is just a name + slug
 // + optional description. Posts can have multiple categories; the first one
 // shows on the card.

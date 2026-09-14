@@ -126,11 +126,13 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       cta${CTA_PROJECTION},
       "items": select(
+        // scaffold: journal
         source == "journal" => *[_type == "journalEntry"] | order(publishedAt desc)[0...limit]{
           _id, "title": title, "meta": publishedAt, "summary": excerpt,
           "href": "/journal/" + slug.current,
           "coverImage": coverImage${IMAGE_PROJECTION}
         },
+        // scaffold:end
         // scaffold: services
         source == "services" => *[_type == "service"] | order(orderRank asc, displayOrder asc)[0...limit]{
           _id, "title": name, "meta": price, "summary": shortDescription,
@@ -481,6 +483,7 @@ export async function getAllProjects(): Promise<CoreProjectCard[]> {
 
 // ---- Journal --------------------------------------------------------------
 
+// scaffold: journal
 // Projection for a journal card (index page) — small surface, no body.
 const JOURNAL_CARD_PROJECTION = `{
   _id,
@@ -492,7 +495,9 @@ const JOURNAL_CARD_PROJECTION = `{
   coverImage${IMAGE_PROJECTION},
   "categories": categories[]->{ _id, title, slug, description }
 }`;
+// scaffold:end
 
+// scaffold: journal
 export async function getJournalPage() {
   return sanityFetch(
     `*[_type == "journalPage"][0]{
@@ -511,7 +516,9 @@ export async function getJournalPage() {
     null,
   );
 }
+// scaffold:end
 
+// scaffold: journal
 export async function getAllJournalEntries() {
   // Featured first, then newest first. Excerpt + cover only (no body).
   return sanityFetch(
@@ -520,7 +527,9 @@ export async function getAllJournalEntries() {
     [],
   );
 }
+// scaffold:end
 
+// scaffold: journal
 export async function getAllJournalCategories() {
   return sanityFetch(
     `*[_type == "journalCategory"] | order(title asc){
@@ -531,7 +540,9 @@ export async function getAllJournalCategories() {
     [],
   );
 }
+// scaffold:end
 
+// scaffold: journal
 export async function getJournalEntryBySlug(slug: string) {
   // Full doc including body. The body's inline image blocks get their asset
   // resolved + alt fallback at the GROQ layer so the renderer doesn't have to
@@ -573,8 +584,10 @@ export async function getJournalEntryBySlug(slug: string) {
     null,
   );
 }
+// scaffold:end
 
 // Static path generation for /journal/[slug]. Returns just the slugs.
+// scaffold: journal
 export async function getAllJournalSlugs(): Promise<string[]> {
   const list: Array<{ slug: { current: string } }> = await sanityFetch(
     `*[_type == "journalEntry" && defined(slug.current)]{ slug }`,
@@ -583,6 +596,7 @@ export async function getAllJournalSlugs(): Promise<string[]> {
   );
   return list.map((e) => e.slug?.current).filter(Boolean);
 }
+// scaffold:end
 
 // ---- Privacy page ---------------------------------------------------------
 

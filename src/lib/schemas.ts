@@ -203,6 +203,7 @@ export function projectSchema(project: Project, heroImageUrl: string | null): st
   });
 }
 
+// scaffold: journal
 // ---------- BlogPosting (for /journal/[slug]) -----------------------------
 
 interface JournalEntryForSchema {
@@ -245,3 +246,4 @@ export function blogPostingSchema(
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
   });
 }
+// scaffold:end
