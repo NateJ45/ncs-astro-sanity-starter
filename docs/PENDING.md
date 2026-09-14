@@ -145,6 +145,27 @@ That is harmless until somebody runs the script on a project with a clean tree, 
 confirm it says nothing. To close: normalise hex case and quote style to what Prettier
 writes before comparing, or run the file through Prettier at the end of the rewrite.
 
+### 10. Two capabilities are still unmarked for `npm run scaffold`
+
+**Queued, 2026-09-13.** `process`, `services` and `journal` are marked and each has been
+proven by running the removal: `--remove journal,services,process --write`, typegen,
+`astro check` 0 errors, build complete, 458 unit tests, all three routes gone and every
+other route plus the Studio still built.
+
+**Left: `faq` and `about`.** faq is the awkward one and needs a decision rather than a
+pass of marking. Three test files use `faqSection` as their REPRESENTATIVE EXAMPLE rather
+than as the thing under test: `page-checks.test.ts` uses it for the self-filling-section
+case, `sectionCadence.test.ts` for the SELF_CONTAINED case, and `section-fields.test.ts`
+asserts on its rich twin AND reads `faqPage.ts` off disk, which throws outright once the
+file is gone. Marking them all means a fork that removes faq silently loses coverage of
+behaviour that has nothing to do with faq. The better answer is probably to re-point
+those examples at a section every project keeps (`richTextSection`) and mark only what is
+genuinely faq, but that edits tests to suit a tool, so it wants a second opinion.
+
+**Then the seed audit** (PORTS card 44's rule): every seeded string should read
+"replace this" rather than plausible copy for a real trade, so a fork cannot ship
+somebody else's words by not noticing them.
+
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 
 Flagged in CLAUDE.md's topic index since the fork. The 2026-08-28 pass corrected every
