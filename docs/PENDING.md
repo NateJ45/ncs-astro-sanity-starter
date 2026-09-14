@@ -129,6 +129,22 @@ lands will report DRIFT on those files. That is the library of record working as
 designed, not a bug: the next sync session pushes this repo's copies out. Do the sync
 before treating any drift report from those paths as meaningful.
 
+### 9. `apply-brand` is not idempotent on globals.css
+
+**Cosmetic, found 2026-09-13, deliberately not fixed in the same commit.**
+
+CLAUDE.md and the script's own header call `apply-brand` idempotent, and semantically it
+is: running it twice produces the same STYLESHEET. It does not produce the same FILE.
+Running it on this repo, whose globals.css already matches its own brand.config.json,
+rewrote 75 lines: single quotes to double on the `@import` lines, and lowercase hex to
+uppercase (`#434e5c` to `#434E5C`, because the config stores uppercase). Prettier then
+disagrees with the result, so `npm run format:check` fails on a file nobody edited.
+
+That is harmless until somebody runs the script on a project with a clean tree, sees a
+75-line diff in the most load-bearing file in the repo, and has to read all of it to
+confirm it says nothing. To close: normalise hex case and quote style to what Prettier
+writes before comparing, or run the file through Prettier at the end of the rewrite.
+
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 
 Flagged in CLAUDE.md's topic index since the fork. The 2026-08-28 pass corrected every
