@@ -114,6 +114,7 @@ is installing it as of the date on the card.
 | 49  | Automation patterns (import-and-deploy, record-and-bake)          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 50  | Production deploy workflow                                        | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 51  | Compressed static server for Lighthouse                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 52  | Radix islands hydrate at client:idle, not client:only             | n/a     | partial     | yes      | no               | no            | no             | n/a                | yes                 | partial        |
 | 53  | One accent splitter (heading-accent absorbs scriptAccent)         | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
@@ -4906,6 +4907,82 @@ That is why stonesteps' map-poster capture keeps one.
 back `public, max-age=31536000, immutable`.
 
 ---
+
+## Card 52: The Radix-cannot-SSR rule was never true, and it cost the nav its markup (2026-09-18)
+
+**Canonical:** `src/components/Header.astro` (the `<MobileNav>` directive),
+`src/components/MobileNav.tsx` (its header comment), and the three docs that
+stated the rule: `docs/agent/components.md`, `docs/agent/page-architecture.md`,
+`docs/agent/performance.md`.
+**Applies to:** every repo that carries a shadcn `Sheet`, `Dialog` or portal
+`DropdownMenu` behind `client:only="react"`, and every repo whose docs repeat the
+rule. The docs are not marked PORTABLE, so this card is the only thing that
+propagates the correction.
+
+**The claim.** Three files in this starter said, as a blanket rule, that shadcn
+primitives wrapping Radix's Dialog cannot server-render inside Astro: that the
+portal hook calls throw "Invalid hook call" during server render and blank the
+page, so they must be hydrated with `client:only="react"`. `components.md` said it
+in a subheading, which is the part people quote.
+
+**It is false on the pinned set.** stonesteps-50k ships a byte-identical
+`src/components/ui/sheet.tsx`, imports the same five primitives in its own
+`MobileNav.tsx`, and hydrates that island at `client:idle`, on the same
+react 19.2.7 / react-dom 19.2.7 / radix-ui ^1.4.3 / astro ^7.2.6 /
+@astrojs/cloudflare 14.2.4 set this starter pins. That site is live, passes its axe
+and smoke suites and scores 100 on Lighthouse. presacademy moved the same island off
+`client:only` on 2026-09-04 for the same reason and left its `components.md` heading
+behind. The rule was measured once on an older React and Radix pairing and then
+outlived the pairing.
+
+**Why a closed Sheet is safe.** A closed Radix Dialog renders only its trigger
+button on the server. The portal mounts nothing until the dialog opens, so there is
+no portal work during the server render at all.
+
+**What the wrong rule cost.** `client:only` skips SSR entirely. The hamburger button
+was absent from every page's server HTML until React loaded, and the React runtime
+sat on the critical path rather than behind `requestIdleCallback`. That is the same
+failure `page-architecture.md` already forbids for the desktop nav, one component
+over.
+
+**The fix.** `client:only="react"` becomes `client:idle`, and the docs state the
+real condition rather than a softened version of the false one.
+
+**The escape hatch is still real, and the docs must say so.** If a component
+genuinely cannot server-render, the symptom is unmistakable: an "Invalid hook call"
+thrown during the build's server render, naming the component. `client:only="react"`
+is the answer to that. `VisualEditingOverlay` in `src/layouts/PreviewLayout.astro`
+keeps it on purpose, being preview-only, Studio-coupled, and having nothing
+meaningful to render on the server.
+
+**Porting it is three greps and a browser.** Grep for `client:only` in `src/`, grep
+the docs for "Radix" and "can't SSR", switch the island, and open the drawer. Do not
+take the build passing as proof: `npm run build` passing only proves nothing threw.
+A working drawer, with focus trapped and returned, is the proof.
+
+**Proof in this repo (2026-09-18).** The committed parity baseline (built from the
+old directive) carried `client="only"` and zero occurrences of `aria-label="Open
+menu"`. After the change the built `/index.html` carries
+`client="idle"` and the trigger with Radix's full wiring:
+`aria-haspopup="dialog" aria-expanded="false" data-state="closed"
+data-slot="sheet-trigger"`. `npm run build` prerendered all thirteen routes with no
+"Invalid hook call". In a real browser at 375px, light and dark: the drawer opens,
+focus lands inside it, twelve Tab presses stay inside it, the rest of `<body>` goes
+`aria-hidden` (six siblings) with `pointer-events: none`, Escape closes it and focus
+returns to the trigger, and the console is empty. `npm run parity compare` showed
+ten of eleven pages changed, `/studio` alone unchanged because it carries no site
+header, and every changed line was the island gaining its server-rendered children.
+`npm run check`, `npm run test:unit` (488), `npm run format:check` and `npm test`
+(98 Playwright, axe light and dark on chromium and a WebKit iPhone profile) all pass.
+
+**Still carrying the false text as of 2026-09-18** (not edited by this session, for a
+later sync): `presacademy/docs/agent/components.md` (lines 20 and 36),
+`reid-design-site/docs/agent/components.md` (24, 26, 36) and its
+`docs/agent/performance.md` (76), `2ndpreschicago/docs/agent/components.md` (20, 22, 36) and its `docs/agent/performance.md` (67), `nixoncreativestudio/CLAUDE.md` (240)
+and `docs/agent/component-sources.md` (100) and `docs/stack-template/CLAUDE.md`
+(153), `stonesteps-50k/docs/agent/performance.md` (67, its table row, although its
+code and `components.md` are already correct), and the archived
+`ncs-church-starter`. wcp-website carries no copy of the claim and has no Sheet at all, so it is n/a; mas-monograms carries the wrong directive in `Header.astro` but no doc copy of the rule. nixoncreativestudio's `Header.astro` is already `client:idle`, so only its three doc copies are stale.
 
 ## Card 53: One accent splitter, not two (2026-09-18)
 

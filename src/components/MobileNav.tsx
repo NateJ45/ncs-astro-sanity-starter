@@ -1,7 +1,23 @@
 // Foundation, edit with care
-// Mobile nav drawer. Uses shadcn Sheet (Radix Dialog under the hood) so it
-// must be hydrated with client:only="react" — Radix's portal hook calls during
-// SSR throw "Invalid hook call" inside Astro.
+// Mobile nav drawer. Uses shadcn Sheet (Radix Dialog under the hood).
+//
+// HYDRATED AT client:idle, NOT client:only (2026-09-18). This file said for a
+// long time that the Sheet had to be client:only="react" because Radix's
+// portal hook threw "Invalid hook call" during Astro's server render. That is
+// not true of the versions this starter pins: a closed Sheet server-renders
+// only its trigger button, the portal mounts nothing until the drawer opens,
+// and every page prerenders without a complaint. Verified against the sibling
+// stonesteps-50k build, which ships the identical ui/sheet.tsx at client:idle
+// on the same react 19.2.7 / radix-ui 1.4.3 / astro 7.x set.
+//
+// What client:only cost was the hamburger: it skips SSR entirely, so the
+// trigger was absent from the server HTML until React loaded. client:idle puts
+// the button in the markup and defers the runtime behind requestIdleCallback.
+//
+// If a future island genuinely cannot server-render, the symptom is an
+// "Invalid hook call" thrown during the build's server render, and
+// client:only="react" is still the escape hatch. VisualEditingOverlay in
+// PreviewLayout.astro uses it for that kind of reason.
 //
 // Layout (top to bottom inside the sheet):
 //   1. Brand accent stripe (4px Warm Bronze) + "Menu" eyebrow
@@ -55,9 +71,9 @@ interface Props {
   siteSettings?: MobileNavSiteSettings | null;
   /**
    * Optimized logo URLs pre-rendered by Astro's getImage() in the parent
-   * Header.astro. We can't import the asset directly in a React component
-   * because client:only skips SSR entirely — so the parent does the work
-   * once at build time and passes the resulting WebP URLs in as strings.
+   * Header.astro. A React island cannot call Astro's build-time image
+   * pipeline itself, so the parent does the work once at build time and
+   * passes the resulting WebP URLs in as plain strings.
    */
   logoLightUrl?: string;
   logoDarkUrl?: string;

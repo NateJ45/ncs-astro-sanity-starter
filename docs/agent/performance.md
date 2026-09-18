@@ -49,7 +49,7 @@ Target: 100 on all four categories (Performance, Accessibility, Best Practices, 
 
 **Levers that achieve this -- preserve unless you have a stronger reason than "I want to simplify":**
 
-- All islands hydrate at `client:idle` or `client:visible` except `MobileNav` (Radix Sheet portal requires `client:only="react"`)
+- Every island hydrates at `client:idle` or `client:visible`. Nothing on a public page uses `client:only`: it skips SSR, so the island's markup is missing from the server HTML and its runtime lands on the critical path
 - Lenis init wrapped in `requestIdleCallback`
 - Logo PNGs moved from `public/` to `src/assets/` so Astro emits WebPs
 - Single-img theme-aware logo (one fetch per page load instead of two)
@@ -61,14 +61,14 @@ Target: 100 on all four categories (Performance, Accessibility, Best Practices, 
 
 ### Hydration strategy
 
-| Component          | Directive             | Why                                                                                                                                                                                                                                                              |
-| ------------------ | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ThemeToggle`      | `client:idle`         | Anti-FOUC inline script in `BaseLayout` already applies the correct theme class before first paint, so the React island only needs to hydrate by the time the visitor moves to click it. Demoting from `client:load` shaves real TBT off mobile Lighthouse runs. |
-| `MobileNav`        | `client:only="react"` | Radix Sheet portal can't SSR                                                                                                                                                                                                                                     |
-| `ContactForm`      | `client:visible`      | Below the fold on most pages                                                                                                                                                                                                                                     |
-| `BackToTop`        | `client:idle`         | Doesn't appear until the visitor scrolls 600px, so the JS doesn't need to race first paint                                                                                                                                                                       |
-| `Toaster` (Sonner) | `client:idle`         | Region only -- toast calls fire from elsewhere, plenty of time for the region to mount                                                                                                                                                                           |
-| `FaqAccordion`     | `client:visible`      | Interactive but not critical-path                                                                                                                                                                                                                                |
+| Component          | Directive        | Why                                                                                                                                                                                                                                                                 |
+| ------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ThemeToggle`      | `client:idle`    | Anti-FOUC inline script in `BaseLayout` already applies the correct theme class before first paint, so the React island only needs to hydrate by the time the visitor moves to click it. Demoting from `client:load` shaves real TBT off mobile Lighthouse runs.    |
+| `MobileNav`        | `client:idle`    | The closed Radix Sheet server-renders its trigger and mounts the portal only when the drawer opens, so the hamburger is in the server HTML and React can arrive on idle. Was `client:only="react"` until 2026-09-18 on a Radix-can't-SSR claim that no longer holds |
+| `ContactForm`      | `client:visible` | Below the fold on most pages                                                                                                                                                                                                                                        |
+| `BackToTop`        | `client:idle`    | Doesn't appear until the visitor scrolls 600px, so the JS doesn't need to race first paint                                                                                                                                                                          |
+| `Toaster` (Sonner) | `client:idle`    | Region only -- toast calls fire from elsewhere, plenty of time for the region to mount                                                                                                                                                                              |
+| `FaqAccordion`     | `client:visible` | Interactive but not critical-path                                                                                                                                                                                                                                   |
 
 Default to `client:visible` or `client:idle` for anything not immediately above the fold. Astro ships less JS up front. `client:load` is reserved for islands that genuinely must be live before first interaction -- and even then, ask twice whether `client:idle` is acceptable.
 
