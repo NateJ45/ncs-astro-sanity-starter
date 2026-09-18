@@ -1,0 +1,213 @@
+# TEMPLATE, NOT A LIVE WORKFLOW.
+#
+# This file lives under docs/templates/workflows/ on purpose: GitHub only runs
+# what is in .github/workflows/, so nothing here fires in this repo or in a fork
+# that has not deliberately copied it across. Copy it, rename it, replace every
+# <ANGLE_BRACKET> placeholder, and delete the parts a given client does not need.
+#
+# WHAT IT IS. The "import and deploy on change" shape from
+# docs/agent/automation-patterns.md: pull a client's real data from somebody
+# else's system into Sanity on a schedule, and rebuild the site only when the
+# data actually moved. Generalised from stonesteps-50k's results-import.yml
+# (2026-09-18), which is the worked example in that doc.
+#
+# WHAT YOU HAVE TO SUPPLY.
+#   scripts/<IMPORT_SCRIPT>.mjs   idempotent: deterministic _id values,
+#                                 createOrReplace, and it DISCOVERS what exists
+#                                 upstream rather than carrying a list of years
+#                                 or ids. Both properties are what make a
+#                                 scheduled run safe to fire twice.
+#   Repo secrets:    SANITY_API_WRITE_TOKEN, CLOUDFLARE_API_TOKEN,
+#                    CLOUDFLARE_ACCOUNT_ID
+#   Repo variables:  PUBLIC_SANITY_PROJECT_ID, PUBLIC_SANITY_DATASET
+#
+# Every credential is checked in a STEP, never in an `if:`. A secret cannot be
+# read in an `if:` expression, and missing credentials WARN and skip rather than
+# failing, so this file is safe to commit before any of them exist.
+#
+# KNOWN LIMIT, STATED ON PURPOSE. The deploy is gated on the document COUNT
+# changing. A re-import that CORRECTS an existing row does not change the count,
+# so it will not trigger a deploy. Use the manual run; `deploy_anyway` forces it.
+# A workflow that silently skips the deploy you needed is worse than one that
+# admits when it will.
+
+name: Import <WHAT> from <SOURCE>
+
+on:
+  schedule:
+    # Dense around the event that produces the data, thin the rest of the year.
+    # The weekly run is the answer to "what if the source takes three weeks to
+    # publish": without it a late posting sits unimported until next season.
+    - cron: '0 9 * <EVENT_MONTHS> *' # daily, the months around the event
+    - cron: '0 9 * * 1' # every Monday, the rest of the year
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'One <YEAR/BATCH> only (blank imports everything available)'
+        required: false
+        type: string
+      deploy_anyway:
+        description: 'Deploy even if the document count did not change'
+        required: false
+        type: boolean
+        default: false
+
+# One at a time. Two overlapping imports would race on the same documents and
+# two overlapping deploys would race on the same Worker. `cancel-in-progress`
+# stays FALSE: a half-finished import is worse than a queued one.
+concurrency:
+  group: <IMPORT_NAME>
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+      can_deploy: ${{ steps.check.outputs.can_deploy }}
+    steps:
+      - id: check
+        # No checkout: this job needs nothing but the presence of credentials.
+        env:
+          WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+        run: |
+          if [ -z "$WRITE_TOKEN" ] || [ -z "$PROJECT_ID" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SANITY_API_WRITE_TOKEN and/or PUBLIC_SANITY_PROJECT_ID not set; skipping the import."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$CF_TOKEN" ] && [ -n "$CF_ACCOUNT" ]; then
+            echo "can_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Cloudflare credentials not set; data will import but the site will not be rebuilt."
+          fi
+
+  import:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # A public dataset needs no token to count, so this is a plain curl rather
+      # than another Node script. Swap the GROQ for whatever type the import
+      # creates.
+      - name: Count before
+        id: before
+        env:
+          PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: |
+          N=$(curl -sfG \
+            "https://$PROJECT_ID.api.sanity.io/v2026-05-01/data/query/${DATASET:-production}" \
+            --data-urlencode 'query=count(*[_type == "<DOC_TYPE>"])' | jq -r '.result')
+          echo "count=$N" >> "$GITHUB_OUTPUT"
+          echo "before: $N"
+
+      - name: Import
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+          SANITY_API_WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+          ONLY: ${{ inputs.scope }}
+        run: |
+          if [ -n "$ONLY" ]; then
+            node scripts/<IMPORT_SCRIPT>.mjs --scope "$ONLY"
+          else
+            node scripts/<IMPORT_SCRIPT>.mjs
+          fi
+
+      # OPTIONAL: the "record and bake" pattern folds in here. Both steps are
+      # idempotent and fail soft, and the bake reports changed=true|false so this
+      # workflow can treat it as a second reason to deploy. See
+      # docs/templates/workflows/record-and-bake-step.yml.
+      #
+      # - name: Record what just happened
+      #   env: { ...same three... }
+      #   run: node scripts/<SYNC_SCRIPT>.mjs --record
+      #
+      # - name: Bake derived data
+      #   id: bake
+      #   env: { ...project id and dataset only... }
+      #   run: node scripts/<SYNC_SCRIPT>.mjs
+
+      - name: Count after
+        id: after
+        env:
+          PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: |
+          # Sanity commits with visibility: 'async', so the query index can trail
+          # the write by a moment. Poll briefly rather than reading once and
+          # concluding nothing changed.
+          BEFORE=${{ steps.before.outputs.count }}
+          for i in 1 2 3 4 5 6; do
+            N=$(curl -sfG \
+              "https://$PROJECT_ID.api.sanity.io/v2026-05-01/data/query/${DATASET:-production}" \
+              --data-urlencode 'query=count(*[_type == "<DOC_TYPE>"])' | jq -r '.result')
+            [ "$N" != "$BEFORE" ] && break
+            sleep 5
+          done
+          echo "count=$N" >> "$GITHUB_OUTPUT"
+          echo "after: $N"
+
+      - name: Summarise
+        env:
+          BEFORE: ${{ steps.before.outputs.count }}
+          AFTER: ${{ steps.after.outputs.count }}
+        run: |
+          {
+            echo "### <WHAT> import"
+            echo ""
+            echo "| | count |"
+            echo "| --- | --- |"
+            echo "| before | $BEFORE |"
+            echo "| after | $AFTER |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$BEFORE" = "$AFTER" ]; then
+            echo "Nothing new." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Imported $((AFTER - BEFORE)) new documents." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Generate Sanity types
+        if: >-
+          needs.gate.outputs.can_deploy == 'true' &&
+          (steps.before.outputs.count != steps.after.outputs.count || inputs.deploy_anyway)
+        run: npm run typegen
+
+      - name: Build
+        if: >-
+          needs.gate.outputs.can_deploy == 'true' &&
+          (steps.before.outputs.count != steps.after.outputs.count || inputs.deploy_anyway)
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: npm run build
+
+      # THE CONFIG FLAG IS LOAD-BEARING. This is a hybrid static+SSR build, and a
+      # plain `wrangler deploy` reads the SOURCE wrangler.jsonc, which knows
+      # nothing about the adapter's generated asset manifest: every sub-route
+      # 404s. Deploy the adapter's own config, exactly as `npm run deploy` does.
+      - name: Deploy
+        if: >-
+          needs.gate.outputs.can_deploy == 'true' &&
+          (steps.before.outputs.count != steps.after.outputs.count || inputs.deploy_anyway)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy -c dist/server/wrangler.json

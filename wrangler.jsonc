@@ -10,21 +10,62 @@
   "name": "ncs-astro-sanity-starter",
 
   // ── The contact endpoint's bindings (src/pages/api/contact.ts) ────────────
-  // COMMENTED OUT ON PURPOSE. A fresh clone must build and deploy with no
-  // Cloudflare resources of its own; an active binding with a placeholder id
-  // fails the deploy for anyone who has not created the database yet.
+  // COMMENTED OUT ON PURPOSE, and they stay that way in the template. A fresh
+  // clone must build and deploy with no Cloudflare resources of its own, and an
+  // active binding with a placeholder id fails the deploy for anyone who has not
+  // created the database yet. A fork uncomments them; this repo never does.
   //
-  // To turn the contact endpoint on for a site:
+  // THE SIX STEPS THAT ACTUALLY WORKED, in order, on stonesteps-50k on
+  // 2026-09-18. They are written out because this comment used to say Email
+  // Sending was theoretical here: nobody in the family had watched a message
+  // arrive. One has now, and this is the path it took. Card 45 in the starter's
+  // PORTS.md carries the reasoning; this is the recipe.
+  //
+  //   PREREQUISITE: the domain must be on Cloudflare DNS. Email Sending cannot
+  //   be enabled otherwise. `npm run cutover` is the script that gets it there.
   //
   //   1. npx wrangler d1 create <site>-contact
-  //   2. Paste the returned database_id below and uncomment the block.
-  //   3. npx wrangler d1 migrations apply <site>-contact --remote
-  //   4. Set the recipient and sender, both as plain vars:
-  //        npx wrangler secret put CONTACT_TO      (verified destination address)
-  //        npx wrangler secret put CONTACT_FROM    (an address on a sending domain)
-  //   5. Optional: TURNSTILE_SECRET, and PUBLIC_TURNSTILE_SITE_KEY in .env.
-  //   6. Optional fallback for sites with no email binding:
-  //        npx wrangler secret put WEB3FORMS_KEY
+  //      Note the returned database_id.
+  //
+  //   2. npx wrangler d1 migrations apply <site>-contact --remote
+  //      The REMOTE apply is a separate, deliberate act from the local one.
+  //      migrations/ holds the schema; `npm run contact:migration` regenerates it.
+  //
+  //   3. npx wrangler email sending enable <domain>
+  //      Onboards the domain for OUTBOUND mail. It writes SPF and DKIM under a
+  //      cf-bounce subdomain, so it coexists with Microsoft 365 or Google
+  //      Workspace on the same domain. (Email ROUTING would not: it takes the
+  //      apex MX, and the Cloudflare docs are explicit that it cannot be used
+  //      with an external mail server.) Beta command; there is no stable REST
+  //      equivalent, which is why scripts/cutover.mjs prints it rather than
+  //      running it.
+  //
+  //   4. npx wrangler secret put CONTACT_TO     (the verified destination)
+  //      npx wrangler secret put CONTACT_FROM   (an address on the sending domain)
+  //      Secrets, not vars: CONTACT_TO is where a client's enquiries land.
+  //
+  //   5. Uncomment the two blocks below, paste the database_id from step 1, and
+  //      deploy. Turning the bindings on and creating the resources are separate
+  //      commits on purpose: a deploy that fails on a binding is much easier to
+  //      read when it is the only thing that changed.
+  //
+  //   6. Send ONE labelled test submission through the live form, then read the
+  //      row back:
+  //        npx wrangler d1 execute <site>-contact --remote \
+  //          --command "SELECT id, received_at, notified, notify_error FROM contact_submissions ORDER BY id DESC LIMIT 1"
+  //      `notified = 1` is the proof. A 200 from the endpoint is not: the route
+  //      returns 200 for a stored-but-not-sent submission on purpose (the
+  //      visitor did their part), so the only thing that distinguishes a working
+  //      form from a silently broken one is that column.
+  //
+  // TWO THINGS TO HAND TO A HUMAN RATHER THAN AN AGENT. Steps 2 and 4 can trip
+  // a permission gate: the remote migration writes to a live database and
+  // `secret put` reads a value from a prompt, and an agent was blocked on both
+  // during the stonesteps-50k cutover. Hand those two to whoever holds the
+  // account and let the agent do the rest. And leave DMARC at `p=none` until
+  // the client's own mail provider has DKIM set up; tightening it first means
+  // the client's ordinary mail starts failing, which is a far bigger problem
+  // than a contact form.
   //
   // LOCAL D1 STATE IS KEYED PER CONFIG PATH. `wrangler dev` runs against
   // dist/server/wrangler.json, so a migration applied with the root config goes
@@ -36,12 +77,13 @@
   //   { "binding": "CONTACT_DB", "database_name": "<site>-contact", "database_id": "<id>" }
   // ],
   //
-  // Email Sending needs the Workers Paid plan and a domain onboarded for
-  // sending. Sends to a VERIFIED DESTINATION address are free and do not count
-  // against the monthly quota, which is the case a contact form is.
-  // "send_email": [
-  //   { "name": "EMAIL", "destination_address": "<owner>@example.com" }
-  // ],
+  // Email Sending needs the Workers Paid plan. Sends to a VERIFIED DESTINATION
+  // address are free and do not count against the monthly quota, which is
+  // exactly what a contact form notifying the site owner is.
+  // "send_email": [{ "name": "EMAIL" }],
+  //
+  // Optional, both as secrets: TURNSTILE_SECRET (plus PUBLIC_TURNSTILE_SITE_KEY
+  // in .env) and WEB3FORMS_KEY, the fallback for a site with no email binding.
 
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {

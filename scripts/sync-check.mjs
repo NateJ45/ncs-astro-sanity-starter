@@ -93,6 +93,14 @@ const TEXT_EXT = new Set([
   '.js',
   '.cjs',
   '.ts',
+  // .mts / .cts (2026-09-18): a plain-JS script in scripts/lib/ that a
+  // TypeScript test imports gets a hand-written .d.mts beside it, and that
+  // declaration file is as portable as the module it describes. Without the
+  // extension here its marker was scanned for and never found, which is the
+  // worst state for a drift check to be in: a file that says it is canonical
+  // and is silently not checked.
+  '.mts',
+  '.cts',
   '.tsx',
   '.jsx',
   '.astro',

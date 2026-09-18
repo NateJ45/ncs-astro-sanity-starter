@@ -51,3 +51,9 @@ worker-configuration.d.ts
 # Playwright output (npm test).
 playwright-report/
 test-results/
+
+# Cleaned zone files written by `npm run cutover` next to a registrar export.
+# They are a local record of what was imported, not repo source, and they can
+# carry a real client's DNS. Never commit one.
+*.cleaned.txt
+*.cleaned.zone

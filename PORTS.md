@@ -110,8 +110,10 @@ is installing it as of the date on the card.
 | 44  | Fork residue audit                                                | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
 | 46  | Share cards in the brand's real typeface                          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 47  | The icon set, from one drawing                                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 48  | Production deploy workflow                                        | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 49  | Compressed static server for Lighthouse                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 48  | Domain cutover script + zone audit                                | no      | no          | yes      | no               | no            | no             | n/a                | no                  | partial        |
+| 49  | Automation patterns (import-and-deploy, record-and-bake)          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 50  | Production deploy workflow                                        | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 51  | Compressed static server for Lighthouse                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -4409,6 +4411,50 @@ storage path, the validation, the honeypot, the timing check and the degraded an
 all verified end to end under `wrangler dev`. `Reply-To` is sent as a custom header with a
 retry without it, because the exact field name is not confirmed against a live send.
 
+### Addendum, 2026-09-18: somebody has now watched one arrive
+
+The paragraph above is superseded. stonesteps-50k moved its domain to Cloudflare DNS that
+morning (card 48), and the endpoint went from "built and waiting" to "working" in one
+sitting. The race director forwarded the test message back at 8:40 am: it reached
+`rd@stonesteps50k.com` from `website@stonesteps50k.com` with the visitor named and the
+subject intact. `Reply-To` as a custom header is confirmed against a live send, so the
+retry-without-it path is now belt and braces rather than the load-bearing part.
+
+**The six steps, in the order they worked.** They are also written into `wrangler.jsonc`
+next to the bindings, and into `docs/agent/deployment.md` for the human reading a runbook.
+
+1. `npx wrangler d1 create <site>-contact`, note the `database_id`.
+2. `npx wrangler d1 migrations apply <site>-contact --remote`.
+3. `npx wrangler email sending enable <domain>`. SPF and DKIM land under a `cf-bounce`
+   subdomain, so it coexists with the client's existing provider on the same domain.
+4. `npx wrangler secret put CONTACT_TO` and `CONTACT_FROM`.
+5. Uncomment the bindings, paste the id, deploy. Its own commit: a deploy that fails on a
+   binding is far easier to read when the binding is the only thing that changed.
+6. One labelled test submission, then read the row back and check `notified = 1`.
+
+**Step 6 is the only real proof, and this is the reason to insist on it.** The endpoint
+returns 200 for a stored-but-not-sent submission BY DESIGN, because the visitor did their
+part and the message exists. That design decision means a 200 cannot distinguish a working
+form from a silently broken one. The `notified` column can. Anyone who signs the form off
+on a 200 has verified nothing.
+
+**Two things a future session should hand to the human rather than attempt.** The remote
+migration (step 2) and the secret puts (step 4) both tripped a permission gate when an
+agent tried them: one writes to a live database, the other reads a value from a prompt.
+Everything else in the list is agent work. Say so up front instead of discovering it
+halfway through a cutover.
+
+**DMARC stays at `p=none`** until the client's own mail provider has DKIM configured.
+Stone Steps' mail is on Microsoft 365 with no DKIM set up, and tightening the policy first
+would have started failing the client's ordinary mail, which is a far bigger problem than
+a contact form. Enabling Cloudflare's sending domain does not change that: `cf-bounce` is
+its own subdomain and it aligns on its own.
+
+**Turnstile is still not wired anywhere.** The form ships no widget, so
+`TURNSTILE_SECRET` stays unset and the endpoint skips the check entirely. The honeypot and
+the timing check carried the load on a live form for a day with no spam. Wire Turnstile
+when a site actually attracts some.
+
 ## Card 44: Fork residue, and the audit that finds it (2026-09-08)
 
 **What it is.** A named failure mode rather than a file: **a template forked from a
@@ -4548,7 +4594,202 @@ has more than one word in it, draw a separate mark.
 
 ---
 
-## Card 48: The production deploy nobody inherited (2026-09-18)
+## Card 48: The domain cutover, and the zone audit inside it (2026-09-18)
+
+**Canonical:** `scripts/cutover.mjs`, `scripts/lib/zone-audit.mjs` (+ its `.d.mts`),
+`src/lib/zone-audit.test.ts`, `scripts/fixtures/godaddy-zone-export.txt`
+**Applies to:** every repo in the family, and every future client. Six of these sites are
+already on Cloudflare DNS; the seventh took a morning of hand work to get there, and the
+eighth would have taken the same morning.
+
+**What it is.** One script that takes a site from "the zone is not on Cloudflare" to "live
+on its own domain, with the mail intact". Find or create the zone as a full setup and print
+the two nameservers for the registrar. Audit a BIND export from the old registrar and
+import a cleaned copy. Once the zone goes active, attach the Worker to the apex and www as
+custom domains, file a 301 from www in the `http_request_dynamic_redirect` phase, and set
+`always_use_https` on, `min_tls_version` 1.2, `ssl` strict, `automatic_https_rewrites` on.
+Print the two commands it will not run. Verify from outside and print a table.
+
+**Where it came from.** stonesteps50k.com moved from GoDaddy to Cloudflare on 2026-09-18.
+Every step above was done by hand through the API and wrangler that morning, in order, with
+the client waiting, and every step is identical for the next site. A runbook a human
+follows at speed on the one irreversible morning of a project is a runbook with a step
+missed in it.
+
+**Dry run by default, and that is the whole safety model.** With no flags it makes no
+state-changing calls and no outside checks, and nothing leaves the machine, not even a GET.
+It reads the repo, prints the plan, and stops. `--write` is the only thing that lets it
+act. The blast radius here is a client's live domain and their mail, and a plan you can
+read and disagree with before anything happens is worth more than any amount of care in the
+calls themselves. Reads are suppressed in dry run too, deliberately: a plan that quietly
+depends on live account state reads differently to the person who has the credentials and
+the person who does not, and both of them have to be able to review it.
+
+**Idempotent, and it says why it is skipping.** Every step checks whether it is already
+done and prints the reason. Running it twice is a no-op; running it after a partial failure
+resumes. It also refuses to import over a zone that already holds records, because
+re-importing on top is exactly how a zone ends up with two SPF records.
+
+**It stops at "pending" on purpose.** A custom domain cannot be attached and a certificate
+cannot be issued until Cloudflare is authoritative. If the zone is not active the script
+says so, says what to do, and reports that nothing below was attempted. Half a cutover that
+announces itself is fine. Half a cutover that looks finished is not.
+
+### The zone audit, which is the part that earns its keep
+
+The website being wrong after a cutover is visible in a second. The MAIL being wrong is
+invisible until somebody does not get an email, and a registrar's export is the only
+picture anyone has of a client's mail setup. So the export gets read, not just imported.
+The findings below are not hypothetical: **one real export contained every single one.**
+
+- **Two SPF records on the apex.** RFC 7208 section 3.2 makes that a permerror, so every
+  SPF check on the domain fails. Both are merged into one.
+- **An SPF that names no include for the MX provider it can see.** Neither record on that
+  domain named Microsoft 365, which is what actually sends the client's mail. The provider
+  is detected from the MX and its include is added, FIRST, because SPF stops at the first
+  match and the 10-lookup limit is real.
+- **The merge takes the strictest qualifier present.** `-all` beats `~all`. A merge is the
+  moment to keep a policy, not to quietly loosen one.
+- **A DKIM value with leading whitespace.** A tab and a space at the front of a
+  hand-pasted key. Resolvers hand the value back byte for byte, so the verifier reads a key
+  that does not parse and every signature fails, with a record that looks right in every
+  UI. Stripped, and the record kept.
+- **Records pointing at the old host:** `_acme-challenge`, `ftp`, `staging`. Left out.
+- **Registrar cruft:** `_domainconnect`, and the eight GoDaddy Workspace Email names in a
+  zone whose mail has been on Microsoft 365 for years.
+- **The apex A and www are left out on purpose**, and the audit says so as `info` rather
+  than as a fault: the Worker custom domains create both themselves, with their own
+  certificates, and importing an A record for the apex could answer from the old host in
+  the window before the custom domain attaches.
+
+**The one rule in there that needed a second condition.** GoDaddy's mail names are dropped
+only when the MX says mail is elsewhere AND the record actually points at
+`secureserver.net`. Microsoft 365 wants an `autodiscover` CNAME of its own, and a name-only
+rule would have thrown away a record the new provider needs, breaking mail client setup for
+everyone on the domain. That case is a named test.
+
+**A cleaned file is written next to the original, in both modes, and kept.** It carries
+every dropped record as a comment saying why. On the day a client's mail misbehaves after a
+move, the diff between the two files is the first thing anybody wants to read.
+
+**The logic is pure and unit tested (25 cases) because it runs once per client.** Same
+reasoning as card 49's `raceDayDue`: a rule that fires once, on the one irreversible day of
+a client's project, is exactly the rule nobody notices is wrong.
+`scripts/lib/zone-audit.mjs` holds it, a `.d.mts` types it so a TypeScript test can import
+it with no directive, and `scripts/fixtures/godaddy-zone-export.txt` is the deliberately
+broken fixture.
+
+### Two commands it will not run, and why that is not laziness
+
+- `npx wrangler email sending enable <domain>` is a **beta** command that writes SPF and
+  DKIM under a `cf-bounce` subdomain and puts the account into an onboarding flow with no
+  documented stable REST equivalent. Wrapping a beta CLI in a script that runs against a
+  client's live mail domain trades a command somebody reads for one they do not. With
+  `--write` the script does check `wrangler email sending list` and skips the instruction
+  when the domain is already onboarded.
+- `npx sanity cors add https://<domain> --credentials` needs the interactive Sanity login,
+  not an API token. Skip it and the embedded Studio loads on the new origin and then fails
+  every request, which looks like a broken build rather than a missing CORS entry.
+
+**Per-site adaptation: none, which is the point.** The domain comes from
+`src/data/site.ts` and the Worker name from `wrangler.jsonc`, both already per-site.
+`--domain` and `--worker` exist for rehearsal against a fake domain, not for daily use: a
+cutover that takes the domain as an argument is a cutover where somebody can type the wrong
+one.
+
+**What it needs:** `CLOUDFLARE_API_TOKEN` (Zone:Edit, DNS:Edit, SSL:Edit, Workers:Edit) and
+`CLOUDFLARE_ACCOUNT_ID`, from the environment or `.env`.
+
+**One change to `sync-check.mjs` came with it.** `.mts` and `.cts` were added to its
+extension list. A plain-JS module in `scripts/lib/` that a TypeScript test imports gets a
+hand-written `.d.mts` beside it, and that declaration is as portable as the module it
+describes; without the extension its marker was scanned for and never found. That is the
+worst state a drift check can be in, because the file claims to be canonical and is
+silently not checked. 87 marked files now, all `SAME`.
+
+**Status: `partial` on stonesteps-50k on purpose.** The cutover HAPPENED there, by hand;
+the script did not exist yet and has not been run against a live zone in either direction.
+It is proved in dry run against a fake domain and its audit is proved against a fixture
+carrying every real fault. The first `--write` run is on the next client, and whoever does
+it should read the plan line by line rather than trusting this paragraph.
+
+---
+
+## Card 49: Two automation patterns for outside data (2026-09-18)
+
+**Canonical:** `docs/agent/automation-patterns.md`,
+`docs/templates/workflows/external-import.yml`,
+`docs/templates/workflows/record-and-bake-step.yml`
+**Worked examples (stonesteps-50k):** `scripts/import-results.mjs`,
+`.github/workflows/results-import.yml`, `scripts/weather-sync.mjs`,
+`scripts/lib/weather.mjs` + `weather.d.mts`
+**Applies to:** any client whose site shows data that lives in somebody else's system.
+
+**The rule underneath both.** A yearly touch is a touch that gets forgotten. A step that
+runs once a year, is nobody's job in particular, and produces a page that looks fine either
+way will eventually not happen, and the site is quietly stale for months. On Stone Steps
+every other yearly thing was already automatic and the weather was the one manual step
+left, which is exactly the one that would have been missed.
+
+**The templates are under `docs/templates/workflows/`, not `.github/workflows/`,** so
+nothing in this repo runs them. GitHub only executes what is in the real directory. A fork
+copies one across, fills in the `<ANGLE_BRACKET>` placeholders, and commits it.
+
+### Pattern 1: import and deploy on change
+
+An idempotent importer (deterministic `_id`s, `createOrReplace`) that **discovers what
+exists upstream rather than carrying a list**. A hardcoded list of years is a yearly touch
+wearing a disguise: it just moves the forgetting from "run the import" to "add 2027 to the
+array". A workflow that counts the documents before and after and deploys only when the
+count moved, with `concurrency` (`cancel-in-progress: false`, because a half-finished
+import is worse than a queued one) and a schedule dense around the event and weekly the
+rest of the year.
+
+Three details that are easy to get wrong. The count is a plain `curl` because a public
+dataset needs no token. The "after" count POLLS, because Sanity commits with
+`visibility: 'async'` and the query index trails the write by a second or two, which reads
+as "nothing changed". And credentials are checked in a STEP, never in an `if:`, because a
+secret cannot be read in an `if:` expression; missing ones warn and skip, which is what
+makes the file safe to commit before any of them exist.
+
+**The limit is documented in capitals in the file's own header.** A re-import that CORRECTS
+an existing row does not change the count, so it will not trigger a deploy; that is what
+`deploy_anyway` is for. A workflow that silently skips the deploy you needed is worse than
+one that admits when it will.
+
+### Pattern 2: record and bake
+
+A value knowable in advance becomes true later and must not be lost when the source moves
+on. It is recorded as **its own document** once a condition holds, and a build-time step
+bakes the derived data into a **committed file**.
+
+- **A document, not a field**, because the source field gets edited. The race date sits on
+  The Race months ahead and the editor moves it to next year as soon as the race is run.
+- **A committed file, not a fetch**, so a visitor never waits on a third-party archive and
+  the page cannot go blank when that archive is down.
+- **The condition is a pure function with an injectable clock** (`raceDayDue()` in
+  `scripts/lib/weather.mjs`, typed by a `.d.mts` beside it, unit tested), exposed as
+  `--as-of YYYY-MM-DD` so next November can be rehearsed today, and `--dry-run` so the
+  rehearsal writes nothing.
+- **Leave a margin for the source's own lag.** ERA5 publishes about five days behind and
+  answers with nulls before that, which would bake a blank bar into the page. Six days is
+  the margin. Every external archive has a lag; find out what it is rather than retrying a
+  source that is correctly saying "not yet".
+- **Fail soft on the network, always.** The bake runs before every build. A source that is
+  down must never block a deploy: warn with `::warning::`, keep the years already on file,
+  try again next time.
+
+**The two patterns compose.** The bake prints `changed=true|false` to `$GITHUB_OUTPUT`, so
+the import workflow folds it in as a second independent reason to deploy: one workflow, one
+deploy, two reasons it might be worth doing.
+
+**Why this is a card and not just a doc.** Neither pattern is about running races. The
+shapes are "the client's real data lives somewhere else" and "a value the site needs
+becomes true later", and most clients with anything dynamic have one of them. Writing them
+down as shapes is what stops the next one being rebuilt from scratch with the same three
+bugs in it.
+
+## Card 50: The production deploy nobody inherited (2026-09-18)
 
 **Canonical:** `.github/workflows/deploy.yml`
 **Applies to:** every project forked from this starter.
@@ -4613,7 +4854,7 @@ human pushing code can act on the same warning.
 
 ---
 
-## Card 49: Lighthouse was measuring a site nobody is served (2026-09-18)
+## Card 51: Lighthouse was measuring a site nobody is served (2026-09-18)
 
 **Canonical:** `scripts/serve-dist.mjs` (PORTABLE), and the `collect` block of
 `lighthouserc.json`

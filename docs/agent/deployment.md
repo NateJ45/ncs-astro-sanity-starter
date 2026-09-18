@@ -13,6 +13,12 @@
 
 As of early 2026, Cloudflare merged Pages into Workers. Pages is in maintenance mode; Workers gets all new investment. New Astro projects should use Workers via the `@astrojs/cloudflare` adapter and `wrangler deploy`.
 
+### Putting a site on its real domain
+
+`npm run cutover` (`scripts/cutover.mjs`) takes a site from "the zone is not on Cloudflare" to "live on its domain, mail intact": it finds or creates the zone, audits and imports a registrar's zone export, attaches the Worker to the apex and www as custom domains, files the 301 from www, sets the four TLS settings this studio uses everywhere, and verifies the result from outside. **Dry run by default**; `--write` is the only thing that lets it act. Read the plan first, every time. Full detail in PORTS.md card 48.
+
+Two commands it deliberately does not run, and prints instead: `npx wrangler email sending enable <domain>` (a beta command with no stable API behind it) and `npx sanity cors add https://<domain> --credentials` (needs the interactive Sanity login). Without the second one the embedded Studio loads on the new origin and then fails every request, which looks like a broken build rather than a missing CORS entry.
+
 ### Sanity -> live site rebuild model (READ THIS BEFORE CHANGING CONTENT EXPECTATIONS)
 
 The site is `output: 'static'` -- every page is **pre-rendered to HTML at build time, not fetched at runtime**. Practical implication: when an editor edits a field in Sanity and clicks Publish, **the change does NOT appear on the live site until the site rebuilds**. The Sanity dataset updates instantly, but the live HTML is whatever was generated at the last build.
@@ -75,6 +81,32 @@ Bindings (`CONTACT_DB` for D1, `EMAIL` for Email Sending) are configured in `wra
 - `PUBLIC_CF_ANALYTICS_TOKEN` -- Cloudflare Web Analytics token. Without it the analytics beacon doesn't render.
 - `PUBLIC_CALENDLY_URL` -- optional. Booking link for the discovery call CTA.
 - `PUBLIC_NEWSLETTER_FORM_ACTION` -- optional. Build-time override for the ESP form-action endpoint.
+
+### Contact form: turning it on
+
+Added 2026-09-18. Until then nobody in the family had watched a message actually arrive, and this section said so. One has now (Stone Steps 50K, confirmed by the client the same morning), so these are the six steps that worked, in the order they worked in. `wrangler.jsonc` carries the same list as a comment next to the bindings themselves; PORTS.md card 45 carries the reasoning.
+
+**Prerequisite: the domain has to be on Cloudflare DNS.** Email Sending cannot be enabled otherwise, and that is the single thing that blocked this for months. `npm run cutover` is the script that moves a zone across.
+
+1. `npx wrangler d1 create <site>-contact`, and note the returned `database_id`.
+2. `npx wrangler d1 migrations apply <site>-contact --remote`. The remote apply is deliberately separate from the local one.
+3. `npx wrangler email sending enable <domain>`. This onboards the domain for **outbound** mail: SPF and DKIM go under a `cf-bounce` subdomain, so it sits alongside Microsoft 365 or Google Workspace on the same domain. Email **Routing** would not, because it takes the apex MX.
+4. `npx wrangler secret put CONTACT_TO` and `npx wrangler secret put CONTACT_FROM`. Secrets, not vars: `CONTACT_TO` is where a client's enquiries land.
+5. Uncomment the two binding blocks in `wrangler.jsonc`, paste the database id, and deploy. Keep that as its own commit: a deploy that fails on a binding is much easier to read when the binding is the only thing that changed.
+6. Send **one** labelled test submission through the live form, then read the row back:
+
+   ```
+   npx wrangler d1 execute <site>-contact --remote \
+     --command "SELECT id, received_at, notified, notify_error FROM contact_submissions ORDER BY id DESC LIMIT 1"
+   ```
+
+   `notified = 1` is the proof, and it is the only proof. A 200 from the endpoint does not distinguish a working form from a silently broken one, because the route returns 200 for a stored-but-not-sent submission on purpose: the visitor did their part and the message exists.
+
+**Two things to hand to a human rather than an agent.** Steps 2 and 4 can trip a permission gate, and did during the Stone Steps cutover: the remote migration writes to a live database and `secret put` reads a value from a prompt. Give those two to whoever holds the account and let the agent do the rest.
+
+**DMARC stays at `p=none`** until the client's own mail provider has DKIM set up. Tightening it first means the client's ordinary mail starts failing, which is a much bigger problem than a contact form.
+
+**Turnstile is separate and optional.** The endpoint skips it entirely when `TURNSTILE_SECRET` is unset, and the honeypot plus the timing check stand on their own. Stone Steps shipped without it.
 
 ### Studio: deploy after schema changes
 

@@ -1,0 +1,94 @@
+# TEMPLATE, AND NOT A WORKFLOW AT ALL: this is a STEP BLOCK to paste into an
+# existing job. It lives under docs/templates/workflows/ so GitHub never tries to
+# run it, and it is not a whole file because that is the honest shape of it. The
+# bake belongs inside the deploy job you already have, before the build.
+#
+# WHAT IT IS. The "record and bake" shape from docs/agent/automation-patterns.md,
+# generalised from stonesteps-50k (2026-09-18) where the thing being recorded is
+# the race day and the thing being baked is that day's weather.
+#
+# THE SHAPE, in one sentence: a value the site will need is knowable in advance,
+# becomes TRUE later, and must not be lost when the source moves on, so it is
+# recorded as its own document once a condition holds and then baked into a
+# committed file at build time.
+#
+# WHY A DOCUMENT AND NOT A FIELD. The source field gets edited. On Stone Steps the
+# race date sits on The Race document months ahead, and the editor moves it to next
+# year's date as soon as this year's race is run. A `raceDay` document written
+# before that edit is durable memory; a field on The Race is not.
+#
+# WHY A COMMITTED FILE AND NOT A FETCH. The page reads the file, so a visitor never
+# waits on a third-party archive and the page cannot go blank when that archive is
+# down.
+#
+# WHAT YOU HAVE TO SUPPLY: scripts/<SYNC_SCRIPT>.mjs with two modes.
+#
+#   --record   (needs SANITY_API_WRITE_TOKEN) Reads the source field. If the
+#              condition holds and the value is not on file, writes the document
+#              with `createIfNotExists` and a deterministic _id.
+#
+#   (default)  Read-only. Fetches whatever the baked file is missing and rewrites
+#              it. Prints `changed=true|false` and appends the same to
+#              $GITHUB_OUTPUT so the calling workflow can fold it into its own
+#              deploy-or-not decision.
+#
+# THREE RULES THE SCRIPT HAS TO FOLLOW, and each one is a bug that was found the
+# hard way.
+#
+#   1. THE CONDITION IS A PURE FUNCTION WITH AN INJECTABLE CLOCK, in scripts/lib/,
+#      typed by a .d.mts beside it, unit tested in src/lib/. A rule that runs once
+#      a year, on a runner, in November, is exactly the rule nobody notices is
+#      wrong. Expose it as `--as-of YYYY-MM-DD` so next November can be rehearsed
+#      today, and `--dry-run` so the rehearsal writes nothing.
+#
+#   2. LEAVE A MARGIN FOR THE SOURCE'S OWN LAG. Every external archive publishes
+#      behind real time (the weather archive Stone Steps uses is about five days
+#      behind, and asking sooner returns nulls, which would bake a blank into the
+#      page). Find out what the lag is and wait past it, rather than retrying a
+#      source that is answering correctly with "not yet".
+#
+#   3. FAIL SOFT ON THE NETWORK, ALWAYS. The bake runs on every deploy. A source
+#      that is down must never block a deploy: warn, keep what is already on file,
+#      and let the next run try again.
+#        } catch (err) {
+#          console.warn(`::warning::<thing> for ${key} not baked: ${err.message}`);
+#        }
+#
+# ── PASTE FROM HERE, into the job that deploys, BEFORE the build step ─────────
+
+- name: Record <WHAT> if it is due
+  # Write mode. Idempotent: it writes at most one document and only when the
+  # condition holds, so running it daily costs a second and changes nothing on
+  # 364 of 365 days.
+  env:
+    PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+    PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+    SANITY_API_WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+  run: node scripts/<SYNC_SCRIPT>.mjs --record
+
+- name: Bake <DERIVED_DATA>
+  # Read-only against Sanity, which is why it is safe to run in every deploy and
+  # not only in the scheduled import. `id:` is what makes the output readable by
+  # the deploy condition below.
+  id: bake
+  env:
+    PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+    PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+  run: node scripts/<SYNC_SCRIPT>.mjs
+# ── AND THEN, in the conditions on the build and deploy steps ─────────────────
+#
+# Fold `steps.bake.outputs.changed` in as a SECOND independent reason to deploy,
+# alongside whatever the import already gates on. That is how the two patterns
+# compose: one workflow, one deploy, two reasons it might be worth doing.
+#
+#   if: >-
+#     needs.gate.outputs.can_deploy == 'true' &&
+#     (steps.before.outputs.count != steps.after.outputs.count ||
+#      steps.bake.outputs.changed == 'true' ||
+#      inputs.deploy_anyway)
+#
+# ── ONE MORE PLACE THIS BELONGS ───────────────────────────────────────────────
+#
+# Put the bake in the ORDINARY deploy workflow too, before its build, with no
+# condition at all. It is cheap when there is nothing to do, and a value baked
+# into the build is a value that cannot be missing from the build.
