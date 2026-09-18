@@ -23,6 +23,17 @@ Two commands it deliberately does not run, and prints instead: `npx wrangler ema
 
 The site is `output: 'static'` -- every page is **pre-rendered to HTML at build time, not fetched at runtime**. Practical implication: when an editor edits a field in Sanity and clicks Publish, **the change does NOT appear on the live site until the site rebuilds**. The Sanity dataset updates instantly, but the live HTML is whatever was generated at the last build.
 
+**Since 2026-09-18 the starter ships `.github/workflows/deploy.yml`, and that is the
+mechanism to wire on a new project.** It deploys on a push to `main`, on a manual
+`workflow_dispatch`, and on a `repository_dispatch` of type `sanity-publish`, which is
+what a Sanity webhook sends. So the publish webhook now points at GitHub's dispatches
+endpoint for the repo, with an `Authorization: Bearer <token>` header (the word `Bearer`
+is load-bearing: without it GitHub answers 401 and Sanity reports only a failed attempt)
+and a projection of exactly `{"event_type": "sanity-publish"}`. The GROQ filter below is
+unchanged and still the right one. The Cloudflare build-hook steps that follow describe
+the older route, for a fork that builds through Cloudflare's own git integration instead.
+`docs/bootstrap/NEW-PROJECT.md` Step 8 is the setup order.
+
 There are two ways the site rebuilds:
 
 1. **`git push origin main`** -- Cloudflare detects the push -- triggers `npm run build` -- site updates in ~1-3 min.
