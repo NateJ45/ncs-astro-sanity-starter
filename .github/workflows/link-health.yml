@@ -1,0 +1,47 @@
+name: Link health
+
+# Weekly check of the links this site sends visitors to on OTHER people's sites:
+# whatever the header nav, the footer, the social links, the page-builder CTAs
+# and any document with a url field currently point at. They are read out of the
+# DATASET, not the source, so a link an editor changes in the Studio is the link
+# that gets checked.
+#
+# WHY IT IS NOT PART OF CI. `npm run check:links` walks the built site and
+# deliberately skips external hosts, because failing a build every time a third
+# party has a bad minute teaches everyone to ignore the build. This runs on its
+# own schedule instead, where a red run is information rather than a blocker.
+#
+# It needs no secrets: a public dataset is readable over the plain query API,
+# and the script uses only built-in fetch.
+#
+# A GONE link (404, 410, or a host that never answers) fails the run, which
+# mails the repo owner. A link that answers but refuses a script, which is what
+# some social hosts do to anything without a browser session, is reported and
+# does NOT fail. That distinction is the whole reason this is worth running: a
+# checker that cries wolf gets muted, and a muted checker is worse than none.
+#
+# With no PUBLIC_SANITY_PROJECT_ID set, which is how a fresh clone of this
+# starter stands, the script says so and exits 0.
+
+on:
+  schedule:
+    - cron: '15 9 * * 1' # Mondays 09:15 UTC
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # No `npm ci`: the script has no dependencies, on purpose, so this job
+      # stays a few seconds rather than a few minutes.
+      - name: Check every external link in the dataset
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: node scripts/check-live-links.mjs --verbose

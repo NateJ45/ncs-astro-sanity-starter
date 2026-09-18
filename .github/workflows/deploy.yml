@@ -1,0 +1,184 @@
+name: Deploy
+
+# Deploys the production Worker. The Worker NAME is not written here: it comes
+# from wrangler.jsonc by way of the adapter's generated config, which is what
+# `npm run apply-brand` already rewrites for a fork.
+#
+# ── WHY THIS EXISTS ─────────────────────────────────────────────────────────
+# Until 2026-09-18 this starter shipped no production deploy at all. There was
+# deploy-staging.yml for the `staging` branch and nothing for `main`, so every
+# project forked from here wrote this same workflow on day one: stonesteps-50k
+# forked at 13:59 on 2026-09-07 and was authoring its own deploy workflow by
+# 20:30 the same evening. Until a fork did that, a merged code change was live
+# only if somebody remembered, and a Sanity publish was live only if somebody
+# remembered twice.
+#
+# ── THE THREE WAYS IT FIRES ─────────────────────────────────────────────────
+# push to main          a code change. Docs-only paths are ignored, see below.
+# repository_dispatch   an editor published in the Studio. A Sanity webhook
+#   (sanity-publish)    POSTs to GitHub's dispatches endpoint. This is the piece
+#                       that makes content edits reach the live site on their
+#                       own, because the site is STATICALLY BUILT: publishing in
+#                       Sanity changes the dataset and nothing else. Wiring the
+#                       webhook is a per-project setup step; see
+#                       docs/agent/deployment.md.
+# workflow_dispatch     a human, for when something needs pushing out now.
+#
+# ── WHAT IT WILL NOT DO ─────────────────────────────────────────────────────
+# It will not deploy a build whose unit tests fail. They run in well under a
+# second and three of them are gates rather than ordinary suites: colour
+# contrast over the theme palette, the layout-variant column derivation, and
+# the section-field drift check. `astro build` does NOT type-check, so without
+# this step a red repo could still ship.
+#
+# Playwright is deliberately NOT run here. ci.yml runs it on the same push, in
+# parallel, and duplicating a browser matrix in the deploy path buys nothing:
+# if it fails, the fix is another commit either way.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      # Prose that cannot reach the built site. Everything else deploys,
+      # because a missed deploy is a worse failure than a spare one.
+      - 'docs/**'
+      - 'README.md'
+      - 'CLAUDE.md'
+      - 'OPERATIONS.md'
+      - 'PORTS.md'
+      - '.github/**/*.md'
+  repository_dispatch:
+    types: [sanity-publish]
+  workflow_dispatch:
+
+# Deploys queue rather than cancelling each other. cancel-in-progress would
+# abort a run mid `wrangler deploy`, and three spare minutes is a much better
+# outcome than an interrupted upload.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        # A secret cannot be read in an `if:` expression, so the check happens
+        # in a step. Missing credentials warn and skip rather than failing, so
+        # a fresh fork of this starter is never red for a reason it cannot yet
+        # fix. Same pattern as deploy-staging.yml, uptime.yml and
+        # sanity-backup.yml.
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Cloudflare credentials not set; skipping the production deploy."
+          fi
+
+  deploy:
+    needs: gate
+    if: needs.gate.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Sanity types
+        run: npm run typegen
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      # A PROJECT THAT GENERATES SHARE CARDS ADDS ITS FRESHNESS CHECK HERE, and
+      # adds it as a WARNING, not a failure. This workflow also fires on
+      # repository_dispatch when an editor publishes, and a stale picture must
+      # never be able to stop a content change reaching the live site. Stale
+      # cards are a much smaller problem than a site that quietly stopped
+      # updating. The same check belongs in ci.yml as a hard failure, where a
+      # human is pushing code and can act on it. The starter has no committed
+      # per-page cards yet, so there is nothing to check.
+
+      - name: Build
+        env:
+          # Without these the build succeeds and ships EMPTY pages, because
+          # sanityFetch falls back silently when the project id is absent. That
+          # is the right behaviour for a fresh clone and the wrong thing to
+          # deploy over a live site, so treat a missing variable here as a real
+          # problem.
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: |
+          if [ -z "$PUBLIC_SANITY_PROJECT_ID" ]; then
+            echo "::error::PUBLIC_SANITY_PROJECT_ID is not set. The build would ship empty pages over the live site."
+            exit 1
+          fi
+          npm run build
+
+      # THE CONFIG FLAG IS LOAD-BEARING. This is a hybrid static+SSR build, and
+      # a plain `wrangler deploy` reads the SOURCE wrangler.jsonc, which knows
+      # nothing about the adapter's generated asset manifest: every sub-route
+      # 404s. Deploy the adapter's own config, exactly as `npm run deploy` does.
+      # No `--name` here, unlike the staging deploy: production IS the name in
+      # wrangler.jsonc.
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy -c dist/server/wrangler.json
+
+      # A deploy that 200s on the home page and empties every sub-route is a
+      # failure this family has already had once, via assets.not_found_handling.
+      # Prove the routes rather than trusting the upload.
+      #
+      # The base URL is DERIVED, never hardcoded: repo variable PRODUCTION_URL
+      # if the project set one (a custom domain, or the workers.dev host), else
+      # the domain in src/data/site.ts, which apply-brand writes. A fork that
+      # has changed neither still has the placeholder domain, and smoking
+      # example.com would be a test of somebody else's server, so the step says
+      # so and skips.
+      - name: Smoke the deployed site
+        env:
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          BASE="$PRODUCTION_URL"
+          if [ -z "$BASE" ]; then
+            DOMAIN=$(sed -n "s/^const _domain = '\(.*\)';.*/\1/p" src/data/site.ts)
+            BASE="https://$DOMAIN"
+          fi
+          case "$BASE" in
+            *example.com*|https://)
+              echo "::warning::No production URL configured (src/data/site.ts still has the placeholder domain, and vars.PRODUCTION_URL is unset). Skipping the smoke."
+              exit 0
+              ;;
+          esac
+          echo "Smoking $BASE"
+          FAIL=0
+          for path in / /about /services /process /faq /contact /journal /privacy; do
+            CODE=$(curl -sL -o /dev/null -w '%{http_code}' "$BASE$path")
+            echo "$CODE $path"
+            [ "$CODE" = "200" ] || FAIL=1
+          done
+          # One content assertion, so an empty-but-200 deploy cannot pass. The
+          # site name is in every page's <title>, and it is the first thing a
+          # fallback-content build would still get right, so check for it on a
+          # page whose body comes from Sanity rather than on the shell alone.
+          NAME=$(sed -n "s/^const _name = '\(.*\)';.*/\1/p" src/data/site.ts)
+          curl -sL "$BASE/" | grep -qF "$NAME" || {
+            echo "::error::The home page rendered without the site name in it."
+            FAIL=1
+          }
+          exit $FAIL
