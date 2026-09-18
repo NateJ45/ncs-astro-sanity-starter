@@ -126,7 +126,15 @@ export default defineConfig({
       // that is archived) drops out here too. `page` is a full URL, so compare
       // on the pathname with the trailing slash Astro's directory format adds.
       filter: (page) => {
-        if (page.includes('/404') || page.includes('/studio') || page.includes('/preview'))
+        // /styleguide is a real built route so Playwright can load it out of
+        // dist/client, but it is the design-system wall, not a page for
+        // visitors, and it is noindex. Keep it out of the sitemap too.
+        if (
+          page.includes('/404') ||
+          page.includes('/studio') ||
+          page.includes('/preview') ||
+          page.includes('/styleguide')
+        )
           return false;
         try {
           const path = new URL(page).pathname.replace(/\/+$/, '');

@@ -33,7 +33,10 @@
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:unit": "node --experimental-strip-types --test src/lib/*.test.ts",
-    "serve:dist": "http-server dist/client -p 4321 -s -c-1 --silent",
+    "test:visual": "playwright test -c playwright.visual.config.ts",
+    "test:visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots=all",
+    "links:live": "node scripts/check-live-links.mjs",
+    "serve:dist": "node scripts/serve-dist.mjs --port 4321",
     "check:links": "linkinator ./dist/client --recurse --skip \"^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])\" --skip \"/studio\" --skip \"/preview\" --skip \"/api/\"",
     "favicon": "node scripts/generate-favicons.mjs",
     "scaffold": "node scripts/scaffold.mjs"

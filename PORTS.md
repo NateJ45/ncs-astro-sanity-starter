@@ -100,16 +100,18 @@ is installing it as of the date on the card.
 | 34  | Studio search weights (__experimental_search)                     | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | no             |
 | 35  | The family test standard (gates, suites, budgets)                 | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 | yes            |
 | 36  | sync-check as a CI gate                                           | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
-| 37  | Visual regression on a fixed-data styleguide                      | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 37  | Visual regression on a fixed-data styleguide                      | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 38  | Studio Checkup (what needs attention)                             | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 39  | Year-rollover wizard                                              | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 40  | Studio Welcome pane (task cards)                                  | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 41  | Guide handbook held as repo data                                  | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 42  | External link health, on its own schedule                         | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 42  | External link health, on its own schedule                         | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 43  | Contrast for what axe declines to judge                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 44  | Fork residue audit                                                | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
 | 46  | Share cards in the brand's real typeface                          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 47  | The icon set, from one drawing                                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 48  | Production deploy workflow                                        | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 49  | Compressed static server for Lighthouse                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -187,11 +189,12 @@ Neither mode builds. The caller builds; the script reads existing output. That k
 fast to re-run, keeps build noise out of the diff, and lets capture and compare be
 pointed at the same artifacts while debugging the normalizer itself.
 
-The normalizer strips exactly five classes of build-varying value and leaves everything
+The normalizer strips exactly six classes of build-varying value and leaves everything
 else byte-faithful: `/_astro/` content hashes, Astro's generated `data-astro-cid-*` and
-transition-scope hashes, the `<astro-island>` render-order `prefix`, the contents and
-accessible name of an element with `role="timer"`, and whitespace between tags. Text,
-classes, ids, aria, inline styles and JSON-LD are otherwise all compared.
+transition-scope hashes, the `<astro-island>` render-order `prefix`, the BODY of every
+inlined `<style>` element, the contents and accessible name of an element with
+`role="timer"`, and whitespace between tags. Text, classes, ids, aria and JSON-LD are
+otherwise all compared.
 
 **Rule 5 added 2026-09-12 (stonesteps-50k), ported here the same day.** An element with
 `role="timer"` is by definition a value that counts, and a countdown server-rendered so the
@@ -215,6 +218,28 @@ rewritten, so its `aria-label` went through untouched and the page failed parity
 rebuild. It is `\\b` now. Worth remembering generally: a regex built in a template literal
 needs its backslashes doubled, and the failure is silent because an unmatched pattern is
 not an error.
+
+**The inlined-stylesheet rule, added 2026-09-18 (learned on stonesteps-50k, written
+here).** It is rule 4 in the file's list, and it is the reason the last sentence above no
+longer promises to compare inline styles. A project that sets
+`build.inlineStylesheets: 'always'` ships the whole stylesheet inside every page, so one
+changed colour token rewrites the same tens of kilobytes on all 31 routes at once.
+`parity compare` then answers with every page DIFF and a diff body that is pure CSS,
+which is not a parity report, it is a recapture instruction. Four full baseline
+recaptures were taken on stonesteps in a single week for exactly this, and not one of
+them carried information. The rule replaces each `<style>` element's BODY with its byte
+count and an FNV-1a checksum, so the stylesheet change still breaks parity, still names
+every affected page, and takes ONE line on each instead of the whole file. The `<style>`
+tag and its attributes are untouched, so a lost or added stylesheet is still real drift,
+and the checksum is deliberately a change detector, not a security primitive: it is
+written out inline so the file stays dependency-free.
+
+**Proof, 2026-09-18, in the starter.** Temporarily set `inlineStylesheets: 'always'`
+(121KB of CSS per page), capture, change `--color-tertiary` by one hex digit, rebuild,
+compare: ten of eleven pages report DIFF with a single changed line each,
+`- <style>/* CSS 121864B abec36b4 */</style>` against
+`+ <style>/* CSS 121864B ccd4b458 */</style>`. Config reverted, rebuilt, recaptured,
+11/11 PASS.
 
 **Parameterization done on the port:** the built-HTML root is auto-detected
 (`dist/client` when it holds an index.html, which is the adapter 14 shape, else `dist`,
@@ -3958,9 +3983,12 @@ emails correctly reported as notices rather than failures.
 
 **What it is.** A `/styleguide` route that renders the design system with every value
 hardcoded, plus a SEPARATE Playwright config that screenshot-diffs it in both themes.
-Canonical implementation currently in **stonesteps-50k** (`src/pages/styleguide.astro`,
-`playwright.visual.config.ts`, `tests/visual/styleguide.spec.ts`,
-`.github/workflows/visual.yml`); the technique came from wcp-website.
+Proven on stonesteps-50k; the technique came from wcp-website. **Brought home
+2026-09-18**, so the canonical copies are now `playwright.visual.config.ts` and
+`tests/visual/styleguide.spec.ts` in this starter (both marked PORTABLE), with
+`.github/workflows/visual.yml` and `src/pages/styleguide.astro` carried unmarked because
+each holds something legitimately per-site: the workflow's Sanity `env:` block, and the
+wall's own contents.
 
 **The cost that produced it.** Three defects shipped in one afternoon that every gate in
 that repo was structurally blind to. The footer still imported the FORKED REPO'S logo,
@@ -3984,8 +4012,8 @@ content, and a gate that goes red for nothing gets muted.
 **Two rules that keep it honest.**
 
 1. Baselines are a LINUX artefact. Font rasterisation differs from Windows, so they are
-   generated by `workflow_dispatch` in CI and committed. A local Windows run failing is
-   expected; CI is the arbiter, exactly as with the a11y sweeps.
+   generated by `workflow_dispatch` in CI and committed. CI is the arbiter, exactly as
+   with the a11y sweeps.
 2. Refresh baselines only when the visual change is INTENDED, in the change that causes
    it. A baseline updated to make the red go away converts the gate into decoration,
    which is worse than no gate because it looks like cover.
@@ -4001,6 +4029,28 @@ The main config needs `testIgnore: '**/visual/**'`.
 **Second gotcha.** The regenerate job needs `permissions: contents: write`. The default
 GITHUB_TOKEN is read-only, so the job ran the suite and then could not push what it
 produced.
+
+**Third gotcha, and the amendment made on the way home (2026-09-18). "Expected to fail
+locally" is not a state a gate can survive in.** On stonesteps, rule 1 above left the
+dark snapshot red on every Windows run, and in that repo's first week every agent who
+touched it hit that red, spent time on it, and came away discounting the suite. The
+canonical spec therefore SKIPS on `process.platform === 'win32'` and prints the reason,
+naming the workflow that is allowed to judge it. `VISUAL_FORCE=1 npm run test:visual`
+runs it anyway for anyone debugging the harness rather than the design.
+
+The alternative was to suffix baselines by platform and commit a Windows set beside the
+Linux one. It is rejected, and the reason is the whole point of the gate: a second
+baseline that a laptop can regenerate at will, reviewed by nobody, is a second truth.
+Exactly one set of pixels is the truth and CI owns it. Skipping keeps that; suffixing
+quietly gives it away. Evidence that this is not hypothetical: stonesteps' working tree
+carries a stray `tests/visual/styleguide.spec.ts-snapshots/` holding
+`styleguide-{light,dark}-chromium-win32.png`, which is what happens when a laptop is
+allowed to write baselines at all.
+
+**So a fresh fork gets its first baselines from CI, never from a laptop:** apply the
+brand, then run the Visual regression workflow with `update: true`. Until that has
+happened the suite has nothing to compare against, which is why this starter ships
+`tests/visual/` with no `__screenshots__` directory.
 
 ## Card 38: Studio Checkup, "what needs attention" (2026-09-07)
 
@@ -4096,8 +4146,20 @@ are easy to leave unseeded, so all four panes open EMPTY. Check them on any fork
 
 **What it is.** A dependency-free script that reads every EXTERNAL url out of the DATASET
 (not the source), probes each, and fails only on links that are genuinely gone. Run
-weekly by its own workflow. Canonical: stonesteps-50k `scripts/check-live-links.mjs` and
-`.github/workflows/link-health.yml`.
+weekly by its own workflow. Proven on stonesteps-50k; **brought home 2026-09-18**, so
+the canonical copy is this starter's `scripts/check-live-links.mjs` (marked PORTABLE),
+with `.github/workflows/link-health.yml` alongside it.
+
+**What generalising it changed.** The stonesteps version named that race's own document
+fields, and defaulted its project id to that project's. The canonical version reads the
+three structural places every site built from this starter has (header nav, footer
+columns, social links), the page-builder CTAs, and then a SWEEP of any document carrying
+a `url` or `externalUrl`, so sponsors, partners, suppliers and venues are covered without
+anyone editing the file. It also reads the site's own domain out of `src/data/site.ts`
+and treats absolute links to it as internal: `check:links` already covers those against
+the built output, and going red because the production host had a bad minute is
+uptime.yml's job, not this one's. With no `PUBLIC_SANITY_PROJECT_ID` it says so and exits
+0, which is how a fresh clone of the starter stands.
 
 **Why it is not part of CI.** The build's link checker walks the built site and skips
 external hosts on purpose: failing a build because a third party had a bad minute teaches
@@ -4483,3 +4545,120 @@ FAVICON IS A MARK, NOT A SIGNATURE. On stonesteps-50k the favicon was the client
 four-line painted logo, 48KB of base64 PNG inside an SVG, and an unreadable smudge at the
 16 pixels a browser actually draws. Check legibility at 16 before shipping; if the logo
 has more than one word in it, draw a separate mark.
+
+---
+
+## Card 48: The production deploy nobody inherited (2026-09-18)
+
+**Canonical:** `.github/workflows/deploy.yml`
+**Applies to:** every project forked from this starter.
+
+**What was missing.** The starter shipped `deploy-staging.yml` for the `staging` branch
+and nothing at all for `main`. So every new project wrote this same workflow on day one:
+stonesteps-50k forked at 13:59 on 2026-09-07 and was authoring its own deploy workflow by
+20:30 that evening, from scratch, rediscovering each of the details below. Until a fork
+did that, a merged change was live only if somebody remembered to run `npm run deploy`
+from a laptop, and a Sanity publish was live only if somebody remembered twice, because
+the site is STATICALLY BUILT and publishing changes the dataset and nothing else.
+
+**The three triggers, and why each one is there.** `push` to `main` is the code path,
+with a `paths-ignore` for prose that cannot reach the built site. `repository_dispatch`
+on `sanity-publish` is the content path: a Sanity webhook POSTs GitHub's dispatches
+endpoint, and that is the piece that lets an editor's publish reach the live site on its
+own. `workflow_dispatch` is the human path. A missed deploy is a worse failure than a
+spare one, so the ignore list is short and everything else ships.
+
+**Five details that are not obvious, all of them load-bearing.**
+
+- **`concurrency` with `cancel-in-progress: false`.** Cancelling would abort a run mid
+  `wrangler deploy`. Three spare minutes beats an interrupted upload.
+- **Unit tests gate the deploy; Playwright does not.** `astro build` does not type-check,
+  so without the unit step a red repo could still ship, and three of those suites are
+  gates rather than ordinary tests. The browser matrix runs on the same push in ci.yml,
+  in parallel; duplicating it here buys nothing, because if it fails the fix is another
+  commit either way.
+- **The build fails when `PUBLIC_SANITY_PROJECT_ID` is missing**, rather than succeeding.
+  `sanityFetch` falls back silently with no project id, which is exactly right for a
+  fresh clone and exactly wrong to lay over a live site: it would ship empty pages at 200. The check is an explicit `if [ -z ... ]` with an `::error::`, not a hope.
+- **`deploy -c dist/server/wrangler.json`.** A bare `wrangler deploy` reads the SOURCE
+  `wrangler.jsonc`, which knows nothing about the adapter's generated asset manifest, and
+  every sub-route 404s. There is no `--name` here, unlike the staging deploy: production
+  IS the name in `wrangler.jsonc`, which `apply-brand` already rewrites.
+- **A smoke step, because a deploy that 200s on `/` and empties every sub-route is a
+  failure this family has already had once**, via `assets.not_found_handling`. It walks
+  the built routes and makes one content assertion, so an empty-but-200 deploy cannot
+  pass.
+
+**The generalisations made on the way home.** Nothing is named after a project. The
+Worker name comes from `wrangler.jsonc`. The smoke base URL comes from repo variable
+`PRODUCTION_URL` if a project set one, else the domain in `src/data/site.ts`, and when
+that is still the placeholder the step warns and skips rather than curling somebody
+else's server. The credential gate warns and skips instead of failing, so a fork with no
+Cloudflare secrets is never red for a reason it cannot yet fix, matching
+`deploy-staging.yml`, `uptime.yml` and `sanity-backup.yml`.
+
+**Where the family stands as of this card.** Only stonesteps-50k and wcp-website have a
+production deploy at all, and wcp's is its own divergent form, hence `partial`.
+presacademy, reid-design-site, mas-monograms, 2ndpreschicago and nixoncreativestudio all
+ship `deploy-staging.yml` and nothing for `main`, which is the gap this card closes for
+every fork made from today onward and a five-minute copy for every repo already out
+there.
+
+**Deliberately left out:** stonesteps' share-card freshness step, which needs an OG
+inputs record this starter does not have yet, and its race-day weather bake, which is
+that project's own. The card-freshness SHAPE is worth keeping when a project adds one,
+and it is written into the workflow as a comment: warn in `deploy.yml`, fail in `ci.yml`.
+A stale picture must never be able to stop a content change reaching the live site; a
+human pushing code can act on the same warning.
+
+---
+
+## Card 49: Lighthouse was measuring a site nobody is served (2026-09-18)
+
+**Canonical:** `scripts/serve-dist.mjs` (PORTABLE), and the `collect` block of
+`lighthouserc.json`
+**Applies to:** every repo. All of them deploy to Cloudflare, which compresses
+everything, and all of them audited against a server that does not.
+
+**The bug, and it is a measurement bug, which is the expensive kind.** `lhci`'s built-in
+static server (`staticDistDir`) sends every byte uncompressed. On 2026-09-17 stonesteps
+inlined its stylesheet into every page. Measured through a compressed harness the home
+page went from performance 88 to 99 and LCP 2.47s to 1.56s. Measured by CI it did not
+move at all: 4.2 to 4.9 seconds before and after, flapping either side of a 4.5 second
+hard gate on identical markup. That page was 435KB raw and 84KB gzipped, and at
+Lighthouse's mobile throttle of 1.6Mbps the raw file alone is two seconds of download
+before any CSS can run. CI was penalising the exact optimisation that helped every real
+reader, and a budget that behaves that way eventually gets raised instead of met.
+
+**The fix.** A dependency-free static server for `dist/client` that negotiates brotli or
+gzip from `Accept-Encoding`, sets the same immutable caching the deploy sets on
+`/_astro/*`, and resolves clean URLs to `index.html` the way the Worker does.
+`lighthouserc.json` swaps `staticDistDir` for
+`startServerCommand: node scripts/serve-dist.mjs --port 4173` plus
+`startServerReadyPattern: "serve-dist:"`. THE ASSERT BLOCK IS UNTOUCHED: it is the family
+test standard (card 35) and must not diverge. Only the collection changed, and only so
+that the numbers describe what a reader gets.
+
+**Three things to keep when porting.**
+
+- **Compress once and cache it.** The build is immutable for the life of the server, so a
+  cache keyed on path can never go stale, and it means Lighthouse's three runs are not
+  timing zlib on the second and third.
+- **The ready pattern is a contract.** The server's last line prints `serve-dist:` and
+  `lighthouserc.json` waits for it. Change the line and lhci hangs until its timeout with
+  no useful message.
+- **The url list changes shape.** With `staticDistDir` the URLs are
+  `http://localhost/about/index.html`; with a real server they are
+  `http://localhost:4173/about/`. Forget that and lhci audits nine 404s at a very good
+  LCP.
+
+**A caution rather than a rule.** If a repo has a capture or screenshot harness that must
+never be handed a stale compressed body, leave it on its own tiny uncompressed server.
+That is why stonesteps' map-poster capture keeps one.
+
+**Proof in this repo (2026-09-18):** `npm run build`, then
+`node scripts/serve-dist.mjs --port 4199`, then
+`curl -D - -H 'Accept-Encoding: br' http://localhost:4199/about` returns
+`Content-Encoding: br` with `Content-Length: 7504` against 29473 bytes uncompressed on
+`/`, gzip negotiates to `Content-Encoding: gzip`, and an `/_astro/*.css` request comes
+back `public, max-age=31536000, immutable`.
