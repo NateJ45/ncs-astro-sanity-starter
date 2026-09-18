@@ -5131,6 +5131,43 @@ rendered on any fork's deploy even with a token set. That is the same omission c
 the GA4 one and half of what went wrong at stonesteps-50k, so both variables are wired
 here rather than leaving one to be discovered later.
 
+**GA4 SETS COOKIES, AND THE PRIVACY COPY HAS TO KNOW THAT.** Caught during review
+of this card, not after. The Cloudflare beacon is genuinely cookieless, and years
+of copy in this starter reflected that: the privacy page carried the reassurance
+"traffic is measured with Cloudflare Web Analytics, which counts page visits
+without setting cookies", inside a list headed "What doesn't happen". The moment
+GA4 became available that sentence was false for any fork that set
+`PUBLIC_GA_ID`, and nothing in the build would ever have flagged it. A privacy
+statement that is missing is a gap; one that actively denies a cookie the site is
+setting is a false statement to visitors.
+
+The fix is rule 15 applied to prose. `src/lib/analytics-config.ts` (PORTABLE)
+exports `hasGa`, `hasCfAnalytics` and `setsAnalyticsCookies`, and BOTH the
+component that renders the tags and the page that describes them read it. A fork
+that turns GA4 on cannot end up telling visitors it is off, because the copy is
+derived from the values that decide whether the script renders. `privacy.astro`
+now has a "How traffic is measured" section with three branches: no analytics,
+cookieless only, and GA4 naming the `_ga` cookies in plain words. The stale
+"no tracking pixels" claim went too, for the same reason.
+
+**Two obligations come with turning GA4 on, and they are not the same question.**
+(1) A privacy policy is required by Google's own Analytics terms, which oblige
+you to disclose your use of Analytics and of cookies. That is contractual and
+applies wherever the visitors are, so it is not a judgement call. (2) A consent
+banner is a judgement call, and it turns on audience rather than on the tag: the
+EU and UK ePrivacy rules want prior consent for analytics cookies, while a US
+audience generally does not, and the California thresholds are far above a small
+business site. This starter ships no banner and no consent gate. A fork serving
+EU or UK visitors has to decide that itself; `setsAnalyticsCookies` is the
+boolean to branch on if one is ever added, because it is the cookie that matters,
+not whether analytics exists.
+
+**A fork with no privacy route needs one before it sets `PUBLIC_GA_ID`.** Not
+every site in this family has the page: stonesteps-50k deliberately removed it
+during its build, on the correct reasoning at the time that a race with no
+analytics had nothing to disclose and a footer link to a 404 is worse than no
+link. Adding GA4 changed those facts, so that repo now needs the page back.
+
 **Per-repo work when porting.** Set `PUBLIC_GA_ID` as a repository VARIABLE (not a
 secret; it is public by design and appears in the page source). It is the web data
 stream Measurement ID, `G-XXXXXXXXXX`, NOT the numeric property id the GA4 admin screen

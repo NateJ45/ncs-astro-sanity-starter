@@ -51,16 +51,12 @@
 import CloudflareBeacon from './analytics/CloudflareBeacon.astro';
 import GoogleAnalytics from './analytics/GoogleAnalytics.astro';
 
-// Cloudflare Web Analytics: a plain hex token from the Cloudflare dashboard.
-const cfToken = (import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN ?? '').trim();
-const hasCfToken = cfToken.length > 0;
-
-// Google Analytics 4: the web data stream Measurement ID (G-XXXXXXXXXX), NOT
-// the numeric property id. The shape test is what makes a typo silent rather
-// than a broken tag, and it is also what lets an empty value mean "no GA4".
-const gaId = (import.meta.env.PUBLIC_GA_ID ?? '').trim();
-const hasGa = /^G-[A-Z0-9]+$/.test(gaId);
+// The env reading lives in src/lib/analytics-config.ts rather than here, so the
+// privacy page can describe exactly what this file renders without restating
+// the conditions and drifting from them. That module's header explains the
+// near-miss that made it worth a file of its own.
+import { cfAnalyticsToken, gaId, hasCfAnalytics, hasGa } from '@/lib/analytics-config';
 ---
 
-{hasCfToken && <CloudflareBeacon token={cfToken} />}
+{hasCfAnalytics && <CloudflareBeacon token={cfAnalyticsToken} />}
 {hasGa && <GoogleAnalytics gaId={gaId} />}

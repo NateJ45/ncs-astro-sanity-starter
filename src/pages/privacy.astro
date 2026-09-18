@@ -12,6 +12,14 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
 import PortableTextStatic from '@/components/PortableTextStatic.astro';
 import { getPrivacyPage, getSiteSettings } from '@/lib/queries';
+
+// What this build ACTUALLY ships, read from the same module that decides whether
+// each tag renders. The fallback copy below branches on these rather than
+// asserting a fixed answer: this page used to state flatly that traffic was
+// counted "without setting cookies", which stopped being true the day GA4
+// became available and would have been a false statement to visitors rather
+// than a missing one. See src/lib/analytics-config.ts.
+import { hasCfAnalytics, hasGa } from '@/lib/analytics-config';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
 
@@ -107,12 +115,43 @@ const hasSanityBody = Boolean(page?.body);
               <h2 class="mb-s font-display text-h3 text-foreground">What doesn't happen</h2>
               <ul class="list-disc space-y-1 pl-l text-foreground/80">
                 <li>Your information is never sold.</li>
-                <li>There is no ad targeting or tracking pixels on this site.</li>
-                <li>
-                  Traffic is measured with Cloudflare Web Analytics, which counts page visits
-                  without setting cookies or identifying individual visitors.
-                </li>
+                <li>There is no ad targeting on this site.</li>
               </ul>
+            </div>
+
+            {/*
+              Measurement, described from the build's real configuration rather
+              than asserted. Each branch says what that tool actually does,
+              including the cookie, because Google's own terms require a policy
+              that discloses the use of Analytics and of cookies.
+            */}
+            <div>
+              <h2 class="mb-s font-display text-h3 text-foreground">How traffic is measured</h2>
+              {!hasGa && !hasCfAnalytics && (
+                <p class="text-foreground/80">
+                  This site runs no analytics at all. Visits are not counted, and nothing is stored
+                  on your device for measurement.
+                </p>
+              )}
+              {hasCfAnalytics && (
+                <p class="text-foreground/80">
+                  Page visits are counted with Cloudflare Web Analytics, which sets no cookies and
+                  does not identify individual visitors.
+                </p>
+              )}
+              {hasGa && (
+                <p class="mt-s text-foreground/80">
+                  {/* "also" only reads right when the cookieless paragraph above it rendered. */}
+                  Page visits are {hasCfAnalytics ? 'also ' : ''}measured with Google Analytics,
+                  which does set cookies on your device (named <code>_ga</code> and{' '}
+                  <code>_ga_</code> followed by a stream id) so returning visits are recognised as
+                  the same session. It records which pages are opened, roughly where in the world
+                  the visit came from, and what kind of device was used. It is not used for
+                  advertising, and the data is not sold or shared beyond Google's own processing.
+                  You can block these cookies in your browser settings, or with any tracker-blocking
+                  extension, and the site will work exactly the same.
+                </p>
+              )}
             </div>
 
             <div>

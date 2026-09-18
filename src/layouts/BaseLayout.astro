@@ -250,7 +250,10 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     {/*
       Analytics: the Cloudflare beacon and GA4, each conditional on its own
       environment variable and each a silent no-op when that variable is unset.
-      No cookie banner is needed for either. See src/components/Analytics.astro.
+      The Cloudflare beacon is cookieless. GA4 is NOT: it sets first-party _ga
+      cookies, so a site that turns it on needs a privacy policy disclosing that
+      (Google's own terms require one) and, for an audience in the EU or UK, a
+      consent decision. See src/components/Analytics.astro.
     */}
     <Analytics />
 
