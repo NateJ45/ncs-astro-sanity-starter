@@ -7,40 +7,20 @@
 // (editors make as many as they like), so it is deliberately kept out of the
 // SINGLETON_TYPES sets in sanity.config.ts and structure.ts.
 //
-// Keep RESERVED_SLUGS in sync with src/lib/reservedSlugs.ts (both lists guard
-// the same invariant; the Studio list shows a validation error, the Astro list
-// filters getStaticPaths).
+// The reserved-slug list is IMPORTED from src/lib/reservedSlugs.ts, not copied.
+// It used to be a second hand-kept copy with a "keep in sync" comment over it,
+// which is exactly the shape of thing that goes stale: the two lists guard one
+// invariant from two sides (the Studio shows a validation error, the Astro
+// route filters getStaticPaths) and there is no gate that would notice them
+// disagreeing. There is one list now, and it carries the scaffold markers, so
+// removing a capability takes its slug out of both consumers at once.
 
 import { defineType, defineField } from 'sanity';
 import { DocumentsIcon } from '@sanity/icons';
 import { SECTION_TYPES, sectionArrayOptions } from './sections';
 import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
 import { seoFields } from './_seoFields';
-
-// Every built-in route segment. A custom page slug may not match any of these.
-// Keep in sync with src/lib/reservedSlugs.ts.
-const RESERVED_SLUGS = new Set([
-  'about',
-  'services',
-  'process',
-  'portfolio',
-  'faq',
-  'contact',
-  'journal',
-  'e-design',
-  'shop',
-  'gift-certificates',
-  'quiz',
-  'calculator',
-  'resources',
-  'guides',
-  'press',
-  'privacy',
-  '404',
-  'sitemap-index.xml',
-  'og',
-  '_astro',
-]);
+import { RESERVED_SLUGS } from '../../lib/reservedSlugs';
 
 export const page = defineType({
   name: 'page',

@@ -4,6 +4,17 @@ Every feature that a client may or may not need lives in its own folder here.
 Modules are **OFF by default**. The starter ships with none of them enabled;
 a project enables only the ones that client actually needs.
 
+Two are staged here: `events` and `resources`. The other eleven moved to
+`archive/modules/` on 2026-09-18 because no repo in the family had ever turned
+one of them on. `archive/README.md` says how to bring one back. The folder
+shape below is still the contract, for a module returning from the archive and
+for a new one.
+
+**A new module carries its own scaffold markers from the first commit.** The
+enable process is a copy, so a module that is later not wanted has to be
+un-copied by hand across roughly twenty-five files unless `npm run scaffold`
+can see it. `scripts/scaffold.mjs` documents the four kinds of marker.
+
 ---
 
 ## Required folder shape

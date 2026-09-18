@@ -19,6 +19,10 @@ export default [
       // .studio-dist/ is the output of a standalone `sanity build`, if anyone
       // ever runs one.
       '.studio-dist/**',
+      // Retired work, kept but not maintained. See archive/README.md. Nothing
+      // imports it and nothing type-checks it, so linting it would only report
+      // on code the repo has stopped maintaining on purpose.
+      'archive/**',
       'src/lib/sanity.types.ts',
     ],
   },
