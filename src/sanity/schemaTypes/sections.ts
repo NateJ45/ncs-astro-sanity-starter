@@ -328,7 +328,18 @@ export const statSection = defineType({
               validation: (R) => R.required(),
             }),
           ],
-          preview: { select: { title: 'number', subtitle: 'label' } },
+          // The title is DERIVED, never selected straight from `number`.
+          // Sanity lowercases a preview title to index it, so a title that is a
+          // number throws "toLowerCase is not a function" and the whole array
+          // field renders as a red Unhandled Runtime Error. Found by
+          // `npm run audit:studio` check 2.
+          preview: {
+            select: { number: 'number', suffix: 'suffix', label: 'label' },
+            prepare: ({ number, suffix, label }) => ({
+              title: `${number ?? ''}${suffix ?? ''}` || 'Number',
+              subtitle: label,
+            }),
+          },
         }),
       ],
     }),

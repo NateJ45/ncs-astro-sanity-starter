@@ -96,7 +96,11 @@ export const homePage = defineType({
       group: 'hero',
       hidden: true,
       readOnly: true,
-      validation: (Rule) => Rule.required(),
+      // NOT required, and it used to be. Sanity validates the DOCUMENT, not the
+      // form, so a hidden required field makes the document permanently invalid
+      // and shows the editor an error naming a field that is nowhere on screen.
+      // This legacy hero moved into the pageBuilder's own heroSection, which
+      // carries the requirement now. Found by `npm run audit:studio` check 1.
     }),
     defineField({
       name: 'heroSubhead',
