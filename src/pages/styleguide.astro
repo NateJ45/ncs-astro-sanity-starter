@@ -1,0 +1,212 @@
+---
+// Foundation, edit with care
+//
+// THE STYLEGUIDE WALL - the fixed-data page the visual-regression suite shoots.
+//
+// WHY IT EXISTS. Three defects shipped in one afternoon on a repo forked from
+// this starter that every automated gate was structurally blind to: the footer
+// still carried the FORKED REPO'S logo, so another client's wordmark sat at the
+// bottom of every page; a base-layer rule pinned every heading to a token meant
+// for dark grounds, so in light mode the whole site had cream headings on
+// paper; and a card rule declared before its base rule at equal specificity
+// silently lost its background, leaving its heading at 1.15:1. Types passed,
+// every unit test passed, axe passed. (A text-shadow makes axe report contrast
+// as "incomplete" rather than a violation, and the suite asserts on
+// violations.) All three were found by a human looking at the site.
+//
+// A screenshot diff is the only gate that can see that class of bug, and it
+// needs FIXED data or it cries wolf: real pages carry content that changes, so
+// shooting them would churn the baseline on words rather than on design.
+// Everything below is hardcoded here on purpose. If a pixel moves, the design
+// moved.
+//
+// WHAT BELONGS HERE: anything whose appearance is decided by the design system
+// rather than by content. The palette tokens, the type scale on each surface,
+// the semantic shadcn pairs, the CTA variants, and the polish-layer utilities.
+// The header and footer come free from BaseLayout, which is what would have
+// caught the inherited logo.
+//
+// WHAT DOES NOT: anything time-based, anything read from Sanity, anything that
+// grows. A project adding its own signature objects to the wall should give
+// them fixed props, right here, and nowhere else.
+//
+// noindex, and filtered out of the sitemap in astro.config.mjs. It is a real
+// route so Playwright can load it from the built output, but it is not for
+// visitors, and 'styleguide' is reserved in src/lib/reservedSlugs.ts so a
+// custom page cannot shadow it.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import { site } from '@/data/site';
+
+/** The brand palette from the `@theme` block in src/styles/globals.css. */
+const BRAND_TOKENS = [
+  '--color-primary',
+  '--color-primary-dark',
+  '--color-accent',
+  '--color-accent-dark',
+  '--color-secondary',
+  '--color-tertiary',
+  '--color-bg',
+  '--color-bg-soft',
+  '--color-border-soft',
+];
+
+/** The shadcn semantic pairs. These are the ones that must flip with theme. */
+const SEMANTIC_TOKENS = [
+  '--background',
+  '--foreground',
+  '--card',
+  '--card-foreground',
+  '--muted',
+  '--muted-foreground',
+  '--primary',
+  '--primary-foreground',
+  '--border',
+];
+
+// Written out rather than built from a loop variable: Tailwind's scanner reads
+// SOURCE TEXT, so `text-${h}` generates nothing at all and the whole scale
+// would render at the base size in a screenshot nobody would question.
+const HEADINGS = [
+  ['Display h1', 'text-h1'],
+  ['Display h2', 'text-h2'],
+  ['Display h3', 'text-h3'],
+  ['Display h4', 'text-h4'],
+  ['Display h5', 'text-h5'],
+  ['Display h6', 'text-h6'],
+] as const;
+
+/** Fixed CTA stand-ins. Never read from Sanity: that is the whole point. */
+const PRIMARY_CTA = { label: 'Book a call', linkType: 'external' as const, externalUrl: '#' };
+const SECONDARY_CTA = { label: 'See the work', linkType: 'external' as const, externalUrl: '#' };
+---
+
+<BaseLayout
+  title={`Styleguide | ${site.name}`}
+  description="Fixed-data design system wall. Not for visitors."
+  noindex
+>
+  <section class="bg-background py-section-lg">
+    <div class="mx-auto w-full max-w-content px-6">
+      <SectionHeading
+        headingId="styleguide-heading"
+        level="h1"
+        eyebrow="Design system"
+        headline="Styleguide"
+        subhead="Fixed data. Every pixel below is decided by the design system, so a diff here means the design moved, not the content."
+      />
+
+      <h2 class="mt-14 font-display text-h3">Brand palette</h2>
+      <ul class="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {
+          BRAND_TOKENS.map((t) => (
+            <li class="rounded-lg border border-border p-3">
+              <span
+                class="block h-12 w-full rounded border border-foreground/20"
+                style={`background: var(${t})`}
+              />
+              <code class="mt-2 block font-mono text-[0.6875rem] break-all">{t}</code>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2 class="mt-14 font-display text-h3">Semantic tokens</h2>
+      <p class="mt-2 max-w-[60ch] text-sm text-muted-foreground">
+        These are the pairs that must flip with the theme. A swatch that looks identical in both
+        baselines is a token that forgot to.
+      </p>
+      <ul class="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {
+          SEMANTIC_TOKENS.map((t) => (
+            <li class="rounded-lg border border-border p-3">
+              <span
+                class="block h-12 w-full rounded border border-foreground/20"
+                style={`background: var(${t})`}
+              />
+              <code class="mt-2 block font-mono text-[0.6875rem] break-all">{t}</code>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2 class="mt-14 font-display text-h3">Type, on the page ground</h2>
+      <div class="mt-5">
+        {HEADINGS.map(([label, cls]) => <p class={`font-display ${cls}`}>{label}</p>)}
+        <p class="mt-3 max-w-[60ch]">
+          Body copy on the page ground. The quick brown fox jumps over the lazy dog, twice, so the
+          line has enough letters in it for a rasterisation change to show.
+        </p>
+        <p class="mt-2 text-sm text-muted-foreground">Muted body copy, one step down.</p>
+        <p class="mt-4 font-mono text-[0.75rem] tracking-eyebrow text-primary uppercase">
+          Eyebrow, uppercase, tracked
+        </p>
+        <p class="mt-4">
+          A <a class="nav-underline text-primary-dark" href="#">link with the nav underline</a> in a sentence,
+          so its rule sits against real type.
+        </p>
+      </div>
+
+      <h2 class="mt-14 font-display text-h3">Type, on a card</h2>
+      {
+        /* The exact combination that failed elsewhere: a heading inside a card,
+           where a base-layer heading colour would otherwise win over the card's
+           own foreground token. */
+      }
+      <div class="card-lift mt-5 max-w-[30rem] rounded-lg border border-border bg-card p-7">
+        <h3 class="font-display text-h3 text-card-foreground">Heading on a card</h3>
+        <p class="mt-2 text-sm text-card-foreground">Body copy on a card.</p>
+        <p class="mt-2 text-sm text-muted-foreground">Muted copy on a card.</p>
+      </div>
+
+      <h2 class="mt-14 font-display text-h3">Calls to action</h2>
+      <div class="mt-5 flex flex-wrap items-center gap-4">
+        <CtaLink cta={PRIMARY_CTA} variant="primary" />
+        <CtaLink cta={SECONDARY_CTA} variant="secondary" />
+      </div>
+    </div>
+  </section>
+
+  {/* The alternating surface, with a CTA pair on it, so both grounds are shot. */}
+  <section class="surface-warm py-section-lg">
+    <div class="mx-auto w-full max-w-content px-6">
+      <SectionHeading
+        headingId="styleguide-surface"
+        level="h2"
+        eyebrow="The other ground"
+        headline="Soft paper surface"
+        headingAccent="Soft"
+        subhead="The alternating band the section cadence puts every other section on."
+        align="center"
+      />
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <CtaLink cta={PRIMARY_CTA} variant="primary" class="press-tactile" />
+        <CtaLink cta={SECONDARY_CTA} variant="secondary" />
+      </div>
+    </div>
+  </section>
+
+  {
+    /* A dark panel, because the inverse tone has its own contrast problems and
+      they are invisible in a light-only shot. */
+  }
+  <section class="bg-accent-dark py-section-lg">
+    <div class="mx-auto w-full max-w-content px-6">
+      <SectionHeading
+        headingId="styleguide-inverse"
+        level="h2"
+        eyebrow="Inverse"
+        headline="Type on a dark panel"
+        subhead="The closing-CTA ground. Its foreground tokens are separate from the page's."
+        tone="inverse"
+        align="center"
+      />
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <CtaLink cta={PRIMARY_CTA} variant="primary" onDark />
+        <CtaLink cta={SECONDARY_CTA} variant="secondary" onDark />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

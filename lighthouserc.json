@@ -1,18 +1,21 @@
 {
-  "//": "The `assert` block below is the family test standard (PORTS.md card 35) and must not diverge between repos. The `url` list above it is EXPECTED TO DIFFER: it names the pages this repo builds. Lighthouse CI runs against the built static output (dist/client) so dev-server quirks never affect scores. The url list is EXPLICIT on purpose: with staticDistDir alone, lhci auto-discovers pages but caps at 5, testing a near-random subset. Listing URLs covers every distinct template and skips non-page stubs. Accessibility is a HARD gate (must hold 100); performance / best-practices / SEO are warnings so normal CI variance does not block a PR. Not listed, on purpose: /studio, /preview/** and /api/draft-mode/* are SSR-only and never emitted into dist/client; /[slug] and /journal/[slug] build zero paths with no Sanity project configured; the nine module routes under modules/ are staged, not built. Add a representative URL per template as a project brings those online. Run locally: npm run build && npx lhci autorun",
+  "//": "The `assert` block below is the family test standard (PORTS.md card 35) and must not diverge between repos. The `url` list above it is EXPECTED TO DIFFER: it names the pages this repo builds. Lighthouse CI runs against the built static output (dist/client) so dev-server quirks never affect scores. The url list is EXPLICIT on purpose: left to auto-discover, lhci caps at 5 pages and tests a near-random subset. Listing URLs covers every distinct template and skips non-page stubs. Accessibility is a HARD gate (must hold 100); performance / best-practices / SEO are warnings so normal CI variance does not block a PR. Not listed, on purpose: /studio, /preview/** and /api/draft-mode/* are SSR-only and never emitted into dist/client; /[slug] and /journal/[slug] build zero paths with no Sanity project configured; the nine module routes under modules/ are staged, not built. Add a representative URL per template as a project brings those online. Run locally: npm run build && npx lhci autorun",
   "ci": {
     "collect": {
-      "staticDistDir": "./dist/client",
+      "//": "NOT staticDistDir. lhci's own static server sends every byte uncompressed, and on 2026-09-17 that hid a real win on stonesteps-50k: inlining the stylesheet took the home page from 88 to 99 in a compressed harness while CI's LCP stayed at 4.2 to 4.9s against a 4.5s gate, because the 435KB raw HTML (84KB gzipped) was two seconds of download at the mobile throttle. Production is Cloudflare and compresses everything. scripts/serve-dist.mjs serves the same dist/client with brotli/gzip and the deploy's cache headers, so the numbers here describe what a reader gets. Build first: this server never builds. /styleguide is deliberately absent, it is the visual suite's fixed-data wall and not a page anyone visits.",
+      "startServerCommand": "node scripts/serve-dist.mjs --port 4173",
+      "startServerReadyPattern": "serve-dist:",
+      "startServerReadyTimeout": 20000,
       "url": [
-        "http://localhost/index.html",
-        "http://localhost/about/index.html",
-        "http://localhost/services/index.html",
-        "http://localhost/process/index.html",
-        "http://localhost/faq/index.html",
-        "http://localhost/contact/index.html",
-        "http://localhost/journal/index.html",
-        "http://localhost/privacy/index.html",
-        "http://localhost/404.html"
+        "http://localhost:4173/",
+        "http://localhost:4173/about/",
+        "http://localhost:4173/services/",
+        "http://localhost:4173/process/",
+        "http://localhost:4173/faq/",
+        "http://localhost:4173/contact/",
+        "http://localhost:4173/journal/",
+        "http://localhost:4173/privacy/",
+        "http://localhost:4173/404.html"
       ],
       "numberOfRuns": 3,
       "settings": {

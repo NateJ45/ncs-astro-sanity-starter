@@ -1,0 +1,126 @@
+name: Visual regression
+
+# Screenshot-diffs /styleguide, the fixed-data design-system wall, in both
+# themes. This is the only gate that can see the class of defect that shipped on
+# a fork of this starter on 2026-09-07: the forked repo's logo still in the
+# footer, headings rendered cream on cream in light mode, and a card losing its
+# background to a CSS ordering mistake. Types, unit tests and axe all passed on
+# every one of them.
+#
+# ── BASELINES ARE A LINUX ARTEFACT ──────────────────────────────────────────
+# Font rasterisation differs between Windows and these runners, so baselines
+# MUST be generated here, never on a laptop. That is what the update job below
+# is for. The suite SKIPS itself on win32 with a printed reason rather than
+# failing (see tests/visual/styleguide.spec.ts): a gate whose local failure is
+# "expected" is a gate everybody learns to discount. CI is the arbiter, exactly
+# as with the a11y sweeps.
+#
+# ── THE RULE THAT KEEPS THIS HONEST ─────────────────────────────────────────
+# Refresh the baselines only when a visual change is INTENDED, and in the same
+# change that causes it. A baseline updated to make the red go away turns this
+# gate into decoration, which is worse than not having it, because it looks like
+# cover.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # Only what can move a pixel. Docs and scripts cannot.
+      - 'src/**'
+      - 'public/**'
+      - 'tests/visual/**'
+      - 'playwright.visual.config.ts'
+      - 'package.json'
+      - '.github/workflows/visual.yml'
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      update:
+        description: 'Regenerate the baselines instead of checking against them'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: visual-${{ github.ref }}
+  cancel-in-progress: true
+
+# The default GITHUB_TOKEN is read-only on this repo, so the regenerate job
+# could run the suite and then not push what it produced. Write access is
+# needed ONLY for the baseline commit; every other run of this workflow reads.
+permissions:
+  contents: write
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright chromium
+        # `--with-deps` runs `apt-get update`, which fails outright when the
+        # runner's third-party Chrome/Microsoft apt sources are mid-sync and
+        # report a "Hash Sum mismatch" (that killed a WCP deploy 2026-09-09).
+        # Playwright's system libraries come from Ubuntu's own archive, so drop
+        # those sources first, then retry once for transient network failures.
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
+          npx playwright install --with-deps chromium ||
+            npx playwright install --with-deps chromium
+
+      - name: Generate Sanity types
+        run: npm run typegen
+
+      # The styleguide renders fixed data, so this build needs no Sanity
+      # project. The variables are passed anyway so the page's shared chrome
+      # (header, footer) is the real one rather than an empty-state fallback,
+      # which is exactly where the forked logo was hiding.
+      - name: Run the visual suite
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+        run: |
+          if [ "${{ inputs.update }}" = "true" ]; then
+            npm run test:visual:update
+          else
+            npm run test:visual
+          fi
+
+      # On a check run this is the evidence of what moved. On an update run it
+      # is nothing, because there is no diff.
+      - name: Upload the diff
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-diff
+          path: |
+            test-results/**
+            tests/visual/__screenshots__/**
+          retention-days: 14
+
+      # Only on a deliberate regenerate. The baselines are committed so the
+      # gate has something to diff against, and so a reviewer can SEE the
+      # intended change in the diff rather than take it on trust. This is also
+      # how a fresh fork gets its FIRST set: run this workflow with
+      # `update: true` once the brand is applied, and never commit a
+      # laptop-rendered image.
+      - name: Commit regenerated baselines
+        if: ${{ inputs.update == true }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/visual/__screenshots__
+          if git diff --staged --quiet; then
+            echo "Baselines unchanged."
+          else
+            git commit -m "test: regenerate visual baselines"
+            git push
+          fi

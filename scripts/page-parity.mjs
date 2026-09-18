@@ -73,10 +73,21 @@
  *      rule 2: a generated identity derived from source layout. The
  *      <astro-island> tag itself, its component-url and its serialized props
  *      are all still compared, so a real island change still shows up.
- *   4. The digits inside an element with role="timer". A countdown rendered at
+ *   4. The CONTENT of every inlined <style> element, replaced with a byte count
+ *      and a checksum. A project that sets build.inlineStylesheets: 'always'
+ *      ships the whole stylesheet inside every page, so a one-token colour
+ *      change diffs all 31 pages with the same 60KB of CSS and the run carries
+ *      no information at all: stonesteps-50k recaptured its full baseline set
+ *      four times in one week for exactly this. The placeholder keeps the
+ *      change VISIBLE, as ONE changed line on each page instead of the whole
+ *      stylesheet on each page, and a stylesheet edit still FAILS parity,
+ *      which is the part a normaliser must never give away. The <style> tag
+ *      and its attributes are untouched, so a lost or added stylesheet is
+ *      still real drift.
+ *   5. The digits inside an element with role="timer". A countdown rendered at
  *      build time is computed from the clock, so two identical rebuilds differ.
  *      See stripTimerText for the full argument.
- *   4. Whitespace runs BETWEEN tags (>   < becomes ><) and trailing whitespace
+ *   6. Whitespace runs BETWEEN tags (>   < becomes ><) and trailing whitespace
  *      on every line, plus CRLF -> LF. Astro's indentation shifts when markup
  *      is nested one level deeper inside a section wrapper; the browser does not
  *      care and neither should the diff. Whitespace INSIDE a text node is left
@@ -211,7 +222,44 @@ function stripAstroCids(html) {
 }
 
 /**
- * Rule 4: the contents of an ARIA live timer.
+ * Rule 4: the body of every inlined <style> element.
+ *
+ * With `build.inlineStylesheets: 'always'` (or on any page small enough for
+ * Astro to inline its CSS by default) the whole stylesheet is part of every
+ * page's markup. One changed colour token then rewrites the same tens of
+ * kilobytes on every route at once, and `parity compare` answers with every
+ * page DIFF and a diff body that is pure CSS. That is not a parity report, it
+ * is a recapture instruction, and it is how four full baseline recaptures got
+ * taken in a week on stonesteps-50k without one of them carrying information.
+ *
+ * Replacing the body with its LENGTH and a checksum keeps the signal and drops
+ * the volume: a stylesheet change still breaks parity, still names every page,
+ * and takes one line on each instead of the whole file.
+ *
+ * The checksum is a plain 32-bit FNV-1a, written out rather than imported, so
+ * this file stays dependency-free (it is copied verbatim into repos that may
+ * not have run an install). It is a change detector, not a security primitive.
+ */
+function hashCss(css) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < css.length; i++) {
+    h ^= css.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
+function stripInlineStyles(html) {
+  // Non-greedy to the first </style>, which is correct here: CSS cannot
+  // contain the literal string "</style>" without ending the element.
+  return html.replace(/(<style\b[^>]*>)([\s\S]*?)(<\/style>)/gi, (_all, open, css, close) => {
+    const normalised = css.replace(/\r\n/g, '\n');
+    return `${open}/* CSS ${Buffer.byteLength(normalised, 'utf8')}B ${hashCss(normalised)} */${close}`;
+  });
+}
+
+/**
+ * Rule 5: the contents of an ARIA live timer.
  *
  * An element with `role="timer"` is, by definition, a value that counts. When
  * one is server-rendered so the block never appears empty or shifts layout, its
@@ -281,7 +329,7 @@ function stripIslandPrefixes(html) {
   return html.replace(/(<astro-island\b[^>]*?)\sprefix="r\d+"/g, '$1 prefix="rN"');
 }
 
-/** Rule 4: whitespace that only reflects source indentation. */
+/** Rule 6: whitespace that only reflects source indentation. */
 function collapseWhitespace(html) {
   return html
     .replace(/\r\n/g, '\n')
@@ -307,7 +355,11 @@ function stripGeneratorMeta(html) {
 
 export function normalize(html) {
   return collapseWhitespace(
-    stripTimerText(stripIslandPrefixes(stripAstroCids(stripAssetHashes(stripGeneratorMeta(html))))),
+    stripTimerText(
+      stripIslandPrefixes(
+        stripInlineStyles(stripAstroCids(stripAssetHashes(stripGeneratorMeta(html)))),
+      ),
+    ),
   );
 }
 
