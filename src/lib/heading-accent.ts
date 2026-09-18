@@ -2,21 +2,12 @@
 // =============================================================================
 // Accent words in headings (2026-08-28)
 // =============================================================================
-// THE one splitter. An editor types a word or phrase that appears in a display
-// heading, and the renderer wraps the first match: in the section's accent
-// colour for the `headingAccent` field (.heading-accent in globals.css, which
-// reads the --section-accent the surface/accent choice already sets), or in the
-// script face for the older `scriptAccent` field (.font-script). The two fields
-// are different editorial devices with the same matching problem, so they share
-// this function.
-//
-// It did not start that way. Until 2026-09-18 the script accent had its own
-// copy, src/lib/scriptAccent.ts, which matched case-sensitively and knew
-// nothing about stega, and SectionHeading.astro imported both with a comment
-// saying which one was the safe one. That was a bug queued up for whoever
-// edited the file next, so the weaker copy was retired and its consumers moved
-// here. PORTS.md card 53 has the behaviour table and the two things the move
-// changed.
+// The site already had one designed way to emphasise part of a display heading:
+// scriptAccent (src/lib/scriptAccent.ts), which sets one word of a headline in
+// the script face. This is its colour sibling. An editor types a word or phrase
+// that appears in the heading, and the renderer wraps the first match in the
+// section's accent colour (.heading-accent in globals.css, which reads the
+// --section-accent the surface/accent choice already sets).
 //
 // THE STEGA TRAP
 // In the Presentation preview every display string arrives stega-encoded: a run
@@ -36,15 +27,6 @@
 //
 // Matching is CASE-INSENSITIVE (an editor typing "grace" should not have to
 // match "Grace") and returns the heading's own casing for the matched slice.
-// The one cost, stated so nobody rediscovers it: on a heading that uses the
-// same word twice in different cases ("Love what you love"), a case-sensitive
-// matcher would have picked the occurrence whose casing the editor typed, and
-// this one always picks the first. First-occurrence-only is the documented
-// house rule for both accent fields, so that is the answer we want anyway.
-//
-// plain() also TRIMS, so on a hit the rendered halves come from the trimmed
-// heading. Headings with padding are a content bug, not a layout device, and
-// the parity harness confirms no page in this repo has one.
 // =============================================================================
 
 // Explicit .ts extension: this module is reached by `node --test` (see
