@@ -4983,6 +4983,7 @@ and `docs/agent/component-sources.md` (100) and `docs/stack-template/CLAUDE.md`
 (153), `stonesteps-50k/docs/agent/performance.md` (67, its table row, although its
 code and `components.md` are already correct), and the archived
 `ncs-church-starter`. wcp-website carries no copy of the claim and has no Sheet at all, so it is n/a; mas-monograms carries the wrong directive in `Header.astro` but no doc copy of the rule. nixoncreativestudio's `Header.astro` is already `client:idle`, so only its three doc copies are stale.
+
 ## Card 53: One accent splitter, not two (2026-09-18)
 
 **Canonical:** `src/lib/heading-accent.ts` and `src/lib/heading-accent.test.ts`
