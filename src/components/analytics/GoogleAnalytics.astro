@@ -1,0 +1,80 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+/* ============================================================================
+   Google Analytics 4 (gtag.js), loaded after the page is idle
+   ============================================================================
+   Foundation, edit with care.
+
+   Rendered by Analytics.astro, and only when PUBLIC_GA_ID looks like a real
+   Measurement ID. This file owns the tag; Analytics.astro owns the condition.
+   They are separate files because prettier-plugin-astro cannot parse a
+   <script> nested inside a template expression, so the script has to sit at
+   the top level of a component of its own.
+
+   TWO DELIBERATE DEPARTURES FROM GOOGLE'S SNIPPET. Both are load-bearing.
+   Change either one only with a reason written down, because each was paid
+   for by a real outage somewhere in this family (PORTS.md card 54).
+
+   1. THE LIBRARY LOADS AFTER THE LOAD EVENT, NOT IN THE HEAD.
+      Google's copy-paste block is `<script async src=".../gtag/js?id=...">`
+      in the head, which puts roughly 100KB of third-party JavaScript in front
+      of the render. Every repo in this family gates LCP as a HARD error, so
+      that block is a gate failure waiting to happen. Instead the dataLayer and
+      the gtag() stub are defined immediately, and the library itself is
+      fetched at idle once the page has loaded. Anything that calls gtag()
+      before it arrives is queued on the dataLayer, not lost, so no data is
+      dropped. GA4 records the page view when the script arrives, a second or
+      so later, and the reported figures are unchanged.
+
+   2. THE <script> ELEMENT IS BUILT AT RUNTIME, NOT PRINTED AS A LITERAL TAG.
+      Cloudflare Zaraz rewrites literal googletagmanager tags it finds in the
+      HTML, takes over the gtag() call, and queues it into its own payload.
+      When Zaraz then stops delivering, which it can do while still reporting a
+      healthy config, the hits vanish with no error anywhere: no console
+      message, no 5xx, no dashboard warning. Two sites in this family lost
+      weeks of data to exactly that, and restoring a normal snippet did not fix
+      it because the replacement got swallowed too. Creating the element in
+      JavaScript means Zaraz's HTML rewriting never sees it. It costs nothing
+      and it buys immunity, so it stays even on zones with no Zaraz today.
+
+   The tag is intentionally absent from CI, Lighthouse and staging builds. See
+   the comment on the Build step in .github/workflows/deploy.yml.
+   ============================================================================ */
+
+interface Props {
+  /** The GA4 web data stream Measurement ID (G-XXXXXXXXXX), not the numeric property id. */
+  gaId: string;
+}
+
+const { gaId } = Astro.props;
+---
+
+<script is:inline define:vars={{ gaId }}>
+  window.dataLayer = window.dataLayer || [];
+  // gtag.js inspects a real `arguments` object here, so rest parameters would
+  // silently break every queued call. This shape is required, not stylistic.
+  function gtag() {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer.push(arguments);
+  }
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', gaId);
+
+  // Built as an element rather than printed as a tag. See departure 2 above.
+  function loadGa() {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId);
+    document.head.appendChild(s);
+  }
+
+  // Idle after load, with a timeout so a permanently busy page still reports.
+  function whenIdle() {
+    if ('requestIdleCallback' in window) requestIdleCallback(loadGa, { timeout: 4000 });
+    else setTimeout(loadGa, 500);
+  }
+
+  if (document.readyState === 'complete') whenIdle();
+  else window.addEventListener('load', whenIdle, { once: true });
+</script>

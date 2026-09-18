@@ -58,3 +58,10 @@ docs/superpowers
 src/components/Hero.astro
 src/components/HeroBackground.astro
 src/layouts/BaseLayout.astro
+
+# Agent worktrees. `.claude/worktrees/<id>/` is a full checkout of this repo, so
+# without this line `npm run format:check` scans every file in it a second time
+# and reports failures for files nobody is editing. Git does not track them, so
+# CI never sees them, which means the local gate fails while CI passes and the
+# gate gets ignored. Added 2026-09-18 after exactly that.
+.claude/worktrees/

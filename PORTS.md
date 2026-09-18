@@ -116,6 +116,7 @@ is installing it as of the date on the card.
 | 51  | Compressed static server for Lighthouse                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 52  | Radix islands hydrate at client:idle, not client:only             | n/a     | partial     | yes      | no               | no            | no             | n/a                | yes                 | partial        |
 | 53  | One accent splitter (heading-accent absorbs scriptAccent)         | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 54  | Analytics component (GA4 + Cloudflare beacon, canonical)          | no      | no          | yes      | partial          | no            | no             | n/a                | yes                 | yes            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5044,3 +5045,119 @@ fewer assertions than it went in with has lost coverage, not gained simplicity.
 guards at the call sites, and move the test cases. Check each repo's own content for a
 heading that repeats a word in two cases before assuming the change is invisible there:
 that is the one input where the two functions disagree about WHICH word to accent.
+
+## Card 54: The analytics a rebuild leaves behind (2026-09-18)
+
+**Canonical:** `src/components/Analytics.astro`,
+`src/components/analytics/GoogleAnalytics.astro` and
+`src/components/analytics/CloudflareBeacon.astro`, all three PORTABLE. Wired in
+`src/layouts/BaseLayout.astro` (per-repo, not marked), documented in `.env.example`,
+and passed through the Build step of `.github/workflows/deploy.yml` only.
+
+**The defect is an omission, not a bug, which is why it keeps happening.** A rebuild
+inherits the domain and the content but NOT the analytics tag, because the tag lived
+in whatever the old site was built in: a WordPress plugin, a theme header, a Wix
+setting. A rebuild's checklist is about what the new site DOES, and the tag is a thing
+the old site HAD. It has now cost this family twice.
+
+- **nixoncreativestudio** lost roughly six months. GA4 property 532519109 went dark in
+  2026-06 when the Astro rebuild never carried the previous site's gtag snippet.
+- **stonesteps-50k** lost its analytics on 2026-09-18, the day its domain moved off
+  WordPress onto a Worker. Property 552910285 has daily sessions through 09-17 and
+  zero from the 18th. It shipped with no measurement of ANY kind, because the
+  Cloudflare beacon is conditional on a token that was never set either.
+
+Nothing failed either time. The Worker answered, TLS matched, the forms delivered,
+every cutover check passed. The loss is invisible for weeks because a thirty day
+total decays one day at a time rather than dropping, so there is no moment where it
+looks broken. wcp-website and mas-monograms both still have cutovers ahead of them.
+
+**Two design decisions, each paid for by a different outage. Do not undo either.**
+
+1. **The library loads after the load event, not in the head.** Google's copy-paste
+   block puts about 100KB of third-party JavaScript in front of the render, and every
+   repo here gates LCP as a hard error. So `dataLayer` and the `gtag()` stub are
+   defined immediately and `gtag.js` is fetched at idle once the page has loaded.
+   Calls made before it arrives queue on the dataLayer rather than being lost, and
+   GA4 records the page view when the script lands. The reported numbers are
+   unchanged; only the moment of the network request moves.
+2. **The `<script>` element is built at runtime, not printed as a literal tag.**
+   Cloudflare Zaraz rewrites literal googletagmanager tags it finds in the HTML,
+   takes over the `gtag()` call, and queues it into its own payload. When Zaraz then
+   stops delivering, which it can do while still reporting a healthy config, the hits
+   vanish with no console error, no 5xx and no dashboard warning. Theology Matters
+   and FRT lost about 1,800 and 400 sessions respectively over eleven unnoticed days,
+   and restoring a normal snippet did not fix it because the replacement was swallowed
+   too. Creating the element in JavaScript means the rewriter never sees it. It costs
+   nothing, so it stays even on zones with no Zaraz today.
+
+**The shape: a wrapper, not conditions in the layout.** `Analytics.astro` owns the
+environment variables and the conditions; the two files under `analytics/` own the
+tags. nixoncreativestudio already used this split and stonesteps-50k kept the
+condition in `BaseLayout.astro` instead. The starter takes the wrapper, for a reason
+that is about drift rather than taste: **`Analytics.astro` carries the PORTABLE marker
+and `BaseLayout.astro` deliberately does not**, because the layout is heavily
+customised per site. Conditions placed in the layout get re-implemented in every repo
+and are invisible to `npm run sync-check`, which is exactly how reid-design-site ended
+up with the raw vendor snippet under a different variable name. A marked file makes
+that drift detectable. The split also exists for a smaller mechanical reason:
+prettier-plugin-astro cannot parse a `<script>` nested inside a template expression,
+so the tag needs a top-level component of its own either way.
+
+The secondary benefit is that "what analytics does this site have?" becomes a
+one-file question. Opening `Analytics.astro` is a checkable launch-list step in a way
+that grepping the layout for a tag is not.
+
+**Both tags are silent when unset, and that is a deliberate trade.** A fresh clone,
+local dev and preview builds all have to work with nothing configured, so an absent
+variable renders nothing rather than failing. The cost is that a missing variable
+cannot announce itself, which is precisely the failure above. The mitigation is not in
+the code: carry the tag over as a step on the cutover checklist, beside DNS and TLS,
+and prove it with a live hit. studio-status raising `ga4-flatline` is the backstop, not
+the check, because it needs several days of collapsed traffic before it can tell a dead
+tag from a quiet week.
+
+**Only `deploy.yml` gets the variables, on purpose.** Not `ci.yml`, not
+`lighthouse.yml`, not `deploy-staging.yml`. A Lighthouse run would otherwise file about
+eighteen localhost page views into the live property every time it ran, and once that
+data lands it is indistinguishable from real traffic. Since the tag loads after the
+load event it is outside LCP by construction, so the performance gate measures the same
+thing without it. The workflow carries that reasoning in a comment, because the
+omission looks like a mistake to anyone tidying the file later.
+
+**A second gap closed in the same commit.** `PUBLIC_CF_ANALYTICS_TOKEN` had never been
+passed through any workflow in this starter, so the Cloudflare beacon could not have
+rendered on any fork's deploy even with a token set. That is the same omission class as
+the GA4 one and half of what went wrong at stonesteps-50k, so both variables are wired
+here rather than leaving one to be discovered later.
+
+**Per-repo work when porting.** Set `PUBLIC_GA_ID` as a repository VARIABLE (not a
+secret; it is public by design and appears in the page source). It is the web data
+stream Measurement ID, `G-XXXXXXXXXX`, NOT the numeric property id the GA4 admin screen
+shows beside the property name. Add the import and the `<Analytics />` tag to that
+repo's own `BaseLayout.astro`, near the end of `<head>`. If the repo already renders a
+beacon inline, delete it in the same change or the beacon doubles.
+
+**reid-design-site is `partial` for a specific reason.** It has GA4, but as Google's
+literal snippet inside `src/layouts/BaseLayout.astro`, under `PUBLIC_GA_MEASUREMENT_ID`
+rather than `PUBLIC_GA_ID`. So it has the data but neither of the two protections
+above, and its tag is in the exact form Zaraz swallows. Porting it means replacing the
+inline block, renaming the variable, and re-capturing the parity baselines, which
+currently have the snippet baked into all ten of them.
+
+**Verified state at time of writing (2026-09-18)**, by searching each repo for
+`googletagmanager` rather than assuming: nixoncreativestudio yes (origin of the
+component), stonesteps-50k yes, reid-design-site partial as above, and wcp-website,
+presacademy, mas-monograms and 2ndpreschicago all no.
+
+**How to verify a port, because config inspection and HTML scraping both lie here.**
+Build, serve the built output under `wrangler dev`, and check in a real browser:
+`typeof window.gtag === 'function'`; a `googletagmanager.com/gtag/js?id=` script present
+in the head; `performance.getEntriesByType('resource')` showing a
+`google-analytics.com/g/collect` entry (its `responseStatus` reads 0 and `transferSize`
+0, which is opaque cross-origin rather than failure, so a non-zero duration is the
+signal); no literal `<script src=googletagmanager>` in the built HTML; and no tag on
+`/studio`. Close the loop with a GA4 realtime report if there is a property to point at,
+querying `eventName` and `eventCount`. Do not query `unifiedScreenName`: it returns
+empty rows for web `page_view` and reads as a false negative. Those hits are real and
+land in the live property.

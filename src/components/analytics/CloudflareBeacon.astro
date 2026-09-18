@@ -1,0 +1,47 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+/* ============================================================================
+   Cloudflare Web Analytics beacon
+   ============================================================================
+   Foundation, edit with care.
+
+   Cookieless, privacy-friendly page views and Web Vitals. Nothing is stored on
+   the visitor's device, so this needs no cookie banner and no consent gate.
+
+   Rendered by Analytics.astro, and only when PUBLIC_CF_ANALYTICS_TOKEN is set.
+   This file owns the tag; Analytics.astro owns the condition.
+
+   Setup, once per site:
+     1. Cloudflare dashboard, Analytics and Logs, Web Analytics, Add a site.
+     2. Cloudflare returns a token, a plain hex string.
+     3. Put it in PUBLIC_CF_ANALYTICS_TOKEN locally, and as a build variable on
+        the deploy.
+     4. Rebuild. The value is inlined at build time because these pages are
+        prerendered, so a runtime variable will not do.
+
+   This one IS printed as a literal tag, unlike its GA4 sibling. Cloudflare
+   serves the beacon from its own edge on the same zone, so the Zaraz rewriting
+   problem that forces the runtime-element trick for googletagmanager does not
+   apply here.
+
+   NO SUBRESOURCE INTEGRITY HASH ON PURPOSE, on this tag or on the GA4 loader.
+   A linter will suggest one. Both vendors ship rolling builds behind a stable
+   URL, so a pinned hash starts failing the moment the vendor updates, and a
+   failed integrity check does not degrade: the browser refuses the script and
+   analytics goes silently dead, which is the exact failure this whole card
+   exists to prevent. Neither script is same-origin, so both are already
+   covered by whatever the site's Content-Security-Policy allows.
+   ============================================================================ */
+
+interface Props {
+  /** The Cloudflare Web Analytics site token (a hex string). */
+  token: string;
+}
+
+const { token } = Astro.props;
+---
+
+<script
+  defer
+  src="https://static.cloudflareinsights.com/beacon.min.js"
+  data-cf-beacon={`{"token": "${token}"}`}></script>

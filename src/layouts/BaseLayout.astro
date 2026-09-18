@@ -18,6 +18,7 @@ import { getActiveAnnouncement } from '@/lib/queries';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import BackToTop from '@/components/BackToTop';
+import Analytics from '@/components/Analytics.astro';
 import { Toaster } from '@/components/ui/sonner';
 import '@/styles/globals.css';
 // Starwind UI CSS — accordion keyframes + @theme inline for new semantic tokens.
@@ -100,8 +101,10 @@ const fullTitle = cleanTitle === site.name || hasBrandInline
 // Pages can still pass their own additional schemas (Service, FAQPage, BreadcrumbList).
 const allSchemas = siteSettings ? [localBusinessSchema(siteSettings), ...schemas] : schemas;
 
-// Cloudflare Web Analytics token — only render the beacon when present.
-const cfToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+// Analytics (Cloudflare Web Analytics + GA4) lives in src/components/Analytics.astro,
+// which owns the environment variables and the conditions. It is rendered near the
+// bottom of <head>. Nothing is configured here on purpose: that file is PORTABLE and
+// this layout is not, so keeping the gating there is what stops eight repos drifting.
 
 // Optional site-wide announcement banner (Announcement collection in Sanity).
 // Fetched here once so every page gets it without each page running its own
@@ -244,14 +247,12 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       })();
     </script>
 
-    {/* Cloudflare Web Analytics — conditional, no cookie banner needed. */}
-    {cfToken && (
-      <script
-        defer
-        src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon={`{"token": "${cfToken}"}`}
-      ></script>
-    )}
+    {/*
+      Analytics: the Cloudflare beacon and GA4, each conditional on its own
+      environment variable and each a silent no-op when that variable is unset.
+      No cookie banner is needed for either. See src/components/Analytics.astro.
+    */}
+    <Analytics />
 
     <ClientRouter />
   </head>
