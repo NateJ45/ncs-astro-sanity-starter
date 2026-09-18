@@ -145,26 +145,51 @@ That is harmless until somebody runs the script on a project with a clean tree, 
 confirm it says nothing. To close: normalise hex case and quote style to what Prettier
 writes before comparing, or run the file through Prettier at the end of the rewrite.
 
-### 10. Two capabilities are still unmarked for `npm run scaffold`
+### 10. The scaffold is finished (DONE, 2026-09-18)
 
-**Queued, 2026-09-13.** `process`, `services` and `journal` are marked and each has been
-proven by running the removal: `--remove journal,services,process --write`, typegen,
-`astro check` 0 errors, build complete, 458 unit tests, all three routes gone and every
-other route plus the Studio still built.
+`faq` and `about` are marked, and so are `testimonials` and `philosophy`, which this item
+did not ask for and which a race site or a school wants gone just as much. Seven
+capabilities are removable now: `about` (31 files), `faq` (34), `journal` (31),
+`philosophy` (16), `process` (29), `services` (32), `testimonials` (21). Each was proven
+by running its own removal followed by typegen, `astro check`, build and the unit tests,
+and all seven together were proven the same way.
 
-**Left: `faq` and `about`.** faq is the awkward one and needs a decision rather than a
-pass of marking. Three test files use `faqSection` as their REPRESENTATIVE EXAMPLE rather
-than as the thing under test: `page-checks.test.ts` uses it for the self-filling-section
-case, `sectionCadence.test.ts` for the SELF_CONTAINED case, and `section-fields.test.ts`
-asserts on its rich twin AND reads `faqPage.ts` off disk, which throws outright once the
-file is gone. Marking them all means a fork that removes faq silently loses coverage of
-behaviour that has nothing to do with faq. The better answer is probably to re-point
-those examples at a section every project keeps (`richTextSection`) and mark only what is
-genuinely faq, but that edits tests to suit a tool, so it wants a second opinion.
+This item's open question was whether re-pointing tests at a section every project keeps
+counts as editing tests to suit a tool. It does not, and the reason is worth keeping: in
+all three files the faq section was the EXAMPLE and something else was the subject, so
+pointing the example at a block nobody removes is a correction, not a concession. The
+same turned out to be true of `about`: `storySection` and `founderSection` were the
+cadence suite's stand-in CONTENT and SELF_CONTAINED types, and a fork dropping about
+would have lost coverage of the cadence itself. Where a section really IS the subject it
+kept its name and took a marker.
 
-**Then the seed audit** (PORTS card 44's rule): every seeded string should read
-"replace this" rather than plausible copy for a real trade, so a fork cannot ship
-somebody else's words by not noticing them.
+The seed audit landed with it, along with the modules archive, the reserved-slug
+cleanup, and the Studio audit ported from the Stone Steps build.
+
+### 11. Three things the scaffold work left open
+
+**Queued, 2026-09-18.** None blocks anything; each is a smaller job than it looks and
+each is written down because the reason decays faster than the code.
+
+**`dynamicListSection` cannot lose its last source cleanly.** Its four sources (journal,
+services, testimonials, faqs) each belong to a capability, and the block itself belongs
+to none. Removing all four now leaves a valid build, because the `source` prop widened to
+`string` and the GROQ `select()` gained a `[]` default arm, but it also leaves an
+editor-facing block whose dropdown offers nothing and which can only ever render empty.
+Either the block should become a capability of its own, or the schema should hide it when
+its options list is empty. The second is probably right and is a ten-line change.
+
+**Seed markers cannot express a capability inside another capability's page.** Markers
+never nest, so the aboutPage seed is `about` end to end including the `valuesSection` in
+its pageBuilder, which is `philosophy`. Remove philosophy while keeping about and the
+seeder plants a block of a type the schema no longer declares. It is a dataset problem
+rather than a build one and the boundary is defended in the file's header, but a fork
+doing exactly that combination will see an unknown-type block in the Studio.
+
+**`lighthouserc.json` still says "the nine module routes under modules/".** There are two
+staged modules now and eleven archived ones. The file is owned by another agent's wave
+(the family test standard, PORTS.md card 35), so the sentence was left alone rather than
+edited across an ownership line. One-line fix, next time someone is in there.
 
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 
