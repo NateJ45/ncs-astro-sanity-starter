@@ -212,12 +212,12 @@ const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
       // single-segment path is a custom `page` slug, which /preview/<slug> also
       // renders). Keep the two in sync.
       const FIRST_SEGMENT_PREVIEWABLE = new Set([
-        'about',
-        'services',
-        'process',
-        'faq',
+        'about', // scaffold: about
+        'services', // scaffold: services
+        'process', // scaffold: process
+        'faq', // scaffold: faq
         'contact',
-        'journal',
+        'journal', // scaffold: journal
         'privacy',
       ]);
       const NEVER_REMAP = new Set(['api', 'studio', 'preview', '404']);

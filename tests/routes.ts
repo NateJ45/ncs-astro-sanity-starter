@@ -17,10 +17,10 @@
 /** Routes that render real content and must pass every check. */
 export const routes: string[] = [
   '/',
-  '/about',
+  '/about', // scaffold: about
   '/services', // scaffold: services
   '/process', // scaffold: process
-  '/faq',
+  '/faq', // scaffold: faq
   '/contact',
   '/journal', // scaffold: journal
   '/privacy',

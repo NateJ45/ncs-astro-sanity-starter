@@ -100,10 +100,10 @@ test('unknown _type gets null surface (treated as unknown, not content)', () => 
 
 test('rich SELF_CONTAINED types get null surface', () => {
   const richSelf = [
-    'founderSection',
+    'founderSection', // scaffold: about
     'servicesGridSection', // scaffold: services
-    'testimonialsSection',
-    'valuesSection',
+    'testimonialsSection', // scaffold: testimonials
+    'valuesSection', // scaffold: philosophy
     'processSection', // scaffold: process
   ];
   for (const type of richSelf) {
@@ -113,7 +113,11 @@ test('rich SELF_CONTAINED types get null surface', () => {
 });
 
 test('rich CONTENT types get alternating surface', () => {
-  const richContent = ['storySection', 'serviceAreaSection', 'guaranteeSection'];
+  const richContent = [
+    'storySection', // scaffold: about
+    'serviceAreaSection',
+    'guaranteeSection',
+  ];
   for (const type of richContent) {
     const rows = classifySections([block(type)]);
     assert.equal(rows[0].surface, 'background', `${type} should get background on first`);
@@ -122,7 +126,7 @@ test('rich CONTENT types get alternating surface', () => {
 
 test('rich content types advance the cadence counter', () => {
   const rows = classifySections([
-    block('storySection'), // background (idx 0)
+    block('richTextSection'), // background (idx 0)
     block('serviceAreaSection'), // muted (idx 1)
     block('guaranteeSection'), // background (idx 2)
   ]);
@@ -131,20 +135,20 @@ test('rich content types advance the cadence counter', () => {
 
 test('rich self-contained types do not advance the cadence counter', () => {
   const rows = classifySections([
-    block('storySection'), // background (idx 0)
-    block('founderSection'), // null (self-contained, no advance)
+    block('richTextSection'), // background (idx 0)
+    block('statSection'), // null (self-contained, no advance)
     block('serviceAreaSection'), // muted (idx 1)
   ]);
   assert.deepEqual(surfaces(rows), ['background', null, 'muted']);
 });
 
-test('all 8 new rich types appear in SELF_CONTAINED_TYPES or CONTENT_TYPES', () => {
+test('every new rich type appears in SELF_CONTAINED_TYPES or CONTENT_TYPES', () => {
   const all8 = [
-    'founderSection',
+    'founderSection', // scaffold: about
     'servicesGridSection', // scaffold: services
-    'testimonialsSection',
-    'storySection',
-    'valuesSection',
+    'testimonialsSection', // scaffold: testimonials
+    'storySection', // scaffold: about
+    'valuesSection', // scaffold: philosophy
     'processSection', // scaffold: process
     'serviceAreaSection',
     'guaranteeSection',
@@ -160,9 +164,9 @@ test('all 8 new rich types appear in SELF_CONTAINED_TYPES or CONTENT_TYPES', () 
   }
 });
 
-test('divider inserted between storySection and serviceAreaSection (different surfaces)', () => {
+test('divider inserted between richTextSection and serviceAreaSection (different surfaces)', () => {
   const rows = classifySections([
-    block('storySection'), // background
+    block('richTextSection'), // background
     block('serviceAreaSection'), // muted -> divider before
   ]);
   assert.deepEqual(dividers(rows), [false, true]);
@@ -170,10 +174,12 @@ test('divider inserted between storySection and serviceAreaSection (different su
 
 // ── U7: new page-builder blocks — all SELF_CONTAINED ─────────────────────
 
+// scaffold: faq
 test('faqSection is SELF_CONTAINED (null surface)', () => {
   const rows = classifySections([block('faqSection')]);
   assert.equal(rows[0].surface, null, 'faqSection should have null surface');
 });
+// scaffold:end
 
 test('logoStripSection is SELF_CONTAINED (null surface)', () => {
   const rows = classifySections([block('logoStripSection')]);
@@ -192,18 +198,23 @@ test('embedSection is SELF_CONTAINED (null surface)', () => {
 
 test('U7 blocks do not advance the content cadence counter', () => {
   const rows = classifySections([
-    block('storySection'), // background (idx 0)
-    block('faqSection'), // null — no advance
+    block('richTextSection'), // background (idx 0)
+    block('ctaBandSection'), // null — no advance
     block('logoStripSection'), // null — no advance
     block('teamSection'), // null — no advance
     block('embedSection'), // null — no advance
-    block('storySection'), // muted (idx 1)
+    block('richTextSection'), // muted (idx 1)
   ]);
   assert.deepEqual(surfaces(rows), ['background', null, null, null, null, 'muted']);
 });
 
-test('all 4 U7 types appear in SELF_CONTAINED_TYPES and not CONTENT_TYPES', () => {
-  const u7 = ['faqSection', 'logoStripSection', 'teamSection', 'embedSection'];
+test('every U7 type appears in SELF_CONTAINED_TYPES and not CONTENT_TYPES', () => {
+  const u7 = [
+    'faqSection', // scaffold: faq
+    'logoStripSection',
+    'teamSection',
+    'embedSection',
+  ];
   for (const type of u7) {
     assert.ok(SELF_CONTAINED_TYPES.has(type), `${type} must be in SELF_CONTAINED_TYPES`);
     assert.ok(!CONTENT_TYPES.has(type), `${type} must not be in CONTENT_TYPES`);
@@ -219,7 +230,7 @@ test('dynamicListSection is SELF_CONTAINED (null surface)', () => {
 
 test('dynamicListSection does not advance the content cadence counter', () => {
   const rows = classifySections([
-    block('storySection'), // background (idx 0)
+    block('richTextSection'), // background (idx 0)
     block('dynamicListSection'), // null — self-contained, no advance
     block('serviceAreaSection'), // muted (idx 1)
   ]);

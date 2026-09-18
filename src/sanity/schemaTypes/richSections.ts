@@ -95,6 +95,7 @@ const proseBody = (name = 'body', title = 'Text') =>
     ],
   });
 
+// scaffold: about
 // ── 1. founderSection ────────────────────────────────────────────────────────
 // Two-column bio block: portrait + prose intro. Use once per site (home page).
 // Manages its own bg-background surface (SELF_CONTAINED).
@@ -124,6 +125,7 @@ export const founderSection = defineType({
     }),
   },
 });
+// scaffold:end
 
 // scaffold: services
 // ── 2. servicesGridSection ───────────────────────────────────────────────────
@@ -188,6 +190,7 @@ export const servicesGridSection = defineType({
 });
 // scaffold:end
 
+// scaffold: testimonials
 // ── 3. testimonialsSection ───────────────────────────────────────────────────
 // Testimonial grid with an optional featured pull-quote above.
 // References service testimonial docs (resolved at query time via sectionsProjection).
@@ -245,7 +248,9 @@ export const testimonialsSection = defineType({
     prepare: ({ title }) => ({ title: title || 'Testimonials', subtitle: 'Testimonials' }),
   },
 });
+// scaffold:end
 
+// scaffold: about
 // ── 4. storySection ──────────────────────────────────────────────────────────
 // Long-form narrative block: sticky portrait, story prose, attribution + credential lines.
 // Participates in alternating surface cadence (CONTENT) — receives surface prop.
@@ -293,7 +298,9 @@ export const storySection = defineType({
     }),
   },
 });
+// scaffold:end
 
+// scaffold: philosophy
 // ── 5. valuesSection ─────────────────────────────────────────────────────────
 // Numbered card grid of values or philosophy points.
 // Auto-populates from the philosophyPoint collection at query time.
@@ -318,6 +325,7 @@ export const valuesSection = defineType({
     prepare: ({ title }) => ({ title: title || 'Values', subtitle: 'Values / philosophy' }),
   },
 });
+// scaffold:end
 
 // scaffold: process
 // ── 6. processSection ────────────────────────────────────────────────────────
@@ -436,6 +444,7 @@ export const guaranteeSection = defineType({
   },
 });
 
+// scaffold: faq
 // ── 9. faqSection ─────────────────────────────────────────────────────────--
 // Inline FAQ accordion. References existing faqItem documents so editors pick
 // from the curated collection rather than entering duplicate copy.
@@ -484,6 +493,7 @@ export const faqSection = defineType({
     }),
   },
 });
+// scaffold:end
 
 // ── 10. teamSection ─────────────────────────────────────────────────────────
 // Inline team member grid. Members are stored as inline objects rather than
@@ -664,15 +674,15 @@ export const dynamicListSection = defineType({
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 export const richSectionSchemas = [
-  founderSection,
+  founderSection, // scaffold: about
   servicesGridSection, // scaffold: services
-  testimonialsSection,
-  storySection,
-  valuesSection,
+  testimonialsSection, // scaffold: testimonials
+  storySection, // scaffold: about
+  valuesSection, // scaffold: philosophy
   processSection, // scaffold: process
   serviceAreaSection,
   guaranteeSection,
-  faqSection,
+  faqSection, // scaffold: faq
   teamSection,
   dynamicListSection,
 ];
@@ -690,20 +700,20 @@ export const RICH_SECTION_TYPES = richSectionSchemas.map((s) => ({ type: s.name 
 //   dynamicListSection -> HOME, ABOUT (auto-pull latest content; generic small-biz sources)
 export const HOME_SECTION_TYPES = [
   ...SECTION_TYPES,
-  { type: 'founderSection' },
+  { type: 'founderSection' }, // scaffold: about
   { type: 'servicesGridSection' }, // scaffold: services
-  { type: 'testimonialsSection' },
+  { type: 'testimonialsSection' }, // scaffold: testimonials
   { type: 'processSection' }, // scaffold: process
-  { type: 'faqSection' },
+  { type: 'faqSection' }, // scaffold: faq
   { type: 'teamSection' },
   { type: 'dynamicListSection' },
 ];
 
 export const ABOUT_SECTION_TYPES = [
   ...SECTION_TYPES,
-  { type: 'storySection' },
-  { type: 'valuesSection' },
-  { type: 'faqSection' },
+  { type: 'storySection' }, // scaffold: about
+  { type: 'valuesSection' }, // scaffold: philosophy
+  { type: 'faqSection' }, // scaffold: faq
   { type: 'teamSection' },
   { type: 'dynamicListSection' },
 ];
@@ -713,11 +723,11 @@ export const SERVICES_SECTION_TYPES = [
   { type: 'servicesGridSection' }, // scaffold: services
   { type: 'serviceAreaSection' },
   { type: 'guaranteeSection' },
-  { type: 'faqSection' },
+  { type: 'faqSection' }, // scaffold: faq
 ];
 
 export const PROCESS_SECTION_TYPES = [
   ...SECTION_TYPES,
   { type: 'processSection' }, // scaffold: process
-  { type: 'faqSection' },
+  { type: 'faqSection' }, // scaffold: faq
 ];

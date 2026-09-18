@@ -32,10 +32,10 @@ import {
 /** Preview path per singleton type. */
 export const SINGLETON_PREVIEW_PATHS: Record<string, string> = {
   homePage: '/preview',
-  aboutPage: '/preview/about',
+  aboutPage: '/preview/about', // scaffold: about
   servicesPage: '/preview/services', // scaffold: services
   processPage: '/preview/process', // scaffold: process
-  faqPage: '/preview/faq',
+  faqPage: '/preview/faq', // scaffold: faq
   contactPage: '/preview/contact',
   journalPage: '/preview/journal', // scaffold: journal
   privacyPage: '/preview/privacy',
@@ -81,10 +81,10 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     // scaffold:end
     service: { locations: [{ title: 'Services', href: '/preview/services' }] }, // scaffold: services
     processStep: { locations: [{ title: 'Process', href: '/preview/process' }] }, // scaffold: process
-    philosophyPoint: { locations: [{ title: 'About', href: '/preview/about' }] },
-    testimonial: { locations: [{ title: 'Home', href: '/preview' }] },
-    faqItem: { locations: [{ title: 'FAQ', href: '/preview/faq' }] },
-    faqCategory: { locations: [{ title: 'FAQ', href: '/preview/faq' }] },
+    philosophyPoint: { locations: [{ title: 'About', href: '/preview/about' }] }, // scaffold: philosophy
+    testimonial: { locations: [{ title: 'Home', href: '/preview' }] }, // scaffold: testimonials
+    faqItem: { locations: [{ title: 'FAQ', href: '/preview/faq' }] }, // scaffold: faq
+    faqCategory: { locations: [{ title: 'FAQ', href: '/preview/faq' }] }, // scaffold: faq
     journalCategory: { locations: [{ title: 'Journal', href: '/preview/journal' }] }, // scaffold: journal
     announcement: { locations: [{ title: 'Home', href: '/preview' }] },
     siteSettings: { locations: [{ title: 'Home', href: '/preview' }] },

@@ -1,3 +1,4 @@
+// scaffold-file: faq
 // Safe to edit by hand
 // React island wrapping shadcn Accordion. Renders FAQs either flat (Process page,
 // where each item is scoped to alsoShowOnProcessPage) or grouped by category

@@ -1,3 +1,4 @@
+// scaffold-file: faq
 // FAQ category document. Lets editors define FAQ groupings as real content
 // instead of hardcoded string options. Each faqItem can reference a category
 // here via categoryRef; the frontend coalesces categoryRef->title with the

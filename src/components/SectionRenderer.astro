@@ -19,15 +19,15 @@ import ImageText from '@/components/sections/ImageText.astro';
 import GalleryGrid from '@/components/sections/GalleryGrid.astro';
 import QuoteBlock from '@/components/sections/QuoteBlock.astro';
 import VideoEmbed from '@/components/sections/VideoEmbed.astro';
-import FounderSection from '@/components/sections/FounderSection.astro';
+import FounderSection from '@/components/sections/FounderSection.astro'; // scaffold: about
 import ServicesGridSection from '@/components/sections/ServicesGridSection.astro'; // scaffold: services
-import TestimonialsSection from '@/components/sections/TestimonialsSection.astro';
-import StorySection from '@/components/sections/StorySection.astro';
-import ValuesSection from '@/components/sections/ValuesSection.astro';
+import TestimonialsSection from '@/components/sections/TestimonialsSection.astro'; // scaffold: testimonials
+import StorySection from '@/components/sections/StorySection.astro'; // scaffold: about
+import ValuesSection from '@/components/sections/ValuesSection.astro'; // scaffold: philosophy
 import ProcessSection from '@/components/sections/ProcessSection.astro'; // scaffold: process
 import ServiceAreaSection from '@/components/sections/ServiceAreaSection.astro';
 import GuaranteeSection from '@/components/sections/GuaranteeSection.astro';
-import FaqSection from '@/components/sections/FaqSection.astro';
+import FaqSection from '@/components/sections/FaqSection.astro'; // scaffold: faq
 import LogoStrip from '@/components/sections/LogoStrip.astro';
 import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
@@ -159,7 +159,8 @@ const wrapAttrs = (key: string | undefined) =>
             surface={surface ?? 'background'}
             headingId={headingId}
           />
-        ) : s._type === 'founderSection' ? (
+        ) : // scaffold-branch: about
+        s._type === 'founderSection' ? (
           <FounderSection
             portrait={s.portrait}
             eyebrow={s.eyebrow}
@@ -183,7 +184,8 @@ const wrapAttrs = (key: string | undefined) =>
             variant={s.variant ?? 'grid'}
             headingId={headingId}
           />
-        ) : s._type === 'testimonialsSection' ? (
+        ) : // scaffold-branch: testimonials
+        s._type === 'testimonialsSection' ? (
           <TestimonialsSection
             eyebrow={s.eyebrow}
             headline={s.headline}
@@ -196,7 +198,8 @@ const wrapAttrs = (key: string | undefined) =>
             attribution={s.attribution}
             headingId={headingId}
           />
-        ) : s._type === 'storySection' ? (
+        ) : // scaffold-branch: about
+        s._type === 'storySection' ? (
           <StorySection
             eyebrow={s.eyebrow}
             headline={s.headline}
@@ -208,7 +211,8 @@ const wrapAttrs = (key: string | undefined) =>
             surface={surface ?? 'background'}
             headingId={headingId}
           />
-        ) : s._type === 'valuesSection' ? (
+        ) : // scaffold-branch: philosophy
+        s._type === 'valuesSection' ? (
           <ValuesSection
             eyebrow={s.eyebrow}
             headline={s.headline}
@@ -243,7 +247,8 @@ const wrapAttrs = (key: string | undefined) =>
             siteSettingsText={s.siteSettingsText}
             surface={surface ?? 'background'}
           />
-        ) : s._type === 'faqSection' ? (
+        ) : // scaffold-branch: faq
+        s._type === 'faqSection' ? (
           <FaqSection
             eyebrow={s.eyebrow}
             headline={s.headline}

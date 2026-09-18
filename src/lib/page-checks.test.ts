@@ -18,7 +18,7 @@ import {
 const CONFIG: PageCheckConfig = {
   sectionArrays: ['pageBuilder', 'extraSections'],
   header: { label: 'Hero (top banner)', fields: ['hero'], checkEmpty: true },
-  selfFillingSections: ['teamSection', 'faqSection'],
+  selfFillingSections: ['teamSection', 'logoStripSection'],
   codeOwnedPaths: ['events', 'news', 'og'],
 };
 
@@ -34,13 +34,13 @@ const group = (doc: unknown, id: CheckId, slugs: string[] = []) =>
 
 test('label turns a suffixed type name into plain words', () => {
   assert.equal(sectionLabel('imageTextSection'), 'Image text');
-  assert.equal(sectionLabel('faqSection'), 'Faq');
+  assert.equal(sectionLabel('quoteSection'), 'Quote');
   assert.equal(sectionLabel('heroObject'), 'Hero');
 });
 
 test('label turns a prefixed type name into the same plain words', () => {
   assert.equal(sectionLabel('sectionImageText'), 'Image text');
-  assert.equal(sectionLabel('sectionFaqList'), 'Faq list');
+  assert.equal(sectionLabel('sectionQuoteList'), 'Quote list');
   assert.equal(sectionLabel('embed'), 'Embed');
 });
 
@@ -165,7 +165,7 @@ test('empty counts words nested deep inside the section', () => {
 });
 
 test('empty skips the sections that fill themselves from a list', () => {
-  const doc = { pageBuilder: [{ _type: 'teamSection' }, { _type: 'faqSection' }] };
+  const doc = { pageBuilder: [{ _type: 'teamSection' }, { _type: 'logoStripSection' }] };
   assert.deepEqual(group(doc, 'empty').findings, []);
 });
 

@@ -1,3 +1,4 @@
+// scaffold-file: philosophy
 // Values shown on the About page. Currently three; designed to grow to four.
 
 import { defineType, defineField } from 'sanity';

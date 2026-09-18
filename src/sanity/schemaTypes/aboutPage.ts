@@ -1,3 +1,4 @@
+// scaffold-file: about
 // About page singleton. Philosophy values auto-populate from philosophyPoint collection.
 //
 // Structured content fields (hero*, story*, philosophy*, personal*, stats, final*)

@@ -602,11 +602,11 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
       title: 'Proof and trust',
       of: [
         'quoteSection',
-        'testimonialsSection',
+        'testimonialsSection', // scaffold: testimonials
         'statSection',
         'logoStripSection',
         'guaranteeSection',
-        'faqSection',
+        'faqSection', // scaffold: faq
       ],
     },
     {
@@ -620,9 +620,9 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
       of: [
         'servicesGridSection', // scaffold: services
         'processSection', // scaffold: process
-        'storySection',
-        'valuesSection',
-        'founderSection',
+        'storySection', // scaffold: about
+        'valuesSection', // scaffold: philosophy
+        'founderSection', // scaffold: about
         'teamSection',
         'serviceAreaSection',
         'dynamicListSection',

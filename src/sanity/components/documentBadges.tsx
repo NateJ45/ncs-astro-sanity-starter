@@ -24,11 +24,11 @@ import type { DocumentBadgeComponent, DocumentBadgeProps } from 'sanity';
 //     overrides that fall back to the title/excerpt, so a badge would nag)
 const SEO_PAGE_TYPES = new Set<string>([
   'homePage',
-  'aboutPage',
+  'aboutPage', // scaffold: about
   'processPage', // scaffold: process
   'servicesPage', // scaffold: services
   'portfolioPage',
-  'faqPage',
+  'faqPage', // scaffold: faq
   'contactPage',
   'journalPage', // scaffold: journal
   'eDesignPage',

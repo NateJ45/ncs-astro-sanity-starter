@@ -1,3 +1,4 @@
+// scaffold-file: testimonials
 // Client testimonials. Used across the site — featured pull-quote on the
 // homepage, smaller cards in the grid, optional sidebar quotes elsewhere.
 

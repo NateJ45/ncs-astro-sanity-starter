@@ -56,10 +56,10 @@ const SINGLETON_TYPES = [
   'businessInfo',
   // Core pages
   'homePage',
-  'aboutPage',
+  'aboutPage', // scaffold: about
   'servicesPage', // scaffold: services
   'processPage', // scaffold: process
-  'faqPage',
+  'faqPage', // scaffold: faq
   'contactPage',
   'journalPage', // scaffold: journal
   'notFoundPage',
@@ -70,7 +70,7 @@ const SINGLETON_TYPES = [
 
 const ORDERABLE_TYPES = [
   'service', // scaffold: services
-  'philosophyPoint',
+  'philosophyPoint', // scaffold: philosophy
   'processStep', // scaffold: process
 ] as const;
 
@@ -78,9 +78,9 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...SINGLETON_TYPES,
   ...ORDERABLE_TYPES,
   'announcement', // placed explicitly under Content → Announcements
-  'testimonial',
-  'faqItem',
-  'faqCategory',
+  'testimonial', // scaffold: testimonials
+  'faqItem', // scaffold: faq
+  'faqCategory', // scaffold: faq
   'journalEntry', // scaffold: journal
   'journalCategory', // scaffold: journal
   'page', // custom pages, placed explicitly under "Pages"
@@ -219,10 +219,10 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
             .title('Pages')
             .items([
               singletonWithPreview(S, 'homePage', 'Home', HomeIcon),
-              singletonWithPreview(S, 'aboutPage', 'About', UserIcon),
+              singletonWithPreview(S, 'aboutPage', 'About', UserIcon), // scaffold: about
               singletonWithPreview(S, 'servicesPage', 'Services', PackageIcon), // scaffold: services
               singletonWithPreview(S, 'processPage', 'Process', OlistIcon), // scaffold: process
-              singletonWithPreview(S, 'faqPage', 'FAQ', HelpCircleIcon),
+              singletonWithPreview(S, 'faqPage', 'FAQ', HelpCircleIcon), // scaffold: faq
               singletonWithPreview(S, 'contactPage', 'Contact', EnvelopeIcon),
               singletonWithPreview(S, 'journalPage', 'Journal (index page)', BookIcon), // scaffold: journal
               singletonWithPreview(S, 'notFoundPage', '404 Page', DocumentTextIcon),
@@ -288,6 +288,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 context,
               }),
               // scaffold:end
+              // scaffold: philosophy
               orderableDocumentListDeskItem({
                 type: 'philosophyPoint',
                 title: 'Philosophy Values',
@@ -295,6 +296,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 S,
                 context,
               }),
+              // scaffold:end
               // scaffold: process
               orderableDocumentListDeskItem({
                 type: 'processStep',
@@ -304,9 +306,9 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
                 context,
               }),
               // scaffold:end
-              S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon),
-              S.documentTypeListItem('faqCategory').title('FAQ Categories').icon(TagIcon),
-              S.documentTypeListItem('faqItem').title('FAQ Items').icon(HelpCircleIcon),
+              S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon), // scaffold: testimonials
+              S.documentTypeListItem('faqCategory').title('FAQ Categories').icon(TagIcon), // scaffold: faq
+              S.documentTypeListItem('faqItem').title('FAQ Items').icon(HelpCircleIcon), // scaffold: faq
 
               S.divider(),
 

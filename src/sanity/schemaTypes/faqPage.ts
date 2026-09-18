@@ -1,3 +1,4 @@
+// scaffold-file: faq
 // FAQ page singleton. Questions auto-populate from faqItem collection,
 // grouped by category in the order specified by categoryOrder.
 

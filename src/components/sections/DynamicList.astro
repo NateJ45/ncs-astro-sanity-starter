@@ -25,7 +25,15 @@ type Props = {
   subhead?: string;
   /** Optional rich twin of `subhead` (bold / italic). See src/lib/inline-rich.ts. */
   subheadRich?: unknown;
-  source?: 'journal' | 'services' | 'testimonials' | 'faqs';
+  /**
+   * Which collection to pull from. Every value this can take belongs to a
+   * scaffold capability (journal, services, testimonials, faq), so this is a
+   * plain string rather than a union: a fork that removes all four would
+   * otherwise be left with an empty union, which does not parse. The dropdown
+   * in `sections.ts` is what actually limits an editor's choice, and each of
+   * its options carries its own scaffold marker.
+   */
+  source?: string;
   items?: ProjectedDynamicListSection['items'];
   cta?: ProjectedDynamicListSection['cta'];
   /** How many cards across on a desktop. Three is what this grid always was. */
@@ -65,14 +73,14 @@ function formatDate(d?: string | null): string {
 const fallbackHref: Record<string, string> = {
   journal: '/journal', // scaffold: journal
   services: '/services', // scaffold: services
-  testimonials: '/',
-  faqs: '/faq',
+  testimonials: '/', // scaffold: testimonials
+  faqs: '/faq', // scaffold: faq
 };
 const fallbackLabel: Record<string, string> = {
   journal: 'Read all posts', // scaffold: journal
-  services: 'See all services',
-  testimonials: 'See all reviews',
-  faqs: 'Browse all FAQs',
+  services: 'See all services', // scaffold: services
+  testimonials: 'See all reviews', // scaffold: testimonials
+  faqs: 'Browse all FAQs', // scaffold: faq
 };
 ---
 
@@ -144,6 +152,7 @@ const fallbackLabel: Record<string, string> = {
         )}
         {/* scaffold:end */}
 
+        {/* scaffold: services */}
         {/* ── Service cards ────────────────────────────────────────────── */}
         {source === 'services' && (
           <ul
@@ -190,7 +199,9 @@ const fallbackLabel: Record<string, string> = {
             ))}
           </ul>
         )}
+        {/* scaffold:end */}
 
+        {/* scaffold: testimonials */}
         {/* ── Testimonial cards ────────────────────────────────────────── */}
         {source === 'testimonials' && (
           <ul
@@ -216,7 +227,9 @@ const fallbackLabel: Record<string, string> = {
             ))}
           </ul>
         )}
+        {/* scaffold:end */}
 
+        {/* scaffold: faq */}
         {/* ── FAQ items (mini accordion) ───────────────────────────────── */}
         {source === 'faqs' && (
           <dl class="mx-auto mt-section-lg max-w-3xl divide-y divide-border-soft">
@@ -244,6 +257,7 @@ const fallbackLabel: Record<string, string> = {
             ))}
           </dl>
         )}
+        {/* scaffold:end */}
 
         {/* CTA button */}
         <div class="mt-section-lg flex justify-center">

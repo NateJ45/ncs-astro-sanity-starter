@@ -25,11 +25,11 @@ import type {
   CtaBandSection as _CtaBandSection,
   VideoSection as _VideoSection,
   SpacerSection as _SpacerSection,
-  FounderSection as _FounderSection,
+  FounderSection as _FounderSection, // scaffold: about
   ServicesGridSection as _ServicesGridSection, // scaffold: services
-  TestimonialsSection as _TestimonialsSection,
-  StorySection as _StorySection,
-  ValuesSection as _ValuesSection,
+  TestimonialsSection as _TestimonialsSection, // scaffold: testimonials
+  StorySection as _StorySection, // scaffold: about
+  ValuesSection as _ValuesSection, // scaffold: philosophy
   ProcessSection as _ProcessSection, // scaffold: process
   ServiceAreaSection as _ServiceAreaSection,
   GuaranteeSection as _GuaranteeSection,
@@ -162,6 +162,7 @@ export type ProjectedSpacerSection = { _key: string } & _SpacerSection & {
     [key: string]: unknown;
   };
 
+// scaffold: about
 export type ProjectedFounderSection = { _key: string } & Omit<
   _FounderSection,
   'portrait' | 'cta'
@@ -169,6 +170,7 @@ export type ProjectedFounderSection = { _key: string } & Omit<
     portrait?: ProjectedImage | null;
     cta?: ProjectedCtaBlock | null;
   };
+// scaffold:end
 
 // scaffold: services
 /** servicesGridSection adds a `services` array resolved from the collection. */
@@ -192,6 +194,7 @@ export type ProjectedServicesGridSection = { _key: string } & Omit<_ServicesGrid
   };
 // scaffold:end
 
+// scaffold: testimonials
 /** Testimonial shape after dereffing in the projection. */
 interface ProjectedTestimonial {
   _id?: string;
@@ -210,11 +213,15 @@ export type ProjectedTestimonialsSection = { _key: string } & Omit<
     featuredQuote?: ProjectedTestimonial | null;
     testimonialsToShow?: ProjectedTestimonial[];
   };
+// scaffold:end
 
+// scaffold: about
 export type ProjectedStorySection = { _key: string } & Omit<_StorySection, 'portrait'> & {
     portrait?: ProjectedImage | null;
   };
+// scaffold:end
 
+// scaffold: philosophy
 /** valuesSection adds a `points` array resolved from the collection. */
 export type ProjectedValuesSection = { _key: string } & _ValuesSection & {
     points?: Array<{
@@ -223,6 +230,7 @@ export type ProjectedValuesSection = { _key: string } & _ValuesSection & {
       displayOrder?: number;
     }>;
   };
+// scaffold:end
 
 // scaffold: process
 /** processSection adds a `steps` array resolved from the collection + cta projection. */
@@ -255,6 +263,7 @@ export type ProjectedGuaranteeSection = { _key: string } & _GuaranteeSection & {
 // verify these align with the generated shapes and update the imports above).
 // ---------------------------------------------------------------------------
 
+// scaffold: faq
 /** A dereffed faqItem projected inside faqSection.items. */
 export interface ProjectedFaqItem {
   _id?: string;
@@ -284,6 +293,7 @@ export interface ProjectedFaqSection {
   items?: ProjectedFaqItem[];
   cta?: ProjectedCtaBlock | null;
 }
+// scaffold:end
 
 /** A single logo image inside logoStripSection, after asset-> projection. */
 export type ProjectedLogoStripLogo = ProjectedImage;
@@ -381,7 +391,15 @@ export interface ProjectedDynamicListSection {
   /** Portable Text twin of `subhead` (bold / italic only). */
   subheadRich?: unknown;
   columns?: 2 | 3;
-  source?: 'journal' | 'services' | 'testimonials' | 'faqs';
+  /**
+   * Which collection to pull from. Every value this can take belongs to a
+   * scaffold capability (journal, services, testimonials, faq), so this is a
+   * plain string rather than a union: a fork that removes all four would
+   * otherwise be left with an empty union, which does not parse. The dropdown
+   * in `sections.ts` is what actually limits an editor's choice, and each of
+   * its options carries its own scaffold marker.
+   */
+  source?: string;
   limit?: number;
   items?: ProjectedDynamicListItem[];
   cta?: ProjectedCtaBlock | null;
@@ -401,16 +419,16 @@ export type PageBuilderBlock =
   | ProjectedCtaBandSection
   | ProjectedVideoSection
   | ProjectedSpacerSection
-  | ProjectedFounderSection
+  | ProjectedFounderSection // scaffold: about
   | ProjectedServicesGridSection // scaffold: services
-  | ProjectedTestimonialsSection
-  | ProjectedStorySection
-  | ProjectedValuesSection
+  | ProjectedTestimonialsSection // scaffold: testimonials
+  | ProjectedStorySection // scaffold: about
+  | ProjectedValuesSection // scaffold: philosophy
   | ProjectedProcessSection // scaffold: process
   | ProjectedServiceAreaSection
   | ProjectedGuaranteeSection
   // U7 new blocks
-  | ProjectedFaqSection
+  | ProjectedFaqSection // scaffold: faq
   | ProjectedLogoStripSection
   | ProjectedTeamSection
   | ProjectedEmbedSection

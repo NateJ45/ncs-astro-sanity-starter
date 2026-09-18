@@ -25,7 +25,7 @@ export const homePage = defineType({
     { name: 'featuredWork', title: 'Featured Work' },
     { name: 'featuredJournal', title: 'Featured Journal' },
     { name: 'process', title: 'Process preview' },
-    { name: 'testimonials', title: 'Testimonials' },
+    { name: 'testimonials', title: 'Testimonials' }, // scaffold: testimonials
     { name: 'services', title: 'Services grid' },
     { name: 'final', title: 'Service area + final CTA' },
   ],
@@ -366,6 +366,7 @@ export const homePage = defineType({
       readOnly: true,
     }),
 
+    // scaffold: testimonials
     // Testimonials (legacy — hidden for rollback safety)
     defineField({
       name: 'featuredTestimonial',
@@ -437,6 +438,7 @@ export const homePage = defineType({
       description:
         'Optional line under the testimonials grid. Example: "From the studio\'s Facebook recommendations."',
     }),
+    // scaffold:end
 
     // Services grid (legacy — hidden for rollback safety)
     defineField({
