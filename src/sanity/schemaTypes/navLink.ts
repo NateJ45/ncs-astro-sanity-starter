@@ -61,7 +61,7 @@ export const navLink = defineType({
         { type: 'processPage' }, // scaffold: process
         { type: 'faqPage' }, // scaffold: faq
         { type: 'contactPage' },
-        { type: 'journalPage' },
+        { type: 'journalPage' }, // scaffold: journal
         { type: 'privacyPage' },
         // Pages built by the editor (slug-based route /[slug]).
         { type: 'page' },
