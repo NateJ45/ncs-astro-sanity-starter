@@ -57,3 +57,12 @@ test-results/
 # carry a real client's DNS. Never commit one.
 *.cleaned.txt
 *.cleaned.zone
+
+# Dataset exports left behind by a restore drill. `sanity-backup.yml` writes
+# these, and the drill in docs/RESTORE-DRILL.md has you download and decrypt one
+# by hand, so they end up sitting in the checkout afterwards. Found 2026-09-18:
+# a 28MB export untracked and unignored in a sibling repo, one `git add -A` away
+# from a binary nobody can easily remove from history again. They are encrypted,
+# which limits the damage but is not a reason to commit one.
+sanity-backup-*.tar.gz
+sanity-backup-*.tar.gz.enc

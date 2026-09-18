@@ -181,6 +181,27 @@ jobs:
             echo "::warning::BACKUP_R2_BUCKET variable and/or Cloudflare credentials not set; the backup exists only as a 90-day GitHub artifact. See the header of sanity-backup.yml."
             exit 0
           fi
+          # ONE OFF-SITE COPY A WEEK, not one a day (2026-09-18).
+          #
+          # The bucket had no expiry rule and was growing about 190MB a day
+          # across the family with nothing ever deleting anything. The policy is
+          # now one copy a week, keep the last 12, delete older: this gate is the
+          # "one a week" half, and an R2 lifecycle rule on the bucket (prefix
+          # "sanity/", 90 day age, which is 12 weeks plus slack) is the other.
+          #
+          # The DAILY run above is untouched on purpose. Its 90-day GitHub
+          # artifact costs nothing extra and gives day-level recovery for a
+          # recent mistake; weekly copies alone would mean losing up to seven
+          # days of edits in a restore. So: daily for "yesterday was fine",
+          # weekly off-site for "three months ago was fine".
+          #
+          # A MANUAL run always uploads, whatever day it is, so that verifying
+          # this step never means waiting for Monday.
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$(date -u +%u)" != "1" ]; then
+            echo "Off-site copy is weekly (Mondays). Today's backup is the 90-day GitHub artifact above."
+            exit 0
+          fi
+
           for f in sanity-backup-*.tar.gz.enc; do
             # Keyed by repo so one bucket can hold the whole family, and by date
             # so a bad dataset restored last week has not overwritten the good
