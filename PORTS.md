@@ -114,6 +114,7 @@ is installing it as of the date on the card.
 | 49  | Automation patterns (import-and-deploy, record-and-bake)          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 50  | Production deploy workflow                                        | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 51  | Compressed static server for Lighthouse                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 53  | One accent splitter (heading-accent absorbs scriptAccent)         | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -4903,3 +4904,66 @@ That is why stonesteps' map-poster capture keeps one.
 `Content-Encoding: br` with `Content-Length: 7504` against 29473 bytes uncompressed on
 `/`, gzip negotiates to `Content-Encoding: gzip`, and an `/_astro/*.css` request comes
 back `public, max-age=31536000, immutable`.
+
+---
+
+## Card 53: One accent splitter, not two (2026-09-18)
+
+**Canonical:** `src/lib/heading-accent.ts` and `src/lib/heading-accent.test.ts`
+(both PORTABLE). `src/lib/scriptAccent.ts` and its test are DELETED by this card.
+**Applies to:** every repo that carries the in-canvas control layer. reid-design-site
+and mas-monograms carry four of these files and will read as drift until they sync.
+
+**The defect, and it is the kind that only bites the next person.** This repo had two
+functions that split a display heading around an accent word. `splitScriptAccent`
+(28 lines) matched with a case-sensitive `indexOf` and knew nothing about stega.
+`splitHeadingAccent` cleaned the stega payload off both arguments, matched
+case-insensitively, tolerated a null heading, and handed back the original heading
+alongside the split. `SectionHeading.astro` imported BOTH, and its own header comment
+said which of the two was the safe one. A component that needs a comment to explain
+which of its two identical-looking helpers is the correct one is a bug that has not
+happened yet.
+
+**What the two actually did, measured rather than assumed** (run before any code moved):
+
+| input                                     | `splitScriptAccent`                     | `splitHeadingAccent`                   |
+| ----------------------------------------- | --------------------------------------- | -------------------------------------- |
+| `('Design That Feels Like You', 'Feels')` | before `'Design That '`, word `'Feels'` | identical                              |
+| `('Hello World', 'hello')`                | `found: false`                          | `found: true`, word `'Hello'`          |
+| `('Love what you love', 'love')`          | word is the LAST `love`                 | word is the FIRST `Love`               |
+| `('  Padded heading  ', 'Padded')`        | before `'  '`, after `' heading  '`     | before `''`, after `' heading'`        |
+| heading carries a stega run               | the run lands inside `word` and renders | run stripped, halves clean             |
+| `(undefined, 'x')`                        | throws `TypeError`                      | `found: false`, `heading: ''`          |
+| miss                                      | `{found, before, word, after}`          | plus `heading`, the original untouched |
+
+**The merge, and the two ways it could have changed the site.** Only two rows above are
+behaviour changes on a live page rather than fixes, and both were checked before the
+merge, not after. (1) Case-insensitive matching can select a DIFFERENT occurrence: on
+`'Love what you love'` the old matcher found the only exact-case hit, at the end, and the
+new one takes the first. First-occurrence-only is the documented house rule for both
+accent fields, so the new answer is the intended one, and the case is recorded as a test
+that says CHANGED on its own line. (2) `plain()` trims, so on a HIT the rendered halves
+come from the trimmed heading. A padded heading is a content bug rather than a layout
+device, and `npm run parity compare` across every built route confirmed no page in this
+repo has one. On a MISS nothing changes at all: `heading` comes back untouched and every
+consumer renders its own `headline` anyway.
+
+**The dead ternary this uncovered.** `Hero.astro` called
+`splitScriptAccent(rotateEnabled ? headline : headline, rotateEnabled ? undefined : scriptAccent)`.
+The first ternary returns the same value on both branches and so did nothing. Only the
+ACCENT was ever meant to be conditional: when the rotator owns the first word of the
+headline there is no script accent to apply, so the accent argument goes `undefined`. The
+call now says exactly that. Hero was also the one caller that did not guard its heading
+argument, which the old splitter would have thrown on.
+
+**Tests move, they do not get deleted.** The retired file's 12 cases and 32 assertions
+were moved into `heading-accent.test.ts` under a describe block that names where they
+came from, and two of them were rewritten to record the deliberate behaviour change
+rather than dropped. 74 assertions before, 83 after. A refactor that comes out with
+fewer assertions than it went in with has lost coverage, not gained simplicity.
+
+**Porting it.** Delete `src/lib/scriptAccent.ts` and its test, point every
+`splitScriptAccent(` call at `splitHeadingAccent(`, drop the now-redundant `?? ''`
+guards at the call sites, and move the test cases. Check each repo's own content for a
+heading that repeats a word in two cases before assuming the change is invisible there:
+that is the one input where the two functions disagree about WHICH word to accent.

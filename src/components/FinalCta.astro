@@ -12,7 +12,6 @@
 
 import CtaLink from '@/components/CtaLink.astro';
 import SanityImage from '@/components/SanityImage.astro';
-import { splitScriptAccent } from '@/lib/scriptAccent';
 import { splitHeadingAccent } from '@/lib/heading-accent';
 import { hasInlineRich } from '@/lib/inline-rich';
 import InlineRich from '@/components/InlineRich.astro';
@@ -42,7 +41,8 @@ interface Props {
   fallbackCtaLabel?: string;
   /**
    * Optional single word/phrase from the headline to render in handwritten
-   * the script accent font. Must match the headline text exactly (case-sensitive). Leave
+   * the script accent font. Matched case-insensitively against the headline,
+   * first occurrence only. Leave
    * blank to skip. Use sparingly, one accent per heading. The script word
    * inherits the heading color (text-bg / cream) so contrast is correct on
    * the Charcoal Dark surface in both themes.
@@ -85,13 +85,15 @@ const {
 // empty image object never flips on the overlay path.
 const hasBackground = !!backgroundImage?.asset;
 
-// Split the headline around the script-accent word when provided.
+// Split the headline around the script-accent word when provided. Both accent
+// devices go through splitHeadingAccent: same matching, same stega handling,
+// only the class on the wrapping span differs.
 const {
   found: scriptFound,
   before: scriptBefore,
   word: scriptWord,
   after: scriptAfter,
-} = splitScriptAccent(headline, scriptAccent);
+} = splitHeadingAccent(headline, scriptAccent);
 
 // The colour accent, only considered when the script accent did not fire.
 const colour = scriptFound
