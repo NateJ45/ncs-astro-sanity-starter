@@ -15,7 +15,9 @@
 //     wrapped. Falls back to plain rendering when undefined, empty, or not
 //     found — so no existing heading is affected unless the prop is explicitly
 //     passed with a matching string.
-//   - Logic is shared with Hero.astro via splitScriptAccent() in src/lib/scriptAccent.ts.
+//   - Logic is shared with Hero.astro and FinalCta.astro via splitHeadingAccent()
+//     in src/lib/heading-accent.ts, which is the one splitter both accent
+//     devices use.
 //   - At most one script accent per heading (editorial discipline, per CLAUDE.md).
 //
 // Heading accent (PORTS.md card 26, 2026-08-28):
@@ -24,7 +26,7 @@
 //     headline and the first match is wrapped in `.heading-accent`, which reads
 //     the brand accent colour (globals.css; measured on every surface in both
 //     themes by src/lib/surfaces.test.ts). Matching is case-insensitive and
-//     stega-safe, unlike splitScriptAccent - see src/lib/heading-accent.ts.
+//     stega-safe - see src/lib/heading-accent.ts.
 //   - PRECEDENCE, and it is deliberate: if a script accent is set AND found,
 //     the colour accent is skipped. Two accents on one heading is decoration,
 //     not emphasis, and the script accent is the older, louder device.
@@ -37,7 +39,6 @@
 //     difference in the markup is the <strong> / <em> the editor asked for.
 //     Empty or absent, the plain `subhead` renders untouched.
 
-import { splitScriptAccent } from '@/lib/scriptAccent';
 import { splitHeadingAccent } from '@/lib/heading-accent';
 import { hasInlineRich } from '@/lib/inline-rich';
 import InlineRich from '@/components/InlineRich.astro';
@@ -54,7 +55,8 @@ interface Props {
   tone?: 'default' | 'inverse';
   /**
    * Optional single word/phrase from the headline to render in handwritten
-   * the script accent font. Must match the headline text exactly (case-sensitive).
+   * the script accent font. Matched case-insensitively against the headline,
+   * first occurrence only.
    * Leave undefined or blank to skip. Use sparingly — one accent per heading.
    */
   scriptAccent?: string;
@@ -88,7 +90,7 @@ const {
   before: scriptBefore,
   word: scriptWord,
   after: scriptAfter,
-} = splitScriptAccent(headline ?? '', scriptAccent);
+} = splitHeadingAccent(headline, scriptAccent);
 
 // The colour accent, only considered when the script accent did not fire.
 const colour = scriptFound

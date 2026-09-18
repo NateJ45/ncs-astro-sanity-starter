@@ -13,7 +13,7 @@
 import HeroBackground from '@/components/HeroBackground.astro';
 import CtaLink from '@/components/CtaLink.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
-import { splitScriptAccent } from '@/lib/scriptAccent';
+import { splitHeadingAccent } from '@/lib/heading-accent';
 import { ChevronDown } from 'lucide-react';
 
 interface CtaBlock {
@@ -86,14 +86,20 @@ const rotatingPayload = rotateEnabled ? JSON.stringify([headlineFirst, ...rotati
 // Script accent: split the headline around the accent word so it can be
 // rendered in three pieces (before / accent-span / after). Only fires when
 // rotatingWords isn't active — the two flourishes shouldn't compete.
-// Delegates to the shared splitScriptAccent helper so Hero and SectionHeading
-// use identical logic.
+// Delegates to the shared splitHeadingAccent helper so Hero, SectionHeading and
+// FinalCta use identical logic.
+//
+// The headline argument used to read `rotateEnabled ? headline : headline`,
+// which is the same value on both branches and so did nothing. Only the ACCENT
+// is conditional, and always was: when the rotator owns the first word there is
+// no accent to apply, so the accent argument goes undefined and the helper
+// returns found:false. Simplified to say exactly that.
 const {
   found: scriptFound,
   before: scriptBefore,
   word: scriptWord,
   after: scriptAfter,
-} = splitScriptAccent(rotateEnabled ? headline : headline, rotateEnabled ? undefined : scriptAccent);
+} = splitHeadingAccent(headline, rotateEnabled ? undefined : scriptAccent);
 
 // Subhead emphasis: parse markdown-style _word_ markers into <em> spans so
 // editors can italicize a key word in the Sanity subhead without HTML.
