@@ -3,9 +3,9 @@
 // + optional description. Posts can have multiple categories; the first one
 // shows on the card.
 //
-// Common categories for an interior designer's journal:
-//   Project Stories · Style Notes · Behind the Scenes · Source Roundups ·
-//   Process · Q&A · Announcements
+// PLACEHOLDER CATEGORIES. Replace these with the ones this project publishes
+// under; they are here to show the shape, not to be shipped:
+//   Category One · Category Two · Behind the Scenes · Q&A · Announcements
 //
 // Editors create new categories as they need them. The journal index page
 // renders category chips automatically based on what's been used.
