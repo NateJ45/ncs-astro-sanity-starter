@@ -1,0 +1,56 @@
+; Fixture for scripts/lib/zone-audit.mjs and src/lib/zone-audit.test.ts.
+;
+; Written 2026-09-18 from the SHAPES found in the real GoDaddy export for
+; stonesteps50k.com, with the client's own hostnames, IPs and key material
+; replaced. Every fault below was in that one export:
+;
+;   - two SPF records on the apex, neither naming the actual sender
+;   - a tab and a space at the front of the DKIM value
+;   - the apex A, www, staging, ftp and _acme-challenge all on the old host
+;   - _domainconnect, and eight GoDaddy Workspace Email names while the MX
+;     has been on Microsoft 365 for years
+;
+; Keep this file as a fixture, not as a template. It is deliberately broken.
+;
+;; Domain: example-client.com.
+;; Exported (yyyy-mm-dd hh:mm:ss): 2026-09-18 08:02:11
+
+$ORIGIN example-client.com.
+$TTL 3600
+
+;; A Records
+@	600	IN	A	203.0.113.24
+staging	600	IN	A	203.0.113.24
+
+;; CNAME Records
+www	3600	IN	CNAME	@
+ftp	3600	IN	CNAME	@
+_acme-challenge	600	IN	CNAME	acme.oldhost.example.net.
+_domainconnect	3600	IN	CNAME	_domainconnect.gd.domaincontrol.com.
+email	3600	IN	CNAME	email.secureserver.net.
+imap	3600	IN	CNAME	imap.secureserver.net.
+pop	3600	IN	CNAME	pop.secureserver.net.
+smtp	3600	IN	CNAME	smtp.secureserver.net.
+mail	3600	IN	CNAME	pop.secureserver.net.
+webmail	3600	IN	CNAME	webmail.secureserver.net.
+autodiscover	3600	IN	CNAME	autodiscover.outlook.com.
+mobilemail	3600	IN	CNAME	mobilemail-v01.prod.mesa1.secureserver.net.
+api._domainkey	3600	IN	CNAME	api.dkim.example-esp.net.
+pay	3600	IN	CNAME	pay.godaddysites.com.
+
+;; MX Records
+@	3600	IN	MX	0	example-client-com.mail.protection.outlook.com.
+
+;; TXT Records
+@	3600	IN	TXT	"v=spf1 include:secureserver.net -all"
+@	3600	IN	TXT	"v=spf1 include:example-esp.net ~all"
+@	3600	IN	TXT	"MS=ms41337700"
+_dmarc	3600	IN	TXT	"v=DMARC1; p=none; rua=mailto:dmarc@example-client.com"
+selector1._domainkey	3600	IN	TXT	"	 k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQEXAMPLEKEYMATERIALONLYNOTAREALKEY1234567890abcdefGHIJKLMNOPqrstuvwxyz"
+
+;; SRV Records
+_sip._tls	3600	IN	SRV	100	1	443	sipdir.online.lync.com.
+
+;; NS Records
+@	3600	IN	NS	ns13.domaincontrol.com.
+@	3600	IN	NS	ns14.domaincontrol.com.

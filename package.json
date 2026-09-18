@@ -22,6 +22,7 @@
     "studio:import": "node scripts/import-content.mjs",
     "seed": "node scripts/seed-core.mjs",
     "parity": "node scripts/page-parity.mjs",
+    "cutover": "node scripts/cutover.mjs",
     "sync-check": "node scripts/sync-check.mjs",
     "free-dist": "node scripts/free-dist.mjs",
     "check": "astro check && npm run lint",
