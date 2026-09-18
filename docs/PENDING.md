@@ -128,6 +128,46 @@ Drop it during a slop sweep (card 16) if it is still unused then.
 Revisit when a newer adapter's peer range and emitted config are both checked by hand
 against a real `wrangler dev` and a real deploy.
 
+### 4a. Thirty npm advisories, accepted rather than fixed
+
+**Checked 2026-09-18. `npm audit` reports 30: 14 high, 14 moderate, 2 low, 0 critical.**
+
+**NEVER RUN `npm audit fix --force` IN THIS REPO.** Its offered fix for the Sanity half of
+the list is a DOWNGRADE of `sanity` from 6.9.1 to 5.14.1 and of `@sanity/vision` from 6.9.1
+to 5.31.2, each across a major version. That takes the embedded Studio back a major line
+with it, and the Studio ships with the site, so the damage lands on editors, not on a
+developer's machine. It would also downgrade `@lhci/cli` from 0.15.1 to 0.6.1 and push
+`wrangler` to 4.135.0, which breaks the pin CLAUDE.md rule 8 exists to hold. The plain
+`npm audit fix`, with no `--force`, is harmless and already has nothing left to do.
+
+**Why they are accepted.** Every one of the 30 is in tooling that runs at build time or in
+CI. None of it is in the bundle a visitor downloads, and none of it is in the Studio
+runtime either: the `sanity` and `@sanity/vision` entries are flagged through
+`@sanity/cli`, the command-line package used for `typegen`, `sanity cors` and dataset work,
+not through the Studio code the browser loads. The three roots:
+
+- **The Cloudflare build chain, 5 packages.** `wrangler`, `@cloudflare/vite-plugin`,
+  `miniflare`, `sharp`, `undici`. Everything here runs on the machine doing the build.
+- **The Sanity CLI chain, 13 packages.** `sanity`, `@sanity/vision`, the four `@sanity/*`
+  CLI packages, the two `@module-federation/*` packages, `@vercel/frameworks`, and the
+  `js-yaml`, `smol-toml`, `adm-zip` and `typeid-js` underneath them.
+- **Lighthouse CI, 12 packages.** `@lhci/cli`, `@lhci/utils`, `lighthouse`,
+  `puppeteer-core`, `@puppeteer/browsers`, `extract-zip`, `tmp`, `external-editor`,
+  `inquirer`, `qs`, `body-parser`, `uuid`. This one only ever runs in
+  `.github/workflows/lighthouse.yml`.
+
+**What would actually change this.** Upstream releases, nothing else. The Sanity set moves
+when the family takes PORTS.md card 10 phase 2 (the `@sanity/ui` 4 migration), which is a
+deliberate piece of work and not an audit fix. `wrangler` and `sharp` clear when a wrangler
+release inside the `~4.110.0` line picks up a patched `sharp` and `undici`, or when rule 8's
+pin is revisited on purpose. Lighthouse CI clears when `@lhci/cli` ships a 0.15.x that drops
+the old `puppeteer-core` and `tmp`.
+
+**To check whether anything has changed since this was written:** run `npm audit`. If the
+summary still reads 30 with the same 14/14/2 split, nothing has moved and this entry stands.
+If the numbers differ, find out which root moved before editing anything, and re-read the
+`--force` warning above before touching a dependency.
+
 ### 5. Seven eslint warnings, all unused bindings
 
 `npm run lint` is a CI step now (2026-09-06) and exits clean, but it still prints seven
