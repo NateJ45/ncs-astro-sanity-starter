@@ -44,10 +44,12 @@ interface Service {
   price?: string;
 }
 
+// scaffold: faq
 interface FaqItem {
   question?: string;
   answer?: any;
 }
+// scaffold:end
 
 interface Breadcrumb {
   name: string;
@@ -129,6 +131,7 @@ export function serviceListSchema(services: Service[] | null | undefined): strin
   });
 }
 
+// scaffold: faq
 // ---------- FAQPage (for /faq) --------------------------------------------
 
 /**
@@ -160,6 +163,7 @@ export function faqPageSchema(faqs: FaqItem[] | null | undefined): string {
     })),
   });
 }
+// scaffold:end
 
 // ---------- BreadcrumbList (every internal page) --------------------------
 

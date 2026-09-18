@@ -131,7 +131,7 @@ export const contactPage = defineType({
       type: 'array',
       group: 'form',
       description:
-        'Budget brackets shown on the form. The wording matters — keep the "Not sure yet" option so the form stays approachable. Leave blank to use the built-in defaults.',
+        'Budget brackets shown on the form. The wording matters — keep the "Not sure yet" option so the form stays approachable. Leave blank and the form falls back to labelled placeholders, which is a prompt to fill this in rather than a usable default.',
       of: [defineArrayMember({ type: 'string' })],
     }),
     defineField({
@@ -149,7 +149,7 @@ export const contactPage = defineType({
       type: 'array',
       group: 'form',
       description:
-        'Optional lead-source dropdown options. Useful for understanding where good leads come from over time. Leave blank to use the built-in defaults (Google, Instagram, Facebook, Houzz, referrals, journal, project in person, Other).',
+        'Optional lead-source dropdown options. Useful for understanding where good leads come from over time. Leave blank to use the built-in defaults (Google, Instagram, Facebook, referrals, journal, Other), and replace those with the channels this business is actually findable on.',
       of: [defineArrayMember({ type: 'string' })],
     }),
     // Editor-defined questions. Leave this empty and the contact form is

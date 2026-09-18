@@ -33,6 +33,9 @@ tmp
 # permanently out of step for no benefit.
 modules
 
+# Retired work, kept but not maintained. See archive/README.md.
+archive
+
 # Planning history and migration notes: prose archives, not maintained source.
 docs/superpowers
 

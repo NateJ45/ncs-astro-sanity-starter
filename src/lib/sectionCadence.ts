@@ -26,13 +26,13 @@ export const SELF_CONTAINED_TYPES = new Set([
   'statSection',
   'spacerSection',
   // Rich section types — phase B
-  'founderSection',
+  'founderSection', // scaffold: about
   'servicesGridSection', // scaffold: services
-  'testimonialsSection',
-  'valuesSection',
+  'testimonialsSection', // scaffold: testimonials
+  'valuesSection', // scaffold: philosophy
   'processSection', // scaffold: process
   // U7 new blocks — all four are SELF_CONTAINED (manage their own surface)
-  'faqSection',
+  'faqSection', // scaffold: faq
   'logoStripSection',
   'teamSection',
   'embedSection',
@@ -48,7 +48,7 @@ export const CONTENT_TYPES = new Set([
   'quoteSection',
   'videoSection',
   // Rich section types — phase B
-  'storySection',
+  'storySection', // scaffold: about
   'serviceAreaSection',
   'guaranteeSection',
 ]);

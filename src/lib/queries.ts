@@ -50,15 +50,19 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       images[]${IMAGE_PROJECTION}
     },
+    // scaffold: about
     _type == "founderSection" => {
       ...,
       portrait${IMAGE_PROJECTION},
       cta${CTA_PROJECTION}
     },
+    // scaffold:end
+    // scaffold: about
     _type == "storySection" => {
       ...,
       portrait${IMAGE_PROJECTION}
     },
+    // scaffold:end
     // scaffold: services
     _type == "servicesGridSection" => {
       ...,
@@ -66,6 +70,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       "services": *[_type == "service"] | order(orderRank asc, displayOrder asc)
     },
     // scaffold:end
+    // scaffold: testimonials
     _type == "testimonialsSection" => {
       ...,
       "featuredQuote": featuredQuote->{
@@ -77,12 +82,15 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         "relatedProject": relatedProject->{ title, "slug": slug.current }
       }
     },
+    // scaffold:end
+    // scaffold: philosophy
     _type == "valuesSection" => {
       ...,
       "points": *[_type == "philosophyPoint"] | order(orderRank asc, displayOrder asc){
         title, description, displayOrder
       }
     },
+    // scaffold:end
     // scaffold: process
     _type == "processSection" => {
       ...,
@@ -100,6 +108,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
       ...,
       "siteSettingsText": *[_type == "siteSettings"][0].satisfactionGuarantee
     },
+    // scaffold: faq
     _type == "faqSection" => {
       ...,
       cta${CTA_PROJECTION},
@@ -109,6 +118,7 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         displayOrder
       }
     },
+    // scaffold:end
     _type == "logoStripSection" => {
       ...,
       logos[]${IMAGE_PROJECTION}
@@ -139,13 +149,25 @@ export function sectionsProjection(field = 'pageBuilder'): string {
           "href": "/services#" + slug.current
         },
         // scaffold:end
+        // scaffold: testimonials
         source == "testimonials" => *[_type == "testimonial"] | order(_createdAt desc)[0...limit]{
           _id, "title": attribution, "meta": detail, "summary": quote, "href": null
         },
+        // scaffold:end
+        // scaffold: faq
         source == "faqs" => *[_type == "faqItem"] | order(displayOrder asc, _createdAt asc)[0...limit]{
           _id, "title": question, "summary": null, "meta": coalesce(categoryRef->title, category), "href": null,
           "answer": answer
-        }
+        },
+        // scaffold:end
+        // 2026-09-18: the trailing [] is the select's DEFAULT arm, and it is
+        // load-bearing for the scaffold. Every other arm here belongs to a
+        // removable capability, so without a default a fork that removes the
+        // last one would be left with a dangling comma, or an empty select(),
+        // neither of which is valid GROQ. An empty list is also the right
+        // answer for a
+        // source nothing serves any more: the component renders nothing.
+        []
       )
     }
   }`;
@@ -310,6 +332,7 @@ export async function getHomePage() {
   );
 }
 
+// scaffold: about
 // ---- About page -----------------------------------------------------------
 
 export async function getAboutPage() {
@@ -324,6 +347,7 @@ export async function getAboutPage() {
     null,
   );
 }
+// scaffold:end
 
 // ---- Services page --------------------------------------------------------
 
@@ -372,6 +396,7 @@ export async function getProcessPage() {
 }
 // scaffold:end
 
+// scaffold: faq
 // ---- FAQ page -------------------------------------------------------------
 
 export async function getFaqPage() {
@@ -398,6 +423,7 @@ export async function getFaqPage() {
     null,
   );
 }
+// scaffold:end
 
 // ---- Contact page ---------------------------------------------------------
 

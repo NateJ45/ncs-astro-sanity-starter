@@ -13,6 +13,41 @@
 //
 // Module types (service modules, etc.) have their own per-module seed.mjs.
 // Run ONLY this file for the core pages.
+//
+// -----------------------------------------------------------------------------
+// EVERY SEEDED STRING READS AS A PLACEHOLDER. THAT IS THE RULE (2026-09-18).
+// -----------------------------------------------------------------------------
+// PORTS.md card 44. This file used to seed plausible copy for a real trade: an
+// interior-design studio's services at $150 and $650, budget brackets from
+// "Under $2,000" to "$25,000+", testimonials about living rooms, process steps
+// ending in an installation day. All of it was well written and none of it
+// belonged to the fork that ran the seeder, and a fork could ship it simply by
+// not noticing it. Plausible copy for the wrong business looks exactly like
+// copy; an obvious placeholder does not.
+//
+// So a seeded string either says "replace this" in so many words, or it is
+// structurally neutral ("How long it takes", "Category one (replace me)"). If
+// you find yourself writing a sentence a real business could publish, that is
+// the signal to stop. The one exception is the privacy policy, which is generic
+// boilerplate every site needs, and the Studio help documents, which are
+// instructions to the editor rather than content for a visitor.
+//
+// -----------------------------------------------------------------------------
+// THE SCAFFOLD MARKERS
+// -----------------------------------------------------------------------------
+// Each numbered section that belongs to a removable capability is wrapped in a
+// scaffold block, so `npm run scaffold --remove faq` takes the FAQ page and its
+// four questions out of the seeder along with the schema and the route.
+//
+// ONE LIMIT, AND IT IS DELIBERATE. Markers never nest (see scripts/scaffold.mjs),
+// so a section gets the ONE capability that owns the page it seeds. The
+// aboutPage seed is `about` end to end, including the valuesSection block inside
+// its pageBuilder, which really belongs to `philosophy`. A fork that removed
+// philosophy and kept about would seed a block whose type the schema no longer
+// declares. That is a DATASET problem, not a build problem: the Studio shows it
+// as an unknown type and the editor deletes it, exactly as it does for any
+// document of a removed type. The scaffold has never been able to touch the
+// dataset, on purpose, and this is the same boundary.
 
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -102,19 +137,34 @@ docs.push({
   _id: 'siteSettings',
   _type: 'siteSettings',
   title: 'Studio Starter',
-  tagline: 'Good design lives in the details.',
+  tagline: 'Your tagline goes here.',
   email: 'hello@example.com',
-  availabilityStatus: 'Accepting new clients',
+  availabilityStatus: 'Replace with your current availability',
   serviceAreas: ['Your City', 'Surrounding Region'],
   travelFees: [
-    { _type: 'travelFeeTier', _key: key(), distanceLabel: 'Under 30 minutes', fee: 'None' },
-    { _type: 'travelFeeTier', _key: key(), distanceLabel: '30 to 60 minutes', fee: '$50' },
-    { _type: 'travelFeeTier', _key: key(), distanceLabel: '60 to 90 minutes', fee: '$100' },
+    {
+      _type: 'travelFeeTier',
+      _key: key(),
+      distanceLabel: 'Nearest tier (replace me)',
+      fee: 'None',
+    },
+    {
+      _type: 'travelFeeTier',
+      _key: key(),
+      distanceLabel: 'Middle tier (replace me)',
+      fee: 'Replace with a fee',
+    },
+    {
+      _type: 'travelFeeTier',
+      _key: key(),
+      distanceLabel: 'Furthest tier (replace me)',
+      fee: 'Replace with a fee',
+    },
   ],
   newsletter: {
     enabled: false,
-    heading: 'Stay in the loop.',
-    blurb: 'Design notes, project updates, and the occasional resource. No filler.',
+    heading: 'Your signup heading goes here.',
+    blurb: 'Say what a subscriber gets and how often. Replace this line.',
     buttonLabel: 'Subscribe',
     successMessage: "You're in. Check your inbox.",
     consentNote: 'No spam. Unsubscribe anytime.',
@@ -132,7 +182,7 @@ docs.push({
     showBudgetCalculator: true,
   },
   satisfactionGuarantee:
-    'We stand behind every project. If something is not right, we make it right.',
+    'Replace this with the promise this business actually makes, or clear the field to hide it.',
 });
 
 // ── 2. homePage (singleton) ───────────────────────────────────────────────
@@ -155,70 +205,69 @@ docs.push({
 docs.push({
   _id: 'homePage',
   _type: 'homePage',
-  seoTitle: 'Studio Starter - Interior Design',
+  seoTitle: 'Studio Starter - replace this title',
   seoDescription:
-    'A design studio for people who want their home to feel finished and lived-in, not staged.',
+    'Replace this with one sentence describing what this business does, for search results.',
 
   heroEyebrow: 'Welcome.',
-  heroHeadline: 'Design That Feels Like You.',
-  heroSubhead:
-    'We help people create spaces that work as hard as they do and feel good to come home to.',
-  heroPrimaryCta: cta('Start a Conversation', '/contact'),
-  heroSecondaryCta: cta('See Our Work', '/portfolio'),
+  heroHeadline: 'Your Headline Goes Here.',
+  heroSubhead: 'Replace this with one or two sentences saying what you do and who you do it for.',
+  heroPrimaryCta: cta('Primary button label', '/contact'),
+  heroSecondaryCta: cta('Second button label', '/about'),
 
   meetFounderEyebrow: 'Meet the Founder.',
-  meetFounderHeadline: 'Good design starts with a real conversation.',
+  meetFounderHeadline: 'Replace this headline.',
   meetFounderContent: [
     pt(
-      'Every project starts the same way: a conversation about how you actually use your space, not just how you want it to look. That conversation shapes everything that follows.',
+      'Replace this with a short introduction. Two paragraphs is plenty: who you are and what you do.',
     ),
     pt(
-      'Replace this placeholder with your own story. Tell visitors who you are, what drives your work, and why they should trust you with their home.',
+      'Then say why someone should trust you with the work. Be specific; specifics are what make a stranger believe you.',
     ),
   ],
-  meetFounderCta: cta('Learn More About the Studio', '/about'),
+  meetFounderCta: cta('Button label', '/about'),
 
   featuredWorkEyebrow: 'Recent Work.',
-  featuredWorkHeadline: 'Rooms that feel finished.',
+  featuredWorkHeadline: 'Replace this headline.',
   featuredWorkSubhead:
-    'A look at recent projects. Each one starts with a conversation about how the space actually needs to function, then the design follows from there.',
-  featuredWorkCta: cta('See All Work', '/portfolio'),
+    'Replace this with a line introducing whatever this business wants to show off.',
+  featuredWorkCta: cta('Button label', '/about'),
 
   featuredJournalEyebrow: 'From the Journal.',
-  featuredJournalHeadline: 'How we think about design.',
+  featuredJournalHeadline: 'Replace this headline.',
   featuredJournalSubhead:
-    'Posts on the design moves that change a room, source roundups behind specific projects, and the occasional honest note about process.',
+    'Replace this with a line saying what gets written about here and how often.',
   featuredJournalCta: cta('Read the Journal', '/journal'),
 
   processPreviewEyebrow: 'How It Works.',
-  processPreviewHeadline: 'A clear process, start to finish.',
+  processPreviewHeadline: 'Replace this headline.',
   processPreviewSubhead:
-    'No guesswork and no pressure. From your first inquiry to the day everything comes together, you will always know exactly where things stand and what happens next.',
-  processPreviewCta: cta('See the Full Process', '/services'),
+    'Replace this with a line describing how working with this business goes, in plain words.',
+  processPreviewCta: cta('Button label', '/process'),
 
+  // scaffold: testimonials
   testimonialsEyebrow: 'Kind Words.',
-  testimonialsHeadline: 'Words from real homes.',
-  testimonialsSubhead:
-    'The part that matters most: how it felt to work together, and how each space holds up to everyday life.',
+  testimonialsHeadline: 'Replace this headline.',
+  testimonialsSubhead: 'Replace this with a line framing the reviews below.',
   testimonialsToShow: [
     { _type: 'reference', _key: key(), _ref: 'testimonial-1' },
     { _type: 'reference', _key: key(), _ref: 'testimonial-2' },
     { _type: 'reference', _key: key(), _ref: 'testimonial-3' },
   ],
+  // scaffold:end
 
-  servicesGridEyebrow: 'The Studio.',
-  servicesGridHeadline: 'Design Services for Every Space.',
-  servicesGridSubhead:
-    'Whether you need a fresh set of eyes or a full room overhaul, there is a tier designed for where you are.',
-  servicesGridCta: cta('See All Services', '/services'),
-  servicesGridFootnote: 'Final pricing is always discussed before any work begins.',
+  servicesGridEyebrow: 'What We Offer.',
+  servicesGridHeadline: 'Replace this headline.',
+  servicesGridSubhead: 'Replace this with a line introducing the list of services below.',
+  servicesGridCta: cta('Button label', '/services'),
+  servicesGridFootnote: 'Optional small print under the list. Replace or clear it.',
 
-  serviceAreaCue: 'Serving the greater metro area and surrounding region.',
+  serviceAreaCue: 'Replace this with where this business works.',
   finalCtaEyebrow: 'Ready to Begin?',
-  finalCtaHeadline: 'Ready to Love Your Space?',
+  finalCtaHeadline: 'Replace this closing headline.',
   finalCtaSubhead:
-    "Let's start with a conversation. Fill out the form and we'll be in touch within two business days.",
-  finalCta: cta('Start a Conversation', '/contact'),
+    'Replace this with the one thing you want a visitor to do next, and what happens when they do.',
+  finalCta: cta('Primary button label', '/contact'),
 
   // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
   // NOTE: This content mirrors DEFAULT_HOME_SECTIONS in src/data/defaultSections.ts.
@@ -231,80 +280,87 @@ docs.push({
       _type: 'heroSection',
       _key: key(),
       eyebrow: 'Welcome.',
-      headline: 'Design That Feels Like You.',
-      subhead:
-        'We help people create spaces that work as hard as they do and feel good to come home to.',
+      headline: 'Your Headline Goes Here.',
+      subhead: 'Replace this with one or two sentences saying what you do and who you do it for.',
       size: 'tall',
-      primaryCta: cta('Start a Conversation', '/contact'),
-      secondaryCta: cta('See Our Work', '/portfolio'),
+      primaryCta: cta('Primary button label', '/contact'),
+      secondaryCta: cta('Second button label', '/about'),
     },
+    // scaffold: about
     {
       _type: 'founderSection',
       _key: key(),
       eyebrow: 'Meet the Founder.',
-      headline: 'Good design starts with a real conversation.',
+      headline: 'Replace this headline.',
       content: [
         pt(
-          'Every project starts the same way: a conversation about how you actually use your space, not just how you want it to look.',
+          'Replace this with a short introduction. Two paragraphs is plenty: who you are and what you do.',
         ),
         pt(
-          'Replace this placeholder with your own story. Tell visitors who you are, what drives your work, and why they should trust you with their home.',
+          'Then say why someone should trust you with the work. Be specific; specifics are what make a stranger believe you.',
         ),
       ],
-      cta: cta('Learn More About the Studio', '/about'),
+      cta: cta('Button label', '/about'),
     },
+    // scaffold:end
+    // scaffold: testimonials
     {
       _type: 'testimonialsSection',
       _key: key(),
       eyebrow: 'Kind Words.',
-      headline: 'Words from real clients.',
-      subhead: 'The part that matters most: how it felt to work together.',
+      headline: 'Replace this headline.',
+      subhead: 'Replace this with a line framing the reviews below.',
       testimonialsToShow: [
         { _type: 'reference', _key: key(), _ref: 'testimonial-1' },
         { _type: 'reference', _key: key(), _ref: 'testimonial-2' },
         { _type: 'reference', _key: key(), _ref: 'testimonial-3' },
       ],
     },
+    // scaffold:end
+    // scaffold: process
     {
       _type: 'processSection',
       _key: key(),
       eyebrow: 'How It Works.',
-      headline: 'A clear process, start to finish.',
-      subhead: 'No guesswork and no pressure. You will always know exactly where things stand.',
+      headline: 'Replace this headline.',
+      subhead: 'Replace this with a line describing how working with this business goes.',
       variant: 'preview',
-      cta: cta('See the Full Process', '/process'),
+      cta: cta('Button label', '/process'),
     },
+    // scaffold:end
+    // scaffold: services
     {
       _type: 'servicesGridSection',
       _key: key(),
-      eyebrow: 'The Studio.',
-      headline: 'Design Services for Every Space.',
-      subhead:
-        'Whether you need a fresh set of eyes or a full room overhaul, there is a tier for you.',
-      cta: cta('See All Services', '/services'),
-      footnote: 'Final pricing is always discussed before any work begins.',
+      eyebrow: 'What We Offer.',
+      headline: 'Replace this headline.',
+      subhead: 'Replace this with a line introducing the list of services below.',
+      cta: cta('Button label', '/services'),
+      footnote: 'Optional small print under the list. Replace or clear it.',
       variant: 'grid',
     },
+    // scaffold:end
     {
       _type: 'serviceAreaSection',
       _key: key(),
       eyebrow: 'Service Area.',
-      headline: 'Where We Work.',
+      headline: 'Replace this headline.',
       description:
-        'We serve the greater metro area and surrounding region. Travel fees for out-of-area projects are always quoted upfront.',
+        'Replace this with where this business works and what it charges to travel, if anything.',
       showTravelFees: true,
     },
     {
       _type: 'ctaBandSection',
       _key: key(),
       eyebrow: 'Ready to Begin?',
-      headline: 'Ready to Love Your Space?',
-      subhead: "Let's start with a conversation.",
-      cta: cta('Start a Conversation', '/contact'),
+      headline: 'Replace this closing headline.',
+      subhead: 'Replace this with the one thing you want a visitor to do next.',
+      cta: cta('Primary button label', '/contact'),
     },
   ],
 });
 
+// scaffold: about
 // ── 3. aboutPage (singleton) ──────────────────────────────────────────────
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
 //         heroImage?, heroScriptAccent?, storyEyebrow, storyHeadline,
@@ -318,85 +374,90 @@ docs.push({
 docs.push({
   _id: 'aboutPage',
   _type: 'aboutPage',
-  seoTitle: 'About Studio Starter - Interior Design',
+  seoTitle: 'About Studio Starter - replace this title',
   seoDescription:
-    'Learn about the studio, the founder, and the philosophy behind every project we take on.',
+    'Replace this with one sentence about who is behind this business, for search results.',
 
-  heroEyebrow: 'The Designer.',
+  heroEyebrow: 'The Team.',
   heroHeadline: 'People Hire People.',
   heroSubhead: "Here's who you'd be working with.",
 
   storyEyebrow: 'My Story.',
-  storyHeadline: 'Why I Started This Studio.',
+  storyHeadline: 'Replace this headline.',
   storyContent: [
     pt(
-      'Replace this with your real origin story. Tell visitors what led you to design, what you noticed was missing in the industry, and what you set out to do differently.',
+      'Replace this with your real origin story: what led you into this work, what you noticed was missing, and what you set out to do differently.',
     ),
     pt(
-      'Be specific. The more concrete you are about where you came from and what you stand for, the more easily the right clients will recognize themselves in your work.',
+      'Be specific. The more concrete you are about where you came from and what you stand for, the more easily the right people will recognise themselves in it.',
     ),
   ],
-  founderAttribution: 'Your Name, Founder of Studio Starter',
+  founderAttribution: 'Your Name, Founder',
   backgroundLine: 'Your credentials, training, or experience in one plain sentence.',
   serviceAreaMention: 'Based in Your City, serving the surrounding region.',
 
   philosophyEyebrow: 'How We Work.',
-  philosophyHeadline: 'Three principles that guide every project.',
+  philosophyHeadline: 'Replace this headline.',
 
   personalEyebrow: 'Off the Clock.',
   personalHeadline: 'A little more about me.',
-  personalIntro: 'Design is what I do, but it is not all I am.',
+  personalIntro: 'Replace this with one line introducing the off-the-clock section.',
   currentlyList: [
     {
       _type: 'currentlyRow',
       _key: key(),
       label: 'Reading',
-      value: 'Add the book you are reading right now',
+      value: 'Add the book you are reading right now (replace me)',
     },
     {
       _type: 'currentlyRow',
       _key: key(),
       label: 'Listening to',
-      value: 'Add your current playlist or podcast',
+      value: 'Add your current playlist or podcast (replace me)',
     },
     {
       _type: 'currentlyRow',
       _key: key(),
       label: 'Obsessed with',
-      value: 'Add something you keep recommending to people',
+      value: 'Add something you keep recommending (replace me)',
     },
   ],
   rapidFire: [
-    { _type: 'rapidFireRow', _key: key(), prompt: 'Coffee order', answer: 'Black, always' },
     {
       _type: 'rapidFireRow',
       _key: key(),
-      prompt: 'Favorite room to design',
-      answer: 'Living rooms -- the hardest to get right',
+      prompt: 'Coffee order',
+      answer: 'Replace me with a real answer',
     },
     {
       _type: 'rapidFireRow',
       _key: key(),
-      prompt: 'Renovate or decorate',
-      answer: 'Decorate first, then renovate if you still need to',
+      prompt: 'Replace this prompt',
+      answer: 'Replace me with a real answer',
+    },
+    {
+      _type: 'rapidFireRow',
+      _key: key(),
+      prompt: 'Replace this prompt',
+      answer: 'Replace me with a real answer',
     },
   ],
   localSpots: [
     {
       _type: 'localSpotRow',
       _key: key(),
-      name: 'Your Favorite Coffee Shop',
+      name: 'Your favourite coffee shop (replace me)',
       note: 'Best place to think',
     },
     {
       _type: 'localSpotRow',
       _key: key(),
-      name: 'Your Favorite Furniture Store',
-      note: 'For when clients need to see things in person',
+      name: 'A second local spot (replace me)',
+      note: 'Say why it is worth knowing about',
     },
   ],
   beyondDesign:
-    'Replace this with a short paragraph about life outside work. What do you care about beyond design? Family, community, hobbies. Write the way you actually talk.',
+    'Replace this with a short paragraph about life outside work. Family, community, hobbies. Write the way you actually talk.',
 
   stats: [
     { _type: 'statItem', _key: key(), number: 5, suffix: '+', label: 'Years in Business' },
@@ -405,9 +466,9 @@ docs.push({
   ],
 
   finalCtaEyebrow: "Let's Work Together.",
-  finalCtaHeadline: 'Ready to Start?',
-  finalCtaSubhead: 'Send a message and we will be back in touch within two business days.',
-  finalCta: cta('Get in Touch', '/contact'),
+  finalCtaHeadline: 'Replace this closing headline.',
+  finalCtaSubhead: 'Replace this with what happens after someone gets in touch.',
+  finalCta: cta('Button label', '/contact'),
 
   // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
   // NOTE: Mirrors DEFAULT_ABOUT_SECTIONS in src/data/defaultSections.ts.
@@ -418,7 +479,7 @@ docs.push({
     {
       _type: 'heroSection',
       _key: key(),
-      eyebrow: 'The Designer.',
+      eyebrow: 'The Team.',
       headline: 'People Hire People.',
       subhead: "Here's who you'd be working with.",
       size: 'short',
@@ -427,10 +488,10 @@ docs.push({
       _type: 'storySection',
       _key: key(),
       eyebrow: 'My Story.',
-      headline: 'Why I Started This Studio.',
+      headline: 'Replace this headline.',
       content: [
         pt(
-          'Replace this with your real origin story. Tell visitors what led you to design, what you noticed was missing, and what you set out to do differently.',
+          'Replace this with your real origin story: what led you into this work, what you noticed was missing, and what you set out to do differently.',
         ),
       ],
       attribution: 'Your Name, Founder',
@@ -441,7 +502,7 @@ docs.push({
       _type: 'valuesSection',
       _key: key(),
       eyebrow: 'How We Work.',
-      headline: 'Three principles that guide every project.',
+      headline: 'Replace this headline.',
     },
     {
       _type: 'statSection',
@@ -456,13 +517,15 @@ docs.push({
       _type: 'ctaBandSection',
       _key: key(),
       eyebrow: "Let's Work Together.",
-      headline: 'Ready to Start?',
-      subhead: 'Send a message and we will be back in touch within two business days.',
-      cta: cta('Get in Touch', '/contact'),
+      headline: 'Replace this closing headline.',
+      subhead: 'Replace this with what happens after someone gets in touch.',
+      cta: cta('Button label', '/contact'),
     },
   ],
 });
+// scaffold:end
 
+// scaffold: services
 // ── 4. servicesPage (singleton) ──────────────────────────────────────────
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
 //         heroImage?, heroScriptAccent?, stickyCtaLabel?,
@@ -473,32 +536,30 @@ docs.push({
 docs.push({
   _id: 'servicesPage',
   _type: 'servicesPage',
-  seoTitle: 'Interior Design Services - Studio Starter',
+  seoTitle: 'Services - Studio Starter',
   seoDescription:
-    'Design services for every space and stage. From a single room consultation to a full project, we have a tier for where you are.',
+    'Replace this with one sentence listing what this business sells, for search results.',
 
   heroEyebrow: 'What We Offer.',
-  heroHeadline: 'Design Services for Every Space and Stage.',
-  heroSubhead:
-    'Whether you need a fresh perspective or want to hand the whole project over, there is a service for you.',
+  heroHeadline: 'Replace this headline.',
+  heroSubhead: 'Replace this with one or two sentences covering the range of what is on offer.',
 
   servicesListEyebrow: 'The Tiers.',
-  servicesListHeadline: 'Find the right fit.',
+  servicesListHeadline: 'Replace this headline.',
   servicesListSubhead:
-    'Each service is priced to match the scope. Everything is discussed before any work begins.',
+    'Replace this with a line introducing the list below, including how pricing works.',
 
   serviceAreaSection: {
     eyebrow: 'Service Area.',
-    headline: 'Based Locally, Available Regionally.',
+    headline: 'Replace this headline.',
     description:
-      'We serve the greater metro area and surrounding region. Travel fees for out-of-area projects are always quoted upfront before any work begins.',
+      'Replace this with where this business works and what it charges to travel, if anything.',
   },
 
   finalCtaEyebrow: "Let's Talk.",
-  finalCtaHeadline: 'Not sure which service is right?',
-  finalCtaSubhead:
-    'Send a message with a few details about your space. We will point you toward the best fit, no pressure.',
-  finalCta: cta('Start a Conversation', '/contact'),
+  finalCtaHeadline: 'Replace this closing headline.',
+  finalCtaSubhead: 'Replace this with what to do when none of the options above is an obvious fit.',
+  finalCta: cta('Primary button label', '/contact'),
 
   // ── pageBuilder (section-driven layout, Phase B) ─────────────────────────
   // NOTE: Mirrors DEFAULT_SERVICES_SECTIONS in src/data/defaultSections.ts.
@@ -508,27 +569,25 @@ docs.push({
       _type: 'heroSection',
       _key: key(),
       eyebrow: 'What We Offer.',
-      headline: 'Design Services for Every Space and Stage.',
-      subhead:
-        'Whether you need a fresh perspective or want to hand the whole project over, there is a service for you.',
+      headline: 'Replace this headline.',
+      subhead: 'Replace this with one or two sentences covering the range of what is on offer.',
       size: 'short',
     },
     {
       _type: 'servicesGridSection',
       _key: key(),
       eyebrow: 'The Tiers.',
-      headline: 'Find the right fit.',
-      subhead:
-        'Each service is priced to match the scope. Everything is discussed before any work begins.',
+      headline: 'Replace this headline.',
+      subhead: 'Replace this with a line introducing the list below, including how pricing works.',
       variant: 'list',
     },
     {
       _type: 'serviceAreaSection',
       _key: key(),
       eyebrow: 'Service Area.',
-      headline: 'Based Locally, Available Regionally.',
+      headline: 'Replace this headline.',
       description:
-        'We serve the greater metro area and surrounding region. Travel fees are quoted upfront.',
+        'Replace this with where this business works and what it charges to travel, if anything.',
       showTravelFees: true,
     },
     {
@@ -539,95 +598,80 @@ docs.push({
       _type: 'ctaBandSection',
       _key: key(),
       eyebrow: "Let's Talk.",
-      headline: 'Not sure which service is right?',
-      subhead:
-        'Send a message with a few details about your space. We will point you toward the best fit.',
-      cta: cta('Start a Conversation', '/contact'),
+      headline: 'Replace this closing headline.',
+      subhead: 'Replace this with what to do when none of the options above is an obvious fit.',
+      cta: cta('Primary button label', '/contact'),
     },
   ],
 });
+// scaffold:end
 
+// scaffold: services
 // ── 5. service docs (3 collection items) ─────────────────────────────────
 // Required fields: name, slug{_type,current}, price, shortDescription,
 //                  features, bestFor, displayOrder
 // Optional: priceNumeric, longDescription, showOnHomepage, ctaLabel
 
 docs.push({
-  _id: 'service-consultation',
+  _id: 'service-one',
   _type: 'service',
-  name: 'Consultation',
-  slug: { _type: 'slug', current: 'consultation' },
-  price: '$150',
-  priceNumeric: 150,
+  name: 'Service one (replace me)',
+  slug: { _type: 'slug', current: 'service-one' },
+  price: 'Replace with a price',
   shortDescription:
-    'A two-hour in-home session to work through what is not working, prioritize what to tackle first, and leave with a clear action list.',
-  features: [
-    '2-hour in-home session',
-    'Room-by-room walkthrough',
-    'Written action list with priorities',
-    'Paint and product recommendations',
-  ],
-  bestFor: 'Homeowners who know something feels off but are not sure where to start.',
+    'Replace this with two sentences: what this service includes, and what someone walks away with.',
+  features: ['Replace this with what is included', 'One line per item', 'Four or five is plenty'],
+  bestFor: 'Replace this with the person this one is right for.',
   displayOrder: 1,
   showOnHomepage: true,
-  ctaLabel: 'Book a Consultation',
+  ctaLabel: 'Button label',
 });
 
 docs.push({
-  _id: 'service-single-room',
+  _id: 'service-two',
   _type: 'service',
-  name: 'Single Room Design',
-  slug: { _type: 'slug', current: 'single-room-design' },
-  price: 'Starting at $650',
-  priceNumeric: 650,
+  name: 'Service two (replace me)',
+  slug: { _type: 'slug', current: 'service-two' },
+  price: 'Replace with a price',
   shortDescription:
-    'Full design for one room: a concept board, sourcing list, and layout plan you can hand off to a contractor or shop yourself.',
-  features: [
-    'In-home discovery session',
-    'Concept board with color story',
-    'Full sourcing list with links and pricing',
-    'Furniture layout to scale',
-    'One revision round',
-  ],
-  bestFor: 'When you want one room done right before committing to the whole house.',
+    'Replace this with two sentences: what this service includes, and what someone walks away with.',
+  features: ['Replace this with what is included', 'One line per item', 'Four or five is plenty'],
+  bestFor: 'Replace this with the person this one is right for.',
   displayOrder: 2,
   showOnHomepage: true,
-  ctaLabel: 'Start a Conversation',
+  ctaLabel: 'Button label',
   longDescription: [
     pt(
-      'We start with an in-home session to understand how the room is used, what is not working, and what you want it to feel like when it is finished. From there we build a concept, source everything, and hand you a plan you can execute on your own timeline.',
+      'Replace this with the longer version, for the people who want to know exactly how it goes before they commit.',
     ),
   ],
 });
 
 docs.push({
-  _id: 'service-full-project',
+  _id: 'service-three',
   _type: 'service',
-  name: 'Full Project Design',
-  slug: { _type: 'slug', current: 'full-project-design' },
+  name: 'Service three (replace me)',
+  slug: { _type: 'slug', current: 'service-three' },
   price: 'Custom quote',
   shortDescription:
-    'Whole-home or multi-room design with full project management, contractor coordination, and installation oversight.',
-  features: [
-    'Full discovery session',
-    'Concept and color story for each space',
-    'Complete sourcing and procurement',
-    'Contractor coordination',
-    'Installation day oversight',
-    'Final styling',
-  ],
-  bestFor: 'When you would rather hand the project off than manage it yourself.',
+    'Replace this with two sentences: what this service includes, and what someone walks away with.',
+  features: ['Replace this with what is included', 'One line per item', 'Four or five is plenty'],
+  bestFor: 'Replace this with the person this one is right for.',
   displayOrder: 3,
   showOnHomepage: true,
-  ctaLabel: 'Get a Quote',
+  ctaLabel: 'Button label',
   longDescription: [
     pt(
-      'This is the full service. We handle everything from the initial concept through installation day. You make the decisions; we handle the logistics, the sourcing, the contractor communication, and the final styling.',
+      'Replace this with the longer version, for the people who want to know exactly how it goes before they commit.',
     ),
-    pt('Pricing is based on scope and is always discussed in detail before any work begins.'),
+    pt(
+      'Say plainly how pricing works. Vagueness about money costs more enquiries than a high number does.',
+    ),
   ],
 });
+// scaffold:end
 
+// scaffold: process
 // ── 6. processPage (singleton) ───────────────────────────────────────────
 // NOTE: pageBuilder mirrors DEFAULT_PROCESS_SECTIONS in src/data/defaultSections.ts.
 // Keep copy in sync when updating.
@@ -635,17 +679,17 @@ docs.push({
 docs.push({
   _id: 'processPage',
   _type: 'processPage',
-  seoTitle: 'Our Process - Studio Starter Interior Design',
+  seoTitle: 'Our Process - Studio Starter',
   seoDescription:
-    'From the first conversation to the final reveal, here is exactly how our process works.',
+    'Replace this with one sentence describing how working with this business goes, for search results.',
 
   pageBuilder: [
     {
       _type: 'heroSection',
       _key: key(),
       eyebrow: 'The Process.',
-      headline: 'From First Call to Final Reveal.',
-      subhead: 'A clear, pressure-free process from the first inquiry through installation day.',
+      headline: 'Replace this headline.',
+      subhead: 'Replace this with one line covering the whole arc, first contact to finished.',
       size: 'short',
     },
     {
@@ -657,13 +701,15 @@ docs.push({
       _type: 'ctaBandSection',
       _key: key(),
       eyebrow: 'Ready to Begin?',
-      headline: 'Start the Conversation.',
-      subhead: 'Fill out the contact form with a few details about your space.',
-      cta: cta('Get in Touch', '/contact'),
+      headline: 'Replace this closing headline.',
+      subhead: 'Replace this with the one thing you want a visitor to do next.',
+      cta: cta('Button label', '/contact'),
     },
   ],
 });
+// scaffold:end
 
+// scaffold: process
 // ── 7. processStep docs (4 steps) ────────────────────────────────────────
 // Idempotent: createOrReplace with deterministic _id values.
 // Steps auto-populate into any processSection via sectionsProjection().
@@ -672,15 +718,11 @@ docs.push({
   _id: 'process-step-1',
   _type: 'processStep',
   stepNumber: 1,
-  title: 'Initial Inquiry',
-  timeEstimate: '2 business days',
+  title: 'Step one (replace me)',
+  timeEstimate: 'How long it takes',
   shortDescription:
-    'Fill out the contact form with a few details about your project. We review every inquiry personally and reply within two business days.',
-  features: [
-    'Tell us about your space',
-    'Share your goals and timeline',
-    'We respond personally, no automated sequences',
-  ],
+    'Replace this with what happens in this step and what the other person has to do.',
+  features: ['Replace this with what happens', 'One line each', 'Three is plenty'],
   orderRank: 'a0',
 });
 
@@ -688,15 +730,11 @@ docs.push({
   _id: 'process-step-2',
   _type: 'processStep',
   stepNumber: 2,
-  title: 'Discovery Call',
-  timeEstimate: '20 minutes',
+  title: 'Step two (replace me)',
+  timeEstimate: 'How long it takes',
   shortDescription:
-    'A short call to talk through your project, figure out which service is the best fit, and answer any questions before we start.',
-  features: [
-    'Review your goals and budget',
-    'Determine the right service tier',
-    'No pressure, just a conversation',
-  ],
+    'Replace this with what happens in this step and what the other person has to do.',
+  features: ['Replace this with what happens', 'One line each', 'Three is plenty'],
   orderRank: 'a1',
 });
 
@@ -704,16 +742,11 @@ docs.push({
   _id: 'process-step-3',
   _type: 'processStep',
   stepNumber: 3,
-  title: 'Design & Sourcing',
-  timeEstimate: '2 to 3 weeks',
+  title: 'Step three (replace me)',
+  timeEstimate: 'How long it takes',
   shortDescription:
-    'We build your concept, source every piece, and hand you a complete plan you can act on.',
-  features: [
-    'In-home session to assess the space',
-    'Concept board with color story',
-    'Full sourcing list with links and pricing',
-    'Furniture layout to scale',
-  ],
+    'Replace this with what happens in this step and what the other person has to do.',
+  features: ['Replace this with what happens', 'One line each', 'Three is plenty'],
   orderRank: 'a2',
 });
 
@@ -721,14 +754,16 @@ docs.push({
   _id: 'process-step-4',
   _type: 'processStep',
   stepNumber: 4,
-  title: 'Installation & Reveal',
-  timeEstimate: 'One day',
+  title: 'Step four (replace me)',
+  timeEstimate: 'How long it takes',
   shortDescription:
-    'We coordinate delivery, direct placement, and add the final styling details. You walk in at the end of the day to a finished room.',
-  features: ['Delivery and placement coordination', 'Final styling', 'Walkthrough and care notes'],
+    'Replace this with what happens in this step and what the other person has to do.',
+  features: ['Replace this with what happens', 'One line each', 'Three is plenty'],
   orderRank: 'a3',
 });
+// scaffold:end
 
+// scaffold: faq
 // ── 9. faqPage (singleton) ───────────────────────────────────────────────
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
 //         heroImage?, heroScriptAccent?, categoryOrder,
@@ -738,23 +773,24 @@ docs.push({
 docs.push({
   _id: 'faqPage',
   _type: 'faqPage',
-  seoTitle: 'FAQ - Studio Starter Interior Design',
+  seoTitle: 'FAQ - Studio Starter',
   seoDescription:
-    'Answers to the most common questions about our design services, pricing, process, and service area.',
+    'Replace this with one sentence saying what these questions cover, for search results.',
 
   heroEyebrow: 'Common Questions.',
   heroHeadline: 'Everything You Want to Know.',
-  heroSubhead:
-    'If your question is not here, just ask. We respond to every message within two business days.',
+  heroSubhead: 'Replace this with what to do when the answer is not on this page.',
 
   categoryOrder: ['Pricing & Cost', 'The Process', 'Logistics', 'Service Area', 'Getting Started'],
 
   finalCtaEyebrow: 'Not Finding Your Answer?',
   finalCtaHeadline: 'Just ask.',
-  finalCtaSubhead: 'Send a message and we will get back to you within two business days.',
-  finalCta: cta('Send a Message', '/contact'),
+  finalCtaSubhead: 'Replace this with how quickly someone can expect a reply.',
+  finalCta: cta('Button label', '/contact'),
 });
+// scaffold:end
 
+// scaffold: faq
 // ── 10. faqItem docs (4 items) ───────────────────────────────────────────
 // Required fields: question, answer (Portable Text), category, displayOrder
 // Optional: alsoShowOnProcessPage
@@ -765,9 +801,9 @@ docs.push({
   question: 'How much does it cost to work with you?',
   answer: [
     pt(
-      'Consultations are $150 for a two-hour in-home session. Single room design starts at $650. Full-project work is custom quoted based on scope.',
+      'Replace this with real numbers. This is the question every visitor has and the one they will not ask, so answer it plainly rather than inviting them to enquire.',
     ),
-    pt('We always discuss pricing in detail before any work begins. No surprises.'),
+    pt('Then say what is and is not included, so the number means something.'),
   ],
   category: 'Pricing & Cost',
   displayOrder: 1,
@@ -779,12 +815,8 @@ docs.push({
   _type: 'faqItem',
   question: 'How long does a typical project take?',
   answer: [
-    pt(
-      'A consultation takes two hours. Single-room design plans are usually ready within two to three weeks. Full projects vary based on scope, contractor availability, and lead times on furniture.',
-    ),
-    pt(
-      'We will give you a realistic timeline at the start of every project so you can plan accordingly.',
-    ),
+    pt('Replace this with real timings, per service, including the parts you do not control.'),
+    pt('Say when someone finds out their own timeline, and who tells them.'),
   ],
   category: 'The Process',
   displayOrder: 1,
@@ -797,7 +829,7 @@ docs.push({
   question: 'Do you work outside the immediate area?',
   answer: [
     pt(
-      'Yes. We serve the greater metro area and surrounding region. For out-of-area projects, travel fees are quoted upfront based on drive time. Nothing is charged without your approval first.',
+      'Replace this with where this business actually travels, what that costs, and who agrees to it before anything is charged.',
     ),
   ],
   category: 'Service Area',
@@ -811,13 +843,14 @@ docs.push({
   question: 'How do I get started?',
   answer: [
     pt(
-      'Fill out the contact form with a few details about your space and what you are hoping to do. We will review your inquiry and follow up within two business days to talk through your project and figure out which service is the best fit.',
+      'Replace this with the first step, in one sentence, and what happens after it. Link the form if the first step is the form.',
     ),
   ],
   category: 'Getting Started',
   displayOrder: 1,
   alsoShowOnProcessPage: false,
 });
+// scaffold:end
 
 // ── 11. contactPage (singleton) ──────────────────────────────────────────
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
@@ -830,31 +863,31 @@ docs.push({
 docs.push({
   _id: 'contactPage',
   _type: 'contactPage',
-  seoTitle: 'Contact Studio Starter - Start a Conversation',
-  seoDescription:
-    'Tell us about your project. We respond to every inquiry within two business days.',
+  seoTitle: 'Contact Studio Starter',
+  seoDescription: 'Replace this with one sentence about getting in touch, for search results.',
 
-  heroEyebrow: 'Request a Consultation.',
+  heroEyebrow: 'Get in Touch.',
   heroHeadline: 'Start the Conversation.',
-  heroSubhead:
-    "Tell us a little about your space. We'll be back in touch within two business days.",
+  heroSubhead: 'Replace this with what to send and how quickly a reply comes back.',
 
-  formIntroNote: 'No automated sequences and no sales calls. Just a real reply from a real person.',
+  formIntroNote: 'Replace this with what a visitor can expect after they press send.',
+  // These three lists are what the visitor picks from, so every entry here is a
+  // labelled placeholder rather than plausible copy for somebody else's trade.
+  // A fork that ships one of these has shipped an obvious placeholder, which is
+  // the point: the old list read like a real interior-design studio's options
+  // and could be shipped by not noticing it.
   formProjectTypeOptions: [
-    'Single room',
-    'Multiple rooms',
-    'Whole home',
-    'New construction',
-    'Builder or realtor partnership',
+    'Service one (replace me)',
+    'Service two (replace me)',
+    'Service three (replace me)',
     'Not sure yet',
   ],
   formLocationOptions: [],
   formBudgetOptions: [
-    'Under $2,000',
-    '$2,000 to $5,000',
-    '$5,000 to $10,000',
-    '$10,000 to $25,000',
-    '$25,000+',
+    'Lowest bracket (replace me)',
+    'Second bracket (replace me)',
+    'Third bracket (replace me)',
+    'Highest bracket (replace me)',
     'Not sure yet',
   ],
   formTimelineOptions: [
@@ -868,10 +901,8 @@ docs.push({
     'Google search',
     'Instagram',
     'Facebook',
-    'Houzz',
     'Referral from a friend or family member',
-    'Saw your work in person',
-    'Journal post',
+    'Another channel (replace me)',
     'Other',
   ],
 
@@ -879,46 +910,47 @@ docs.push({
   whatToExpectHeadline: 'When you submit this form...',
   whatToExpectContent: [
     pt(
-      'A real person reads every inquiry. No automated follow-up sequences, no sales calls. We review your message, look at your project details, and reply personally within two business days.',
+      'Replace this with what actually happens to a submission: who reads it, how fast, and whether a human replies.',
     ),
     pt(
-      'If we are a good fit, we will set up a brief call to talk through your space, your goals, and which service makes sense for where you are. If we are not the right fit, we will say so and point you in a better direction.',
+      'Then say what happens next if it is a fit, and what happens if it is not. Both answers are reassuring; only one of them is usually written down.',
     ),
   ],
   postInquiryRoadmap: [
     {
       _type: 'roadmapStep',
       _key: key(),
-      title: 'We review your inquiry.',
-      body: 'A real person reads your form within two business days.',
-      timeEstimate: 'Within 48 hours',
+      title: 'Step one (replace me).',
+      body: 'Replace this with what happens first after someone presses send.',
+      timeEstimate: 'How long it takes',
     },
     {
       _type: 'roadmapStep',
       _key: key(),
-      title: 'We send a personal reply.',
-      body: 'If we are a good fit, we reach out to schedule a short discovery call.',
-      timeEstimate: '1 to 2 business days',
+      title: 'Step two (replace me).',
+      body: 'Replace this with what happens next, and who does it.',
+      timeEstimate: 'How long it takes',
     },
     {
       _type: 'roadmapStep',
       _key: key(),
-      title: 'Discovery call.',
-      body: 'A 20-minute call to talk through your space and figure out which service is the right fit.',
-      timeEstimate: '20 minutes',
+      title: 'Step three (replace me).',
+      body: 'Replace this with the conversation, the visit, or whatever the middle of this looks like.',
+      timeEstimate: 'How long it takes',
     },
     {
       _type: 'roadmapStep',
       _key: key(),
-      title: 'Proposal and next steps.',
-      body: 'If we move forward, we send a scope and pricing summary for your review. Nothing starts until you approve it.',
-      timeEstimate: '2 to 3 business days',
+      title: 'Step four (replace me).',
+      body: 'Replace this with the point at which someone has to decide, and what they are deciding on.',
+      timeEstimate: 'How long it takes',
     },
   ],
 
-  schedulingLinkLabel: 'Schedule a 20-minute discovery call.',
+  schedulingLinkLabel: 'Replace this with the label on the scheduling link.',
 });
 
+// scaffold: testimonials
 // ── 12. testimonial docs (3 items) ───────────────────────────────────────
 // Required fields: quote, attribution, date, source
 // Optional: location, photo, featured, sourceType, reviewUrl
@@ -926,9 +958,8 @@ docs.push({
 docs.push({
   _id: 'testimonial-1',
   _type: 'testimonial',
-  quote:
-    'Working with this studio changed how I feel about coming home. Our living room finally makes sense. Replace this with a real client quote.',
-  attribution: 'Happy Client',
+  quote: 'Replace this with a real quote from a real client. Placeholder one of three.',
+  attribution: 'Client name (replace me)',
   date: '2025-01-15',
   source: 'Google',
   sourceType: 'Google',
@@ -939,9 +970,8 @@ docs.push({
 docs.push({
   _id: 'testimonial-2',
   _type: 'testimonial',
-  quote:
-    'I kept putting off dealing with our dining room because it felt too hard. One consultation and a clear plan later, we finally did it. Replace this with a real client quote.',
-  attribution: 'Satisfied Client',
+  quote: 'Replace this with a real quote from a real client. Placeholder two of three.',
+  attribution: 'Client name (replace me)',
   date: '2025-03-20',
   source: 'Facebook',
   sourceType: 'Facebook',
@@ -952,15 +982,16 @@ docs.push({
 docs.push({
   _id: 'testimonial-3',
   _type: 'testimonial',
-  quote:
-    'The process was clear from start to finish and the result is exactly what we hoped for. Replace this with a real client quote.',
-  attribution: 'Returning Client',
+  quote: 'Replace this with a real quote from a real client. Placeholder three of three.',
+  attribution: 'Client name (replace me)',
   date: '2025-06-01',
   source: 'Direct (email or text)',
   sourceType: 'Direct',
   featured: false,
 });
+// scaffold:end
 
+// scaffold: philosophy
 // ── 13. philosophyPoint docs (3 items) ───────────────────────────────────
 // Required fields: title, description
 // Optional: displayOrder, orderRank (managed by plugin, omit here)
@@ -968,50 +999,54 @@ docs.push({
 docs.push({
   _id: 'philosophy-1',
   _type: 'philosophyPoint',
-  title: 'Your Vision First',
+  title: 'First value (replace me)',
   description:
-    'Good design starts by listening. We learn how you live before we suggest how anything should look.',
+    'Replace this with something this business actually does differently. A value nobody would disagree with says nothing.',
   displayOrder: 1,
 });
 
 docs.push({
   _id: 'philosophy-2',
   _type: 'philosophyPoint',
-  title: 'Honest About Money',
+  title: 'Second value (replace me)',
   description:
-    'Pricing is always discussed before any work begins. We give you real numbers up front so you can decide with confidence.',
+    'Replace this with something this business actually does differently. A value nobody would disagree with says nothing.',
   displayOrder: 2,
 });
 
 docs.push({
   _id: 'philosophy-3',
   _type: 'philosophyPoint',
-  title: 'Clear All the Way Through',
+  title: 'Third value (replace me)',
   description:
-    'You will always know where your project stands and what comes next. No radio silence, no guesswork.',
+    'Replace this with something this business actually does differently. A value nobody would disagree with says nothing.',
   displayOrder: 3,
 });
+// scaffold:end
 
+// scaffold: journal
 // ── 14. journalCategory docs (2 items) ───────────────────────────────────
 // Required fields: title, slug{_type,current}
 // Optional: description
 
 docs.push({
-  _id: 'journal-category-project-stories',
+  _id: 'journal-category-one',
   _type: 'journalCategory',
-  title: 'Project Stories',
-  slug: { _type: 'slug', current: 'project-stories' },
-  description: 'Before, after, and the thinking in between.',
+  title: 'Category one (replace me)',
+  slug: { _type: 'slug', current: 'category-one' },
+  description: 'Replace this with what gets filed under this category.',
 });
 
 docs.push({
-  _id: 'journal-category-design-notes',
+  _id: 'journal-category-two',
   _type: 'journalCategory',
-  title: 'Design Notes',
-  slug: { _type: 'slug', current: 'design-notes' },
-  description: 'Opinions, observations, and practical advice from the studio.',
+  title: 'Category two (replace me)',
+  slug: { _type: 'slug', current: 'category-two' },
+  description: 'Replace this with what gets filed under this category.',
 });
+// scaffold:end
 
+// scaffold: journal
 // ── 15. journalPage (singleton) ──────────────────────────────────────────
 // Fields: seoTitle, seoDescription, heroEyebrow, heroHeadline, heroSubhead,
 //         heroImage?, heroScriptAccent?, stickyCtaLabel?,
@@ -1022,19 +1057,20 @@ docs.push({
   _type: 'journalPage',
   seoTitle: 'Journal - Studio Starter',
   seoDescription:
-    'Project walkthroughs, design thinking, and practical notes from the studio. Written between projects.',
+    'Replace this with one sentence saying what gets written here, for search results.',
 
   heroEyebrow: 'The Journal.',
   heroHeadline: 'Notes from the studio.',
-  heroSubhead:
-    'Project walkthroughs, design thinking, and the occasional opinion. Written between projects.',
-  stickyCtaLabel: 'Have a room in mind?',
+  heroSubhead: 'Replace this with what gets written about here and roughly how often.',
+  stickyCtaLabel: 'Got a question?',
 
-  finalCtaHeadline: 'Got a project of your own?',
-  finalCtaSubhead: "Let's talk about it.",
-  finalCta: cta('Start a Conversation', '/contact'),
+  finalCtaHeadline: 'Replace this closing headline.',
+  finalCtaSubhead: 'Replace this with the one thing you want a reader to do next.',
+  finalCta: cta('Primary button label', '/contact'),
 });
+// scaffold:end
 
+// scaffold: journal
 // ── 16. journalEntry docs (2 items) ──────────────────────────────────────
 // Required fields: title, slug, excerpt, publishedAt, body (min 1 block)
 // Optional: coverImage, categories (refs), author, featured, updatedAt,
@@ -1047,58 +1083,49 @@ docs.push({
   slug: { _type: 'slug', current: 'welcome-to-the-journal' },
   excerpt:
     'This is a placeholder post. Replace it with your first real journal entry once the site is live.',
-  author: 'Studio Starter',
+  author: 'Author name (replace me)',
   publishedAt: '2025-06-01T12:00:00.000Z',
   featured: true,
-  categories: [{ _type: 'reference', _key: key(), _ref: 'journal-category-design-notes' }],
+  categories: [{ _type: 'reference', _key: key(), _ref: 'journal-category-two' }],
   body: [
     pt('This is a placeholder journal entry. Replace this content with your first real post.'),
     pt(
-      'The journal is a good place to share project walkthroughs, design tips, and honest notes about your process. Write the way you talk. Be specific.',
+      'A journal is a good place for walkthroughs of real work and honest notes about how it goes. Write the way you talk. Be specific.',
     ),
     ptH2('What to write about'),
     pt(
-      'Start with a recent project. Walk readers through the brief, the challenges, and the decisions you made. Specific detail is more interesting than general advice.',
+      'Start with something you did recently. Walk readers through the brief, what went wrong, and the decisions you made. Specific detail is more interesting than general advice.',
     ),
     pt(
-      'Once you have a few project posts, mix in shorter notes: a product you keep recommending, a paint color worth knowing about, a sourcing find that changed the way you approach a common problem.',
+      'Once you have a few of those, mix in shorter notes: something you keep recommending, something worth knowing about, something that changed how you approach a common problem.',
     ),
   ],
 });
 
 docs.push({
-  _id: 'journal-entry-getting-started',
+  _id: 'journal-entry-second-post',
   _type: 'journalEntry',
-  title: 'How to Get the Most Out of a Design Consultation',
-  slug: { _type: 'slug', current: 'how-to-get-the-most-out-of-a-design-consultation' },
+  title: 'Second placeholder post (replace me)',
+  slug: { _type: 'slug', current: 'second-placeholder-post' },
   excerpt:
-    'A consultation works best when you come prepared. Here is what to gather, what questions to have ready, and what to expect when we walk through your space.',
-  author: 'Studio Starter',
+    'Replace this with a real summary. The excerpt is what shows on the index page and in search results, so write it for a stranger.',
+  author: 'Author name (replace me)',
   publishedAt: '2025-05-15T12:00:00.000Z',
   featured: false,
-  categories: [{ _type: 'reference', _key: key(), _ref: 'journal-category-design-notes' }],
+  categories: [{ _type: 'reference', _key: key(), _ref: 'journal-category-two' }],
   body: [
     pt(
-      'Replace this with your own content. This placeholder post is here to give the journal index page something to show on launch.',
+      'Replace this with your own content. This placeholder post exists so the journal index has two entries to lay out on launch day, not because anything in it is worth publishing.',
     ),
-    ptH2('Before the session'),
-    pt(
-      'Walk through the room and take note of what bothers you most. You do not need to know why -- just what. That is a good starting point for the conversation.',
-    ),
-    ptH2('During the session'),
-    pt(
-      'Ask every question you have. There are no obvious ones. The more honest you are about how the space is actually used, the more useful the recommendations will be.',
-    ),
-    ptH3('What to bring'),
-    pt(
-      'Any inspiration images you have saved, even if you are not sure exactly what you like about them. Patterns in your taste are useful information.',
-    ),
-    ptH2('After the session'),
-    pt(
-      'You will leave with a written action list. Start with the lowest-cost, highest-impact items first. Quick wins build momentum.',
-    ),
+    ptH2('A heading'),
+    pt('Replace this paragraph. It is here to show what a body paragraph looks like.'),
+    ptH2('A second heading'),
+    pt('Replace this paragraph too.'),
+    ptH3('A subheading'),
+    pt('And this one, which shows the third heading level rendering.'),
   ],
 });
+// scaffold:end
 
 // ── 17. notFoundPage (singleton) ─────────────────────────────────────────
 // Fields: seoTitle, seoDescription, eyebrow, headline, body, heroImage?,
@@ -1117,8 +1144,10 @@ docs.push({
 
   primaryCtaLabel: 'Back home',
   primaryCtaHref: '/',
+  // scaffold: services
   secondaryCtaLabel: 'See our services',
   secondaryCtaHref: '/services',
+  // scaffold:end
   tertiaryCtaLabel: 'Get in touch',
   tertiaryCtaHref: '/contact',
 });
@@ -1381,9 +1410,9 @@ docs.push({
   _id: 'studioNotes',
   _type: 'studioNotes',
   businessSummary:
-    'Studio Starter is a placeholder business description. Replace this with a clear, plain-English description of your studio: what you do, where you work, and what makes your approach different.',
+    'Studio Starter is a placeholder business description. Replace this with a clear, plain-English description of this business: what it does, where it works, and what makes its approach different.',
   idealClient:
-    'Replace this with a description of your ideal client. Be specific. The more clearly you can picture who you are designing for, the easier it is to write copy that speaks to them.',
+    'Replace this with a description of your ideal client. Be specific. The more clearly you can picture who you are writing for, the easier it is to write copy that speaks to them.',
   voiceSummary:
     'Replace this with a description of your voice. Plain-spoken and warm? Confident and direct? A little irreverent? Pick a lane and describe it in a sentence or two so anyone writing for the site stays consistent.',
   wordsToAvoid: [

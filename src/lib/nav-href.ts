@@ -22,10 +22,10 @@
 /** Live route per path-mapped singleton. Mirrors SINGLETON_PREVIEW_PATHS. */
 export const SINGLETON_LIVE_PATHS: Record<string, string> = {
   homePage: '/',
-  aboutPage: '/about',
+  aboutPage: '/about', // scaffold: about
   servicesPage: '/services', // scaffold: services
   processPage: '/process', // scaffold: process
-  faqPage: '/faq',
+  faqPage: '/faq', // scaffold: faq
   contactPage: '/contact',
   journalPage: '/journal', // scaffold: journal
   privacyPage: '/privacy',

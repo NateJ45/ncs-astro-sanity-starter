@@ -64,7 +64,8 @@
  *      markup from about.astro into a section component legitimately changes it
  *      while the rendered result is identical. The attribute NAME is kept (its
  *      presence or absence is real drift), the hash is replaced with CID.
- *   3. The hydration PREFIX on <astro-island>, prefix="r1" -> prefix="rN".
+ *   3. The two GENERATED IDENTITIES on <astro-island>: prefix="r1" -> "rN"
+ *      and uid="1KA1rQ" -> "UID".
  *      Astro numbers each island by its position in the render order and uses
  *      the value only to namespace that island's hydration variables, so the
  *      number is unique-per-page and otherwise meaningless. Moving a section
@@ -73,6 +74,16 @@
  *      rule 2: a generated identity derived from source layout. The
  *      <astro-island> tag itself, its component-url and its serialized props
  *      are all still compared, so a real island change still shows up.
+ *
+ *      THE UID WAS ADDED 2026-09-18, on evidence. Archiving eleven unused
+ *      modules changed no rendered byte and failed every page: 22 diff lines,
+ *      each one an island whose component-url and props were IDENTICAL on both
+ *      sides and whose uid had moved (1KA1rQ -> Z2wbren). The uid is a position
+ *      in the build's island graph, so touching any island anywhere shifts the
+ *      rest, which is rule 3's own argument about prefix. A gate that fails
+ *      eleven pages for a change that moved nothing is a gate people learn to
+ *      re-baseline without reading, and that is the failure this harness exists
+ *      to prevent.
  *   4. The CONTENT of every inlined <style> element, replaced with a byte count
  *      and a checksum. A project that sets build.inlineStylesheets: 'always'
  *      ships the whole stylesheet inside every page, so a one-token colour
@@ -326,7 +337,9 @@ function stripTimerText(html) {
 
 /** Rule 3: the render-order counter in an island's hydration prefix. */
 function stripIslandPrefixes(html) {
-  return html.replace(/(<astro-island\b[^>]*?)\sprefix="r\d+"/g, '$1 prefix="rN"');
+  return html
+    .replace(/(<astro-island\b[^>]*?)\sprefix="r\d+"/g, '$1 prefix="rN"')
+    .replace(/(<astro-island\b[^>]*?)\suid="[^"]*"/g, '$1 uid="UID"');
 }
 
 /** Rule 6: whitespace that only reflects source indentation. */

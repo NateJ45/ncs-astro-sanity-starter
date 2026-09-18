@@ -25,7 +25,7 @@ export const homePage = defineType({
     { name: 'featuredWork', title: 'Featured Work' },
     { name: 'featuredJournal', title: 'Featured Journal' },
     { name: 'process', title: 'Process preview' },
-    { name: 'testimonials', title: 'Testimonials' },
+    { name: 'testimonials', title: 'Testimonials' }, // scaffold: testimonials
     { name: 'services', title: 'Services grid' },
     { name: 'final', title: 'Service area + final CTA' },
   ],
@@ -96,7 +96,11 @@ export const homePage = defineType({
       group: 'hero',
       hidden: true,
       readOnly: true,
-      validation: (Rule) => Rule.required(),
+      // NOT required, and it used to be. Sanity validates the DOCUMENT, not the
+      // form, so a hidden required field makes the document permanently invalid
+      // and shows the editor an error naming a field that is nowhere on screen.
+      // This legacy hero moved into the pageBuilder's own heroSection, which
+      // carries the requirement now. Found by `npm run audit:studio` check 1.
     }),
     defineField({
       name: 'heroSubhead',
@@ -366,6 +370,7 @@ export const homePage = defineType({
       readOnly: true,
     }),
 
+    // scaffold: testimonials
     // Testimonials (legacy — hidden for rollback safety)
     defineField({
       name: 'featuredTestimonial',
@@ -437,6 +442,7 @@ export const homePage = defineType({
       description:
         'Optional line under the testimonials grid. Example: "From the studio\'s Facebook recommendations."',
     }),
+    // scaffold:end
 
     // Services grid (legacy — hidden for rollback safety)
     defineField({

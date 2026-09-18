@@ -308,7 +308,9 @@ export const siteSettings = defineType({
       type: 'string',
       description:
         'Short status next to the green dot on the Contact page. Examples: "Accepting new clients" / "Booking for Fall 2026" / "Currently booked, accepting waitlist".',
-      validation: (Rule) => Rule.required().max(80),
+      // NOT required: see the note on homePage.heroHeadline. This field moved
+      // to the businessInfo singleton, which is where the requirement lives now.
+      validation: (Rule) => Rule.max(80),
       hidden: true,
       readOnly: true,
     }),
@@ -319,7 +321,8 @@ export const siteSettings = defineType({
       description:
         'Cities and neighborhoods you serve, in display order. Put your primary market first.',
       of: [defineArrayMember({ type: 'string' })],
-      validation: (Rule) => Rule.required().min(1),
+      // NOT required: moved to businessInfo. A hidden required field blocks
+      // publishing with an error the editor cannot see or act on.
       hidden: true,
       readOnly: true,
     }),
@@ -353,7 +356,8 @@ export const siteSettings = defineType({
           },
         }),
       ],
-      validation: (Rule) => Rule.required().min(1),
+      // NOT required: moved to businessInfo. A hidden required field blocks
+      // publishing with an error the editor cannot see or act on.
       hidden: true,
       readOnly: true,
     }),
@@ -579,6 +583,16 @@ export const siteSettings = defineType({
     // IMPORTANT: an unset field (undefined/null) counts as VISIBLE — only an
     // explicit `false` hides a section. This means the existing live site is
     // completely unaffected until an editor intentionally turns something off.
+    //
+    // 2026-09-18: most of the toggles below name a module that now lives in
+    // `archive/modules/` (portfolio, shop, e-design/virtual-services, gift
+    // certificates, press, guides/lead-magnets, style quiz, budget calculator).
+    // They are KEPT rather than removed, for two reasons: `getSectionVisibility`
+    // treats a module route as hidden-unless-enabled, so an off switch for a
+    // route nothing builds costs nothing, and a module coming back out of the
+    // archive needs its switch to still be here. `showJournal` and
+    // `showResources` are the live ones: journal is core, resources is one of
+    // the two modules still staged in `modules/`.
     defineField({
       name: 'sectionVisibility',
       title: 'Section visibility',

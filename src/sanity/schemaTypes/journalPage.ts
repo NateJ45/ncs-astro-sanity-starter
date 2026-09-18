@@ -106,7 +106,7 @@ export const journalPage = defineType({
       type: 'string',
       group: 'hero',
       description:
-        'Short label for the floating sticky CTA chip that appears on every journal post detail page after the visitor scrolls 50%. Example: "Have a room in mind?". Leave blank to hide the chip on journal posts.',
+        'Short label for the floating sticky CTA chip that appears on every journal post detail page after the visitor scrolls 50%. Example: "Got a question?". Leave blank to hide the chip on journal posts.',
     }),
 
     defineField({

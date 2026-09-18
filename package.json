@@ -40,7 +40,8 @@
     "serve:dist": "node scripts/serve-dist.mjs --port 4321",
     "check:links": "linkinator ./dist/client --recurse --skip \"^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])\" --skip \"/studio\" --skip \"/preview\" --skip \"/api/\"",
     "favicon": "node scripts/generate-favicons.mjs",
-    "scaffold": "node scripts/scaffold.mjs"
+    "scaffold": "node scripts/scaffold.mjs",
+    "audit:studio": "node scripts/audit-studio.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.2.4",

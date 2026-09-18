@@ -99,7 +99,12 @@ const PARSED = BLOCK_LIBRARIES.flatMap((file) => parseLibrary(readLibrary(file))
 
 describe('the registry matches the schema', () => {
   it('every section type is named', () => {
-    assert.ok(PARSED.length > 15, 'the block libraries did not parse');
+    // The floor is the GENERAL block library, sections.ts, whose eleven types
+    // belong to no capability and are therefore always here. It used to be 15,
+    // counting rich sections too, and five of those are scaffold-removable, so
+    // a fork that dropped enough of them failed this gate for having done
+    // exactly what the scaffold is for.
+    assert.ok(PARSED.length >= 11, 'the block libraries did not parse');
     for (const type of PARSED) assert.notEqual(type.name, '');
   });
 
@@ -118,13 +123,16 @@ describe('the registry matches the schema', () => {
   // The popover writes to these by path alone, with no type check, so a rename
   // in a page singleton would leave the card editing a field nobody reads.
   it('every hero text field still exists in a page schema', () => {
-    const all = readFileSync(new URL('../sanity/schemaTypes/faqPage.ts', import.meta.url), 'utf8')
-      .concat(
-        readFileSync(new URL('../sanity/schemaTypes/contactPage.ts', import.meta.url), 'utf8'),
-      )
-      .concat(
-        readFileSync(new URL('../sanity/schemaTypes/privacyPage.ts', import.meta.url), 'utf8'),
-      );
+    // 2026-09-18: contact and privacy only. This used to read faqPage.ts
+    // as well, and faqPage is now scaffold-removable, so the gate would have
+    // thrown on a fork that dropped the FAQ. Both files named here belong to
+    // pages the starter always serves.
+    const all = readFileSync(
+      new URL('../sanity/schemaTypes/contactPage.ts', import.meta.url),
+      'utf8',
+    ).concat(
+      readFileSync(new URL('../sanity/schemaTypes/privacyPage.ts', import.meta.url), 'utf8'),
+    );
     for (const field of Object.keys(HERO_TEXT_FIELDS)) {
       assert.ok(all.includes(`name: '${field}'`), `${field} is gone from the page singletons`);
     }
@@ -196,15 +204,17 @@ describe('headingAccentFieldFor and richTwinFor confirm by type', () => {
   });
 
   it('resolves either half of a twin, and nothing on a type without one', () => {
-    assert.deepEqual(richTwinFor('faqSection', 'subhead'), {
+    // teamSection, not faqSection: the twin is the thing under test here and
+    // the section is only the example, so it should be one every fork keeps.
+    assert.deepEqual(richTwinFor('teamSection', 'subhead'), {
       plain: 'subhead',
       rich: 'subheadRich',
     });
-    assert.deepEqual(richTwinFor('faqSection', 'subheadRich'), {
+    assert.deepEqual(richTwinFor('teamSection', 'subheadRich'), {
       plain: 'subhead',
       rich: 'subheadRich',
     });
-    assert.equal(richTwinFor('faqSection', 'eyebrow'), null);
+    assert.equal(richTwinFor('teamSection', 'eyebrow'), null);
     assert.equal(richTwinFor('heroSection', 'subhead'), null);
   });
 });
@@ -213,7 +223,7 @@ describe('resolveTextTarget', () => {
   const doc = {
     heroHeadline: 'Everything You Want to Know.',
     pageBuilder: [
-      { _key: 'a', _type: 'faqSection', headline: 'Questions', subhead: 'The short answers.' },
+      { _key: 'a', _type: 'teamSection', headline: 'Questions', subhead: 'The short answers.' },
       {
         _key: 'b',
         _type: 'ctaBandSection',

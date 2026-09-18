@@ -121,6 +121,7 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
 
 // â”€â”€ About page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+// scaffold: about
 export const DEFAULT_ABOUT_SECTIONS: PageBuilderBlock[] = [
   {
     _type: 'heroSection',
@@ -207,6 +208,7 @@ export const DEFAULT_ABOUT_SECTIONS: PageBuilderBlock[] = [
     cta: { _type: 'ctaBlock', label: 'Get in Touch', href: '/contact' },
   },
 ];
+// scaffold:end
 
 // â”€â”€ Services page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 

@@ -328,7 +328,18 @@ export const statSection = defineType({
               validation: (R) => R.required(),
             }),
           ],
-          preview: { select: { title: 'number', subtitle: 'label' } },
+          // The title is DERIVED, never selected straight from `number`.
+          // Sanity lowercases a preview title to index it, so a title that is a
+          // number throws "toLowerCase is not a function" and the whole array
+          // field renders as a red Unhandled Runtime Error. Found by
+          // `npm run audit:studio` check 2.
+          preview: {
+            select: { number: 'number', suffix: 'suffix', label: 'label' },
+            prepare: ({ number, suffix, label }) => ({
+              title: `${number ?? ''}${suffix ?? ''}` || 'Number',
+              subtitle: label,
+            }),
+          },
         }),
       ],
     }),
@@ -602,11 +613,11 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
       title: 'Proof and trust',
       of: [
         'quoteSection',
-        'testimonialsSection',
+        'testimonialsSection', // scaffold: testimonials
         'statSection',
         'logoStripSection',
         'guaranteeSection',
-        'faqSection',
+        'faqSection', // scaffold: faq
       ],
     },
     {
@@ -620,9 +631,9 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
       of: [
         'servicesGridSection', // scaffold: services
         'processSection', // scaffold: process
-        'storySection',
-        'valuesSection',
-        'founderSection',
+        'storySection', // scaffold: about
+        'valuesSection', // scaffold: philosophy
+        'founderSection', // scaffold: about
         'teamSection',
         'serviceAreaSection',
         'dynamicListSection',

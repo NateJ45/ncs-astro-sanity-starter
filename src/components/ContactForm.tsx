@@ -39,46 +39,54 @@ const DRAFT_KEY = `${site.storageKeyPrefix}-contact-draft`;
 const WEB3FORMS_ENDPOINT = 'https://api.web3forms.com/submit';
 const ACCESS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PLACEHOLDER DROPDOWN OPTIONS. Every list below is a fallback, used only until
+// the matching field on the contactPage singleton is filled in, and every entry
+// in it READS AS A PLACEHOLDER on purpose (2026-09-18).
+//
+// They used to be a real interior-design studio's options: In-Home
+// Consultation, E-Design, Full Room Design, budget brackets running from "just
+// a consultation" to "whole-home design", and Houzz in the lead-source list. A
+// fork that never looked at this file shipped somebody else's trade to its own
+// visitors, and nothing in the form gave that away, because plausible copy for
+// the wrong business looks exactly like copy. Keep these obviously unfinished:
+// the point is that shipping one is impossible to do by accident.
+// ─────────────────────────────────────────────────────────────────────────────
+
 const DEFAULT_PROJECT_TYPES = [
-  'In-Home Consultation',
-  'E-Design',
-  'Full Room Design',
-  'Full Room Design + Styling',
-  'Shopping & Sourcing',
-  'Builder or Realtor Partnership',
-  'Gift Certificate',
+  'Service one (replace me)',
+  'Service two (replace me)',
+  'Service three (replace me)',
   "Not sure yet, let's chat",
 ] as const;
 
-// Map ?type= URL param values to dropdown option labels.
+// Map ?type= URL param values to dropdown option labels, so a link from a
+// service card can preselect the right option. Replace these keys alongside the
+// labels above; the keys are what appear in the URL.
 // Defensive: unrecognised values produce undefined, which leaves the default blank.
 const TYPE_PARAM_MAP: Record<string, string> = {
-  consultation: 'In-Home Consultation',
-  'e-design': 'E-Design',
-  'full-room': 'Full Room Design',
-  styling: 'Full Room Design + Styling',
-  shopping: 'Shopping & Sourcing',
-  'builder-realtor': 'Builder or Realtor Partnership',
-  'gift-certificate': 'Gift Certificate',
-  // quiz: map to the catch-all so the user sees a reasonable default
-  quiz: "Not sure yet, let's chat",
+  'service-one': 'Service one (replace me)',
+  'service-two': 'Service two (replace me)',
+  'service-three': 'Service three (replace me)',
+  // Anything else maps to the catch-all so the visitor sees a sensible default.
+  other: "Not sure yet, let's chat",
 };
 
 // Service-area cities — replace with your actual service area before launch.
 const LOCATION_OPTIONS = ['My City', 'Nearby City', 'Outside the area'] as const;
 
-// Budget brackets — adjust to your studio's actual price points before launch.
-// The "Not sure yet" option keeps the form approachable.
+// Budget brackets — replace with this business's actual price points before
+// launch. Keep a "Not sure yet" option: it is what keeps the form approachable.
 const BUDGET_OPTIONS = [
-  'Under $2K (just a consultation or quick advice)',
-  '$2K – $10K (a single room or two)',
-  '$10K – $30K (multiple rooms or styling)',
-  '$30K – $75K (whole-home design)',
-  '$75K+ (major project)',
+  'Lowest bracket (replace me)',
+  'Second bracket (replace me)',
+  'Third bracket (replace me)',
+  'Highest bracket (replace me)',
   'Not sure yet, happy to talk it through',
 ] as const;
 
-// Timeline buckets cover the realistic spread for residential design work.
+// Timeline buckets. These are generic enough to survive most trades, but check
+// them against how far ahead this business actually books.
 const TIMELINE_OPTIONS = [
   'ASAP, within the next month',
   '1–3 months out',
@@ -88,18 +96,15 @@ const TIMELINE_OPTIONS = [
 ] as const;
 
 // Lead-source options. Optional field; helps understand where good leads
-// come from over time without forcing the question.
+// come from over time without forcing the question. Replace the channels with
+// the ones this business is actually findable on.
 const SOURCE_OPTIONS = [
   'Google search',
   'Instagram',
   'Facebook',
-  'Houzz',
   'Friend or family referral',
-  'Builder or realtor referral',
-  'Took the style quiz',
-  'Downloaded a free guide',
+  'Industry referral',
   'Reading the journal',
-  'Saw a project in person',
   'Other',
 ] as const;
 
@@ -188,8 +193,8 @@ export default function ContactForm({
 
   // Restore draft on mount, then apply ?type= URL param if present.
   // URL param wins over saved draft for the projectType field on first load
-  // only — this is the "preselect" behaviour for CTAs on /e-design,
-  // /gift-certificates, etc. Other draft fields are still restored normally.
+  // only — this is the "preselect" behaviour for a CTA that links to
+  // /contact?type=service-one. Other draft fields are still restored normally.
   useEffect(() => {
     if (restoredOnce.current) return;
     restoredOnce.current = true;

@@ -59,10 +59,10 @@ const slug = (Astro.params.slug as string | undefined) || '';
 // Fixed preview path -> singleton type. Mirror of src/sanity/resolve.ts.
 const SINGLETON_BY_PATH: Record<string, string> = {
   '': 'homePage',
-  about: 'aboutPage',
+  about: 'aboutPage', // scaffold: about
   services: 'servicesPage', // scaffold: services
   process: 'processPage', // scaffold: process
-  faq: 'faqPage',
+  faq: 'faqPage', // scaffold: faq
   contact: 'contactPage',
   journal: 'journalPage', // scaffold: journal
   privacy: 'privacyPage',
@@ -74,7 +74,7 @@ const SINGLETON_BY_PATH: Record<string, string> = {
 // is handled by the slug branch below.
 const BUILDER_SINGLETONS = new Set([
   'homePage',
-  'aboutPage',
+  'aboutPage', // scaffold: about
   'servicesPage', // scaffold: services
   'processPage', // scaffold: process
 ]);

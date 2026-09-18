@@ -1,3 +1,4 @@
+// scaffold-file: faq
 // Individual FAQ. Grouped by category on the FAQ page and selectively
 // included on the Process page via `alsoShowOnProcessPage`.
 // U8: categoryRef (reference to faqCategory document) replaces the legacy

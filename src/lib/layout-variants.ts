@@ -95,6 +95,7 @@ export const COLUMN_VARIANTS: Readonly<Record<string, ColumnSpec>> = {
   // numbered value card carries a display numeral, a title and a paragraph, and
   // a fetched card carries a cover image, a meta line and a summary. Neither
   // survives a quarter-width column.
+  // scaffold: philosophy
   valuesSection: {
     fallback: 3,
     options: [TWO, THREE],
@@ -105,6 +106,7 @@ export const COLUMN_VARIANTS: Readonly<Record<string, ColumnSpec>> = {
     baseColumns: 'grid-cols-1',
     phoneColumns: 'grid-cols-1',
   },
+  // scaffold:end
   dynamicListSection: {
     fallback: 3,
     options: [TWO, THREE],

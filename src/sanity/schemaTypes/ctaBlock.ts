@@ -35,13 +35,13 @@ export const ctaBlock = defineType({
       type: 'reference',
       to: [
         { type: 'homePage' },
-        { type: 'aboutPage' },
+        { type: 'aboutPage' }, // scaffold: about
         { type: 'servicesPage' }, // scaffold: services
         { type: 'processPage' }, // scaffold: process
-        { type: 'faqPage' },
+        { type: 'faqPage' }, // scaffold: faq
         { type: 'contactPage' },
-        { type: 'journalPage' },
-        { type: 'journalEntry' },
+        { type: 'journalPage' }, // scaffold: journal
+        { type: 'journalEntry' }, // scaffold: journal
         { type: 'page' },
       ],
       hidden: ({ parent }) => parent?.linkType !== 'internal',

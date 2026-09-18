@@ -25,7 +25,15 @@ type Props = {
   subhead?: string;
   /** Optional rich twin of `subhead` (bold / italic). See src/lib/inline-rich.ts. */
   subheadRich?: unknown;
-  source?: 'journal' | 'services' | 'testimonials' | 'faqs';
+  /**
+   * Which collection to pull from. Every value this can take belongs to a
+   * scaffold capability (journal, services, testimonials, faq), so this is a
+   * plain string rather than a union: a fork that removes all four would
+   * otherwise be left with an empty union, which does not parse. The dropdown
+   * in `sections.ts` is what actually limits an editor's choice, and each of
+   * its options carries its own scaffold marker.
+   */
+  source?: string;
   items?: ProjectedDynamicListSection['items'];
   cta?: ProjectedDynamicListSection['cta'];
   /** How many cards across on a desktop. Three is what this grid always was. */
@@ -53,6 +61,17 @@ const hasItems = Array.isArray(items) && items.length > 0;
 // renderings of one grid, not three grids.
 const colClass = columnsClass('dynamicListSection', columns);
 
+// The sources that have a card layout of their own below. Anything else falls
+// through to the generic grid at the end, which is also what happens once a
+// fork has scaffold-removed the capabilities these belong to. Each entry is
+// marked, so this list shrinks with them.
+const KNOWN_SOURCES: string[] = [
+  'journal', // scaffold: journal
+  'services', // scaffold: services
+  'testimonials', // scaffold: testimonials
+  'faqs', // scaffold: faq
+];
+
 // Format a datetime string to a short readable date.
 function formatDate(d?: string | null): string {
   if (!d) return '';
@@ -65,14 +84,14 @@ function formatDate(d?: string | null): string {
 const fallbackHref: Record<string, string> = {
   journal: '/journal', // scaffold: journal
   services: '/services', // scaffold: services
-  testimonials: '/',
-  faqs: '/faq',
+  testimonials: '/', // scaffold: testimonials
+  faqs: '/faq', // scaffold: faq
 };
 const fallbackLabel: Record<string, string> = {
   journal: 'Read all posts', // scaffold: journal
-  services: 'See all services',
-  testimonials: 'See all reviews',
-  faqs: 'Browse all FAQs',
+  services: 'See all services', // scaffold: services
+  testimonials: 'See all reviews', // scaffold: testimonials
+  faqs: 'Browse all FAQs', // scaffold: faq
 };
 ---
 
@@ -144,6 +163,7 @@ const fallbackLabel: Record<string, string> = {
         )}
         {/* scaffold:end */}
 
+        {/* scaffold: services */}
         {/* ── Service cards ────────────────────────────────────────────── */}
         {source === 'services' && (
           <ul
@@ -190,7 +210,9 @@ const fallbackLabel: Record<string, string> = {
             ))}
           </ul>
         )}
+        {/* scaffold:end */}
 
+        {/* scaffold: testimonials */}
         {/* ── Testimonial cards ────────────────────────────────────────── */}
         {source === 'testimonials' && (
           <ul
@@ -216,7 +238,9 @@ const fallbackLabel: Record<string, string> = {
             ))}
           </ul>
         )}
+        {/* scaffold:end */}
 
+        {/* scaffold: faq */}
         {/* ── FAQ items (mini accordion) ───────────────────────────────── */}
         {source === 'faqs' && (
           <dl class="mx-auto mt-section-lg max-w-3xl divide-y divide-border-soft">
@@ -243,6 +267,46 @@ const fallbackLabel: Record<string, string> = {
               </div>
             ))}
           </dl>
+        )}
+        {/* scaffold:end */}
+
+        {/* ── Any other source ──────────────────────────────────────────────
+            Every branch above belongs to a scaffold capability and can be
+            removed; this one belongs to none and is what is left when they
+            have been. It renders the flat shape the GROQ projection normalises
+            every source into (title, meta, summary, optional href), so a new
+            source works the day it is added and before anyone writes cards for
+            it, and the block keeps a real grid to lay out however many of its
+            sources a fork has kept. Added 2026-09-18.
+
+            It is also what keeps `colClass` interpolated somewhere in this
+            file, which layout-variants.test.ts reads off disk to confirm the
+            registry's `baseColumns` has not gone stale. Remove every marked
+            branch without this one and that gate fails on a component that was
+            doing exactly what it was asked to. */}
+        {!KNOWN_SOURCES.includes(source) && (
+          <ul
+            class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
+            data-stagger-grid
+          >
+            {items.map((item) => (
+              <li>
+                <div class="h-full rounded-md border border-border-soft bg-card p-m">
+                  <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
+                  {item.meta && (
+                    <p class="mt-xs text-xs font-semibold tracking-eyebrow text-link uppercase">
+                      {item.meta}
+                    </p>
+                  )}
+                  {item.summary && (
+                    <p class="mt-s line-clamp-3 text-sm leading-relaxed text-foreground/80">
+                      {item.summary}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
 
         {/* CTA button */}

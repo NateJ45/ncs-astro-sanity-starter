@@ -11,16 +11,19 @@
 //                                 starter builds by default)
 //   /studio, /preview/**,
 //   /api/draft-mode/*             SSR only, never emitted into dist/client
-//   the nine module routes        staged under modules/, opt-in, not built
+//   the two module routes         events and resources are staged under
+//                                 modules/, opt-in, and not built. The other
+//                                 eleven modules moved to archive/modules/ on
+//                                 2026-09-18 and are not staged at all.
 //   /404                          reachable as 404.html, not as a route
 
 /** Routes that render real content and must pass every check. */
 export const routes: string[] = [
   '/',
-  '/about',
+  '/about', // scaffold: about
   '/services', // scaffold: services
   '/process', // scaffold: process
-  '/faq',
+  '/faq', // scaffold: faq
   '/contact',
   '/journal', // scaffold: journal
   '/privacy',

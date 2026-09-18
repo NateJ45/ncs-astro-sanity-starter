@@ -1,14 +1,14 @@
 // Registers every schema type with the Studio.
 // Order doesn't affect runtime; alphabetical here for readability.
 
-import { aboutPage } from './aboutPage';
+import { aboutPage } from './aboutPage'; // scaffold: about
 import { announcement } from './announcement';
 import { businessInfo } from './businessInfo';
 import { contactPage } from './contactPage';
 import { ctaBlock } from './ctaBlock';
-import { faqCategory } from './faqCategory';
-import { faqItem } from './faqItem';
-import { faqPage } from './faqPage';
+import { faqCategory } from './faqCategory'; // scaffold: faq
+import { faqItem } from './faqItem'; // scaffold: faq
+import { faqPage } from './faqPage'; // scaffold: faq
 import { formQuestion } from './formQuestion';
 import { homePage } from './homePage';
 import { journalCategory } from './journalCategory'; // scaffold: journal
@@ -19,7 +19,7 @@ import { page } from './page';
 import { pageSectionSchemas } from './sections';
 import { richSectionSchemas } from './richSections';
 import { notFoundPage } from './notFoundPage';
-import { philosophyPoint } from './philosophyPoint';
+import { philosophyPoint } from './philosophyPoint'; // scaffold: philosophy
 import { privacyPage } from './privacyPage';
 import { processPage } from './processPage'; // scaffold: process
 import { processStep } from './processStep'; // scaffold: process
@@ -30,7 +30,7 @@ import { servicesPage } from './servicesPage'; // scaffold: services
 import { siteSettings } from './siteSettings';
 import { studioGuide } from './studioGuide';
 import { studioNotes } from './studioNotes';
-import { testimonial } from './testimonial';
+import { testimonial } from './testimonial'; // scaffold: testimonials
 
 export const schemaTypes = [
   // Object types (embedded) first so they're defined before docs that reference them
@@ -48,10 +48,10 @@ export const schemaTypes = [
   siteSettings,
   businessInfo, // Content-side singleton: service areas, travel fees, availability, geo
   homePage,
-  aboutPage,
+  aboutPage, // scaffold: about
   servicesPage, // scaffold: services
   processPage, // scaffold: process
-  faqPage,
+  faqPage, // scaffold: faq
   contactPage,
   journalPage, // scaffold: journal
   notFoundPage,
@@ -62,10 +62,10 @@ export const schemaTypes = [
 
   // Reusable content collections
   announcement, // site-wide banner collection (enabled + date-windowed)
-  testimonial,
-  faqCategory,
-  faqItem,
-  philosophyPoint,
+  testimonial, // scaffold: testimonials
+  faqCategory, // scaffold: faq
+  faqItem, // scaffold: faq
+  philosophyPoint, // scaffold: philosophy
   service, // scaffold: services
   processStep, // scaffold: process
   journalCategory, // scaffold: journal

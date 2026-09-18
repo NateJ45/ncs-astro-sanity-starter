@@ -16,27 +16,27 @@ import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
 
 export async function getStaticPaths() {
-  // Defined inside getStaticPaths: mirrors the page schema's reserved list so
-  // a custom page can never shadow a built-in route. Keep in sync with
-  // src/lib/reservedSlugs.ts (same set, duplicated by Astro isolation necessity).
+  // Defined inside getStaticPaths, and it has to be: CLAUDE.md rule 10. Astro
+  // runs this function in an isolated scope, and a guard lifted out of it stops
+  // working without saying so. So this is a hand-kept copy of RESERVED_SLUGS in
+  // src/lib/reservedSlugs.ts, on purpose.
+  //
+  // What is NOT on purpose is the copy going stale, which it had: it still
+  // reserved seven module routes the starter never built. reservedSlugs.test.ts
+  // now reads this file off disk and fails when the two lists disagree, the
+  // same way layout-variants.test.ts re-derives a grid's base columns from the
+  // component. Every line carries its capability's scaffold marker so a removal
+  // takes the slug out of both copies at once.
   const RESERVED = new Set([
-    'about',
-    'services',
-    'process',
-    'portfolio',
-    'faq',
+    'about', // scaffold: about
+    'services', // scaffold: services
+    'process', // scaffold: process
+    'faq', // scaffold: faq
+    'journal', // scaffold: journal
     'contact',
-    'journal',
-    'e-design',
-    'shop',
-    'gift-certificates',
-    'quiz',
-    'calculator',
-    'resources',
-    'guides',
-    'press',
     'privacy',
     '404',
+    'styleguide',
     'sitemap-index.xml',
     'og',
     '_astro',

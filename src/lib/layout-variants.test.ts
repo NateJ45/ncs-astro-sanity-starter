@@ -22,7 +22,7 @@ const BEFORE: Record<string, Record<string, string>> = {
   },
   // Both of these were hard-wired: the string under '3' is what was inline in
   // the component, and it is what a section with no stored value still emits.
-  valuesSection: { '3': 'md:grid-cols-3' },
+  valuesSection: { '3': 'md:grid-cols-3' }, // scaffold: philosophy
   dynamicListSection: { '3': 'sm:grid-cols-2 lg:grid-cols-3' },
 };
 
@@ -57,7 +57,7 @@ describe('columnsClass', () => {
   it('falls back for a value outside the offered list', () => {
     // Values and the auto list offer two and three only. A stray 4 must not
     // render an empty class attribute, it must render what the page already had.
-    assert.equal(columnsClass('valuesSection', 4), columnsClass('valuesSection', 3));
+    assert.equal(columnsClass('valuesSection', 4), columnsClass('valuesSection', 3)); // scaffold: philosophy
     assert.equal(columnsClass('dynamicListSection', 4), columnsClass('dynamicListSection', 3));
   });
 
@@ -116,7 +116,7 @@ describe('COLUMN_VARIANTS', () => {
     // first capture that yields any grid-cols-* class wins.
     const COMPONENT: Record<string, string> = {
       gallerySection: 'GalleryGrid',
-      valuesSection: 'ValuesSection',
+      valuesSection: 'ValuesSection', // scaffold: philosophy
       dynamicListSection: 'DynamicList',
     };
     const PATTERNS = [/class=\{`([^`]*)\$\{colClass\}/, /class:list=\{\[([^\]]*?)colClass/];
