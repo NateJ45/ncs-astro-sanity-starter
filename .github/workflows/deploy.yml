@@ -120,6 +120,16 @@ jobs:
           # problem.
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
+          # Analytics, and ONLY on this workflow. Do not "fix" the omission by
+          # copying these into ci.yml, lighthouse.yml or deploy-staging.yml.
+          # Lighthouse alone would file about eighteen localhost page views into
+          # the live property on every run, and that data is indistinguishable
+          # from real traffic once it lands. The GA4 tag loads after the load
+          # event, so it sits outside LCP by construction and the performance
+          # gate measures exactly the same thing without it. Unset is a silent
+          # no-op everywhere, so those builds simply ship no tag.
+          PUBLIC_GA_ID: ${{ vars.PUBLIC_GA_ID }}
+          PUBLIC_CF_ANALYTICS_TOKEN: ${{ vars.PUBLIC_CF_ANALYTICS_TOKEN }}
         run: |
           if [ -z "$PUBLIC_SANITY_PROJECT_ID" ]; then
             echo "::error::PUBLIC_SANITY_PROJECT_ID is not set. The build would ship empty pages over the live site."

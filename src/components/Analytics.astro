@@ -1,0 +1,62 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+/* ============================================================================
+   Analytics
+   ============================================================================
+   Foundation, edit with care.
+
+   ONE FILE THAT ANSWERS "what analytics does this site have?". That is the
+   whole point of it existing, and it is worth keeping even though the two
+   conditions below would fit comfortably in BaseLayout.
+
+   The failure this guards against is not a bug, it is an omission. A rebuild
+   inherits the domain and the content but NOT the analytics tag, because the
+   tag lived in whatever the old site was built in. It has cost this family
+   twice: one site went dark for roughly six months when an Astro rebuild
+   never carried the previous gtag snippet across, and another lost its
+   analytics on the exact day its domain moved onto a Worker, having shipped
+   with no measurement of any kind. Nothing failed either time. Every other
+   cutover check passed. The number decayed over a thirty day window instead
+   of dropping, so there was never a moment where it looked broken.
+
+   A single named file is the cheapest fix for an omission: "open
+   Analytics.astro" is a checkable step on a launch list, where "grep the
+   layout for a tag" is not. Adding a third provider later adds a file here,
+   not more conditions in a layout.
+
+   WHY THE CONDITIONS LIVE HERE AND NOT IN BaseLayout.astro. This file carries
+   the PORTABLE marker, so `npm run sync-check` holds every repo in the family
+   to the same copy of it. BaseLayout.astro is deliberately NOT marked: it is
+   per-repo and heavily customised in every site. Conditions placed there would
+   be re-implemented eight times and would drift, which is how one repo in this
+   family ended up with the raw vendor snippet under a different variable name.
+   Keeping the gating in a marked file makes the drift detectable.
+
+   BOTH TAGS ARE OPTIONAL AND SILENT WHEN ABSENT. An unset variable renders
+   nothing at all. That is a deliberate contract, not an oversight: a fresh
+   clone, a local dev server and a preview build all have to work with no
+   analytics configured. It does mean a missing variable cannot announce
+   itself, which is why carrying the tag over belongs on the cutover checklist
+   next to DNS and TLS, and why studio-status watches for a flatline as the
+   backstop.
+
+   The PUBLIC_ prefix on both variables is required: these values are read in
+   the browser. They are inlined at BUILD time because these pages are
+   prerendered, so they must be set on the build environment, not the runtime
+   one.
+
+   See PORTS.md card 54.
+   ============================================================================ */
+
+import CloudflareBeacon from './analytics/CloudflareBeacon.astro';
+import GoogleAnalytics from './analytics/GoogleAnalytics.astro';
+
+// The env reading lives in src/lib/analytics-config.ts rather than here, so the
+// privacy page can describe exactly what this file renders without restating
+// the conditions and drifting from them. That module's header explains the
+// near-miss that made it worth a file of its own.
+import { cfAnalyticsToken, gaId, hasCfAnalytics, hasGa } from '@/lib/analytics-config';
+---
+
+{hasCfAnalytics && <CloudflareBeacon token={cfAnalyticsToken} />}
+{hasGa && <GoogleAnalytics gaId={gaId} />}
