@@ -466,8 +466,16 @@ function isGroupActive(items: { href: string }[]) {
       }
     </div>
 
+    {
+      /* The drawer hydrates on idle, not client:only. The shadcn Sheet (Radix
+        Dialog) server-renders its trigger button fine, and the portal mounts
+        nothing until the drawer opens, so the hamburger is in the server HTML
+        and React arrives behind requestIdleCallback rather than on the
+        critical path. An Astro comment, not an HTML one, so it does not ship
+        on every page. See docs/agent/components.md. */
+    }
     <MobileNav
-      client:only="react"
+      client:idle
       links={NAV_LINKS}
       siteSettings={mobileNavSettings}
       logoLightUrl={logoLightWebpMobile.src}
