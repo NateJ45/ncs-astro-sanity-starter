@@ -99,7 +99,12 @@ const PARSED = BLOCK_LIBRARIES.flatMap((file) => parseLibrary(readLibrary(file))
 
 describe('the registry matches the schema', () => {
   it('every section type is named', () => {
-    assert.ok(PARSED.length > 15, 'the block libraries did not parse');
+    // The floor is the GENERAL block library, sections.ts, whose eleven types
+    // belong to no capability and are therefore always here. It used to be 15,
+    // counting rich sections too, and five of those are scaffold-removable, so
+    // a fork that dropped enough of them failed this gate for having done
+    // exactly what the scaffold is for.
+    assert.ok(PARSED.length >= 11, 'the block libraries did not parse');
     for (const type of PARSED) assert.notEqual(type.name, '');
   });
 

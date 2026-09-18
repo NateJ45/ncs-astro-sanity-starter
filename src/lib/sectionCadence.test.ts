@@ -96,10 +96,16 @@ test('unknown _type gets null surface (treated as unknown, not content)', () => 
   assert.equal(rows[0].surface, null);
 });
 
+// 2026-09-18: the four lists below are ANNOTATED `string[]` rather than
+// inferred. Every name in them is scaffold-marked, so a fork that removes
+// enough capabilities empties one, and an empty array literal is an implicit
+// `any[]` that fails `astro check` under strict mode. The annotation is what
+// lets the list shrink to nothing without taking the type check with it.
+
 // ── Phase B: rich section type classification ─────────────────────────────
 
 test('rich SELF_CONTAINED types get null surface', () => {
-  const richSelf = [
+  const richSelf: string[] = [
     'founderSection', // scaffold: about
     'servicesGridSection', // scaffold: services
     'testimonialsSection', // scaffold: testimonials
@@ -113,7 +119,7 @@ test('rich SELF_CONTAINED types get null surface', () => {
 });
 
 test('rich CONTENT types get alternating surface', () => {
-  const richContent = [
+  const richContent: string[] = [
     'storySection', // scaffold: about
     'serviceAreaSection',
     'guaranteeSection',
@@ -143,7 +149,7 @@ test('rich self-contained types do not advance the cadence counter', () => {
 });
 
 test('every new rich type appears in SELF_CONTAINED_TYPES or CONTENT_TYPES', () => {
-  const all8 = [
+  const all8: string[] = [
     'founderSection', // scaffold: about
     'servicesGridSection', // scaffold: services
     'testimonialsSection', // scaffold: testimonials
@@ -209,7 +215,7 @@ test('U7 blocks do not advance the content cadence counter', () => {
 });
 
 test('every U7 type appears in SELF_CONTAINED_TYPES and not CONTENT_TYPES', () => {
-  const u7 = [
+  const u7: string[] = [
     'faqSection', // scaffold: faq
     'logoStripSection',
     'teamSection',
