@@ -73,6 +73,34 @@ until an in-canvas control draws and writes back, then note it here.
 Do NOT take `sanity` 6.9.2: that PATCH release crosses to `@sanity/ui` 4, which is a real
 migration (PORTS.md card 10, phase 2).
 
+### 1b. Run `npm run cutover --write` against a real zone, once
+
+**Blocker: this template owns no domain, and the one real cutover predates the script.**
+
+Added 2026-09-18 with PORTS.md card 48. `scripts/cutover.mjs` generalises the
+stonesteps50k.com move from GoDaddy to Cloudflare, which was done by hand that morning:
+every API call in the script is one that was made, in that order, and worked. What has
+NOT happened is the script itself making them.
+
+What IS proved here: the whole dry-run path against a fake domain, and the zone audit
+against `scripts/fixtures/godaddy-zone-export.txt`, which carries every fault the real
+export had (25 unit cases in `src/lib/zone-audit.test.ts`).
+
+What the next client's cutover should confirm, in order, and note here:
+
+- The zone create returns nameservers and the script prints them before anything else.
+- The import POST accepts the cleaned file, and the resulting record set matches the
+  audit's `import + rewrite` count exactly.
+- The script refuses to import over a zone that already holds records.
+- With the zone still `pending`, step 3 stops and says nothing below was attempted.
+- After the nameservers move: both custom domains attach, the redirect rule lands in the
+  `http_request_dynamic_redirect` phase, and the four TLS settings read back.
+- A second `--write` run is a clean no-op, with a printed reason on every step.
+- The verify table: apex 200 with the title, www and http 301, MX still resolving.
+
+Read the plan line by line before passing `--write`. The blast radius is a client's live
+domain and their mail.
+
 ---
 
 ## Known gaps, deliberately open
