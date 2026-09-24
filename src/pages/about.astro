@@ -13,10 +13,7 @@ import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
 import { DEFAULT_ABOUT_SECTIONS } from '@/data/defaultSections';
 
-const [page, siteSettings] = await Promise.all([
-  getAboutPage().catch(() => null),
-  getSiteSettings().catch(() => null),
-]);
+const [page, siteSettings] = await Promise.all([getAboutPage(), getSiteSettings()]);
 
 const title = page?.seoTitle ?? `About · ${site.name}`;
 const description = page?.seoDescription ?? `Meet the designer behind ${site.name}.`;

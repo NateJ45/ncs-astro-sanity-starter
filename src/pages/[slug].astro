@@ -41,16 +41,22 @@ export async function getStaticPaths() {
     'og',
     '_astro',
   ]);
-  const slugs = await getAllPageSlugs().catch(() => [] as string[]);
+  const slugs = await getAllPageSlugs();
   return slugs.filter((slug) => !RESERVED.has(slug)).map((slug) => ({ params: { slug } }));
 }
 
 const { slug } = Astro.params;
-const [pageDoc, siteSettings] = await Promise.all([
-  getPage(slug as string).catch(() => null),
-  getSiteSettings().catch(() => null),
-]);
+const [pageDoc, siteSettings] = await Promise.all([getPage(slug as string), getSiteSettings()]);
 
+// getStaticPaths listed this slug, so an empty answer here is a failed read,
+// not a missing page. A production build stops rather than publish the page as
+// a redirect to /404, which is what a swallowed fetch error used to do.
+// In dev it still redirects.
+if (!pageDoc && import.meta.env.PROD) {
+  throw new Error(
+    `[slug] page "${slug}" was listed but came back empty; refusing to publish it as a 404`,
+  );
+}
 if (!pageDoc) return Astro.redirect('/404');
 
 const title = (pageDoc as any).seoTitle ?? (pageDoc as any).title ?? site.name;

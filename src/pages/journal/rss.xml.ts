@@ -12,10 +12,7 @@ import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { site } from '@/data/site';
 
 export const GET: APIRoute = async (context) => {
-  const [entries, siteSettings] = await Promise.all([
-    getAllJournalEntries().catch(() => []),
-    getSiteSettings().catch(() => null),
-  ]);
+  const [entries, siteSettings] = await Promise.all([getAllJournalEntries(), getSiteSettings()]);
 
   const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 

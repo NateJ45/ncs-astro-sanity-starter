@@ -5251,3 +5251,62 @@ and stonesteps-50k fixed in the same session as this card, and `ncs-church-start
 bug and the swallow-in-every-environment catch, unported as of this date. Background
 and the ported-to checklist: `_vault/gotchas/sanity-token-builds-bypass-the-cdn.md` in
 the studio vault.
+
+## Card 56: the PROD throw from card 55 was still getting swallowed by page-level `.catch()` (2026-09-24)
+
+**Origin: fbcm** (`a2e3b1c`). Card 55 made `sanityFetch` throw on a failed read
+during a production build, so a quota block or outage would stop the deploy instead
+of shipping empty content. It did not go far enough: every static route's own
+Sanity reads were separately wrapped in `.catch(() => null)` / `.catch(() => [])`,
+so the throw never reached the build. A dynamic route (`/[slug]`, `/journal/[slug]`)
+that took the caught `null` for "no such document" then did
+`if (!doc) return Astro.redirect('/404')`, which is a live route, not the build
+step, redirecting: a transient failed Sanity read published a real page as a
+redirect to `/404`. fbcm caught this on `/ministries` during a merge rebuild via
+`npm run parity compare`.
+
+**The fix, in three parts.**
+
+1. **`fetchWithRetry` inside `sanityFetch`.** A build makes a few hundred reads,
+   and a single network blip on one of them used to fail the whole build (correct
+   per card 55, but a blip is not an outage). `sanityFetch`'s `client.fetch` call
+   now goes through a small retry helper: two retries, waiting 500 ms then 1500 ms,
+   then rethrowing. A real outage or quota block still fails after about 2 s and
+   the build stops; a blip rides it out.
+2. **Static (prerendered) routes under `src/pages` no longer catch their own
+   Sanity reads.** `sanityFetch` already has its own fallback behavior for dev
+   and the unconfigured case; the page-level `.catch()` only ever caught the PROD
+   throw, defeating card 55's whole point. Removed from `404.astro`, `about.astro`,
+   `contact.astro`, `faq.astro`, `index.astro`, `privacy.astro`, `process.astro`,
+   `services.astro`, `journal/index.astro`, `journal/rss.xml.ts`, `journal/[slug].astro`
+   and `[slug].astro`. Catches were deliberately left in place in `preview/**`,
+   `api/**`, any route with `prerender = false`, and shared runtime/layout reads
+   that are not the build's own routing (`BaseLayout.astro`'s announcement fetch,
+   `Footer.astro`'s project list) — those are live-request paths, not the static
+   build.
+3. **The two dynamic routes get a defensive throw ahead of their existing
+   `/404` redirect.** `getStaticPaths` lists a document, so if the per-page fetch
+   for that same document comes back empty in a production build, that is a
+   failed or racing read, not a real 404. `[slug].astro` and `journal/[slug].astro`
+   now do:
+   ```
+   if (!doc && import.meta.env.PROD) {
+     throw new Error(`"${slug}" was listed but came back empty; refusing to publish it as a 404`);
+   }
+   if (!doc) return Astro.redirect('/404');
+   ```
+   The dev-mode redirect is unchanged, so local iteration without a configured
+   project still works.
+
+**What to check before porting.** Same shape as card 55: apply to the
+build/published read client and its routes only, not a separate preview/draft
+client (its catches are a live-request fail-open path, not this one). Read each
+page file individually rather than regexing across it — some repos' fallback
+shapes differ line to line (`[]` vs `[] as string[]` vs `null`), and a multi-line
+`.catch()` can span the query call.
+
+**Verified state at time of writing (2026-09-24):** fbcm fixed (origin, `a2e3b1c`),
+this starter fixed in the same session as this card. `stonesteps-50k`,
+`ncs-church-starter`, `presacademy` and `mas-monograms-rebuild` not yet checked for
+this half of the bug; check each one's static routes for a page-level `.catch()`
+sitting on top of a `sanityFetch` call before assuming card 55 alone protects them.
