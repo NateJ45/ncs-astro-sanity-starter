@@ -117,6 +117,7 @@ is installing it as of the date on the card.
 | 52  | Radix islands hydrate at client:idle, not client:only             | n/a     | partial     | yes      | no               | no            | no             | n/a                | yes                 | partial        |
 | 53  | One accent splitter (heading-accent absorbs scriptAccent)         | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 54  | Analytics component (GA4 + Cloudflare beacon, canonical)          | no      | no          | yes      | partial          | no            | no             | n/a                | yes                 | yes            |
+| 55  | Build reads always use the Sanity CDN; a PROD fetch error throws  | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | yes            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5198,3 +5199,55 @@ signal); no literal `<script src=googletagmanager>` in the built HTML; and no ta
 querying `eventName` and `eventCount`. Do not query `unifiedScreenName`: it returns
 empty rows for web `page_view` and reads as a false negative. Those hits are real and
 land in the live property.
+
+## Card 55: Build reads always use the Sanity CDN; a PROD fetch error throws (2026-09-23)
+
+**Origin: fbcm** (`897cec90`, not itself a column in the matrix above — it is a
+downstream client build, not a family template — but the bug and the fix are general
+and worth carrying into every repo with a `src/lib/sanity.ts`). **Canonical:**
+`src/lib/sanity.ts` in this starter (not PORTABLE-marked; each repo's copy has its own
+shape, so this ports by hand, not by `sync-check`).
+
+**The bug.** `useCdn: !readToken` was written on the belief that Sanity's CDN rejects
+token-authenticated requests, so a client with `SANITY_API_READ_TOKEN` set had to skip
+the CDN and hit the uncached API directly. That belief was wrong: the API CDN has
+accepted authenticated requests since API version 2021-03-25, and it serves the same
+token-widened result set the uncached API does. The practical effect: **every local
+build with a token in `.env` — which is the normal case once a repo is past its
+bootstrap phase — read the uncached API, not the CDN**, while CI (no token in that
+environment) stayed on the CDN throughout. A full build issues several hundred
+queries. On FBCM, five days of agent-heavy local work (rebuilds, `npm run parity`
+recaptures, Playwright's `webServer` builds) spent 325k requests against the Growth
+trial's 250k monthly API quota, while CI's CDN usage over the same window was 156k of
+a 1M CDN quota. The fix is one line: `useCdn: true`, unconditionally, on the published
+build client. A token does not disable CDN use; it only widens what the CDN serves.
+
+**The second half, found in the same file.** `sanityFetch`'s catch block logged a
+warning and returned the caller's fallback for every fetch error, in every
+environment, including a production build. That means a quota block (the failure
+mode above, before this fix) or a genuine Sanity outage during a deploy build would
+not fail the build — it would silently ship the fallback content (usually an empty
+array or `null`) to production. Fixed by checking `import.meta.env.PROD` in the catch:
+in a production build, throw (`` `[sanity] fetch failed during a production build:
+${String(err)}` ``) so the deploy stops and the live site keeps its last good build;
+in dev, keep the warn-and-return-fallback behavior so local iteration without a
+configured project, or against a flaky connection, does not grind to a halt. The
+existing "Sanity unconfigured, no network call, return fallback" short-circuit ahead
+of the `try` is untouched either way — a fresh clone with no `PUBLIC_SANITY_PROJECT_ID`
+still builds clean.
+
+**What to check before porting.** Not every repo's `sanity.ts` has this exact shape.
+Apply both changes only to the **published/build read client** (`perspective:
+'published'`, used for static generation). A repo with a separate preview or draft
+client (`perspective: 'drafts'`, used for the live-preview stack under `/preview/**`)
+must leave that client's `useCdn: false` alone — the draft perspective is explicitly
+CDN-incompatible in Sanity's own docs, unlike the published one, and that client's
+errors are already handled by the preview's own fail-open path, not this one.
+
+**Verified state at time of writing (2026-09-23)**, by reading each repo's
+`src/lib/sanity.ts` directly rather than assuming: fbcm fixed (origin), this starter
+and stonesteps-50k fixed in the same session as this card, and `ncs-church-starter`,
+`presacademy` and `mas-monograms-rebuild` all still carry both the `useCdn: !readToken`
+bug and the swallow-in-every-environment catch, unported as of this date. Background
+and the ported-to checklist: `_vault/gotchas/sanity-token-builds-bypass-the-cdn.md` in
+the studio vault.
