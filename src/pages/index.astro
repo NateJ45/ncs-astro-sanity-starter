@@ -11,10 +11,7 @@ import { getHomePage, getSiteSettings } from '@/lib/queries';
 import { site } from '@/data/site';
 import { DEFAULT_HOME_SECTIONS } from '@/data/defaultSections';
 
-const [page, siteSettings] = await Promise.all([
-  getHomePage().catch(() => null),
-  getSiteSettings().catch(() => null),
-]);
+const [page, siteSettings] = await Promise.all([getHomePage(), getSiteSettings()]);
 
 const title = page?.seoTitle ?? site.name;
 const description = page?.seoDescription ?? 'Your tagline goes here.';

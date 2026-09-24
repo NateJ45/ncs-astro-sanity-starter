@@ -13,10 +13,7 @@ import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
 import { DEFAULT_PROCESS_SECTIONS } from '@/data/defaultSections';
 
-const [page, siteSettings] = await Promise.all([
-  getProcessPage().catch(() => null),
-  getSiteSettings().catch(() => null),
-]);
+const [page, siteSettings] = await Promise.all([getProcessPage(), getSiteSettings()]);
 
 const title = page?.seoTitle ?? `Our Process · ${site.name}`;
 const description = page?.seoDescription ?? 'How we work, from first call to final reveal.';
