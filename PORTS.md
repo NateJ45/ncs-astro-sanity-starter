@@ -118,6 +118,7 @@ is installing it as of the date on the card.
 | 53  | One accent splitter (heading-accent absorbs scriptAccent)         | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 54  | Analytics component (GA4 + Cloudflare beacon, canonical)          | no      | no          | yes      | partial          | no            | no             | n/a                | yes                 | yes            |
 | 55  | Build reads always use the Sanity CDN; a PROD fetch error throws  | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | yes            |
+| 57  | Preview cookie's value is checked, not its presence               | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | no             |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5310,3 +5311,48 @@ this starter fixed in the same session as this card. `stonesteps-50k`,
 `ncs-church-starter`, `presacademy` and `mas-monograms-rebuild` not yet checked for
 this half of the bug; check each one's static routes for a page-level `.catch()`
 sitting on top of a `sanityFetch` call before assuming card 55 alone protects them.
+
+## Card 57: The preview cookie's value is checked, not its presence (2026-09-26)
+
+**Origin: fbcm** (`d909d10d`, where it was filed as "card 29d"; that number is
+already this file's "Staleness counts every channel", so it lands here as 57 and
+fbcm's card should be renumbered at its next sync). **Canonical:**
+`src/lib/preview-auth.ts` (unchanged by this card) and its two callers here,
+`src/pages/preview/[...slug].astro` and `src/pages/preview/live.ts`. fbcm has a third
+caller, `src/pages/preview/post/[slug].astro`; any repo with more preview page routes
+has more.
+
+**The gap, in the starter and every repo on it.** `/api/draft-mode/enable` writes
+`await previewCookieValue()`, a SHA-256 fingerprint of `VERSION` plus the server's
+`SANITY_TOKEN`, into `sanity-preview-perspective`, and `isStudioPreview()` exists to
+compare a cookie against that fingerprint. Nothing called it. Every preview route asked
+only `cookies.has(perspectiveCookieName)`, so anyone who typed that cookie into a
+browser with any value (`true`, `drafts`) read unpublished drafts through the server's
+token, and could hold open `/preview/live` connections to Sanity's listener.
+
+**The fix.** Every presence check becomes
+
+```ts
+await isStudioPreview(cookies.get(perspectiveCookieName)?.value);
+```
+
+(`Astro.cookies` in an `.astro` route). In the page route the result IS `draftMode`, so
+a failed check shows published content, as a missing cookie always did. In
+`/preview/live` a failed check returns the existing 403 before any upstream connection
+opens. With `SANITY_TOKEN` unset, `previewCookieValue()` returns an empty string and
+the check fails closed. presacademy already gates `/api/stats` on the same check in
+production, which is the evidence the Presentation tool never rewrites the cookie's
+value after the handshake, so editors are not locked out.
+
+**What to check before porting.** First confirm the repo's `enable` route writes
+`await previewCookieValue()`, not a literal `'true'` (the visual-editing package's own
+convention). If it writes `'true'`, this check locks every editor out; port
+`preview-auth.ts` and the enable route first. Then grep `src/` (and `modules/`) for
+`cookies.has(perspectiveCookieName)` and every other read of that cookie, and change
+all of them: the gap is per route, and one missed route is the whole gap. Measure it on
+`wrangler dev` with four cookies: none, `true`, `drafts`, and the genuine fingerprint.
+
+**Verified state at time of writing (2026-09-26):** fbcm fixed (origin), this starter
+fixed in the same session as this card. stonesteps-50k, presacademy (its page routes;
+`/api/stats` is already correct), ncs-church-starter, wcp and mas-monograms-rebuild not
+yet checked.
