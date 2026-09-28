@@ -5177,7 +5177,7 @@ shows beside the property name. Add the import and the `<Analytics />` tag to th
 repo's own `BaseLayout.astro`, near the end of `<head>`. If the repo already renders a
 beacon inline, delete it in the same change or the beacon doubles.
 
-**reid-design-site is `partial` for a specific reason.** It has GA4, but as Google's
+**reid-design-site was `partial` until 2026-09-28 (see card 58).** It has GA4, but as Google's
 literal snippet inside `src/layouts/BaseLayout.astro`, under `PUBLIC_GA_MEASUREMENT_ID`
 rather than `PUBLIC_GA_ID`. So it has the data but neither of the two protections
 above, and its tag is in the exact form Zaraz swallows. Porting it means replacing the
@@ -5190,7 +5190,9 @@ component), stonesteps-50k yes, reid-design-site partial as above, and wcp-websi
 presacademy, mas-monograms and 2ndpreschicago all no.
 
 **How to verify a port, because config inspection and HTML scraping both lie here.**
-Build, serve the built output under `wrangler dev`, and check in a real browser:
+Since card 58 the tag does NOTHING on localhost, so the firing half of this check can
+only be done on the production host, after the deploy; locally, the check is that
+nothing fires (the smoke test holds that). On the live site, in a real browser:
 `typeof window.gtag === 'function'`; a `googletagmanager.com/gtag/js?id=` script present
 in the head; `performance.getEntriesByType('resource')` showing a
 `google-analytics.com/g/collect` entry (its `responseStatus` reads 0 and `transferSize`
@@ -5356,3 +5358,43 @@ all of them: the gap is per route, and one missed route is the whole gap. Measur
 fixed in the same session as this card. stonesteps-50k, presacademy (its page routes;
 `/api/stats` is already correct), ncs-church-starter, wcp and mas-monograms-rebuild not
 yet checked.
+
+## Card 58: GA4 fires only on the production hostname (2026-09-28)
+
+**Canonical:** `src/components/analytics/GoogleAnalytics.astro` (rule 3 in its
+header) and `tests/smoke.spec.ts` (the localhost test). Amends card 54.
+
+**The hole in "only `deploy.yml` gets the variable".** Card 54 kept `PUBLIC_GA_ID`
+out of CI and Lighthouse so test runs could not file page views. That holds for CI
+and does nothing about a developer's `.env`: a local Playwright or Lighthouse run
+builds with it. reid-design-site's live property holds 236 (2026-07-28) and 234
+(2026-08-27) one-pageview `localhost` sessions, one per test, on the days its suites
+landed and its stack port ran, plus stray `*.workers.dev` hits. Once in, they are
+indistinguishable from real traffic and wreck a month's report.
+
+**The rule.** The snippet compares `location.hostname` with the site's own `site`
+URL (apex and `www.` both count) and off it does nothing: no dataLayer, no `gtag`,
+no request. Keyed off `Astro.site` so there is no per-repo configuration; every fork
+already sets `site` for its sitemap and canonicals. **It fails OPEN when `site` is
+unset** (the tag runs everywhere, as before), because failing closed would recreate
+the silent-dark failure card 54 exists to prevent. A fork whose site answers on a
+host that is neither the apex nor `www` of `site` (a second domain, a
+`*.workers.dev` it actually serves visitors on) will record nothing there: that is
+intended, and the fix is to serve the real domain, not to widen the list.
+
+**The test.** `tests/smoke.spec.ts` asserts no request to Google and no
+`dataLayer` on localhost. In CI the id is unset so it passes trivially; it bites on
+exactly the local run that caused the leak. Proven both ways on 2026-09-28 with a
+built-in dummy id: fails on the card-54 component (it caught the `gtag/js` request),
+passes on this one. A Node VM run of the built snippet confirmed `example.com` and
+`www.example.com` queue the `js`/`config` calls and inject the loader, while
+`localhost`, `127.0.0.1` and `*.workers.dev` get nothing.
+
+**Porting.** Pull the two files. Nothing else changes: same variable, same props. The
+localhost test belongs in whatever smoke spec the repo has, if its smoke spec is not
+the canonical one.
+
+**Verified state (2026-09-28):** this starter (origin), reid-design-site (ported in
+the same session as its full card-54 port, which is where the leak was found).
+nixoncreativestudio and stonesteps-50k run card 54 without this rule and should pull
+it; the rest have no GA4 yet.

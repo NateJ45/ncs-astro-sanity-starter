@@ -39,6 +39,20 @@
 
    The tag is intentionally absent from CI, Lighthouse and staging builds. See
    the comment on the Build step in .github/workflows/deploy.yml.
+
+   3. IT ONLY RUNS ON THE PRODUCTION HOSTNAME (PORTS.md card 58).
+      Keeping the variable out of CI does not keep it out of a developer's
+      .env, and a local Playwright or Lighthouse run builds with that .env.
+      reid-design-site filed 236 + 234 one-page localhost sessions into its
+      live property that way (2026-07-28, 2026-08-27), where they are
+      indistinguishable from real traffic. So the snippet compares
+      location.hostname with the site's own `site` URL from astro.config
+      (apex and www both count) and does nothing anywhere else: no dataLayer,
+      no gtag, no request. No per-repo configuration, because every fork
+      already sets `site` for its sitemap and canonicals.
+      FAILS OPEN when `site` is unset: the tag then runs everywhere, as it
+      did before this rule. Failing closed would recreate the silent-dark
+      failure this whole card exists to prevent.
    ============================================================================ */
 
 interface Props {
@@ -47,34 +61,43 @@ interface Props {
 }
 
 const { gaId } = Astro.props;
+
+// Hostnames the tag may fire on (rule 3 above), or null to fire anywhere.
+// A `site` of either the apex or www counts both.
+const siteHost = Astro.site?.hostname ?? '';
+const apex = siteHost.replace(/^www./, '');
+const gaHosts: string[] | null = apex ? [apex, `www.${apex}`] : null;
 ---
 
-<script is:inline define:vars={{ gaId }}>
-  window.dataLayer = window.dataLayer || [];
-  // gtag.js inspects a real `arguments` object here, so rest parameters would
-  // silently break every queued call. This shape is required, not stylistic.
-  function gtag() {
-    // eslint-disable-next-line prefer-rest-params
-    window.dataLayer.push(arguments);
-  }
-  window.gtag = gtag;
-  gtag('js', new Date());
-  gtag('config', gaId);
+<script is:inline define:vars={{ gaId, gaHosts }}>
+  // Rule 3: off the production hostname, do nothing at all.
+  if (!gaHosts || gaHosts.indexOf(location.hostname) !== -1) {
+    window.dataLayer = window.dataLayer || [];
+    // gtag.js inspects a real `arguments` object here, so rest parameters would
+    // silently break every queued call. This shape is required, not stylistic.
+    function gtag() {
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer.push(arguments);
+    }
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', gaId);
 
-  // Built as an element rather than printed as a tag. See departure 2 above.
-  function loadGa() {
-    var s = document.createElement('script');
-    s.async = true;
-    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId);
-    document.head.appendChild(s);
-  }
+    // Built as an element rather than printed as a tag. See departure 2 above.
+    function loadGa() {
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId);
+      document.head.appendChild(s);
+    }
 
-  // Idle after load, with a timeout so a permanently busy page still reports.
-  function whenIdle() {
-    if ('requestIdleCallback' in window) requestIdleCallback(loadGa, { timeout: 4000 });
-    else setTimeout(loadGa, 500);
-  }
+    // Idle after load, with a timeout so a permanently busy page still reports.
+    function whenIdle() {
+      if ('requestIdleCallback' in window) requestIdleCallback(loadGa, { timeout: 4000 });
+      else setTimeout(loadGa, 500);
+    }
 
-  if (document.readyState === 'complete') whenIdle();
-  else window.addEventListener('load', whenIdle, { once: true });
+    if (document.readyState === 'complete') whenIdle();
+    else window.addEventListener('load', whenIdle, { once: true });
+  }
 </script>
