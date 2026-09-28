@@ -73,10 +73,15 @@ export const client: SanityClient = createClient({
   projectId: projectId || 'unconfigured',
   dataset,
   apiVersion,
-  // CDN is incompatible with token-based reads (Sanity rejects token + useCdn:true).
-  // When no token, we can use the CDN safely; it serves the same anon-filtered subset
-  // as the API anyway.
-  useCdn: !readToken,
+  // ALWAYS the CDN (2026-09-23, ported from fbcm 897cec9). This used to be
+  // `useCdn: !readToken`, on the belief that the CDN rejects a token; the API
+  // CDN has accepted authenticated requests since API version 2021-03-25. With
+  // a token in .env every LOCAL build read the uncached API instead: a full
+  // build is several hundred queries, and a day of agent-heavy local builds
+  // (parity rebuilds, Playwright webServer builds) can burn a monthly quota
+  // fast, while CI (no token) stayed on the CDN the whole time. Published
+  // reads through the CDN are what a static build wants anyway.
+  useCdn: true,
   perspective: 'published',
   ...(readToken ? { token: readToken } : {}),
 });
@@ -141,10 +146,33 @@ export async function sanityFetch<T>(
     return fallback;
   }
   try {
-    return await client.fetch<T>(query, params);
+    return await fetchWithRetry<T>(query, params);
   } catch (err) {
+    // A production build must not quietly ship placeholder content: if Sanity
+    // is unreachable or refusing requests (a quota block, an outage), fail the
+    // build so the deploy stops and the live site keeps its last good build.
+    if (import.meta.env.PROD) {
+      throw new Error(`[sanity] fetch failed during a production build: ${String(err)}`);
+    }
     console.warn('[sanity] fetch error (returning empty fallback):', err);
     return fallback;
+  }
+}
+
+// A build makes a few hundred reads, and one of them failing on a network blip
+// would otherwise publish a page as a redirect to /404 further down the
+// pipeline (a static route that took a swallowed fetch error for a missing
+// document). Two retries, 0.5 s then 1.5 s apart, ride out a blip; a real
+// outage still fails after about 2 s and the build stops.
+async function fetchWithRetry<T>(query: string, params: Record<string, unknown>): Promise<T> {
+  const waits = [500, 1500];
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await client.fetch<T>(query, params);
+    } catch (err) {
+      if (attempt >= waits.length) throw err;
+      await new Promise((r) => setTimeout(r, waits[attempt]));
+    }
   }
 }
 

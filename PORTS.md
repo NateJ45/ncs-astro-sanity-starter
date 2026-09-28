@@ -117,6 +117,8 @@ is installing it as of the date on the card.
 | 52  | Radix islands hydrate at client:idle, not client:only             | n/a     | partial     | yes      | no               | no            | no             | n/a                | yes                 | partial        |
 | 53  | One accent splitter (heading-accent absorbs scriptAccent)         | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 54  | Analytics component (GA4 + Cloudflare beacon, canonical)          | no      | no          | yes      | partial          | no            | no             | n/a                | yes                 | yes            |
+| 55  | Build reads always use the Sanity CDN; a PROD fetch error throws  | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | yes            |
+| 57  | Preview cookie's value is checked, not its presence               | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | no             |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5175,7 +5177,7 @@ shows beside the property name. Add the import and the `<Analytics />` tag to th
 repo's own `BaseLayout.astro`, near the end of `<head>`. If the repo already renders a
 beacon inline, delete it in the same change or the beacon doubles.
 
-**reid-design-site is `partial` for a specific reason.** It has GA4, but as Google's
+**reid-design-site was `partial` until 2026-09-28 (see card 58).** It has GA4, but as Google's
 literal snippet inside `src/layouts/BaseLayout.astro`, under `PUBLIC_GA_MEASUREMENT_ID`
 rather than `PUBLIC_GA_ID`. So it has the data but neither of the two protections
 above, and its tag is in the exact form Zaraz swallows. Porting it means replacing the
@@ -5188,7 +5190,9 @@ component), stonesteps-50k yes, reid-design-site partial as above, and wcp-websi
 presacademy, mas-monograms and 2ndpreschicago all no.
 
 **How to verify a port, because config inspection and HTML scraping both lie here.**
-Build, serve the built output under `wrangler dev`, and check in a real browser:
+Since card 58 the tag does NOTHING on localhost, so the firing half of this check can
+only be done on the production host, after the deploy; locally, the check is that
+nothing fires (the smoke test holds that). On the live site, in a real browser:
 `typeof window.gtag === 'function'`; a `googletagmanager.com/gtag/js?id=` script present
 in the head; `performance.getEntriesByType('resource')` showing a
 `google-analytics.com/g/collect` entry (its `responseStatus` reads 0 and `transferSize`
@@ -5198,3 +5202,199 @@ signal); no literal `<script src=googletagmanager>` in the built HTML; and no ta
 querying `eventName` and `eventCount`. Do not query `unifiedScreenName`: it returns
 empty rows for web `page_view` and reads as a false negative. Those hits are real and
 land in the live property.
+
+## Card 55: Build reads always use the Sanity CDN; a PROD fetch error throws (2026-09-23)
+
+**Origin: fbcm** (`897cec90`, not itself a column in the matrix above — it is a
+downstream client build, not a family template — but the bug and the fix are general
+and worth carrying into every repo with a `src/lib/sanity.ts`). **Canonical:**
+`src/lib/sanity.ts` in this starter (not PORTABLE-marked; each repo's copy has its own
+shape, so this ports by hand, not by `sync-check`).
+
+**The bug.** `useCdn: !readToken` was written on the belief that Sanity's CDN rejects
+token-authenticated requests, so a client with `SANITY_API_READ_TOKEN` set had to skip
+the CDN and hit the uncached API directly. That belief was wrong: the API CDN has
+accepted authenticated requests since API version 2021-03-25, and it serves the same
+token-widened result set the uncached API does. The practical effect: **every local
+build with a token in `.env` — which is the normal case once a repo is past its
+bootstrap phase — read the uncached API, not the CDN**, while CI (no token in that
+environment) stayed on the CDN throughout. A full build issues several hundred
+queries. On FBCM, five days of agent-heavy local work (rebuilds, `npm run parity`
+recaptures, Playwright's `webServer` builds) spent 325k requests against the Growth
+trial's 250k monthly API quota, while CI's CDN usage over the same window was 156k of
+a 1M CDN quota. The fix is one line: `useCdn: true`, unconditionally, on the published
+build client. A token does not disable CDN use; it only widens what the CDN serves.
+
+**The second half, found in the same file.** `sanityFetch`'s catch block logged a
+warning and returned the caller's fallback for every fetch error, in every
+environment, including a production build. That means a quota block (the failure
+mode above, before this fix) or a genuine Sanity outage during a deploy build would
+not fail the build — it would silently ship the fallback content (usually an empty
+array or `null`) to production. Fixed by checking `import.meta.env.PROD` in the catch:
+in a production build, throw (`` `[sanity] fetch failed during a production build:
+${String(err)}` ``) so the deploy stops and the live site keeps its last good build;
+in dev, keep the warn-and-return-fallback behavior so local iteration without a
+configured project, or against a flaky connection, does not grind to a halt. The
+existing "Sanity unconfigured, no network call, return fallback" short-circuit ahead
+of the `try` is untouched either way — a fresh clone with no `PUBLIC_SANITY_PROJECT_ID`
+still builds clean.
+
+**What to check before porting.** Not every repo's `sanity.ts` has this exact shape.
+Apply both changes only to the **published/build read client** (`perspective:
+'published'`, used for static generation). A repo with a separate preview or draft
+client (`perspective: 'drafts'`, used for the live-preview stack under `/preview/**`)
+must leave that client's `useCdn: false` alone — the draft perspective is explicitly
+CDN-incompatible in Sanity's own docs, unlike the published one, and that client's
+errors are already handled by the preview's own fail-open path, not this one.
+
+**Verified state at time of writing (2026-09-23)**, by reading each repo's
+`src/lib/sanity.ts` directly rather than assuming: fbcm fixed (origin), this starter
+and stonesteps-50k fixed in the same session as this card, and `ncs-church-starter`,
+`presacademy` and `mas-monograms-rebuild` all still carry both the `useCdn: !readToken`
+bug and the swallow-in-every-environment catch, unported as of this date. Background
+and the ported-to checklist: `_vault/gotchas/sanity-token-builds-bypass-the-cdn.md` in
+the studio vault.
+
+## Card 56: the PROD throw from card 55 was still getting swallowed by page-level `.catch()` (2026-09-24)
+
+**Origin: fbcm** (`a2e3b1c`). Card 55 made `sanityFetch` throw on a failed read
+during a production build, so a quota block or outage would stop the deploy instead
+of shipping empty content. It did not go far enough: every static route's own
+Sanity reads were separately wrapped in `.catch(() => null)` / `.catch(() => [])`,
+so the throw never reached the build. A dynamic route (`/[slug]`, `/journal/[slug]`)
+that took the caught `null` for "no such document" then did
+`if (!doc) return Astro.redirect('/404')`, which is a live route, not the build
+step, redirecting: a transient failed Sanity read published a real page as a
+redirect to `/404`. fbcm caught this on `/ministries` during a merge rebuild via
+`npm run parity compare`.
+
+**The fix, in three parts.**
+
+1. **`fetchWithRetry` inside `sanityFetch`.** A build makes a few hundred reads,
+   and a single network blip on one of them used to fail the whole build (correct
+   per card 55, but a blip is not an outage). `sanityFetch`'s `client.fetch` call
+   now goes through a small retry helper: two retries, waiting 500 ms then 1500 ms,
+   then rethrowing. A real outage or quota block still fails after about 2 s and
+   the build stops; a blip rides it out.
+2. **Static (prerendered) routes under `src/pages` no longer catch their own
+   Sanity reads.** `sanityFetch` already has its own fallback behavior for dev
+   and the unconfigured case; the page-level `.catch()` only ever caught the PROD
+   throw, defeating card 55's whole point. Removed from `404.astro`, `about.astro`,
+   `contact.astro`, `faq.astro`, `index.astro`, `privacy.astro`, `process.astro`,
+   `services.astro`, `journal/index.astro`, `journal/rss.xml.ts`, `journal/[slug].astro`
+   and `[slug].astro`. Catches were deliberately left in place in `preview/**`,
+   `api/**`, any route with `prerender = false`, and shared runtime/layout reads
+   that are not the build's own routing (`BaseLayout.astro`'s announcement fetch,
+   `Footer.astro`'s project list) — those are live-request paths, not the static
+   build.
+3. **The two dynamic routes get a defensive throw ahead of their existing
+   `/404` redirect.** `getStaticPaths` lists a document, so if the per-page fetch
+   for that same document comes back empty in a production build, that is a
+   failed or racing read, not a real 404. `[slug].astro` and `journal/[slug].astro`
+   now do:
+   ```
+   if (!doc && import.meta.env.PROD) {
+     throw new Error(`"${slug}" was listed but came back empty; refusing to publish it as a 404`);
+   }
+   if (!doc) return Astro.redirect('/404');
+   ```
+   The dev-mode redirect is unchanged, so local iteration without a configured
+   project still works.
+
+**What to check before porting.** Same shape as card 55: apply to the
+build/published read client and its routes only, not a separate preview/draft
+client (its catches are a live-request fail-open path, not this one). Read each
+page file individually rather than regexing across it — some repos' fallback
+shapes differ line to line (`[]` vs `[] as string[]` vs `null`), and a multi-line
+`.catch()` can span the query call.
+
+**Verified state at time of writing (2026-09-24):** fbcm fixed (origin, `a2e3b1c`),
+this starter fixed in the same session as this card. `stonesteps-50k`,
+`ncs-church-starter`, `presacademy` and `mas-monograms-rebuild` not yet checked for
+this half of the bug; check each one's static routes for a page-level `.catch()`
+sitting on top of a `sanityFetch` call before assuming card 55 alone protects them.
+
+## Card 57: The preview cookie's value is checked, not its presence (2026-09-26)
+
+**Origin: fbcm** (`d909d10d`, where it was filed as "card 29d"; that number is
+already this file's "Staleness counts every channel", so it lands here as 57 and
+fbcm's card should be renumbered at its next sync). **Canonical:**
+`src/lib/preview-auth.ts` (unchanged by this card) and its two callers here,
+`src/pages/preview/[...slug].astro` and `src/pages/preview/live.ts`. fbcm has a third
+caller, `src/pages/preview/post/[slug].astro`; any repo with more preview page routes
+has more.
+
+**The gap, in the starter and every repo on it.** `/api/draft-mode/enable` writes
+`await previewCookieValue()`, a SHA-256 fingerprint of `VERSION` plus the server's
+`SANITY_TOKEN`, into `sanity-preview-perspective`, and `isStudioPreview()` exists to
+compare a cookie against that fingerprint. Nothing called it. Every preview route asked
+only `cookies.has(perspectiveCookieName)`, so anyone who typed that cookie into a
+browser with any value (`true`, `drafts`) read unpublished drafts through the server's
+token, and could hold open `/preview/live` connections to Sanity's listener.
+
+**The fix.** Every presence check becomes
+
+```ts
+await isStudioPreview(cookies.get(perspectiveCookieName)?.value);
+```
+
+(`Astro.cookies` in an `.astro` route). In the page route the result IS `draftMode`, so
+a failed check shows published content, as a missing cookie always did. In
+`/preview/live` a failed check returns the existing 403 before any upstream connection
+opens. With `SANITY_TOKEN` unset, `previewCookieValue()` returns an empty string and
+the check fails closed. presacademy already gates `/api/stats` on the same check in
+production, which is the evidence the Presentation tool never rewrites the cookie's
+value after the handshake, so editors are not locked out.
+
+**What to check before porting.** First confirm the repo's `enable` route writes
+`await previewCookieValue()`, not a literal `'true'` (the visual-editing package's own
+convention). If it writes `'true'`, this check locks every editor out; port
+`preview-auth.ts` and the enable route first. Then grep `src/` (and `modules/`) for
+`cookies.has(perspectiveCookieName)` and every other read of that cookie, and change
+all of them: the gap is per route, and one missed route is the whole gap. Measure it on
+`wrangler dev` with four cookies: none, `true`, `drafts`, and the genuine fingerprint.
+
+**Verified state at time of writing (2026-09-26):** fbcm fixed (origin), this starter
+fixed in the same session as this card. stonesteps-50k, presacademy (its page routes;
+`/api/stats` is already correct), ncs-church-starter, wcp and mas-monograms-rebuild not
+yet checked.
+
+## Card 58: GA4 fires only on the production hostname (2026-09-28)
+
+**Canonical:** `src/components/analytics/GoogleAnalytics.astro` (rule 3 in its
+header) and `tests/smoke.spec.ts` (the localhost test). Amends card 54.
+
+**The hole in "only `deploy.yml` gets the variable".** Card 54 kept `PUBLIC_GA_ID`
+out of CI and Lighthouse so test runs could not file page views. That holds for CI
+and does nothing about a developer's `.env`: a local Playwright or Lighthouse run
+builds with it. reid-design-site's live property holds 236 (2026-07-28) and 234
+(2026-08-27) one-pageview `localhost` sessions, one per test, on the days its suites
+landed and its stack port ran, plus stray `*.workers.dev` hits. Once in, they are
+indistinguishable from real traffic and wreck a month's report.
+
+**The rule.** The snippet compares `location.hostname` with the site's own `site`
+URL (apex and `www.` both count) and off it does nothing: no dataLayer, no `gtag`,
+no request. Keyed off `Astro.site` so there is no per-repo configuration; every fork
+already sets `site` for its sitemap and canonicals. **It fails OPEN when `site` is
+unset** (the tag runs everywhere, as before), because failing closed would recreate
+the silent-dark failure card 54 exists to prevent. A fork whose site answers on a
+host that is neither the apex nor `www` of `site` (a second domain, a
+`*.workers.dev` it actually serves visitors on) will record nothing there: that is
+intended, and the fix is to serve the real domain, not to widen the list.
+
+**The test.** `tests/smoke.spec.ts` asserts no request to Google and no
+`dataLayer` on localhost. In CI the id is unset so it passes trivially; it bites on
+exactly the local run that caused the leak. Proven both ways on 2026-09-28 with a
+built-in dummy id: fails on the card-54 component (it caught the `gtag/js` request),
+passes on this one. A Node VM run of the built snippet confirmed `example.com` and
+`www.example.com` queue the `js`/`config` calls and inject the loader, while
+`localhost`, `127.0.0.1` and `*.workers.dev` get nothing.
+
+**Porting.** Pull the two files. Nothing else changes: same variable, same props. The
+localhost test belongs in whatever smoke spec the repo has, if its smoke spec is not
+the canonical one.
+
+**Verified state (2026-09-28):** this starter (origin), reid-design-site (ported in
+the same session as its full card-54 port, which is where the leak was found).
+nixoncreativestudio and stonesteps-50k run card 54 without this rule and should pull
+it; the rest have no GA4 yet.

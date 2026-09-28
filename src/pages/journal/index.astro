@@ -27,10 +27,10 @@ import FinalCta from '@/components/FinalCta.astro';
 import NewsletterSignup from '@/components/NewsletterSignup';
 
 const [page, entries, categories, siteSettings] = await Promise.all([
-  getJournalPage().catch(() => null),
-  getAllJournalEntries().catch(() => []),
-  getAllJournalCategories().catch(() => []),
-  getSiteSettings().catch(() => null),
+  getJournalPage(),
+  getAllJournalEntries(),
+  getAllJournalCategories(),
+  getSiteSettings(),
 ]);
 
 // Section visibility guard.

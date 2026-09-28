@@ -21,10 +21,7 @@ import Hero from '@/components/Hero.astro';
 import FaqAccordion from '@/components/FaqAccordion';
 import FinalCta from '@/components/FinalCta.astro';
 
-const [page, siteSettings] = await Promise.all([
-  getFaqPage().catch(() => null),
-  getSiteSettings().catch(() => null),
-]);
+const [page, siteSettings] = await Promise.all([getFaqPage(), getSiteSettings()]);
 
 const title = page?.seoTitle ?? `Frequently Asked Questions · ${site.name}`;
 const description =

@@ -45,6 +45,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { perspectiveCookieName } from '@sanity/preview-url-secret/constants';
+import { isStudioPreview } from '@/lib/preview-auth';
 import {
   projectId,
   dataset,
@@ -60,7 +61,11 @@ export const GET: APIRoute = async ({ cookies, url, request }) => {
   // went through the Presentation Tool's URL-secret handshake has this cookie.
   // No draft content flows through here, but there is no reason to let
   // anonymous visitors hold open upstream Sanity connections either.
-  if (!cookies.has(perspectiveCookieName)) {
+  // The cookie's VALUE is checked, not just its presence (2026-09-26): a
+  // presence check let anyone who typed the cookie into their browser read
+  // drafts through the server's token. isStudioPreview compares it with the
+  // fingerprint /api/draft-mode/enable writes (src/lib/preview-auth.ts).
+  if (!(await isStudioPreview(cookies.get(perspectiveCookieName)?.value))) {
     return new Response('Preview only', { status: 403 });
   }
 

@@ -11,10 +11,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getNotFoundPage, getSiteSettings } from '@/lib/queries';
 import SanityImage from '@/components/SanityImage.astro';
 
-const [notFoundPage, siteSettings] = await Promise.all([
-  getNotFoundPage().catch(() => null),
-  getSiteSettings().catch(() => null),
-]);
+const [notFoundPage, siteSettings] = await Promise.all([getNotFoundPage(), getSiteSettings()]);
 
 // Fallback photo — Studio dogs on the sofa, in case the singleton hasn't been
 // populated. Sanity singleton always wins if its image field is set.

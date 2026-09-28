@@ -31,6 +31,7 @@
 export const prerender = false;
 
 import { perspectiveCookieName } from '@sanity/preview-url-secret/constants';
+import { isStudioPreview } from '@/lib/preview-auth';
 import PreviewLayout from '@/layouts/PreviewLayout.astro';
 import Hero from '@/components/Hero.astro';
 import FinalCta from '@/components/FinalCta.astro';
@@ -44,7 +45,11 @@ if (!config.ok) {
   return previewUnconfiguredResponse(config.missing);
 }
 
-const draftMode = Astro.cookies.has(perspectiveCookieName);
+// The cookie's VALUE is checked, not just its presence (2026-09-26): a
+// presence check let anyone who typed the cookie into their browser read
+// drafts through the server's token. isStudioPreview compares it with the
+// fingerprint /api/draft-mode/enable writes (src/lib/preview-auth.ts).
+const draftMode = await isStudioPreview(Astro.cookies.get(perspectiveCookieName)?.value);
 
 // Never let a browser cache a preview page (2026-08-28, measured on
 // presacademy). These SSR responses carried NO Cache-Control, so browsers

@@ -17,10 +17,7 @@ import ServiceAreaMap from '@/components/ServiceAreaMap.astro';
 import { Mail, Phone } from 'lucide-react';
 import PostInquiryRoadmap from '@/components/PostInquiryRoadmap.astro';
 
-const [page, siteSettings] = await Promise.all([
-  getContactPage().catch(() => null),
-  getSiteSettings().catch(() => null),
-]);
+const [page, siteSettings] = await Promise.all([getContactPage(), getSiteSettings()]);
 
 const title = page?.seoTitle ?? `Contact ${site.name}`;
 const description = page?.seoDescription ?? 'Start a conversation about your space.';

@@ -23,10 +23,7 @@ import { hasCfAnalytics, hasGa } from '@/lib/analytics-config';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
 
-const [page, siteSettings] = await Promise.all([
-  getPrivacyPage().catch(() => null),
-  getSiteSettings().catch(() => null),
-]);
+const [page, siteSettings] = await Promise.all([getPrivacyPage(), getSiteSettings()]);
 
 const title = page?.seoTitle ?? `Privacy Policy · ${site.name}`;
 const description =

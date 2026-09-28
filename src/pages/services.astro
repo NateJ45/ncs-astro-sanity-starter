@@ -16,9 +16,9 @@ import { site } from '@/data/site';
 import { DEFAULT_SERVICES_SECTIONS } from '@/data/defaultSections';
 
 const [page, siteSettings, servicesForSchema] = await Promise.all([
-  getServicesPage().catch(() => null),
-  getSiteSettings().catch(() => null),
-  getServiceListForSchema().catch(() => []),
+  getServicesPage(),
+  getSiteSettings(),
+  getServiceListForSchema(),
 ]);
 
 const title = page?.seoTitle ?? `Services & Pricing · ${site.name}`;
