@@ -93,8 +93,17 @@ the same collision; they pick up this renumbering at their next sync.
 ## Applied-to matrix
 
 `yes` = present and current. `partial` = an ancestor or divergent form of the same idea,
-or present but not wired into that repo's gate. `no` = absent. `yes` = a session
-is installing it as of the date on the card.
+or present but not wired into that repo's gate. `fork` = present and working, but a
+deliberately diverged copy of a canonical file, left unmarked so sync-check skips it (the
+cell's sync-session entry says whether it can re-adopt). `no` = absent. `staged` = a
+session is installing it as of the date on the card. `template` = shipped as a workflow
+template, not wired. `n/a` = does not apply to that repo (no Sanity, no GA4, no
+path-scoped `_headers` rule, or the repo IS the library).
+
+Rows 30, 37a, 39a, 40a, 45, 56, 58 and 59 were added on 2026-09-29, filled from a grep of
+each repo's `origin/main` that day (see that date's sync-session entry for what was
+checked). Card 38a (the presacademy harvest audit) is a record of one audit, not a
+technique a repo adopts, so it has no row.
 
 | #   | Card                                                              | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | ----------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
@@ -107,55 +116,63 @@ is installing it as of the date on the card.
 | 7   | Uptime workflow                                                   | yes     | yes         | template | yes              | yes           | yes            | template           | yes                 | template       |
 | 8   | Playwright + axe + reflow suite                                   | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 | yes            |
 | 9   | contrast.ts + theme-token gate                                    | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
-| 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 | yes            |
-| 11  | Preview click interceptor                                         | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 | yes            |
-| 12  | Parity-gated page-builder conversion                              | partial | yes         | partial  | no               | no            | no             | no                 | no                  | partial        |
-| 13  | react/react-dom exact pin                                         | no      | yes         | yes      | staged           | staged        | no             | yes                | no                  | yes            |
-| 14  | wrangler legacy_env pin                                           | no      | yes         | yes      | staged           | staged        | no             | yes                | no                  | yes            |
+| 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 11  | Preview click interceptor                                         | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 12  | Parity-gated page-builder conversion                              | partial | yes         | partial  | partial          | no            | no             | no                 | no                  | partial        |
+| 13  | react/react-dom exact pin                                         | no      | yes         | yes      | yes              | staged        | no             | yes                | no                  | yes            |
+| 14  | wrangler legacy_env pin                                           | no      | yes         | yes      | yes              | staged        | no             | yes                | no                  | yes            |
 | 15  | PENDING.md / TESTING.md docs registry                             | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
 | 16  | Quarterly slop sweep                                              | no      | no          | no       | no               | no            | no             | no                 | no                  | no             |
-| 17  | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes         | yes      | staged           | staged        | no             | yes                | n/a                 | yes            |
-| 18  | Chrome options (editable header/footer content)                   | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 | yes            |
-| 19  | Shareable draft links                                             | no      | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
+| 17  | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 18  | Chrome options (editable header/footer content)                   | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 19  | Shareable draft links                                             | no      | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
 | 20  | publishAt scheduled publishing (free-tier)                        | no      | no          | template | no               | no            | no             | template           | n/a                 | template       |
-| 21  | Pages as first-class objects (duplicate / archive / SEO panel)    | partial | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
-| 22  | Redirects on rename                                               | yes     | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
+| 21  | Pages as first-class objects (duplicate / archive / SEO panel)    | partial | no          | yes      | partial          | no            | no             | yes                | n/a                 | yes            |
+| 22  | Redirects on rename                                               | yes     | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
 | 23  | Editor-defined forms                                              | yes     | no          | yes      | no               | no            | no             | yes                | no                  | yes            |
 | 24  | Saved sections (section presets)                                  | partial | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
-| 25  | Pre-publish page checks                                           | partial | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
-| 26  | Appearance controls (surfaces, accents, rich twins, layout)       | partial | yes         | partial  | no               | no            | no             | yes                | no                  | partial        |
-| 27  | Undo & redo                                                       | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 28  | Floating in-canvas controls (accent word, "Edit here")            | yes     | yes         | partial  | no               | no            | no             | no                 | n/a                 | partial        |
-| 29  | Instant preview text                                              | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 29a | Local edit-state channel (LiveDraftBridge)                        | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 29b | Refresh scheduler (single-flight / stale discard / floor)         | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 29c | Preview morph (in-place reconcile)                                | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 29d | Staleness counts every channel                                    | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
+| 25  | Pre-publish page checks                                           | partial | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
+| 26  | Appearance controls (surfaces, accents, rich twins, layout)       | partial | yes         | partial  | partial          | no            | no             | yes                | no                  | partial        |
+| 27  | Undo & redo                                                       | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 28  | Floating in-canvas controls (accent word, "Edit here")            | yes     | yes         | partial  | partial          | no            | no             | no                 | n/a                 | partial        |
+| 29  | Instant preview text                                              | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29a | Local edit-state channel (LiveDraftBridge)                        | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29b | Refresh scheduler (single-flight / stale discard / floor)         | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29c | Preview morph (in-place reconcile)                                | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29d | Staleness counts every channel                                    | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 30  | One branch vocabulary (main + staging)                            | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | no             |
 | 31  | Studio welcome tour (StudioTour)                                  | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
 | 32  | Branded tool headings (ToolHeading)                               | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
 | 33  | Year-scoped lists for accumulating types                          | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | no             |
-| 34  | Studio search weights (__experimental_search)                     | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | no             |
+| 34  | Studio search weights (__experimental_search)                     | yes     | yes         | no       | yes              | no            | no             | no                 | n/a                 | no             |
 | 35  | The family test standard (gates, suites, budgets)                 | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 | yes            |
 | 36  | sync-check as a CI gate                                           | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
+| 37a | Drift opens its own PR (propose-drift in CI)                      | yes     | yes         | n/a      | yes              | yes           | yes            | no                 | yes                 | no             |
+| 39a | Restore drill + off-site backup copy                              | yes     | yes         | yes      | yes              | yes           | yes            | no                 | n/a                 | yes            |
+| 40a | Public-data audit in CI                                           | yes     | yes         | yes      | yes              | yes           | yes            | no                 | n/a                 | yes            |
 | 37  | Visual regression on a fixed-data styleguide                      | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 38  | Studio Checkup (what needs attention)                             | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 39  | Year-rollover wizard                                              | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 40  | Studio Welcome pane (task cards)                                  | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 41  | Guide handbook held as repo data                                  | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 42  | External link health, on its own schedule                         | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 42  | External link health, on its own schedule                         | yes     | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
 | 43  | Contrast for what axe declines to judge                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 44  | Fork residue audit                                                | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
-| 46  | Share cards in the brand's real typeface                          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 47  | The icon set, from one drawing                                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 45  | The site's own contact endpoint                                   | yes     | no          | yes      | no               | no            | no             | no                 | no                  | yes            |
+| 46  | Share cards in the brand's real typeface                          | no      | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
+| 47  | The icon set, from one drawing                                    | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
 | 48  | Domain cutover script + zone audit                                | no      | no          | yes      | no               | no            | no             | n/a                | no                  | partial        |
 | 49  | Automation patterns (import-and-deploy, record-and-bake)          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 50  | Production deploy workflow                                        | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 51  | Compressed static server for Lighthouse                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 52  | Radix islands hydrate at client:idle, not client:only             | n/a     | partial     | yes      | no               | no            | no             | n/a                | yes                 | partial        |
+| 52  | Radix islands hydrate at client:idle, not client:only             | n/a     | partial     | yes      | yes              | no            | no             | n/a                | yes                 | partial        |
 | 53  | One accent splitter (heading-accent absorbs scriptAccent)         | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
-| 54  | Analytics component (GA4 + Cloudflare beacon, canonical)          | no      | no          | yes      | partial          | no            | no             | n/a                | yes                 | yes            |
-| 55  | Build reads always use the Sanity CDN; a PROD fetch error throws  | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 57  | Preview cookie's value is checked, not its presence               | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | no             |
+| 54  | Analytics component (GA4 + Cloudflare beacon, canonical)          | no      | no          | yes      | yes              | no            | no             | n/a                | yes                 | yes            |
+| 55  | Build reads always use the Sanity CDN; a PROD fetch error throws  | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 56  | No page-level `.catch()` swallows the PROD throw                  | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | partial        |
+| 57  | Preview cookie's value is checked, not its presence               | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | no             |
+| 58  | GA4 fires only on the production hostname                         | n/a     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | no                  | no             |
+| 59  | `_headers`: one rule per path; /_astro/* owns its cache           | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -3365,6 +3382,103 @@ self-documenting ones in `UndoRedo.tsx` and `shareDraftLink.tsx` and are expecte
 **All five siblings after the pass:** presacademy 42/0/0, WCP 19/2/0 (both drifts
 expected), ncs-church-starter 50/0/0, reid-design-site 17/0/0, mas-monograms
 25/0/0.
+
+### 2026-09-29: reid-design-site's upgrade program (PR #43), audited cell by cell
+
+Reid merged its upgrade program on 2026-09-29 (`8af0229`, PR #43). Its changelog and
+PENDING.md say what was ported; every cell below was checked against `origin/main`
+instead (git grep / git show, plus `sync-check` from this repo's `origin/main`: 34 marked
+files, 34 SAME, 0 drift). The column had drifted badly: six cells still said `staged`
+for work that shipped on 2026-08-28, and most of today's adoptions were not recorded.
+
+**Reid column, changed cells** (old -> new, evidence):
+
+- 10 staged -> yes: `src/pages/preview/[...slug].astro`, `preview/live.ts`,
+  `api/draft-mode/{enable,disable}.ts`; `@sanity/astro` with `studioBasePath: '/studio'`.
+- 11 staged -> yes: the click interceptor with its edit-mode gate in
+  `src/layouts/PreviewLayout.astro`.
+- 12 no -> partial: `homePage` and the other singletons carry `pageBuilder` since the
+  marker-based retrofits (`c69b380` Home, `30555c8` Services), parity baselines in
+  `scripts/.parity/`; not presacademy's D1-D4 plan as written.
+- 13 staged -> yes: `react`, `react-dom`, `react-is` all exactly `19.2.8`.
+- 14 staged -> yes, on a newer pair: adapter exactly `14.3.0` with wrangler `~4.129.0`,
+  the generated `dist/server/wrangler.json` checked for `legacy_env` on 2026-09-29 (Reid
+  `CLAUDE.md`, `stack-and-config.md`). The rule is kept; the starter's `~4.110.0` pin is
+  not what Reid runs.
+- 17 staged -> yes: section `data-sanity` wrappers, and the grouped insert menu
+  (`SECTION_INSERT_MENU` in `sections.ts`, `src/lib/insert-menu.test.ts`) on all fourteen
+  builder arrays, in the form and the canvas.
+- 18 staged -> yes: shared `navLink` type, `src/lib/nav-href.ts`, `resolveSiteSettings()`
+  exposing `footerColumns`, `legalNav`, `headerCta`, `showEmail`.
+- 19 no -> yes: `shareDraftLink.tsx` SAME, appended by `withEditorActions`
+  (`src/sanity/editorActions.ts`).
+- 21 no -> partial: a soft-delete Archive/Restore of its own (`actions/archive.tsx`, a
+  `trashedItem` snapshot) rather than the `archived` flag; no Duplicate override and no
+  SEO snippet panel. `pageOps.ts` is present and SAME, used only for `readSlug()`.
+- 22 no -> yes: `redirect` type, `slugRedirect.tsx` and `redirects.ts` SAME, the build
+  map in `astro.config.mjs`, plus the live-page guard now folded back here (card 22
+  addendum).
+- 25 no -> yes: `checkPage.tsx` and `page-checks.ts` SAME, with a Reid config that derives
+  a "Main content" unit from the schema.
+- 26 no -> partial: the layout half (`SectionLayoutCard`) and script accents; no
+  surfaces, no inline-rich twins.
+- 27 no -> yes: `undoRedo.ts`, `UndoRedo.tsx` SAME, in the publish menu and on Ctrl+Z.
+- 28 no -> partial: `ScriptAccentPicker` and `SectionLayoutCard` over the canonical
+  `usePopover` / `useDraftDocument` / `styles` / `sanity-path` (all SAME), with a
+  `section-fields.ts` registry; no text popover.
+- 29, 29a-29d no -> yes: `LiveDraftBridge.tsx`, `overlay/useInstantText.ts`, and the
+  `preview-{live-draft,refresh,morph,text-diff,text-nodes,stega}.ts` modules all SAME.
+- 34 no -> yes: 13 `__experimental_search` weights across the content types.
+- 42 no -> fork: its own `check-live-links.mjs` that walks every document, deliberately
+  unmarked. Now canonical here (card 42 addendum), so Reid can re-adopt.
+- 46 no -> fork: the share-card bug is fixed by a different renderer, satori + resvg with
+  the real `@fontsource` faces in `src/integrations/og-cards.ts`, drawn on every build;
+  `render-og.mjs` was deleted.
+- 47 no -> yes: `generate-favicons.mjs` SAME; `apple-touch-icon.png`, `icon-192/512`,
+  `site.webmanifest` in `public/`.
+- 52 no -> yes: MobileNav at `client:idle` (`Header.astro`), trigger in every page's HTML.
+- 54 partial -> yes: `Analytics.astro`, `analytics/{GoogleAnalytics,CloudflareBeacon}`,
+  `analytics-config.ts` all SAME, privacy disclosure derived from the config.
+- 55 no -> yes: `useCdn: true` on the build client, `sanityFetch()` retries twice and
+  throws in a production build (`src/lib/sanity.ts`).
+- 57 no -> yes: `isStudioPreview()` called in `preview/[...slug].astro` and
+  `preview/live.ts` (and in the new `/api/stats`).
+
+**Reid cells in the new rows:** 30 yes (`origin/staging`, CI on `[main, staging]`); 37a
+yes (`propose-drift.mjs` in `ci.yml`); 39a yes (`restore-dataset.mjs`, `RESTORE-DRILL.md`,
+`r2 object put` in `sanity-backup.yml`); 40a yes (`public-data-audit.mjs` in `ci.yml`); 45
+no (Web3Forms); 56 yes (no `.catch(() =>` left on a static route; the preview routes and
+a PROD-rethrowing `Footer.astro` keep theirs on purpose); 58 yes (GoogleAnalytics SAME,
+`tests/smoke.spec.ts` localhost test); 59 yes (three rules, `/_astro/*` owns the immutable
+cache; the source of card 59).
+
+**Cells left as they were, checked:** 20, 23, 24, 31-33, 37-41, 43, 48-51 and 53 are
+still `no`: no `publishAt`, Web3Forms rather than `formQuestion`, no presets, no tour /
+ToolHeading / year lists / visual suite / Checkup / rollover / Welcome pane, the guide is
+a Sanity singleton rather than repo data, no contrast spec, the cutover was done by hand,
+no `deploy.yml` (Workers Builds deploys `main`), `lhci` still on `staticDistDir`, and
+`scriptAccent.ts` with no `heading-accent.ts`.
+
+**Not ported, and why:** card 53 is the next drift Reid will feel (four files still on
+`splitScriptAccent`); card 45 would replace Web3Forms, which is a business decision;
+cards 37-40 wait on a Studio-first pass.
+
+**Folded back from Reid in the same session** (each in its own commit, card and code
+together): the redirect live-page guard (card 22 addendum), the `_headers` same-path trap
+(new card 59), link health that walks every document (card 42 addendum), and the two
+garbled phrases in `.gitattributes`. **For Reid's next sync:** re-adopt
+`scripts/check-live-links.mjs` and `src/lib/redirect-guard.ts` (+ its test, as a vitest
+port) from here with the marker, replacing its forks (the guard's code is identical; the
+link checker adds `archived != true`), and optionally the `link-health.yml` comment.
+Nothing here changed a file Reid carries marked, so its sync-check stays green until it
+chooses to.
+
+**Other rows, new cells from the same grep** (not audited beyond it): wcp's `/_astro/*`
+rule already owns `Cache-Control` (59 yes) and it has `src/pages/api/contact.ts` (45
+yes); nixoncreativestudio's `GoogleAnalytics.astro` has no hostname guard (58 no, as card
+58 says); stonesteps-50k has no `origin/staging` (30 no), no `propose-drift` in CI (37a
+no) and two page-level catches left (56 partial); ncs-church-starter has no restore
+script, drift PR or public-data audit (37a/39a/40a no).
 
 ## Card 30: One branch vocabulary across the family (2026-08-29)
 
