@@ -1,0 +1,46 @@
+# =============================================================================
+# Dependabot — grouped weekly dependency PRs, validated by the existing gates
+# =============================================================================
+# One PR per week per ecosystem, minor+patch grouped so a Monday merge is one
+# green-CI review, not twelve. Majors arrive as their own PRs (Astro, Sanity and
+# wrangler majors all have real migration notes on this stack). CI plus the
+# Playwright suite are the safety net that makes auto-updates sane solo.
+# Mirrors the config proven on presacademy and wcp-website.
+# =============================================================================
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: America/New_York
+    groups:
+      minor-and-patch:
+        update-types: ['minor', 'patch']
+    open-pull-requests-limit: 5
+    # The Sanity stack (sanity, @sanity/*, react, react-dom) is pinned to exact
+    # versions on purpose and moves BY HAND, TOGETHER. Dependabot bumping one
+    # member of the set fails `npm ci` with an ERESOLVE against the pinned
+    # @sanity/client and takes the whole minor-and-patch group down with it
+    # (observed on presacademy, 2026-09-04). The sanity-plugin-* set is pinned
+    # for the same reason: those plugins import @sanity/ui/tooltip, which no
+    # @sanity/ui 3.x exports.
+    ignore:
+      - dependency-name: 'sanity'
+      - dependency-name: '@sanity/*'
+      - dependency-name: 'react'
+      - dependency-name: 'react-dom'
+      - dependency-name: 'sanity-plugin-*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: America/New_York
+    groups:
+      actions:
+        update-types: ['major', 'minor', 'patch']
