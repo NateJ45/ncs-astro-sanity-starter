@@ -14,6 +14,7 @@ import { ClientRouter } from 'astro:transitions';
 import { site } from '@/data/site';
 import { urlFor } from '@/lib/sanity';
 import { localBusinessSchema } from '@/lib/schemas';
+import { ogImageForRoute, servedOgPaths } from '@/lib/og-image';
 import { getActiveAnnouncement } from '@/lib/queries';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
@@ -29,7 +30,7 @@ import '@/styles/starwind.css';
 interface Props {
   title: string;
   description: string;
-  /** Override the default OG image. If omitted, BaseLayout looks for a per-page OG at /og/&lt;slug&gt;.png, falling back to /og-default.png. */
+  /** Override the default OG image. If omitted, BaseLayout uses the page's generated card at /og/&lt;slug&gt;.png when that file exists, otherwise /og-default.png. */
   ogImage?: string;
   /** Raw Sanity image object for a per-page social share override (seoImage on the page singleton). Resolved through the Sanity image pipeline to a 1200x630 OG URL. Lower priority than ogImage, higher than the siteSettings default. */
   seoImage?: any;
@@ -59,14 +60,16 @@ const {
 
 const canonical = new URL(Astro.url.pathname, site.url).toString();
 
-// Per-page OG image: convention is /og/<route-slug>.png generated at build time.
-// `/` → /og/home.png, `/contact` → /og/contact.png, `/portfolio/foo` → /og/portfolio-foo.png.
-// Falls back to og-default.png if the slug-specific file isn't there.
-function ogPathForRoute(pathname: string): string {
-  const trimmed = pathname.replace(/^\/|\/$/g, '');
-  if (!trimmed) return '/og/home.png';
-  return `/og/${trimmed.replace(/\//g, '-')}.png`;
-}
+// Per-page OG image: the branded cards `npm run og:pages` writes to public/og/
+// (`/` -> /og/home.png, `/journal/foo` -> /og/journal-foo.png). The naming and
+// the fallback live in src/lib/og-image.ts, which is unit tested.
+//
+// Which cards EXIST is read at build time with import.meta.glob, because the
+// prerender runs inside workerd, where node:fs cannot see the project folder.
+// Only the glob's KEYS are used (the file list); the lazy importers it returns
+// are never called, so no PNG is pulled into the bundle. A route with no card
+// shares og-default.png instead of a URL that 404s (PORTS.md card 59).
+const ogCardsOnDisk = servedOgPaths(Object.keys(import.meta.glob('/public/og/*.png')));
 
 // Resolve a raw Sanity image object to a 1200x630 OG URL through the image
 // pipeline. Returns null when there's no asset (so the ?? chain falls through
@@ -78,10 +81,11 @@ function ogUrlFromImage(img: any): string | null {
 
 // OG image priority: explicit ogImage prop (a real photo passed by detail
 // pages) > per-page seoImage override (page singleton) > global seoImage
-// default (siteSettings) > the build-time /og/<route>.png convention.
+// default (siteSettings) > the route's generated /og/<route>.png card, if one
+// exists > og-default.png.
 const perPageOg = ogUrlFromImage(seoImage);
 const globalOg = ogUrlFromImage(siteSettings?.seoImage);
-const resolvedOg = ogImage ?? perPageOg ?? globalOg ?? ogPathForRoute(Astro.url.pathname);
+const resolvedOg = ogImage ?? perPageOg ?? globalOg ?? ogImageForRoute(Astro.url.pathname, ogCardsOnDisk);
 const absOg = resolvedOg.startsWith('http') ? resolvedOg : new URL(resolvedOg, site.url).toString();
 
 // Build the document title. If the editor-supplied seoTitle already contains

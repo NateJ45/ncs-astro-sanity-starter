@@ -10,6 +10,18 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-29 — Two things from a look at Bryan Hogan's astro-starter-template, and one bug the look turned up._
+
+Most of that template (MDX pages, a blog, one config file, an `npm create` wizard) is either already here in a fuller form or deliberately not here: its build-time share cards draw through sharp's Pango text renderer, which is exactly what card 46 moved this family off. One idea was worth taking.
+
+**Hashed build files cached for a year** (PORTS card 60). `public/_headers` had no cache rule, so Workers Static Assets sent `max-age=0, must-revalidate` for every file and returning visitors re-checked every script and stylesheet on every page. `/_astro/*` now answers `public, max-age=31536000, immutable`, with a warning in the file never to put `Cache-Control` on `/*` (Cloudflare joins duplicate headers with a comma). Verified under `wrangler dev`.
+
+**The share card fallback that did not fall back** (PORTS card 59). Checking how this starter picks share images showed that BaseLayout pointed at `/og/<route>.png` whether or not the file existed, despite a comment saying otherwise, so every route without a card shared a 404. The logic moved to `src/lib/og-image.ts` with five unit tests, and BaseLayout now passes it the real file list from `import.meta.glob`. Parity: nine pages identical, `/404` and `/styleguide` now share `og-default.png`; those two baselines were recaptured.
+
+The same look found 23 Reid Design share cards still in `public/og/`, including a home card reading "Reid Design LLC". Deleting them is PENDING item 1c; the session could not delete files.
+
+---
+
 _2026-09-06 — The starter catches up: Sanity phase 1, the family test standard, and two workflows harvested from the retiring church starter._
 
 The starter had become the odd one out. It is structurally the canonical source (57 files carry the `PORTABLE` marker, PORTS.md has 44 cards, every client repo's `scripts/sync-check.mjs` diffs against it), but its stack and its gates were older than the sites it governs.

@@ -28,9 +28,30 @@
 # *.sanity.studio for a hosted Studio and the iframe-pane plugin; both are
 # retired. Re-add those origins only if you deliberately run a hosted Studio.)
 
+#
+# NEVER put Cache-Control in the /* block below. Cloudflare applies EVERY block
+# whose path matches, and when two blocks set the same header it joins the
+# values with a comma. A Cache-Control on /* would be glued onto the /_astro/*
+# value further down ("public, max-age=31536000, immutable, max-age=0...") and
+# the result means nothing reliable. Cache rules go in their own path blocks.
+# (PORTS.md card 59.)
+
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Content-Security-Policy: frame-ancestors 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Cross-Origin-Opener-Policy: same-origin
+
+# Astro's build output. Every filename under /_astro/ carries a content hash
+# (Header.CzX8q1.css), so a changed file always gets a NEW name and a browser
+# can keep the old one forever without ever serving stale code. Without this
+# block Cloudflare sends `public, max-age=0, must-revalidate`, which makes every
+# returning visitor re-ask about every script, stylesheet, font and optimized
+# image on every page load. (PORTS.md card 59.)
+#
+# Only hashed files belong here. Anything in public/ keeps its filename across
+# changes (favicon.svg, og-default.png, og/*.png), so it must NOT be marked
+# immutable, or visitors keep the old copy for a year after you replace it.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

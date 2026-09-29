@@ -119,6 +119,8 @@ is installing it as of the date on the card.
 | 54  | Analytics component (GA4 + Cloudflare beacon, canonical)          | no      | no          | yes      | partial          | no            | no             | n/a                | yes                 | yes            |
 | 55  | Build reads always use the Sanity CDN; a PROD fetch error throws  | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | yes            |
 | 57  | Preview cookie's value is checked, not its presence               | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | no             |
+| 59  | Share card used only if the file exists                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 60  | Hashed /_astro/* build files cached for a year                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5398,3 +5400,89 @@ the canonical one.
 the same session as its full card-54 port, which is where the leak was found).
 nixoncreativestudio and stonesteps-50k run card 54 without this rule and should pull
 it; the rest have no GA4 yet.
+
+---
+
+## Card 59: A route's share card is used only if the file exists (2026-09-29)
+
+**Canonical:** `src/lib/og-image.ts` (+ `og-image.test.ts`), and the three lines in
+`src/layouts/BaseLayout.astro` that build the file list and call it.
+
+**The bug.** BaseLayout's last-resort share image is the branded card
+`npm run og:pages` writes to `public/og/<route>.png`. The helper built that path and
+returned it unconditionally, under a comment promising a fallback to `og-default.png`
+"if the slug-specific file isn't there". Nothing checked. Every route without a PNG
+(every custom `[slug]` page, every journal post without a cover photo, `/404`,
+`/styleguide`) advertised an `og:image` that 404s, so a shared link showed no picture
+on Facebook, iMessage or Slack. Nothing in the build, the link checker or Lighthouse
+looks at where an `og:image` points, so it passed every gate.
+
+**The residue that made it worse.** The starter still carried 23 of the Reid Design
+build's generated cards in `public/og/` (card 44's failure mode, a fifth instance). With
+the files present and no `seoImage` set in the Studio, a fresh fork's home, about,
+services, process, contact, FAQ, journal and privacy pages all shared as "Reid Design
+LLC, Plainfield Interior Design". Found on 2026-09-29 while comparing the starter
+against Bryan Hogan's astro-starter-template; see PENDING.md for the deletion.
+
+**The fix.** `ogImageForRoute(pathname, available)` returns the route's card only when
+it is in `available`, otherwise `/og-default.png`. BaseLayout builds `available` from
+`Object.keys(import.meta.glob('/public/og/*.png'))`. Two things about that choice:
+
+- **Not `node:fs`.** The prerender runs inside workerd, which cannot see the project
+  folder. The glob is resolved by Vite at build time, so it works in any runtime.
+- **Keys only.** The lazy importers the glob returns are never called, so no PNG is
+  pulled into the bundle. Verified: no `.png` under any `_astro/` after a build.
+
+Parity on 2026-09-29: 9 of 11 pages byte-identical; `/404` and `/styleguide` moved from
+a missing `/og/<route>.png` to `/og-default.png` and nothing else. Baselines recaptured.
+
+**Porting.** Copy `og-image.ts` and its test, then replace the site's own
+`ogPathForRoute(...)` call in BaseLayout with the glob plus `ogImageForRoute`. Then look
+at every PNG in the site's `public/og/` with your eyes: in a client repo they are
+presumably the client's own cards, but any repo that started from this template may be
+carrying Reid Design's.
+
+**Verified state (2026-09-29):** this starter. The sibling cells are unaudited;
+reid-design-site is the ancestor of this BaseLayout, so assume the bug is there too.
+
+---
+
+## Card 60: Hashed build files are cached for a year (2026-09-29)
+
+**Canonical:** the `/_astro/*` block and the warning above `/*` in `public/_headers`.
+Taken from Bryan Hogan's astro-starter-template, which does the same.
+
+**The gap.** With no rule, Workers Static Assets sends
+`Cache-Control: public, max-age=0, must-revalidate` for everything, so a returning
+visitor's browser re-asks the server about every script, stylesheet, font and optimized
+image on every page load. Every filename under `/_astro/` carries a content hash, so a
+changed file always arrives under a new name, and those files can safely be kept for a
+year.
+
+**The rule.**
+
+```
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+```
+
+Two warnings travel with it, both written into the file:
+
+- **Never put `Cache-Control` in the `/*` block.** Cloudflare applies every matching
+  block and joins duplicate headers with a comma, so a value on `/*` would be glued onto
+  this one.
+- **Only hashed files.** `public/` files keep their names when they change
+  (`og-default.png`, `favicon.svg`, `og/*.png`); marked immutable, visitors would keep
+  the old copy for a year.
+
+**Verified (2026-09-29, `wrangler dev` against the build):** a `/_astro/*.css` answers
+`public, max-age=31536000, immutable` with the `/*` security headers still present;
+`/og-default.png` and `/` keep `public, max-age=0, must-revalidate`. `/preview/**` is
+SSR and sets its own `no-store`; `_headers` never touches Worker responses.
+
+**Porting.** Paste the block and the warning into the site's `public/_headers`, after
+checking its `/*` block carries no `Cache-Control`. Prove it with `npm run preview` and
+`curl -I` on one `/_astro/` file; a static file server sends no headers and proves
+nothing.
+
+**Verified state (2026-09-29):** this starter. Sibling cells unaudited.
