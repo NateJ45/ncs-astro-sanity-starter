@@ -5474,3 +5474,53 @@ the canonical one.
 the same session as its full card-54 port, which is where the leak was found).
 nixoncreativestudio and stonesteps-50k run card 54 without this rule and should pull
 it; the rest have no GA4 yet.
+
+## Card 59: `_headers` rules for the same path do not merge (2026-09-29)
+
+**Origin: reid-design-site** (PR #43, the full-CSP hardening). **Canonical:** the header
+comment of `public/_headers` and "Security headers" in `docs/agent/deployment.md`. A
+gotcha, not a file: each site's `_headers` is its own.
+
+**The trap.** Reid moved from `frame-ancestors` alone to a full Content-Security-Policy,
+and a Web Worker is governed by the CSP on its OWN script response, so it added a
+`/_astro/*` rule that only detached the policy (`! Content-Security-Policy`). The
+year-long immutable cache on every hashed asset vanished. `@astrojs/cloudflare`
+prepends its own `/_astro/*` rule at build carrying
+`Cache-Control: public, max-age=31536000, immutable`, and two rules for the same path
+do not add up: the result served `max-age=0, must-revalidate`. Nothing fails, nothing
+logs; the site just re-downloads every script and stylesheet on every visit.
+
+**Reproduced here** under `npm run preview` (wrangler 4.110, adapter 14.2.4): a
+`/_astro/` stylesheet answers `public, max-age=31536000, immutable` as built; append a
+second `/_astro/*` rule holding only `! Content-Security-Policy` and the same file
+answers `public, max-age=0, must-revalidate` AND still carries the CSP, so the detach
+did not take effect either. Replace both with ONE rule that detaches and sets the cache
+line, and it answers immutable with no CSP.
+
+**The fix is one rule that owns the cache.** The adapter skips its injection when a
+matching rule in `_headers` already sets `Cache-Control` (`buildAssetsHeadersContent()`
+returns null; the log line "Injected immutable Cache-Control for /_astro/* into
+_headers" disappears, the skip itself is debug-level). So any `/_astro/*` rule a site
+writes carries the cache line itself.
+
+**The other half: different patterns DO merge.** Cloudflare applies every matching
+rule's headers, and two `Content-Security-Policy` headers are both enforced (the browser
+intersects them). A public policy on `/*` therefore still binds `/studio/*`, and the
+Studio fails in ways that pass the build. `/studio/*` has to start with
+`! Content-Security-Policy` and then set its own.
+
+**Two more things Reid measured that belong with it.** `upgrade-insecure-requests`
+broke click navigation under `npm run preview` (a 307 to `http://127.0.0.1` rewritten to
+https) and buys nothing behind HSTS, so it is out. And the SSR routes get no `_headers`
+at all: a policy for `/preview/**` has to be set from the SSR code.
+
+**Starter status:** not exposed. `public/_headers` here has only the `/*` rule, and the
+built `dist/client/_headers` holds the adapter's `/_astro/*` rule first and ours second;
+verified under `npm run preview` 2026-09-29. The comment now warns before anyone adds a
+second rule, and `docs/agent/deployment.md` (whose headers list still claimed an
+`X-Frame-Options: DENY` that was never shipped) is corrected.
+
+**Applies to:** any site that adds a path-scoped rule to `_headers`. reid-design-site
+has it right (three rules, `/_astro/*` owning the cache, verified). Other repos with a
+full CSP should check that their `/_astro/*` files still answer `immutable` under their
+preview command.

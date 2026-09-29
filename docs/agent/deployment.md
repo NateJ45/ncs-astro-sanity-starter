@@ -125,15 +125,44 @@ When you change a Sanity schema (`src/sanity/schemaTypes/**`), run `npm run type
 
 ### Security headers
 
-`public/_headers` ships with the deploy. Five site-wide headers Cloudflare applies to every route:
+`public/_headers` ships with the deploy. Cloudflare applies it to every **static**
+response (every prerendered page, `/studio/`, and the `/_astro/*` files). It does NOT
+apply to responses the Worker generates itself, so the SSR routes (`/preview/**`,
+`/api/draft-mode/*`) carry none of these headers. Site-wide:
 
 - `Strict-Transport-Security` (HSTS, one year, includeSubDomains)
-- `X-Frame-Options: DENY` (clickjacking)
+- `Content-Security-Policy: frame-ancestors 'self'`, which replaces the legacy
+  `X-Frame-Options` (there is no `X-Frame-Options` header; an older version of this doc
+  said `DENY`, which would break the Presentation tool's iframe of `/preview/*`)
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Cross-Origin-Opener-Policy: same-origin`
 
-Content-Security-Policy is intentionally not included; doing it right requires testing against all third-party scripts in use (Sanity CDN, Web3Forms, Cloudflare Analytics, any embed). See `stack-and-config.md` for why the meta-CSP approach was abandoned.
+A full Content-Security-Policy is intentionally not included; doing it right requires
+testing against all third-party scripts in use (Sanity CDN, Web3Forms, Cloudflare
+Analytics, GA4, any embed). See `stack-and-config.md` for why the meta-CSP approach was
+abandoned, and the header comment in `public/_headers` for the Studio's grants.
+reid-design-site's `public/_headers` (2026-09-29) is a tested full policy to start from.
+
+**Rules for the SAME path do not merge (PORTS.md card 59).** Before adding any rule
+other than `/*`, know two things, both measured under `npm run preview`:
+
+- `@astrojs/cloudflare` prepends its own `/_astro/*` rule at build (the immutable
+  year-long `Cache-Control`), unless a `/_astro/*` rule in this file already sets
+  `Cache-Control`. Add a second `/_astro/*` rule WITHOUT it (say, to detach a CSP) and
+  the adapter's rule is silently lost: hashed assets fall back to
+  `max-age=0, must-revalidate`, and the detach does not take effect either. So any
+  `/_astro/*` rule you write must carry
+  `Cache-Control: public, max-age=31536000, immutable` itself; the build log then stops
+  printing "Injected immutable Cache-Control for /_astro/* into _headers".
+- Rules for DIFFERENT patterns do merge, and two `Content-Security-Policy` headers are
+  both enforced (the browser takes the intersection). So a public CSP on `/*` also
+  binds `/studio/*` unless that rule detaches it first with
+  `! Content-Security-Policy`, then sets the Studio's own.
+
+Check any change to this file with `npm run build && npm run preview` and `curl -sI`
+on a page, `/studio/` and one `/_astro/` file. A static file server sends no headers,
+so it proves nothing.
 
 ### Privacy and analytics
 
