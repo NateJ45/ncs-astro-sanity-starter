@@ -1,4 +1,13 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// =============================================================================
+// check-live-links - is every link that leaves this website still alive?
+// =============================================================================
+// Ported from stonesteps-50k 2026-09-18 (PORTS.md card 42). Rewritten
+// 2026-09-29 from reid-design-site's fork, which found the fixed field list
+// blind: against a real dataset it probed 222 cdn.sanity.io image assets and
+// never saw the affiliate links, review links or menus the check is for. It now
+// WALKS every published document instead of naming fields (see collect()), and
+// writes its result to the Actions run's Summary page.
 //
 // Checks every EXTERNAL link the website carries, by reading them out of the
 // DATASET rather than out of the source. Run weekly by
@@ -6,8 +15,6 @@
 //
 //   node scripts/check-live-links.mjs
 //   node scripts/check-live-links.mjs --verbose
-//
-// Ported from stonesteps-50k 2026-09-18 (PORTS.md card 42).
 //
 // ---------------------------------------------------------------------------
 // WHY THIS EXISTS
@@ -19,9 +26,10 @@
 //
 // But the links that send a visitor somewhere else are exactly the ones an
 // EDITOR changes, in the Studio, long after the last deploy: a booking page, a
-// shop, a social profile, a supplier. If one of those hosts reorganises a URL,
-// the button, the footer and the CTA all point at a 404 and nothing in the
-// build would notice. The business finds out from a customer.
+// shop item, a social profile, a supplier. If one of those hosts reorganises a
+// URL, the button, the footer and the CTA all point at a 404 and nothing in the
+// build would notice. Affiliate links are the worst case: retailers retire
+// products constantly. The business finds out from a customer.
 //
 // So this runs on its own schedule, away from the build, and is allowed to be
 // noisy: a red weekly run mails the owner and nothing is blocked.
@@ -32,7 +40,7 @@
 // starter has no dataset to check.
 // ---------------------------------------------------------------------------
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, appendFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -49,18 +57,20 @@ const TIMEOUT_MS = 15000;
  *
  * An absolute link to the site's OWN pages is an internal link wearing an
  * external coat, and `check:links` already covers those against the built
- * output. Checking them here would double-report and, worse, would go red
- * whenever the production host is briefly down, which is uptime.yml's job.
+ * output. Going red because the production host had a bad minute is
+ * uptime.yml's job, not this one's.
  *
- * Read by regex rather than by import, exactly as scripts/worker-name.mjs
- * reads wrangler.jsonc: this script is dependency-free on purpose, and site.ts
- * is TypeScript. apply-brand rewrites the quoted string on `const _domain =`,
- * so that one line is a stable contract.
+ * Read by regex rather than by import: this script is dependency-free on
+ * purpose, and site.ts is TypeScript. Two shapes are accepted, because the
+ * family has both: the starter's `const _domain = '...'` (the line apply-brand
+ * rewrites, so a stable contract) and a literal `domain: '...'`.
  */
 function readOwnDomain() {
   try {
     const src = readFileSync(resolve(root, 'src/data/site.ts'), 'utf8');
-    const m = src.match(/const\s+_domain\s*=\s*['"]([^'"]+)['"]/);
+    const m =
+      src.match(/const\s+_domain\s*=\s*['"]([^'"]+)['"]/) ??
+      src.match(/\bdomain:\s*['"]([^'"]+)['"]/);
     return m ? m[1].toLowerCase() : null;
   } catch {
     return null;
@@ -70,29 +80,32 @@ function readOwnDomain() {
 const OWN_DOMAIN = readOwnDomain();
 
 /**
- * Everything in the dataset that can hold an outside URL.
- *
- * The first three are structural and exist in every site built from this
- * starter. The fourth is deliberately a SWEEP rather than a list of document
- * types: any document carrying a `url` or `externalUrl` field is caught, so a
- * project that adds sponsors, partners, venues or suppliers gets them checked
- * without editing this file. A site with a link somewhere stranger than that
- * adds a key here; nothing else in the script needs to change.
+ * Hosts that are not "a link to somewhere else": the Sanity image/file CDN
+ * (every asset document carries a `url`), and endpoints a visitor never opens.
  */
-const QUERY = `{
-  "nav": *[_type == "siteSettings"][0].headerNav[]{ label, externalUrl, href },
-  "footer": *[_type == "siteSettings"][0].footerColumns[].links[]{ label, href, externalUrl },
-  "social": *[_type == "siteSettings"][0].socialLinks[]{ "label": platform, url },
-  "ctas": *[defined(pageBuilder)].pageBuilder[]{
-    "label": coalesce(cta.label, primaryCta.label, secondaryCta.label),
-    "url": coalesce(cta.externalUrl, primaryCta.externalUrl, secondaryCta.externalUrl)
-  },
-  "docs": *[defined(url) || defined(externalUrl)]{
-    _type,
-    "label": coalesce(name, title, label, _type),
-    "url": coalesce(url, externalUrl)
-  }
-}`;
+const SKIP_HOSTS = new Set(['cdn.sanity.io', 'api.web3forms.com']);
+
+/**
+ * Field names that hold an address a script must not GET: the contact form's
+ * POST endpoint. Skipped by name, wherever they appear.
+ */
+const SKIP_KEYS = new Set(['formActionUrl']);
+
+/**
+ * Every published document that is not Sanity's own bookkeeping. Drafts are left
+ * out (an unpublished link is not live), and so is anything archived: an
+ * archived page (card 21) is not built, and a `trashedItem` (the soft-delete
+ * some sites carry) is a snapshot of something already removed from the site.
+ * A type a given dataset does not have simply matches nothing.
+ */
+const QUERY = `*[
+  !(_id in path("drafts.**")) &&
+  !(_type match "sanity.*") &&
+  !(_type match "system.*") &&
+  _type != "trashedItem" &&
+  _type != "media.tag" &&
+  archived != true
+]`;
 
 async function readDataset() {
   const url =
@@ -101,35 +114,68 @@ async function readDataset() {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Sanity query failed: ${res.status}`);
   const { result } = await res.json();
-  return result ?? {};
+  return result ?? [];
 }
 
 /** Only absolute http(s) links leave this site; everything else is internal. */
 function isExternal(u) {
-  if (typeof u !== 'string' || !/^https?:\/\//i.test(u)) return false;
-  if (!OWN_DOMAIN) return true;
+  if (typeof u !== 'string' || !/^https?:\/\/\S+$/i.test(u.trim())) return false;
   try {
-    const host = new URL(u).hostname.toLowerCase();
-    return host !== OWN_DOMAIN && !host.endsWith(`.${OWN_DOMAIN}`);
+    const host = new URL(u.trim()).hostname.toLowerCase();
+    if (SKIP_HOSTS.has(host)) return false;
+    if (OWN_DOMAIN && (host === OWN_DOMAIN || host.endsWith(`.${OWN_DOMAIN}`))) return false;
+    return true;
   } catch {
     return false;
   }
 }
 
-function collect(data) {
-  const found = new Map(); // url -> Set of labels, so one URL is checked once
-  const add = (label, url) => {
-    if (!isExternal(url)) return;
-    const key = url.trim();
-    if (!found.has(key)) found.set(key, new Set());
-    found.get(key).add(label || '(no label)');
-  };
+/** A human label for a document: its own title, else its type. */
+function docLabel(doc) {
+  const name =
+    doc.title ??
+    doc.name ??
+    doc.headline ??
+    doc.outlet ??
+    doc.internalTitle ??
+    doc.label ??
+    doc.author ??
+    doc.reviewerName ??
+    doc._id;
+  return `${doc._type}: ${typeof name === 'string' ? name : doc._id}`;
+}
 
-  for (const n of data.nav ?? []) add(`Header: ${n.label}`, n.externalUrl ?? n.href);
-  for (const f of data.footer ?? []) add(`Footer: ${f.label}`, f.externalUrl ?? f.href);
-  for (const s of data.social ?? []) add(`Social: ${s.label}`, s.url);
-  for (const c of data.ctas ?? []) add(`Button: ${c.label}`, c.url);
-  for (const d of data.docs ?? []) add(`${d._type}: ${d.label}`, d.url);
+/**
+ * Walk one document and yield [path, value] for every whole-string http(s) URL.
+ * `path` is the field trail (e.g. "navItems[2].externalUrl") so a report can say
+ * WHERE in the Studio the dead link lives.
+ */
+function* urlsIn(node, path = '') {
+  if (typeof node === 'string') {
+    if (isExternal(node)) yield [path, node.trim()];
+    return;
+  }
+  if (Array.isArray(node)) {
+    for (let i = 0; i < node.length; i++) yield* urlsIn(node[i], `${path}[${i}]`);
+    return;
+  }
+  if (node && typeof node === 'object') {
+    for (const [key, value] of Object.entries(node)) {
+      if (key.startsWith('_') || SKIP_KEYS.has(key)) continue; // _type, _ref, _key, ...
+      yield* urlsIn(value, path ? `${path}.${key}` : key);
+    }
+  }
+}
+
+function collect(docs) {
+  const found = new Map(); // url -> Set of labels, so one URL is checked once
+  for (const doc of docs) {
+    const label = docLabel(doc);
+    for (const [path, url] of urlsIn(doc)) {
+      if (!found.has(url)) found.set(url, new Set());
+      found.get(url).add(`${label} (${path})`);
+    }
+  }
   return found;
 }
 
@@ -178,6 +224,37 @@ async function probe(url) {
   }
 }
 
+/** Write the run report to the Actions summary page when running in CI. */
+function writeSummary(total, failures, unverified) {
+  const file = process.env.GITHUB_STEP_SUMMARY;
+  if (!file) return;
+  const lines = [`## Link health: ${total} outbound links checked`, ''];
+  if (failures.length === 0) lines.push('No dead links.', '');
+  else {
+    lines.push(`### ${failures.length} dead link${failures.length === 1 ? '' : 's'}`, '');
+    lines.push('| Link | Result | Where it lives in the Studio |', '| --- | --- | --- |');
+    for (const f of failures) lines.push(`| ${f.url} | ${f.detail} | ${f.where} |`);
+    lines.push('');
+  }
+  if (unverified.length > 0) {
+    lines.push(
+      `### ${unverified.length} the host would not let a script check`,
+      '',
+      'These answered, but refused an automated request (a bot wall). Open them by hand now and then.',
+      '',
+      '| Link | Result | Where it lives in the Studio |',
+      '| --- | --- | --- |',
+    );
+    for (const u of unverified) lines.push(`| ${u.url} | ${u.detail} | ${u.where} |`);
+    lines.push('');
+  }
+  try {
+    appendFileSync(file, lines.join('\n') + '\n');
+  } catch {
+    // The summary is a courtesy; never fail the run over it.
+  }
+}
+
 async function main() {
   if (!PROJECT_ID) {
     // A fork with no Sanity project cannot answer the question, and must not
@@ -186,14 +263,16 @@ async function main() {
     return;
   }
 
-  const data = await readDataset();
-  const targets = collect(data);
+  const docs = await readDataset();
+  const targets = collect(docs);
   if (targets.size === 0) {
-    console.log('No external links found in the dataset. Nothing to check.');
+    console.log(`Read ${docs.length} documents. No external links found. Nothing to check.`);
     return;
   }
 
-  console.log(`Checking ${targets.size} external links from ${PROJECT_ID}/${DATASET}`);
+  console.log(
+    `Checking ${targets.size} external links across ${docs.length} documents in ${PROJECT_ID}/${DATASET}`,
+  );
   if (OWN_DOMAIN) console.log(`Links to ${OWN_DOMAIN} are internal and skipped.`);
   console.log('');
 
@@ -204,7 +283,7 @@ async function main() {
   // server in parallel to check they are up is poor manners.
   for (const [url, labels] of targets) {
     const res = await probe(url);
-    const where = [...labels].join(', ');
+    const where = [...labels].join('; ');
     const detail = res.error ? String(res.error) : `HTTP ${res.status}`;
 
     if (res.ok) {
@@ -236,6 +315,7 @@ async function main() {
         'automatically (the host refuses scripted requests). Open them by hand now and then.',
     );
   }
+  writeSummary(targets.size, failures, unverified);
   if (failures.length === 0) {
     console.log(`No broken links. ${targets.size} checked.`);
     return;

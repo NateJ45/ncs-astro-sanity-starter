@@ -4233,7 +4233,8 @@ weekly by its own workflow. Proven on stonesteps-50k; **brought home 2026-09-18*
 the canonical copy is this starter's `scripts/check-live-links.mjs` (marked PORTABLE),
 with `.github/workflows/link-health.yml` alongside it.
 
-**What generalising it changed.** The stonesteps version named that race's own document
+**What generalising it changed** (the field list below was replaced on 2026-09-29 by a
+walk of every document; see the addendum). The stonesteps version named that race's own document
 fields, and defaulted its project id to that project's. The canonical version reads the
 three structural places every site built from this starter has (header nav, footer
 columns, social links), the page-builder CTAs, and then a SWEEP of any document carrying
@@ -4260,6 +4261,40 @@ fail the run. The first version conflated the two and would have cried wolf on i
 scheduled run.
 
 **Needs no secrets** when the dataset is public.
+
+### Addendum, 2026-09-29: walk the documents, do not name the fields
+
+**Folded back from reid-design-site** (PR #43), which forked this script on its first
+real run. The field list above was the flaw. Against Reid's dataset the `url` /
+`externalUrl` sweep found 222 links, and every one was a `cdn.sanity.io` image asset
+(each `sanity.imageAsset` carries a `url`). It did NOT find what the check exists for:
+`shopItem.affiliateUrl`, `testimonial.reviewUrl`, and a header menu named `navItems`
+rather than `headerNav`. So it probed 222 images one at a time and would have reported
+"no broken links" about a `/shop` page it never looked at. A list of field names is a
+second copy of the schema, and the second copy is the one that goes stale.
+
+**The canonical copy now walks.** One query fetches every published document that is not
+Sanity's bookkeeping (`sanity.*`, `system.*`, `media.tag`), not archived (`archived !=
+true`) and not a `trashedItem`; `collect()` recurses through each one and keeps every
+string that is a WHOLE http(s) URL, recording its field trail
+(`guides[4].sections[4].links[0].url`) so the report says where in the Studio the dead
+link lives. Skipped: `_`-prefixed keys, `formActionUrl` (a POST endpoint no script
+should GET), and the hosts `cdn.sanity.io` and `api.web3forms.com`. The own-domain rule
+is unchanged, and `readOwnDomain()` now accepts both the starter's `const _domain =`
+and a literal `domain:` in `src/data/site.ts`. New: the run appends a markdown report to
+`$GITHUB_STEP_SUMMARY`, so the weekly result reads without opening the log. The probe
+(HEAD, then GET on a method objection; gone vs refused) is unchanged.
+
+**Evidence:** run from this starter against Reid's public dataset, 2026-09-29: 22
+documents, 10 external links, 1 gone (`wayfair.com/professional/`, 404), 3 refusing a
+script (Facebook 400, Arhaus 430, RH 403), the same result Reid's fork reported. Its
+links sat in `siteSettings` fields and a `studioPlaybook` array four levels deep, none
+of which the field list could name.
+
+**Adopting it:** a site with the old canonical copy just takes the new one (sync-check
+will show it as drift). reid-design-site's fork (unmarked) can now be replaced by this
+file with the marker; the only behaviour difference is `archived != true`, and its
+`link-health.yml` differs only in comments.
 
 ## Card 43: Contrast for the elements axe declines to judge (2026-09-08)
 

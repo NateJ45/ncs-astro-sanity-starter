@@ -1,10 +1,11 @@
 name: Link health
 
 # Weekly check of the links this site sends visitors to on OTHER people's sites:
-# whatever the header nav, the footer, the social links, the page-builder CTAs
-# and any document with a url field currently point at. They are read out of the
-# DATASET, not the source, so a link an editor changes in the Studio is the link
-# that gets checked.
+# every whole http(s) address in any published document, wherever it sits (menus,
+# buttons, social profiles, Portable Text links, affiliate and review links, a
+# field added next month). They are read out of the DATASET, not the source, so a
+# link an editor changes in the Studio is the link that gets checked. The result
+# is also written to the run's Summary page as a table (PORTS.md card 42).
 #
 # WHY IT IS NOT PART OF CI. `npm run check:links` walks the built site and
 # deliberately skips external hosts, because failing a build every time a third
