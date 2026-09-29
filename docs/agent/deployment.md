@@ -166,10 +166,11 @@ so it proves nothing.
 
 ### Privacy and analytics
 
-The starter ships in an effectively zero-cookie posture. The current baseline:
+The starter ships in an effectively zero-cookie posture until a site sets `PUBLIC_GA_ID`. The current baseline:
 
 - **Cloudflare Web Analytics** uses no cookies and stores no personal data.
-- **No Google Analytics, no Facebook/Meta Pixel.** No ad-tracking or retargeting pixels by default. If you add one, design a full consent management platform in BEFORE adding the tracker -- don't bolt it on.
+- **Google Analytics 4 is opt-in per site (card 54).** `src/components/Analytics.astro` renders GA4 only when `PUBLIC_GA_ID` is set AND the page is served from the host of `site` in astro.config (card 58), so dev, staging and CI never report. When it is on, GA4 sets `_ga` cookies: the `/privacy` page's "How traffic is measured" section is derived from `src/lib/analytics-config.ts`, never hand-written, so it cannot claim there is no GA while GA runs (the Reid bug, 2026-09-28).
+- **No Facebook/Meta Pixel.** No ad-tracking or retargeting pixels by default. If you add one, design a full consent management platform in BEFORE adding the tracker -- don't bolt it on.
 - **Sanity client** reads public published content, no auth cookies.
 - **Web3Forms** contact-form submissions go server-side via `fetch`; no cookies set.
 
