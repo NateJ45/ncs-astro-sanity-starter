@@ -18,7 +18,7 @@ Most of that template (MDX pages, a blog, one config file, an `npm create` wizar
 
 **The share card fallback that did not fall back** (PORTS card 59). Checking how this starter picks share images showed that BaseLayout pointed at `/og/<route>.png` whether or not the file existed, despite a comment saying otherwise, so every route without a card shared a 404. The logic moved to `src/lib/og-image.ts` with five unit tests, and BaseLayout now passes it the real file list from `import.meta.glob`. Parity: nine pages identical, `/404` and `/styleguide` now share `og-default.png`; those two baselines were recaptured.
 
-The same look found 23 Reid Design share cards still in `public/og/`, including a home card reading "Reid Design LLC". Deleting them is PENDING item 1c; the session could not delete files.
+The same look found 23 Reid Design share cards still in `public/og/`, including a home card reading "Reid Design LLC". They were deleted in a follow-up commit the same day (PENDING item 1c, opened and closed on 2026-09-29), which moved the other eight content pages to `og-default.png`; parity confirmed nothing else changed. Fork residue number five, now listed on PORTS card 44 and in CLAUDE.md rule 11.
 
 ---
 

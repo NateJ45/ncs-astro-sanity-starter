@@ -4488,6 +4488,11 @@ type check or lint could see.
    `--name ncs-astro-sanity-starter-staging`, so the first fork to set its Cloudflare
    secrets and push a staging branch would have deployed its site under the template's
    name.
+5. **Another client's share cards** (found 2026-09-29, card 59). `public/og/` held 23
+   PNGs from the Reid Design build, and BaseLayout used a route's card whenever one
+   existed, so a fork with no `seoImage` in the Studio shared its home page as "Reid
+   Design LLC, Plainfield Interior Design". An image, so no grep for the client's name
+   in source could see it; only the filenames gave it away. Deleted.
 
 **Why none of it was caught.** Every one is CORRECT CODE containing the WRONG NOUN. Types
 pass, tests pass, lint passes, the build is green, and the page renders. The only detector
@@ -5422,7 +5427,8 @@ build's generated cards in `public/og/` (card 44's failure mode, a fifth instanc
 the files present and no `seoImage` set in the Studio, a fresh fork's home, about,
 services, process, contact, FAQ, journal and privacy pages all shared as "Reid Design
 LLC, Plainfield Interior Design". Found on 2026-09-29 while comparing the starter
-against Bryan Hogan's astro-starter-template; see PENDING.md for the deletion.
+against Bryan Hogan's astro-starter-template, and deleted the same day. `public/og/` no
+longer exists in the starter; `npm run og:pages` recreates it with a fork's own name.
 
 **The fix.** `ogImageForRoute(pathname, available)` returns the route's card only when
 it is in `available`, otherwise `/og-default.png`. BaseLayout builds `available` from
@@ -5434,7 +5440,9 @@ it is in `available`, otherwise `/og-default.png`. BaseLayout builds `available`
   pulled into the bundle. Verified: no `.png` under any `_astro/` after a build.
 
 Parity on 2026-09-29: 9 of 11 pages byte-identical; `/404` and `/styleguide` moved from
-a missing `/og/<route>.png` to `/og-default.png` and nothing else. Baselines recaptured.
+a missing `/og/<route>.png` to `/og-default.png` and nothing else. After the residue was
+deleted, the other eight content pages moved to `/og-default.png` the same way, again
+with no other line changed. All ten baselines recaptured; 11/11 PASS.
 
 **Porting.** Copy `og-image.ts` and its test, then replace the site's own
 `ogPathForRoute(...)` call in BaseLayout with the glob plus `ogImageForRoute`. Then look
