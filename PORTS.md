@@ -1310,6 +1310,45 @@ object, so a Studio entry can correct a stale launch one without a code change.
 original, with a repo-specific `redirects.ts` that also owns the doc-type path
 map, plus the launch-migration entries) / everything else pending rollout.
 
+### Addendum, 2026-09-29: the rename-and-back loop, and the live-page guard
+
+**Canonical:** `src/lib/redirect-guard.ts` (+ `redirect-guard.test.ts`), both PORTABLE,
+wired in `astro.config.mjs`. Folded back from reid-design-site (PR #43), where it was
+written while porting this card.
+
+**The hole "renames repoint, they do not chain" leaves.** Rename `/a` to `/b` and the
+action files `/a -> /b`. Rename it back to `/a` and the action files `/b -> /a`, and the
+repoint step skips the first entry because its `from` equals the new `to`. The map now
+holds `/a -> /b` AND `/b -> /a`, and the page lives at `/a`. Cloudflare applies
+`_redirects` BEFORE it serves any file, so the redirect shadows the real page and every
+visitor bounces between the two addresses. A hand-filed redirect from an address a
+published page already uses does the same thing with one entry.
+
+**The fix is at build time, not in the action.** The build is the one place that knows
+every address a page lives at right now, and `slugRedirect.tsx` has to stay
+byte-identical across the family. `astro.config.mjs` reads the published, non-archived
+slugged documents alongside the redirects (one query), turns each into its live path
+through a small `LIVE_PATH_BY_TYPE` table, and `dropRedirectsOverLivePages()` removes
+every entry whose `from` is one of them, with a `[redirects] skipped N ...` build warning
+naming each. The `redirect` document is not touched: it sits harmless in the Studio and
+starts working again if the page ever moves away. Archived pages are not built, so a
+redirect away from one is kept.
+
+**Why a separate file and not a function in `redirects.ts`.** Every repo carrying card 22
+has `redirects.ts` marked PORTABLE, so adding to it would turn every one of their
+sync-checks red at once for something each can adopt at its own sync. A new file drifts
+nobody.
+
+**Per-site adaptation:** `LIVE_PATH_BY_TYPE` lists the types whose address comes from a
+slug. The starter has `page` and `journalEntry`; Reid has `page`, `project`,
+`journalEntry` and `leadMagnet`. It is the same knowledge as `pathForDoc()`; it is
+repeated rather than imported because `astro.config.mjs` runs before the env that
+`src/sanity/urls.ts` reads is populated.
+
+**Reid's copy** (`src/lib/redirect-guard.ts`, unmarked, "Reid-only") is identical in
+code to this one; its header comment and its test's runner (vitest) differ. It re-adopts
+by taking this file and adding the marker.
+
 ## Card 23: Editor-defined forms (2026-08-28)
 
 **Canonical:** `src/lib/custom-form-fields.ts` (+ `src/lib/custom-form-fields.test.ts`),
