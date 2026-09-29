@@ -51,13 +51,59 @@ site-specific / dead for each, and either port the wins or write down why not. T
 first one (WCP, 2026-09-06) is recorded in the harvest notes under the cards it
 touched.
 
+### Card numbers are ids, and the one collision (37a-40a)
+
+A card's number is its permanent id: other repos' docs and code comments cite
+"PORTS.md card N", so a number is never reused and never shifted. A letter suffix
+normally marks a follow-on to the same card (28a and 28b amend 28; 29a-29d are 29's
+parts).
+
+**The exception, 2026-09-29.** Two unrelated sets were both numbered 37-40. The first,
+written 2026-09-06 as `## 37.` to `## 40.` without the "Card" prefix, is now
+**37a-40a**; the second, written 2026-09-07 as `## Card 37:` to `## Card 40:` and the
+only one with matrix rows until today, keeps 37-40. Here the letter is a
+disambiguator, not "a follow-on to card 37":
+
+| Id  | Card                                                  | Old citation meant it as |
+| --- | ----------------------------------------------------- | ------------------------ |
+| 37a | Drift opens its own pull request (propose-drift)      | "card 37", before 09-07  |
+| 38a | presacademy harvest audit                             | "card 38", before 09-07  |
+| 39a | The restore drill, and an off-site copy of the backup | "card 39", before 09-07  |
+| 40a | The public-data audit                                 | "card 40", before 09-07  |
+| 37  | Visual regression on a fixed-data styleguide          | "card 37", 09-07 onward  |
+| 38  | Studio Checkup                                        | "card 38", 09-07 onward  |
+| 39  | Year-rollover wizard                                  | "card 39", 09-07 onward  |
+| 40  | Studio Welcome pane                                   | "card 40", 09-07 onward  |
+
+**Citations elsewhere that mean the 37a-40a set** (found by a grep of every repo under
+`Projects/` on 2026-09-29; left as written, since this starter does not edit them):
+`_vault/clients/nixon-creative-studio.md` ("PORTS card 39" twice = 39a, "card 37" =
+37a), `_vault/gotchas/a-backup-you-have-never-restored.md` ("PORTS card 39" = 39a),
+`_vault/gotchas/ci-push-to-another-repo-403s-as-the-bot.md` ("PORTS.md card 37" =
+37a), `_vault/gotchas/sanity-public-dataset-is-public.md` ("PORTS card 40" = 40a).
+**Citations that mean the 37-40 set, correctly:** "PORTS.md card 37" in
+`playwright.config.ts`, `playwright.visual.config.ts` and `src/lib/reservedSlugs.ts`
+here and in fbcm and stonesteps-50k, plus fbcm's `tests/visual/styleguide.spec.ts`, and
+`_vault/clients/stone-steps-50k.md` ("now PORTS card 37", the axe-incomplete finding
+that card 37 records). fbcm and stonesteps-50k carry their own copies of PORTS.md with
+the same collision; they pick up this renumbering at their next sync.
+
 ---
 
 ## Applied-to matrix
 
 `yes` = present and current. `partial` = an ancestor or divergent form of the same idea,
-or present but not wired into that repo's gate. `no` = absent. `yes` = a session
-is installing it as of the date on the card.
+or present but not wired into that repo's gate. `fork` = present and working, but a
+deliberately diverged copy of a canonical file, left unmarked so sync-check skips it (the
+cell's sync-session entry says whether it can re-adopt). `no` = absent. `staged` = a
+session is installing it as of the date on the card. `template` = shipped as a workflow
+template, not wired. `n/a` = does not apply to that repo (no Sanity, no GA4, no
+path-scoped `_headers` rule, or the repo IS the library).
+
+Rows 30, 37a, 39a, 40a, 45, 56, 58 and 59 were added on 2026-09-29, filled from a grep of
+each repo's `origin/main` that day (see that date's sync-session entry for what was
+checked). Card 38a (the presacademy harvest audit) is a record of one audit, not a
+technique a repo adopts, so it has no row.
 
 | #   | Card                                                              | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | ----------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
@@ -70,55 +116,63 @@ is installing it as of the date on the card.
 | 7   | Uptime workflow                                                   | yes     | yes         | template | yes              | yes           | yes            | template           | yes                 | template       |
 | 8   | Playwright + axe + reflow suite                                   | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 | yes            |
 | 9   | contrast.ts + theme-token gate                                    | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
-| 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 | yes            |
-| 11  | Preview click interceptor                                         | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 | yes            |
-| 12  | Parity-gated page-builder conversion                              | partial | yes         | partial  | no               | no            | no             | no                 | no                  | partial        |
-| 13  | react/react-dom exact pin                                         | no      | yes         | yes      | staged           | staged        | no             | yes                | no                  | yes            |
-| 14  | wrangler legacy_env pin                                           | no      | yes         | yes      | staged           | staged        | no             | yes                | no                  | yes            |
+| 10  | Embedded-studio live-preview stack                                | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 11  | Preview click interceptor                                         | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 12  | Parity-gated page-builder conversion                              | partial | yes         | partial  | partial          | no            | no             | no                 | no                  | partial        |
+| 13  | react/react-dom exact pin                                         | no      | yes         | yes      | yes              | staged        | no             | yes                | no                  | yes            |
+| 14  | wrangler legacy_env pin                                           | no      | yes         | yes      | yes              | staged        | no             | yes                | no                  | yes            |
 | 15  | PENDING.md / TESTING.md docs registry                             | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
 | 16  | Quarterly slop sweep                                              | no      | no          | no       | no               | no            | no             | no                 | no                  | no             |
-| 17  | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes         | yes      | staged           | staged        | no             | yes                | n/a                 | yes            |
-| 18  | Chrome options (editable header/footer content)                   | yes     | yes         | yes      | staged           | staged        | no             | yes                | n/a                 | yes            |
-| 19  | Shareable draft links                                             | no      | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
+| 17  | In-canvas section controls (overlay insert/drag/duplicate/remove) | partial | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 18  | Chrome options (editable header/footer content)                   | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 19  | Shareable draft links                                             | no      | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
 | 20  | publishAt scheduled publishing (free-tier)                        | no      | no          | template | no               | no            | no             | template           | n/a                 | template       |
-| 21  | Pages as first-class objects (duplicate / archive / SEO panel)    | partial | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
-| 22  | Redirects on rename                                               | yes     | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
+| 21  | Pages as first-class objects (duplicate / archive / SEO panel)    | partial | no          | yes      | partial          | no            | no             | yes                | n/a                 | yes            |
+| 22  | Redirects on rename                                               | yes     | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
 | 23  | Editor-defined forms                                              | yes     | no          | yes      | no               | no            | no             | yes                | no                  | yes            |
 | 24  | Saved sections (section presets)                                  | partial | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
-| 25  | Pre-publish page checks                                           | partial | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
-| 26  | Appearance controls (surfaces, accents, rich twins, layout)       | partial | yes         | partial  | no               | no            | no             | yes                | no                  | partial        |
-| 27  | Undo & redo                                                       | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 28  | Floating in-canvas controls (accent word, "Edit here")            | yes     | yes         | partial  | no               | no            | no             | no                 | n/a                 | partial        |
-| 29  | Instant preview text                                              | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 29a | Local edit-state channel (LiveDraftBridge)                        | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 29b | Refresh scheduler (single-flight / stale discard / floor)         | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 29c | Preview morph (in-place reconcile)                                | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 29d | Staleness counts every channel                                    | no      | yes         | yes      | no               | no            | no             | no                 | n/a                 | yes            |
+| 25  | Pre-publish page checks                                           | partial | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
+| 26  | Appearance controls (surfaces, accents, rich twins, layout)       | partial | yes         | partial  | partial          | no            | no             | yes                | no                  | partial        |
+| 27  | Undo & redo                                                       | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 28  | Floating in-canvas controls (accent word, "Edit here")            | yes     | yes         | partial  | partial          | no            | no             | no                 | n/a                 | partial        |
+| 29  | Instant preview text                                              | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29a | Local edit-state channel (LiveDraftBridge)                        | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29b | Refresh scheduler (single-flight / stale discard / floor)         | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29c | Preview morph (in-place reconcile)                                | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29d | Staleness counts every channel                                    | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 30  | One branch vocabulary (main + staging)                            | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | no             |
 | 31  | Studio welcome tour (StudioTour)                                  | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
 | 32  | Branded tool headings (ToolHeading)                               | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
 | 33  | Year-scoped lists for accumulating types                          | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | no             |
-| 34  | Studio search weights (__experimental_search)                     | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | no             |
+| 34  | Studio search weights (__experimental_search)                     | yes     | yes         | no       | yes              | no            | no             | no                 | n/a                 | no             |
 | 35  | The family test standard (gates, suites, budgets)                 | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 | yes            |
 | 36  | sync-check as a CI gate                                           | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
+| 37a | Drift opens its own PR (propose-drift in CI)                      | yes     | yes         | n/a      | yes              | yes           | yes            | no                 | yes                 | no             |
+| 39a | Restore drill + off-site backup copy                              | yes     | yes         | yes      | yes              | yes           | yes            | no                 | n/a                 | yes            |
+| 40a | Public-data audit in CI                                           | yes     | yes         | yes      | yes              | yes           | yes            | no                 | n/a                 | yes            |
 | 37  | Visual regression on a fixed-data styleguide                      | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 38  | Studio Checkup (what needs attention)                             | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 39  | Year-rollover wizard                                              | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 40  | Studio Welcome pane (task cards)                                  | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
 | 41  | Guide handbook held as repo data                                  | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 42  | External link health, on its own schedule                         | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 42  | External link health, on its own schedule                         | yes     | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
 | 43  | Contrast for what axe declines to judge                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 44  | Fork residue audit                                                | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
-| 46  | Share cards in the brand's real typeface                          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 47  | The icon set, from one drawing                                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 45  | The site's own contact endpoint                                   | yes     | no          | yes      | no               | no            | no             | no                 | no                  | yes            |
+| 46  | Share cards in the brand's real typeface                          | no      | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
+| 47  | The icon set, from one drawing                                    | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
 | 48  | Domain cutover script + zone audit                                | no      | no          | yes      | no               | no            | no             | n/a                | no                  | partial        |
 | 49  | Automation patterns (import-and-deploy, record-and-bake)          | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 50  | Production deploy workflow                                        | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 51  | Compressed static server for Lighthouse                           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 52  | Radix islands hydrate at client:idle, not client:only             | n/a     | partial     | yes      | no               | no            | no             | n/a                | yes                 | partial        |
+| 52  | Radix islands hydrate at client:idle, not client:only             | n/a     | partial     | yes      | yes              | no            | no             | n/a                | yes                 | partial        |
 | 53  | One accent splitter (heading-accent absorbs scriptAccent)         | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
-| 54  | Analytics component (GA4 + Cloudflare beacon, canonical)          | no      | no          | yes      | partial          | no            | no             | n/a                | yes                 | yes            |
-| 55  | Build reads always use the Sanity CDN; a PROD fetch error throws  | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | yes            |
-| 57  | Preview cookie's value is checked, not its presence               | no      | no          | yes      | no               | no            | no             | no                 | n/a                 | no             |
+| 54  | Analytics component (GA4 + Cloudflare beacon, canonical)          | no      | no          | yes      | yes              | no            | no             | n/a                | yes                 | yes            |
+| 55  | Build reads always use the Sanity CDN; a PROD fetch error throws  | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 56  | No page-level `.catch()` swallows the PROD throw                  | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | partial        |
+| 57  | Preview cookie's value is checked, not its presence               | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | no             |
+| 58  | GA4 fires only on the production hostname                         | n/a     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | no                  | no             |
+| 59  | `_headers`: one rule per path; /_astro/* owns its cache           | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -1272,6 +1326,45 @@ object, so a Studio entry can correct a stale launch one without a code change.
 **Applied to:** starter yes (canonical) / church-starter yes / WCP yes (the
 original, with a repo-specific `redirects.ts` that also owns the doc-type path
 map, plus the launch-migration entries) / everything else pending rollout.
+
+### Addendum, 2026-09-29: the rename-and-back loop, and the live-page guard
+
+**Canonical:** `src/lib/redirect-guard.ts` (+ `redirect-guard.test.ts`), both PORTABLE,
+wired in `astro.config.mjs`. Folded back from reid-design-site (PR #43), where it was
+written while porting this card.
+
+**The hole "renames repoint, they do not chain" leaves.** Rename `/a` to `/b` and the
+action files `/a -> /b`. Rename it back to `/a` and the action files `/b -> /a`, and the
+repoint step skips the first entry because its `from` equals the new `to`. The map now
+holds `/a -> /b` AND `/b -> /a`, and the page lives at `/a`. Cloudflare applies
+`_redirects` BEFORE it serves any file, so the redirect shadows the real page and every
+visitor bounces between the two addresses. A hand-filed redirect from an address a
+published page already uses does the same thing with one entry.
+
+**The fix is at build time, not in the action.** The build is the one place that knows
+every address a page lives at right now, and `slugRedirect.tsx` has to stay
+byte-identical across the family. `astro.config.mjs` reads the published, non-archived
+slugged documents alongside the redirects (one query), turns each into its live path
+through a small `LIVE_PATH_BY_TYPE` table, and `dropRedirectsOverLivePages()` removes
+every entry whose `from` is one of them, with a `[redirects] skipped N ...` build warning
+naming each. The `redirect` document is not touched: it sits harmless in the Studio and
+starts working again if the page ever moves away. Archived pages are not built, so a
+redirect away from one is kept.
+
+**Why a separate file and not a function in `redirects.ts`.** Every repo carrying card 22
+has `redirects.ts` marked PORTABLE, so adding to it would turn every one of their
+sync-checks red at once for something each can adopt at its own sync. A new file drifts
+nobody.
+
+**Per-site adaptation:** `LIVE_PATH_BY_TYPE` lists the types whose address comes from a
+slug. The starter has `page` and `journalEntry`; Reid has `page`, `project`,
+`journalEntry` and `leadMagnet`. It is the same knowledge as `pathForDoc()`; it is
+repeated rather than imported because `astro.config.mjs` runs before the env that
+`src/sanity/urls.ts` reads is populated.
+
+**Reid's copy** (`src/lib/redirect-guard.ts`, unmarked, "Reid-only") is identical in
+code to this one; its header comment and its test's runner (vitest) differ. It re-adopts
+by taking this file and adding the marker.
 
 ## Card 23: Editor-defined forms (2026-08-28)
 
@@ -3290,6 +3383,103 @@ self-documenting ones in `UndoRedo.tsx` and `shareDraftLink.tsx` and are expecte
 expected), ncs-church-starter 50/0/0, reid-design-site 17/0/0, mas-monograms
 25/0/0.
 
+### 2026-09-29: reid-design-site's upgrade program (PR #43), audited cell by cell
+
+Reid merged its upgrade program on 2026-09-29 (`8af0229`, PR #43). Its changelog and
+PENDING.md say what was ported; every cell below was checked against `origin/main`
+instead (git grep / git show, plus `sync-check` from this repo's `origin/main`: 34 marked
+files, 34 SAME, 0 drift). The column had drifted badly: six cells still said `staged`
+for work that shipped on 2026-08-28, and most of today's adoptions were not recorded.
+
+**Reid column, changed cells** (old -> new, evidence):
+
+- 10 staged -> yes: `src/pages/preview/[...slug].astro`, `preview/live.ts`,
+  `api/draft-mode/{enable,disable}.ts`; `@sanity/astro` with `studioBasePath: '/studio'`.
+- 11 staged -> yes: the click interceptor with its edit-mode gate in
+  `src/layouts/PreviewLayout.astro`.
+- 12 no -> partial: `homePage` and the other singletons carry `pageBuilder` since the
+  marker-based retrofits (`c69b380` Home, `30555c8` Services), parity baselines in
+  `scripts/.parity/`; not presacademy's D1-D4 plan as written.
+- 13 staged -> yes: `react`, `react-dom`, `react-is` all exactly `19.2.8`.
+- 14 staged -> yes, on a newer pair: adapter exactly `14.3.0` with wrangler `~4.129.0`,
+  the generated `dist/server/wrangler.json` checked for `legacy_env` on 2026-09-29 (Reid
+  `CLAUDE.md`, `stack-and-config.md`). The rule is kept; the starter's `~4.110.0` pin is
+  not what Reid runs.
+- 17 staged -> yes: section `data-sanity` wrappers, and the grouped insert menu
+  (`SECTION_INSERT_MENU` in `sections.ts`, `src/lib/insert-menu.test.ts`) on all fourteen
+  builder arrays, in the form and the canvas.
+- 18 staged -> yes: shared `navLink` type, `src/lib/nav-href.ts`, `resolveSiteSettings()`
+  exposing `footerColumns`, `legalNav`, `headerCta`, `showEmail`.
+- 19 no -> yes: `shareDraftLink.tsx` SAME, appended by `withEditorActions`
+  (`src/sanity/editorActions.ts`).
+- 21 no -> partial: a soft-delete Archive/Restore of its own (`actions/archive.tsx`, a
+  `trashedItem` snapshot) rather than the `archived` flag; no Duplicate override and no
+  SEO snippet panel. `pageOps.ts` is present and SAME, used only for `readSlug()`.
+- 22 no -> yes: `redirect` type, `slugRedirect.tsx` and `redirects.ts` SAME, the build
+  map in `astro.config.mjs`, plus the live-page guard now folded back here (card 22
+  addendum).
+- 25 no -> yes: `checkPage.tsx` and `page-checks.ts` SAME, with a Reid config that derives
+  a "Main content" unit from the schema.
+- 26 no -> partial: the layout half (`SectionLayoutCard`) and script accents; no
+  surfaces, no inline-rich twins.
+- 27 no -> yes: `undoRedo.ts`, `UndoRedo.tsx` SAME, in the publish menu and on Ctrl+Z.
+- 28 no -> partial: `ScriptAccentPicker` and `SectionLayoutCard` over the canonical
+  `usePopover` / `useDraftDocument` / `styles` / `sanity-path` (all SAME), with a
+  `section-fields.ts` registry; no text popover.
+- 29, 29a-29d no -> yes: `LiveDraftBridge.tsx`, `overlay/useInstantText.ts`, and the
+  `preview-{live-draft,refresh,morph,text-diff,text-nodes,stega}.ts` modules all SAME.
+- 34 no -> yes: 13 `__experimental_search` weights across the content types.
+- 42 no -> fork: its own `check-live-links.mjs` that walks every document, deliberately
+  unmarked. Now canonical here (card 42 addendum), so Reid can re-adopt.
+- 46 no -> fork: the share-card bug is fixed by a different renderer, satori + resvg with
+  the real `@fontsource` faces in `src/integrations/og-cards.ts`, drawn on every build;
+  `render-og.mjs` was deleted.
+- 47 no -> yes: `generate-favicons.mjs` SAME; `apple-touch-icon.png`, `icon-192/512`,
+  `site.webmanifest` in `public/`.
+- 52 no -> yes: MobileNav at `client:idle` (`Header.astro`), trigger in every page's HTML.
+- 54 partial -> yes: `Analytics.astro`, `analytics/{GoogleAnalytics,CloudflareBeacon}`,
+  `analytics-config.ts` all SAME, privacy disclosure derived from the config.
+- 55 no -> yes: `useCdn: true` on the build client, `sanityFetch()` retries twice and
+  throws in a production build (`src/lib/sanity.ts`).
+- 57 no -> yes: `isStudioPreview()` called in `preview/[...slug].astro` and
+  `preview/live.ts` (and in the new `/api/stats`).
+
+**Reid cells in the new rows:** 30 yes (`origin/staging`, CI on `[main, staging]`); 37a
+yes (`propose-drift.mjs` in `ci.yml`); 39a yes (`restore-dataset.mjs`, `RESTORE-DRILL.md`,
+`r2 object put` in `sanity-backup.yml`); 40a yes (`public-data-audit.mjs` in `ci.yml`); 45
+no (Web3Forms); 56 yes (no `.catch(() =>` left on a static route; the preview routes and
+a PROD-rethrowing `Footer.astro` keep theirs on purpose); 58 yes (GoogleAnalytics SAME,
+`tests/smoke.spec.ts` localhost test); 59 yes (three rules, `/_astro/*` owns the immutable
+cache; the source of card 59).
+
+**Cells left as they were, checked:** 20, 23, 24, 31-33, 37-41, 43, 48-51 and 53 are
+still `no`: no `publishAt`, Web3Forms rather than `formQuestion`, no presets, no tour /
+ToolHeading / year lists / visual suite / Checkup / rollover / Welcome pane, the guide is
+a Sanity singleton rather than repo data, no contrast spec, the cutover was done by hand,
+no `deploy.yml` (Workers Builds deploys `main`), `lhci` still on `staticDistDir`, and
+`scriptAccent.ts` with no `heading-accent.ts`.
+
+**Not ported, and why:** card 53 is the next drift Reid will feel (four files still on
+`splitScriptAccent`); card 45 would replace Web3Forms, which is a business decision;
+cards 37-40 wait on a Studio-first pass.
+
+**Folded back from Reid in the same session** (each in its own commit, card and code
+together): the redirect live-page guard (card 22 addendum), the `_headers` same-path trap
+(new card 59), link health that walks every document (card 42 addendum), and the two
+garbled phrases in `.gitattributes`. **For Reid's next sync:** re-adopt
+`scripts/check-live-links.mjs` and `src/lib/redirect-guard.ts` (+ its test, as a vitest
+port) from here with the marker, replacing its forks (the guard's code is identical; the
+link checker adds `archived != true`), and optionally the `link-health.yml` comment.
+Nothing here changed a file Reid carries marked, so its sync-check stays green until it
+chooses to.
+
+**Other rows, new cells from the same grep** (not audited beyond it): wcp's `/_astro/*`
+rule already owns `Cache-Control` (59 yes) and it has `src/pages/api/contact.ts` (45
+yes); nixoncreativestudio's `GoogleAnalytics.astro` has no hostname guard (58 no, as card
+58 says); stonesteps-50k has no `origin/staging` (30 no), no `propose-drift` in CI (37a
+no) and two page-level catches left (56 partial); ncs-church-starter has no restore
+script, drift PR or public-data audit (37a/39a/40a no).
+
 ## Card 30: One branch vocabulary across the family (2026-08-29)
 
 Six repos had four conventions between them: this one still on `master`,
@@ -3672,7 +3862,7 @@ checkout `path:` and `NCS_STARTER_DIR` are both relative to
 `github.workspace` (the repo root), NOT to `site/`. Put the starter checkout at
 `.ncs-starter` at the root and point `NCS_STARTER_DIR` at it there.
 
-## 37. Drift opens its own pull request (2026-09-06)
+## Card 37a: Drift opens its own pull request (2026-09-06)
 
 `sync-check` detects drift and stops the build, but porting the improvement
 up was still an errand you had to remember to start, in another repo, after
@@ -3730,7 +3920,7 @@ Two lessons, both earned the expensive way:
   minute locally with a deliberately bogus header: the push fails without the
   override and succeeds with it.
 
-## 38. presacademy harvest audit, and eleven files that were already the same (2026-09-06)
+## Card 38a: presacademy harvest audit, and eleven files that were already the same (2026-09-06)
 
 The second harvest audit of the family (WCP was card 35's neighbour) went
 through `src/lib/**` and `scripts/**` in presacademy. presacademy is the
@@ -3823,13 +4013,13 @@ is entangled with its three-part wordmark ("The Presbyterian / Academy",
 keyword in green), so adopting it means separating the centring math from the
 wordmark parsing first.
 
-## 39. The restore drill, and an off-site copy of the backup (2026-09-06)
+## Card 39a: The restore drill, and an off-site copy of the backup (2026-09-06)
 
 `sanity-backup.yml` had been green nightly on all five Sanity sites for months
 (presacademy alone: 33 successful runs, a 28.8 MB encrypted tarball). Nobody
 had ever restored one. Those runs prove the export and encrypt steps work and
 say nothing about whether a client's content can be recovered, which is the
-only property the backup exists for. Same shape as card 37 and as the link
+only property the backup exists for. Same shape as card 37a and as the link
 checker that scanned nothing: green means no test failed, not that a test would
 have failed.
 
@@ -3942,7 +4132,7 @@ Result: 112 documents restored against 113 in production, and the one difference
 was `_.schemas.churchstarter`, a schema manifest rather than content. Established
 by diffing the id sets, not by assuming a single missing document was drift.
 
-## 40. The public-data audit: what can a stranger read? (2026-09-06)
+## Card 40a: The public-data audit: what can a stranger read? (2026-09-06)
 
 Sanity's free plan is "2 datasets (public only)". A public dataset is readable
 by anyone over a plain URL with no token, and the project id is not a secret -
@@ -3977,7 +4167,7 @@ Three design decisions worth keeping:
   id (hardcoded in src/sanity/env.ts, not an env var) and exited 0 with a pass
   over 37 exposed families. It now reads the source too, and a repo that depends
   on Sanity with no resolvable id FAILS rather than reporting a pass it did not
-  earn. Same trap as cards 37 and 39: green means no test failed, not that a
+  earn. Same trap as cards 37a and 39a: green means no test failed, not that a
   test would have failed.
 
 Tuning that mattered: `children` is Portable Text's field name for spans AND a
@@ -4157,7 +4347,8 @@ weekly by its own workflow. Proven on stonesteps-50k; **brought home 2026-09-18*
 the canonical copy is this starter's `scripts/check-live-links.mjs` (marked PORTABLE),
 with `.github/workflows/link-health.yml` alongside it.
 
-**What generalising it changed.** The stonesteps version named that race's own document
+**What generalising it changed** (the field list below was replaced on 2026-09-29 by a
+walk of every document; see the addendum). The stonesteps version named that race's own document
 fields, and defaulted its project id to that project's. The canonical version reads the
 three structural places every site built from this starter has (header nav, footer
 columns, social links), the page-builder CTAs, and then a SWEEP of any document carrying
@@ -4184,6 +4375,40 @@ fail the run. The first version conflated the two and would have cried wolf on i
 scheduled run.
 
 **Needs no secrets** when the dataset is public.
+
+### Addendum, 2026-09-29: walk the documents, do not name the fields
+
+**Folded back from reid-design-site** (PR #43), which forked this script on its first
+real run. The field list above was the flaw. Against Reid's dataset the `url` /
+`externalUrl` sweep found 222 links, and every one was a `cdn.sanity.io` image asset
+(each `sanity.imageAsset` carries a `url`). It did NOT find what the check exists for:
+`shopItem.affiliateUrl`, `testimonial.reviewUrl`, and a header menu named `navItems`
+rather than `headerNav`. So it probed 222 images one at a time and would have reported
+"no broken links" about a `/shop` page it never looked at. A list of field names is a
+second copy of the schema, and the second copy is the one that goes stale.
+
+**The canonical copy now walks.** One query fetches every published document that is not
+Sanity's bookkeeping (`sanity.*`, `system.*`, `media.tag`), not archived (`archived !=
+true`) and not a `trashedItem`; `collect()` recurses through each one and keeps every
+string that is a WHOLE http(s) URL, recording its field trail
+(`guides[4].sections[4].links[0].url`) so the report says where in the Studio the dead
+link lives. Skipped: `_`-prefixed keys, `formActionUrl` (a POST endpoint no script
+should GET), and the hosts `cdn.sanity.io` and `api.web3forms.com`. The own-domain rule
+is unchanged, and `readOwnDomain()` now accepts both the starter's `const _domain =`
+and a literal `domain:` in `src/data/site.ts`. New: the run appends a markdown report to
+`$GITHUB_STEP_SUMMARY`, so the weekly result reads without opening the log. The probe
+(HEAD, then GET on a method objection; gone vs refused) is unchanged.
+
+**Evidence:** run from this starter against Reid's public dataset, 2026-09-29: 22
+documents, 10 external links, 1 gone (`wayfair.com/professional/`, 404), 3 refusing a
+script (Facebook 400, Arhaus 430, RH 403), the same result Reid's fork reported. Its
+links sat in `siteSettings` fields and a `studioPlaybook` array four levels deep, none
+of which the field list could name.
+
+**Adopting it:** a site with the old canonical copy just takes the new one (sync-check
+will show it as drift). reid-design-site's fork (unmarked) can now be replaced by this
+file with the marker; the only behaviour difference is `archived != true`, and its
+`link-health.yml` differs only in comments.
 
 ## Card 43: Contrast for the elements axe declines to judge (2026-09-08)
 
@@ -5398,3 +5623,53 @@ the canonical one.
 the same session as its full card-54 port, which is where the leak was found).
 nixoncreativestudio and stonesteps-50k run card 54 without this rule and should pull
 it; the rest have no GA4 yet.
+
+## Card 59: `_headers` rules for the same path do not merge (2026-09-29)
+
+**Origin: reid-design-site** (PR #43, the full-CSP hardening). **Canonical:** the header
+comment of `public/_headers` and "Security headers" in `docs/agent/deployment.md`. A
+gotcha, not a file: each site's `_headers` is its own.
+
+**The trap.** Reid moved from `frame-ancestors` alone to a full Content-Security-Policy,
+and a Web Worker is governed by the CSP on its OWN script response, so it added a
+`/_astro/*` rule that only detached the policy (`! Content-Security-Policy`). The
+year-long immutable cache on every hashed asset vanished. `@astrojs/cloudflare`
+prepends its own `/_astro/*` rule at build carrying
+`Cache-Control: public, max-age=31536000, immutable`, and two rules for the same path
+do not add up: the result served `max-age=0, must-revalidate`. Nothing fails, nothing
+logs; the site just re-downloads every script and stylesheet on every visit.
+
+**Reproduced here** under `npm run preview` (wrangler 4.110, adapter 14.2.4): a
+`/_astro/` stylesheet answers `public, max-age=31536000, immutable` as built; append a
+second `/_astro/*` rule holding only `! Content-Security-Policy` and the same file
+answers `public, max-age=0, must-revalidate` AND still carries the CSP, so the detach
+did not take effect either. Replace both with ONE rule that detaches and sets the cache
+line, and it answers immutable with no CSP.
+
+**The fix is one rule that owns the cache.** The adapter skips its injection when a
+matching rule in `_headers` already sets `Cache-Control` (`buildAssetsHeadersContent()`
+returns null; the log line "Injected immutable Cache-Control for /_astro/* into
+_headers" disappears, the skip itself is debug-level). So any `/_astro/*` rule a site
+writes carries the cache line itself.
+
+**The other half: different patterns DO merge.** Cloudflare applies every matching
+rule's headers, and two `Content-Security-Policy` headers are both enforced (the browser
+intersects them). A public policy on `/*` therefore still binds `/studio/*`, and the
+Studio fails in ways that pass the build. `/studio/*` has to start with
+`! Content-Security-Policy` and then set its own.
+
+**Two more things Reid measured that belong with it.** `upgrade-insecure-requests`
+broke click navigation under `npm run preview` (a 307 to `http://127.0.0.1` rewritten to
+https) and buys nothing behind HSTS, so it is out. And the SSR routes get no `_headers`
+at all: a policy for `/preview/**` has to be set from the SSR code.
+
+**Starter status:** not exposed. `public/_headers` here has only the `/*` rule, and the
+built `dist/client/_headers` holds the adapter's `/_astro/*` rule first and ours second;
+verified under `npm run preview` 2026-09-29. The comment now warns before anyone adds a
+second rule, and `docs/agent/deployment.md` (whose headers list still claimed an
+`X-Frame-Options: DENY` that was never shipped) is corrected.
+
+**Applies to:** any site that adds a path-scoped rule to `_headers`. reid-design-site
+has it right (three rules, `/_astro/*` owning the cache, verified). Other repos with a
+full CSP should check that their `/_astro/*` files still answer `immutable` under their
+preview command.

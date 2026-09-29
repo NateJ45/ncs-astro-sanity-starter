@@ -1,4 +1,6 @@
-# Cloudflare applies these headers to every route (Workers Static Assets honors _headers).
+# Cloudflare Workers Static Assets applies these headers to every STATIC response (every
+# prerendered page, /studio/, the /_astro/* files). Not to responses the Worker writes
+# itself: the SSR routes (/preview/**, /api/draft-mode/*) get none of them.
 #
 # Content-Security-Policy beyond frame-ancestors is intentionally NOT set here.
 # Getting it right needs real testing against this project's actual embeds
@@ -21,6 +23,29 @@
 #   style-src     https://fonts.googleapis.com             (brand fonts, if used)
 #   img-src       https: data:                             (cdn.sanity.io images)
 #   worker-src    'self' blob:                             (the Studio uses blob workers)
+#
+# TWO TRAPS BEFORE ADDING ANY RULE OTHER THAN /* (PORTS.md card 59, measured under
+# `npm run preview` 2026-09-29; reid-design-site's _headers is a tested full CSP):
+#
+#   1. Rules for DIFFERENT patterns merge, and two Content-Security-Policy headers are
+#      both enforced (the browser takes the intersection). A public CSP on /* would
+#      still bind /studio/*, so that rule must detach it first and then set its own:
+#          /studio/*
+#            ! Content-Security-Policy
+#            Content-Security-Policy: <the Studio's policy, grants above>
+#
+#   2. Rules for the SAME path do not add up. @astrojs/cloudflare prepends its own
+#      /_astro/* rule at build carrying the immutable year-long Cache-Control, unless
+#      a /_astro/* rule here already sets Cache-Control. A second /_astro/* rule
+#      without it (e.g. only "! Content-Security-Policy") silently loses the adapter's:
+#      hashed assets answer "max-age=0, must-revalidate" and the detach does nothing.
+#      So a /_astro/* rule written here always carries the cache line itself:
+#          /_astro/*
+#            ! Content-Security-Policy
+#            Cache-Control: public, max-age=31536000, immutable
+#
+# This file has only the /* rule today, so neither trap applies: under
+# `npm run preview` a /_astro/ file answers "public, max-age=31536000, immutable".
 #
 # frame-ancestors replaces the legacy X-Frame-Options. 'self' is exactly right
 # now that the Studio is EMBEDDED at /studio: the Presentation tool iframes

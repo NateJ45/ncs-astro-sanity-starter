@@ -107,6 +107,12 @@ map, which the Cloudflare adapter emits as real 301/302s. The editor can also ad
 hand under Pages -> Redirects for an address that never existed on this site. The path
 normalization rules are shared with the build and unit-tested in `src/lib/redirects.ts`.
 
+One redirect is never served: one whose OLD address is where a published page lives now.
+Cloudflare applies `_redirects` before it serves files, so it would shadow the page, and
+a rename followed by a rename back leaves exactly that pair (`/a -> /b`, `/b -> /a`). The
+build drops it with a `[redirects] skipped ...` warning and leaves the document in the
+Studio (`src/lib/redirect-guard.ts`, card 22's 2026-09-29 addendum).
+
 An **archived** page is not built at all, so its URL 404s, it drops out of the menus, and
 it never reaches the sitemap.
 

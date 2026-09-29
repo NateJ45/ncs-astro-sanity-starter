@@ -10,6 +10,7 @@ import react from '@astrojs/react';
 import sanity from '@sanity/astro';
 
 import { buildRedirectMap } from './src/lib/redirects.ts';
+import { dropRedirectsOverLivePages } from './src/lib/redirect-guard.ts';
 
 // The Sanity project id is PUBLIC by design: it ships in every client bundle.
 // A fresh clone with no .env still builds; the Studio then shows a project-not-
@@ -64,9 +65,42 @@ async function cmsQuery(query, fallback) {
 // 301/302. Most of them are filed automatically when a page's web address
 // changes (src/sanity/components/slugRedirect.tsx); the shaping rules live in
 // src/lib/redirects.ts so the Studio and the build agree on what a path is.
-const cmsRedirects = buildRedirectMap(
-  await cmsQuery('*[_type == "redirect" && defined(from) && defined(to)]{from,to,permanent}', []),
+//
+// The live-page guard (src/lib/redirect-guard.ts, card 22 addendum 2026-09-29):
+// a redirect whose OLD address is where a published page lives NOW is dropped,
+// because Cloudflare applies _redirects before it serves files and it would
+// shadow the page. A rename and a rename back produces exactly that loop. The
+// address of each slugged type is listed below; a repo with more slugged routes
+// adds a line (the same map pathForDoc() in src/sanity/urls.ts holds). Archived
+// pages are not built, so a redirect away from one is left alone.
+/** @type {Record<string, (slug: string) => string>} */
+const LIVE_PATH_BY_TYPE = {
+  page: (slug) => `/${slug}`,
+  // Left in place by `scaffold --remove journal` (it does not walk this file),
+  // which is harmless: with no journalEntry documents the line matches nothing.
+  journalEntry: (slug) => `/journal/${slug}`,
+};
+const redirectRead = await cmsQuery(
+  `{
+    "redirects": *[_type == "redirect" && defined(from) && defined(to)]{from,to,permanent},
+    "live": *[_type in $types && defined(slug.current) && archived != true &&
+              !(_id in path("drafts.**"))]{_type, "slug": slug.current}
+  }`.replace('$types', JSON.stringify(Object.keys(LIVE_PATH_BY_TYPE))),
+  { redirects: [], live: [] },
 );
+const guarded = dropRedirectsOverLivePages(
+  buildRedirectMap(Array.isArray(redirectRead?.redirects) ? redirectRead.redirects : []),
+  (Array.isArray(redirectRead?.live) ? redirectRead.live : []).map(
+    (/** @type {{ _type: string; slug: string }} */ doc) =>
+      LIVE_PATH_BY_TYPE[doc._type]?.(doc.slug) ?? null,
+  ),
+);
+if (guarded.dropped.length) {
+  console.warn(
+    `[redirects] skipped ${guarded.dropped.length} redirect(s) from an address a published page lives at now: ${guarded.dropped.join(', ')}`,
+  );
+}
+const cmsRedirects = guarded.redirects;
 
 // Pages the editor keeps out of search. "Keep this page out of Google"
 // (page.hideFromSearch) has to do two things: put a robots tag on the page
