@@ -51,6 +51,43 @@ site-specific / dead for each, and either port the wins or write down why not. T
 first one (WCP, 2026-09-06) is recorded in the harvest notes under the cards it
 touched.
 
+### Card numbers are ids, and the one collision (37a-40a)
+
+A card's number is its permanent id: other repos' docs and code comments cite
+"PORTS.md card N", so a number is never reused and never shifted. A letter suffix
+normally marks a follow-on to the same card (28a and 28b amend 28; 29a-29d are 29's
+parts).
+
+**The exception, 2026-09-29.** Two unrelated sets were both numbered 37-40. The first,
+written 2026-09-06 as `## 37.` to `## 40.` without the "Card" prefix, is now
+**37a-40a**; the second, written 2026-09-07 as `## Card 37:` to `## Card 40:` and the
+only one with matrix rows until today, keeps 37-40. Here the letter is a
+disambiguator, not "a follow-on to card 37":
+
+| Id  | Card                                                  | Old citation meant it as |
+| --- | ----------------------------------------------------- | ------------------------ |
+| 37a | Drift opens its own pull request (propose-drift)      | "card 37", before 09-07  |
+| 38a | presacademy harvest audit                             | "card 38", before 09-07  |
+| 39a | The restore drill, and an off-site copy of the backup | "card 39", before 09-07  |
+| 40a | The public-data audit                                 | "card 40", before 09-07  |
+| 37  | Visual regression on a fixed-data styleguide          | "card 37", 09-07 onward  |
+| 38  | Studio Checkup                                        | "card 38", 09-07 onward  |
+| 39  | Year-rollover wizard                                  | "card 39", 09-07 onward  |
+| 40  | Studio Welcome pane                                   | "card 40", 09-07 onward  |
+
+**Citations elsewhere that mean the 37a-40a set** (found by a grep of every repo under
+`Projects/` on 2026-09-29; left as written, since this starter does not edit them):
+`_vault/clients/nixon-creative-studio.md` ("PORTS card 39" twice = 39a, "card 37" =
+37a), `_vault/gotchas/a-backup-you-have-never-restored.md` ("PORTS card 39" = 39a),
+`_vault/gotchas/ci-push-to-another-repo-403s-as-the-bot.md` ("PORTS.md card 37" =
+37a), `_vault/gotchas/sanity-public-dataset-is-public.md` ("PORTS card 40" = 40a).
+**Citations that mean the 37-40 set, correctly:** "PORTS.md card 37" in
+`playwright.config.ts`, `playwright.visual.config.ts` and `src/lib/reservedSlugs.ts`
+here and in fbcm and stonesteps-50k, plus fbcm's `tests/visual/styleguide.spec.ts`, and
+`_vault/clients/stone-steps-50k.md` ("now PORTS card 37", the axe-incomplete finding
+that card 37 records). fbcm and stonesteps-50k carry their own copies of PORTS.md with
+the same collision; they pick up this renumbering at their next sync.
+
 ---
 
 ## Applied-to matrix
@@ -3672,7 +3709,7 @@ checkout `path:` and `NCS_STARTER_DIR` are both relative to
 `github.workspace` (the repo root), NOT to `site/`. Put the starter checkout at
 `.ncs-starter` at the root and point `NCS_STARTER_DIR` at it there.
 
-## 37. Drift opens its own pull request (2026-09-06)
+## Card 37a: Drift opens its own pull request (2026-09-06)
 
 `sync-check` detects drift and stops the build, but porting the improvement
 up was still an errand you had to remember to start, in another repo, after
@@ -3730,7 +3767,7 @@ Two lessons, both earned the expensive way:
   minute locally with a deliberately bogus header: the push fails without the
   override and succeeds with it.
 
-## 38. presacademy harvest audit, and eleven files that were already the same (2026-09-06)
+## Card 38a: presacademy harvest audit, and eleven files that were already the same (2026-09-06)
 
 The second harvest audit of the family (WCP was card 35's neighbour) went
 through `src/lib/**` and `scripts/**` in presacademy. presacademy is the
@@ -3823,13 +3860,13 @@ is entangled with its three-part wordmark ("The Presbyterian / Academy",
 keyword in green), so adopting it means separating the centring math from the
 wordmark parsing first.
 
-## 39. The restore drill, and an off-site copy of the backup (2026-09-06)
+## Card 39a: The restore drill, and an off-site copy of the backup (2026-09-06)
 
 `sanity-backup.yml` had been green nightly on all five Sanity sites for months
 (presacademy alone: 33 successful runs, a 28.8 MB encrypted tarball). Nobody
 had ever restored one. Those runs prove the export and encrypt steps work and
 say nothing about whether a client's content can be recovered, which is the
-only property the backup exists for. Same shape as card 37 and as the link
+only property the backup exists for. Same shape as card 37a and as the link
 checker that scanned nothing: green means no test failed, not that a test would
 have failed.
 
@@ -3942,7 +3979,7 @@ Result: 112 documents restored against 113 in production, and the one difference
 was `_.schemas.churchstarter`, a schema manifest rather than content. Established
 by diffing the id sets, not by assuming a single missing document was drift.
 
-## 40. The public-data audit: what can a stranger read? (2026-09-06)
+## Card 40a: The public-data audit: what can a stranger read? (2026-09-06)
 
 Sanity's free plan is "2 datasets (public only)". A public dataset is readable
 by anyone over a plain URL with no token, and the project id is not a secret -
@@ -3977,7 +4014,7 @@ Three design decisions worth keeping:
   id (hardcoded in src/sanity/env.ts, not an env var) and exited 0 with a pass
   over 37 exposed families. It now reads the source too, and a repo that depends
   on Sanity with no resolvable id FAILS rather than reporting a pass it did not
-  earn. Same trap as cards 37 and 39: green means no test failed, not that a
+  earn. Same trap as cards 37a and 39a: green means no test failed, not that a
   test would have failed.
 
 Tuning that mattered: `children` is Portable Text's field name for spans AND a
