@@ -105,6 +105,10 @@ each repo's `origin/main` that day (see that date's sync-session entry for what 
 checked). Card 38a (the presacademy harvest audit) is a record of one audit, not a
 technique a repo adopts, so it has no row.
 
+Row 60 was added on 2026-09-29 without a grep of the other repos: the starter (measured)
+and reid-design-site (its PR #48, an inline equivalent, hence `partial`) are known; the rest are
+inferred from their card 10 cells and unchecked.
+
 | #   | Card                                                              | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | ----------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
 | 1   | with-workerd build wrapper                                        | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
@@ -173,6 +177,7 @@ technique a repo adopts, so it has no row.
 | 57  | Preview cookie's value is checked, not its presence               | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | no             |
 | 58  | GA4 fires only on the production hostname                         | n/a     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | no                  | no             |
 | 59  | `_headers`: one rule per path; /_astro/* owns its cache           | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
+| 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias       | no      | no          | yes      | partial          | no            | no             | n/a                | n/a                 | no             |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5673,3 +5678,93 @@ second rule, and `docs/agent/deployment.md` (whose headers list still claimed an
 has it right (three rules, `/_astro/*` owning the cache, verified). Other repos with a
 full CSP should check that their `/_astro/*` files still answer `immutable` under their
 preview command.
+
+## Card 60: `astro dev` on Windows: repair @sanity/astro's dedupe alias (2026-09-29)
+
+**Origin: reid-design-site** (PR #48, https://github.com/NateJ45/reid-design-site/pull/48).
+**Canonical:** `src/lib/sanity-dedupe-alias.ts` (`fixSanityDedupeAlias()`, the Vite plugin,
+and `repairSanityDedupeAlias()`, the logic), tested in `src/lib/sanity-dedupe-alias.test.ts`,
+wired into `vite.plugins` in `astro.config.mjs`.
+
+**The trap.** On Windows, `astro dev` exits within a minute of starting:
+
+```
+Error during dependency optimization:
+Build failed with 364 errors:
+[MISSING_EXPORT] "DocumentStatus" is not exported by "node_modules/sanity/package.json".
+  node_modules/@sanity/orderable-document-list/dist/index.js:1:10
+```
+
+The tell is the path in the first line: a `package.json` where a module should be. Nothing
+else fails. `astro build`, CI, Lighthouse and production are all green, so the first person
+to see it is whoever next opens a dev server on a Windows machine.
+
+**The cause.** `@sanity/astro` (3.4.2 here; 3.5.1 has the same code) injects a dev-only
+Vite plugin, `sanity:module-dedupe` (`apply: 'serve'`, `enforce: 'pre'`). Its `config` hook
+returns `resolve.alias` entries `{ find: /^sanity$/, replacement: <dir> }` (and the same for
+`styled-components`) so every import of those packages lands on one copy. It builds `<dir>` as
+`createRequire(...).resolve('<pkg>/package.json').replace(/\/package\.json$/, "")`. That
+regex matches a FORWARD slash only. Node returns a backslash path on Windows, the replace
+matches nothing, and the alias ends up pointing at
+`C:\...\node_modules\sanity\package.json`, a JSON file with no exports. Find it with
+`grep -o "sanity:module-dedupe" node_modules/@sanity/astro/dist/sanity-astro.js`. Because
+`astro build` never loads the plugin, no CI run can catch this.
+
+**The rejected alternative.** The same plugin has an off switch,
+`SANITY_ASTRO_DISABLE_MODULE_DEDUPE=1`. With it set the crash goes away and the server
+stays up, but the Studio does not hydrate in the browser
+(`react-compiler-runtime ... does not provide an export named 'c'`). The switch drops the
+whole plugin, including the `optimizeDeps.include` list it also contributes, and the Studio
+needs that pre-bundling. Do not use it.
+
+**The fix.** A second plugin, ordered LAST (`enforce: 'post'` and a `config` hook with
+`order: 'post'`), that receives the merged config, finds any `resolve.alias` entry whose
+`find` is a RegExp and whose `replacement` is a string ending in
+`<sep>node_modules<sep>...<sep>package.json`, and cuts the file name off in place. It mutates
+rather than returning a corrected copy because array-valued config merges concatenate: a
+returned copy would sit BEHIND the broken entry and the broken entry would still win. It is
+a no-op on macOS and Linux (nothing matches), for the object form of `alias`, and once
+upstream fixes the regex, so leaving it in is safe. Delete it when `sanity:module-dedupe`
+uses a separator-safe replace.
+
+**Measured here (2026-09-29, Windows 11, Node 24.16.0, @sanity/astro 3.4.2, sanity 6.9.1,
+astro 7.2.9, adapter 14.2.4, wrangler 4.110.0, vite 8.2.2).**
+
+- **Reproduced first, on the unmodified tree.** `astro dev` died about 9 seconds in with
+  `Build failed with 346 errors:` and exit code 1. The count differs from Reid's 364, and the
+  first export named is `FormRow` from `node_modules/sanity/lib/presentation.js` rather than
+  `DocumentStatus`, because the optimizer scans different files first; every one of the
+  `[MISSING_EXPORT]` blocks names `node_modules/sanity/package.json`.
+- **Fixed.** `astro v7.2.9 ready in 26283 ms`, zero `MISSING_EXPORT`. `GET /` 200 in 4.85s
+  cold, `GET /studio/` 200 in 0.13s; both still 200 when polled at 1.5, 3.1 and 4.7 minutes
+  (0.1s to 1.1s). The run was ended by the 330s `timeout` (exit 124), and the "Workers
+  runtime crashed unexpectedly and is being restarted" line stamped at the same second is
+  that kill, not a fault.
+- **The Studio in a real browser.** `/studio/` hydrated to the Studio's own "Project not
+  found" screen (this worktree's `.env` carries no project id; the CORS errors to
+  `placeholder-project-id.api.sanity.io` are that, and expected on localhost). One request
+  each for `styled-components.js`, `sanity.js` and `react-compiler-runtime.js` from
+  `node_modules/.vite/deps/`, and no console message matching
+  `hydrat|does not provide|instances`.
+- **Build output unchanged.** `npm run build` with `origin/main`'s `astro.config.mjs` and
+  with this one, back to back: both exit 0, both 491 files under `dist/client`, and the
+  sorted file list and every file's sha1 are identical.
+  `grep -lF 'packages/styled-components/src/utils/errors.md#' dist/client/_astro/*.js` lists
+  exactly one file, and the loose `grep -l "errors.md#"` also finds one.
+- **Unrelated noise seen while doing it.** `astro dev` logs `[ERROR] Invalid hook call` on
+  each render of `/` (the response is still a 200). It appears identically with
+  `SANITY_ASTRO_DISABLE_MODULE_DEDUPE=1`, that is with no `sanity` alias in play at all, so
+  this change neither causes nor cures it. It is not investigated here.
+
+**Applies to:** every family repo using `@sanity/astro` with the embedded Studio, on any
+Windows dev machine. The regex is present in 3.4.2 (read here) and 3.5.1 (per Reid's
+report).
+
+**Adopting it in a site.** Copy the two files, then in that site's `astro.config.mjs` add
+`import { fixSanityDedupeAlias } from './src/lib/sanity-dedupe-alias.ts';` and put
+`fixSanityDedupeAlias()` in `vite.plugins` next to `tailwindcss()`. Check with `astro dev` on
+Windows and open `/studio/` in a real browser. **reid-design-site** carries an inline
+equivalent (`fixSanityDedupeAliasOnWindows` in its `astro.config.mjs`, plugin name
+`reid:fix-sanity-dedupe-alias`), which works and is marked `partial`; replace it with the
+canonical file, and add the marker, at its next sync session. No other repo has been checked
+for the trap: their matrix cells are inferred from card 10, not verified.
