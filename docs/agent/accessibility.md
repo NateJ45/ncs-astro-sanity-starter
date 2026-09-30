@@ -35,7 +35,7 @@ Target: WCAG 2.1 AA in both light and dark modes. Aim for 100 Lighthouse Accessi
 - `--foreground` (Ink in light, Paper in dark): headings and body text.
 - `--secondary`: borders, dividers, decorative ornaments. NOT eyebrow labels (those use `text-foreground/65`).
 
-**Motion.** `globals.css` disables animations and transitions globally under `prefers-reduced-motion: reduce`, and Lenis smooth scroll becomes a no-op. The before/after slider (if active) falls back to a tap-to-toggle behavior. View Transitions become instant cross-fades. New animations inherit this; no per-component handling needed.
+**Motion.** `globals.css` disables animations and transitions globally under `prefers-reduced-motion: reduce` (animations at 0.01ms so `animationend` still fires; transitions at 0s, duration and delay, never 0.01ms, which WebKit strands: PORTS.md card 61), and Lenis smooth scroll becomes a no-op. The before/after slider (if active) falls back to a tap-to-toggle behavior. View Transitions become instant cross-fades. New animations inherit this; no per-component handling needed.
 
 **Language and metadata.** `<html lang="en">` and the document `title` and `description` come from `BaseLayout`. Pass `title` and `description` through every page that uses the layout. Any Calendly embed needs an `aria-label` on its iframe.
 
@@ -77,7 +77,7 @@ The site uses motion for hero entrances, View Transitions, and component micro-i
 - **Durations:** 150-300ms for state changes (hover, focus), 400-600ms for content reveals, never longer than 800ms for a single animation. Long animations feel laggy.
 - **Easing:** `ease-out` for entrances, `ease-in` for exits. Avoid spring physics for primary content at large scales (disorienting).
 - **What to animate:** opacity, transform (translate/scale). NOT layout properties (width, height, top) -- expensive and janky.
-- **Reduced motion:** the global stylesheet kills animations and transitions under `prefers-reduced-motion: reduce`, and Lenis becomes a no-op. New components inherit this; verify by toggling the OS setting and reloading.
+- **Reduced motion:** the global stylesheet kills animations and transitions under `prefers-reduced-motion: reduce`, and Lenis becomes a no-op. New components inherit this; verify by toggling the OS setting and reloading. `tests/reduced-motion.spec.ts` checks every route settles to still, on WebKit too. Under reduce no `transitionend` fires, so do not make a component depend on it.
 - **Don't animate to grab attention.** If users need to look at something, the design should pull the eye structurally, not by wiggling.
 
 ### Before merging

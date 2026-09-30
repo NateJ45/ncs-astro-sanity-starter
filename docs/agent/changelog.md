@@ -10,6 +10,12 @@
 > in PORTS.md; something that needs to be _understood in sequence_ belongs here. Entries
 > below may reference a card number.
 
+_2026-09-30 — Reduced motion zeroes transitions; a spec holds it (PORTS card 61)._
+
+The global reduced-motion reset gave transitions 0.01ms. Because `transition-property` defaults to `all`, that gives every element a transition, and WebKit never finishes a 10-microsecond one: in fbcm (its PR #6) 289 sat at progress 0 on the home page, each holding its property at the old value, and its motion test failed on the webkit-iphone project on `main`. Transitions are now 0s, duration and delay; animations stay at 0.01ms. New PORTABLE `tests/reduced-motion.spec.ts` checks every route has nothing running 2.5s after load under `reduce`, on chromium and the WebKit iPhone profile. The starter's own pages passed it before the fix too (they do not trip the change that starts a transition), so the proof of the check is fbcm's.
+
+---
+
 _2026-09-29 — `astro dev` works on Windows again: the Sanity dedupe alias is repaired (PORTS card 60)._
 
 Found in reid-design-site (its PR #48) and folded back here. On Windows `astro dev` exited inside a minute with `[MISSING_EXPORT] ... is not exported by "node_modules/sanity/package.json"`, on the same `@sanity/astro` 3.4.2 and `sanity` 6.9.1 this starter pins. Cause: `@sanity/astro`'s dev-only `sanity:module-dedupe` plugin strips `/package.json` from a resolved path with a regex that only knows forward slashes, so on Windows every `import from 'sanity'` is aliased to a JSON file. `astro build` never loads the plugin, which is why CI and production were always green. New PORTABLE `src/lib/sanity-dedupe-alias.ts` (`fixSanityDedupeAlias()`, plus the testable `repairSanityDedupeAlias()`), wired into `vite.plugins` in `astro.config.mjs`, with `sanity-dedupe-alias.test.ts`. The upstream env off switch was tried and rejected: the server stays up but the Studio will not hydrate. No build output changed (byte-identical `dist/client` before and after, measured in the card).

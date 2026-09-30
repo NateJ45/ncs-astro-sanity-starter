@@ -178,6 +178,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 58  | GA4 fires only on the production hostname                         | n/a     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | no                  | no             |
 | 59  | `_headers`: one rule per path; /_astro/* owns its cache           | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
 | 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias       | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | n/a                 | yes            |
+| 61  | Reduced motion zeroes transitions; a spec holds it                | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5796,3 +5797,52 @@ file against that repo's main (identical apart from files that embed the build t
   way on its phase-2 stack (sanity 6.12). The port is protective. The same PR pulled three
   canonical files forward that had drifted since 2026-09-07.
 - **fbcm** [#5](https://github.com/NateJ45/fbcm/pull/5), outside the matrix: straight port.
+
+## Card 61: Reduced motion zeroes transitions; a spec holds it (2026-09-30)
+
+**Origin: fbcm** ([PR #6](https://github.com/NateJ45/fbcm/pull/6)). **Canonical:** the
+reduced-motion block in `src/styles/globals.css` (per-site file: copy the two changed lines
+and the comment), and `tests/reduced-motion.spec.ts` (PORTABLE), added to the
+`webkit-iphone` project's `testMatch` in `playwright.config.ts` (PORTABLE).
+
+**The trap.** The family's reduced-motion reset set `transition-duration: 0.01ms !important`
+on `*`, the common idiom (it keeps `transitionend` firing). But `transition-property`
+defaults to `all`, so the idiom gives EVERY element on the page a transition, and any
+property that changes after load starts one. WebKit never finishes a 10-microsecond
+transition. fbcm's `motion.spec.ts` "nothing on the home page is animating" failed on the
+`webkit-iphone` project on `main`: WebKit did apply `reduce` (`matchMedia` and a CSS probe
+rule agreed), yet two seconds after load 289 `CSSTransition`s on `tab-size` sat at
+`currentTime` 0, progress 0, and the count kept growing (35 at load, 67 at +2s, 228 after a
+navigation). Chromium finishes them at once, which is why it looked like a WebKit flake. It
+is a real-user bug too: a stuck transition holds its property at the OLD value on an iPhone
+with Reduce Motion on.
+
+**The fix.** `transition-duration: 0s !important; transition-delay: 0s !important;` A zero
+combined duration creates no transition at all; the delay matters, because a staggered
+delay alone creates one. The cost: `transitionend` no longer fires under `reduce`, so first
+check nothing waits on it (`grep -rnE "transitionend|ontransitionend" src`: none in the
+starter or fbcm). Animations keep `0.01ms`: Radix waits on `animationend` for exit
+animations, and animations finish correctly in WebKit.
+
+**The spec.** `tests/reduced-motion.spec.ts`: under `reducedMotion: 'reduce'`, every route in
+`routes.ts` must have nothing `running` in `document.getAnimations()` 2.5s after
+`domcontentloaded` (not `load`: a WebM-first video never fires it in WebKit). It runs on
+chromium and the WebKit iPhone profile; on chromium it still catches an infinite animation
+that escaped the reset.
+
+**Measured.** In fbcm the equivalent check failed on WebKit before the fix and passed after
+(PR #6: first fully green CI since 2026-09-28). In the starter the new spec passed BEFORE the
+fix as well (PR #41's first commit: 116 tests, the 16 new ones included), because the
+starter's pages do not trip the post-load property change that starts a transition. So the
+spec cannot prove the bug here; fbcm is the proof. It guards the rest of the family, whose
+pages may or may not trip it.
+
+**Applies to:** every live family repo carries the same reset (checked 2026-09-30 against
+each repo's `main`: presacademy, reid-design-site, mas-monograms, 2ndpreschicago,
+stonesteps-50k, wcp-website (`site/`), nixoncreativestudio, and fbcm outside the matrix,
+already fixed).
+
+**Adopting it in a site.** Change the two lines in its reduced-motion block (and add
+`transition-delay: 0s`), grep for `transitionend`, copy `tests/reduced-motion.spec.ts` and the
+`playwright.config.ts` `testMatch` change (or pull the canonical config), and let CI run it
+on WebKit. A route that fails lists what is still running.

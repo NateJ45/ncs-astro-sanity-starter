@@ -52,7 +52,9 @@ export default defineConfig({
     {
       name: 'webkit-iphone',
       use: { ...devices['iPhone 14'] },
-      testMatch: /(smoke|a11y|a11y-dark)\.spec\.ts$/,
+      // reduced-motion added 2026-09-30 (PORTS.md card 61): WebKit is the
+      // engine that strands a 0.01ms transition, so that is where it must run.
+      testMatch: /(smoke|a11y|a11y-dark|reduced-motion)\.spec\.ts$/,
     },
   ],
   webServer: {
