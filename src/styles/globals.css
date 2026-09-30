@@ -946,7 +946,19 @@ body::before {
 
 /* ---------- Reduced motion -------------------------------------------- */
 /* Disables animations, transitions, and smooth scroll for users who
-   prefer reduced motion. Lenis init must also check this flag. */
+   prefer reduced motion. Lenis init must also check this flag.
+
+   Transitions are ZERO, duration AND delay, never the usual 0.01ms (PORTS.md
+   card 61, 2026-09-30). `transition-property` defaults to `all`, so 0.01ms
+   hands EVERY element a transition, and WebKit never finishes a
+   10-microsecond one: they pile up at progress 0 and each holds its property
+   at the OLD value (fbcm's home page: 289 stuck). 0s creates no transition at
+   all; the delay matters because a staggered delay alone creates one. The
+   cost is that `transitionend` no longer fires under reduce: nothing here
+   listens for it, and a component that does must not rely on it under
+   reduce. Animations keep 0.01ms so `animationend` still fires (Radix waits
+   on it for exit animations); they finish correctly in WebKit.
+   tests/reduced-motion.spec.ts holds this on the webkit-iphone project. */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -954,7 +966,8 @@ body::before {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
   html {
