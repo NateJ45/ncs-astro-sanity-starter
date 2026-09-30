@@ -105,9 +105,10 @@ each repo's `origin/main` that day (see that date's sync-session entry for what 
 checked). Card 38a (the presacademy harvest audit) is a record of one audit, not a
 technique a repo adopts, so it has no row.
 
-Row 60 was added on 2026-09-29 without a grep of the other repos: the starter (measured)
-and reid-design-site (its PR #48, an inline equivalent, hence `partial`) are known; the rest are
-inferred from their card 10 cells and unchecked.
+Row 60 was checked on 2026-09-29: the starter is measured, reid-design-site carries an inline
+equivalent (its PR #48, hence `partial`), and every other `no` was confirmed by grepping that
+repo's installed `@sanity/astro` for the forward-slash regex and its `astro.config.mjs` for any
+repair (none had one).
 
 | #   | Card                                                              | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | ----------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
@@ -5757,8 +5758,9 @@ astro 7.2.9, adapter 14.2.4, wrangler 4.110.0, vite 8.2.2).**
   this change neither causes nor cures it. It is not investigated here.
 
 **Applies to:** every family repo using `@sanity/astro` with the embedded Studio, on any
-Windows dev machine. The regex is present in 3.4.2 (read here) and 3.5.1 (per Reid's
-report).
+Windows dev machine. The regex is present in 3.4.2 (read here) and in 3.5.1, the latest
+release on 2026-09-29 (read from the published tarball, `npm pack @sanity/astro@3.5.1`), so
+upgrading does not fix it.
 
 **Adopting it in a site.** Copy the two files, then in that site's `astro.config.mjs` add
 `import { fixSanityDedupeAlias } from './src/lib/sanity-dedupe-alias.ts';` and put
@@ -5766,5 +5768,7 @@ report).
 Windows and open `/studio/` in a real browser. **reid-design-site** carries an inline
 equivalent (`fixSanityDedupeAliasOnWindows` in its `astro.config.mjs`, plugin name
 `reid:fix-sanity-dedupe-alias`), which works and is marked `partial`; replace it with the
-canonical file, and add the marker, at its next sync session. No other repo has been checked
-for the trap: their matrix cells are inferred from card 10, not verified.
+canonical file, and add the marker, at its next sync session. Checked 2026-09-29: the
+installed `@sanity/astro` in presacademy, mas-monograms, stonesteps-50k and
+ncs-church-starter (and fbcm, outside the matrix) carries the same regex; wcp-website
+(`site/`, `^3.4.2`) and 2ndpreschicago (3.5.1) pin versions that do.
