@@ -105,10 +105,9 @@ each repo's `origin/main` that day (see that date's sync-session entry for what 
 checked). Card 38a (the presacademy harvest audit) is a record of one audit, not a
 technique a repo adopts, so it has no row.
 
-Row 60 was checked on 2026-09-29: the starter is measured, reid-design-site carries an inline
-equivalent (its PR #48, hence `partial`), and every other `no` was confirmed by grepping that
-repo's installed `@sanity/astro` for the forward-slash regex and its `astro.config.mjs` for any
-repair (none had one).
+Row 60 was rolled out to every live family repo on 2026-09-29/30, each port merged through a PR
+with its own before/after evidence (see the card's "Rollout" section). ncs-church-starter is
+archived and nixoncreativestudio has no Sanity, hence `n/a`.
 
 | #   | Card                                                              | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | ----------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
@@ -178,7 +177,7 @@ repair (none had one).
 | 57  | Preview cookie's value is checked, not its presence               | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | no             |
 | 58  | GA4 fires only on the production hostname                         | n/a     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | no                  | no             |
 | 59  | `_headers`: one rule per path; /_astro/* owns its cache           | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
-| 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias       | no      | no          | yes      | partial          | no            | no             | n/a                | n/a                 | no             |
+| 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias       | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | n/a                 | yes            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5772,3 +5771,28 @@ canonical file, and add the marker, at its next sync session. Checked 2026-09-29
 installed `@sanity/astro` in presacademy, mas-monograms, stonesteps-50k and
 ncs-church-starter (and fbcm, outside the matrix) carries the same regex; wcp-website
 (`site/`, `^3.4.2`) and 2ndpreschicago (3.5.1) pin versions that do.
+
+**Rollout (2026-09-29/30).** Each port was verified on Windows before merging: unfixed
+repro, a fixed dev run, the Studio loaded in a browser, and `dist/client` compared file by
+file against that repo's main (identical apart from files that embed the build time).
+
+- **presacademy** [#40](https://github.com/NateJ45/presacademy/pull/40), **mas-monograms**
+  [#50](https://github.com/NateJ45/mas-monograms/pull/50): straight ports, crash reproduced and fixed.
+- **reid-design-site** [#57](https://github.com/NateJ45/reid-design-site/pull/57): its inline
+  equivalent replaced by the canonical module (vitest repo, so a local vitest spec instead of
+  the node:test one).
+- **stonesteps-50k** [#51](https://github.com/NateJ45/stonesteps-50k/pull/51): had already
+  excluded `sanity` from `optimizeDeps` as a workaround for this crash (blamed on rolldown),
+  which kept dev up but left the Studio unable to hydrate. The port drops that exclude, and the
+  Studio now hydrates. **Lesson: an `optimizeDeps.exclude` entry for `sanity` is this bug's
+  workaround in disguise; remove it when adopting the card.**
+- **wcp-website** [#41](https://github.com/NateJ45/wcp-website/pull/41) (`site/`, vitest): the
+  crash is fixed, but the Studio is still blank under dev from a separate WCP-only cause
+  (`"./styles.css" is not exported ... @sanity/ui`, suspected: `sanity-plugin-media` 6.1.7
+  nesting `@sanity/ui` 4.0.7). Its docs had blamed the spaces in its folder path; the crash
+  reproduced from a short path, so that note was corrected.
+- **2ndpreschicago** [#37](https://github.com/NateJ45/2ndpreschicago/pull/37): also excluded
+  `sanity`, so no crash; the exclude stays because this repo's Studio is blank under dev either
+  way on its phase-2 stack (sanity 6.12). The port is protective. The same PR pulled three
+  canonical files forward that had drifted since 2026-09-07.
+- **fbcm** [#5](https://github.com/NateJ45/fbcm/pull/5), outside the matrix: straight port.
