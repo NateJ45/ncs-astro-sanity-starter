@@ -33,6 +33,8 @@ A few `astro.config.mjs` levers that look tempting but break things -- left docu
 
 - **`crossorigin="anonymous"` on Sanity CDN images breaks them.** Sanity's CDN doesn't send `Access-Control-Allow-Origin` for credential-less image requests, so the browser refuses the response and the image fails to render. Lighthouse's third-party-cookie warning about `sanitySession` is a real cookie, but the only known fix would proxy every image through a Cloudflare Worker -- not worth the engineering for an unscored Best Practices flag.
 
+- **`fixSanityDedupeAlias()` in `vite.plugins` stays, and `SANITY_ASTRO_DISABLE_MODULE_DEDUPE=1` is not the alternative** (PORTS.md card 60, 2026-09-29). `@sanity/astro` adds a dev-only plugin, `sanity:module-dedupe`, that aliases `sanity` and `styled-components` to one directory each. On Windows its forward-slash-only regex leaves the alias pointing at the `package.json` file, and `astro dev` dies in under a minute with `[MISSING_EXPORT] "..." is not exported by "node_modules/sanity/package.json"`. `astro build` never loads the plugin, so nothing but a Windows dev server shows it. The canonical `src/lib/sanity-dedupe-alias.ts` repairs the alias in place from a post-ordered `config` hook. The upstream env off switch stops the crash but also drops the plugin's pre-bundling list, and the Studio then fails to hydrate in the browser (`react-compiler-runtime ... does not provide an export named 'c'`). Remove the repair only when the upstream regex is fixed (read `node_modules/@sanity/astro/dist/sanity-astro.js` for `sanity:module-dedupe`).
+
 ### Build order: typegen before build
 
 `npm run build` runs `astro build` only. It does NOT chain typegen.
