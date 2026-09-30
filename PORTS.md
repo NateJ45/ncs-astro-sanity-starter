@@ -178,7 +178,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 58  | GA4 fires only on the production hostname                         | n/a     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | no                  | no             |
 | 59  | `_headers`: one rule per path; /_astro/* owns its cache           | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
 | 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias       | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | n/a                 | yes            |
-| 61  | Reduced motion zeroes transitions; a spec holds it                | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 61  | Reduced motion zeroes transitions; a spec holds it                | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5846,3 +5846,21 @@ already fixed).
 `transition-delay: 0s`), grep for `transitionend`, copy `tests/reduced-motion.spec.ts` and the
 `playwright.config.ts` `testMatch` change (or pull the canonical config), and let CI run it
 on WebKit. A route that fails lists what is still running.
+
+**Needs `@playwright/test` 1.63 or later.** The spec's `test.use({ reducedMotion: 'reduce' })`
+does not exist on 1.62: it fails type-check (`ts(2353)`), and at runtime the page would load
+WITHOUT reduced motion, so the spec would prove nothing. presacademy and wcp-website were on
+1.62 and took the bump (only `@playwright/test`, `playwright` and `playwright-core` move).
+
+**Rollout (2026-09-30).** Every port checked first that nothing listens for `transitionend`
+(none did), then ran the spec plus smoke on chromium and webkit-iphone before merging:
+[stonesteps-50k #52](https://github.com/NateJ45/stonesteps-50k/pull/52) (its config was an older
+canonical copy, pulled forward),
+[reid-design-site #60](https://github.com/NateJ45/reid-design-site/pull/60),
+[mas-monograms #51](https://github.com/NateJ45/mas-monograms/pull/51),
+[presacademy #41](https://github.com/NateJ45/presacademy/pull/41) (Playwright bump),
+[nixoncreativestudio #39](https://github.com/NateJ45/nixoncreativestudio/pull/39),
+[2ndpreschicago #39](https://github.com/NateJ45/2ndpreschicago/pull/39),
+[wcp-website #43](https://github.com/NateJ45/wcp-website/pull/43) (`site/`, Playwright bump), and
+fbcm (the origin, [PR #6](https://github.com/NateJ45/fbcm/pull/6)). None of these sites failed the
+spec BEFORE its fix either, locally; fbcm remains the only measured failure.
