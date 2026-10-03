@@ -6,13 +6,26 @@ If you are a future Claude session and you can only read one doc, read `CLAUDE.m
 
 ---
 
+## Design directions (before a reskin)
+
+For a new client, do not go straight to `/reskin`. Order: brief, references, design-directions, reskin.
+
+1. Fill `docs/templates/design-brief.md` and split it into `PRODUCT.md` and `DESIGN.md` at the repo root.
+2. `npm run references -- https://site-one.example https://site-two.example` screenshots each at 390 and 1280 into `docs/references/<slug>/` and writes `docs/references/README.md`; fill the "what we like / what we avoid" columns by hand (re-runs keep them). Or list URLs in `docs/references/references.json` and run it with no arguments. First run needs `npx playwright install chromium`.
+3. Run `/design-directions`. It writes 3 or 4 mockups and an `index.html` into `docs/design-directions/<date>-<slug>/`, runs `npm run directions:shoot -- <that folder>` (390/768/1280 into `shots/`), and asks you to pick. The pick is recorded as a dated entry in that folder's README.
+4. Run `/reskin`; it reads the pick.
+
+Rules and what each directions run must contain: `.claude/rules/design-flow.md`.
+
+---
+
 ## Reskin (apply a new brand identity)
 
 The primary path for adapting this starter to a new client is the `/reskin` skill. It interviews you for brand inputs, writes `brand/brand.config.json`, runs `npm run apply-brand`, checks contrast, and screenshots the result.
 
 **Quick start with the skill:**
 
-1. Open a Claude session in this repo and type `/reskin`.
+1. Open a Claude session in this repo and type `/reskin` (after the design-directions step above, for a new client).
 2. The skill interviews you for business name, domain, tagline, palette, and fonts.
 3. It fills `brand/brand.config.json` and runs `npm run apply-brand`.
 
