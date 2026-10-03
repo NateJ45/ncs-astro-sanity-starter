@@ -38,6 +38,10 @@ type Props = {
   cta?: ProjectedDynamicListSection['cta'];
   /** How many cards across on a desktop. Three is what this grid always was. */
   columns?: number;
+  /** How many items to show. The GROQ side slices at 12, the schema's max,
+   *  because a subscript range cannot take a field reference. The trim to the
+   *  editor's actual choice happens here. */
+  limit?: number;
   headingId?: string;
 };
 
@@ -50,10 +54,14 @@ const {
   items = [],
   cta,
   columns,
+  limit,
   headingId = 'dynamic-list-heading',
 } = Astro.props as Props;
 
-const hasItems = Array.isArray(items) && items.length > 0;
+// Trim to the block's own limit. The query hands back up to 12 regardless of
+// what the editor chose (see the note in src/lib/queries.ts).
+const shown = Array.isArray(items) ? items.slice(0, limit ?? items.length) : [];
+const hasItems = shown.length > 0;
 
 // Unset, this emits `sm:grid-cols-2 lg:grid-cols-3`, which is the string that
 // was inline on all three card grids below before src/lib/layout-variants.ts
@@ -116,7 +124,7 @@ const fallbackLabel: Record<string, string> = {
             class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
             data-stagger-grid
           >
-            {items.map((item) => (
+            {shown.map((item) => (
               <li>
                 {item.href ? (
                   <a
@@ -170,7 +178,7 @@ const fallbackLabel: Record<string, string> = {
             class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
             data-stagger-grid
           >
-            {items.map((item) => (
+            {shown.map((item) => (
               <li>
                 {item.href ? (
                   <a
@@ -219,7 +227,7 @@ const fallbackLabel: Record<string, string> = {
             class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
             data-stagger-grid
           >
-            {items.map((item) => (
+            {shown.map((item) => (
               <li class="flex">
                 <blockquote class="flex flex-1 flex-col rounded-md border border-border-soft bg-card p-m">
                   {item.summary && (
@@ -244,7 +252,7 @@ const fallbackLabel: Record<string, string> = {
         {/* ── FAQ items (mini accordion) ───────────────────────────────── */}
         {source === 'faqs' && (
           <dl class="mx-auto mt-section-lg max-w-3xl divide-y divide-border-soft">
-            {items.map((item) => (
+            {shown.map((item) => (
               <div class="py-m">
                 <dt class="leading-snug font-semibold text-foreground">{item.title}</dt>
                 {item.summary && (
@@ -289,7 +297,7 @@ const fallbackLabel: Record<string, string> = {
             class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
             data-stagger-grid
           >
-            {items.map((item) => (
+            {shown.map((item) => (
               <li>
                 <div class="h-full rounded-md border border-border-soft bg-card p-m">
                   <h3 class="font-display text-h4 text-foreground">{item.title}</h3>

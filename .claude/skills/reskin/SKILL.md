@@ -87,7 +87,9 @@ c. **Keep the neutral default.** Skip palette changes entirely.
 
 10. Path to `logo-light` file and `logo-dark` file (relative to repo root, under `src/assets/`).
     Note that `apply-brand` does not copy files. The user must place the files at those paths
-    before running `npm run build`.
+    before running `npm run build`. Guard for any SVG logo you write or edit: no `--` inside an
+    XML/SVG comment (it blanks the image while the request still says 200), and when verifying,
+    wait on `naturalWidth > 0`, not `load` (docs/agent/images.md, PORTS.md card 69).
 
 ---
 
@@ -265,7 +267,9 @@ After all automated steps complete, always produce this summary:
 **Logo files:** Confirm whether `logo-light` and `logo-dark` are in place at the paths
 set in `logoPaths`. If not, flag the exact paths where the user must drop the files.
 The build will succeed without them (it uses the placeholder SVGs), but the live site
-will show the placeholder until the real files are placed.
+will show the placeholder until the real files are placed. When the real files arrive, check
+each SVG for a `--` inside a comment (it makes the file malformed and the image renders
+empty with a 200) and confirm `naturalWidth > 0` in a real browser.
 
 **Real photography:** The seed content uses placeholder images. Flag that Unsplash credits
 or client-supplied photos need to be uploaded in Sanity Studio before launch.

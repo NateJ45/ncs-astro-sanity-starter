@@ -10,6 +10,16 @@
 @import '@fontsource/libre-baskerville/700.css';
 @import '@fontsource-variable/inter';
 
+/* Tailwind v4 scans every non-gitignored file for class names. The committed
+   parity baselines (scripts/.parity/*.html) and the Markdown docs name hundreds
+   of utility classes, and each one keeps a CSS rule alive in the shipped sheet
+   even after the last real use under src/ is gone. It also lets the parity gate
+   pass on rules its own baselines fed. Exclude them (PORTS.md card 3, addendum
+   2026-10-03). Paths are relative to THIS file. */
+@source not '../../scripts/.parity';
+@source not '../../docs';
+@source not '../../*.md';
+
 @custom-variant dark (&:is(.dark *));
 
 /* ---------- Brand tokens ---------------------------------- */

@@ -1,0 +1,63 @@
+# Dependabot version updates (PORTS.md card 62). Forks inherit this shape.
+#
+# READ BEFORE EDITING (docs/agent/deployment.md, "Dependabot"):
+#   - This file only configures VERSION-update PRs. Vulnerability alerts and
+#     automated security fixes are separate repo settings and are NOT switched on
+#     by this file.
+#   - Dependabot runs get the DEPENDABOT secrets store, not the Actions one. If a
+#     fork's CI build reads a secret, set it again with
+#     `gh secret set NAME --app dependabot --repo OWNER/REPO` or every Dependabot
+#     PR fails on the first page that needs it. (Repo VARIABLES are shared.)
+#   - `main` is the only long-lived branch, so there is no `target-branch`.
+#   - The ignore list is the pinned stack (CLAUDE.md rule 8, .claude/rules/
+#     dependencies.md). Those packages move together, by hand, in one planned
+#     session. Letting Dependabot bump one member breaks the peer set (ERESOLVE,
+#     or a plugin importing a subpath the pinned @sanity/ui lacks), and a group
+#     that can never go green is a group nobody reads.
+#   - Never merge a dependency PR whose CI is red. Merge on green, leave the rest,
+#     and let Dependabot re-propose per package so CI bisects for you.
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: America/New_York
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # The Sanity stack and React are an exact-pinned, matched set.
+      - dependency-name: sanity
+      - dependency-name: '@sanity/*'
+      - dependency-name: 'sanity-plugin-*'
+      - dependency-name: react
+      - dependency-name: react-dom
+      - dependency-name: react-is
+      - dependency-name: styled-components
+      # Adapter and wrangler are pinned as a pair (rule 8): 14.2.5 wants a
+      # wrangler the pin does not carry.
+      - dependency-name: '@astrojs/cloudflare'
+      - dependency-name: wrangler
+      # TypeScript 7 (the native compiler) breaks Astro's tooling. Majors only:
+      # 6.x minors and patches still flow (vault gotcha typescript-not-7).
+      - dependency-name: typescript
+        versions: ['>=7']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: America/New_York
+    groups:
+      actions:
+        patterns:
+          - '*'

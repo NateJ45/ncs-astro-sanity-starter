@@ -80,6 +80,10 @@ After creating a new singleton with the factory, register it in three places:
 
 **Do NOT retroactively refactor existing singletons** onto this factory. Each existing singleton has hand-authored field variations (extra groups, page-specific fields). The factory is for new singletons only.
 
+### Two query traps that a green build hides (PORTS.md cards 65 and 66)
+
+`sanityFetch` returns its fallback on ANY error, and also when no project is configured, so a broken query renders an empty section and the build stays green; the first hour after a real project is attached is the only time these surface, as `fetch error` lines inside a successful build. **Read the build log for `fetch error` the first time you build against a configured project.** Two shapes to know: (1) a GROQ subscript range needs INTEGER endpoints, so `[0...limit]` with `limit` a field is a parse error (and a `$param` cannot vary per array item); `dynamicListSection` slices at the schema's max (`[0...12]`, the `limit` field's `max(12)`) and `DynamicList.astro` trims to the block's own `limit`, so raising the schema max means raising the literal in `queries.ts` too. Verify a slice against the live API in ten seconds: `curl -s -G "https://<projectId>.api.sanity.io/v2026-05-01/data/query/production" --data-urlencode 'query=*[_type=="journalEntry"][0...12]{_id}'`. (2) Content that is not the client's own words carries a `confirmed` flag and a visible badge (`.claude/rules/sanity-schema.md`, "Schema conventions").
+
 ### GROQ helpers and custom-page queries
 
 All GROQ queries live in `src/lib/queries.ts`. Key helpers:
