@@ -1,0 +1,69 @@
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+/**
+ * parity-glob.mjs - turns a comma-separated list of page-path globs into one
+ * matcher, for page-parity.mjs's `--exclude` / `PARITY_EXCLUDE`.
+ *
+ * WHY THIS EXISTS (plan 2c task 7, 2026-09-20)
+ * A generated archive - pagination, tag pages, category pages, and (on a
+ * content-heavy site) the post list itself - produces hundreds of pages that
+ * are near-identical copies of the same template. Capturing and comparing
+ * every one of them does not add coverage: the first page of each template
+ * already proves the template renders correctly, and the rest just repeat
+ * that proof at O(n) baseline files. Worse, when a real diff DOES appear (a
+ * shared layout change, a card component edit), it shows up as hundreds of
+ * "DIFF" lines that all say the same thing, which buries the one page whose
+ * diff is actually different from the rest. `--exclude` lets a project keep
+ * its baseline set to "one of each template" without silencing genuine drift
+ * on the pages that remain.
+ *
+ * GLOB SYNTAX (deliberately small: two tokens, nothing else)
+ *   *   matches one path SEGMENT (no `/`).
+ *   **  matches ANY NUMBER of path segments, including zero.
+ * Everything else in the pattern is matched literally, including `.` and `-`.
+ * There is no `?`, no character classes, no brace expansion: the parity
+ * harness names pages as simple slash-joined paths
+ * (`blog/tag/advent`, `post/handel-s-messiah-sing-in-carols`), and those two
+ * tokens cover every shape that shows up there.
+ *
+ * MATCHING TARGET
+ * Globs are matched against the page NAME exactly as page-parity.mjs prints
+ * and files it (e.g. `blog/category/sermon-preview/page/2`), never against a
+ * filesystem path or a snapshot filename. A caller with a literal name and no
+ * wildcard gets exact-match-only, which is what "keep three posts explicitly"
+ * in the task brief relies on.
+ */
+
+/**
+ * Compile one glob segment-token pattern into a RegExp that matches a full
+ * page name (anchored start to end).
+ * @param {string} glob
+ * @returns {RegExp}
+ */
+function globToRegExp(glob) {
+  // Escape every regex metacharacter first, then re-expand the two glob
+  // tokens we support. `**` must be substituted before `*` or the second
+  // pass would re-split the placeholder for `**`.
+  const escaped = glob.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  const withDoubleStar = escaped.replace(/\*\*/g, '\u0000DOUBLESTAR\u0000');
+  const withSingleStar = withDoubleStar.replace(/\*/g, '[^/]*');
+  const pattern = withSingleStar.replace(/\u0000DOUBLESTAR\u0000/g, '.*');
+  return new RegExp(`^${pattern}$`);
+}
+
+/**
+ * Parse a comma-separated glob list (from `--exclude` or `PARITY_EXCLUDE`)
+ * into a single predicate over page names. An empty/undefined input matches
+ * nothing, so the default behaviour (no exclusion) is unchanged.
+ * @param {string | undefined | null} spec
+ * @returns {(name: string) => boolean}
+ */
+export function parseExclude(spec) {
+  if (!spec) return () => false;
+  const patterns = spec
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map(globToRegExp);
+  if (patterns.length === 0) return () => false;
+  return (name) => patterns.some((re) => re.test(name));
+}
