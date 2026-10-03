@@ -204,6 +204,34 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ['@sanity/ui', 'styled-components'],
     },
+    environments: {
+      // A MID-REQUEST OPTIMIZER RELOAD BREAKS REACT SSR IN `astro dev`, AND THESE
+      // TWO ARE WHAT TRIGGERED IT (PORTS.md card 63). Both are discovered by
+      // Vite's dep scanner DURING the first render rather than at startup, so
+      // the optimizer re-bundles and reloads the module graph mid-flight.
+      // react-dom/server is then holding a React from the previous pass, its
+      // hook dispatcher reads null, and EVERY island fails to server-render:
+      // "Invalid hook call" followed by "Cannot read properties of null
+      // (reading 'useState')". The page still answers 200, so it looks like a
+      // component bug, not a build one. Upstream: withastro/astro#17834, fixed
+      // in @astrojs/cloudflare past our 14.2.4 pin (see CLAUDE.md rule 8).
+      // Listing them here does the same job at startup, with no version move.
+      //
+      // Measured on this repo, one cold request to / (JSON logging, which is
+      // what `astro dev` does under an agent or `--background`):
+      //   without this block   2 optimizer reloads, 17 dispatcher warnings, 7 TypeErrors
+      //   with it              0 reloads,            0 TypeErrors, 1-3 warnings
+      // (the leftover warnings still render correct HTML. Stone Steps also
+      // pre-bundles react for the `astro` environment; that block is not in the
+      // gotcha this one ports, so it is NOT here.)
+      // Remove it when the adapter pin moves, and check those numbers again.
+      // Dev only; `astro build` does not run the optimizer.
+      ssr: {
+        optimizeDeps: {
+          include: ['astro/app/manifest', 'astro/logger/json'],
+        },
+      },
+    },
     // -----------------------------------------------------------------------
     // ONE module instance per package
     // -----------------------------------------------------------------------

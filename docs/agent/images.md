@@ -58,6 +58,10 @@ If the starter is extended with a case-study or portfolio detail page, apply the
 
 The journal (`/journal/[slug]`) detail page caps its hero image at `max-w-4xl` (~896 px), with `<SanityImage width={1800}>` and `sizes="(min-width: 920px) 896px, 100vw"`. Reads as an editorial feature, not a billboard. The Sanity request stops at 1800 so the site isn't pulling a 1920 px file for a slot that maxes around 900 px even at 2x retina.
 
+### SVG and XML comments: never write `--` inside one (PORTS.md card 69)
+
+A `--` anywhere inside an `<!-- ... -->` comment makes the whole SVG malformed XML. The browser still fetches it (HTTP 200, no console error, nothing in the network panel), renders nothing, and leaves `naturalWidth` at 0 forever. Logo SVGs are exactly where people write a header comment that names a CSS custom property (`--color-ink`), a `-- scaffold` marker or a `git --flag`. Name tokens without the leading dashes ("the ink token") or put the note in a sibling README. When you verify a logo or any SVG in a screenshot or Playwright script, wait for `img.complete && img.naturalWidth > 0`, never for `load`: a broken SVG still fires `load`.
+
 ### Image guidelines for editors
 
 When uploading images via Sanity:

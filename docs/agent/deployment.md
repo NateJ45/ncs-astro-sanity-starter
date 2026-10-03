@@ -74,6 +74,17 @@ Set in Cloudflare -> **Workers & Pages -> your-project -> Settings -> Variables*
 - `SANITY_API_READ_TOKEN` -- only if any page needs to read draft content (typically not, since published content is publicly readable). Mark as Secret.
 - `PUBLIC_WEB3FORMS_KEY` -- LEGACY, and only needed for a build with no Worker. The contact form now posts to the site's own `/api/contact` endpoint first and only falls back to Web3Forms when that endpoint is not there (see PORTS.md card 45). On a Workers deploy, prefer the server-side `WEB3FORMS_KEY` secret below, which keeps the key out of the client bundle.
 
+### Dependabot
+
+`.github/dependabot.yml` (PORTS.md card 62) opens one grouped version-update PR per ecosystem each Monday at 07:00 America/New_York: npm minors and patches in a single `minor-and-patch` group (at most 5 open PRs), and GitHub Actions in an `actions` group. It carries no `target-branch` because `main` is the only long-lived branch. The Sanity stack, React, the Cloudflare adapter, wrangler and TypeScript 7+ are on its `ignore:` list because they are pinned and move together by hand (CLAUDE.md rule 8); take a major or a pinned-set bump in a planned session, not from a Dependabot PR.
+
+Things this file does NOT do, each of which has cost a family repo real time:
+
+- **It does not turn on vulnerability alerts or automated security fixes.** Those are repo settings: `gh api -X PUT repos/OWNER/REPO/vulnerability-alerts` and `gh api -X PUT repos/OWNER/REPO/automated-security-fixes`.
+- **Dependabot PRs do not see your Actions secrets.** Workflow runs it triggers read the separate _Dependabot_ secrets store. The starter's PR build (`ci.yml`) reads only repo VARIABLES (`PUBLIC_SANITY_*`), which Dependabot runs can read, so a fresh fork is fine. The day a fork's CI build reads a `secrets.*` value, grep the workflows for `secrets.` and set each one again with `gh secret set NAME --app dependabot --repo OWNER/REPO`; otherwise every Dependabot PR fails on the first step that needs it, and the red marks look like a dependency problem when they are a missing secret.
+- **It does not make a dependency PR safe to merge on local checks.** If CI is red, do not merge. Read `gh pr checks`, merge the ones whose real gates pass, leave the rest, and let Dependabot re-propose per package so CI bisects for you.
+- **Linters ship new default rules in minors.** If a lint tool's minor starts failing the whole group, exclude that tool from the group (`update-types`) so it lands on its own PR with its fixes.
+
 ### The contact endpoint (`/api/contact`)
 
 All of these are OPTIONAL. With none of them set the route still exists, still validates, and answers a visitor honestly; it just has nowhere to put the message. Set them as Worker secrets, not `.env`:
