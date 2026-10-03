@@ -179,7 +179,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 59  | `_headers`: one rule per path; /_astro/* owns its cache           | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
 | 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias       | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | n/a                 | yes            |
 | 61  | Reduced motion zeroes transitions; a spec holds it                | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
-| 62  | CI: parallel gates, sharded Playwright, scheduled Lighthouse      | pending | pending     | yes      | pending          | pending       | n/a            | n/a                | pending             | pending        |
+| 62  | CI: parallel gates, sharded Playwright, scheduled Lighthouse      | n/a     | pending     | yes      | pending          | pending       | n/a            | n/a                | pending             | pending        |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
