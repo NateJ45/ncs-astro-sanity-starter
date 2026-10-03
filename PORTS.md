@@ -6173,6 +6173,45 @@ reliable win everywhere, about 40 to 50% on PRs, plus not running at all on PRs 
 Lighthouse sample by template, not by taste. A hybrid site whose Worker renders every page (nixoncreativestudio)
 has no `dist/client` to share, so its shards test the uploaded preview URL instead.
 
+### Second pass (fbcm measurement, 2026-10-03)
+
+Five more speed-ups were measured on fbcm (PR 27, reviewed and merged). Two paid and are recipes
+here; the starter's own `ci.yml` took neither, because its numbers do not clear the bar (below).
+
+**B. Weighted shards.** Playwright's `--shard=N/3` hands each shard a contiguous block of an EQUAL
+NUMBER of tests, in project order, so one heavy group lands in one shard and the slowest shard sets
+the wall time. On fbcm 160 reflow tests are 45% of test time and sit together. Fix: set
+`PWTEST_SHARD_WEIGHTS: '268:181:125'` (colon separated, one weight per shard) in the env of the test
+step. Slowest shard job fell 342-378s to 268-286s. Pays when the slowest/mean ratio of the shard
+jobs is about 1.25x or worse. Caveats: it is an INTERNAL Playwright variable and may change without
+notice; the weights are test counts, so re-cut them when tests are added in bulk (run with
+`--reporter=json`, sum duration per test in project-then-file order, cut three blocks of equal
+time); a stale weight only unbalances the shards, it can never drop a test (the blocks always
+partition the whole list).
+
+**F. Link check as its own `links` job.** Move `npm run check:links` out of the end of `site`, so
+`site` ends at the artifact upload and the shards start straight away; a `links` job (`needs: [site]`:
+checkout, setup-node, `npm ci`, download `dist-client`, `npm run check:links`) runs beside the shards.
+`build` then needs `static` + `site` + `links`, so the check names are unchanged and the link check
+is still a gate. Saved about 30-50s per run on fbcm, where the link check takes 35-50s. Pays only
+when the link check is about 20s or more; below that the extra job's checkout and install cost
+more than it saves.
+
+**Why the starter did not take B or F** (last four `ci.yml` runs, 2026-10-03): the link check took
+0-1s (the starter has few pages), so F would only add a job. Shard test steps were 22/53/41s,
+31/53/38s, 26/53/31s and 23/53/38s, 1.37-1.55x slowest/mean on the step but only 1.03-1.20x on the
+shard JOBS (83-139s, dominated by install, browser libraries and runner variance), so the most B
+could win is about 14s of a 130s run, inside the noise. Measure the jobs, not the step, before
+adopting; a repo with heavier tests will clear the bar.
+
+**Measured NOT to pay (do not port):**
+
+- Astro/Vite build cache: the cache is 1.4 MB, nothing to win.
+- Playwright container image: about 10s of setup saved per shard, the tests no faster.
+- `node_modules` cache in the shards: about 25s per shard for 372 MB of cache; marginal.
+- Lighthouse reusing the CI build: saves runner time (about 220s) but not wall time, and changes
+  what the gate audits (the fixture build instead of the live-feed one).
+
 ## Card 71: Tracked `.claude/settings.json` deny rules and one shared conventions file (2026-10-03)
 
 **What it is.** Two small pieces of Claude Code setup that every site repo in the family can copy.
