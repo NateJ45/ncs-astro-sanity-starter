@@ -33,7 +33,7 @@ still carries its column and its historical cards, but nothing syncs to it any m
   part that decays fastest.
 - **Canonical files carry a first-line marker** reading `PORTABLE: canonical copy`
   followed by "ncs-astro-sanity-starter is the library of record for this file", in that
-  file's comment syntax. 94 files carry it as of 2026-09-18. The originals were
+  file's comment syntax. 101 files carry it as of 2026-10-03. The originals were
   `scripts/with-workerd.mjs`, `scripts/free-dist.mjs`, `scripts/page-parity.mjs`,
   `scripts/sync-check.mjs`, `scripts/lib/sanity-lib.mjs` and `src/lib/contrast.ts`; the
   in-canvas control layer and the family test standard added the rest. Run
@@ -42,6 +42,11 @@ still carries its column and its historical cards, but nothing syncs to it any m
   `tests/routes.ts` are deliberately NOT marked because each carries something that is
   legitimately per-site, and a byte-exact check that can never pass teaches everyone to
   ignore the tool (PORTS.md card 35).
+- **A marker in a file type with no comments.** Markdown carries it as an HTML comment on line 1
+  (`docs/claude/family-conventions.md`, `docs/RESTORE-DRILL.md`). JSON cannot, so
+  `.claude/settings.json` carries it as the value of a top-level `"_portable"` key within the first
+  five lines (the scan is a plain substring match; no change to `sync-check.mjs` was needed). Card 71.
+  `.claude/settings.local.json` is git-ignored and never synced.
 - **`npm run sync-check [site-repo]`** walks a repo, finds the marked files, and diffs
   each against this starter's copy of the same path: `SAME` / `DRIFT` /
   `MISSING-IN-STARTER`, exit 1 on drift. Line endings are normalized; everything else is

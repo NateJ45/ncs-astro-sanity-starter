@@ -1,0 +1,19 @@
+{
+  "_portable": "PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file",
+  "permissions": {
+    "deny": [
+      "Bash(git reset --hard*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push --force-with-lease*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f*)",
+      "PowerShell(git reset --hard*)",
+      "PowerShell(git push --force*)",
+      "PowerShell(git push -f*)",
+      "PowerShell(git push --force-with-lease*)",
+      "PowerShell(git push * --force*)",
+      "PowerShell(git push * -f*)"
+    ]
+  }
+}

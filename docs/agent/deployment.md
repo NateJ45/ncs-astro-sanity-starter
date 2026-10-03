@@ -76,7 +76,7 @@ Set in Cloudflare -> **Workers & Pages -> your-project -> Settings -> Variables*
 
 ### Dependabot
 
-`.github/dependabot.yml` (PORTS.md card 62) opens one grouped version-update PR per ecosystem each Monday at 07:00 America/New_York: npm minors and patches in a single `minor-and-patch` group (at most 5 open PRs), and GitHub Actions in an `actions` group. It carries no `target-branch` because `main` is the only long-lived branch. The Sanity stack, React, the Cloudflare adapter, wrangler and TypeScript 7+ are on its `ignore:` list because they are pinned and move together by hand (CLAUDE.md rule 8); take a major or a pinned-set bump in a planned session, not from a Dependabot PR.
+`.github/dependabot.yml` (PORTS.md card 62) opens one grouped version-update PR per ecosystem each Monday at 07:00 America/New_York: npm minors and patches in a single `minor-and-patch` group (at most 5 open PRs), and GitHub Actions in an `actions` group. It carries no `target-branch` because `main` is the only long-lived branch. The Sanity stack, React, the Cloudflare adapter, wrangler and TypeScript 7+ are on its `ignore:` list because they are pinned and move together by hand (CLAUDE.md rule 8); take a pinned-set bump in a planned session, not from a Dependabot PR. npm **majors** of any package are also ignored (`dependency-name: '*'` with `version-update:semver-major`): they wait for one planned, starter-first stack upgrade (Astro, adapter, Sanity, wrangler) with a real deploy test. The `github-actions` ecosystem is exempt; take action majors when CI is green.
 
 Things this file does NOT do, each of which has cost a family repo real time:
 

@@ -6,6 +6,8 @@ Always-loaded rules for `ncs-astro-sanity-starter`. This file stays under 200 li
 
 Companion tactical runbook: `OPERATIONS.md`. New-project setup entry point: `docs/bootstrap/NEW-PROJECT.md`, rewritten 2026-09-18 from the order the Stone Steps build actually followed; it is the start for any team adapting this starter for a new client, and `docs/bootstrap/setup-checklist.md` is its sign-off. Cross-repo shared-improvement registry: `PORTS.md` (see Ports below).
 
+Design context: `PRODUCT.md` and `DESIGN.md` at the repo root are neutral PLACEHOLDERS describing the starter's defaults, not any client; a fork rewrites both (see rule 11).
+
 ## What this is
 
 A production-ready **Astro 7 + Sanity v6 + Cloudflare Workers** site template, forked from the Reid Design build. **Page-builder-first**: home, about, services and process render through `SectionRenderer` from Sanity `pageBuilder` arrays, and any Studio page gets a `/[slug]` route. A new project pours in a brand (`brand/brand.config.json` then `npm run apply-brand`) and content. It ships FULL and subtracts: `npm run scaffold` removes the seven capabilities (`about`, `faq`, `journal`, `philosophy`, `process`, `services`, `testimonials`). Full overview and stack notes: `docs/claude/overview.md`.
@@ -23,14 +25,14 @@ The must-knows:
 - `npm run typegen`: regenerate Sanity types. Run after ANY schema change, before `npm run build`. `npm run build:full` chains both.
 - `npm run build`: `node scripts/with-workerd.mjs astro build`. Does NOT chain typegen.
 - `npm run check` (`astro check && npm run lint`) is the fast gate; `npm run check:full` is typegen, build and unit tests.
-- `npm run test:unit` (node --test, `src/lib/*.test.ts`; three are GATES: `theme-tokens`, `layout-variants`, `section-fields`). `npm test` is the Playwright suite. Also `npm run format:check` and `npm run check:links`.
+- `npm run test:unit` (node --test, `src/lib/*.test.ts`; four are GATES: `theme-tokens`, `layout-variants`, `section-fields`, `site-layout`). `npm test` is the Playwright suite. Also `npm run format:check` and `npm run check:links`.
 - `npm run parity list | capture | compare [page]`: rendered-HTML parity. Build first. Use on any render-neutral change.
 - `npm run preview`: `wrangler dev` on the last build; the only way to exercise SSR routes locally.
 - `npm run apply-brand`, `npm run seed`, `npm run scaffold`, `npm run audit:studio`, `npm run og`, `npm run sync-check [site-repo]`, `npm run free-dist`: see `docs/claude/build-and-scripts.md` (seed and scaffold detail in `.claude/rules/scaffold.md`).
 
 ## Branch, CI and deploy
 
-- Work on a branch and open a PR; `main` is production. CI (`ci.yml`) runs on every push and PR, in two parallel jobs: `check`, `check:full`, `format:check`, `check:links` and `npm test` (Playwright); `lighthouse.yml` runs `npx lhci autorun` separately. Parity is deliberately a local gate.
+- Work on a branch and open a PR; `main` is production. CI (`ci.yml`) runs on every push and PR, as parallel jobs (`static`, `site`, three Playwright shards `e2e`, and the required aggregators `build` and `test`; PORTS.md card 70): the static checks, one build, `check:links` and `npm test` (Playwright); `lighthouse.yml` runs `npx lhci autorun` separately. Parity is deliberately a local gate.
 - `deploy.yml` ships production on a push to `main` (docs-only paths, including `CLAUDE.md`, are ignored), on the Sanity publish webhook (`repository_dispatch`) and on manual dispatch. It will not deploy if the unit tests fail.
 - Content is statically built: a Sanity edit goes live only after a rebuild (rule 6).
 
@@ -56,34 +58,21 @@ Numbering is load-bearing; other docs cite it. Rules 1 to 7 and 10 are in full b
 15. **Anything computable from data is derived at build time,** never stored as a field an editor can retype. Full text: `.claude/rules/sanity-schema.md`.
 16. **Retiring data is a backup-then-delete script, run dry first,** never a raw delete. Full text: `.claude/rules/data-scripts.md`.
 17. **One grammar per page:** one heading system, one left edge, one button family. Full text: `.claude/rules/ui-grammar.md`.
+18. **Layout variants are a config axis** (`brand.config.json` `layout`: header, hero, density, cards); a default emits nothing, so existing sites do not move. Full text: `.claude/rules/brand-reskin.md`.
 
 ## Live draft preview
 
 The `/preview/**` stack (second Sanity client with stega, SSE proxy, instant text, morph refresh, in-canvas controls) is the most fragile area. Never compare or measure a stega-encoded string, never poll instead of the SSE proxy, `/preview/**` must send `Cache-Control: no-store`, and the `/preview/live` listen must stay `visibility: 'query'`. Everything else is in `.claude/rules/preview-stack.md`, which loads when you touch preview files; read PORTS.md cards 29-29d before touching the refresh loop.
 
-## Code conventions
+## Code conventions and Working with Claude
 
-- TypeScript strict mode. No `any`.
-- Comment generously, especially in components that a future maintainer might edit by hand.
-- At the top of each component file, add a header comment marking it `// Safe to edit by hand` or `// Foundation, edit with care`.
-- Astro components for static content. React islands only where interactivity is required (lightbox, mobile nav, form handler, before/after slider, accordions).
-- Prefer Astro's built-in `<Image />` and `<Picture />` components over plain `<img>` tags for any locally-bundled assets. For Sanity-hosted images, use the project's `<SanityImage />` wrapper (see image handling section).
-- Tailwind utility classes inline. Pull into `@apply` only when a pattern repeats four or more times.
-- Use `clsx` or `class-variance-authority` for conditional classes once components get state-dependent styling.
+Shared by every site repo in the family, so they live in one PORTABLE file imported here (it is expanded into context at launch, so this saves lines in this file, not tokens): the code conventions (strict TypeScript, header comments, Astro and React islands, images, Tailwind) and the working-with-Claude habits (desktop app, Plan Mode, confirm before installing, describe design in plain language, verify in a real browser).
+
+@docs/claude/family-conventions.md
 
 ## Visual verification
 
 Every UI change is verified rendered, in light AND dark, at ~375px and ~1280px, with hover/focus/active states and the neighbouring sections checked, before it is reported done. Use the Playwright MCP; for Studio changes open `/studio` in a real browser and read the console. Full loop: `docs/claude/visual-verification.md`.
-
-## Working with Claude
-
-- Use Claude Code from the desktop app, not the terminal. Show diffs clearly so they read well in that UI.
-- Prefer Plan Mode for any multi-file change, especially when touching Sanity schemas (schema changes propagate to live content).
-- Pause for confirmation before installing new dependencies.
-- When proposing design changes, describe the visual outcome in plain language, not just the code.
-- For browser-based verification, prefer the Playwright MCP. See `docs/claude/visual-verification.md` for what to verify and when.
-- For Sanity Studio testing, run `npm run dev` and open `/studio` in a real browser. A 200 response is not verification; read the console.
-- Don't report a UI change as done without screenshots in both themes and both viewports.
 
 ## Style
 
@@ -108,7 +97,7 @@ Path-scoped rules (`.claude/rules/`, load when matching files are touched):
 - `preview-stack.md`: the live draft preview stack.
 - `dependencies.md`: rule 8, the matched dependency set.
 - `sanity-schema.md`: rules 1, 8b, 9, 10, 15.
-- `brand-reskin.md`: rules 11 to 13.
+- `brand-reskin.md`: rules 11 to 13 and 18 (layout variants).
 - `scaffold.md`: rule 14, seeding, scaffold, modules and archive.
 - `data-scripts.md`: rule 16.
 - `ui-grammar.md`: rule 17.
@@ -117,6 +106,7 @@ Path-scoped rules (`.claude/rules/`, load when matching files are touched):
 
 Reference (`docs/claude/`, read when the task needs it):
 
+- `family-conventions.md`: PORTABLE, imported above; the text shared by every site repo.
 - `overview.md`: full about and stack essentials.
 - `build-and-scripts.md`: every npm script and test suite.
 - `routes.md`: the routes table.
