@@ -30,7 +30,7 @@ The must-knows:
 
 ## Branch, CI and deploy
 
-- Work on a branch and open a PR; `main` is production. CI (`ci.yml`) runs on every push and PR, in two parallel jobs: `check`, `check:full`, `format:check`, `check:links` and `npm test` (Playwright); `lighthouse.yml` runs `npx lhci autorun` separately. Parity is deliberately a local gate.
+- Work on a branch and open a PR; `main` is production. CI (`ci.yml`) runs on every push and PR, as parallel jobs (`static`, `site`, three Playwright shards `e2e`, and the required aggregators `build` and `test`; PORTS.md card 70): the static checks, one build, `check:links` and `npm test` (Playwright); `lighthouse.yml` runs `npx lhci autorun` separately. Parity is deliberately a local gate.
 - `deploy.yml` ships production on a push to `main` (docs-only paths, including `CLAUDE.md`, are ignored), on the Sanity publish webhook (`repository_dispatch`) and on manual dispatch. It will not deploy if the unit tests fail.
 - Content is statically built: a Sanity edit goes live only after a rebuild (rule 6).
 
