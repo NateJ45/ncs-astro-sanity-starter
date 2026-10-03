@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: tracked `.claude/settings.json` and the shared conventions file (PORTS card 71)._
+
+Added `.claude/settings.json` (deny rules for `git reset --hard` and force pushes, Bash and PowerShell, marked PORTABLE through a `"_portable"` key) and `docs/claude/family-conventions.md` (the Code conventions and Working with Claude text shared by every site repo, PORTABLE, imported from CLAUDE.md with `@docs/claude/family-conventions.md`). CLAUDE.md went from 128 to 115 lines; behaviour is unchanged. `sync-check.mjs` was not edited, because its marker scan is a substring match on the first five lines.
+
 _2026-10-03: staging abandoned; main is the only branch._
 
 Removed `deploy-staging.yml` (and `scripts/worker-name.mjs`, which only it used), took `staging` out of the `ci.yml` and `lighthouse.yml` push filters, and rewrote the OPERATIONS.md Deploy section to the PR-into-`main` flow. Dated PORTS cards that describe the `main` + `staging` model are left as history; the card 30 row and note carry the current convention.

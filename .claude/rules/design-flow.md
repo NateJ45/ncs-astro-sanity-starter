@@ -11,7 +11,7 @@ paths:
 
 # Design flow: brief, references, design-directions, reskin
 
-Loads when you touch the design-exploration files. PORTS.md card 71 has the why.
+Loads when you touch the design-exploration files. PORTS.md card 73 has the why.
 
 **The problem.** `brand.config.json` carries palette, fonts and radius. Nothing in the reskin can
 change layout, so a site reskinned straight away comes out as the starter's homepage in new colours.
