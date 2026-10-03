@@ -188,6 +188,10 @@ The `/reskin` skill handles this sequence for you (Step 3 in the skill).
 
 ---
 
+## Before the skill: pick a direction
+
+`brand.config.json` can express palette, fonts and radius only. Layout, nav, hero, density and imagery come from the design-directions step (`.claude/commands/design-directions.md`), which runs before the skill; the skill reads the recorded pick. See `.claude/rules/design-flow.md`.
+
 ## The `/reskin` skill -- 8-step flow
 
 The skill lives at `.claude/skills/reskin/SKILL.md`. It orchestrates the full new-client brand setup for sessions where a Claude agent is driving. Invoke it with `/reskin` in a Claude session.

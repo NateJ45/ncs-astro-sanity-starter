@@ -188,6 +188,9 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 68  | Never regenerate package-lock.json; `npm ci`                      | yes     | no          | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
 | 69  | No `--` inside an SVG/XML comment                                 | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 70  | CI: parallel gates, sharded Playwright, scheduled Lighthouse      | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 71  | Design directions before reskin (brief, references, mockups)      | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+
+Row 71 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6170,3 +6173,39 @@ reliable win everywhere, about 40 to 50% on PRs, plus not running at all on PRs 
 **Adapt per site.** Keep the site's `env:` block and URL sample; keep its extra steps. Pick the
 Lighthouse sample by template, not by taste. A hybrid site whose Worker renders every page (nixoncreativestudio)
 has no `dist/client` to share, so its shards test the uploaded preview URL instead.
+
+## Card 71: Design directions before a reskin (2026-10-03)
+
+**Origin:** the studio's own pattern. Every site built from this starter came out as the same
+layout in different colours, because the only step between "new client" and "built" was the reskin,
+and `brand.config.json` carries palette, fonts and radius, not structure.
+**Canonical:** `.claude/commands/design-directions.md`, `scripts/capture-references.mjs`,
+`scripts/screenshot-directions.mjs`, `docs/templates/design-brief.md`, and the "Where this sits"
+section of `.claude/skills/reskin/SKILL.md`. Rules: `.claude/rules/design-flow.md`.
+
+**The flow:** brief -> references -> design-directions -> reskin.
+
+- **Brief.** `docs/templates/design-brief.md` splits into a PRODUCT.md and a DESIGN.md that the
+  impeccable skill can read (Stitch shape: six fixed sections), and forces three inputs that were
+  previously left to taste: references, anti-references, and "must NOT look like <previous client>".
+- **References.** `npm run references -- <urls>` screenshots each URL at 390 and 1280 into
+  `docs/references/<slug>/` and writes a README table with blank "what we like / what we avoid"
+  cells that survive re-runs. It fetches only the URLs it is given.
+- **Directions.** `/design-directions` produces 3 or 4 single-file homepage mockups plus a
+  comparison `index.html`. Divergence is forced by procedure, not hoped for: each direction is
+  assigned a distinct archetype (editorial, poster/typographic, image-led, index/directory, story,
+  bento, split-screen, quiet/document) BEFORE any design starts; a table of axes (layout skeleton,
+  nav pattern, hero structure, type pairing, density, imagery, colour role) must show a different
+  value per direction; shared hero or nav markup and the starter's own section order are forbidden;
+  each direction states what it rejects and what it costs. `npm run directions:shoot` captures
+  390, 768 and 1280 and fails on horizontal overflow. The command stops for Nathan's pick, records
+  it as a dated "Carry forward" entry, and hands off to the reskin skill. It never edits
+  `brand.config.json`.
+- **Reskin.** The skill now reads that entry, takes palette, fonts and radius from it, and reports
+  the structural decisions the config cannot carry as queued work.
+
+**Adapt per site.** Add the previous client's name to the brief's "must not look like" line. Mockups
+and reference captures live under `docs/`, which `.prettierignore` skips for `*.html` and
+`docs/references` (copy those two lines) and which Tailwind already excludes (card 64). Needs
+`@playwright/test` and `npx playwright install chromium`, both already true in this family.
+The npm scripts to copy are `references` and `directions:shoot`.

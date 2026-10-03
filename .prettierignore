@@ -65,3 +65,10 @@ src/layouts/BaseLayout.astro
 # CI never sees them, which means the local gate fails while CI passes and the
 # gate gets ignored. Added 2026-09-18 after exactly that.
 .claude/worktrees/
+
+# Design-direction mockups and reference captures are throwaway exploration
+# artefacts (hand-written single-file HTML, PNGs, a generated README table), not
+# maintained source. Decision entries in docs/design-directions/**/README.md are
+# still formatted.
+docs/design-directions/**/*.html
+docs/references

@@ -49,6 +49,10 @@ A fresh clone builds and runs with no Sanity project at all: pages render their 
 
 Without steps 2 and 3 the public site is unaffected; only the embedded Studio and the preview are off, and the preview routes say so instead of erroring.
 
+## Choosing a design direction
+
+Before a reskin, explore: `docs/templates/design-brief.md` (brief), `npm run references -- <urls>` (reference screenshots into `docs/references/`), the `/design-directions` command (3 or 4 static homepage mockups in `docs/design-directions/<date>-<slug>/`, screenshotted with `npm run directions:shoot`), then `/reskin`. Detail: OPERATIONS.md, "Design directions".
+
 ## Quality gates
 
 Every site in this family runs the same checks, and a fork inherits them (PORTS.md card 35).

@@ -8,6 +8,24 @@ description: 'Use this skill when the user wants to rebrand, reskin, or restyle 
 Collect all brand inputs, write them into `brand/brand.config.json`, and run
 `npm run apply-brand` to update every branding surface in the repo.
 
+## Where this sits: brief, references, design-directions, reskin
+
+Reskin is step 4 of 4. A reskin applies colours, fonts and radius; it cannot change layout, so
+running it first is how every site ends up as the same layout in different colours.
+
+1. **Brief:** `docs/templates/design-brief.md` becomes `PRODUCT.md` / `DESIGN.md`.
+2. **References:** `npm run references -- <urls>` writes `docs/references/`.
+3. **Design directions:** the `/design-directions` command (`.claude/commands/design-directions.md`)
+   makes 3 or 4 mockups and records Nathan's pick under `docs/design-directions/<date>-<slug>/`.
+4. **Reskin:** this skill.
+
+Before Step 1, look for a decision entry in `docs/design-directions/*/README.md` and a
+`PRODUCT.md` / `DESIGN.md`. If a pick exists, take the palette, font pairing and radius from its
+"Carry forward" line instead of asking from scratch, and treat its layout, density and imagery notes
+as the list of things this skill cannot do (report them in Step 8). If none exists on a NEW client,
+say so and offer to run steps 1 to 3 first; skip only if Nathan says the brand is already fixed
+(a rebrand with a supplied style guide, a colour-only refresh). Never invent the pick.
+
 ## Prerequisites
 
 - `brand/brand.config.json` exists (ships with the template, pre-filled with neutral defaults).
@@ -288,6 +306,11 @@ yet connected to Sanity.
 
 **Studio theme:** The Sanity Studio theme was updated by `apply-brand`, but the Studio must
 be rebuilt before editors see the new fonts. The Studio is embedded, so `npm run deploy` does it.
+
+**Layout work the config cannot carry:** if a design direction was picked, list every layout,
+nav, hero, density and imagery decision from its "Carry forward" line that `brand.config.json`
+did not apply, and confirm each one is queued in `docs/PENDING.md`. A reskin that quietly drops
+the chosen direction's structure has not delivered the direction.
 
 **Worker name:** If `workerName` was set and `wrangler.jsonc` was rewritten, confirm that
 the Worker name is unique in the Cloudflare account before deploying.
