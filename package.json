@@ -24,6 +24,7 @@
     "parity": "node scripts/page-parity.mjs",
     "cutover": "node scripts/cutover.mjs",
     "sync-check": "node scripts/sync-check.mjs",
+    "ports:next": "node scripts/next-port-card.mjs",
     "free-dist": "node scripts/free-dist.mjs",
     "check": "astro check && npm run lint",
     "check:full": "npm run typegen && npm run build && npm run test:unit",
