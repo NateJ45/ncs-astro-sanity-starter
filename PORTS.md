@@ -179,7 +179,24 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 59  | `_headers`: one rule per path; /_astro/* owns its cache           | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
 | 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias       | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | n/a                 | yes            |
 | 61  | Reduced motion zeroes transitions; a spec holds it                | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
-| 62  | CI: parallel gates, sharded Playwright, scheduled Lighthouse      | n/a     | pending     | yes      | pending          | pending       | n/a            | n/a                | pending             | pending        |
+| 62  | Dependabot config: grouped, pinned stack ignored                  | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | no             |
+| 63  | `astro dev`: pre-bundle what the first render discovers           | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 64  | Tailwind `@source not` for baselines and docs                     | n/a     | no          | yes      | yes              | no            | n/a            | n/a                | no                  | yes            |
+| 65  | dynamicList slices at a literal max, trims in the component       | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 66  | `confirmed` flag + Provisional badge for unsourced content        | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 67  | Tinted-chip variant-matrix contrast gate                          | yes     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 68  | Never regenerate package-lock.json; `npm ci`                      | yes     | no          | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
+| 69  | No `--` inside an SVG/XML comment                                 | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 70  | CI: parallel gates, sharded Playwright, scheduled Lighthouse      | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+
+Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
+gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
+`a-stack-trace-names-source-not-instance`, `committed-parity-baselines-feed-tailwind`,
+`starter-bugs-hide-until-sanity-is-configured`, `summarised-scrape-is-not-source-data`,
+`tinted-chip-eats-muted-contrast`, `regenerated-lockfile-breaks-sanity-schema-extract`,
+`double-hyphen-in-svg-comment-blanks-the-image`), not re-grepped per repo. A `no` is a repo
+that note lists as still open; each repo's own port flips its cell. fbcm is outside the matrix
+and already carries 64 and 69.
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -332,6 +349,13 @@ services, process, faq, contact, journal, privacy, 404), `npm run build` again, 
 **Per-site adaptation:** re-capture baselines on first install, and again whenever a
 markup change is intended (say so in the commit message). Nested routes are stored with
 `/` flattened to `__` in the snapshot filename.
+
+**Addendum, 2026-10-03 (card 64): the baselines feed Tailwind.** `scripts/.parity/*.html` is
+committed, and Tailwind v4's automatic source detection skips only gitignored paths, so every
+class name in a baseline (and in the Markdown docs) keeps its CSS rule alive in the shipped
+sheet, and a parity compare can pass because its own baselines fed the build. `globals.css`
+now excludes `scripts/.parity`, `docs` and the root Markdown with `@source not`. After any
+change to that block: rebuild, recapture, rebuild, compare. Details on card 64.
 
 ## Card 4: sanity-lib seed/patch plumbing
 
@@ -825,6 +849,15 @@ because npm kept the already-resolved nested tree; the duplicate only disappeare
 deleting the lockfile and node_modules and resolving clean. When a dedupe or override
 "does not work", verify on DISK (`find node_modules -path "*<pkg>/package.json"`) rather
 than trusting the install output, and be aware a clean re-resolve floats every caret.
+
+**Caveat, 2026-10-03 (card 68): do not delete the lockfile in a working repo.** That advice
+was right for presacademy's throwaway experiment and is wrong as a habit. Do it ONLY in a
+throwaway clone, never in the repo you will commit from, and NEVER as a bisect step: a
+regenerated lockfile floats ~259 transitive packages and can break `sanity schema extract`
+(`exports is not defined`), so every candidate "reproduces" the failure on its own. To
+collapse a duplicate, edit `overrides` in `package.json` and run `npm install` against the
+COMMITTED lock (it updates only the affected subtree), or prove the fix in a scratch clone and
+port only the `package.json` change. `npm ci` for any run you will reason from.
 
 ## Card 14: wrangler legacy_env pin
 
@@ -5872,14 +5905,233 @@ canonical copy, pulled forward),
 fbcm (the origin, [PR #6](https://github.com/NateJ45/fbcm/pull/6)). None of these sites failed the
 spec BEFORE its fix either, locally; fbcm remains the only measured failure.
 
-## Card 62: CI is parallel, sharded and builds once; Lighthouse is scheduled (2026-10-03)
+## Card 62: Dependabot config: grouped, pinned stack ignored, secrets separate (2026-10-03)
+
+**Origin:** the 2026-09-04 Dependabot rollout across the six Astro repos
+(vault gotcha `dependabot-secrets-and-pinned-stacks`). **Canonical:** `.github/dependabot.yml`
+(per-repo: the ignore list is the repo's pinned set) and `docs/agent/deployment.md`,
+"Dependabot".
+
+The starter had no `dependabot.yml` at all, so a fork inherited no ignore-rule shape. It now
+opens one grouped npm PR (`minor-and-patch`, at most 5 open) and one `actions` group, weekly
+on Monday at 07:00 America/New_York, with no `target-branch` (`main` is the only long-lived
+branch). The `ignore:` list is the pinned set (`sanity`, `@sanity/*`, `sanity-plugin-*`,
+`react`, `react-dom`, `react-is`, `styled-components`, `@astrojs/cloudflare`, `wrangler`) plus
+`typescript` majors `>=7` (vault gotcha `typescript-not-7`: Dependabot re-proposes any version
+it has not been told to ignore, so closing the PR is not enough).
+
+**Why each part exists.**
+
+- The file configures VERSION-update PRs only. Vulnerability alerts and automated security
+  fixes are separate repo settings (`gh api -X PUT repos/OWNER/REPO/vulnerability-alerts`,
+  `.../automated-security-fixes`), off on every repo until switched on.
+- Dependabot-triggered runs get the _Dependabot_ secrets store, not the Actions one. WCP's
+  build needed three tokens and every Dependabot PR failed with an ENOENT on a
+  Sanity-sourced page until `gh secret set NAME --app dependabot --repo OWNER/REPO` was run
+  for each `secrets.*` the CI build reads. The starter's PR build reads only repo VARIABLES,
+  so a fresh fork is fine; the day a fork adds a secret to CI, set it again for Dependabot.
+- Exact-pinned stacks break the moment Dependabot bumps one member (ERESOLVE against the
+  pinned peer, or a plugin importing a subpath the pinned `@sanity/ui` lacks). Put the set on
+  `ignore:` and move it by hand, together.
+- Linters ship new default rules in minors; exclude such a tool from the group so it lands
+  with its fixes. Never merge a dependency PR on local checks when its CI is red.
+
+**Adopting it in a site.** Copy the file, replace the `ignore:` list with that repo's own
+exact-pinned set, and run `gh secret set --app dependabot` for every `secrets.*` its CI reads.
+**No workflow was touched:** the starter has no dependabot-automerge workflow.
+
+## Card 63: `astro dev` pre-bundles what the first render discovers (2026-10-03)
+
+**Origin:** Stone Steps, 2026-09-16 (vault gotcha `a-stack-trace-names-source-not-instance`,
+withastro/astro#17834). **Canonical:** the `vite.environments.ssr.optimizeDeps.include` block
+in `astro.config.mjs` (per-repo file), and the debugging rule in
+`docs/agent/stack-and-config.md`.
+
+**The bug.** On `@astrojs/cloudflare` 14.2.4 the dev server discovers `astro/app/manifest`
+and `astro/logger/json` during the first render, the Vite optimizer re-bundles and reloads
+mid-request, `react-dom/server` keeps a React from the previous pass, and every React island
+fails to server-render ("Invalid hook call", then "Cannot read properties of null (reading
+'useState')") while the page answers 200. `astro build` never runs the optimizer, so CI and
+production cannot show it.
+
+**Reproduced in the starter, 2026-10-03** (Windows, `ASTRO_DEV_BACKGROUND=1 node
+node_modules/astro/bin/astro.mjs dev --json`, `node_modules/.vite` removed, one request to
+`/`): 2 optimizer reloads, 17 "Invalid hook call" warnings, 7 TypeErrors (`BackToTop`,
+`PortableText`, and others). With the block: 0 reloads, 0 TypeErrors, 1 warning on the first
+request and 3 after two more pages; pages still render correct HTML. Stone Steps also
+pre-bundles react for the `astro` environment; that second block is not part of this port and
+the leftover warnings did not need it.
+
+**The method (the part that generalises).** A path in a bundled runtime's stack trace is
+source-map output: it names where code was WRITTEN, not which copy executed. Prove module
+identity by making the file THROW (`throw new Error('PROBE_X')`, guarded so unrelated loads
+survive), and prove a probe's channel with a signal you know should arrive before trusting
+silence (`console.log` in the workerd module runner never reaches Astro's dev log; thrown
+errors do). Confirm which Vite environment (`client`, `ssr`, `astro`) is running with a
+`configEnvironment` probe. Remove the block when the adapter pin moves; re-measure.
+
+## Card 64: Tailwind must not scan committed baselines or docs (2026-10-03)
+
+**Origin:** FBCM, 2026-09-20 (vault gotcha `committed-parity-baselines-feed-tailwind`).
+**Canonical:** the `@source not` block after the imports in `src/styles/globals.css`.
+
+Tailwind v4 automatic source detection skips only gitignored paths. `scripts/.parity/*.html`
+is committed, and `CLAUDE.md`, `PORTS.md` and `docs/` name hundreds of utility classes in
+prose, so every one kept a CSS rule alive and a rendered-HTML parity compare could pass on
+rules its own baselines fed. FBCM caught it as a 101-byte inline-sheet difference after a
+deliberate recapture, fixed by naming two classes in a Markdown doc.
+
+**Fix in the starter:** `@source not '../../scripts/.parity'; @source not '../../docs';
+@source not '../../*.md';` (paths are relative to `src/styles/globals.css`).
+
+**Measured, 2026-10-03** (`npm run build`, no Sanity project): both shipped sheets shrank by
+4,478 bytes (121,565 to 117,087 and 121,890 to 117,412). The class-selector set lost 32 rules
+and gained none: `bg-blue-600`, `bg-indigo-600`, `text-gray-500` to `-900`, `text-indigo-*`,
+`ring-blue-500`, `ring-indigo-500`, `dark:bg-neutral-950`, `shadow-[0_4px_18px_...]`,
+`leading-[1.05]`, `h-[6.25rem]`, `blur`, `ease-in` and the like, all of which appear only in
+`docs/` prose and none in a built page or script. `parity compare` stayed 11/11 PASS on both
+sides, and the recapture produced a byte-identical baseline set (the starter links its
+stylesheet rather than inlining it, so the sheet shrank without moving one baseline byte).
+The proof of a fixed point is the same as FBCM's: the sheet's byte count does not move
+between two consecutive build-and-capture passes.
+
+**Adopting it in a site.** Add the three lines after the last `@import`, rebuild, recapture
+with `npm run parity capture`, rebuild, compare. A site with `inlineStylesheets: 'always'`
+WILL see every page's `<style>` placeholder change once; that is the expected recapture. Also
+exclude any other committed non-page HTML (screenshot `.yml` snapshots, fixtures, Storybook
+output). Keep class names out of prose the scanner can still see.
+
+## Card 65: dynamicListSection slices at a literal max (2026-10-03)
+
+**Origin:** Stone Steps, 2026-09-07 (vault gotcha `starter-bugs-hide-until-sanity-is-configured`,
+bug 1). **Canonical:** `sectionsProjection()` in `src/lib/queries.ts` and the `limit` trim in
+`src/components/sections/DynamicList.astro`, wired through `SectionRenderer.astro`.
+
+All four `dynamicListSection` arms sliced with `[0...limit]`. GROQ subscript ranges need
+INTEGER endpoints, so that is a parse error ("subscript ranges must have integer endpoints",
+confirmed against a live Sanity project on 2026-10-03), and a `$param` cannot stand in because
+`limit` is a per-BLOCK field. `sanityFetch` swallows the error and returns its fallback, so the
+section rendered empty on every site, forever, with a green build. It only surfaces as a
+`fetch error` line the first time a real project is attached.
+
+**Fix:** slice with the literal `[0...12]` (the schema's `limit` field is `min(3).max(12)` in
+`richSections.ts`) and trim to the block's own `limit` in the component
+(`items.slice(0, limit ?? items.length)`). Raising the schema max means raising the literal.
+`SectionRenderer` now passes `limit={s.limit}`. Guard: `src/lib/queries.test.ts` fails if any
+`[N...name]` range appears in `queries.ts`.
+
+**Adopting it in a site.** Grep for `\[0\.\.\.[a-z]` in the GROQ files; a `$param` slice is
+valid, a field-reference slice is not. Verify against the live API in ten seconds with `curl -G
+.../data/query/production --data-urlencode 'query=*[_type=="journalEntry"][0...12]{_id}'`.
+
+## Card 66: `confirmed` flag and Provisional badge for unsourced content (2026-10-03)
+
+**Origin:** Stone Steps, 2026-09-07 (vault gotcha `summarised-scrape-is-not-source-data`).
+**Canonical:** `src/components/Provisional.astro` and the "Schema conventions" section of
+`.claude/rules/sanity-schema.md`.
+
+A summarising fetch had already thrown away a page's structure, and its output was transcribed
+into a data file: shifted age brackets, invented record holders, 11 bare names where the source
+had 66 timed cells, a dead register link on every CTA, and a code comment that explained the
+truncation and made the fabrication read as a decision. The convention that fixes the class:
+content that did not come from the owner's own words carries a `confirmed` boolean (default
+`false`) and renders a visible badge until someone ticks it, so invented values announce
+themselves in the UI instead of depending on a developer's memory. The migration procedure
+that goes with it is in the same section: parse the DOM for anything tabular, verify by
+counting rows and timed cells at the source, resolve every outbound URL with one `curl`.
+
+`Provisional.astro` is small and self-contained (one component, utility classes only, no
+globals.css rule; the Stone Steps copy used a `.provisional` class). It renders nothing when
+`confirmed === true`. Deliberate departure from the Stone Steps copy: the explanation text is
+`text-foreground`, not `text-muted-foreground`, because the box is a tint (card 67). The
+starter ships no `confirmed` field and no caller, since it has no scraped data; the field
+snippet is in the rule file rather than a dead schema helper. Cost, measured: the unused component adds five
+class rules (`gap-x-3`, `gap-y-1`, `border-dashed`, `border-primary/55`, `bg-primary/10`),
++501 bytes per shipped sheet, and no rendered change.
+
+**Adopting it in a site.** Add the field to the document types a migration fills, put
+`<Provisional confirmed={doc.confirmed} what="..." />` beside the value, and keep unconfirmed
+values out of JSON-LD.
+
+## Card 67: Tinted-chip variant-matrix contrast gate (2026-10-03)
+
+**Origin:** West Chester Preschool Family Hub, 2026-09-07 (vault gotcha
+`tinted-chip-eats-muted-contrast`). **Canonical:** `src/lib/tint-contrast.test.ts` (runs under
+`npm run test:unit`) and the "Muted is not a safe neutral on a tint" paragraph in
+`docs/agent/accessibility.md`.
+
+Flattening a soft tint (`bg-primary/15`) over a surface lifts the composite several tonal
+steps, so a muted label with a comfortable margin on the bare surface can land under 4.5:1 on
+the tinted one, and an axe sweep cannot see it when the tint varies by DATA, because it only
+audits the variants the feed happened to render. The new test is hermetic: it reads the real
+tokens from `globals.css` (via `css-tokens.ts`), composites every tint (`--primary`,
+`--secondary`, `--accent`, `--muted`) at 10, 15, 20 and 30 percent over every surface
+(`--background`, `--card`, `--muted`) in both themes (96 cases), and asserts `--foreground`
+clears AA on all of them. It also scans `src/` for class strings that pair
+`text-muted-foreground` with a `bg-<token>/NN` tint and hard-asserts each resolvable one.
+
+**Measured on the current tokens (2026-10-03): `--muted-foreground` is NOT safe on a tint.**
+It is under 4.5:1 on 8 of the 96 variants: light `--primary/15` over `--muted` 4.46;
+`--primary/20` over `--background` 4.38 and over `--muted` 4.13; `--primary/30` over
+`--background` 3.78, `--card` 3.90 and `--muted` 3.59; dark `--primary/30` over `--card` and
+`--muted` 4.37. No tint in the starter's shipped components hits those (the scan finds 7
+muted-on-tint pairs, all `--input` at 30 to 80 percent in shadcn/Starwind primitives; the
+light ones resolve, the dark `--input` is an oklch alpha the reader cannot resolve and is
+skipped, listed in the test's diagnostics). So the muted result is a printed diagnostic, not a
+hard gate across the whole matrix (a fork's palette moves the numbers); brand tokens were not
+changed. Rule: on a tint, "neutral" means the full-strength `--foreground`; colour lives in the
+tint and an `aria-hidden` icon.
+
+**Adopting it in a site.** Copy the test, set `TINT_TOKENS`/`SURFACES` to the site's token
+names, add a row for every tinted chip or badge variant. If a site has a per-variant label
+colour, replace it with one shared constant so a per-variant colour is not expressible.
+
+## Card 68: Never delete or regenerate package-lock.json (2026-10-03)
+
+**Origin:** reid-design-site, 2026-09-05, about 3 hours lost (vault gotcha
+`regenerated-lockfile-breaks-sanity-schema-extract`). **Canonical:** CLAUDE.md rule 8 and
+`.claude/rules/dependencies.md`.
+
+A bisect that ran `rm -rf node_modules package-lock.json && npm install` on every attempt let
+about 259 transitive packages float to whatever was newest that day. One of them made the Vite
+SSR worker behind `sanity schema extract` (and so `npm run typegen`) evaluate a CommonJS
+module as ESM and die with `Error: exports is not defined`, with no module name in the stack.
+Because the lockfile was regenerated every run, every candidate "reproduced" the failure and
+the pristine baseline failed too. Restoring the committed lock and running `npm ci` passed
+immediately.
+
+**Rules:** bisect with the COMMITTED lockfile in place (`npm install` updates only the affected
+subtree; `git checkout -- package.json package-lock.json` between candidates); check
+`git diff --stat -- package-lock.json` before trusting a result; `npm ci`, never `npm install`,
+for any run you will reason from; let Dependabot propose bumps one package at a time.
+
+**Correction to card 13:** its "adjacent" note advised deleting the lockfile and node_modules
+to clear a stale dedupe. That is now caveated in place: throwaway clone only, never in the repo
+you commit from, never as a bisect step.
+
+## Card 69: No `--` inside an SVG or XML comment (2026-10-03)
+
+**Origin:** FBCM, 2026-09-19 (vault gotcha `double-hyphen-in-svg-comment-blanks-the-image`).
+**Canonical:** `docs/agent/images.md`, "SVG and XML comments", and the reskin skill's logo step.
+
+A `--` anywhere inside `<!-- ... -->` makes the whole SVG malformed XML. The browser fetches it
+(200, no console error, nothing in the network panel) and renders nothing, `naturalWidth`
+stays 0 forever, and curl cannot tell. FBCM's header comment named a CSS custom property
+(`--color-indigo-field`). Logo SVGs are where this happens: comments that mention tokens,
+`-- scaffold` markers or `git --flags`.
+
+**Guard:** name tokens without the leading dashes or put the note in a sibling README, and
+wait on `img.complete && img.naturalWidth > 0` (never `load`) in any screenshot or visual
+script. Audited in the starter on 2026-10-03: 3 SVGs, none has `--` in a comment.
+
+## Card 70: CI is parallel, sharded and builds once; Lighthouse is scheduled (2026-10-03)
 
 **What it is.** The shape of `ci.yml`, `lighthouse.yml` and `visual.yml`, plus one line in
 `playwright.config.ts`. Measured before the change: every PR built the site three times (the
 `build` job, Playwright's `webServer`, Lighthouse), the gates ran serially, and wall time was their
 sum: wcp-website CI 602s plus Lighthouse 853s, fbcm CI 647s plus Lighthouse 494s plus visual 326s.
 The hotspots by step: Lighthouse's 3 passes over every URL (749s of 848s on wcp), the Playwright
-browser download (286s on fbcm) and the serial Playwright run (674s on fbcm).
+browser download (286s on fbcm, though 38 to 53s on a normal day) and the serial Playwright run (674s on fbcm).
 
 **The shape.**
 
@@ -5899,9 +6151,13 @@ browser download (286s on fbcm) and the serial Playwright run (674s on fbcm).
   `lighthouse` job must keep reporting (no path filter there).
 - visual: the pull_request trigger gets the same `paths:` as the push trigger.
 
-**Pilot result.** Starter PR #47, cold browser cache: `build` green at 1m36s, e2e shards 2m15s to
-2m21s, Lighthouse 3m31s, visual 2m28s, against a 273s to 298s serial CI baseline. The starter is
-small; the larger sites carry the bigger gain.
+**Measured per repo (the gain depends on how heavy the tests are).** Nixon CI about 9 to 4 minutes;
+fbcm 783s to about 570s; reid-design 321s to 246s; stonesteps 290s to 226s warm. **Small sites barely
+gain, and the sharded layout can lose:** mas-monograms measured 250 to 272s against 212s with the
+two-job original (the old jobs already ran in parallel, so the new shape only added a serial hop and
+a second install), so it kept ci.yml as it was and took only the Lighthouse change. Lighthouse is the
+reliable win everywhere, about 40 to 50% on PRs, plus not running at all on PRs that cannot move a score.
 
-**Adapt per site.** Keep the site's `env:` block and URL sample; keep its extra steps (wcp's gated
-hub tests, its `site/` working directory). Pick the Lighthouse sample by template, not by taste.
+**Adapt per site.** Keep the site's `env:` block and URL sample; keep its extra steps. Pick the
+Lighthouse sample by template, not by taste. A hybrid site whose Worker renders every page (nixoncreativestudio)
+has no `dist/client` to share, so its shards test the uploaded preview URL instead.

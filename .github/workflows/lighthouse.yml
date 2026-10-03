@@ -1,10 +1,10 @@
 # The family test standard's Lighthouse workflow (PORTS.md card 35, rescheduled
-# by card 62). Deliberately NOT marked PORTABLE: like ci.yml it carries a
+# by card 70). Deliberately NOT marked PORTABLE: like ci.yml it carries a
 # per-site `env:` block, and the `url` list in lighthouserc.json names the pages
 # a given repo builds. The ASSERTIONS in lighthouserc.json are the part that
 # must not diverge. Copy the shape, not the bytes.
 #
-# ── WHEN IT RUNS (card 62) ──────────────────────────────────────────────────
+# ── WHEN IT RUNS (card 70) ──────────────────────────────────────────────────
 # Lighthouse was the slowest gate by a distance (749s of a 848s job on
 # wcp-website: 3 passes over every listed URL) and it ran on every PR, including
 # ones that cannot move a score. It is NOT a required status check (only

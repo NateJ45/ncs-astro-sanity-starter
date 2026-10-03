@@ -58,7 +58,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // PLAYWRIGHT_SKIP_BUILD (set by the CI shards, PORTS.md card 62) serves a
+    // PLAYWRIGHT_SKIP_BUILD (set by the CI shards, PORTS.md card 70) serves a
     // dist/client that an earlier job already built and uploaded, instead of
     // paying for the same build once per shard. Unset, every local run still
     // builds fresh, which is what keeps a stale dist from passing.

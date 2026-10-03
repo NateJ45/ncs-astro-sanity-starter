@@ -1,0 +1,47 @@
+---
+// Safe to edit by hand
+//
+// The "not confirmed" marker (PORTS.md card 66, ported from Stone Steps).
+//
+// WHY IT IS DRIVEN BY DATA. A badge placed by hand wherever a value was
+// invented works exactly once: it relies on a developer remembering to delete
+// it the day the real answer arrives, and nothing fails if they forget. Driven
+// by a document's `confirmed` field, the marker appears and disappears on its
+// own and the burden sits with the person who actually knows the answer. See
+// "Schema conventions" in .claude/rules/sanity-schema.md for the field.
+//
+// Rendering nothing when confirmed is deliberate: the component is always safe
+// to include, so a caller never writes the conditional itself.
+//
+// The starter ships no `confirmed` field (it has no scraped data), so nothing
+// renders this yet. A migration that fills content from a source adds the field
+// to its document types and drops this beside the value.
+//
+// Contrast: the explanation text uses the full-strength foreground, not
+// `text-muted-foreground`, because the box is a soft primary tint and muted is
+// not a safe neutral on a tint (docs/agent/accessibility.md, PORTS.md card 67).
+
+interface Props {
+  /** The document's `confirmed` flag. Anything other than true shows the marker. */
+  confirmed?: boolean | null;
+  /** What is unconfirmed, in plain words. Shown beside the tag. */
+  what: string;
+  class?: string;
+}
+
+const { confirmed, what, class: className = '' } = Astro.props;
+---
+
+{
+  confirmed !== true && (
+    <p
+      class={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed border-primary/55 bg-primary/10 px-3 py-2 text-sm ${className}`}
+      role="note"
+    >
+      <span class="rounded-sm bg-primary px-2 py-0.5 font-mono text-[0.6875rem] tracking-[0.2em] text-primary-foreground uppercase">
+        Not confirmed
+      </span>
+      <span class="text-foreground">{what}</span>
+    </p>
+  )
+}

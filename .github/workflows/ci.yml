@@ -1,5 +1,5 @@
 # The family test standard's CI workflow (PORTS.md card 35, restructured for
-# speed by card 62). Deliberately NOT marked PORTABLE: it carries a per-site
+# speed by card 70). Deliberately NOT marked PORTABLE: it carries a per-site
 # `env:` block, so a byte-exact drift check would fail forever on every repo.
 # Copy the SHAPE from here, and keep the job ids, the step list, the
 # concurrency group and the linkinator skip identical.
@@ -12,7 +12,7 @@
 # hidden-section stub.
 #
 # ── SHAPE (why it looks like this) ──────────────────────────────────────────
-# Before card 62 this was two serial jobs and the site was built THREE times
+# Before card 70 this was two serial jobs and the site was built THREE times
 # per PR (the build job, Playwright's webServer, Lighthouse). Wall time was the
 # sum of every gate. Now:
 #
