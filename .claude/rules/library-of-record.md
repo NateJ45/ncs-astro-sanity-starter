@@ -26,6 +26,7 @@ still carries its column and its historical cards, but nothing syncs to it any m
   improvement covering what it is, the bug that produced it, where the canonical copy
   lives, and what has to be adapted per site. Read it before porting anything between
   repos, and before assuming a technique is new.
+- **Pick the card number with `npm run ports:next`**, which fetches and reads origin/main's PORTS.md too (merged cards only; an open PR's number is invisible to it). A card number is a cross-repo reference (workflow comments, docs), so a collision is expensive to unpick: on 2026-10-03 the CI speed-up and Dependabot both took 62, and the CI card had to be renumbered to 70 across seven repos.
 - **Docs-in-sync clause:** an improvement that generalizes gets a card **in the same
   commit that generalizes it**. Same for the matrix when a repo's status changes. A card
   written a week later is written from memory, and the reason a technique exists is the

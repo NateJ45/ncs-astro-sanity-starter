@@ -182,7 +182,8 @@ jobs:
           [ "${{ needs.static.result }}" = "success" ] && [ "${{ needs.site.result }}" = "success" ]
 
   # The Playwright suite, sharded. fullyParallel is on in playwright.config.ts,
-  # so --shard splits at TEST granularity and the shards come out even.
+  # so --shard splits at TEST granularity: even by COUNT, not by time (see
+  # PORTS.md card 70, "Weighted shards", when one project dominates the runtime).
   e2e:
     name: e2e (shard ${{ matrix.shard }}/3)
     needs: [site]
