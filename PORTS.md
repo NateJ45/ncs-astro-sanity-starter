@@ -144,7 +144,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 29b | Refresh scheduler (single-flight / stale discard / floor)         | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
 | 29c | Preview morph (in-place reconcile)                                | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
 | 29d | Staleness counts every channel                                    | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
-| 30  | One branch vocabulary (main + staging)                            | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | no             |
+| 30  | One branch vocabulary (main only; staging abandoned 2026-10-03)   | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | no             |
 | 31  | Studio welcome tour (StudioTour)                                  | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
 | 32  | Branded tool headings (ToolHeading)                               | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
 | 33  | Year-scoped lists for accumulating types                          | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | no             |
@@ -182,6 +182,12 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
+
+Card 30 changed meaning on 2026-10-03: the family convention is now `main` alone, and
+`staging` is abandoned everywhere (short-lived branches, PRs into `main`, required checks
+`build` and `test`, merge = production deploy). The row's cells record that a repo
+adopted the one-vocabulary rename; the dated card below is history and still describes
+the retired `main` + `staging` model.
 
 Card 28's starter cell reads `partial` for the same reason card 26's does, and the two
 have to be read together: this template forbids a per-block colour field, so the band

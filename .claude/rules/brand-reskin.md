@@ -8,7 +8,6 @@ paths:
   - 'src/styles/globals.css'
   - 'src/assets/**'
   - 'docs/brand/**'
-  - '.github/workflows/deploy-staging.yml'
   - '.claude/skills/reskin/**'
 ---
 

@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: staging abandoned; main is the only branch._
+
+Removed `deploy-staging.yml` (and `scripts/worker-name.mjs`, which only it used), took `staging` out of the `ci.yml` and `lighthouse.yml` push filters, and rewrote the OPERATIONS.md Deploy section to the PR-into-`main` flow. Dated PORTS cards that describe the `main` + `staging` model are left as history; the card 30 row and note carry the current convention.
+
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
 > **Scope note (2026-08-27).** This file stays **narrative**: what changed here, in

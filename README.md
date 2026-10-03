@@ -71,7 +71,7 @@ on a `<select>` turns out to be invisible.
 Two more workflows ship dormant, gated on repo secrets and variables that do not exist
 in the template: `sanity-backup.yml` (nightly encrypted dataset export) and `uptime.yml`
 (hourly 200 check on four key pages). Set the secrets and uncomment the schedule to turn
-either on. `deploy-staging.yml` and `publish-due.yml` work the same way.
+either on. `publish-due.yml` works the same way.
 
 ---
 
