@@ -188,7 +188,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 68  | Never regenerate package-lock.json; `npm ci`                           | yes     | no          | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
 | 69  | No `--` inside an SVG/XML comment                                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 70  | CI: parallel gates, sharded Playwright, scheduled Lighthouse           | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
-| 71  | Tracked `.claude/settings.json` deny rules + shared conventions import | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 71  | Tracked `.claude/settings.json` deny rules + shared conventions import | no      | yes         | yes      | yes              | partial       | no             | n/a                | no                  | yes            |
 | 72  | Layout variants: structure as a brand.config axis                      | no      | no          | yes      | no               | no            | no             | no                 | no                  | no             |
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
@@ -6257,6 +6257,17 @@ keep any repo-specific bullet (light-only theme, a different scroll library) in 
 import. A site that already has a tracked `.claude/settings.json` merges the `deny` array by hand and drops the
 `_portable` key from the marker check (it would then not be byte-exact, so leave the file unmarked there).
 Run `node scripts/sync-check.mjs`.
+
+**Rollout (2026-10-03).** Both pieces are on `main` in presacademy, stonesteps-50k, reid-design-site and fbcm
+(fbcm is not a matrix column; it adopted both too). mas-monograms took only the deny rules: it never
+carried the duplicated Code conventions / Working with Claude text, so it has no conventions import (hence
+`partial`). 2ndpreschicago is archived on GitHub, so no PR could be opened there. wcp and
+nixoncreativestudio are not Astro + Sanity site repos of this shape and were not part of the rollout.
+Two things the rollout turned up: stonesteps-50k already had the `@docs/claude/family-conventions.md`
+import line but no file behind it (a dangling import), and in Git Bash on Windows
+`git show origin/main:.claude/settings.json` can produce an empty file unless `MSYS_NO_PATHCONV=1` is set,
+so copy then check the byte size (597 and 2313) and run `sync-check` rather than trusting `cmp` alone
+(vault gotcha `git-bash-mangles-git-show-colon-paths`).
 
 **Not moved yet (and why).** The family-wide numbered rules (never click "Remove field", no em-dashes in public
 copy, desktop nav server-rendered, content is statically built, matched dependency set) are true in every
