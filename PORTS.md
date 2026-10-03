@@ -179,6 +179,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 59  | `_headers`: one rule per path; /_astro/* owns its cache           | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
 | 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias       | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | n/a                 | yes            |
 | 61  | Reduced motion zeroes transitions; a spec holds it                | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
+| 62  | CI: parallel gates, sharded Playwright, scheduled Lighthouse      | pending | pending     | yes      | pending          | pending       | n/a            | n/a                | pending             | pending        |
 
 Rows for repos that have adopted nothing still exist on purpose: a future sweep ticks
 cells instead of inventing the table again.
@@ -5870,3 +5871,36 @@ canonical copy, pulled forward),
 [wcp-website #43](https://github.com/NateJ45/wcp-website/pull/43) (`site/`, Playwright bump), and
 fbcm (the origin, [PR #6](https://github.com/NateJ45/fbcm/pull/6)). None of these sites failed the
 spec BEFORE its fix either, locally; fbcm remains the only measured failure.
+
+## Card 62: CI is parallel, sharded and builds once; Lighthouse is scheduled (2026-10-03)
+
+**What it is.** The shape of `ci.yml`, `lighthouse.yml` and `visual.yml`, plus one line in
+`playwright.config.ts`. Measured before the change: every PR built the site three times (the
+`build` job, Playwright's `webServer`, Lighthouse), the gates ran serially, and wall time was their
+sum: wcp-website CI 602s plus Lighthouse 853s, fbcm CI 647s plus Lighthouse 494s plus visual 326s.
+The hotspots by step: Lighthouse's 3 passes over every URL (749s of 848s on wcp), the Playwright
+browser download (286s on fbcm) and the serial Playwright run (674s on fbcm).
+
+**The shape.**
+- `static` (typegen, stale-types guard, astro check, lint, format, unit) and `site` (build, link
+  check, upload `dist/client`) run in parallel. `build` is a cheap aggregator over both.
+- `e2e` runs Playwright in 3 shards (`--shard=N/3`) against the uploaded build, with
+  `PLAYWRIGHT_SKIP_BUILD=1` so the config serves it instead of rebuilding. `test` is a cheap
+  aggregator over the shards. Browsers are cached by Playwright version; on a hit only
+  `install-deps` runs.
+- **`build` and `test` are REQUIRED status checks** in every repo's "main: PR + green CI" ruleset
+  (reid-design-site also requires `lighthouse`). Keep those job names, keep them failing when
+  anything behind them fails, and never put a path filter on `ci.yml`: a required check that never
+  reports blocks the merge forever.
+- Lighthouse: pull requests run only when score-moving paths change, on one URL per template
+  (`--collect.url` overrides the list, assertions and median-of-3 unchanged). Push to main and a
+  weekly cron run the full list. Not a required check, except on reid-design-site, whose
+  `lighthouse` job must keep reporting (no path filter there).
+- visual: the pull_request trigger gets the same `paths:` as the push trigger.
+
+**Pilot result.** Starter PR #47, cold browser cache: `build` green at 1m36s, e2e shards 2m15s to
+2m21s, Lighthouse 3m31s, visual 2m28s, against a 273s to 298s serial CI baseline. The starter is
+small; the larger sites carry the bigger gain.
+
+**Adapt per site.** Keep the site's `env:` block and URL sample; keep its extra steps (wcp's gated
+hub tests, its `site/` working directory). Pick the Lighthouse sample by template, not by taste.
