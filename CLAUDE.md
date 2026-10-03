@@ -62,29 +62,15 @@ Numbering is load-bearing; other docs cite it. Rules 1 to 7 and 10 are in full b
 
 The `/preview/**` stack (second Sanity client with stega, SSE proxy, instant text, morph refresh, in-canvas controls) is the most fragile area. Never compare or measure a stega-encoded string, never poll instead of the SSE proxy, `/preview/**` must send `Cache-Control: no-store`, and the `/preview/live` listen must stay `visibility: 'query'`. Everything else is in `.claude/rules/preview-stack.md`, which loads when you touch preview files; read PORTS.md cards 29-29d before touching the refresh loop.
 
-## Code conventions
+## Code conventions and Working with Claude
 
-- TypeScript strict mode. No `any`.
-- Comment generously, especially in components that a future maintainer might edit by hand.
-- At the top of each component file, add a header comment marking it `// Safe to edit by hand` or `// Foundation, edit with care`.
-- Astro components for static content. React islands only where interactivity is required (lightbox, mobile nav, form handler, before/after slider, accordions).
-- Prefer Astro's built-in `<Image />` and `<Picture />` components over plain `<img>` tags for any locally-bundled assets. For Sanity-hosted images, use the project's `<SanityImage />` wrapper (see image handling section).
-- Tailwind utility classes inline. Pull into `@apply` only when a pattern repeats four or more times.
-- Use `clsx` or `class-variance-authority` for conditional classes once components get state-dependent styling.
+Shared by every site repo in the family, so they live in one PORTABLE file imported here (it is expanded into context at launch, so this saves lines in this file, not tokens): the code conventions (strict TypeScript, header comments, Astro and React islands, images, Tailwind) and the working-with-Claude habits (desktop app, Plan Mode, confirm before installing, describe design in plain language, verify in a real browser).
+
+@docs/claude/family-conventions.md
 
 ## Visual verification
 
 Every UI change is verified rendered, in light AND dark, at ~375px and ~1280px, with hover/focus/active states and the neighbouring sections checked, before it is reported done. Use the Playwright MCP; for Studio changes open `/studio` in a real browser and read the console. Full loop: `docs/claude/visual-verification.md`.
-
-## Working with Claude
-
-- Use Claude Code from the desktop app, not the terminal. Show diffs clearly so they read well in that UI.
-- Prefer Plan Mode for any multi-file change, especially when touching Sanity schemas (schema changes propagate to live content).
-- Pause for confirmation before installing new dependencies.
-- When proposing design changes, describe the visual outcome in plain language, not just the code.
-- For browser-based verification, prefer the Playwright MCP. See `docs/claude/visual-verification.md` for what to verify and when.
-- For Sanity Studio testing, run `npm run dev` and open `/studio` in a real browser. A 200 response is not verification; read the console.
-- Don't report a UI change as done without screenshots in both themes and both viewports.
 
 ## Style
 
@@ -118,6 +104,7 @@ Path-scoped rules (`.claude/rules/`, load when matching files are touched):
 
 Reference (`docs/claude/`, read when the task needs it):
 
+- `family-conventions.md`: PORTABLE, imported above; the text shared by every site repo.
 - `overview.md`: full about and stack essentials.
 - `build-and-scripts.md`: every npm script and test suite.
 - `routes.md`: the routes table.
