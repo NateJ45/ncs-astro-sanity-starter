@@ -188,8 +188,11 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 68  | Never regenerate package-lock.json; `npm ci`                           | yes     | no          | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
 | 69  | No `--` inside an SVG/XML comment                                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 70  | CI: parallel gates, sharded Playwright, scheduled Lighthouse           | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
-| 71  | Tracked `.claude/settings.json` deny rules + shared conventions import | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 71  | Tracked `.claude/settings.json` deny rules + shared conventions import | no      | yes         | yes      | yes              | partial       | no             | n/a                | no                  | yes            |
 | 72  | Layout variants: structure as a brand.config axis                      | no      | no          | yes      | no               | no            | no             | no                 | no                  | no             |
+| 73  | Design directions before reskin (brief, references, mockups)           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+
+Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6258,6 +6261,17 @@ import. A site that already has a tracked `.claude/settings.json` merges the `de
 `_portable` key from the marker check (it would then not be byte-exact, so leave the file unmarked there).
 Run `node scripts/sync-check.mjs`.
 
+**Rollout (2026-10-03).** Both pieces are on `main` in presacademy, stonesteps-50k, reid-design-site and fbcm
+(fbcm is not a matrix column; it adopted both too). mas-monograms took only the deny rules: it never
+carried the duplicated Code conventions / Working with Claude text, so it has no conventions import (hence
+`partial`). 2ndpreschicago is archived on GitHub, so no PR could be opened there. wcp and
+nixoncreativestudio are not Astro + Sanity site repos of this shape and were not part of the rollout.
+Two things the rollout turned up: stonesteps-50k already had the `@docs/claude/family-conventions.md`
+import line but no file behind it (a dangling import), and in Git Bash on Windows
+`git show origin/main:.claude/settings.json` can produce an empty file unless `MSYS_NO_PATHCONV=1` is set,
+so copy then check the byte size (597 and 2313) and run `sync-check` rather than trusting `cmp` alone
+(vault gotcha `git-bash-mangles-git-show-colon-paths`).
+
 **Not moved yet (and why).** The family-wide numbered rules (never click "Remove field", no em-dashes in public
 copy, desktop nav server-rendered, content is statically built, matched dependency set) are true in every
 Sanity repo, but each repo numbers them differently and other docs cite the numbers. They are the next
@@ -6290,3 +6304,45 @@ candidate once the rule numbers stop being load-bearing.
 **Install in a site.** Copy `site-layout.ts` and its test, `tests/visual/layouts.spec.ts` and `tests/visual/fixtures/`; add the `layout` block to the site's `brand.config.json` and schema; add the `layout.ts` step and the `enum` check to its `apply-brand.mjs`; copy the variant CSS block and the hook classes; add the Hero variant and the `<html>` spread. Then run the default-unchanged check: screenshot `/` and one inner page at 390 and 1280 before and after, expect 0 differing pixels. Dispatch `visual.yml` with `update` to create the layouts baselines (and only those).
 
 **Adapt per site.** A site with a bespoke header or hero must re-map the hook classes in the CSS rather than drop them; the `cards` rules assume `.card-lift` is on every card surface (check with grep before trusting `soft` and `outline`). A site whose hero has no image gets no visible `split`.
+
+## Card 73: Design directions before a reskin (2026-10-03)
+
+**Origin:** the studio's own pattern. Every site built from this starter came out as the same
+layout in different colours, because the only step between "new client" and "built" was the reskin,
+and `brand.config.json` carried palette, fonts and radius, not structure. Card 72 added four coarse
+layout slots; this card covers the exploration that decides which slots, and what lies beyond them.
+**Canonical:** `.claude/commands/design-directions.md`, `scripts/capture-references.mjs`,
+`scripts/screenshot-directions.mjs`, `docs/templates/design-brief.md`, and the "Where this sits"
+section of `.claude/skills/reskin/SKILL.md`. Rules: `.claude/rules/design-flow.md`.
+
+**The flow:** brief -> references -> design-directions -> reskin.
+
+- **Brief.** `docs/templates/design-brief.md` splits into a PRODUCT.md and a DESIGN.md that the
+  impeccable skill can read (Stitch shape: six fixed sections), and forces three inputs that were
+  previously left to taste: references, anti-references, and "must NOT look like <previous client>".
+- **References.** `npm run references -- <urls>` screenshots each URL at 390 and 1280 into
+  `docs/references/<slug>/` and writes a README table with blank "what we like / what we avoid"
+  cells that survive re-runs. It fetches only the URLs it is given.
+- **Directions.** `/design-directions` produces 3 or 4 single-file homepage mockups plus a
+  comparison `index.html`. Divergence is forced by procedure, not hoped for: each direction is
+  assigned a distinct archetype (editorial, poster/typographic, image-led, index/directory, story,
+  bento, split-screen, quiet/document) BEFORE any design starts; a table of axes (layout skeleton,
+  nav pattern, hero structure, type pairing, density, imagery, colour role) must show a different
+  value per direction; shared hero or nav markup and the starter's own section order are forbidden;
+  each direction states what it rejects and what it costs. `npm run directions:shoot` captures
+  390, 768 and 1280 and fails on horizontal overflow. The command stops for Nathan's pick, records
+  it as a dated "Carry forward" entry, and hands off to the reskin skill. It never edits
+  `brand.config.json`.
+- **Reskin.** The skill now reads that entry, takes palette, fonts, radius and the matching `layout` slots from it, and
+  reports the structural decisions the config cannot carry as queued work.
+
+**Adapt per site.** Add the previous client's name to the brief's "must not look like" line. Mockups
+and reference captures live under `docs/`, which `.prettierignore` skips for `*.html` and
+`docs/references` (copy those two lines) and which Tailwind already excludes (card 64). Needs
+`@playwright/test` and `npx playwright install chromium`, both already true in this family.
+The npm scripts to copy are `references` and `directions:shoot`.
+
+**The reskin skill is NOT `PORTABLE:`-marked** (it never was), so `sync-check` will not carry the
+"Where this sits" section and the Step 8 "layout work the config cannot carry" paragraph from
+`.claude/skills/reskin/SKILL.md` to a site. Port those two edits by hand, or the flow stops at the
+command and the skill never reads the picked direction.
