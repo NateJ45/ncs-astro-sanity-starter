@@ -6178,8 +6178,8 @@ has no `dist/client` to share, so its shards test the uploaded preview URL inste
 
 ### Second pass (fbcm measurement, 2026-10-03)
 
-Five more speed-ups were measured on fbcm (PR 27, reviewed and merged). Two paid and are recipes
-here; the starter's own `ci.yml` took neither, because its numbers do not clear the bar (below).
+Six speed-ups were measured on fbcm (PR 27, reviewed and merged). Two paid (B and F, the recipes
+below) and four did not (listed after them); the starter's own `ci.yml` took neither, because its numbers do not clear the bar (below).
 
 **B. Weighted shards.** Playwright's `--shard=N/3` hands each shard a contiguous block of an EQUAL
 NUMBER of tests, in project order, so one heavy group lands in one shard and the slowest shard sets
@@ -6202,7 +6202,7 @@ more than it saves.
 
 **Why the starter did not take B or F** (last four `ci.yml` runs, 2026-10-03): the link check took
 0-1s (the starter has few pages), so F would only add a job. Shard test steps were 22/53/41s,
-31/53/38s, 26/53/31s and 23/53/38s, 1.37-1.55x slowest/mean on the step but only 1.03-1.20x on the
+31/53/38s, 26/53/31s and 23/53/38s, 1.30-1.44x slowest/mean on the step but only 1.03-1.20x on the
 shard JOBS (83-139s, dominated by install, browser libraries and runner variance), so the most B
 could win is about 14s of a 130s run, inside the noise. Measure the jobs, not the step, before
 adopting; a repo with heavier tests will clear the bar.
