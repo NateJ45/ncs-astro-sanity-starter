@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: layout variants, the structure axis of the brand config (PORTS card 72)._
+
+**Decision.** Reskinning was colours, fonts and radius on one fixed structure, so every site looked like the same site. Structure is now a second config axis: `brand.config.json` `layout`, four slots with three values each, the first value of every slot being today's behaviour. Chosen because each fits an existing component without forking a page: `header` inline / centered / minimal (CSS on the existing header markup, plus hook classes), `hero` bleed / split / editorial (one `variant` prop on `Hero.astro`; split puts the existing dark panel beside the image, editorial drops the image), `density` standard / airy / tight (two spacing tokens), `cards` standard / outline / soft (the shared `.card-lift` surface). Left out on purpose: footer variants, a compact hero (density covers the need), per-card-type styles (one surface keeps the page on one grammar, rule 17), anything needing a second page template. **Mechanism:** defaults emit no attribute, so existing sites render pixel-identical (0 differing pixels on `/` and `/about/` at 390 and 1280); variants are unlayered CSS on `html[data-*]`. **Cost:** four hook classes added to `Header.astro` and `MobileNav.tsx`, so rendered HTML differs by class names only (a `parity compare` shows exactly that). **Visual coverage:** `/styleguide/layouts/` plus `tests/visual/layouts.spec.ts`, 24 baselines generated in CI.
+
 _2026-10-03: staging abandoned; main is the only branch._
 
 Removed `deploy-staging.yml` (and `scripts/worker-name.mjs`, which only it used), took `staging` out of the `ci.yml` and `lighthouse.yml` push filters, and rewrote the OPERATIONS.md Deploy section to the PR-into-`main` flow. Dated PORTS cards that describe the `main` + `staging` model are left as history; the card 30 row and note carry the current convention.

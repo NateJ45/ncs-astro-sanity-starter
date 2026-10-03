@@ -126,6 +126,17 @@ The shipped `brand/brand.config.json` encodes the neutral starter defaults. Runn
 
 **`workerName` and domain coverage.** When `workerName` is non-null, `apply-brand` also rewrites the `"name"` field in `wrangler.jsonc` (to set the Cloudflare Worker name). When `domain` is anything other than `"example.com"`, the script also rewrites the `site:` URL in `astro.config.mjs` to `https://<domain>`. The neutral defaults (`workerName: null`, `domain: "example.com"`) leave both files untouched, preserving the no-op guarantee.
 
+**`layout` is the structure axis (PORTS card 72).** Palette and fonts reskin one fixed structure; the optional `layout` block picks the shape. Four slots, three values each, and the FIRST value of every slot is the original layout, so omitting the block (or any slot) changes nothing:
+
+| Slot      | Values                          | What it does                                                                                                                                                                          |
+| --------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `header`  | `inline`, `centered`, `minimal` | inline: logo left, nav right. centered: logo centred over a centred nav row (desktop). minimal: the phone header at every width, nav in the drawer.                                   |
+| `hero`    | `bleed`, `split`, `editorial`   | bleed: full-bleed image under a scrim (text hero when the page has no image). split: dark text panel beside the image. editorial: type only, oversized heading, image never rendered. |
+| `density` | `standard`, `airy`, `tight`     | Section rhythm: moves `--spacing-section-md` and `--spacing-section-lg`, so every band, the hero padding and the dividers move together.                                              |
+| `cards`   | `standard`, `outline`, `soft`   | Surface of everything carrying `.card-lift`. outline: square, firm border, no shadow. soft: borderless, tinted fill.                                                                  |
+
+`apply-brand` validates the block against the schema (enums) and writes `src/data/layout.ts`. `BaseLayout.astro` puts `data-header` / `data-density` / `data-cards` on `<html>` ONLY for non-default values, and the CSS lives at the end of `globals.css`; the hero is a per-section `data-hero` attribute set by `Hero.astro` (its `variant` prop overrides the site-wide value for one page). Slots and defaults are defined once in `src/lib/site-layout.ts`; `site-layout.test.ts` fails if the schema, `brand.config.json` and that file disagree. Not to be confused with `src/lib/layout-variants.ts`, the per-section column count an editor picks in the Studio.
+
 ---
 
 ## What `npm run apply-brand` rewrites
@@ -136,6 +147,7 @@ The script (`scripts/apply-brand.mjs`) targets comment-delimited regions in each
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/styles/globals.css`          | `@theme` color tokens, `@theme` font tokens (including `--font-script` always), `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string |
 | `src/data/site.ts`                | `name`, `domain`, `brandColors` (`storageKeyPrefix`, `themeStorageKey`, and `studio` are computed from `name` -- never rewritten)                                                                   |
+| `src/data/layout.ts`              | The whole file, from the `layout` block (missing slots take the defaults)                                                                                                                           |
 | `sanity.config.ts`                | Studio theme font stacks (`DISPLAY_STACK` / `BODY_STACK`, from `studio.fonts`)                                                                                                                      |
 | `scripts/generate-og-default.mjs` | `wordmark`, `tagline` in the script's inputs block                                                                                                                                                  |
 | `scripts/lib/render-og.mjs`       | `DEFAULTS` object (colors and font stack)                                                                                                                                                           |

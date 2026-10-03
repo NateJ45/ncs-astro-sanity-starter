@@ -118,6 +118,13 @@
   },
   "radius": "0.5rem",
 
+  "layout": {
+    "header": "inline",
+    "hero": "bleed",
+    "density": "standard",
+    "cards": "standard"
+  },
+
   "workerName": null,
 
   "logoPaths": {

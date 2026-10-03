@@ -23,7 +23,7 @@ The must-knows:
 - `npm run typegen`: regenerate Sanity types. Run after ANY schema change, before `npm run build`. `npm run build:full` chains both.
 - `npm run build`: `node scripts/with-workerd.mjs astro build`. Does NOT chain typegen.
 - `npm run check` (`astro check && npm run lint`) is the fast gate; `npm run check:full` is typegen, build and unit tests.
-- `npm run test:unit` (node --test, `src/lib/*.test.ts`; three are GATES: `theme-tokens`, `layout-variants`, `section-fields`). `npm test` is the Playwright suite. Also `npm run format:check` and `npm run check:links`.
+- `npm run test:unit` (node --test, `src/lib/*.test.ts`; four are GATES: `theme-tokens`, `layout-variants`, `section-fields`, `site-layout`). `npm test` is the Playwright suite. Also `npm run format:check` and `npm run check:links`.
 - `npm run parity list | capture | compare [page]`: rendered-HTML parity. Build first. Use on any render-neutral change.
 - `npm run preview`: `wrangler dev` on the last build; the only way to exercise SSR routes locally.
 - `npm run apply-brand`, `npm run seed`, `npm run scaffold`, `npm run audit:studio`, `npm run og`, `npm run sync-check [site-repo]`, `npm run free-dist`: see `docs/claude/build-and-scripts.md` (seed and scaffold detail in `.claude/rules/scaffold.md`).
@@ -56,6 +56,7 @@ Numbering is load-bearing; other docs cite it. Rules 1 to 7 and 10 are in full b
 15. **Anything computable from data is derived at build time,** never stored as a field an editor can retype. Full text: `.claude/rules/sanity-schema.md`.
 16. **Retiring data is a backup-then-delete script, run dry first,** never a raw delete. Full text: `.claude/rules/data-scripts.md`.
 17. **One grammar per page:** one heading system, one left edge, one button family. Full text: `.claude/rules/ui-grammar.md`.
+18. **Layout variants are a config axis** (`brand.config.json` `layout`: header, hero, density, cards); a default emits nothing, so existing sites do not move. Full text: `.claude/rules/brand-reskin.md`.
 
 ## Live draft preview
 
@@ -108,7 +109,7 @@ Path-scoped rules (`.claude/rules/`, load when matching files are touched):
 - `preview-stack.md`: the live draft preview stack.
 - `dependencies.md`: rule 8, the matched dependency set.
 - `sanity-schema.md`: rules 1, 8b, 9, 10, 15.
-- `brand-reskin.md`: rules 11 to 13.
+- `brand-reskin.md`: rules 11 to 13 and 18 (layout variants).
 - `scaffold.md`: rule 14, seeding, scaffold, modules and archive.
 - `data-scripts.md`: rule 16.
 - `ui-grammar.md`: rule 17.

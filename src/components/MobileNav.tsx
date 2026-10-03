@@ -108,7 +108,7 @@ export default function MobileNav({
   const close = () => setOpen(false);
 
   return (
-    <div className="absolute top-1/2 right-m -translate-y-1/2 lg:hidden">
+    <div className="site-header__menu absolute top-1/2 right-m -translate-y-1/2 lg:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <button

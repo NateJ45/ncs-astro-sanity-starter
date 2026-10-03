@@ -31,6 +31,8 @@ npm install @fontsource/your-display-font @fontsource-variable/your-body-font
 
 The shipped `brand/brand.config.json` encodes the neutral starter defaults, so `npm run apply-brand` on a fresh clone is a no-op. The OG image is non-deterministic (node-canvas rendering) and re-running produces a visually identical but byte-different file.
 
+**Layout (structure) is a second config axis.** The `layout` block in `brand/brand.config.json` picks `header` (inline, centered, minimal), `hero` (bleed, split, editorial), `density` (standard, airy, tight) and `cards` (standard, outline, soft). The first value of each is the original layout and the default; `apply-brand` writes `src/data/layout.ts` and the rest is CSS and one component prop. To try a variant: set it in the config, `npm run apply-brand`, `npm run build`, look at `/` at 390 and 1280. `/styleguide/layouts/` (noindex) shows every variant side by side with fixed data. Detail: `docs/brand/brand-system.md`, rule 18 in `.claude/rules/brand-reskin.md`.
+
 Full reference for the brand config shape, what `apply-brand` rewrites, and the `/reskin` skill's 8-step flow: `docs/brand/brand-system.md`.
 
 ---
