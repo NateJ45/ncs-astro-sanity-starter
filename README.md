@@ -73,6 +73,10 @@ in the template: `sanity-backup.yml` (nightly encrypted dataset export) and `upt
 (hourly 200 check on four key pages). Set the secrets and uncomment the schedule to turn
 either on. `publish-due.yml` works the same way.
 
+An opt-in `@claude` workflow for GitHub issues and PRs is kept as a template at
+`docs/templates/claude.yml`, outside `.github/workflows/`, so it is off until a repo copies it. Steps in
+`OPERATIONS.md`, rationale in PORTS.md card 72.
+
 ---
 
 Maintained by [Nixon Creative Studio](https://nixoncreativestudio.com).

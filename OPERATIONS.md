@@ -482,6 +482,52 @@ curl -s "https://your-worker.workers.dev/?cb=$(date +%s)" | grep -oE 'SOMETHING_
 
 ---
 
+## Adopting the Claude Code Action in a site repo
+
+**Nothing has been installed or enabled by writing this section.** The template at
+`docs/templates/claude.yml` is deliberately outside `.github/workflows/`, so it does nothing in this
+repo or any site until someone copies it. No GitHub App was installed, no secret was added, no
+repo setting was changed (PORTS.md card 72). Facts below are from
+https://code.claude.com/docs/en/github-actions and the `anthropics/claude-code-action` docs,
+checked 2026-10-03.
+
+**Which secret.** Default to `ANTHROPIC_API_KEY` for client repos: a Console API key, billed per
+token, not tied to a person, and the form the docs recommend when one secret is shared across
+repositories. `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`, one-year token, needs a Pro,
+Max, Team or Enterprise plan) makes runs use the subscription instead of API billing, but the docs
+note it is tied to the subscription of the person who generated it; it suits Nathan's own internal
+repos. Use a Console workspace with a spend limit for the API key. The docs do not state
+subscription-in-CI terms-of-service or rate-limit detail; read Anthropic's current terms before
+putting a subscription token in a client repo.
+
+**Steps (per site repo; needs repo admin):**
+
+1. Install the Claude GitHub App (https://github.com/apps/claude) on that repository only. It asks
+   for the app's full permission set (Contents, Issues, Pull requests, Actions, Checks, Workflows
+   and more); GitHub does not allow a subset.
+2. Add ONE repository secret: `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`.
+3. On a branch, copy `docs/templates/claude.yml` to `.github/workflows/claude.yml`. Keep the one
+   `with:` auth line that matches your secret, delete the other. Do not touch `ci.yml`, and do not
+   add `paths:` to it: `build` and `test` are required checks.
+4. Open and merge the PR through the normal gates. `claude.yml` only fires on `@claude` comments, so
+   it reports no check on the PR.
+5. Test on a throwaway issue: comment `@claude reply with the word ok and do nothing else`. Confirm
+   Claude answers, the run is green in Actions, and no commit was pushed. Close the issue.
+6. Confirm who can trigger it: the action runs only for actors with write access (docs: "Who can
+   trigger runs"). Check Settings > Collaborators and teams, and optionally have a read-only account
+   comment `@claude`; the run should fail at the actor check.
+
+Claude follows the repo's `CLAUDE.md` because the job checks the repo out. Keep it concise; it is
+read on every run. CI does not run on commits Claude pushes if `github_token: ${{ secrets.GITHUB_TOKEN }}`
+is passed, so leave that input out.
+
+**Rollback.** Delete `.github/workflows/claude.yml` (the action stops running at once). Delete the
+repository secret; the credential itself stays valid, so also delete the API key in the Console or
+revoke the OAuth token. Uninstall the Claude GitHub App from the repo only if no other Claude
+feature (Code Review, web auto-fix) uses it.
+
+---
+
 ## When something feels wrong
 
 1. **Check the deployed workers URL first**, not localhost — the bug might already be fixed and just hasn't been redeployed.

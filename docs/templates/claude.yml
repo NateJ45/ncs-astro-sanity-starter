@@ -1,0 +1,73 @@
+# TEMPLATE, NOT A LIVE WORKFLOW.
+#
+# This file lives under docs/templates/ on purpose: GitHub only runs what is in
+# .github/workflows/, so nothing here fires in this repo or in any site repo
+# that has not deliberately copied it across. Adoption steps and rollback are in
+# OPERATIONS.md ("Adopting the Claude Code Action in a site repo"); the port
+# card is PORTS.md card 72.
+#
+# WHAT IT IS. The documented interactive-mode workflow for
+# anthropics/claude-code-action (https://code.claude.com/docs/en/github-actions):
+# someone with write access comments "@claude ..." on an issue, a pull request
+# or a PR review comment, and Claude replies and can push commits to a branch.
+#
+# WHAT IT IS NOT. It is a SEPARATE workflow file. It must never be merged into
+# ci.yml and must never rename or replace the required `build` / `test` jobs.
+# Its only trigger is a comment containing @claude, so it adds no check to any
+# pull request and cannot block a merge.
+#
+# SECRETS. None are in this file. Add exactly ONE repository secret and keep the
+# matching line below (delete the other):
+#   ANTHROPIC_API_KEY         Console API key, pay per token.
+#   CLAUDE_CODE_OAUTH_TOKEN   from `claude setup-token`, uses a Claude subscription.
+#
+# WHO CAN TRIGGER IT. The action itself rejects any actor without write access
+# to the repo, and rejects bot actors unless listed in `allowed_bots`. Do NOT set
+# `allowed_non_write_users`; the action docs call it risky.
+#
+# Replace nothing else; every value below is already a real value. The action is
+# pinned to a commit SHA (v1.0.240, 2026-10-03). Dependabot's github-actions
+# ecosystem keeps SHA pins current if the repo opts in.
+name: Claude Code
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+# One run per issue or PR at a time. Do not cancel a run that is mid-push.
+concurrency:
+  group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  claude:
+    # Cheap pre-filter so no runner starts for ordinary comments. The action
+    # re-checks the trigger phrase itself.
+    if: contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The set the docs list for interactive mode. id-token is for the action's
+    # default GitHub App authentication; actions: read lets Claude read CI results.
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@ed670b4cf9de2a5a570d130d2f6197b9e543cd64 # v1.0.240
+        with:
+          # Keep ONE of these two lines.
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # Caps the work per run. The action has no separate timeout input; the
+          # job-level timeout-minutes above is the hard stop.
+          claude_args: |
+            --max-turns 15

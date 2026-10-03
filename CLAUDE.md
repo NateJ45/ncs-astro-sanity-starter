@@ -4,7 +4,7 @@ Always-loaded rules for `ncs-astro-sanity-starter`. This file stays under 200 li
 
 **Read `docs/PENDING.md` early in a session.** It is the live registry of open loops: queued work, known gaps, and waiting-on-a-human items. If you finish or discover one, update it in the same commit.
 
-Companion tactical runbook: `OPERATIONS.md`. New-project setup entry point: `docs/bootstrap/NEW-PROJECT.md`, rewritten 2026-09-18 from the order the Stone Steps build actually followed; it is the start for any team adapting this starter for a new client, and `docs/bootstrap/setup-checklist.md` is its sign-off. Cross-repo shared-improvement registry: `PORTS.md` (see Ports below).
+Companion tactical runbook: `OPERATIONS.md`. Opt-in Claude Code Action template (dormant, not under `.github/workflows`): `docs/templates/claude.yml`, adoption in `OPERATIONS.md`, PORTS.md card 72. New-project setup entry point: `docs/bootstrap/NEW-PROJECT.md`, rewritten 2026-09-18 from the order the Stone Steps build actually followed; it is the start for any team adapting this starter for a new client, and `docs/bootstrap/setup-checklist.md` is its sign-off. Cross-repo shared-improvement registry: `PORTS.md` (see Ports below).
 
 ## What this is
 

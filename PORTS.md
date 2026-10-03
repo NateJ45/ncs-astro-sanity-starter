@@ -188,6 +188,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 68  | Never regenerate package-lock.json; `npm ci`                      | yes     | no          | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
 | 69  | No `--` inside an SVG/XML comment                                 | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 70  | CI: parallel gates, sharded Playwright, scheduled Lighthouse      | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 72  | Claude Code Action template (`@claude`, dormant, opt-in)          | no      | no          | template | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6170,3 +6171,37 @@ reliable win everywhere, about 40 to 50% on PRs, plus not running at all on PRs 
 **Adapt per site.** Keep the site's `env:` block and URL sample; keep its extra steps. Pick the
 Lighthouse sample by template, not by taste. A hybrid site whose Worker renders every page (nixoncreativestudio)
 has no `dist/client` to share, so its shards test the uploaded preview URL instead.
+
+## Card 72: Claude Code Action as an opt-in template, not a live workflow (2026-10-03)
+
+**Canonical:** `docs/templates/claude.yml`; adoption and rollback steps in `OPERATIONS.md`
+("Adopting the Claude Code Action in a site repo")
+**Applies to:** any Astro + Sanity + Cloudflare site repo that wants `@claude` on issues and PRs.
+**Status:** nothing installed, enabled or adopted anywhere. No GitHub App was installed, no secret
+was added, and no site repo was touched when this card was written.
+
+**What it is.** The documented `anthropics/claude-code-action` interactive workflow, trimmed to the
+family's rules and parked under `docs/templates/` so nothing runs until a repo copies it into
+`.github/workflows/claude.yml`. A user with write access comments `@claude ...` on an issue, a PR or
+a PR review comment; Claude replies and may push commits to a branch.
+
+**Why it is shaped this way.**
+
+- **Its own file, never `ci.yml`.** `build` and `test` are required status checks (card 70). The
+  workflow's only triggers are `issue_comment` and `pull_request_review_comment` filtered to
+  `@claude`, so it adds no check to a pull request and cannot block or satisfy a merge. Do not add a
+  path filter to `ci.yml` to "make room" for it.
+- **No secrets in the file.** One repo secret, `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`,
+  chosen per repo. The docs say an OAuth token is tied to the subscription of whoever ran
+  `claude setup-token`, and that a secret shared across repos should be an API key.
+- **Pinned to a commit SHA** (v1.0.240 at the time of writing), with the tag in a comment, because
+  the action can push to the repo. The docs' own examples use the floating `@v1`.
+- **Bounded.** `timeout-minutes: 20`, `--max-turns 15`, and a per-issue/PR `concurrency` group.
+  The action has no timeout input of its own.
+- **Who can trigger it** is enforced by the action, not the file: write access is required, and bot
+  actors are rejected unless listed in `allowed_bots`. Never set `allowed_non_write_users`.
+- **Claude reads the repo's `CLAUDE.md`** because the job checks the repo out; the docs recommend
+  keeping it concise since it is read on every run.
+
+**Install.** `OPERATIONS.md` has the steps. **Adapt per site:** pick the secret, add
+`--allowedTools` to `claude_args` only if you want Claude to run `npm` commands (the action's defaults apply otherwise), and check the repo's CLAUDE.md is current before the first test.
