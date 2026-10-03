@@ -261,7 +261,7 @@ edited across an ownership line. One-line fix, next time someone is in there.
 
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 
-Flagged in CLAUDE.md's topic index since the fork. The 2026-08-28 pass corrected every
+Flagged in the topic index (now docs/claude/topic-index.md, formerly in CLAUDE.md) since the fork. The 2026-08-28 pass corrected every
 stale `studio/` path and every `studio:deploy` instruction in the live docs, but the
 examples inside them were not retoned. Trust the patterns; fix nouns when you touch a
 file.

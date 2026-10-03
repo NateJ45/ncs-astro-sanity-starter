@@ -1,0 +1,25 @@
+---
+paths:
+  - 'src/sanity/**'
+  - 'sanity.config.ts'
+  - 'sanity.cli.ts'
+  - 'src/lib/queries.ts'
+  - 'src/lib/sectionCadence.ts'
+  - 'src/lib/section-fields*.ts'
+  - 'src/lib/reservedSlugs.ts'
+  - 'src/pages/[slug].astro'
+  - 'src/components/SectionRenderer.astro'
+  - 'scripts/audit-studio.mjs'
+---
+
+# Schema, page builder and data-model rules (1, 8b, 9, 10, 15)
+
+Loads when you touch the Sanity schema, Studio config or page builder. Moved verbatim from CLAUDE.md; the numbering is the original rule numbering, which other docs cite.
+
+<!-- prettier-ignore-start -->
+1. **Never click "Remove field" in the Studio.** It deletes that field's data across every document and cannot be undone without a dataset restore. It appears when the Studio's schema is older than the data. Since the Studio is embedded (it ships with the site build) the sequence after a schema change is: edit schema, `npm run typegen`, commit, deploy. There is no separate `studio:deploy` step any more.
+8b. **Adding a logic-driving dropdown field to a schema means adding its name to `NON_STEGA_FIELDS`** in `src/lib/cms-preview.ts`, in the same commit. Miss it and the block renders the wrong branch **in the preview only**, which is the hardest kind of bug to notice.
+9. **`pageBuilder` cadence is managed by `SectionRenderer`, not by the blocks themselves.** Blocks carry no surface/color field. The alternating-surface logic lives in `src/lib/sectionCadence.ts`. Do not add color fields to block schemas. This is now a TEST, not just a rule: `src/lib/section-fields.test.ts` fails if `sections.ts` or `richSections.ts` ever declares a `tone`, `surface`, `background` or `accent` field. It is also why PORTS.md cards 26 and 28 land here `partial` on purpose -- the sibling repos' band swatch control has nothing to write to here, and adding a field to get the control would trade the reorder guarantee for a convenience.
+10. **The reserved-slug guard lives inside `getStaticPaths` in `[slug].astro`,** not at module scope. This is an Astro isolated-scope requirement; shared list is in `src/lib/reservedSlugs.ts`. If you move the guard outside `getStaticPaths`, it silently stops working.
+15. **Anything computable from data is derived at build time, never stored as a field an editor can retype.** Stone Steps modelled its race records as `recordEntry` documents with the name and the time typed into them, alongside the results archive those records are supposed to summarise, and the two drifted: five 27K records sat on the board for marks that match no result on file, in any year, at either distance. The fix was to compute the board from the results, so the two cannot disagree, and the same move was made again for the entry fee (quoted from the fee tiers rather than typed a second time) and for the numbers in the stat band. The test is simple: if a value can be worked out from something else in the dataset, a field for it is a second source of truth, and the second one is the one that goes stale. Give the editor the inputs, not the answer. This is a judgement rule, not a gate: nothing in the test suite can tell a derived number from a typed one.
+<!-- prettier-ignore-end -->
