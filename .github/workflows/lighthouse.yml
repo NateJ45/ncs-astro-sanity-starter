@@ -1,14 +1,45 @@
-# The family test standard's Lighthouse workflow (PORTS.md card 35).
-# Deliberately NOT marked PORTABLE: like ci.yml it carries a per-site `env:`
-# block, and the `url` list in lighthouserc.json names the pages a given repo
-# builds. The ASSERTIONS in lighthouserc.json are the part that must not
-# diverge. Copy the shape, not the bytes.
+# The family test standard's Lighthouse workflow (PORTS.md card 35, rescheduled
+# by card 62). Deliberately NOT marked PORTABLE: like ci.yml it carries a
+# per-site `env:` block, and the `url` list in lighthouserc.json names the pages
+# a given repo builds. The ASSERTIONS in lighthouserc.json are the part that
+# must not diverge. Copy the shape, not the bytes.
+#
+# ── WHEN IT RUNS (card 62) ──────────────────────────────────────────────────
+# Lighthouse was the slowest gate by a distance (749s of a 848s job on
+# wcp-website: 3 passes over every listed URL) and it ran on every PR, including
+# ones that cannot move a score. It is NOT a required status check (only
+# `build` and `test` are, reid-design-site's ruleset excepted), so it is free to
+# be scheduled rather than blocking:
+#
+#   - pull_request, path-filtered to what can move a score (markup, styles,
+#     assets, scripts, config), and audited on a SAMPLE of URLs, one per
+#     distinct template, via --collect.url flags below. The full list in
+#     lighthouserc.json is untouched.
+#   - push to main, same path filter, FULL url list: the post-merge record.
+#   - weekly schedule, FULL url list: catches drift nobody pushed (a font host
+#     change, a dependency bump that landed on a different path).
+#   - workflow_dispatch: a branch tip on demand, full list.
+#
+# A docs-only, content-only or workflow-only PR therefore runs no Lighthouse and
+# reports no check, which the dependabot auto-merge workflow treats as green.
 name: Lighthouse
 
 on:
   push:
     branches: [main]
+    paths: &score-paths
+      - 'src/**'
+      - 'public/**'
+      - 'scripts/serve-dist.mjs'
+      - 'lighthouserc.json'
+      - 'astro.config.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/lighthouse.yml'
   pull_request:
+    paths: *score-paths
+  schedule:
+    - cron: '17 5 * * 1'
   # Dispatchable so a branch tip can be re-audited on demand, without pushing
   # an empty commit.
   workflow_dispatch:
@@ -32,7 +63,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       # Same build ci.yml runs: consumes the committed src/lib/sanity.types.ts,
       # emits dist/client (audited here) and dist/server (the SSR bundle for
@@ -43,5 +74,21 @@ jobs:
       # Accessibility is a hard gate (minScore 1) in lighthouserc.json, as are
       # LCP 4500ms and CLS 0.1; performance, best-practices and SEO are
       # warnings so normal CI variance does not block a PR.
-      - name: Lighthouse CI
+      #
+      # On a PR the URL list is overridden with ONE PAGE PER TEMPLATE. Passing
+      # --collect.url replaces the config's list, so the assertions and the
+      # median-of-3 stay exactly as the standard defines them; only the page set
+      # shrinks. A site repo picks its own sample: home, one content template,
+      # one listing, and the 404 if it has a bespoke one.
+      - name: Lighthouse CI (sample, pull request)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: >-
+          npx lhci autorun
+          --collect.url=http://localhost:4173/
+          --collect.url=http://localhost:4173/about/
+          --collect.url=http://localhost:4173/journal/
+          --collect.url=http://localhost:4173/404.html
+
+      - name: Lighthouse CI (full)
+        if: ${{ github.event_name != 'pull_request' }}
         run: npx lhci autorun
