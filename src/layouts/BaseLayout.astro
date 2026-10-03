@@ -12,6 +12,8 @@
 
 import { ClientRouter } from 'astro:transitions';
 import { site } from '@/data/site';
+import { layout } from '@/data/layout';
+import { layoutAttrs } from '@/lib/site-layout';
 import { urlFor } from '@/lib/sanity';
 import { localBusinessSchema } from '@/lib/schemas';
 import { getActiveAnnouncement } from '@/lib/queries';
@@ -127,7 +129,7 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
 ---
 
 <!doctype html>
-<html lang={site.lang}>
+<html lang={site.lang} {...layoutAttrs(layout)}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

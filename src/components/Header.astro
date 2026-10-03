@@ -165,7 +165,7 @@ function isGroupActive(items: { href: string }[]) {
       appear once there's room for the full nav + CTA without squishing
       the logo. */
   }
-  <div class="hidden border-b border-border-soft bg-muted lg:block">
+  <div class="site-header__eyebrow hidden border-b border-border-soft bg-muted lg:block">
     <div class="mx-auto flex max-w-content items-center justify-between px-l py-2">
       <div class="flex items-center gap-m">
         <p class="text-xs tracking-eyebrow text-foreground/80 uppercase">
@@ -265,7 +265,7 @@ function isGroupActive(items: { href: string }[]) {
       layout would squish, so mobile-style header stays in use. */
   }
   <div
-    class="relative mx-auto flex max-w-content items-center justify-center border-b border-border px-l py-m lg:justify-between"
+    class="site-header__row relative mx-auto flex max-w-content items-center justify-center border-b border-border px-l py-m lg:justify-between"
   >
     {
       /* Mobile-only availability pill, mirroring the hamburger menu's
@@ -279,7 +279,7 @@ function isGroupActive(items: { href: string }[]) {
       availability && (
         <a
           href="/contact"
-          class="absolute top-1/2 left-m inline-flex h-9 -translate-y-1/2 items-center gap-1.5 rounded-full border border-border-soft bg-muted pr-2.5 pl-2 text-foreground transition-colors hover:border-primary hover:text-primary-dark lg:hidden"
+          class="site-header__pill absolute top-1/2 left-m inline-flex h-9 -translate-y-1/2 items-center gap-1.5 rounded-full border border-border-soft bg-muted pr-2.5 pl-2 text-foreground transition-colors hover:border-primary hover:text-primary-dark lg:hidden"
           aria-label={`${availability}. Tap to start a conversation.`}
         >
           <span class="relative flex h-2 w-2 shrink-0" aria-hidden="true">
@@ -381,7 +381,7 @@ function isGroupActive(items: { href: string }[]) {
         bottom of this file layers on hover-to-open + outside-click/Escape/
         navigation close; the nav is fully functional without it. */
     }
-    <div class="hidden items-center gap-l lg:flex">
+    <div class="site-header__nav hidden items-center gap-l lg:flex">
       <nav class="site-nav flex items-center gap-l" aria-label="Primary">
         {
           NAV_ITEMS.map((item) =>

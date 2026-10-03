@@ -1,0 +1,96 @@
+---
+// Foundation, edit with care
+//
+// THE LAYOUT WALL: the fixed-data page tests/visual/layouts.spec.ts shoots, one
+// region per layout slot (PORTS.md card 72). /styleguide covers the design
+// system at the site's configured layout; this page exists so every VARIANT of
+// every slot can be shot from one build.
+//
+//   - hero: three <Hero> instances, each given an explicit `variant`.
+//   - cards, density, header: the spec flips the matching data-* attribute on
+//     <html>, the same attributes BaseLayout emits from brand.config.json, so the
+//     CSS under test is the CSS a configured site ships.
+//
+// Fixed data on purpose (see styleguide.astro for why). The hero image is a fake
+// Sanity asset reference; the spec answers the CDN request with a local fixture
+// so no network is needed. noindex, filtered from the sitemap (astro.config.mjs
+// matches '/styleguide'), and 'styleguide' is a reserved slug.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import ServiceCard from '@/components/ServiceCard.astro';
+import TestimonialCard from '@/components/TestimonialCard.astro';
+import JournalCard from '@/components/JournalCard.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import { site } from '@/data/site';
+
+const image = {
+  _type: 'image',
+  alt: 'Fixture image',
+  asset: {
+    _type: 'reference',
+    _ref: 'image-0123456789abcdef0123456789abcdef01234567-1600x900-jpg',
+  },
+};
+
+const hero = {
+  eyebrow: 'Layout fixture',
+  headline: 'A heading long enough to wrap across two lines',
+  subhead: 'One supporting sentence so the hero has body copy to carry.',
+  primaryCta: { label: 'Primary action', linkType: 'external', externalUrl: '/' },
+  secondaryCta: { label: 'Secondary', linkType: 'external', externalUrl: '/' },
+} as const;
+
+const service = {
+  name: 'Fixture service',
+  price: 'From $100',
+  shortDescription: 'A short description of what this service is.',
+  features: ['First feature', 'Second feature', 'Third feature'],
+  ctaLabel: 'Learn more',
+};
+const testimonial = {
+  quote: 'A fixed quotation so the card has a body to wrap.',
+  attribution: 'A Client',
+  date: '2026-01-15',
+};
+const entry = {
+  title: 'A fixed journal entry title',
+  slug: { current: 'fixture' },
+  excerpt: 'A fixed excerpt for the journal card.',
+  publishedAt: '2026-01-15',
+};
+---
+
+<BaseLayout
+  title={`Layout wall | ${site.name}`}
+  description="Fixed-data layout variants wall. Not for visitors."
+  noindex
+>
+  <div data-fx="hero-bleed">
+    <Hero {...hero} backgroundImage={image} headingId="fx-h-bleed" variant="bleed" />
+  </div>
+  <div data-fx="hero-split">
+    <Hero {...hero} backgroundImage={image} headingId="fx-h-split" variant="split" />
+  </div>
+  <div data-fx="hero-editorial">
+    <Hero {...hero} backgroundImage={image} headingId="fx-h-editorial" variant="editorial" />
+  </div>
+
+  <div data-fx="body">
+    <section class="bg-background py-section-lg" aria-labelledby="fx-cards">
+      <div class="mx-auto max-w-content px-m">
+        <SectionHeading eyebrow="Cards" headline="Card surfaces" headingId="fx-cards" />
+        <div class="mt-l grid gap-m md:grid-cols-3">
+          <ServiceCard service={service} />
+          <TestimonialCard testimonial={testimonial} />
+          <JournalCard entry={entry} />
+        </div>
+      </div>
+    </section>
+    <section class="bg-muted py-section-md" aria-labelledby="fx-density">
+      <div class="mx-auto max-w-content px-m">
+        <SectionHeading eyebrow="Density" headline="Section rhythm" headingId="fx-density" />
+      </div>
+    </section>
+  </div>
+</BaseLayout>

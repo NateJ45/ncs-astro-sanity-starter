@@ -75,6 +75,19 @@ c. **Keep the neutral default.** Skip palette changes entirely.
    `"0.75rem"` (softened), `"1rem"` (rounded/friendly). Custom values like `"6px"` are
    also valid. Leave at default if unsure.
 
+**Layout (optional, the structure axis)**
+
+6b. Layout. Palette and fonts do not change the page's shape; the `layout` block does.
+Offer it once, after palette and radius, and leave it at the defaults if the user has
+no opinion (the defaults are the original layout). Four slots:
+`header` (`inline` | `centered` | `minimal`), `hero` (`bleed` | `split` | `editorial`),
+`density` (`standard` | `airy` | `tight`), `cards` (`standard` | `outline` | `soft`).
+Suggest by character: editorial or luxury brands pair `centered` + `editorial` + `airy` +
+`outline`; dense information sites pair `minimal` or `inline` + `bleed` + `tight` + `standard`.
+`split` needs a hero photo to show (without one it renders as `bleed`); `editorial`
+never shows the hero image. Check the result at 390px and 1280px, light and dark.
+Reference: `docs/brand/brand-system.md`, PORTS.md card 72.
+
 **Fonts**
 
 7. Display font (default: Libre Baskerville). Ask if they want to change it.
@@ -156,6 +169,7 @@ This rewrites:
 
 - `src/styles/globals.css` -- `@theme` palette tokens, font tokens, `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string
 - `src/data/site.ts` -- `name`, `domain`, `brandColors` (derived fields `storageKeyPrefix`, `themeStorageKey`, `studio` are computed automatically -- never stale)
+- `src/data/layout.ts` -- the `layout` block (header, hero, density, cards); defaults reproduce the original layout
 - `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json; the Studio's colours come from @sanity/ui's built-in light/dark theme and are not brand-driven)
 - `scripts/generate-og-default.mjs` -- `wordmark`, `tagline`
 - `scripts/lib/render-og.mjs` -- `DEFAULTS` object colors and font stack
