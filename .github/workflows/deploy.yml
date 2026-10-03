@@ -6,7 +6,7 @@ name: Deploy
 #
 # ── WHY THIS EXISTS ─────────────────────────────────────────────────────────
 # Until 2026-09-18 this starter shipped no production deploy at all. There was
-# deploy-staging.yml for the `staging` branch and nothing for `main`, so every
+# a staging-branch deploy (since removed, 2026-10-03) and nothing for `main`, so every
 # project forked from here wrote this same workflow on day one: stonesteps-50k
 # forked at 13:59 on 2026-09-07 and was authoring its own deploy workflow by
 # 20:30 the same evening. Until a fork did that, a merged code change was live
@@ -47,6 +47,7 @@ on:
       - 'OPERATIONS.md'
       - 'PORTS.md'
       - '.github/**/*.md'
+      - '.claude/**/*.md'
   repository_dispatch:
     types: [sanity-publish]
   workflow_dispatch:
@@ -68,8 +69,7 @@ jobs:
         # A secret cannot be read in an `if:` expression, so the check happens
         # in a step. Missing credentials warn and skip rather than failing, so
         # a fresh fork of this starter is never red for a reason it cannot yet
-        # fix. Same pattern as deploy-staging.yml, uptime.yml and
-        # sanity-backup.yml.
+        # fix. Same pattern as uptime.yml and sanity-backup.yml.
         env:
           TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -121,7 +121,7 @@ jobs:
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
           # Analytics, and ONLY on this workflow. Do not "fix" the omission by
-          # copying these into ci.yml, lighthouse.yml or deploy-staging.yml.
+          # copying these into ci.yml or lighthouse.yml.
           # Lighthouse alone would file about eighteen localhost page views into
           # the live property on every run, and that data is indistinguishable
           # from real traffic once it lands. The GA4 tag loads after the load
@@ -141,7 +141,7 @@ jobs:
       # a plain `wrangler deploy` reads the SOURCE wrangler.jsonc, which knows
       # nothing about the adapter's generated asset manifest: every sub-route
       # 404s. Deploy the adapter's own config, exactly as `npm run deploy` does.
-      # No `--name` here, unlike the staging deploy: production IS the name in
+      # No `--name` here: production IS the name in
       # wrangler.jsonc.
       - name: Deploy
         uses: cloudflare/wrangler-action@v3

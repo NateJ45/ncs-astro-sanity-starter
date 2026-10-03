@@ -1,10 +1,10 @@
 # New Project Setup Runbook
 
-Read `CLAUDE.md` first, then work through this in order. Every step names its
+Read `CLAUDE.md` first (it is short on purpose; the file-specific rules sit in `.claude/rules/` and the reference in `docs/claude/`, both of which ship with the clone and must be kept when you adapt it for a client), then work through this in order. Every step names its
 gate: the command that has to pass before the next step is worth starting.
 
 This is the single entry point for adapting the starter to a new client site.
-The Foundation-vs-Safe-to-edit taxonomy in `CLAUDE.md` says which files you can
+The Foundation-vs-Safe-to-edit taxonomy (`.claude/rules/foundation-files.md` and `docs/claude/safe-to-edit.md`) says which files you can
 change freely and which need a planned session. Read that section before
 touching anything in the Foundation list.
 
@@ -287,7 +287,7 @@ and vocabulary while the copy is fresh in your head: that file is what an agent
 reads when it writes copy for this project later.
 
 **Gate:** every core page renders real content, in both themes, at ~375px and
-~1280px. `CLAUDE.md`'s visual verification workflow is the full list.
+~1280px. `docs/claude/visual-verification.md` is the full list.
 
 ---
 
@@ -475,7 +475,7 @@ the real domain, and submit the sitemap to Google Search Console.
 ## What not to casually edit
 
 Before changing any Foundation file, read the Foundation-vs-Safe-to-edit
-taxonomy in `CLAUDE.md`. The ones that most often look harmless:
+taxonomy in `.claude/rules/foundation-files.md` and `docs/claude/safe-to-edit.md`. The ones that most often look harmless:
 
 - `src/styles/globals.css` beyond the design-seam tokens (polish-layer
   utilities, shadcn overrides, base resets)
@@ -491,7 +491,7 @@ taxonomy in `CLAUDE.md`. The ones that most often look harmless:
   and it gets a note on its PORTS.md card.
 
 The `src/components/ui/` shadcn primitives are Foundation too. If you reinstall
-one via `npx shadcn add`, reapply the customizations documented in `CLAUDE.md`,
+one via `npx shadcn add`, reapply the customizations documented in `.claude/rules/foundation-files.md`,
 notably the `accordion.tsx` changes.
 
 ---

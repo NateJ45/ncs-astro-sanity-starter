@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: staging abandoned; main is the only branch._
+
+Removed `deploy-staging.yml` (and `scripts/worker-name.mjs`, which only it used), took `staging` out of the `ci.yml` and `lighthouse.yml` push filters, and rewrote the OPERATIONS.md Deploy section to the PR-into-`main` flow. Dated PORTS cards that describe the `main` + `staging` model are left as history; the card 30 row and note carry the current convention.
+
 > Running change log, moved out of CLAUDE.md so it does not load on every task.
 
 > **Scope note (2026-08-27).** This file stays **narrative**: what changed here, in
@@ -118,6 +122,6 @@ and fails if the committed `src/lib/sanity.types.ts` differs. New npm scripts: `
 `scripts/.parity/`, proven by a build, capture, rebuild, compare cycle at 9/9 PASS.
 
 `PORTS.md` was created with fifteen port cards and the applied-to matrix. See the
-[Library of record](../../CLAUDE.md) section of CLAUDE.md for the working rules, above
+[Library of record](../../.claude/rules/library-of-record.md) rules file (split out of CLAUDE.md) for the working rules, above
 all the docs-in-sync clause: an improvement that generalizes gets a card in the same
 commit that generalizes it.

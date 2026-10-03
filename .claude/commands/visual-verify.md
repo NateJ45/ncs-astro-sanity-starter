@@ -3,7 +3,7 @@ description: Screenshot-verify UI changes in both themes and both viewports
 argument-hint: '[route, e.g. / or /about]'
 ---
 
-Run the visual verification loop from CLAUDE.md against $ARGUMENTS (default:
+Run the visual verification loop from docs/claude/visual-verification.md against $ARGUMENTS (default:
 every page touched by the current change). No UI change ships without this.
 
 1. Make sure the dev server is running (`npm run dev`, http://localhost:4321).

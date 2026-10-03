@@ -7,9 +7,9 @@ name: Lighthouse
 
 on:
   push:
-    branches: [main, staging]
+    branches: [main]
   pull_request:
-  # Dispatchable so a staging tip can be re-audited on demand, without pushing
+  # Dispatchable so a branch tip can be re-audited on demand, without pushing
   # an empty commit.
   workflow_dispatch:
 
