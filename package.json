@@ -24,6 +24,7 @@
     "parity": "node scripts/page-parity.mjs",
     "cutover": "node scripts/cutover.mjs",
     "sync-check": "node scripts/sync-check.mjs",
+    "ports:next": "node scripts/next-port-card.mjs",
     "references": "node scripts/capture-references.mjs",
     "directions:shoot": "node scripts/screenshot-directions.mjs",
     "free-dist": "node scripts/free-dist.mjs",
