@@ -5920,6 +5920,15 @@ branch). The `ignore:` list is the pinned set (`sanity`, `@sanity/*`, `sanity-pl
 `typescript` majors `>=7` (vault gotcha `typescript-not-7`: Dependabot re-proposes any version
 it has not been told to ignore, so closing the PR is not enough).
 
+**Blanket major ignore (2026-10-03, Nathan's decision).** The npm `ignore:` list also carries
+`dependency-name: '*'` with `update-types: ['version-update:semver-major']`, so no npm major
+opens a PR (the explicit pinned entries and `typescript >=7` stay: they document intent).
+Why: majors (`@astrojs/react` 7, `motion` 13, `primereact` 11, `eslint-plugin-astro`) piled up
+as PRs nobody could merge alone, because Astro, the adapter, Sanity and wrangler must move
+together with a real deploy test (vault gotcha `wrangler-bump-needs-real-deploy-test`). They
+wait for ONE planned, starter-first stack upgrade. The `github-actions` ecosystem is exempt.
+Adopting it in a site: copy the same two lines into that repo's npm `ignore:`.
+
 **Why each part exists.**
 
 - The file configures VERSION-update PRs only. Vulnerability alerts and automated security
