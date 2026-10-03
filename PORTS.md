@@ -5882,6 +5882,7 @@ The hotspots by step: Lighthouse's 3 passes over every URL (749s of 848s on wcp)
 browser download (286s on fbcm) and the serial Playwright run (674s on fbcm).
 
 **The shape.**
+
 - `static` (typegen, stale-types guard, astro check, lint, format, unit) and `site` (build, link
   check, upload `dist/client`) run in parallel. `build` is a cheap aggregator over both.
 - `e2e` runs Playwright in 3 shards (`--shard=N/3`) against the uploaded build, with
