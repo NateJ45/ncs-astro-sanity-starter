@@ -9,6 +9,9 @@
 #     `gh secret set NAME --app dependabot --repo OWNER/REPO` or every Dependabot
 #     PR fails on the first page that needs it. (Repo VARIABLES are shared.)
 #   - `main` is the only long-lived branch, so there is no `target-branch`.
+#   - npm majors are ignored wholesale ('*' + semver-major): they are taken in one
+#     planned stack upgrade, never from a Dependabot PR. The github-actions
+#     ecosystem below is exempt (action majors are fine to take).
 #   - The ignore list is the pinned stack (CLAUDE.md rule 8, .claude/rules/
 #     dependencies.md). Those packages move together, by hand, in one planned
 #     session. Letting Dependabot bump one member breaks the peer set (ERESOLVE,
@@ -33,6 +36,12 @@ updates:
           - minor
           - patch
     ignore:
+      # No major bumps from Dependabot. Majors wait for ONE planned,
+      # starter-first stack upgrade (Astro, the Cloudflare adapter, Sanity,
+      # wrangler) with a real deploy test (vault gotcha
+      # wrangler-bump-needs-real-deploy-test). Minors and patches still flow.
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
       # The Sanity stack and React are an exact-pinned, matched set.
       - dependency-name: sanity
       - dependency-name: '@sanity/*'
