@@ -187,6 +187,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 67  | Tinted-chip variant-matrix contrast gate                          | yes     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 68  | Never regenerate package-lock.json; `npm ci`                      | yes     | no          | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
 | 69  | No `--` inside an SVG/XML comment                                 | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 70  | CI: parallel gates, sharded Playwright, scheduled Lighthouse      | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6122,3 +6123,41 @@ stays 0 forever, and curl cannot tell. FBCM's header comment named a CSS custom 
 **Guard:** name tokens without the leading dashes or put the note in a sibling README, and
 wait on `img.complete && img.naturalWidth > 0` (never `load`) in any screenshot or visual
 script. Audited in the starter on 2026-10-03: 3 SVGs, none has `--` in a comment.
+
+## Card 70: CI is parallel, sharded and builds once; Lighthouse is scheduled (2026-10-03)
+
+**What it is.** The shape of `ci.yml`, `lighthouse.yml` and `visual.yml`, plus one line in
+`playwright.config.ts`. Measured before the change: every PR built the site three times (the
+`build` job, Playwright's `webServer`, Lighthouse), the gates ran serially, and wall time was their
+sum: wcp-website CI 602s plus Lighthouse 853s, fbcm CI 647s plus Lighthouse 494s plus visual 326s.
+The hotspots by step: Lighthouse's 3 passes over every URL (749s of 848s on wcp), the Playwright
+browser download (286s on fbcm, though 38 to 53s on a normal day) and the serial Playwright run (674s on fbcm).
+
+**The shape.**
+
+- `static` (typegen, stale-types guard, astro check, lint, format, unit) and `site` (build, link
+  check, upload `dist/client`) run in parallel. `build` is a cheap aggregator over both.
+- `e2e` runs Playwright in 3 shards (`--shard=N/3`) against the uploaded build, with
+  `PLAYWRIGHT_SKIP_BUILD=1` so the config serves it instead of rebuilding. `test` is a cheap
+  aggregator over the shards. Browsers are cached by Playwright version; on a hit only
+  `install-deps` runs.
+- **`build` and `test` are REQUIRED status checks** in every repo's "main: PR + green CI" ruleset
+  (reid-design-site also requires `lighthouse`). Keep those job names, keep them failing when
+  anything behind them fails, and never put a path filter on `ci.yml`: a required check that never
+  reports blocks the merge forever.
+- Lighthouse: pull requests run only when score-moving paths change, on one URL per template
+  (`--collect.url` overrides the list, assertions and median-of-3 unchanged). Push to main and a
+  weekly cron run the full list. Not a required check, except on reid-design-site, whose
+  `lighthouse` job must keep reporting (no path filter there).
+- visual: the pull_request trigger gets the same `paths:` as the push trigger.
+
+**Measured per repo (the gain depends on how heavy the tests are).** Nixon CI about 9 to 4 minutes;
+fbcm 783s to about 570s; reid-design 321s to 246s; stonesteps 290s to 226s warm. **Small sites barely
+gain, and the sharded layout can lose:** mas-monograms measured 250 to 272s against 212s with the
+two-job original (the old jobs already ran in parallel, so the new shape only added a serial hop and
+a second install), so it kept ci.yml as it was and took only the Lighthouse change. Lighthouse is the
+reliable win everywhere, about 40 to 50% on PRs, plus not running at all on PRs that cannot move a score.
+
+**Adapt per site.** Keep the site's `env:` block and URL sample; keep its extra steps. Pick the
+Lighthouse sample by template, not by taste. A hybrid site whose Worker renders every page (nixoncreativestudio)
+has no `dist/client` to share, so its shards test the uploaded preview URL instead.

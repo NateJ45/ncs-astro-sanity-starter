@@ -33,6 +33,15 @@ on:
       - 'package.json'
       - '.github/workflows/visual.yml'
   pull_request:
+    # Same paths as the push trigger (PORTS.md card 70): a PR that only touches
+    # docs or scripts cannot move a pixel, so it should not pay for a browser run.
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'tests/visual/**'
+      - 'playwright.visual.config.ts'
+      - 'package.json'
+      - '.github/workflows/visual.yml'
   workflow_dispatch:
     inputs:
       update:
