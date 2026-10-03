@@ -47,6 +47,7 @@ on:
       - 'OPERATIONS.md'
       - 'PORTS.md'
       - '.github/**/*.md'
+      - '.claude/**/*.md'
   repository_dispatch:
     types: [sanity-publish]
   workflow_dispatch:
