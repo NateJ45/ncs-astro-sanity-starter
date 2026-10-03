@@ -13,8 +13,9 @@ paths:
 
 Loads when you touch the design-exploration files. PORTS.md card 73 has the why.
 
-**The problem.** `brand.config.json` carries palette, fonts and radius. Nothing in the reskin can
-change layout, so a site reskinned straight away comes out as the starter's homepage in new colours.
+**The problem.** `brand.config.json` carries palette, fonts, radius and four coarse layout slots (header,
+hero, density, cards; card 72). It cannot express section order, nav pattern, imagery treatment or
+a bespoke structure, so a site reskinned straight away comes out as the starter's homepage in new colours.
 Exploration has to happen BEFORE the reskin and has to force structural difference.
 
 **The order, and what each step leaves behind.**

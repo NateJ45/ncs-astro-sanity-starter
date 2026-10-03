@@ -14,6 +14,8 @@ import HeroBackground from '@/components/HeroBackground.astro';
 import CtaLink from '@/components/CtaLink.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 import { splitHeadingAccent } from '@/lib/heading-accent';
+import { layout } from '@/data/layout';
+import type { SiteLayout } from '@/lib/site-layout';
 import { ChevronDown } from 'lucide-react';
 
 interface CtaBlock {
@@ -57,6 +59,14 @@ interface Props {
    * word; pick one effect per hero. If both are passed, rotatingWords wins.
    */
   scriptAccent?: string;
+  /**
+   * Hero structure: bleed (full-bleed image under a scrim, the original),
+   * split (dark text panel beside the image) or editorial (type only, image
+   * ignored). Defaults to the site-wide `layout.hero` from brand.config.json
+   * (src/data/layout.ts). Pass it only to override one page, or from the
+   * layouts fixture. With no image, split renders exactly as bleed does.
+   */
+  variant?: SiteLayout['hero'];
 }
 
 const {
@@ -71,7 +81,10 @@ const {
   size = 'short',
   rotatingWords,
   scriptAccent,
+  variant,
 } = Astro.props as Props;
+
+const heroVariant = variant ?? layout.hero;
 
 // Split the headline into a first word + the rest, so the rotator can swap
 // the first word in place without touching the rest of the line. Matches
@@ -124,7 +137,8 @@ const heroImageList = (Array.isArray(backgroundImages) ? backgroundImages : []).
 const effectiveImages = heroImageList.length > 0
   ? heroImageList
   : (backgroundImage?.asset ? [backgroundImage] : []);
-const hasImage = effectiveImages.length > 0;
+// Editorial is type only: the image is never rendered (so never fetched).
+const hasImage = heroVariant !== 'editorial' && effectiveImages.length > 0;
 
 // "tall" (homepage) fills the screen below the sticky header on first load.
 // The exact fill height comes from the .hero-fill class plus the measured
@@ -237,6 +251,7 @@ const wrapperHeight =
       wrapperHeight,
     ]}
     aria-labelledby={headingId}
+    data-hero={heroVariant === 'split' ? 'split' : undefined}
   >
     {/* Background: single static image or a cross-fading slideshow (2+ images),
         plus the readability overlays. See HeroBackground.astro. */}
@@ -311,7 +326,11 @@ const wrapperHeight =
     )}
   </section>
 ) : (
-  <section class="bg-background" aria-labelledby={headingId}>
+  <section
+    class="bg-background"
+    aria-labelledby={headingId}
+    data-hero={heroVariant === 'editorial' ? 'editorial' : undefined}
+  >
     <div class:list={['mx-auto max-w-content px-m py-section-lg flex items-end', wrapperHeight]}>
       <SectionHeading
         eyebrow={eyebrow}

@@ -208,6 +208,16 @@
       "description": "Border-radius personality token (e.g. '0.5rem', '0.25rem', '1rem'). Drives --radius in globals.css.",
       "pattern": "^[0-9]+(\\.[0-9]+)?(rem|px|em)$"
     },
+    "layout": {
+      "type": "object",
+      "description": "Structure variants (the second axis beside palette and fonts). Each slot's FIRST value is the original layout. See src/lib/site-layout.ts.",
+      "properties": {
+        "header": { "type": "string", "enum": ["inline", "centered", "minimal"] },
+        "hero": { "type": "string", "enum": ["bleed", "split", "editorial"] },
+        "density": { "type": "string", "enum": ["standard", "airy", "tight"] },
+        "cards": { "type": "string", "enum": ["standard", "outline", "soft"] }
+      }
+    },
     "workerName": {
       "type": ["string", "null"],
       "description": "Cloudflare Worker name. When set (non-null) and domain != example.com, apply-brand rewrites the 'name' field in wrangler.jsonc. null = leave wrangler.jsonc untouched."

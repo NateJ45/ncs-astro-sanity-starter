@@ -189,6 +189,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 69  | No `--` inside an SVG/XML comment                                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 70  | CI: parallel gates, sharded Playwright, scheduled Lighthouse           | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 71  | Tracked `.claude/settings.json` deny rules + shared conventions import | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 72  | Layout variants: structure as a brand.config axis                      | no      | no          | yes      | no               | no            | no             | no                 | no                  | no             |
 | 73  | Design directions before reskin (brief, references, mockups)           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -6226,11 +6227,40 @@ copy, desktop nav server-rendered, content is statically built, matched dependen
 Sanity repo, but each repo numbers them differently and other docs cite the numbers. They are the next
 candidate once the rule numbers stop being load-bearing.
 
+---
+
+## Card 72: Layout variants, the structure axis of brand.config.json (2026-10-03)
+
+**What it is.** Reskinning changed colours, fonts and radius on ONE fixed structure, so every site built from the starter had the same shape. `brand/brand.config.json` now has an optional `layout` block: four slots, three values each. The FIRST value of every slot is the original behaviour and the default.
+
+| Slot      | Values                          |
+| --------- | ------------------------------- |
+| `header`  | `inline`, `centered`, `minimal` |
+| `hero`    | `bleed`, `split`, `editorial`   |
+| `density` | `standard`, `airy`, `tight`     |
+| `cards`   | `standard`, `outline`, `soft`   |
+
+**Why it is built this way.**
+
+- **A default emits nothing.** `layoutAttrs()` returns `data-header`, `data-density` and `data-cards` only for non-default values and `Hero.astro` sets `data-hero` only for `split` and `editorial`. A site that never sets `layout` matches none of the new CSS. Measured on the starter before and after, default config: `/` and `/about/` at 390 and 1280, full page, 0 differing pixels in all four.
+- **CSS, not forked pages.** Header, density and cards are unlayered rules on `html[data-*]` at the end of `globals.css` (unlayered so they beat Tailwind utilities without `!important`). Density moves the two `--spacing-section-*` tokens, so bands, hero padding and dividers move together. Cards override the shared `.card-lift` surface. The one component branch is `Hero`'s `variant` prop (default `layout.hero`), because split and editorial change what is rendered, not only how: editorial never renders the image, so it is never fetched.
+- **One definition.** Slots, values and defaults live only in `src/lib/site-layout.ts`. `scripts/apply-brand.mjs` validates the schema enum (a validator `enum` check was added) and writes `src/data/layout.ts` whole, with no substitution patterns to drift. `src/lib/site-layout.test.ts` is a gate: it fails if the schema enums, `brand.config.json` and the lib disagree, or if a default would emit an attribute.
+- **Every variant has a baseline.** `src/pages/styleguide/layouts.astro` (fixed data, noindex, covered by the existing `/styleguide` sitemap filter) and `tests/visual/layouts.spec.ts` loop over `LAYOUT_SLOTS` at 390 and 1280: 24 shots. Header, density and cards are exercised by setting the same `<html>` attribute BaseLayout emits; the hero page renders all three. The hero image is a fake Sanity reference answered from `tests/visual/fixtures/layout-hero.jpg`, so no network. Baselines are Linux, generated in CI by `visual.yml` like the rest; existing baselines were not touched.
+- **Cost.** Hook classes added (`site-header__eyebrow`, `__row`, `__nav`, `__pill` in `Header.astro`, `__menu` in `MobileNav.tsx`), so rendered HTML differs by class names only; `npm run parity compare` will show exactly that.
+- **Not this.** `src/lib/layout-variants.ts` (card 26) is the per-SECTION column count and media side an editor picks in the Studio. This card is site-wide and set in the brand config.
+
+**Canonical files.** `src/lib/site-layout.ts` (PORTABLE) and its test; `tests/visual/layouts.spec.ts`. Starter-owned and adapted per site: `src/data/layout.ts` (generated), `src/pages/styleguide/layouts.astro`, the final block of `globals.css`, the hook classes in `Header.astro` / `MobileNav.tsx`, the `Hero.astro` variant, `BaseLayout.astro`'s `{...layoutAttrs(layout)}` on `<html>`, `apply-brand.mjs` and the brand schema.
+
+**Install in a site.** Copy `site-layout.ts` and its test, `tests/visual/layouts.spec.ts` and `tests/visual/fixtures/`; add the `layout` block to the site's `brand.config.json` and schema; add the `layout.ts` step and the `enum` check to its `apply-brand.mjs`; copy the variant CSS block and the hook classes; add the Hero variant and the `<html>` spread. Then run the default-unchanged check: screenshot `/` and one inner page at 390 and 1280 before and after, expect 0 differing pixels. Dispatch `visual.yml` with `update` to create the layouts baselines (and only those).
+
+**Adapt per site.** A site with a bespoke header or hero must re-map the hook classes in the CSS rather than drop them; the `cards` rules assume `.card-lift` is on every card surface (check with grep before trusting `soft` and `outline`). A site whose hero has no image gets no visible `split`.
+
 ## Card 73: Design directions before a reskin (2026-10-03)
 
 **Origin:** the studio's own pattern. Every site built from this starter came out as the same
 layout in different colours, because the only step between "new client" and "built" was the reskin,
-and `brand.config.json` carries palette, fonts and radius, not structure.
+and `brand.config.json` carried palette, fonts and radius, not structure. Card 72 added four coarse
+layout slots; this card covers the exploration that decides which slots, and what lies beyond them.
 **Canonical:** `.claude/commands/design-directions.md`, `scripts/capture-references.mjs`,
 `scripts/screenshot-directions.mjs`, `docs/templates/design-brief.md`, and the "Where this sits"
 section of `.claude/skills/reskin/SKILL.md`. Rules: `.claude/rules/design-flow.md`.
@@ -6253,8 +6283,8 @@ section of `.claude/skills/reskin/SKILL.md`. Rules: `.claude/rules/design-flow.m
   390, 768 and 1280 and fails on horizontal overflow. The command stops for Nathan's pick, records
   it as a dated "Carry forward" entry, and hands off to the reskin skill. It never edits
   `brand.config.json`.
-- **Reskin.** The skill now reads that entry, takes palette, fonts and radius from it, and reports
-  the structural decisions the config cannot carry as queued work.
+- **Reskin.** The skill now reads that entry, takes palette, fonts, radius and the matching `layout` slots from it, and
+  reports the structural decisions the config cannot carry as queued work.
 
 **Adapt per site.** Add the previous client's name to the brief's "must not look like" line. Mockups
 and reference captures live under `docs/`, which `.prettierignore` skips for `*.html` and

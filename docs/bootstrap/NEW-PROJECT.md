@@ -194,7 +194,7 @@ right from the first deploy.
 
 ## Step 5 - Choose a direction, then apply the brand
 
-Do not start with the reskin: it changes colours, fonts and radius, not layout. First fill
+Do not start with the reskin: it changes colours, fonts, radius and four coarse layout slots, not the full structure. First fill
 `docs/templates/design-brief.md` (PRODUCT.md and DESIGN.md), capture references with
 `npm run references -- <urls>`, and run the `/design-directions` command to pick one of 3 or 4
 genuinely different homepage directions. See OPERATIONS.md, "Design directions".

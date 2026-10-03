@@ -137,7 +137,7 @@ reskin must preserve>.
 Also update the brief's `DESIGN.md` Overview and Do's and Don'ts if the project has one (the
 chosen direction's type pairing, density, imagery rule and rejects belong there), and add a line to
 `docs/PENDING.md` for the layout work the pick implies, since `brand.config.json` carries colours,
-fonts and radius only and cannot express layout.
+fonts, radius and only four coarse layout slots (header, hero, density, cards).
 
 Finish by handing off to the **reskin skill** (`.claude/skills/reskin/SKILL.md`): give it the
 decision entry path, the chosen palette and font pairing, and a list of layout, density and imagery

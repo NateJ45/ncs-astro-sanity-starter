@@ -5,6 +5,7 @@ Moved out of CLAUDE.md. Read before a reskin or any change where you are unsure 
 These are the files where a project maintainer can make changes without risk of breaking the underlying architecture:
 
 - Text content inside `src/pages/*.astro` (everything outside the frontmatter and Sanity-fetched content)
+- `src/data/layout.ts` -- the layout variants (header, hero, density, cards), written by `npm run apply-brand` from the `layout` block of `brand/brand.config.json`; edit the config, not this file.
 - `src/data/site.ts` -- static identity constants (site name, domain, brand color mirrors for scripts, asset paths). Replace all placeholder values before launch. (Written automatically by `npm run apply-brand`; also safe to edit by hand.)
 - **The brand config (preferred reskin path):**
   - `brand/brand.config.json` -- single source of truth for identity, palette, fonts, and logo paths. Edit this, then run `npm run apply-brand` and it cascades to globals.css, site.ts, the Studio theme, and the OG image.

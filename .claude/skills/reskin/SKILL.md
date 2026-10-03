@@ -10,8 +10,9 @@ Collect all brand inputs, write them into `brand/brand.config.json`, and run
 
 ## Where this sits: brief, references, design-directions, reskin
 
-Reskin is step 4 of 4. A reskin applies colours, fonts and radius; it cannot change layout, so
-running it first is how every site ends up as the same layout in different colours.
+Reskin is step 4 of 4. A reskin applies colours, fonts, radius and the four coarse `layout` slots
+(header, hero, density, cards); it cannot express section order, nav pattern, imagery treatment or
+a bespoke structure, so running it first is how sites drift toward the same layout.
 
 1. **Brief:** `docs/templates/design-brief.md` becomes `PRODUCT.md` / `DESIGN.md`.
 2. **References:** `npm run references -- <urls>` writes `docs/references/`.
@@ -92,6 +93,19 @@ c. **Keep the neutral default.** Skip palette changes entirely.
    scale. Options: `"0.25rem"` (sharp/editorial), `"0.5rem"` (default -- balanced),
    `"0.75rem"` (softened), `"1rem"` (rounded/friendly). Custom values like `"6px"` are
    also valid. Leave at default if unsure.
+
+**Layout (optional, the structure axis)**
+
+6b. Layout. Palette and fonts do not change the page's shape; the `layout` block does.
+Offer it once, after palette and radius, and leave it at the defaults if the user has
+no opinion (the defaults are the original layout). Four slots:
+`header` (`inline` | `centered` | `minimal`), `hero` (`bleed` | `split` | `editorial`),
+`density` (`standard` | `airy` | `tight`), `cards` (`standard` | `outline` | `soft`).
+Suggest by character: editorial or luxury brands pair `centered` + `editorial` + `airy` +
+`outline`; dense information sites pair `minimal` or `inline` + `bleed` + `tight` + `standard`.
+`split` needs a hero photo to show (without one it renders as `bleed`); `editorial`
+never shows the hero image. Check the result at 390px and 1280px, light and dark.
+Reference: `docs/brand/brand-system.md`, PORTS.md card 72.
 
 **Fonts**
 
@@ -174,6 +188,7 @@ This rewrites:
 
 - `src/styles/globals.css` -- `@theme` palette tokens, font tokens, `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string
 - `src/data/site.ts` -- `name`, `domain`, `brandColors` (derived fields `storageKeyPrefix`, `themeStorageKey`, `studio` are computed automatically -- never stale)
+- `src/data/layout.ts` -- the `layout` block (header, hero, density, cards); defaults reproduce the original layout
 - `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json; the Studio's colours come from @sanity/ui's built-in light/dark theme and are not brand-driven)
 - `scripts/generate-og-default.mjs` -- `wordmark`, `tagline`
 - `scripts/lib/render-og.mjs` -- `DEFAULTS` object colors and font stack
@@ -309,7 +324,7 @@ be rebuilt before editors see the new fonts. The Studio is embedded, so `npm run
 
 **Layout work the config cannot carry:** if a design direction was picked, list every layout,
 nav, hero, density and imagery decision from its "Carry forward" line that `brand.config.json`
-did not apply, and confirm each one is queued in `docs/PENDING.md`. A reskin that quietly drops
+did not apply (map what fits onto the `layout` slots in Step 2, item 6b, and queue the rest), and confirm each one is queued in `docs/PENDING.md`. A reskin that quietly drops
 the chosen direction's structure has not delivered the direction.
 
 **Worker name:** If `workerName` was set and `wrangler.jsonc` was rewritten, confirm that
