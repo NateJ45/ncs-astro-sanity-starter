@@ -199,7 +199,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | yes         | yes      | yes              | n/a           | no             | n/a                | n/a                 | yes            |
 | 80  | `sync-check` skips `_worktrees/` folders                               | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 81  | llms-full identity from brand config; audit shared field consts        | no      | yes         | yes      | no               | no            | no             | n/a                | n/a                 | yes            |
-| 82  | Invisible 44px hit area for small links                                | no      | no          | no       | yes              | no            | no             | n/a                | no                  | yes            |
+| 82  | Invisible 44px hit area for small links                                | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
 | 83  | `measure-tap-targets.mjs` 390px tap-target scan                        | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 84  | Linux-runner font-swap layout-shift check (fallback faces, preload)    | no      | no          | no       | yes              | no            | no             | n/a                | no                  | no             |
 | 85  | MapLibre 6.x: `setMissingStyleImageResolver` for generated icons       | n/a     | n/a         | n/a      | n/a              | n/a           | no             | n/a                | n/a                 | yes            |
@@ -6878,10 +6878,9 @@ its test); none carries a marked audit today.
 buttons under 44px at phone width on reid-design-site, fbcm and stonesteps-50k. Each fixed it in its own audit PR, each
 landed on the same idea (grow the TAPPABLE box, not the visible one), and each named the class differently:
 reid-design-site PR #113 (`.r-link`), fbcm PR #36 (`.hit-44`), stonesteps-50k PR #77 (`.tap-pad` and `.tap-pad-lg`).
-**Canonical:** none yet. It is CSS that lives in each site's `globals.css`/`reid.css`, so no `PORTABLE` file carries it;
-the snippets below are the reference. The starter's own buttons already meet the floor by size (`CtaLink.astro` uses
-`min-h-[44px]`), and the starter ships no utility for small text links; the first site that adopts one should copy the
-fbcm block below.
+**Canonical:** none. It is CSS that lives in each site's `globals.css`/`reid.css`, so no `PORTABLE` file carries it;
+the snippets below are the reference. The starter now carries fbcm's block as `.hit-44` in `src/styles/globals.css` (applied
+2026-10-03, see Status) and uses it on the footer's bottom-bar links and the "View larger map" link; copy that block.
 
 **What it is.** A small link whose box is 16 to 24px tall fails the 44px comfortable-touch floor (WCAG 2.5.5 AAA; 2.5.8
 sets 24px as the AA minimum). Padding it to 44px moves things you can see, and for a text link with an underline it drops
@@ -6956,7 +6955,18 @@ booking line and the header rating.
 4. Write the rule into the site's layout/CSS rules file (the `::before` rule and "never pad an underlined text link").
 5. Build and look at it in light and dark: nothing visible should have moved.
 
-**Status, checked against each repo's `origin/main` on 2026-10-03.** reid-design-site: `.r-link::after` in
+**Applied in the starter (2026-10-03, PR for `docs/PENDING.md` item 12).** `.hit-44` (fbcm's block, unchanged) in
+`src/styles/globals.css`; `relative hit-44` on the footer bottom-bar links (Privacy policy, legal links, site credit) and on
+"View larger map" in `ServiceAreaMap.astro`. The footer's column links are stacked rows only about 28px apart, where a 44px
+hit area would overlap its neighbours by 16px each, so they take real row height instead (`inline-flex min-h-[44px]
+min-w-[44px] items-center justify-center md:justify-start`, and the lists lose `space-y-2`): the footer is taller by about 16px
+per link on a phone. A one-word link ("FAQ", 27px wide) also needs `min-w-[44px]`, which the first pass missed: the scan checks
+width as well as height. The contact form's inputs, selects, textareas and Send button took `min-h-[44px]` (they are visible
+controls, so a real height, 40 to 42px up to 44px). None of those files is `PORTABLE`, so there is nothing to sync; a site
+repeats the same edits in its own footer and form. The footer social icons went from `h-10 w-10` to `h-11 w-11` (not rendered
+in the seed content, so not scan-verified).
+
+**Status, checked against each repo's `origin/main` on 2026-10-03.** Starter: `yes` (see above). reid-design-site: `.r-link::after` in
 `src/styles/reid.css`. stonesteps-50k: `.tap-pad` and `.tap-pad-lg` in `src/styles/globals.css`. fbcm (not a column):
 `.hit-44::after` in `src/styles/globals.css`. Every other cell is `no` meaning not adopted and not measured, not known to
 fail; a site is `no` until its own 390px scan says otherwise.
@@ -7023,8 +7033,10 @@ site's real routes. Optionally add an npm script. No workflow edit.
 **First reading on this starter** (`npm run build`, `npm run serve:dist`, 390px, 2026-10-03, seed content, exit 1). `/`: 6
 under 44px (the footer's About, Process, Services & Pricing, FAQ, Journal and Privacy policy links, 15 to 17px tall).
 `/services/`: the same 6. `/contact/`: 16, those 6 plus the form's 3 text inputs (42px), 5 selects (40px), the Send
-button (36px) and the "View larger map" link (15px). 0 inline, 0 lifted, 0 stolen. So the starter does not meet the 44px
-floor yet; that is logged in `docs/PENDING.md` item 12 and is the first thing card 82 would fix.
+button (36px) and the "View larger map" link (15px). 0 inline, 0 lifted, 0 stolen. So the starter did not meet the 44px
+floor then. **Fixed 2026-10-03** (card 82, "Applied in the starter"): the same scan over `/`, `/services/`, `/contact/`,
+`/about/`, `/faq/`, `/journal/`, `/privacy/` and `/process/` went from 58 under 44px to 0, with 3 inline-in-sentence links
+exempt and 0 stolen taps.
 
 ---
 

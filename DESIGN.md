@@ -80,6 +80,7 @@ Soft and light by default: marketing cards rest on a low-opacity shadow that dee
 
 - **Buttons (`CtaLink.astro`).** Two looks, `primary` (filled, Slate Dark ground, white label) and `secondary` (outlined), plus an `onDark` toggle for dark surfaces (a `class` override does not work, because Tailwind v4 utility order lets the link colour win). Generous padding, uppercase tracking, 44px minimum tap target. Note: the file's header comment still says "bronze" from the Reid Design fork; the live colours are Slate. Forks usually replace both variants with one family (rule 17).
 - **Header, footer, mobile drawer.** Server-rendered desktop nav (rule 4), a brand stripe, theme toggle, `MobileNav` drawer.
+- **Touch targets.** Every link, button and form control is at least 44 by 44px at phone width (scan: `scripts/measure-tap-targets.mjs`). Footer column links and form controls carry real `min-h-[44px]`; standalone underlined links use the invisible `.hit-44` area so nothing visible moves (PORTS.md cards 82 and 83).
 - **Hero.** `Hero.astro` with `HeroBackground.astro` for image heroes and an entry stagger (`.hero-entry-stagger`).
 - **Sections.** The page-builder blocks under `src/components/sections/` render through `SectionRenderer.astro`; cards (service, journal, testimonial, project) share the stripe and card lift.
 - [PLACEHOLDER: the project's own component vocabulary and signature objects.]

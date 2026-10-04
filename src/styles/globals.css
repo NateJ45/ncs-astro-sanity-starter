@@ -1219,3 +1219,21 @@ html[data-cards='soft'] .card-lift:hover {
   border-color: transparent;
   box-shadow: none;
 }
+
+/* ---- Invisible 44px hit area for a small standalone link (PORTS.md card 82).
+   Grows the TAPPABLE box, not the visible one, so nothing moves and an
+   underline stays on its baseline. The element must be positioned: put
+   `relative` beside this class (left to the caller so a link that is already
+   absolute or fixed is never knocked back to relative). This class owns the
+   element's ::after, so a component that needs its own pseudo-element on the
+   same link uses ::before. Not for links inside a sentence (WCAG 2.5.8 exempt)
+   and not for stacked rows closer than 44px (give those real min-height). ---- */
+.hit-44::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}
