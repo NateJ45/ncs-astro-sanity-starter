@@ -269,6 +269,35 @@ function morphElement(
  * same `class` back is cheap but assigning the same `src` back is not, and the
  * rule is simpler to keep than to qualify.
  */
+/**
+ * Classes the page's own scripts add after load, which the server's HTML never
+ * carries: the scroll-reveal observer's `is-visible` (and the glyph draw's
+ * `is-drawn`), the image curtain's `is-revealed`, the grid entrance's
+ * `is-staggered`. A plain class sync took them off on every refresh, and
+ * since each observer runs once, anything revealed went back to its hidden
+ * start state for good: in the FBCM preview, 2026-09-26, the Staff hero's two
+ * arch portraits sat clipped to nothing after any draft edit. A class the live
+ * element has from this list is kept when the server's copy lacks it. They are
+ * state, not content, so keeping them cannot hide an edit.
+ */
+export const CLIENT_STATE_CLASSES: readonly string[] = [
+  'is-visible',
+  'is-drawn',
+  'is-revealed',
+  'is-staggered',
+];
+
+/** `to`'s class list plus any client-state class `from` has and `to` lacks. */
+function mergedClass(from: MorphElement, to: MorphElement): string | null {
+  const next = to.getAttribute('class');
+  const live = (from.getAttribute('class') ?? '').split(/\s+/).filter(Boolean);
+  const kept = live.filter((c) => CLIENT_STATE_CLASSES.includes(c));
+  if (kept.length === 0) return next;
+  const nextList = (next ?? '').split(/\s+/).filter(Boolean);
+  const add = kept.filter((c) => !nextList.includes(c));
+  return add.length === 0 ? next : [...nextList, ...add].join(' ');
+}
+
 function syncAttributes(from: MorphElement, to: MorphElement, keepImageSource: boolean): void {
   const skip = (name: string): boolean =>
     keepImageSource && (IMAGE_SOURCE_ATTRIBUTES as readonly string[]).includes(name);
@@ -276,12 +305,19 @@ function syncAttributes(from: MorphElement, to: MorphElement, keepImageSource: b
   const wanted = to.getAttributeNames();
   for (const name of wanted) {
     if (skip(name)) continue;
-    const value = to.getAttribute(name) ?? '';
+    const value = (name === 'class' ? mergedClass(from, to) : to.getAttribute(name)) ?? '';
     if (from.getAttribute(name) !== value) from.setAttribute(name, value);
   }
   const keep = new Set(wanted);
   for (const name of from.getAttributeNames()) {
     if (keep.has(name) || skip(name)) continue;
+    if (name === 'class') {
+      const state = mergedClass(from, to);
+      if (state) {
+        if (from.getAttribute('class') !== state) from.setAttribute('class', state);
+        continue;
+      }
+    }
     from.removeAttribute(name);
   }
 }
