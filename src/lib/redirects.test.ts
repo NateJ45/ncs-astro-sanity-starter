@@ -10,7 +10,12 @@
 // =============================================================================
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeRedirectPath, isExternalTarget, buildRedirectMap } from './redirects.ts';
+import {
+  normalizeRedirectPath,
+  normalizeRedirectTarget,
+  isExternalTarget,
+  buildRedirectMap,
+} from './redirects.ts';
 
 test('normalizeRedirectPath adds the leading slash and drops the trailing one', () => {
   assert.equal(normalizeRedirectPath('old-page'), '/old-page');
@@ -90,4 +95,71 @@ test('buildRedirectMap lets a later entry win for the same source path', () => {
     ]),
     { '/a': { status: 301, destination: '/new' } },
   );
+});
+
+// ── Destinations keep their ?query and #fragment (2026-09-18) ──────────────
+// A SOURCE is matched on its path, so its query and hash are dropped. A
+// DESTINATION is handed to the browser, so its query and hash ARE the
+// instruction. Running the source's rules over a destination shipped
+// "/visit#accessibility" as "/visit" on every anchored target.
+
+test('normalizeRedirectTarget keeps a fragment, and still normalizes the path', () => {
+  assert.equal(normalizeRedirectTarget('/visit#accessibility'), '/visit#accessibility');
+  assert.equal(normalizeRedirectTarget('visit/#accessibility'), '/visit#accessibility');
+  assert.equal(normalizeRedirectTarget(' /a//b/#frag '), '/a/b#frag');
+});
+
+test('normalizeRedirectTarget keeps a query string', () => {
+  assert.equal(normalizeRedirectTarget('/blog?category=ruminations'), '/blog?category=ruminations');
+  assert.equal(normalizeRedirectTarget('blog/?category=x'), '/blog?category=x');
+});
+
+test('normalizeRedirectTarget keeps both, in order, byte for byte', () => {
+  assert.equal(
+    normalizeRedirectTarget('/blog/?category=x&page=2#list'),
+    '/blog?category=x&page=2#list',
+  );
+});
+
+test('normalizeRedirectTarget anchors a bare query or fragment to the site root', () => {
+  assert.equal(normalizeRedirectTarget('#top'), '/#top');
+  assert.equal(normalizeRedirectTarget('?q=1'), '/?q=1');
+});
+
+test('normalizeRedirectTarget leaves an external target and a blank alone', () => {
+  assert.equal(
+    normalizeRedirectTarget('https://example.org/a?x=1#y'),
+    'https://example.org/a?x=1#y',
+  );
+  assert.equal(normalizeRedirectTarget('  '), null);
+  assert.equal(normalizeRedirectTarget(undefined), null);
+});
+
+test('buildRedirectMap ships an anchored destination whole', () => {
+  assert.deepEqual(buildRedirectMap([{ from: '/accessibility', to: '/visit#accessibility' }]), {
+    '/accessibility': { status: 301, destination: '/visit#accessibility' },
+  });
+});
+
+test('buildRedirectMap ships a query destination whole', () => {
+  assert.deepEqual(
+    buildRedirectMap([{ from: '/blog/categories/ruminations', to: '/blog?category=ruminations' }]),
+    { '/blog/categories/ruminations': { status: 301, destination: '/blog?category=ruminations' } },
+  );
+});
+
+test('buildRedirectMap ships a destination carrying both', () => {
+  assert.deepEqual(buildRedirectMap([{ from: '/old', to: '/blog?category=x#list' }]), {
+    '/old': { status: 301, destination: '/blog?category=x#list' },
+  });
+});
+
+test('a fragment or query does NOT smuggle a self-redirect past the loop guard', () => {
+  // The browser never sends either part, so "/a -> /a#top" loops forever.
+  assert.deepEqual(buildRedirectMap([{ from: '/a', to: '/a#top' }]), {});
+  assert.deepEqual(buildRedirectMap([{ from: '/a', to: '/a/?x=1' }]), {});
+});
+
+test('normalizeRedirectPath still drops query and fragment on the SOURCE side', () => {
+  assert.equal(normalizeRedirectPath('/a/b?x=1#frag'), '/a/b');
 });
