@@ -203,6 +203,9 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 83  | `measure-tap-targets.mjs` 390px tap-target scan                        | no      | yes         | yes      | no               | yes           | no             | n/a                | yes                 | no             |
 | 84  | Linux-runner font-swap layout-shift check (fallback faces, preload)    | no      | no          | no       | yes              | no            | no             | n/a                | no                  | no             |
 | 85  | MapLibre 6.x: `setMissingStyleImageResolver` for generated icons       | n/a     | n/a         | n/a      | n/a              | n/a           | no             | n/a                | n/a                 | yes            |
+| 86  | Production-write second factor (NCS_PRODUCTION_WRITE) for data scripts | n/a     | partial     | no       | no               | no            | no             | n/a                | staged              | no             |
+| 87  | Dead-weight scan: unused kits and packages inflate every page's CSS    | n/a     | yes         | no       | no               | no            | yes            | n/a                | staged              | no             |
+| 88  | Cloudflare beacon starts after load and idle, not deferred in head     | n/a     | no          | no       | no               | no            | no             | n/a                | staged              | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7254,3 +7257,193 @@ bar). stonesteps-50k kept the attribution icon's look and gave it a card 82 invi
 **Status.** stonesteps-50k: `setMissingStyleImageResolver` is in `CourseMapLibre.tsx` on `origin/main` (read 2026-10-03,
 and the `styleimagemissing` word survives there only in the explanatory comment). Every other cell is `n/a` where no
 MapLibre dependency was found, `no` where it was not checked.
+
+---
+
+## Card 86: A second factor for production writes: `--apply` alone is one keystroke from live data (2026-10-04)
+
+**Origin:** nixoncreativestudio, redesign-2026 branch, commit `c631a66` (not merged to that repo's `main` when this
+card was written; the hash may change if the branch is squash-merged). **Canonical:** guidance plus a reference
+implementation in that repo (`scripts/cms/args.mjs`, `scripts/cms/production-load.mjs`,
+`.claude/rules/live-writes.md`). The starter's `scripts/lib/sanity-lib.mjs` is `PORTABLE` and does NOT have the guard
+yet; adding it is the follow-up below, and it follows the marked-file ordering in the Projects `CLAUDE.md`.
+
+**The incident.** A delegated agent wrote a markdown plan with `node -e "..."` in Git Bash. The text held backticked
+commands, and the shell ran them as command substitutions, including a content load that already carried its own
+`--yes`: `npm run cms:load -- --collection pages --url <the production domain> --yes`. Real page entries were written
+to production. The `--yes` flag was a deliberate gate and it did not help, because anything that can be typed into a
+shell string can contain the flag. The two things an accident cannot supply are a value in the process environment and
+a typed answer.
+
+**The rule.** A script that WRITES to a live target needs two independent things, and the second must not be something
+a command line can carry by accident:
+
+1. **Dry by default.** No write without `--apply` (or `--yes`), exactly the gate card 4's `sanity-lib` already gives.
+2. **A production second factor.** When the target is production (a Sanity `production` dataset, an EmDash instance
+   that is not the CI Worker or a local address), the run also needs `NCS_PRODUCTION_WRITE=yes` in the real process
+   environment, set in the same command by a person who is present. The reference implementation:
+
+```js
+// scripts/cms/args.mjs (nixoncreativestudio)
+if (!args.yes) fail('... rerun with --yes (or add --dry-run to read only).');
+if (process.env.NCS_PRODUCTION_WRITE !== 'yes') {
+  fail(
+    '--yes is not enough: set NCS_PRODUCTION_WRITE=yes in the same command, and only with Nathan present.',
+  );
+}
+```
+
+A wrapper that already asks a person to type "yes" (`production-load.mjs`) sets the variable for its own child
+processes only after that answer. A delegated agent never sets it, never passes the production URL to a write script,
+and tests the guard against a dummy host such as `https://example.invalid`, never against production.
+
+**Two details that make it work.**
+
+- Read `process.env.NCS_PRODUCTION_WRITE` directly. `sanity-lib` builds its env from `loadEnv`, which merges the root
+  `.env` under `process.env`; if the guard read the merged object, someone would put the variable in `.env` once and the
+  guard would be permanently open. It must be a per-command value.
+- Never put backticks inside a shell string. Write any text that contains them with the Write tool, then run a script
+  file. This is the actual root cause; the guard limits the damage when it recurs.
+
+**What the sibling repos have (read from each working copy, 2026-10-04).** Counted as: scripts that call a Sanity
+write method (`commit`, `create`, `createOrReplace`, `delete`, `patch`, `transaction`) on a `createClient` client.
+This is a grep, so read the numbers as approximate.
+
+| Repo             | Scripts that write | Write the moment they run (no `--apply`, `--dry-run`, `--write` or `--yes`) | Notes                                                                                                                   |
+| ---------------- | ------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| presacademy      | 18                 | 0                                                                           | All 18 take `--apply` (12 through `sanity-lib`). One factor.                                                            |
+| fbcm             | 27                 | 0 found by grep                                                             | 25 through `sanity-lib`; `seed-core.mjs` reads argv but no write flag. One factor.                                      |
+| starter          | 1                  | 1 (`seed-core.mjs`)                                                         | `sanity-lib` is dry by default; `seed-core.mjs` is not and defaults to the `production` dataset.                        |
+| reid-design-site | 27                 | 23 (20 read no argv at all)                                                 | Most `patch-*` and `seed-*` scripts write on a bare run. `patch-site-phone.mjs` is typical.                             |
+| mas-monograms    | 12                 | 9                                                                           | Two through `sanity-lib`; `patch-footer-credit.mjs` and `seed-legal.mjs` write on a bare run.                           |
+| 2ndpreschicago   | 21                 | 19                                                                          | Nearly every `seed-*` writes on a bare run (`seed-staff.mjs`); `seed-sample-page.mjs` is flag-gated only by `--delete`. |
+| stonesteps-50k   | 11                 | 4                                                                           | `retire-27k-records.mjs` writes unless `--dry-run` is passed: dry is the opt-in, the opposite of the rule 16 default.   |
+
+Every one of these defaults its dataset to `production` (`env.PUBLIC_SANITY_DATASET ?? 'production'`) and holds a write
+token in `.env`, and none of the family has a second dataset for scratch writes, so for a Sanity site every write is a
+production write.
+
+**To adopt (the PORTABLE change; ordering per the Projects `CLAUDE.md`).** (1) In the starter's `sanity-lib.mjs`
+`apply()`: when `APPLY` is set and `dataset === 'production'`, exit unless `process.env.NCS_PRODUCTION_WRITE === 'yes'`,
+and print the reason. (2) Make `seed-core.mjs` dry by default through the same gate (it predates `sanity-lib`). (3) Per
+site, move each bare-run script onto `sanity-lib` or give it the same two lines; the retire scripts first. (4) Add the
+backtick rule and the variable to each repo's data-scripts rule. Do the starter PR as a draft first, then the sites.
+
+**Status, 2026-10-04.** nixoncreativestudio: implemented on the unmerged redesign-2026 branch (`staged`). Every other
+cell is `no` or `partial`: `partial` = every write script is dry by default behind one flag, so only the second factor is
+missing; `no` = at least one script writes on a bare run. wcp is a Bricks (WordPress) site with no Sanity scripts and
+ncs-church-starter is archived, hence `n/a`. fbcm has no matrix column; its row above is recorded here.
+
+---
+
+## Card 87: Dead UI kits and packages inflate every page's CSS, and `find-dead-weight.mjs` finds them (2026-10-04)
+
+**Origin:** nixoncreativestudio, redesign-2026 branch, commit `b93e381` (dead kit, packages and the scan narrowed) and
+`1d580e1` (Lenis removed); not merged to that repo's `main` when this card was written. **Canonical:**
+`scripts/find-dead-weight.mjs` here (not `PORTABLE`; a read-only helper). Run it from a site root:
+`node scripts/find-dead-weight.mjs` (or `npm run deadweight`).
+
+**The trap.** Tailwind 4 scans every file under `src/` for class names and writes the CSS for each one it finds, whether
+or not the component holding the class is imported anywhere. A kit that was copied in "in case" therefore costs bytes on
+every page, and with `build.inlineStylesheets: 'always'` (stonesteps-50k) those bytes ride in every HTML response.
+nixoncreativestudio deleted Starwind, PrimeReact and 15 unused shadcn, Aceternity and Magic UI files plus a dozen unused
+packages and measured the home page's inline CSS going 137 to 100 KB raw (HTML brotli 37.7 to 33.2 KB); phone LCP on the
+five measured pages moved by 0 to 170 ms in that PR's own table, so treat it as a bytes win first.
+
+**Measured here, 2026-10-04.** The starter and four sites carry the same unused kit copy: `src/components/starwind/`
+(36 files, 90,035 bytes) and, in all but mas-monograms, `src/components/primereact/` (3 files), with nothing outside
+those folders importing them. Using Tailwind's own scanner (`@tailwindcss/oxide` with `@tailwindcss/node`, each repo's
+own `globals.css`, scanning `src/**/*` once with and once without the kit folders; raw CSS bytes, so no minifier,
+and the real build's other `@source not` lines are not applied):
+
+| Repo             | CSS from `src/` | Without the kit | Saved             | Real build today                                            |
+| ---------------- | --------------- | --------------- | ----------------- | ----------------------------------------------------------- |
+| starter          | 138,902         | 129,824         | 9,078 (6.5%)      | kit in the scan                                             |
+| reid-design-site | 129,231         | 117,547         | 11,684 (9.0%)     | kit in the scan                                             |
+| mas-monograms    | 138,094         | 129,500         | 8,594 (6.2%)      | kit in the scan (starwind only)                             |
+| stonesteps-50k   | 207,180         | 198,249         | 8,931 (4.3%)      | kit in the scan; CSS is inlined into every page             |
+| fbcm             | 181,862         | 173,126         | 0 in the real run | 28 `@source not` lines already exclude the kit and the rest |
+
+presacademy and 2ndpreschicago have no kit folders (both `yes` in the matrix). The numbers are a scan-level proxy: a
+real `astro build` before and after is the proof to attach to each site's PR.
+
+**What to do per site.** Run the script; confirm each hit by hand (it lists candidates: a CLI-only package such as
+`typescript` or `prettier-plugin-tailwindcss` is fine, and a component loaded by a computed name shows up as unused);
+delete the kit folder, its stylesheet (`starwind.css`) and the packages only it used (`primereact` is imported only by
+`src/components/primereact/` in every repo that has it); then `npm run build` and compare the CSS bytes. Where deleting
+is not wanted yet, an `@source not '../components/starwind';` line in `globals.css` stops the scan (the fbcm form) and
+leaves the files. Component hits from the 2026-10-04 run that are worth a look: starter `AboutPersonal`,
+`FeaturedJournal`, `Provisional`, `ServiceAreaCue`, `ui/animated-beam`, `ui/bento-grid`; reid-design-site `HomeServices`,
+`ui/animated-beam`, `ui/bento-grid`; stonesteps-50k 11 files; mas-monograms `ui/dropdown-menu`; presacademy and
+2ndpreschicago `FaqAccordion`; fbcm `ProcessStepIllustration`. Unverified: these are what the script printed, not
+confirmed dead.
+
+**Lenis (a design call, not a defect).** The smooth-scroll library is still installed and initialised in the starter,
+presacademy and 2ndpreschicago (`import('lenis')` in `BaseLayout.astro`, `"lenis"` in `package.json`; read
+2026-10-04). It was removed in fbcm on 2026-09-24, in reid-design-site on 2026-09-30 and in nixoncreativestudio in
+`1d580e1` (native scrolling). mas-monograms and stonesteps-50k never carried it. The starter's rule 5 still tells a fork
+to keep the Lenis navigation reset, so removing it from the starter is Nathan's decision; this card only records which
+repos still ship it and that three siblings dropped it without a card.
+
+**Inlined CSS is a measurement, not a rule.** nixoncreativestudio chose `inlineStylesheets: 'always'` because its
+sheet is about 25 KB and it measured faster (home 94 to 97 Lighthouse locally); a 130 to 200 KB sheet like the ones above
+is the case where it hurts, which is why shrinking the sheet comes first. fbcm uses `'auto'`, stonesteps-50k `'always'`.
+
+**Status.** starter, reid-design-site, mas-monograms and stonesteps-50k: kit present, `no`. presacademy and
+2ndpreschicago: no kit, `yes`. nixoncreativestudio: done on its unmerged branch (`staged`). fbcm: scan already excludes
+the kit but the files and packages remain (no matrix column; recorded here). Lenis: starter, presacademy and
+2ndpreschicago still ship it.
+
+---
+
+## Card 88: The Cloudflare beacon starts after load and idle, not as a deferred head script (2026-10-04)
+
+**Origin:** nixoncreativestudio, redesign-2026 branch, commit `fb82d0e` (not merged to that repo's `main` when this card
+was written). **Canonical:** `src/components/analytics/CloudflareBeacon.astro` in that repo; the starter's copy of that
+file (card 54, `PORTABLE`) still renders the old `<script defer>` and is NOT changed by this card. Changing it follows
+the marked-file ordering in the Projects `CLAUDE.md`.
+
+**The cost.** A `<script defer>` in `<head>` still starts downloading during the first paint, so the 7 KB beacon and
+its connection to `static.cloudflareinsights.com` compete with the hero image on a throttled phone link. A/B on a local
+production build with a dummy token, Lighthouse mobile, median of 5: home LCP 2015 to 1850 ms (the 2.6 s mode in the
+raw runs disappeared), `/contact` 1862 to 1558 ms, CLS and TBT 0 in both arms. That is local data from one site; the CI
+preview run is the authority, and the gain scales with how close the LCP element is to the beacon in the waterfall.
+
+**The shape.** A 0.7 KB inline script that adds `<script type="module" src=".../beacon.min.js" data-cf-beacon="...">`
+after the `load` event plus a `requestIdleCallback` (3 s timeout, 1.5 s `setTimeout` fallback), guarded by a flag so it
+runs once per visit (the beacon follows view transitions itself). Web Vitals come from the browser's buffered
+performance entries, so a late start still reports the page's LCP, CLS and INP. `type="module"` is what Cloudflare's
+current snippet uses. Do not go back to Partytown: its sandbox cost about 540 ms of throttled main-thread time, more
+than the beacon it isolated.
+
+**Where it stands (read from each working copy, 2026-10-04).** Every site and the starter loads the beacon with
+`defer` in the head: starter, reid-design-site and fbcm in `src/components/analytics/CloudflareBeacon.astro`;
+presacademy, mas-monograms, stonesteps-50k and 2ndpreschicago inline in `BaseLayout.astro` (these four never took card
+54's component, so they need the component first). The measurement above is from one site; each adopter should rerun
+the A/B (dummy token, so nothing reaches the real Web Analytics site) before merging.
+
+**Separate from this card: the edge script.** When Bot Fight Mode is on, Cloudflare injects
+`/cdn-cgi/challenge-platform/scripts/jsd/main.js` into the HTML at the edge. No code in a repo can remove it; it is a
+dashboard choice (nixoncreativestudio's `docs/redesign-2026/performance-handoff.md`). Its forensics measured beacon plus
+that script at about 467 ms of LCP and 4 Lighthouse points on production. Check `view-source` of a live page for
+`challenge-platform` before blaming the repo's own scripts.
+
+**Judged not portable, from the same redesign (so the next session does not redo the assessment).**
+
+- **ci-dataset from-scratch ordering** (`scripts/ci-dataset/rebuild.mjs`, commit `8380057`): build before dropping, drop
+  and deploy back to back, drop again once the new Worker is live because the OLD Worker's every-minute cron
+  (`"triggers": { "crons": ["* * * * *"] }`) re-seeds a dropped D1 database with the old schema. It exists only in
+  nixoncreativestudio: no other repo has a `ci-dataset` folder or a cron trigger in `wrangler.jsonc` (checked in the
+  starter, presacademy, reid-design-site, mas-monograms, stonesteps-50k, fbcm and 2ndpreschicago). The Sanity sites
+  have no per-PR dataset to rebuild. Revisit only if another site moves to EmDash or a cron-seeded Worker.
+- **Font split by `unicode-range` with a preloaded core file** (`scripts/brand/subset-fonts.py`, commit `3218b47`):
+  it saved 4 to 9 KB per face (Bebas 13.8 to 9.6 KB, Newsreader 22.5 to 13.8 KB) by trimming a latin Fontsource file to
+  the characters English copy uses, by hand with Python fontTools. The family's sites import Fontsource packages whose
+  default CSS already declares one face per subset with its own `unicode-range`, many use variable fonts, and
+  reid-design-site, mas-monograms, stonesteps-50k and fbcm already preload their critical
+  faces. The remaining win is small and per-face; not worth a family-wide script.
+- **`<img>` hero posters and CSS inlining as LCP levers:** design choices for that site's poster-first showreel and its
+  25 KB sheet (see card 87's note on inlining), with no family-wide before-and-after to cite.
+
+**Status.** nixoncreativestudio: done on its unmerged branch (`staged`). All other cells `no`; wcp is a Bricks site
+(no Astro), ncs-church-starter is archived, hence `n/a`. fbcm has no matrix column; its beacon is `defer`, as above.
