@@ -60,6 +60,17 @@ still carries its column and its historical cards, but nothing syncs to it any m
 - **If you change a marked file, you are changing the family's copy.** Either the change
   is general (make it here, note it on the card, and the next sync session pushes it out)
   or it is site-specific (then it does not belong in a marked file at all).
+- **Order of work when a marked file changes (cards 77 to 80, 2026-10-03).** Presacademy,
+  reid-design-site, mas-monograms and nixoncreativestudio run `sync-check` against the LIVE
+  starter `main` in CI and fail `build` on drift, so a site PR that carries the new copy is red
+  (and GitHub emails a failed run) until the starter has merged. Do it in this order: (1) open
+  the starter PR as a draft and get it green; (2) in each site, make the branch and push it
+  WITHOUT opening a PR (site CI runs on pushes to `main` and on PRs, so a bare branch runs
+  nothing); (3) merge the starter; (4) open each site PR, so its one CI run reads the new
+  starter `main` and passes; (5) merge each green PR, one at a time. fbcm and stonesteps-50k
+  only self-check and are never red either way. If a drift run does happen, `propose-drift.mjs`
+  opens a stray "Drift from <site>" PR in the starter: close it and delete its `sync/from-*`
+  branch. Vault note: `gotchas/marked-file-change-open-site-prs-after-starter-merges`.
 
 Related tooling installed alongside: `npm run parity` (the rendered-HTML parity harness,
 baselines committed in `scripts/.parity/`), `npm run free-dist` (Windows dist-lock
