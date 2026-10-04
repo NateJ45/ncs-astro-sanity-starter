@@ -195,6 +195,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 75  | Playwright fixture: Sanity images from a disk cache                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 | 76  | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`  | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 77  | Preview morph keeps client-state classes (reveal state)                | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 78  | `preview-stega.ts` exports `RUN_SOURCE`                                | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -6566,3 +6567,24 @@ starter copy BEFORE this card).**
 
 The re-sync in each red repo is a copy-forward of these two files (their copies equal the old starter copy), so the
 fix is mechanical; merge it right after this card, or this card right before the re-syncs are ready.
+
+---
+
+## Card 78: `preview-stega.ts` exports `RUN_SOURCE` (2026-10-03)
+
+**Origin:** fbcm, 2026-09-23. Its `highlight-words.ts` (a site-specific splitter that highlights chosen whole
+words in a band's text) has to find stega runs in a preview string and map cleaned indexes back to raw ones, or it
+splits the invisible payload and click-to-edit stops working. The exact character class already lived in `preview-stega.ts` as the private
+`RUN_SOURCE` (mirroring `@vercel/stega`'s `VERCEL_STEGA_REGEX`, including the legacy alphabet), so fbcm exported it
+rather than copy a regex that must never drift from the decoder. One keyword; no behaviour change.
+**Canonical:** `src/lib/preview-stega.ts` (`PORTABLE`; byte-identical to fbcm's after this card).
+
+**Why it is general.** Any module that measures, splits or rewrites a string that may carry stega (CLAUDE.md:
+"never compare or measure a stega-encoded string") needs the same pattern; importing it is the only way to stay in
+step with the decoder. Use: `new RegExp(RUN_SOURCE, 'gu')` (the `u` flag is required: the class includes astral code
+points).
+
+**Blast radius (checked 2026-10-03; every marked copy equals the starter copy before this card).** Marked in
+presacademy, reid-design-site and mas-monograms (all enforce sync-check against live starter `main`: `build` RED
+until re-synced), 2ndpreschicago (archived, no CI), stonesteps-50k (self-check only: manual DRIFT) and fbcm (becomes
+SAME). The re-sync is a copy-forward of one file.
