@@ -14,6 +14,7 @@ import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnv } from './lib/loadEnv.mjs';
+import { readBrandConfig, resolveSiteIdentity } from './lib/site-identity.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -53,10 +54,24 @@ function ptToPlainText(blocks) {
     .trim();
 }
 
-// Site URL for generating absolute links in the output document.
-// Reads from env (PUBLIC_SITE_URL or SITE_URL) so CI/CD can override without
-// touching source. Matches the `url` field in src/data/site.ts at rest.
-const SITE = env.PUBLIC_SITE_URL ?? env.SITE_URL ?? 'https://example.com';
+// Site identity (name and absolute URL) for the document heading and links.
+// Env wins (PUBLIC_SITE_URL / SITE_URL / SITE_NAME), so CI/CD can override
+// without touching source; then brand/brand.config.json, the committed source of
+// truth that src/data/site.ts is generated from; then the old placeholders, so a
+// repo with no brand config behaves exactly as it always did (PORTS.md card 81).
+const identity = resolveSiteIdentity({ env, brand: readBrandConfig(root) });
+const SITE = identity.site;
+if (identity.fallback.name || identity.fallback.site) {
+  const what = [
+    identity.fallback.name ? `name "${identity.siteName}"` : '',
+    identity.fallback.site ? `URL ${identity.site}` : '',
+  ]
+    .filter(Boolean)
+    .join(' and ');
+  console.warn(
+    `[warn] llms-full.txt is using the placeholder ${what}. Set \`name\` and \`domain\` in brand/brand.config.json (or SITE_NAME / PUBLIC_SITE_URL in .env) before publishing it.`,
+  );
+}
 
 const [settings, services, steps, faqs, projects, journal, guides] = await Promise.all([
   client
@@ -93,9 +108,8 @@ const [settings, services, steps, faqs, projects, journal, guides] = await Promi
 const lines = [];
 const p = (s = '') => lines.push(s);
 
-// Site name for the document heading. Reads SITE_NAME from env so CI can
-// override without touching source; mirrors `name` in src/data/site.ts.
-const siteName = env.SITE_NAME ?? 'Studio Starter';
+// Site name for the document heading (see the identity note above).
+const siteName = identity.siteName;
 
 p(`# ${siteName} — Full Site Content`);
 p('');

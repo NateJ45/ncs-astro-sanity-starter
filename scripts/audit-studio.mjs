@@ -67,6 +67,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnv } from './lib/loadEnv.mjs';
+import { sharedFieldConsts, sharedFieldNames } from './lib/shared-field-consts.mjs';
 
 // sanity-lib.mjs EXITS THE PROCESS at import time when no project is
 // configured, which is right for a script that only ever writes and wrong for
@@ -145,9 +146,14 @@ const schemaFiles = () => readdirSync(SCHEMA_DIR).filter((f) => f.endsWith('.ts'
 
 // ── Read the schema ────────────────────────────────────────────────────────
 
-/** Every declared field name inside one block of schema source. */
-function fieldNames(body) {
+/**
+ * Every declared field name inside one block of schema source. `shared` is the
+ * file's module-level `const x = defineField(...)` map (lib/shared-field-consts),
+ * so a type that spreads `x` by bare identifier is credited with its field.
+ */
+function fieldNames(body, shared = new Map()) {
   const names = new Set([...body.matchAll(/name:\s*'([A-Za-z0-9_]+)'/g)].map((m) => m[1]));
+  for (const n of sharedFieldNames(body, shared)) names.add(n);
   for (const [helper, arg] of Object.entries(FIELD_HELPERS)) {
     if (arg === 'first-arg') {
       const re = new RegExp(`${helper}\\(\\s*'([A-Za-z0-9_]+)'`, 'g');
@@ -166,24 +172,25 @@ function readSchema() {
 
   for (const file of schemaFiles()) {
     const src = readFileSync(resolve(SCHEMA_DIR, file), 'utf8');
+    const shared = sharedFieldConsts(src);
 
     // Top-level document and object types.
     const starts = [...src.matchAll(/defineType\(\{\s*\n?\s*name:\s*'([A-Za-z0-9_]+)'/g)];
     starts.forEach((m, i) => {
       const end = i + 1 < starts.length ? starts[i + 1].index : src.length;
-      add(m[1], fieldNames(src.slice(m.index, end)));
+      add(m[1], fieldNames(src.slice(m.index, end), shared));
     });
 
     // Inline object members inside arrays, which are real types with real keys.
     for (const m of src.matchAll(
       /defineArrayMember\(\{[\s\S]{0,200}?type:\s*'object',[\s\S]{0,200}?name:\s*'([A-Za-z0-9_]+)'/g,
     )) {
-      add(m[1], fieldNames(src.slice(m.index, m.index + 3000)));
+      add(m[1], fieldNames(src.slice(m.index, m.index + 3000), shared));
     }
     for (const m of src.matchAll(
       /defineArrayMember\(\{[\s\S]{0,200}?name:\s*'([A-Za-z0-9_]+)',[\s\S]{0,200}?type:\s*'object'/g,
     )) {
-      add(m[1], fieldNames(src.slice(m.index, m.index + 3000)));
+      add(m[1], fieldNames(src.slice(m.index, m.index + 3000), shared));
     }
   }
   return types;
