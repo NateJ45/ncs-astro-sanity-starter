@@ -24,9 +24,9 @@ The must-knows:
 - `npm run dev`: dev server on :4321, Studio at `/studio`.
 - `npm run typegen`: regenerate Sanity types. Run after ANY schema change, before `npm run build`. `npm run build:full` chains both.
 - `npm run build`: `node scripts/with-workerd.mjs astro build`. Does NOT chain typegen.
-- `npm run check` (`astro check && npm run lint`) is the fast gate; `npm run check:full` is typegen, build and unit tests.
-- `npm run test:unit` (node --test, `src/lib/*.test.ts`; four are GATES: `theme-tokens`, `layout-variants`, `section-fields`, `site-layout`). `npm test` is the Playwright suite. Also `npm run format:check` and `npm run check:links`.
-- `npm run parity list | capture | compare [page] [--exclude globs]`: rendered-HTML parity. Build first. Use on any render-neutral change. `npm run test:scripts` tests the helpers in `scripts/lib/`.
+- `npm run check` (`astro check && npm run lint`) is the fast gate; `npm run check:full` is typegen, build and unit tests (`test:unit` includes the scripts tests).
+- `npm run test:unit` (node --test, `src/lib/*.test.ts`, then `npm run test:scripts`; four are GATES: `theme-tokens`, `layout-variants`, `section-fields`, `site-layout`). `npm test` is the Playwright suite. Also `npm run format:check` and `npm run check:links`.
+- `npm run parity list | capture | compare [page] [--exclude globs]`: rendered-HTML parity. Build first. Use on any render-neutral change. `npm run test:scripts` tests the helpers in `scripts/lib/` (also run at the end of `test:unit`, so CI and deploy cover it).
 - `npm run preview`: `wrangler dev` on the last build; the only way to exercise SSR routes locally.
 - `npm run references -- <urls>` (reference screenshots into `docs/references/`), `npm run directions:shoot -- <folder>` (390/768/1280 shots of design-direction mockups), and the `/design-directions` command: see "Design flow" below.
 - `npm run apply-brand`, `npm run seed`, `npm run scaffold`, `npm run audit:studio`, `npm run og`, `npm run sync-check [site-repo]`, `npm run free-dist`: see `docs/claude/build-and-scripts.md` (seed and scaffold detail in `.claude/rules/scaffold.md`).
