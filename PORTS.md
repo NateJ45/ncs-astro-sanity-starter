@@ -193,6 +193,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 73  | Design directions before reskin (brief, references, mockups)           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 74  | page-parity `--exclude` (parity-glob helper + test)                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 75  | Playwright fixture: Sanity images from a disk cache                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 76  | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`  | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -205,6 +206,9 @@ sync-check never compares them and each takes the change by hand. All `no` until
 Row 75 (2026-10-03): fbcm built the fixture on 2026-09-26 and is the one site that carries it (not a column; see the
 card). nixoncreativestudio has no Sanity, hence `n/a`. Every other cell is `no` until that site copies
 `tests/fixtures.ts` and switches its spec imports.
+
+Row 76 (2026-10-03): fbcm hard-coded the longer timeout on 2026-09-27 (not a column; see the card). Only fbcm marks
+`playwright.visual.config.ts`; presacademy and stonesteps-50k carry unmarked copies. All `no` until a site re-syncs.
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6481,3 +6485,38 @@ If the job also caches `node_modules`, exclude `!node_modules/.cache` from that 
 `tests/fixtures.ts` differs from fbcm's (unmarked) copy in the header comment only: the marker line, the card
 reference, and two fbcm-only references generalised (`this-sunday.spec.ts`, "CI restores the folder, ci.yml").
 `smoke.spec.ts` differs: fbcm moves its `/blog` and `/post` tests to an unmarked spec and takes this copy.
+
+---
+
+## Card 76: Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS` (2026-10-03)
+
+**Origin:** fbcm, 2026-09-27. Its visual-regression run on CI timed out before a single screenshot: the
+`webServer` command in `playwright.visual.config.ts` is `npm run build && http-server ...`, so its timeout covers
+the BUILD, and fbcm builds about 390 pages in roughly four minutes on a runner. The family default of 180 s was
+written for sites of a few dozen pages. fbcm raised its copy to a literal `600_000`, which made the marked file
+`DRIFT`.
+**Canonical:** `playwright.visual.config.ts` (`PORTABLE`).
+
+**What it is.** The timeout is read from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`. Unset, empty, non-numeric, zero or
+negative falls back to 180000, today's value, so every site that does not set it behaves exactly as before. A site
+with a large build sets it in the environment of its visual run rather than editing the file, so the file stays
+byte-identical across the family. Hard-coding fbcm's 600 s for everyone was rejected: a hung build on a small site
+would then take ten minutes to fail instead of three.
+
+**Adopt / fbcm re-sync (follow-up PR in fbcm, not done here).** Copy the file byte for byte, then set the variable
+where the visual suite runs. fbcm: either `"test:visual"` / `"test:visual:update"` in `package.json` (a
+cross-platform form needs `cross-env`, which fbcm does not have, so prefer the workflow) or, simplest, an `env:`
+block on the run step in `.github/workflows/visual.yml`:
+
+```yaml
+env:
+  PLAYWRIGHT_WEBSERVER_TIMEOUT_MS: '600000'
+```
+
+Until that lands, fbcm's copy (literal 600 s) reports `DRIFT` against this one under a manual `sync-check`; fbcm's
+CI only self-checks, so no required check moves.
+
+**Not changed:** `playwright.config.ts` (the main suite) still has a literal 180 s. fbcm's main config is unmarked
+(600 s), and fbcm did not mark or promote that change, so it was out of scope here. Making the main config read the
+same variable is a candidate follow-up: only stonesteps-50k marks a copy of it (and self-checks), so it would not
+turn any repo's required check red.
