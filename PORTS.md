@@ -199,6 +199,10 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | yes         | yes      | yes              | n/a           | no             | n/a                | n/a                 | yes            |
 | 80  | `sync-check` skips `_worktrees/` folders                               | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 81  | llms-full identity from brand config; audit shared field consts        | no      | yes         | yes      | no               | no            | no             | n/a                | n/a                 | yes            |
+| 82  | Invisible 44px hit area for small links                                | no      | no          | no       | yes              | no            | no             | n/a                | no                  | yes            |
+| 83  | `measure-tap-targets.mjs` 390px tap-target scan                        | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 84  | Linux-runner font-swap layout-shift check (fallback faces, preload)    | no      | no          | no       | yes              | no            | no             | n/a                | no                  | no             |
+| 85  | MapLibre 6.x: `setMissingStyleImageResolver` for generated icons       | n/a     | n/a         | n/a      | n/a              | n/a           | no             | n/a                | n/a                 | yes            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -245,6 +249,14 @@ nixoncreativestudio (plus the archived wcp and 2ndpreschicago) enforce against l
 `build` goes RED on merge until they resync (blast-radius table on the card). stonesteps-50k and fbcm only self-check
 in CI. wcp and 2ndpreschicago are archived on GitHub, so they stay `no` and cannot take a PR. fbcm is not a column;
 it carries the old copy too.
+
+Rows 82 to 85 (2026-10-03) came out of one Impeccable audit pass over reid-design-site (PR #113), fbcm (PR #36, not a
+column) and stonesteps-50k (PR #77). A `yes` on 82 means the site carries its own variant of the fix, read from its
+`origin/main` (reid-design-site `.r-link::after`, stonesteps-50k `.tap-pad`); no two use the same class, and nothing is
+sync-checked because the CSS lives in each site's stylesheet. Row 83 is the one PORTABLE file: starter `yes`, every site
+`no` until it copies `scripts/measure-tap-targets.mjs` (fbcm keeps an unmarked original). On 82 to 84 a `no` means not
+measured, not known broken. Row 85 applies only where a site has `maplibre-gl`: stonesteps-50k is the only one found
+(`n/a` for the repos whose `package.json` has none; 2ndpreschicago is archived and was not checked).
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6857,3 +6869,300 @@ set `name` and `domain` in `brand/brand.config.json` if they are still the place
 with `NCS_STARTER_DIR` set (expect all `SAME`), push, and let `build` and `test` run. No workflow edit, no marker
 change. A site that wants the audit half copies `scripts/audit-studio.mjs`, `scripts/lib/shared-field-consts.mjs` (and
 its test); none carries a marked audit today.
+
+---
+
+## Card 82: An invisible 44px hit area for small links, with no layout shift (2026-10-03)
+
+**Origin:** three sites, one day, one cause. The Impeccable design audit of the live sites on 2026-10-03 found links and
+buttons under 44px at phone width on reid-design-site, fbcm and stonesteps-50k. Each fixed it in its own audit PR, each
+landed on the same idea (grow the TAPPABLE box, not the visible one), and each named the class differently:
+reid-design-site PR #113 (`.r-link`), fbcm PR #36 (`.hit-44`), stonesteps-50k PR #77 (`.tap-pad` and `.tap-pad-lg`).
+**Canonical:** none yet. It is CSS that lives in each site's `globals.css`/`reid.css`, so no `PORTABLE` file carries it;
+the snippets below are the reference. The starter's own buttons already meet the floor by size (`CtaLink.astro` uses
+`min-h-[44px]`), and the starter ships no utility for small text links; the first site that adopts one should copy the
+fbcm block below.
+
+**What it is.** A small link whose box is 16 to 24px tall fails the 44px comfortable-touch floor (WCAG 2.5.5 AAA; 2.5.8
+sets 24px as the AA minimum). Padding it to 44px moves things you can see, and for a text link with an underline it drops
+the underline off the baseline. So the fix is a hit area the finger can land on that nothing else can see. Two shapes
+proved out.
+
+1. **A pseudo-element hit area** (reid-design-site, fbcm). For a standalone small link or control. fbcm's:
+
+   ```css
+   .hit-44::after {
+     content: '';
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     width: max(100%, 44px);
+     height: max(100%, 44px);
+     transform: translate(-50%, -50%);
+   }
+   ```
+
+   The element must be positioned. fbcm leaves that to the caller (`class="hit-44 relative"`) so a link that is already
+   `absolute` or `fixed` is never knocked back to `relative`. reid-design-site's version is for one link class and sets
+   `position: relative` on it: `.r-link::after { content: ''; position: absolute; inset: -0.75rem -0.15rem; }` (0.75rem
+   above and below the words, a hair either side). `max(100%, 44px)` is the better default: it only grows what is too small
+   and is centred, so a wide link is not widened for nothing.
+
+2. **Vertical padding on an inline box** (stonesteps-50k). For a link inside a sentence or a table cell. Padding on an
+   INLINE box does not move the line it sits in; it only grows the box the finger can hit.
+
+   ```css
+   @media (width < 48rem) {
+     .tap-pad {
+       padding-block: 0.55rem;
+     }
+     .tap-pad-lg {
+       padding-block: 1rem;
+     } /* 12px small-print links */
+   }
+   ```
+
+**What it must not do.**
+
+- **No visible layout shift.** Nothing you can see may move or resize: no `min-height`, no block padding, on a text link
+  that has an underline (fbcm's rule: the underline would drop). Re-measure the page height before and after; it should
+  be unchanged. (A standalone footer row or a button is different: give it real `min-height` or padding at its own rule, as
+  reid-design-site did for the footer index rows and base links, and stonesteps-50k for `.foot-link`.)
+- **Never take the element's `::after` when it already has one.** The hit area owns `::after`. reid-design-site had to move
+  `GoogleCite`'s separator dot from `::after` to `::before`, and wrote the rule down: a component that needs its own
+  pseudo-element on an `.r-link` uses `::before`. Grep the component for `::after` before adding the class.
+- **Do not steal a neighbour's tap.** Stacked rows closer than 44px apart overlap by a few px, and the later one in source
+  order wins the overlap, which is how any stacked list of links behaves. That is accepted at a few px; a hit area that
+  reaches well into another control is a bug. Card 83's script hit-tests this.
+- **Do not chase what is not a target.** A link inside a sentence is exempt under WCAG 2.5.8 ("Inline"). fbcm left its two
+  inline links alone and reported them separately; reid-design-site and stonesteps-50k gave them the invisible area anyway
+  because it costs nothing. An off-screen, `aria-hidden`, `tabindex="-1"` honeypot input is not a target either (reid's audit
+  listed a "13x13 contact checkbox"; it was the honeypot, left alone).
+- **A third-party icon keeps its look.** stonesteps-50k's MapLibre attribution toggle is a 24px icon; a bigger circle would
+  cover the credit it opens, so it gets `::after { content: ''; position: absolute; inset: -10px; }` and nothing else.
+
+**Measured (each site's own PR, before and after, at 390px).** fbcm: 81 targets under 44px on Home, Visit and Staff, 79
+fixed to 0 with the 2 inline links reported as exempt. stonesteps-50k: `/` 17 to 0, `/course/` 30 to 1 (the attribution
+toggle: its scan reads box sizes and does not credit the `::after`, so it still lists it). reid-design-site: not counted as a number in its PR; it
+reports axe-core 0 violations before and after on four routes and a hit area on `.r-link`, the footer contact links, the
+booking line and the header rating.
+
+**Adopt (per site).**
+
+1. Add the CSS above to the site's global stylesheet, outside any Tailwind layer that purges it.
+2. Add the class to each small standalone link (and `relative` if it is not positioned). Use the padding form for links in
+   prose and table cells.
+3. Run card 83's script at 390px before and after and quote both totals. Aim for 0 under 44px and 0 stolen-tap warnings.
+4. Write the rule into the site's layout/CSS rules file (the `::before` rule and "never pad an underlined text link").
+5. Build and look at it in light and dark: nothing visible should have moved.
+
+**Status, checked against each repo's `origin/main` on 2026-10-03.** reid-design-site: `.r-link::after` in
+`src/styles/reid.css`. stonesteps-50k: `.tap-pad` and `.tap-pad-lg` in `src/styles/globals.css`. fbcm (not a column):
+`.hit-44::after` in `src/styles/globals.css`. Every other cell is `no` meaning not adopted and not measured, not known to
+fail; a site is `no` until its own 390px scan says otherwise.
+
+---
+
+## Card 83: `measure-tap-targets.mjs`, the 390px tap-target scan with a stolen-tap hit test (2026-10-03)
+
+**Origin:** fbcm PR #36, 2026-10-03 (the Impeccable audit fix), generalised here. It is the instrument card 82's numbers
+come from. **Canonical:** `scripts/measure-tap-targets.mjs` (`PORTABLE`, new in this card, so sync-check now covers it).
+
+**What it is.** A Playwright script that opens each path of a served copy of the site at phone width (390 by 844; mobile
+emulation and touch below 700px), scrolls the page in 500px steps so lazy content and reveal blocks settle, and lists every link, button, summary,
+input, select, textarea and `role=button`/`role=link` whose tappable area is under 44px in either direction.
+
+```
+node scripts/measure-tap-targets.mjs <baseUrl> [--width 390] [--paths /,/contact/] [--json out.json]
+```
+
+- **The tappable area is the box grown by its own `::after`.** When an element has an absolutely positioned `::after`, the
+  effective size is `max(box, ::after box)` each way. So it credits card 82's hit area and a bare `getBoundingClientRect`
+  scan does not (the stonesteps-50k scan was the second kind, which is why it still listed the attribution toggle).
+- **Inline links are counted apart.** A link whose parent is a `p`, `dd` or `blockquote` with more than 12 other characters
+  of text is reported as `inline`, exempt under WCAG 2.5.8, and left out of the failing total.
+- **Stolen taps.** Every element that relies on a hit-area `::after` is hit-tested with `elementFromPoint` 3px inside its
+  top and bottom edges at the horizontal centre. If the point lands on something that is not the element or its descendant,
+  it is reported (`stolen`). Points outside the viewport are skipped at that scroll stop; each element is measured at several
+  stops, so it is hit-tested while on screen.
+- **Not a target:** `display: none`, `visibility: hidden`, zero or 1px boxes, anything inside `[inert]` or
+  `[aria-hidden="true"]`, anything off the left edge.
+- **Output and exit code.** Per path: the failing list, then a TOTAL line (`N under 44px, N inline-in-sentence (exempt), N
+lifted to 44px by a hit-area ::after, N stolen-tap warnings`). Exit 1 when any target is under 44px or any tap is stolen,
+  0 otherwise, 2 for a usage error. `--json` writes the full per-path list.
+
+**What changed from fbcm's copy.** Only wording and one default: `--paths` defaults to `/` (fbcm's was its own
+`/,/visit/,/staff/`), and the comments and the TOTAL line no longer name `.hit-44`/`PRODUCT.md`. The measuring logic is
+byte-for-byte fbcm's. fbcm's own copy is unmarked and differs by those lines; sync-check does not compare it, and it can
+take the starter copy as a straight overwrite.
+
+**What it does not do.**
+
+- **It does not measure text size.** The card's brief said "small-text scan": stonesteps-50k's audit PR describes a scan
+  that also counted text under 11px (2 groups to 0), but that variant is not committed anywhere on `main` (its `scripts/`
+  holds no such file), so it was not read and is not claimed here. A text-size floor check is still to be written.
+- **It is not a CI gate.** It needs a served site and a browser. It is the number to quote before and after a change.
+- **It reads one viewport width per run.** Run it twice for 390 and 360 if a site cares about both.
+- **Tightly stacked rows trip the stolen-tap check.** Footer link lists closer than 44px apart overlap by design (card 82),
+  so such a page can exit 1 on `stolen` while having nothing under 44px. Read the list; a few px of overlap in a stacked
+  list is the accepted trade, a hit area reaching into a different control is a bug.
+
+**Verified when this card was written (2026-10-03).** On a five-element fixture page (one 16px link, one link with a
+centred 44px `::after`, two stacked 16px rows with the `::after`, one inline link in a sentence, one 60 by 50 button) it
+printed `1 under 44px, 1 inline-in-sentence (exempt), 3 lifted to 44px by a hit-area ::after, 1 stolen-tap warnings` and
+exited 1, which is the right answer for that page (the stacked rows overlap). `prettier --check` and `eslint` pass on the
+file. It was also run against this starter's own production build (see Status).
+
+**Adopt (per site).** Copy `scripts/measure-tap-targets.mjs` byte for byte (`@playwright/test` and Chromium must be
+installed; every family site has them). Run `node scripts/sync-check.mjs` with `NCS_STARTER_DIR` set; expect `SAME`. Serve
+the build (`npm run serve:dist` where the repo has it, `npx http-server dist/client` otherwise) and pass `--paths` with the
+site's real routes. Optionally add an npm script. No workflow edit.
+
+**Status.** Starter: `yes`. No site carries a marked copy yet. fbcm (not a column) has its own unmarked original.
+
+**First reading on this starter** (`npm run build`, `npm run serve:dist`, 390px, 2026-10-03, seed content, exit 1). `/`: 6
+under 44px (the footer's About, Process, Services & Pricing, FAQ, Journal and Privacy policy links, 15 to 17px tall).
+`/services/`: the same 6. `/contact/`: 16, those 6 plus the form's 3 text inputs (42px), 5 selects (40px), the Send
+button (36px) and the "View larger map" link (15px). 0 inline, 0 lifted, 0 stolen. So the starter does not meet the 44px
+floor yet; that is logged in `docs/PENDING.md` item 12 and is the first thing card 82 would fix.
+
+---
+
+## Card 84: Font-swap layout shift hides on Windows and Mac and shows on the Linux runner (2026-10-03)
+
+**Origin:** reid-design-site PR #113, 2026-10-03 (the Impeccable audit fix for the phone hero). **Canonical:** guidance;
+the one reusable piece is the metric-matched fallback `@font-face` pattern below. No `PORTABLE` file.
+
+**The trap.** Windows and macOS ship Georgia and Times New Roman. A Linux CI runner (the Lighthouse box) ships neither
+Georgia nor, usually, anything but Liberation/Tinos fonts, which are Times New Roman's metric twins. So the same page
+falls back to a DIFFERENT font on the runner than on the machine you test on, and a fallback-to-web-font shift that is
+invisible locally is a failing CLS number in CI. reid-design-site passed locally, then Lighthouse reported CLS 0.147
+(median) on `/` against the 0.1 gate (baseline 0.049) after the PR moved the hero's subhead and buttons above the phone fold.
+
+**Why a tuned fallback alone did not fix it.** The home headline uses `text-wrap: balance`, which re-wraps on tiny width
+differences. With the Times-metric fallback the headline broke a line differently from real Zodiak, so when Zodiak landed
+the subhead and buttons jumped 59px. Changing `Zodiak Fallback TNR`'s `size-adjust` from 118% to 128% did not change the
+wrap. When content sits below the headline and above the fold, the line breaks of a balanced headline cannot be kept
+stable by a fallback face; the web font has to be there at first paint.
+
+**What worked (two parts, both measured on a Linux runner throttled like Lighthouse).**
+
+1. **Preload the headline faces on the page that needs it, and only there.** Two font preload links in the home hero
+   (`<link rel="preload" href="..." as="font" type="font/woff2" crossorigin />`), one for the display face and one for the
+   hand-lettered accent face (about 25 KB and 36 KB). Shifts went from 3 (total 1.08, including an initial-paint artefact) to none (0). The site-wide "no font
+   preload" rule came from a Cormorant-era measurement where a preload delayed the hero photo; LCP headroom on `/` was 3.55s
+   against a 4.5s budget, and the PR's own Lighthouse job re-checked LCP. Re-measure LCP on any page you add a preload to.
+2. **A metric-matched fallback for a face that is far narrower than any serif.** Waterfall (a script face) is about 140px
+   wide where Georgia Italic is about 340px for the same word at hero size, so before it loaded the headline wrapped onto an
+   extra line (CLS 0.16 on a phone). The fix is a `size-adjust` fallback face, measured as web-font width over local-font
+   width on the real strings (ratio 0.42), times the base fallback's own adjust:
+
+   ```css
+   @font-face {
+     font-family: 'Waterfall Fallback';
+     font-style: italic;
+     src: local('Georgia Italic'), local('Georgia-Italic');
+     size-adjust: 45.9%; /* 109.28% x 0.42 */
+   }
+   @font-face {
+     font-family: 'Waterfall Fallback TNR';
+     font-style: italic;
+     src:
+       local('Times New Roman Italic'), local('TimesNewRomanPS-ItalicMT'),
+       local('Liberation Serif Italic'), local('Tinos Italic');
+     size-adjust: 49.6%; /* 118.19% x 0.42 */
+   }
+   /* in the font stack, right after the web font */
+   --font-hand:
+     'Waterfall', 'Waterfall Fallback', 'Waterfall Fallback TNR', 'Zodiak', 'Zodiak Fallback',
+     Georgia, serif;
+   ```
+
+   After it, the fallback layout matched the loaded layout (subhead top 599px both ways) and local CLS was 0.005. The two
+   faces (Georgia, and the Times-metric twins for Linux) are what a Windows or Mac machine and a Linux runner each resolve
+   to; both are needed. The numbers are for that font at that size: re-measure if the face or its size changes.
+
+**How to check any site for it (this is the card's real value).**
+
+- Measure on the SAME OS family as CI, not on your own machine. A Playwright run in the Lighthouse job's container, or the
+  CI Lighthouse artifact itself, has the runner's fonts; a Windows or Mac run does not. Look at the layout-shift entries
+  (`PerformanceObserver` type `layout-shift`) with the page throttled like Lighthouse, not at the total alone.
+- Suspect it whenever a PR moves content from below the fold to above it, or changes a headline's size, wrap or font.
+- Order of fixes, cheapest first: metric-matched fallback (`size-adjust`, plus `ascent-override`, `descent-override` and
+  `line-gap-override` taken from the web font's own metrics, divided by `size-adjust` because the browser scales them too);
+  then a preload of just the faces the first screen uses; the site-wide ban on preloading is a default, not a law.
+- Do not ship a fallback you measured on one OS and call it done: list a Linux twin (`Liberation Serif`, `Tinos`,
+  `Liberation Sans`, `Arimo`) next to every `local('Georgia')`, `local('Times New Roman')` or `local('Arial')`.
+
+**Status, read from `origin/main` on 2026-10-03.** reid-design-site: `Waterfall Fallback` and `Waterfall Fallback TNR` in
+`src/styles/globals.css`, and the two preloads in `src/components/home/HomeHero.astro`. No other repo was checked for the
+trap; a `no` means not measured. The starter ships no metric-matched fallback faces of its own (`src/styles/globals.css` has no
+`size-adjust` descriptor, only the unrelated `-webkit-text-size-adjust`), which is the follow-up if a site hits this twice.
+
+---
+
+## Card 85: MapLibre 6.x: register generated icons with `setMissingStyleImageResolver`, not `styleimagemissing` (2026-10-03)
+
+**Origin:** stonesteps-50k PR #77, 2026-10-03 (the Impeccable audit fix; the console on `/course/` logged
+`Image "course-arrow" could not be loaded` on every page view). **Canonical:** guidance only. **The starter ships no
+MapLibre map component** (no `maplibre-gl` in its `package.json` or `src`), and neither do presacademy, reid-design-site,
+mas-monograms or nixoncreativestudio (checked in each `origin/main` `package.json`; fbcm, wcp and 2ndpreschicago were not
+checked). stonesteps-50k's `src/components/race/CourseMapLibre.tsx` is the only reference (`maplibre-gl ^6.10.0`). Read
+this card before a site adds a map.
+
+**The rule.** If a layer names an image that you draw yourself (a canvas arrow, a generated marker), supply it from
+`map.setMissingStyleImageResolver(...)`. Do NOT rely on a `map.on('styleimagemissing', ...)` listener: in 6.x the event
+fires only after the resolver has had its chance, and an image added by a listener is ignored, so the warning stays.
+stonesteps-50k tried the listener first and it did nothing.
+
+**The second half of the same bug.** The style, and so the layer that names the image, is parsed before the `load` event
+fires. Adding the image only inside `m.on('load', ...)` was too late, which is what logged the warning on every view.
+Register the resolver right after constructing the map, and keep the `load` call too, behind a `hasImage` guard so the
+second call (and any style reload) is a no-op:
+
+```ts
+const addArrowImage = () => {
+  if (m.hasImage('course-arrow')) return;
+  const S = 24;
+  const c = document.createElement('canvas');
+  c.width = S;
+  c.height = S;
+  const ctx = c.getContext('2d');
+  if (ctx) {
+    ctx.translate(S / 2, S / 2);
+    // Point along +x: MapLibre rotates a line symbol so the image's right edge follows the line.
+    ctx.beginPath();
+    ctx.moveTo(7, 0);
+    ctx.lineTo(-4, -5.5);
+    ctx.lineTo(-4, 5.5);
+    ctx.closePath();
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = 'rgba(26,23,18,0.75)';
+    ctx.lineWidth = 1.5;
+    ctx.fill();
+    ctx.stroke();
+    m.addImage('course-arrow', ctx.getImageData(0, 0, S, S), { pixelRatio: 2 });
+  }
+};
+m.setMissingStyleImageResolver((id) => {
+  if (id === 'course-arrow') addArrowImage();
+});
+m.on('load', () => {
+  addArrowImage(); // no-op if the resolver already ran
+  // ...
+});
+```
+
+The image added inside the resolver is used for that very render. Drawing the arrow on a canvas is deliberate: a text
+symbol would need a `glyphs` endpoint in the style and the arrow to exist in whatever font was substituted.
+
+**How to tell it worked.** Open the page with the console open: the `Image "..." could not be loaded` warning is gone (on
+stonesteps-50k only headless-GL performance notices remained).
+
+**Same PR, same file, a related MapLibre note.** MapLibre's own controls are small (24px attribution toggle, a 10px scale
+bar). stonesteps-50k kept the attribution icon's look and gave it a card 82 invisible hit area, raised the zoom stack to
+44px at 640px and under, and set the scale bar to 11px. A map added to a site needs the card 82 and card 83 pass too.
+
+**Status.** stonesteps-50k: `setMissingStyleImageResolver` is in `CourseMapLibre.tsx` on `origin/main` (read 2026-10-03,
+and the `styleimagemissing` word survives there only in the explanatory comment). Every other cell is `n/a` where no
+MapLibre dependency was found, `no` where it was not checked.
