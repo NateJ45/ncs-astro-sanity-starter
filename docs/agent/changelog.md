@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: cards 82 to 85 from the Impeccable audit fixes, and `scripts/measure-tap-targets.mjs` (PORTS cards 82 to 85)._
+
+**Decision.** Four things the audit PRs on reid-design-site (#113), fbcm (#36) and stonesteps-50k (#77) proved became cards, written from their merged diffs: the invisible 44px hit area (82), the 390px tap-target scan (83, the only PORTABLE file, generalised from fbcm's original: default `--paths` is `/`, wording no longer names fbcm's class), the Linux-runner font-swap layout-shift trap (84) and the MapLibre 6.x `setMissingStyleImageResolver` rule (85, guidance only: no site but stonesteps-50k has MapLibre). **Found while checking:** the scan run on this starter's own build lists 6 footer links under 44px on `/`, and 16 targets on `/contact/`; logged as PENDING item 12, not fixed here. The small-text scan the brief mentioned is stonesteps-50k's and is not on its `main`, so it is not in the script.
+
 _2026-10-03: card 81 rolled out, and what it did not fix (PORTS card 81 row note)._
 
 Presacademy and stonesteps-50k resynced the script. Live check beforehand: both sites served the starter's interior-design `llms-full.txt` (stonesteps even listed a "Consultation, $150" price). The resync fixes the site name and URL only; the script still reads the starter's content types, so on a different kind of site it writes a stub. Stonesteps-50k's files were hand-written from its live pages and verified; presacademy's `llms-full.txt` was removed because its content is still seed data. Docs only in this repo.
