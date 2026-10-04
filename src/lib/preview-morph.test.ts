@@ -145,6 +145,30 @@ test('never writes an attribute whose value already matches', () => {
   assert.deepEqual(from.removals, []);
 });
 
+test('keeps the classes page scripts add after load (reveal state), not other stale classes', () => {
+  // The Staff hero's arch, revealed by the observer, then re-rendered by the
+  // server without `is-visible` (2026-09-26).
+  const from = el('DIV', { class: 'reveal old is-visible is-drawn', 'data-reveal': 'arch' });
+  const to = el('DIV', { class: 'reveal new', 'data-reveal': 'arch' });
+  morph(from, to);
+  assert.equal(from.getAttribute('class'), 'reveal new is-visible is-drawn');
+
+  // Nothing to keep: a plain class sync, as before.
+  const a = el('DIV', { class: 'a' });
+  morph(a, el('DIV', { class: 'b' }));
+  assert.equal(a.getAttribute('class'), 'b');
+
+  // The server drops the class attribute entirely: state classes survive alone.
+  const b = el('DIV', { class: 'x is-visible' });
+  morph(b, el('DIV', {}));
+  assert.equal(b.getAttribute('class'), 'is-visible');
+
+  // Already in agreement: no write at all.
+  const c = el('DIV', { class: 'reveal is-visible' });
+  morph(c, el('DIV', { class: 'reveal' }));
+  assert.deepEqual(c.writes, []);
+});
+
 // ---------------------------------------------------------------------------
 // Text
 // ---------------------------------------------------------------------------
