@@ -1,3 +1,35 @@
+<div align="center">
+
+# NCS Astro + Sanity Starter
+
+**A page-builder-first starter for small-business sites: Astro, Sanity and Cloudflare Workers, with editing on the page itself.**
+
+[![CI](https://github.com/NateJ45/ncs-astro-sanity-starter/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NateJ45/ncs-astro-sanity-starter/actions/workflows/ci.yml)
+![Astro 7](https://img.shields.io/badge/Astro-7-BC52EE?logo=astro&logoColor=white)
+![Sanity v6](https://img.shields.io/badge/Sanity-v6-F36458?logo=sanity&logoColor=white)
+![Tailwind 4](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+[![Use this template](https://img.shields.io/badge/Use%20this-template-2ea44f?logo=github)](https://github.com/NateJ45/ncs-astro-sanity-starter/generate)
+
+<img src="docs/screenshots/home-desktop.png" alt="The starter's default home page at desktop width" width="760">
+<img src="docs/screenshots/home-mobile.png" alt="The starter's default home page at phone width" width="150">
+
+<sub>What a fresh clone renders with no Sanity project connected: the default home page at 1440 and 390 pixels wide. A second page, [services](docs/screenshots/services-desktop.png), and its [mobile view](docs/screenshots/services-mobile.png) are in `docs/screenshots/`.</sub>
+
+</div>
+
+## Why teams of one use it
+
+- **Edit on the page.** The Sanity Studio is embedded at `/studio` with a live draft preview: click the words you want to change, and add, duplicate, reorder or remove whole sections in place.
+- **Reskin in one command.** Palette, fonts, radius and a layout block (header, hero, density, card style) come from one brand config, so the next site does not look like the last one.
+- **Improvements travel.** `PORTS.md` is the registry of port cards that carry fixes to every site built from this starter (85 cards so far), and `scripts/sync-check.mjs` reports when a site's shared files have drifted.
+
+Quality gates in CI: Playwright on Chromium and a WebKit iPhone profile, axe accessibility checks, Lighthouse, and visual regression. A workflow for encrypted Sanity dataset backups ships in the template, and extra capabilities are opt-in modules (`modules/events`, `modules/resources`). Licensed under the [MIT License](LICENSE); security reports go through [SECURITY.md](SECURITY.md).
+
+---
+
 # NCS Astro + Sanity Starter
 
 A reusable, production-grade starter for small-business marketing sites on **Astro + Sanity + Cloudflare Workers**, by [Nixon Creative Studio](https://nixoncreativestudio.com). It is the foundation the studio's client sites are built on, so a polished, editor-friendly site is an afternoon of setup instead of a month of plumbing.
@@ -80,3 +112,7 @@ either on. `publish-due.yml` works the same way.
 ---
 
 Maintained by [Nixon Creative Studio](https://nixoncreativestudio.com).
+
+## License
+
+Released under the [MIT License](LICENSE), copyright 2026 Nathan Nixon / Nixon Creative Studio.
