@@ -13,11 +13,6 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 [![Use this template](https://img.shields.io/badge/Use%20this-template-2ea44f?logo=github)](https://github.com/NateJ45/ncs-astro-sanity-starter/generate)
 
-<img src="docs/screenshots/home-desktop.png" alt="The starter's default home page at desktop width" width="760">
-<img src="docs/screenshots/home-mobile.png" alt="The starter's default home page at phone width" width="150">
-
-<sub>What a fresh clone renders with no Sanity project connected: the default home page at 1440 and 390 pixels wide. A second page, [services](docs/screenshots/services-desktop.png), and its [mobile view](docs/screenshots/services-mobile.png) are in `docs/screenshots/`.</sub>
-
 </div>
 
 ## Why teams of one use it
