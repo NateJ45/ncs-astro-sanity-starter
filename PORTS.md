@@ -192,7 +192,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 72  | Layout variants: structure as a brand.config axis                      | no      | no          | yes      | no               | no            | no             | no                 | no                  | no             |
 | 73  | Design directions before reskin (brief, references, mockups)           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 74  | page-parity `--exclude` (parity-glob helper + test)                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 75  | Playwright fixture: Sanity images from a disk cache                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 75  | Playwright fixture: Sanity images from a disk cache                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | yes            |
 | 76  | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`  | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 77  | Preview morph keeps client-state classes (reveal state)                | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
 | 78  | `preview-stega.ts` exports `RUN_SOURCE`                                | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
@@ -207,9 +207,11 @@ column of this matrix, so it is recorded on the card. Of the columns here only s
 wcp, presacademy, reid-design-site, mas-monograms, 2ndpreschicago and nixoncreativestudio hold unmarked copies, so
 sync-check never compares them and each takes the change by hand. Those stay `no` until a site does.
 
-Row 75 (2026-10-03): fbcm built the fixture on 2026-09-26 and is the one site that carries it (not a column; see the
-card). nixoncreativestudio has no Sanity, hence `n/a`. Every other cell is `no` until that site copies
-`tests/fixtures.ts` and switches its spec imports.
+Row 75 (2026-10-03): fbcm built the fixture on 2026-09-26 (not a column; see the card). stonesteps-50k adopted it the same
+day (PR #76): `tests/fixtures.ts`, the `a11y`, `reflow` and `smoke` specs, and one `actions/cache` step in its `e2e` job so
+the shards share the image folder between runs; the saving is not yet measured (the first CI run was a cold cache).
+nixoncreativestudio has no Sanity, hence `n/a`. Every other cell is `no` until that site copies `tests/fixtures.ts`
+and switches its spec imports.
 
 Row 76 (2026-10-03): fbcm hard-coded the longer timeout on 2026-09-27 (not a column; see the card). Only fbcm marks
 `playwright.visual.config.ts`; presacademy and stonesteps-50k carry unmarked copies. All `no` until a site re-syncs.
