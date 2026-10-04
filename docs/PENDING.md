@@ -259,15 +259,6 @@ staged modules now and eleven archived ones. The file is owned by another agent'
 (the family test standard, PORTS.md card 35), so the sentence was left alone rather than
 edited across an ownership line. One-line fix, next time someone is in there.
 
-### 12. The starter fails its own 44px tap scan at 390px
-
-First reading of `scripts/measure-tap-targets.mjs` (PORTS.md card 83) on a production build with seed content,
-2026-10-03: `/` and `/services/` each list 6 footer links under 44px (About, Process, Services & Pricing, FAQ, Journal,
-Privacy policy, 15 to 17px tall); `/contact/` lists 16 (those 6, the three text inputs at 42px, five selects at 40px, the
-Send button at 36px and "View larger map" at 15px). Buttons built from `CtaLink.astro` already pass. Fix with card 82's
-`.hit-44` block for the links; the form controls want real `min-height: 44px`. Nothing in a client build depends on it,
-so it waits for the first site that needs the floor. Close it by re-running the script to 0 and noting it in the changelog.
-
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 
 Flagged in the topic index (now docs/claude/topic-index.md, formerly in CLAUDE.md) since the fork. The 2026-08-28 pass corrected every

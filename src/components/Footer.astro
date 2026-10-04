@@ -216,10 +216,13 @@ const latestProjects = allProjects.slice(0, 3);
             >
               {col.title}
             </p>
-            <ul class="list-none space-y-2 p-0 text-sm">
+            <ul class="list-none p-0 text-sm">
               {col.links.map((link) => (
                 <li>
-                  <a href={link.href} class="text-foreground/85 transition-colors hover:text-link">
+                  <a
+                    href={link.href}
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
                     {link.label}
                   </a>
                 </li>
@@ -239,38 +242,53 @@ const latestProjects = allProjects.slice(0, 3);
             >
               Studio
             </p>
-            <ul class="list-none space-y-2 p-0 text-sm">
+            <ul class="list-none p-0 text-sm">
               {/* scaffold: about */}
               <li>
-                <a href="/about" class="text-foreground/85 transition-colors hover:text-link">
+                <a
+                  href="/about"
+                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                >
                   About
                 </a>
               </li>
               {/* scaffold:end */}
               {/* scaffold: process */}
               <li>
-                <a href="/process" class="text-foreground/85 transition-colors hover:text-link">
+                <a
+                  href="/process"
+                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                >
                   Process
                 </a>
               </li>
               {/* scaffold:end */}
               {/* scaffold: services */}
               <li>
-                <a href="/services" class="text-foreground/85 transition-colors hover:text-link">
+                <a
+                  href="/services"
+                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                >
                   Services &amp; Pricing
                 </a>
               </li>
               {/* scaffold:end */}
               {/* scaffold: faq */}
               <li>
-                <a href="/faq" class="text-foreground/85 transition-colors hover:text-link">
+                <a
+                  href="/faq"
+                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                >
                   FAQ
                 </a>
               </li>
               {/* scaffold:end */}
               {visible.press && (
                 <li>
-                  <a href="/press" class="text-foreground/85 transition-colors hover:text-link">
+                  <a
+                    href="/press"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
                     Press
                   </a>
                 </li>
@@ -283,10 +301,13 @@ const latestProjects = allProjects.slice(0, 3);
             <p id="footer-work" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
               Work
             </p>
-            <ul class="list-none space-y-2 p-0 text-sm">
+            <ul class="list-none p-0 text-sm">
               {visible.portfolio && (
                 <li>
-                  <a href="/portfolio" class="text-foreground/85 transition-colors hover:text-link">
+                  <a
+                    href="/portfolio"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
                     Portfolio
                   </a>
                 </li>
@@ -295,7 +316,7 @@ const latestProjects = allProjects.slice(0, 3);
                 <li>
                   <a
                     href="/portfolio/before-after"
-                    class="text-foreground/85 transition-colors hover:text-link"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Before &amp; After
                   </a>
@@ -304,7 +325,10 @@ const latestProjects = allProjects.slice(0, 3);
               {/* scaffold: journal */}
               {visible.journal && (
                 <li>
-                  <a href="/journal" class="text-foreground/85 transition-colors hover:text-link">
+                  <a
+                    href="/journal"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
                     Journal
                   </a>
                 </li>
@@ -312,7 +336,10 @@ const latestProjects = allProjects.slice(0, 3);
               {/* scaffold:end */}
               {visible.shop && (
                 <li>
-                  <a href="/shop" class="text-foreground/85 transition-colors hover:text-link">
+                  <a
+                    href="/shop"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
                     Shop
                   </a>
                 </li>
@@ -321,7 +348,7 @@ const latestProjects = allProjects.slice(0, 3);
                 <li>
                   <a
                     href="/gift-certificates"
-                    class="text-foreground/85 transition-colors hover:text-link"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Gift Certificates
                   </a>
@@ -335,10 +362,13 @@ const latestProjects = allProjects.slice(0, 3);
             <p id="footer-tools" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
               Free tools &amp; guides
             </p>
-            <ul class="list-none space-y-2 p-0 text-sm">
+            <ul class="list-none p-0 text-sm">
               {visible.styleQuiz && (
                 <li>
-                  <a href="/quiz" class="text-foreground/85 transition-colors hover:text-link">
+                  <a
+                    href="/quiz"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
                     Style Quiz
                   </a>
                 </li>
@@ -347,7 +377,7 @@ const latestProjects = allProjects.slice(0, 3);
                 <li>
                   <a
                     href="/calculator"
-                    class="text-foreground/85 transition-colors hover:text-link"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Cost Calculator
                   </a>
@@ -355,14 +385,20 @@ const latestProjects = allProjects.slice(0, 3);
               )}
               {visible.guides && (
                 <li>
-                  <a href="/guides" class="text-foreground/85 transition-colors hover:text-link">
+                  <a
+                    href="/guides"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
                     Guides
                   </a>
                 </li>
               )}
               {visible.resources && (
                 <li>
-                  <a href="/resources" class="text-foreground/85 transition-colors hover:text-link">
+                  <a
+                    href="/resources"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
                     Resources
                   </a>
                 </li>
@@ -381,12 +417,12 @@ const latestProjects = allProjects.slice(0, 3);
             Latest projects
           </p>
           {latestProjects.length > 0 ? (
-            <ul class="list-none space-y-2 p-0 text-sm">
+            <ul class="list-none p-0 text-sm">
               {latestProjects.map((p) => (
                 <li>
                   <a
                     href={`/portfolio/${p.slug?.current ?? ''}`}
-                    class="text-foreground/85 transition-colors hover:text-link"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     {p.title}
                   </a>
@@ -395,7 +431,7 @@ const latestProjects = allProjects.slice(0, 3);
               <li class="pt-xs">
                 <a
                   href="/portfolio"
-                  class="inline-flex items-center gap-xs text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:text-primary-dark"
+                  class="inline-flex min-h-[44px] items-center gap-xs text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:text-primary-dark"
                 >
                   View all <span aria-hidden="true">→</span>
                 </a>
@@ -434,7 +470,7 @@ const latestProjects = allProjects.slice(0, 3);
             <p>
               <a
                 href={telHref(phone)}
-                class="inline-flex items-center gap-xs text-link transition-colors hover:text-primary-dark"
+                class="inline-flex min-h-[44px] items-center gap-xs text-link transition-colors hover:text-primary-dark"
               >
                 <Phone size={14} aria-hidden="true" />
                 {phone}
@@ -459,7 +495,7 @@ const latestProjects = allProjects.slice(0, 3);
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={ariaLabel}
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-primary-dark hover:bg-primary-dark hover:text-white"
+                    class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-primary-dark hover:bg-primary-dark hover:text-white"
                   >
                     <Icon size={20} stroke={1.5} />
                   </a>
@@ -523,7 +559,7 @@ const latestProjects = allProjects.slice(0, 3);
             LEGAL_LINKS.map((l) => (
               <a
                 href={l.href}
-                class="underline underline-offset-2 transition-colors hover:text-link"
+                class="hit-44 relative underline underline-offset-2 transition-colors hover:text-link"
               >
                 {l.label}
               </a>
@@ -531,7 +567,7 @@ const latestProjects = allProjects.slice(0, 3);
           ) : (
             <a
               href="/privacy"
-              class="underline underline-offset-2 transition-colors hover:text-link"
+              class="hit-44 relative underline underline-offset-2 transition-colors hover:text-link"
             >
               Privacy policy
             </a>
@@ -544,7 +580,7 @@ const latestProjects = allProjects.slice(0, 3);
                 href={siteCreditUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="underline underline-offset-2 transition-colors hover:text-link"
+                class="hit-44 relative underline underline-offset-2 transition-colors hover:text-link"
               >
                 {siteCredit}
               </a>

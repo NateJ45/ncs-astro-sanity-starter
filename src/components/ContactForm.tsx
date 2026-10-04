@@ -492,7 +492,7 @@ export default function ContactForm({
           onChange={(e) => update('name', e.target.value)}
           aria-invalid={!!errors.name}
           aria-describedby={errors.name ? 'name-error' : undefined}
-          className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+          className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
         />
         {errors.name && (
           <p
@@ -521,7 +521,7 @@ export default function ContactForm({
             onChange={(e) => update('email', e.target.value)}
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'email-error' : undefined}
-            className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+            className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
           />
           {errors.email && (
             <p
@@ -546,7 +546,7 @@ export default function ContactForm({
             autoComplete="tel"
             value={draft.phone}
             onChange={(e) => update('phone', e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+            className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
           />
         </div>
       </div>
@@ -576,7 +576,7 @@ export default function ContactForm({
                 aria-describedby={
                   errors.location ? 'location-error location-hint' : 'location-hint'
                 }
-                className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+                className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
               >
                 <option value="">Pick the closest area</option>
                 {locationOptions.map((opt) => (
@@ -616,7 +616,7 @@ export default function ContactForm({
                 onChange={(e) => update('projectType', e.target.value)}
                 aria-invalid={!!errors.projectType}
                 aria-describedby={errors.projectType ? 'projectType-error' : undefined}
-                className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+                className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
               >
                 <option value="">Pick the closest match</option>
                 {projectTypeOptions.map((opt) => (
@@ -655,7 +655,7 @@ export default function ContactForm({
                 onChange={(e) => update('budget', e.target.value)}
                 aria-invalid={!!errors.budget}
                 aria-describedby={errors.budget ? 'budget-error budget-hint' : 'budget-hint'}
-                className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+                className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
               >
                 <option value="">Pick a bracket</option>
                 {budgetOptions.map((opt) => (
@@ -695,7 +695,7 @@ export default function ContactForm({
                 onChange={(e) => update('timeline', e.target.value)}
                 aria-invalid={!!errors.timeline}
                 aria-describedby={errors.timeline ? 'timeline-error' : undefined}
-                className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+                className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
               >
                 <option value="">When do you want to start?</option>
                 {timelineOptions.map((opt) => (
@@ -730,7 +730,7 @@ export default function ContactForm({
               onChange={(e) => update('message', e.target.value)}
               aria-invalid={!!errors.message}
               aria-describedby={errors.message ? 'message-error message-hint' : 'message-hint'}
-              className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
+              className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none"
             />
             {errors.message ? (
               <p
@@ -761,7 +761,7 @@ export default function ContactForm({
               name="source"
               value={draft.source}
               onChange={(e) => update('source', e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+              className="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:outline-2 focus:outline-offset-2 focus:outline-ring"
             >
               <option value="">Skip if you'd rather not say</option>
               {sourceOptions.map((opt) => (
@@ -799,8 +799,8 @@ export default function ContactForm({
         // webkit-iphone project, 2026-09-06.
         const cls =
           f.kind === 'select'
-            ? 'w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-2 focus:outline-offset-2 focus:outline-ring'
-            : 'w-full px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring';
+            ? 'w-full min-h-[44px] px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-2 focus:outline-offset-2 focus:outline-ring'
+            : 'w-full min-h-[44px] px-s py-s border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring';
 
         if (f.kind === 'checkbox') {
           return (
@@ -888,7 +888,7 @@ export default function ContactForm({
       <button
         type="submit"
         disabled={status === 'submitting'}
-        className="inline-flex items-center bg-primary-dark px-l py-s text-sm font-semibold tracking-widest text-white uppercase transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-[44px] items-center bg-primary-dark px-l py-s text-sm font-semibold tracking-widest text-white uppercase transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
       >
         {status === 'submitting' ? 'Sending…' : 'Send message'}
       </button>
