@@ -197,6 +197,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 77  | Preview morph keeps client-state classes (reveal state)                | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
 | 78  | `preview-stega.ts` exports `RUN_SOURCE`                                | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
 | 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | yes         | yes      | yes              | n/a           | no             | n/a                | n/a                 | yes            |
+| 80  | `sync-check` skips `_worktrees/` folders                               | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -219,6 +220,13 @@ blast-radius table). **Rolled out 2026-10-03:** presacademy (#57), reid-design-s
 stonesteps-50k (#73) re-synced after the starter merge, each a byte-for-byte copy gated by its own CI; fbcm already
 had all three (not a column). mas-monograms does not carry `redirects.ts`, hence `n/a` on row 79. 2ndpreschicago is
 archived on GitHub, so it stays `no` and cannot take a PR. nixoncreativestudio has no Sanity, hence `n/a`.
+
+Row 80 (2026-10-03): every site carries a MARKED `scripts/sync-check.mjs` byte-identical to the old starter copy
+(wcp at `site/scripts/`), so the cells are `no` until each re-syncs. presacademy, reid-design-site, mas-monograms and
+nixoncreativestudio (plus the archived wcp and 2ndpreschicago) enforce against live starter `main`: their required
+`build` goes RED on merge until they resync (blast-radius table on the card). stonesteps-50k and fbcm only self-check
+in CI. wcp and 2ndpreschicago are archived on GitHub, so they stay `no` and cannot take a PR. fbcm is not a column;
+it carries the old copy too.
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6632,3 +6640,79 @@ map is empty on every build here.
 
 `redirect-guard.ts` imports only `normalizeRedirectPath` and the `RedirectTarget` type, both unchanged, so it needs
 no edit in any repo.
+
+---
+
+## Card 80: `sync-check` skips `_worktrees/` folders (2026-10-03)
+
+**Origin:** fbcm, 2026-10-03. A local `node scripts/sync-check.mjs` in fbcm printed
+`85 same, 1 drifted, 86 missing in starter (172 marked file(s) checked)`. fbcm has 86 marked files; the other 86
+rows were paths like `_worktrees/product-md-answers/.claude/settings.json`, the full second copy of the repo that
+`git worktree add _worktrees/product-md-answers` makes. Every row was `MISSING-IN-STARTER` (the starter has no file
+at a `_worktrees/...` path), so the run exited 1 and the one real finding was lost in the noise.
+**Canonical:** `scripts/sync-check.mjs` (`PORTABLE`), plus a starter-only regression test,
+`scripts/lib/sync-check-skip-dirs.test.mjs` (not marked; sites that want it copy it by hand).
+
+**What it is.** One entry in `SKIP_DIRS`: `'_worktrees'`. The walker never descends into a folder with that exact
+name, wherever it sits in the tree. The studio puts agent and developer worktrees in `<repo>/_worktrees/<name>/`
+(Projects CLAUDE.md, "Folders and worktrees"), and each one carries a whole copy of the repo, node_modules aside.
+
+**Why a second entry and not a looser rule.** The set already held `'worktrees'`, which covers the older
+`.claude/worktrees/<name>/` convention (by name, because it is the last path segment that is tested, so the
+`.claude` parent does not matter). `worktrees` does not match `_worktrees`: `Set.has` is an exact comparison and the
+leading underscore makes it a different name. Both conventions exist in these repos, so there are two exact names.
+A substring or `*worktrees` suffix match was rejected: it would also hide a real folder such as
+`docs/old_worktrees-notes/` and a marked file in it would stop being checked, which is the failure this tool exists
+to prevent. The test pins that boundary.
+
+**CI is unaffected on the day, and that is why it was not caught.** A fresh `actions/checkout` has no `_worktrees`
+folder, so no CI run ever saw the doubled count. It is a local-run problem: it buries real drift for whoever runs
+`sync-check` in a checkout that has live worktrees (every working session here).
+
+**Test.** `scripts/lib/sync-check-skip-dirs.test.mjs` builds a throwaway site and starter in the temp dir and runs
+`sync-check.mjs` as a child process (the script is a CLI and runs at import, so it cannot be imported). Four cases:
+a control (two real marked files are found and compared), a marked file under `_worktrees/x/...` is not reported,
+the `.claude/worktrees/` skip still holds, and a marked file in a look-alike folder (`my_worktrees-notes/`) is still
+checked. Run first against the old script, the `_worktrees` case failed with `MISSING-IN-STARTER  _worktrees/...`
+and `(5 marked file(s) checked)`; with the entry it passes at `(2 marked file(s) checked)`. It runs under
+`npm run test:scripts`, which `test:unit` chains, so `ci.yml` needs no change.
+
+**Measured on fbcm (2026-10-03, same checkout, old script then new):**
+
+| Script              | Result line                                                              | Rows under `_worktrees/` |
+| ------------------- | ------------------------------------------------------------------------ | ------------------------ |
+| `origin/main` (old) | `85 same, 1 drifted, 86 missing in starter (172 marked file(s) checked)` | 86                       |
+| this branch         | `85 same, 1 drifted, 0 missing in starter (86 marked file(s) checked)`   | 0                        |
+
+The one remaining DRIFT is `scripts/sync-check.mjs` itself (fbcm still has the old copy), which is the signal
+working as intended.
+
+**Blast radius (checked 2026-10-03 against each repo's `origin/main`; every marked `sync-check.mjs` equals the
+starter copy before this card, normalising line endings).** Merging the starter change makes every repo whose CI
+checks out live starter `main` and ENFORCES the diff go red until it resyncs:
+
+| Repo                      | Marked copy                   | CI mode                                                                          | Effect of merging this card                                               |
+| ------------------------- | ----------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| presacademy               | `scripts/sync-check.mjs`      | live starter `main`, enforce step in `static` (feeds `build`)                    | required `build` RED until re-synced                                      |
+| reid-design-site          | `scripts/sync-check.mjs`      | live starter `main`, enforce step in `static` (feeds `build`)                    | required `build` RED until re-synced (`test` and `lighthouse` unaffected) |
+| nixoncreativestudio       | `scripts/sync-check.mjs`      | live starter `main`, enforce step in `static` (feeds `build`)                    | required `build` RED until re-synced                                      |
+| mas-monograms             | `scripts/sync-check.mjs`      | live starter `main`, enforce step inside the `build` job                         | required `build` RED until re-synced                                      |
+| stonesteps-50k            | `scripts/sync-check.mjs`      | self-check only                                                                  | DRIFT under a manual `sync-check` only                                    |
+| fbcm                      | `scripts/sync-check.mjs`      | self-check only                                                                  | DRIFT under a manual `sync-check` only                                    |
+| wcp (archived)            | `site/scripts/sync-check.mjs` | live starter `main` (`staging` on the `staging` branch), enforce step in `build` | would go red, but the repo is archived: no PRs, no CI runs                |
+| 2ndpreschicago (archived) | `scripts/sync-check.mjs`      | live starter `main` (`staging` on the `staging` branch), enforce step in `build` | would go red, but the repo is archived: no PRs, no CI runs                |
+| ncs-church-starter        | none                          | archived, no longer synced                                                       | nothing                                                                   |
+
+The enforce step uses `continue-on-error: true`, then a later step fails the job when the outcome was not `success`,
+and the job result feeds the required `build` check. Also on a DRIFT the `propose-drift.mjs` step tries to open a PR
+against the starter with the site's copy (it exits 0 whatever happens); that PR would carry the OLD file, so close it
+and resync instead.
+
+**Adopt (per site).** Same drill as cards 77 to 79: the starter PR merges only after the site resync PRs are ready.
+In each repo: branch from `origin/main`, copy `scripts/sync-check.mjs` from the starter byte for byte, run
+`node scripts/sync-check.mjs` with `NCS_STARTER_DIR` pointing at the starter (expect all `SAME`), push, and let `build`
+and `test` run. Optionally copy `scripts/lib/sync-check-skip-dirs.test.mjs` into a repo that has a `test:scripts`
+script. Nothing else changes: no workflow edit, no marker change.
+
+**Scope.** `.claude/worktrees` and `_worktrees` are skipped for `sync-check` only. Other whole-tree tools
+(prettier, eslint, Tailwind, Lighthouse) have their own ignore lists and were not touched or re-checked here.
