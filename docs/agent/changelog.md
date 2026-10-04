@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: the Sanity image disk cache for Playwright, promoted from fbcm (PORTS card 75)._
+
+**Decision.** fbcm's Playwright runs were spending about 13 GB a week of Sanity image bandwidth, so on 2026-09-26 it added `tests/fixtures.ts`, which routes `cdn.sanity.io` images through a disk cache, and pointed its specs at it. Promoted here as a new marked file, with `a11y`, `reflow` and `smoke` switched to `./fixtures`. **Harmless without a cache or a Sanity project:** an empty cache fetches once and keeps; this starter's CI builds from fallbacks, so the route never fires. The smoke spec was merged by hand: the starter's card 58 GA test stays, fbcm's `/blog` and `/post` tests stay out (one site's content). `reduced-motion.spec.ts` was NOT switched: five site repos mark it and check against live starter `main`, so changing it would turn their `build` red. No workflow touched.
+
 _2026-10-03: the scripts tests now run in CI (PORTS card 74 follow-up)._
 
 **Decision.** Card 74 chained `test:scripts` onto `check:full`, but `ci.yml` and `deploy.yml` call `npm run test:unit` directly, so CI and the deploy gate never ran the 5 scripts tests. Fixed without touching a workflow: `test:unit` is now `node --experimental-strip-types --test src/lib/*.test.ts && npm run test:scripts`, and `check:full` drops its own `&& npm run test:scripts` so they do not run twice. The `src/lib` command is unchanged, so the four gate tests run exactly as before; `test:scripts` stays its own script. Job names and triggers are untouched.
