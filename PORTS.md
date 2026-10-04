@@ -198,7 +198,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 78  | `preview-stega.ts` exports `RUN_SOURCE`                                | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
 | 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | yes         | yes      | yes              | n/a           | no             | n/a                | n/a                 | yes            |
 | 80  | `sync-check` skips `_worktrees/` folders                               | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
-| 81  | llms-full identity from brand config; audit shared field consts        | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 81  | llms-full identity from brand config; audit shared field consts        | no      | yes         | yes      | no               | no            | no             | n/a                | n/a                 | yes            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -229,9 +229,15 @@ stonesteps-50k carry a MARKED `generate-llms-full.mjs` (byte-identical to the st
 the two that resync; mas-monograms, 2ndpreschicago and reid-design-site hold unmarked, diverged copies and take the change
 by hand, or not at all. NO site carries a marked `audit-studio.mjs` (stonesteps-50k's is unmarked and older), so the audit
 half turns nothing red. All `no` cells stay `no` until that site copies the files. nixoncreativestudio has neither script,
-hence `n/a`. The committed `public/llms-full.txt` in presacademy, stonesteps-50k and 2ndpreschicago still reads
-'Studio Starter' / example.com: resyncing the script fixes the next run, but the file has to be regenerated and
-committed (needs `SANITY_API_READ_TOKEN`).
+hence `n/a`. **Rolled out 2026-10-03:** presacademy (#59) and stonesteps-50k (#78) resynced the script and its
+`site-identity` helper. The committed `public/llms-full.txt` in presacademy, stonesteps-50k and 2ndpreschicago read
+'Studio Starter' / example.com, and resyncing the script did NOT fix that: the script fixes the site NAME and URL only, it
+still queries the starter's content types (services, process steps, FAQs, projects, journal entries, guides), so on a fork
+with different content (stonesteps-50k is a race site) it writes a near-empty stub (327 bytes there). stonesteps-50k's two
+public files were therefore hand-written from its live pages (#79; every number and name machine-checked against the
+pages) and its seo note says never to run `llms:full`; presacademy's `llms-full.txt` was removed (#60) because its build
+still runs on seed content, to be generated at launch. 2ndpreschicago is archived and still serves the placeholder. The
+lesson for any fork: before trusting `llms:full`, check its content types match the site's.
 
 Row 80 (2026-10-03): every site carries a MARKED `scripts/sync-check.mjs` byte-identical to the old starter copy
 (wcp at `site/scripts/`), so the cells are `no` until each re-syncs. presacademy, reid-design-site, mas-monograms and
