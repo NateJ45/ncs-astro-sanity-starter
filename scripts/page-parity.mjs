@@ -28,6 +28,22 @@
  *   node scripts/page-parity.mjs compare about   # limit to one page
  *   node scripts/page-parity.mjs list         # show the routes it would snapshot
  *
+ * EXCLUDING GENERATED ARCHIVE PAGES (added 2026-09-20, plan 2c task 7)
+ * A content-heavy site's pagination, tag and category routes multiply one
+ * template into hundreds of near-identical pages. Snapshotting every one adds
+ * baseline weight without adding coverage (the first page of each template
+ * already proves the template), and when a real diff appears it drowns in
+ * hundreds of copies of the same DIFF line. `--exclude` (or its env-var
+ * twin, for callers that cannot pass flags) drops matching page names from
+ * BOTH capture and compare, so the excluded pages simply have no baseline and
+ * are never checked:
+ *   node scripts/page-parity.mjs capture --exclude "blog/page/**,blog/tag/**"
+ *   node scripts/page-parity.mjs compare --exclude "blog/page/**,blog/tag/**"
+ *   PARITY_EXCLUDE="blog/page/**,blog/tag/**" node scripts/page-parity.mjs capture
+ * The flag wins if both are given. Glob syntax is `*` (one path segment) and
+ * `**` (any number of segments); see scripts/lib/parity-glob.mjs. Default is
+ * no exclusion, so a project that never sets this sees no change in behaviour.
+ *
  * WHERE IT READS THE BUILT HTML (the 2026-08-27 parameterization)
  * Astro's Cloudflare output shape moved between adapter majors:
  *   - @astrojs/cloudflare 14 (Astro 7) writes static HTML to dist/client/
@@ -119,6 +135,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseExclude } from './lib/parity-glob.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SNAP_DIR = join(ROOT, 'scripts', '.parity');
@@ -201,10 +218,14 @@ function discoverPages() {
 /** Snapshot filename for a route name (nested routes keep their shape). */
 const snapFile = (name) => `${name.replace(/\//g, '__')}.html`;
 
-function getPages() {
-  if (PAGES.length > 0) return PAGES;
-  requireDist();
-  return discoverPages();
+/**
+ * @param {(name: string) => boolean} [isExcluded] Drops matching page names.
+ *   Defaults to excluding nothing, so callers that never pass one see no
+ *   change in behaviour.
+ */
+function getPages(isExcluded = () => false) {
+  const all = PAGES.length > 0 ? PAGES : (requireDist(), discoverPages());
+  return all.filter(([name]) => !isExcluded(name));
 }
 
 // --------------------------------------------------------------------------
@@ -500,8 +521,8 @@ function clip(line, width = 200) {
 // Modes
 // --------------------------------------------------------------------------
 
-function capture(only) {
-  const pages = getPages();
+function capture(only, isExcluded) {
+  const pages = getPages(isExcluded);
   mkdirSync(SNAP_DIR, { recursive: true });
   let written = 0;
   let missing = 0;
@@ -528,8 +549,8 @@ function capture(only) {
   if (missing) process.exit(1);
 }
 
-function compare(only) {
-  const pages = getPages();
+function compare(only, isExcluded) {
+  const pages = getPages(isExcluded);
   if (!existsSync(SNAP_DIR) || readdirSync(SNAP_DIR).length === 0) {
     fail('No snapshots in scripts/.parity/. Run: node scripts/page-parity.mjs capture');
   }
@@ -587,26 +608,51 @@ function fail(msg) {
   process.exit(1);
 }
 
+// --------------------------------------------------------------------------
+// CLI argument parsing
+// --------------------------------------------------------------------------
+// `--exclude <globs>` (or `--exclude=<globs>`) can appear anywhere after the
+// mode; whatever positional argument is left over is `only`, the single-page
+// filter capture/compare already supported. The flag wins over PARITY_EXCLUDE
+// when both are set.
 const mode = process.argv[2];
-const only = process.argv[3];
+const rest = process.argv.slice(3);
+let excludeSpec;
+const positional = [];
+for (let i = 0; i < rest.length; i++) {
+  const arg = rest[i];
+  if (arg === '--exclude') {
+    excludeSpec = rest[++i];
+  } else if (arg.startsWith('--exclude=')) {
+    excludeSpec = arg.slice('--exclude='.length);
+  } else {
+    positional.push(arg);
+  }
+}
+const only = positional[0];
+const isExcluded = parseExclude(excludeSpec ?? process.env.PARITY_EXCLUDE);
 
 if (mode === 'capture' || mode === 'compare') {
   console.log(`[page-parity] html root: ${DIST_LABEL}`);
   if (only) {
-    const known = getPages().map(([n]) => n);
+    const known = getPages(isExcluded).map(([n]) => n);
     if (!known.includes(only)) fail(`Unknown page "${only}". Known: ${known.join(', ')}`);
   }
 }
 
-if (mode === 'capture') capture(only);
-else if (mode === 'compare') compare(only);
+if (mode === 'capture') capture(only, isExcluded);
+else if (mode === 'compare') compare(only, isExcluded);
 else if (mode === 'list') list();
 else {
   console.log('Usage (build first, this script never builds):');
   console.log('  npm run build');
-  console.log('  node scripts/page-parity.mjs capture [page]');
-  console.log('  node scripts/page-parity.mjs compare [page]');
+  console.log('  node scripts/page-parity.mjs capture [page] [--exclude a/**,b/**]');
+  console.log('  node scripts/page-parity.mjs compare [page] [--exclude a/**,b/**]');
   console.log('  node scripts/page-parity.mjs list');
+  console.log(
+    '\n--exclude (or PARITY_EXCLUDE) drops matching page names from capture and compare.',
+  );
+  console.log('Glob syntax: * matches one path segment, ** matches any number of segments.');
   console.log('\nHtml root is auto-detected (dist/client, else dist); override with PARITY_DIST.');
   process.exit(mode ? 1 : 0);
 }

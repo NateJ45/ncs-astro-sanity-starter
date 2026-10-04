@@ -191,8 +191,15 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 71  | Tracked `.claude/settings.json` deny rules + shared conventions import | no      | yes         | yes      | yes              | partial       | no             | n/a                | no                  | yes            |
 | 72  | Layout variants: structure as a brand.config axis                      | no      | no          | yes      | no               | no            | no             | no                 | no                  | no             |
 | 73  | Design directions before reskin (brief, references, mockups)           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 74  | page-parity `--exclude` (parity-glob helper + test)                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
+
+Row 74 (2026-10-03): fbcm built this on 2026-09-20 and is the one site that already carries it; fbcm is not a
+column of this matrix, so it is recorded on the card. Of the columns here only stonesteps-50k carries a
+`PORTABLE`-marked `page-parity.mjs` (it will report DRIFT once it is re-synced, which is the intended signal);
+wcp, presacademy, reid-design-site, mas-monograms, 2ndpreschicago and nixoncreativestudio hold unmarked copies, so
+sync-check never compares them and each takes the change by hand. All `no` until a site does.
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6346,3 +6353,54 @@ The npm scripts to copy are `references` and `directions:shoot`.
 "Where this sits" section and the Step 8 "layout work the config cannot carry" paragraph from
 `.claude/skills/reskin/SKILL.md` to a site. Port those two edits by hand, or the flow stops at the
 command and the skill never reads the picked direction.
+
+---
+
+## Card 74: page-parity `--exclude`, the glob helper and its test (2026-10-03)
+
+**Origin:** fbcm (a content-heavy church site), 2026-09-20. Its pagination, tag and category routes
+multiply one template into hundreds of near-identical pages. Snapshotting every one adds baseline
+weight without adding coverage (the first page of each template already proves the template renders),
+and a real diff drowns in hundreds of copies of the same `DIFF` line. fbcm built the fix in its own copy
+of the harness and marked it `PORTABLE`, which showed up as `DRIFT` (`page-parity.mjs`) and
+`MISSING-IN-STARTER` (the two helper files) in `sync-check` until this card promoted it.
+**Canonical:** `scripts/page-parity.mjs`, `scripts/lib/parity-glob.mjs`, `scripts/lib/parity-glob.test.mjs`
+(all `PORTABLE`; the starter copies are byte-identical to fbcm's after line-ending normalisation).
+
+**What it is.** `capture` and `compare` take `--exclude <globs>` (or `--exclude=<globs>`), a comma-separated list
+matched against the page name the harness already prints and files things by (`blog/category/news/page/2`).
+`PARITY_EXCLUDE` is the env twin for callers that cannot pass flags; the flag wins when both are given.
+Excluded pages get no baseline and are never compared. The glob syntax is two tokens on purpose: `*` is one
+path segment, `**` is any number of segments including none; everything else is literal. Naming a page that
+the exclude removes (`capture blog/tag/x --exclude "blog/tag/**"`) fails as "Unknown page".
+
+**Backward compatible.** With neither flag nor env set, `parseExclude` returns a predicate that excludes
+nothing, so `getPages()` returns the same list as before and every existing caller (`npm run parity ...`,
+`capture [page]`, `compare [page]`, `list`) behaves the same. The only other change is the `Usage` text.
+Verified on the starter (2026-10-03, old `origin/main` harness against the new one, same `dist/client`): `capture` output and the 11 baselines are byte-identical, `compare` output is identical (11/11 PASS). With `--exclude faq` `capture` writes 10 and `compare` passes 10/10. Note `about/**` does NOT match the bare page `about` (the `/` is literal), so list the index page too when you mean it.
+
+**Wiring.** The starter had no tests under `scripts/`, so `package.json` gains
+`"test:scripts": "node --test scripts/lib/*.test.mjs"` (the same line fbcm uses) and `check:full` ends with it.
+`ci.yml` calls `npm run test:unit` directly, so CI does not run `test:scripts` yet; adding it is a workflow
+change this card deliberately does not make (see the note below).
+
+**Adapt per site.** Add your own default to a `parity:capture` / `parity:compare` pair, as fbcm does:
+`"parity:capture": "node scripts/page-parity.mjs capture --exclude \"blog/page/**,blog/tag/**,blog/category/**/page/**\""`.
+The list is per site, so it is a package.json script, never baked into the harness. Take the three files
+together (the harness now imports the helper, so a copy of `page-parity.mjs` without `scripts/lib/parity-glob.mjs`
+dies at import) and add the `test:scripts` script.
+
+**Per-repo status (checked 2026-10-03 against each repo's `origin/main`).**
+
+| Repo                                                                                   | Copy of `page-parity.mjs`                      | After this merges                                                                          |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| fbcm                                                                                   | marked, has the feature                        | SAME (byte for byte); CI only runs the self-check, nothing changes                         |
+| stonesteps-50k                                                                         | marked, identical to the OLD starter copy      | DRIFT under a manual `sync-check`; CI only runs the self-check, so no required check moves |
+| wcp, presacademy, mas-monograms, reid-design-site, nixoncreativestudio, 2ndpreschicago | unmarked (forked or a pattern copy on purpose) | not compared; port by hand if the site wants the flag                                      |
+
+**Rollout.** Not started. Order and the CI `test:scripts` question are in the PR description.
+
+**Note on CI.** A site repo's `ci.yml` runs `sync-check` against the live starter `main` and fails the build on
+drift, but only for marked files. Marking a copy of `page-parity.mjs` in a site that checks against the starter
+therefore makes every later change to this file a red build there until it re-syncs. Mark a copy only when the
+site will keep it byte-identical.
