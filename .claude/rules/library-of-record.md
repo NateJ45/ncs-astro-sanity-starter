@@ -33,7 +33,7 @@ still carries its column and its historical cards, but nothing syncs to it any m
   part that decays fastest.
 - **Canonical files carry a first-line marker** reading `PORTABLE: canonical copy`
   followed by "ncs-astro-sanity-starter is the library of record for this file", in that
-  file's comment syntax. 107 files carry it as of 2026-10-03 (card 74 added `scripts/lib/parity-glob.mjs` and its test). The originals were
+  file's comment syntax. 108 files carry it as of 2026-10-03 (card 74 added `scripts/lib/parity-glob.mjs` and its test; card 75 added `tests/fixtures.ts`). The originals were
   `scripts/with-workerd.mjs`, `scripts/free-dist.mjs`, `scripts/page-parity.mjs`,
   `scripts/sync-check.mjs`, `scripts/lib/sanity-lib.mjs` and `src/lib/contrast.ts`; the
   in-canvas control layer and the family test standard added the rest. Run

@@ -192,6 +192,8 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 72  | Layout variants: structure as a brand.config axis                      | no      | no          | yes      | no               | no            | no             | no                 | no                  | no             |
 | 73  | Design directions before reskin (brief, references, mockups)           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 74  | page-parity `--exclude` (parity-glob helper + test)                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 75  | Playwright fixture: Sanity images from a disk cache                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 76  | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`  | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -200,6 +202,13 @@ column of this matrix, so it is recorded on the card. Of the columns here only s
 `PORTABLE`-marked `page-parity.mjs` (it will report DRIFT once it is re-synced, which is the intended signal);
 wcp, presacademy, reid-design-site, mas-monograms, 2ndpreschicago and nixoncreativestudio hold unmarked copies, so
 sync-check never compares them and each takes the change by hand. All `no` until a site does.
+
+Row 75 (2026-10-03): fbcm built the fixture on 2026-09-26 and is the one site that carries it (not a column; see the
+card). nixoncreativestudio has no Sanity, hence `n/a`. Every other cell is `no` until that site copies
+`tests/fixtures.ts` and switches its spec imports.
+
+Row 76 (2026-10-03): fbcm hard-coded the longer timeout on 2026-09-27 (not a column; see the card). Only fbcm marks
+`playwright.visual.config.ts`; presacademy and stonesteps-50k carry unmarked copies. All `no` until a site re-syncs.
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6405,3 +6414,109 @@ dies at import) and add the `test:scripts` script, chained onto the end of `test
 drift, but only for marked files. Marking a copy of `page-parity.mjs` in a site that checks against the starter
 therefore makes every later change to this file a red build there until it re-syncs. Mark a copy only when the
 site will keep it byte-identical.
+
+---
+
+## Card 75: Playwright fixture: Sanity images from a disk cache (2026-10-03)
+
+**Origin:** fbcm, 2026-09-26 (AVIF/WebP key fix 2026-09-27). Sanity's request log for fbcm counted 13.1 GB of
+image bandwidth in 533k browser requests in one week (2026-09-19 to 26), almost all of it Playwright runs, local
+and CI, loading every page's photographs from `cdn.sanity.io` again on every run. Sanity's free plan meters that
+bandwidth, so a test suite was spending a client's quota.
+**Canonical:** `tests/fixtures.ts` (new, `PORTABLE`), and the three marked specs that now import from it:
+`tests/a11y.spec.ts`, `tests/reflow.spec.ts`, `tests/smoke.spec.ts`.
+
+**What it is.** `tests/fixtures.ts` re-exports everything from `@playwright/test` and extends `test` so every
+browser context routes `https://cdn.sanity.io/images/**` through a disk cache in `node_modules/.cache/test-images/`.
+A Sanity image URL names its asset and its transform, so it never changes: the first run on a machine fetches each
+one once and keeps it; later runs are served from disk. Only a successful answer is kept (a blip is retried next
+run); files are written to temporary names and renamed so parallel workers never read half a file; `misses.log`
+gets one line per real fetch, so a warm run can prove it asked Sanity for nothing. `auto=format` is
+content-negotiated (Chromium gets AVIF, Playwright's WebKit gets WebP), so a browser that does not accept AVIF gets
+its own cache key; keyed on the URL alone, WebKit was served Chromium's AVIF and showed broken images. The route
+handler never fails a test on its own account: an error falls back to `route.continue()`, and an error there (the
+page already closed) is ignored. A spec that opens its own context (`browser.newContext`) calls
+`cacheSanityImages(ctx)` itself.
+
+**Measured on fbcm (2026-09-26):** a cold full run fetched 206 images (7 MB) and passed 514 tests; the next full run
+fetched 0 and passed 514.
+
+**Harmless where there is nothing to cache.** With an empty cache every image is fetched once, as before, and kept.
+A build with no Sanity project (this starter on CI, which builds from fallbacks) makes no `cdn.sanity.io` request,
+so the route never fires; the only side effect is an empty `node_modules/.cache/test-images/` folder. The pages
+under test are unchanged; only where the image bytes come from differs.
+
+**Smoke spec, hand-merged.** fbcm's `smoke.spec.ts` also carried two site-specific tests (its Wix-migration
+URL-preservation gate: a real post slug at `/post/<slug>` and the listing at `/blog`), and lacked this starter's
+card 58 localhost-GA test. The canonical smoke spec is the starter's (card 58 test kept) with the `./fixtures`
+import; the `/blog` and `/post` tests stay out because they assert one site's content and routes. fbcm keeps them in
+an unmarked spec of its own when it re-syncs.
+
+**Scope held back on purpose.** Only the three specs fbcm had already switched are switched here. The starter's
+`tests/reduced-motion.spec.ts` is a marked copy in presacademy, reid-design-site, mas-monograms, 2ndpreschicago and
+nixoncreativestudio, all of which run `sync-check` against live starter `main` and fail `build` on drift, so
+switching its import here would turn their required check red. `a11y-dark.spec.ts` and `contrast.spec.ts` can switch
+in a later pass (only stonesteps-50k marks them, and it self-checks).
+
+**Blast radius (checked 2026-10-03 against each repo's `origin/main`).** `a11y`, `reflow` and `smoke` are marked
+only in stonesteps-50k (self-check CI: it will show DRIFT under a manual `sync-check`, no required check moves) and
+fbcm (self-check CI). presacademy, reid-design-site, mas-monograms, 2ndpreschicago and nixoncreativestudio carry
+unmarked copies, so sync-check never compares them. `tests/fixtures.ts` is new: sync-check walks a site's marked
+files, so a new marked file in the starter cannot turn a site red.
+
+**Adopt in a site repo.** Copy `tests/fixtures.ts` byte for byte, change `from '@playwright/test'` to
+`from './fixtures'` in every spec (types such as `Page` re-export too), and call `cacheSanityImages(ctx)` in any spec
+that builds its own context. To share the cache across CI runs, add to the Playwright job in the site's own
+`ci.yml` (a site decision; the starter's CI has no Sanity images to cache):
+
+```yaml
+- name: Restore the test images
+  uses: actions/cache@v4
+  with:
+    path: node_modules/.cache/test-images
+    key: test-images-${{ runner.os }}-${{ github.run_id }}
+    restore-keys: test-images-${{ runner.os }}-
+```
+
+If the job also caches `node_modules`, exclude `!node_modules/.cache` from that cache so the two do not fight
+(fbcm does both).
+
+**fbcm re-sync (follow-up PR in fbcm, not done here).** `a11y.spec.ts` and `reflow.spec.ts` become `SAME`.
+`tests/fixtures.ts` differs from fbcm's (unmarked) copy in the header comment only: the marker line, the card
+reference, and two fbcm-only references generalised (`this-sunday.spec.ts`, "CI restores the folder, ci.yml").
+`smoke.spec.ts` differs: fbcm moves its `/blog` and `/post` tests to an unmarked spec and takes this copy.
+
+---
+
+## Card 76: Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS` (2026-10-03)
+
+**Origin:** fbcm, 2026-09-27. Its visual-regression run on CI timed out before a single screenshot: the
+`webServer` command in `playwright.visual.config.ts` is `npm run build && http-server ...`, so its timeout covers
+the BUILD, and fbcm builds about 390 pages in roughly four minutes on a runner. The family default of 180 s was
+written for sites of a few dozen pages. fbcm raised its copy to a literal `600_000`, which made the marked file
+`DRIFT`.
+**Canonical:** `playwright.visual.config.ts` (`PORTABLE`).
+
+**What it is.** The timeout is read from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`. Unset, empty, non-numeric, zero or
+negative falls back to 180000, today's value, so every site that does not set it behaves exactly as before. A site
+with a large build sets it in the environment of its visual run rather than editing the file, so the file stays
+byte-identical across the family. Hard-coding fbcm's 600 s for everyone was rejected: a hung build on a small site
+would then take ten minutes to fail instead of three.
+
+**Adopt / fbcm re-sync (follow-up PR in fbcm, not done here).** Copy the file byte for byte, then set the variable
+where the visual suite runs. fbcm: either `"test:visual"` / `"test:visual:update"` in `package.json` (a
+cross-platform form needs `cross-env`, which fbcm does not have, so prefer the workflow) or, simplest, an `env:`
+block on the run step in `.github/workflows/visual.yml`:
+
+```yaml
+env:
+  PLAYWRIGHT_WEBSERVER_TIMEOUT_MS: '600000'
+```
+
+Until that lands, fbcm's copy (literal 600 s) reports `DRIFT` against this one under a manual `sync-check`; fbcm's
+CI only self-checks, so no required check moves.
+
+**Not changed:** `playwright.config.ts` (the main suite) still has a literal 180 s. fbcm's main config is unmarked
+(600 s), and fbcm did not mark or promote that change, so it was out of scope here. Making the main config read the
+same variable is a candidate follow-up: only stonesteps-50k marks a copy of it (and self-checks), so it would not
+turn any repo's required check red.

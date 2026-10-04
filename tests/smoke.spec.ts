@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { routes, hiddenRoutes } from './routes';
 import { site } from '../src/data/site';
 
