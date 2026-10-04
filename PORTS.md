@@ -7010,7 +7010,7 @@ emulation and touch below 700px), scrolls the page in 500px steps so lazy conten
 input, select, textarea and `role=button`/`role=link` whose tappable area is under 44px in either direction.
 
 ```
-node scripts/measure-tap-targets.mjs <baseUrl> [--width 390] [--paths /,/contact/] [--json out.json]
+node scripts/measure-tap-targets.mjs <baseUrl> [--width 390] [--paths /,/contact/] [--json out.json] [--include-closed-details]
 ```
 
 - **The tappable area is the box grown by its own `::after`.** When an element has an absolutely positioned `::after`, the
@@ -7023,7 +7023,8 @@ node scripts/measure-tap-targets.mjs <baseUrl> [--width 390] [--paths /,/contact
   it is reported (`stolen`). Points outside the viewport are skipped at that scroll stop; each element is measured at several
   stops, so it is hit-tested while on screen.
 - **Not a target:** `display: none`, `visibility: hidden`, zero or 1px boxes, anything inside `[inert]` or
-  `[aria-hidden="true"]`, anything off the left edge.
+  `[aria-hidden="true"]`, anything off the left edge, and (2026-10-04, see "Closed `<details>`" below) anything inside a
+  closed `<details>` other than its own `<summary>`.
 - **Output and exit code.** Per path: the failing list, then a TOTAL line (`N under 44px, N inline-in-sentence (exempt), N
 lifted to 44px by a hit-area ::after, N stolen-tap warnings`). Exit 1 when any target is under 44px or any tap is stolen,
   0 otherwise, 2 for a usage error. `--json` writes the full per-path list.
@@ -7032,6 +7033,21 @@ lifted to 44px by a hit-area ::after, N stolen-tap warnings`). Exit 1 when any t
 `/,/visit/,/staff/`), and the comments and the TOTAL line no longer name `.hit-44`/`PRODUCT.md`. The measuring logic is
 byte-for-byte fbcm's. fbcm's own copy is unmarked and differs by those lines; sync-check does not compare it, and it can
 take the starter copy as a straight overwrite.
+
+**Closed `<details>` (fixed 2026-10-04, closes `docs/PENDING.md` item 13; lesson 3 below is the origin).** Content inside
+a `<details>` without `open` is not rendered or tappable, but Chrome still reports a box for it, so the scan counted those
+links as under 44px and the hit test landed on whatever sat underneath (a mobile filter panel gave mas-monograms
+`/style-gallery/` 68 false stolen taps). The script now decides at scan time, from the live DOM: for each match it walks
+every ancestor `details:not([open])` (nested ones included) and skips the element unless it is that details' own
+`<summary>` or sits inside it. The summary of a closed details is always measured, content of an open details is measured,
+and content of an open details nested inside a closed one is skipped (the outer panel hides it). Nothing else changed:
+`hidden`, `display: none` and `visibility: hidden` were already skipped, so they were not touched. `--include-closed-details`
+restores the old behaviour. Pinned by `scripts/lib/measure-tap-targets.test.mjs` (starter-only, not PORTABLE; it serves a
+fixture of closed, open, nested and undersized-summary cases, runs the real script in headless Chromium and skips itself
+when Chromium is not installed). Fixture before the fix: 3 under 44px, 10 lifted, 6 stolen; after: 2 under 44px (the two
+undersized summaries, correctly), 4 lifted, 0 stolen. The starter's own 8 routes read the same before and after (0 under
+44px, 3 inline exempt, 9 lifted, 0 stolen). Because the script is `PORTABLE`, presacademy, mas-monograms and
+nixoncreativestudio take the new copy by straight overwrite; fbcm's unmarked original is unchanged.
 
 **What it does not do.**
 
@@ -7072,7 +7088,8 @@ is unchanged by these; they are how to read and run it.
    whatever sits underneath, so the stolen-tap check fires. mas-monograms `/style-gallery/` reported 68 stolen taps because
    its mobile filter panel is a closed `<details>`; with the panel opened the page was 0 under 44px and 0 stolen. Do not
    "fix" the page for these. The fix belongs in the script (skip the content of a closed `<details>` other than its
-   `<summary>`); it is a follow-up in `docs/PENDING.md` (item 13), not done here because the script is PORTABLE.
+   `<summary>`); done 2026-10-04 in the starter (see "Closed `<details>`" above), so a site on the new copy no longer needs
+   the panel opened for the scan.
 4. **Running it.** Under Git Bash set `MSYS_NO_PATHCONV=1`, or `--paths /` is rewritten to a Windows path. Restart the static
    server for each scan so it serves the current build. A server-rendered site (nixoncreativestudio) has no `dist` to serve:
    scan by URL against production or the CI preview. nixoncreativestudio also saw headless Chromium killed mid-run on
