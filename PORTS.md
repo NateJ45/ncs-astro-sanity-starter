@@ -196,6 +196,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 76  | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`  | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 77  | Preview morph keeps client-state classes (reveal state)                | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 | 78  | `preview-stega.ts` exports `RUN_SOURCE`                                | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -6588,3 +6589,44 @@ points).
 presacademy, reid-design-site and mas-monograms (all enforce sync-check against live starter `main`: `build` RED
 until re-synced), 2ndpreschicago (archived, no CI), stonesteps-50k (self-check only: manual DRIFT) and fbcm (becomes
 SAME). The re-sync is a copy-forward of one file.
+
+---
+
+## Card 79: Redirect destinations keep `?query` and `#fragment` (2026-10-03)
+
+**Origin:** fbcm, 2026-09-18, during its Wix migration. `buildRedirectMap` ran `normalizeRedirectPath` over the
+DESTINATION as well as the source, and that function drops everything after `?` or `#` on purpose (a source is a
+key matched on the request path alone). So every anchored or filtered target shipped truncated:
+`/visit#accessibility` went out as `/visit`, `/blog?category=ruminations` as `/blog`. 25 of fbcm's 42 targets were
+wrong, and only the anchor-free ones had been tested. Card 22's redirect stack is the same code here.
+**Canonical:** `src/lib/redirects.ts` and `src/lib/redirects.test.ts` (both `PORTABLE`; byte-identical to fbcm's
+after this card).
+
+**What it is.** A new exported `normalizeRedirectTarget`: the same path arithmetic as `normalizeRedirectPath`
+(leading slash, collapsed `//`, no trailing slash) on the path component only, with the `?query` and `#fragment`
+re-attached byte for byte. A bare `#top` or `?q=1` is anchored to `/`; external targets are untouched; blank is
+`null`. `buildRedirectMap` uses it for `to`. The self-redirect guard now compares PATHS (`from` against
+`normalizeRedirectPath(to)`), because `/a -> /a#top` and `/a -> /a?x=1` are both infinite loops even though the
+strings differ. Sources are normalized exactly as before, so every existing redirect key is unchanged.
+
+**Test.** Ten new cases in `redirects.test.ts` (fragment, query, both in order, bare query/fragment, external and
+blank, three `buildRedirectMap` shapes, the loop guard, and the source side still dropping both).
+
+**Caveat recorded by fbcm.** Its `scripts/verify-redirects.mjs` (not promoted; it reads fbcm's own redirect data)
+found that a `#fragment` in the emitted `Location` is not carried through by Cloudflare's redirect layer, while the
+`?query` is. So the query half is the one that changes visitor behaviour; keeping the fragment costs nothing and is
+correct if the platform ever passes it. Not re-verified on this starter: it has no Sanity project, so its redirect
+map is empty on every build here.
+
+**Blast radius (checked 2026-10-03; every marked copy equals the starter copy before this card).**
+
+| Repo                                                    | `redirects.ts` | `.test.ts` | CI mode                                       | Effect of merging this card            |
+| ------------------------------------------------------- | -------------- | ---------- | --------------------------------------------- | -------------------------------------- |
+| presacademy                                             | marked         | marked     | live starter `main`, enforce step in `static` | `build` RED until re-synced            |
+| reid-design-site                                        | marked         | unmarked   | live starter `main`, enforce step in `static` | `build` RED until re-synced            |
+| stonesteps-50k                                          | marked         | marked     | self-check only                               | DRIFT under a manual `sync-check` only |
+| fbcm                                                    | marked         | marked     | self-check only                               | becomes SAME                           |
+| mas-monograms, 2ndpreschicago, wcp, nixoncreativestudio | none           | none       | n/a                                           | nothing                                |
+
+`redirect-guard.ts` imports only `normalizeRedirectPath` and the `RedirectTarget` type, both unchanged, so it needs
+no edit in any repo.

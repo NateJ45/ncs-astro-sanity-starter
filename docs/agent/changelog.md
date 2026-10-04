@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: redirect destinations keep `?query` and `#fragment`, promoted from fbcm (PORTS card 79)._
+
+**Decision.** `buildRedirectMap` normalized the destination with the source's rules, which drop the query and fragment, so `/visit#accessibility` shipped as `/visit` (25 of fbcm's 42 targets were wrong). Promoted fbcm's `normalizeRedirectTarget` and its ten tests byte for byte; the self-redirect guard now compares paths so `/a -> /a#top` is still caught. Sources are unchanged, so no redirect key moves. Same site-CI caveat as card 77, for presacademy and reid-design-site.
+
 _2026-10-03: `RUN_SOURCE` is exported from `preview-stega.ts` (PORTS card 78)._
 
 **Decision.** fbcm needed the stega-run pattern in a site module and exported the existing private constant rather than copy a regex that must match the decoder exactly. One keyword, no behaviour change, promoted byte for byte. Same site-CI caveat as card 77: presacademy, reid-design-site and mas-monograms mark this file and go red until they re-sync.
