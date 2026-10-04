@@ -49,7 +49,7 @@ const NUL = String.fromCharCode(0);
  * Every character either encoding can emit, four or more in a row. Mirrors
  * `VERCEL_STEGA_REGEX` so that splitting is exact.
  */
-const RUN_SOURCE =
+export const RUN_SOURCE =
   '[\\u200b\\u200c\\u200d\\u2060\\u2061\\u2062\\u2063\\ufeff\\u{1d173}-\\u{1d17a}]{4,}';
 const RUN_FIRST = new RegExp(RUN_SOURCE, 'u');
 const RUN_ALL = new RegExp(RUN_SOURCE, 'gu');

@@ -1,4 +1,10 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// 2026-09-18: a destination now keeps its ?query and #fragment. buildRedirectMap
+// ran normalizeRedirectPath over the DESTINATION as well as the source, and that
+// function drops everything after "?" or "#" on purpose (a SOURCE is matched on
+// its path alone). So every anchored target shipped truncated: "/visit#accessibility"
+// went out as "/visit" and "/blog?category=ruminations" as "/blog". 25 of one
+// site's 42 targets were wrong and only the anchor-free ones had been tested.
 // =============================================================================
 // redirects - the pure path arithmetic behind the Studio's Redirects manager
 // =============================================================================
@@ -76,6 +82,37 @@ export function normalizeRedirectPath(value: unknown): string | null {
 }
 
 /**
+ * Normalize a DESTINATION: the same path arithmetic as normalizeRedirectPath,
+ * applied to the path component only, with the `?query` and `#fragment`
+ * re-attached byte for byte.
+ *
+ * The asymmetry with the source side is the whole point. A SOURCE is a key the
+ * request's path is matched against, so its query and hash are noise and are
+ * dropped. A DESTINATION is a string handed to the browser, so its query and
+ * hash are the instruction: "/visit#accessibility" is what sends a visitor to
+ * the right heading, and "/blog?category=ruminations" is what pre-filters the
+ * index. Normalizing a destination with the source's rules silently deletes
+ * exactly the part that made it a useful redirect.
+ *
+ * "/visit#accessibility"        -> "/visit#accessibility"
+ * "/blog/?category=x"           -> "/blog?category=x"
+ * "blog//a/?x=1#frag"           -> "/blog/a?x=1#frag"
+ * External targets are returned untouched.
+ */
+export function normalizeRedirectTarget(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (isExternalTarget(trimmed)) return trimmed;
+
+  const cut = trimmed.search(/[?#]/);
+  if (cut === -1) return normalizeRedirectPath(trimmed);
+  // A target that is only a query or a fragment ("#top") is anchored to "/".
+  const path = normalizeRedirectPath(trimmed.slice(0, cut)) ?? '/';
+  return `${path}${trimmed.slice(cut)}`;
+}
+
+/**
  * Turn the published `redirect` docs into Astro's `redirects` map.
  *
  * Rules, all of them there to stop an editor typo becoming a broken site:
@@ -93,10 +130,14 @@ export function buildRedirectMap(docs: readonly RedirectDoc[]): Record<string, R
   const map: Record<string, RedirectTarget> = {};
   for (const doc of docs ?? []) {
     const from = normalizeRedirectPath(doc?.from);
-    const to = normalizeRedirectPath(doc?.to);
+    const to = normalizeRedirectTarget(doc?.to);
     if (!from || !to) continue;
     if (isExternalTarget(from)) continue;
-    if (from === to) continue;
+    // The self-redirect guard compares PATHS, not the whole target. A browser
+    // never sends the fragment and the key is matched on the path alone, so
+    // "/a -> /a#top" and "/a -> /a?x=1" are both infinite loops even though
+    // the two strings differ. Comparing the paths is what still catches them.
+    if (from === normalizeRedirectPath(doc?.to)) continue;
     map[from] = { status: doc?.permanent === false ? 302 : 301, destination: to };
   }
   return map;
