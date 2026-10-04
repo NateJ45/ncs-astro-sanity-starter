@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: card 81 rolled out, and what it did not fix (PORTS card 81 row note)._
+
+Presacademy and stonesteps-50k resynced the script. Live check beforehand: both sites served the starter's interior-design `llms-full.txt` (stonesteps even listed a "Consultation, $150" price). The resync fixes the site name and URL only; the script still reads the starter's content types, so on a different kind of site it writes a stub. Stonesteps-50k's files were hand-written from its live pages and verified; presacademy's `llms-full.txt` was removed because its content is still seed data. Docs only in this repo.
+
 _2026-10-03: `generate-llms-full` reads site identity from the brand config, `audit-studio` reads shared field consts, promoted from fbcm (PORTS card 81)._
 
 **Decision.** fbcm un-marked its two scripts (PR #31) but left two generic fixes in them. (1) `generate-llms-full.mjs` fell back to the literal 'Studio Starter' and 'https://example.com' when SITE_NAME / PUBLIC_SITE_URL were unset, so a fork with a filled `brand/brand.config.json` still published the starter's name and a dead domain (presacademy, stonesteps-50k and 2ndpreschicago all have exactly that committed in `public/llms-full.txt`). Identity now resolves env, then `brand.config.json`, then today's placeholders, in `scripts/lib/site-identity.mjs`; fbcm's exit-if-missing is NOT promoted (a missing config behaves as before, with one `[warn]` line, exit 0). (2) `audit-studio.mjs` check 3 did not see fields declared as `const eyebrow = defineField(...)` and spread into several types, so it flagged every stored value of them; `scripts/lib/shared-field-consts.mjs` reads them. Both pieces are pure functions with unit tests. Church-specific parts of fbcm's copies (`/post/` links, `travelFees`, contact fields, the structuredInUse rule) stay in fbcm. Site resync order: starter merges first, then site PRs (rule in `.claude/rules/library-of-record.md`).
