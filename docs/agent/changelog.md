@@ -1,8 +1,12 @@
 # Change history
 
+_2026-10-03: the scripts tests now run in CI (PORTS card 74 follow-up)._
+
+**Decision.** Card 74 chained `test:scripts` onto `check:full`, but `ci.yml` and `deploy.yml` call `npm run test:unit` directly, so CI and the deploy gate never ran the 5 scripts tests. Fixed without touching a workflow: `test:unit` is now `node --experimental-strip-types --test src/lib/*.test.ts && npm run test:scripts`, and `check:full` drops its own `&& npm run test:scripts` so they do not run twice. The `src/lib` command is unchanged, so the four gate tests run exactly as before; `test:scripts` stays its own script. Job names and triggers are untouched.
+
 _2026-10-03: page-parity `--exclude`, promoted from fbcm (PORTS card 74)._
 
-**Decision.** fbcm added `--exclude` to its copy of the parity harness on 2026-09-20 (generated archive pages multiply baselines without adding coverage) and marked it `PORTABLE`, so it reported drift. Promoted here unchanged and byte-identical, with `scripts/lib/parity-glob.mjs` and its test. **Backward compatible:** no flag and no `PARITY_EXCLUDE` means nothing is excluded and the page list is the same. `package.json` gained `test:scripts` (also at the end of `check:full`); `ci.yml` was not touched, so CI does not run it yet. No site CI turns red: only fbcm and stonesteps-50k carry a marked copy, and both run sync-check against themselves.
+**Decision.** fbcm added `--exclude` to its copy of the parity harness on 2026-09-20 (generated archive pages multiply baselines without adding coverage) and marked it `PORTABLE`, so it reported drift. Promoted here unchanged and byte-identical, with `scripts/lib/parity-glob.mjs` and its test. **Backward compatible:** no flag and no `PARITY_EXCLUDE` means nothing is excluded and the page list is the same. `package.json` gained `test:scripts` (chained onto the end of `test:unit`, so CI runs it; see the entry above). No site CI turns red: only fbcm and stonesteps-50k carry a marked copy, and both run sync-check against themselves.
 
 _2026-10-03: layout variants, the structure axis of the brand config (PORTS card 72)._
 

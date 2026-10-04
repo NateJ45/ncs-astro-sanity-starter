@@ -6380,15 +6380,16 @@ nothing, so `getPages()` returns the same list as before and every existing call
 Verified on the starter (2026-10-03, old `origin/main` harness against the new one, same `dist/client`): `capture` output and the 11 baselines are byte-identical, `compare` output is identical (11/11 PASS). With `--exclude faq` `capture` writes 10 and `compare` passes 10/10. Note `about/**` does NOT match the bare page `about` (the `/` is literal), so list the index page too when you mean it.
 
 **Wiring.** The starter had no tests under `scripts/`, so `package.json` gains
-`"test:scripts": "node --test scripts/lib/*.test.mjs"` (the same line fbcm uses) and `check:full` ends with it.
-`ci.yml` calls `npm run test:unit` directly, so CI does not run `test:scripts` yet; adding it is a workflow
-change this card deliberately does not make (see the note below).
+`"test:scripts": "node --test scripts/lib/*.test.mjs"` (the same line fbcm uses), and `test:unit` ends with
+`&& npm run test:scripts`. `ci.yml`, `deploy.yml` and `check:full` all call `npm run test:unit`, so every caller
+runs the scripts tests with no workflow change (the first version of this card chained it onto `check:full`
+only, which CI never ran; fixed 2026-10-03). A site that ports `test:scripts` should chain it the same way.
 
 **Adapt per site.** Add your own default to a `parity:capture` / `parity:compare` pair, as fbcm does:
 `"parity:capture": "node scripts/page-parity.mjs capture --exclude \"blog/page/**,blog/tag/**,blog/category/**/page/**\""`.
 The list is per site, so it is a package.json script, never baked into the harness. Take the three files
 together (the harness now imports the helper, so a copy of `page-parity.mjs` without `scripts/lib/parity-glob.mjs`
-dies at import) and add the `test:scripts` script.
+dies at import) and add the `test:scripts` script, chained onto the end of `test:unit`.
 
 **Per-repo status (checked 2026-10-03 against each repo's `origin/main`).**
 
@@ -6398,7 +6399,7 @@ dies at import) and add the `test:scripts` script.
 | stonesteps-50k                                                                         | marked, identical to the OLD starter copy      | DRIFT under a manual `sync-check`; CI only runs the self-check, so no required check moves |
 | wcp, presacademy, mas-monograms, reid-design-site, nixoncreativestudio, 2ndpreschicago | unmarked (forked or a pattern copy on purpose) | not compared; port by hand if the site wants the flag                                      |
 
-**Rollout.** Not started. Order and the CI `test:scripts` question are in the PR description.
+**Rollout.** Not started. Order is in the PR description; CI runs `test:scripts` via `test:unit`.
 
 **Note on CI.** A site repo's `ci.yml` runs `sync-check` against the live starter `main` and fails the build on
 drift, but only for marked files. Marking a copy of `page-parity.mjs` in a site that checks against the starter
