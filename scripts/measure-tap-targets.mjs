@@ -6,6 +6,7 @@
 // (PORTS.md card 82) so a grown area that steals taps from a neighbour shows up.
 //
 //   node scripts/measure-tap-targets.mjs <baseUrl> [--width 390] [--paths /,/contact/] [--json out.json]
+//                                        [--include-closed-details]
 //
 // <baseUrl> is any served copy of the site: the live Worker, or
 // `npm run serve:dist` after a build. Needs @playwright/test and an installed
@@ -17,6 +18,13 @@
 // that is absolutely positioned (the card 82 hit area): the effective size is
 // max(box, ::after box) in each direction. An element inside aria-hidden or
 // inert, a hidden or 1px element, or an off-canvas skip link is not a target.
+// Neither is anything inside a closed <details> (no `open` attribute, checked at
+// scan time on every ancestor, so nested details count) other than that
+// <details>' own <summary>, which is always measured: the content is not
+// rendered or tappable, but Chrome still reports its geometry, so counting it
+// gives false "under 44px" and stolen-tap warnings (card 83, lesson 3). Open the
+// panel in the page if you want its controls measured, or pass
+// --include-closed-details to restore the old behaviour and count them anyway.
 //
 // WHAT IS REPORTED SEPARATELY. A link that sits inside a sentence of body text
 // (its parent block has other text around it) is exempt under WCAG 2.5.8
@@ -39,16 +47,17 @@ const flag = (name, dflt) => {
 };
 if (!base) {
   console.error(
-    'usage: node scripts/measure-tap-targets.mjs <baseUrl> [--width 390] [--paths /,/contact/] [--json out.json]',
+    'usage: node scripts/measure-tap-targets.mjs <baseUrl> [--width 390] [--paths /,/contact/] [--json out.json] [--include-closed-details]',
   );
   process.exit(2);
 }
 const width = Number(flag('width', 390));
 const paths = flag('paths', '/').split(',');
 const jsonOut = flag('json', '');
+const includeClosed = args.includes('--include-closed-details');
 
 /* Runs in the page. Plain function, serialised by Playwright. */
-function collect() {
+function collect(includeClosedDetails) {
   const SEL =
     'a[href], button, summary, input:not([type=hidden]), select, textarea, [role=button], [role=link]';
   const out = [];
@@ -60,6 +69,24 @@ function collect() {
     if (r.width <= 1 || r.height <= 1) continue;
     if (r.right <= 0 || r.bottom + window.scrollY < 0) continue;
     if (el.closest('[inert],[aria-hidden=true]')) continue;
+
+    // Content of a closed <details> is not rendered or tappable although Chrome
+    // still reports a box for it. Walk every closed ancestor <details> (nested
+    // ones included); the element survives only when it is that details' own
+    // <summary> (or sits inside it). Anything else is skipped.
+    if (!includeClosedDetails) {
+      let closed = el.closest('details:not([open])');
+      let hiddenByDetails = false;
+      while (closed) {
+        const own = el.closest('summary');
+        if (!(own && own.parentElement === closed)) {
+          hiddenByDetails = true;
+          break;
+        }
+        closed = closed.parentElement && closed.parentElement.closest('details:not([open])');
+      }
+      if (hiddenByDetails) continue;
+    }
 
     // The ::after hit area, when the element has one that is absolutely placed.
     let w = r.width;
@@ -147,7 +174,7 @@ for (const p of paths) {
   for (let y = 0; y < height; y += 500) {
     await page.evaluate((v) => window.scrollTo(0, v), y);
     await page.waitForTimeout(30);
-    for (const t of await page.evaluate(collect)) {
+    for (const t of await page.evaluate(collect, includeClosed)) {
       const key = `${t.tag}|${t.text}|${t.y}`;
       const prev = seen.get(key);
       if (!prev || (prev.stolen === false && t.stolen)) seen.set(key, t);

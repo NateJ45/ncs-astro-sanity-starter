@@ -261,6 +261,13 @@ edited across an ownership line. One-line fix, next time someone is in there.
 
 ### 13. `measure-tap-targets.mjs` reports closed `<details>` content
 
+**Closed 2026-10-04 in the starter (PR: fix/tap-scan-closed-details).** The script now skips anything inside a closed
+`<details>` other than its own `<summary>`, with `--include-closed-details` as the opt-out, and
+`scripts/lib/measure-tap-targets.test.mjs` pins it; see PORTS.md card 83, "Closed `<details>`". What is left is the per-site
+resync only: presacademy, mas-monograms and nixoncreativestudio each carry the previous marked copy and take the new one
+by straight overwrite (starter PR first, then the three, in the order in `.claude/rules/library-of-record.md`). Delete this
+item once all three have merged. The original report follows.
+
 **Queued, 2026-10-04.** False positive found by the mas-monograms port (PR #72, PORTS.md card 83 lesson 3). Content
 inside a closed `<details>` other than its `<summary>` (a mobile filter panel, say) is not rendered, but the script still
 reads its geometry and hit-tests it, and the point lands on whatever sits underneath. mas-monograms `/style-gallery/`
