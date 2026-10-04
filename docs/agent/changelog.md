@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: cards 77 to 79 rolled out to the sites, matrix rows 74 to 79 updated._
+
+Presacademy (#57), reid-design-site (#108), mas-monograms (#69) and stonesteps-50k (#73) re-synced the marked `preview-morph`, `preview-stega` and `redirects` copies after the starter merge (mas carries no redirects file); fbcm resynced cards 75 and 76 (#33). Each site PR was held as a draft, red on the sync-check enforce step, until starter #70 merged, then re-run green. Docs only in this repo; no code or behaviour change.
+
 _2026-10-03: redirect destinations keep `?query` and `#fragment`, promoted from fbcm (PORTS card 79)._
 
 **Decision.** `buildRedirectMap` normalized the destination with the source's rules, which drop the query and fragment, so `/visit#accessibility` shipped as `/visit` (25 of fbcm's 42 targets were wrong). Promoted fbcm's `normalizeRedirectTarget` and its ten tests byte for byte; the self-redirect guard now compares paths so `/a -> /a#top` is still caught. Sources are unchanged, so no redirect key moves. Same site-CI caveat as card 77, for presacademy and reid-design-site.

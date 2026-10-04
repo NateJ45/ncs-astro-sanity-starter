@@ -191,20 +191,20 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 71  | Tracked `.claude/settings.json` deny rules + shared conventions import | no      | yes         | yes      | yes              | partial       | no             | n/a                | no                  | yes            |
 | 72  | Layout variants: structure as a brand.config axis                      | no      | no          | yes      | no               | no            | no             | no                 | no                  | no             |
 | 73  | Design directions before reskin (brief, references, mockups)           | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
-| 74  | page-parity `--exclude` (parity-glob helper + test)                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 74  | page-parity `--exclude` (parity-glob helper + test)                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 75  | Playwright fixture: Sanity images from a disk cache                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 | 76  | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`  | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
-| 77  | Preview morph keeps client-state classes (reveal state)                | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
-| 78  | `preview-stega.ts` exports `RUN_SOURCE`                                | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
-| 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 77  | Preview morph keeps client-state classes (reveal state)                | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
+| 78  | `preview-stega.ts` exports `RUN_SOURCE`                                | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
+| 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | yes         | yes      | yes              | n/a           | no             | n/a                | n/a                 | yes            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
 Row 74 (2026-10-03): fbcm built this on 2026-09-20 and is the one site that already carries it; fbcm is not a
 column of this matrix, so it is recorded on the card. Of the columns here only stonesteps-50k carries a
-`PORTABLE`-marked `page-parity.mjs` (it will report DRIFT once it is re-synced, which is the intended signal);
+`PORTABLE`-marked `page-parity.mjs`, and it re-synced on 2026-10-03 (stonesteps-50k PR #70, `yes`);
 wcp, presacademy, reid-design-site, mas-monograms, 2ndpreschicago and nixoncreativestudio hold unmarked copies, so
-sync-check never compares them and each takes the change by hand. All `no` until a site does.
+sync-check never compares them and each takes the change by hand. Those stay `no` until a site does.
 
 Row 75 (2026-10-03): fbcm built the fixture on 2026-09-26 and is the one site that carries it (not a column; see the
 card). nixoncreativestudio has no Sanity, hence `n/a`. Every other cell is `no` until that site copies
@@ -215,8 +215,10 @@ Row 76 (2026-10-03): fbcm hard-coded the longer timeout on 2026-09-27 (not a col
 
 Rows 77 to 79 (2026-10-03) are fbcm fixes promoted into files that several sites carry MARKED and byte-identical to
 the old starter copy (presacademy, reid-design-site, mas-monograms, 2ndpreschicago, stonesteps-50k; see each card's
-blast-radius table). A `no` there means "has the file, without the fix" until that site re-syncs. fbcm already has
-all three (not a column). nixoncreativestudio has no Sanity, hence `n/a`.
+blast-radius table). **Rolled out 2026-10-03:** presacademy (#57), reid-design-site (#108), mas-monograms (#69) and
+stonesteps-50k (#73) re-synced after the starter merge, each a byte-for-byte copy gated by its own CI; fbcm already
+had all three (not a column). mas-monograms does not carry `redirects.ts`, hence `n/a` on row 79. 2ndpreschicago is
+archived on GitHub, so it stays `no` and cannot take a PR. nixoncreativestudio has no Sanity, hence `n/a`.
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
