@@ -199,8 +199,8 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | yes         | yes      | yes              | n/a           | no             | n/a                | n/a                 | yes            |
 | 80  | `sync-check` skips `_worktrees/` folders                               | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 81  | llms-full identity from brand config; audit shared field consts        | no      | yes         | yes      | no               | no            | no             | n/a                | n/a                 | yes            |
-| 82  | Invisible 44px hit area for small links                                | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
-| 83  | `measure-tap-targets.mjs` 390px tap-target scan                        | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 82  | Invisible 44px hit area for small links                                | no      | yes         | yes      | yes              | yes           | no             | n/a                | yes                 | yes            |
+| 83  | `measure-tap-targets.mjs` 390px tap-target scan                        | no      | yes         | yes      | no               | yes           | no             | n/a                | yes                 | no             |
 | 84  | Linux-runner font-swap layout-shift check (fallback faces, preload)    | no      | no          | no       | yes              | no            | no             | n/a                | no                  | no             |
 | 85  | MapLibre 6.x: `setMissingStyleImageResolver` for generated icons       | n/a     | n/a         | n/a      | n/a              | n/a           | no             | n/a                | n/a                 | yes            |
 
@@ -6971,6 +6971,33 @@ in the seed content, so not scan-verified).
 `.hit-44::after` in `src/styles/globals.css`. Every other cell is `no` meaning not adopted and not measured, not known to
 fail; a site is `no` until its own 390px scan says otherwise.
 
+**Three more ports (2026-10-04), each read from its merged PR.** All three reached 0 targets under 44px and 0 stolen taps
+at 390px; none needed a different idea, only a different mix of the shapes above. The shape depends on whether the
+element's `::after` is free and whether the control is native.
+
+- **presacademy** (PRs #61 and #62, merged 2026-10-04): `.hit-44` plus two more classes in `globals.css`. `.tap-44` is a
+  real 44px box for stacked lists such as footer links, where `.link-underline` already owns `::after` (the label sits in a
+  child `.link-underline` span so the underline hugs the text). `.check-44` is a 44px checkbox with a drawn 20px box. The
+  header, FAQ summaries (`-my-2 py-2` so accordion rows do not grow), filter chips and checkboxes needed it too. PR #62 was
+  a follow-up: the breadcrumb links on the course, event and faculty detail pages exist only with live Sanity content, so
+  the empty-Sanity CI build never rendered them and only the live scan found them (see card 83, lesson 2).
+- **mas-monograms** (PR #72, merged 2026-10-04): footer rows `min-h-[44px]`; `.hit-44` on the arrow links and the gallery
+  filter chips, with the chip rows at `gap-y-5` so neighbouring hit areas do not overlap; the quote form's radios and
+  checkbox redrawn by a `.choice-input` class at 18px plus `hit-44`. A native radio or checkbox cannot carry a pseudo-element
+  hit area (see card 83, lesson 5); high-contrast mode falls back to the native control.
+- **nixoncreativestudio** (PR #90, merged 2026-10-04): everything gated on `pointer: coarse` (`pointer-coarse:min-h-11` in
+  markup, `@media (pointer: coarse)` in `globals.css`), so a mouse desktop keeps its compact density and every touch device,
+  tablets included, gets 44px. Real box heights rather than `::after` hit areas, because three places already use `::after`
+  (`a.card-link` draws its arrow there, the heading copy-link its "Copied" bubble, the Coming Soon link its underline).
+  Measured by URL against production and the CI preview: 180 distinct failing elements on 20 routes to 0 (preview: 114 to 0
+  on 15 routes).
+
+Lesson for the choice between shapes, now with five sites behind it: grep the element for `::after` first. If it is taken,
+or the control is a native radio/checkbox, use a real box (`min-h-[44px]`, `.tap-44`) or redraw the control; if it is free,
+`.hit-44`. A visible footer gets taller either way (presacademy about 70px on a phone, mas-monograms about 300px), so expect
+`visual` baseline changes; regenerate them through the repo's visual workflow update input, then push an empty commit,
+because a commit pushed with a token triggers no checks.
+
 ---
 
 ## Card 83: `measure-tap-targets.mjs`, the 390px tap-target scan with a stolen-tap hit test (2026-10-03)
@@ -7028,7 +7055,39 @@ installed; every family site has them). Run `node scripts/sync-check.mjs` with `
 the build (`npm run serve:dist` where the repo has it, `npx http-server dist/client` otherwise) and pass `--paths` with the
 site's real routes. Optionally add an npm script. No workflow edit.
 
-**Status.** Starter: `yes`. No site carries a marked copy yet. fbcm (not a column) has its own unmarked original.
+**Status.** Starter: `yes`. presacademy, mas-monograms and nixoncreativestudio: `yes` (2026-10-04, each carries the
+byte-identical marked copy; PRs below). fbcm (not a column) has its own unmarked original. reid-design-site and
+stonesteps-50k have no marked copy.
+
+**Lessons from the three ports (2026-10-04; presacademy #61 and #62, mas-monograms #72, nixoncreativestudio #90).** The script
+is unchanged by these; they are how to read and run it.
+
+1. **Compare distinct failing elements, not the TOTAL.** The script scrolls in 500px steps and keys elements by position, so
+   a sticky element (the header) is listed again at every scroll stop and the raw TOTAL is inflated, about 3x.
+   Quote the number of distinct failing elements (nixoncreativestudio's notes say the same).
+2. **Scan the LIVE site after the deploy, not only the build.** CMS-driven pages (detail pages, forms, filters) do not
+   exist in an empty-Sanity CI build, so a clean build scan proves nothing about them. presacademy's build scan was 0 and the
+   live scan still found the breadcrumb links on its course, event and faculty pages (PR #62, a second PR).
+3. **False positive: content inside a closed `<details>`.** The script reports it with geometry, and the hit test lands on
+   whatever sits underneath, so the stolen-tap check fires. mas-monograms `/style-gallery/` reported 68 stolen taps because
+   its mobile filter panel is a closed `<details>`; with the panel opened the page was 0 under 44px and 0 stolen. Do not
+   "fix" the page for these. The fix belongs in the script (skip the content of a closed `<details>` other than its
+   `<summary>`); it is a follow-up in `docs/PENDING.md` (item 13), not done here because the script is PORTABLE.
+4. **Running it.** Under Git Bash set `MSYS_NO_PATHCONV=1`, or `--paths /` is rewritten to a Windows path. Restart the static
+   server for each scan so it serves the current build. A server-rendered site (nixoncreativestudio) has no `dist` to serve:
+   scan by URL against production or the CI preview. nixoncreativestudio also saw headless Chromium killed mid-run on
+   Windows; run one path per process and retry. The script sets touch emulation, which is what makes `pointer: coarse`
+   rules match.
+5. **A native radio or checkbox cannot carry an invisible hit area** (a replaced control has no usable `::after`). Either
+   redraw it (mas-monograms `.choice-input` at 18px, presacademy `.check-44` with a 20px drawn box) or wrap it in a label
+   with `min-h-[44px]`. High-contrast mode falls back to the native control on a redrawn one.
+6. **A visible footer gets taller, so `visual` baselines move.** Regenerate them with the repo's visual workflow update
+   input, then push an empty commit: a commit pushed with a token triggers no checks.
+
+Results at 390px: presacademy 62 to 107 under 44px per route to 0 over 14 prebuilt routes and the 404, then 0 on the live
+site after #62; mas-monograms 23 to 149 per route (27 on `/`, 42 on `/request-a-quote/`, 149 on `/style-gallery/`) to 0 over 22
+routes; nixoncreativestudio 180 distinct elements on 20 production routes to 0 (PR preview, 15 routes: 114 to 0). In-sentence links are
+exempt in all three.
 
 **First reading on this starter** (`npm run build`, `npm run serve:dist`, 390px, 2026-10-03, seed content, exit 1). `/`: 6
 under 44px (the footer's About, Process, Services & Pricing, FAQ, Journal and Privacy policy links, 15 to 17px tall).
