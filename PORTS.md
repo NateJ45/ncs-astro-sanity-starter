@@ -198,6 +198,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 78  | `preview-stega.ts` exports `RUN_SOURCE`                                | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
 | 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | yes         | yes      | yes              | n/a           | no             | n/a                | n/a                 | yes            |
 | 80  | `sync-check` skips `_worktrees/` folders                               | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 81  | llms-full identity from brand config; audit shared field consts        | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -222,6 +223,15 @@ blast-radius table). **Rolled out 2026-10-03:** presacademy (#57), reid-design-s
 stonesteps-50k (#73) re-synced after the starter merge, each a byte-for-byte copy gated by its own CI; fbcm already
 had all three (not a column). mas-monograms does not carry `redirects.ts`, hence `n/a` on row 79. 2ndpreschicago is
 archived on GitHub, so it stays `no` and cannot take a PR. nixoncreativestudio has no Sanity, hence `n/a`.
+
+Row 81 (2026-10-03): fbcm built both parts and un-marked its copies (fbcm is not a column). Only presacademy and
+stonesteps-50k carry a MARKED `generate-llms-full.mjs` (byte-identical to the starter's before this card), so those are
+the two that resync; mas-monograms, 2ndpreschicago and reid-design-site hold unmarked, diverged copies and take the change
+by hand, or not at all. NO site carries a marked `audit-studio.mjs` (stonesteps-50k's is unmarked and older), so the audit
+half turns nothing red. All `no` cells stay `no` until that site copies the files. nixoncreativestudio has neither script,
+hence `n/a`. The committed `public/llms-full.txt` in presacademy, stonesteps-50k and 2ndpreschicago still reads
+'Studio Starter' / example.com: resyncing the script fixes the next run, but the file has to be regenerated and
+committed (needs `SANITY_API_READ_TOKEN`).
 
 Row 80 (2026-10-03): every site carries a MARKED `scripts/sync-check.mjs` byte-identical to the old starter copy
 (wcp at `site/scripts/`), so the cells are `no` until each re-syncs. presacademy, reid-design-site, mas-monograms and
@@ -6718,3 +6728,114 @@ script. Nothing else changes: no workflow edit, no marker change.
 
 **Scope.** `.claude/worktrees` and `_worktrees` are skipped for `sync-check` only. Other whole-tree tools
 (prettier, eslint, Tailwind, Lighthouse) have their own ignore lists and were not touched or re-checked here.
+
+---
+
+## Card 81: `generate-llms-full` identity from `brand.config.json`; `audit-studio` shared field consts (2026-10-03)
+
+**Origin:** fbcm, 2026-09-18, in its copies of `scripts/generate-llms-full.mjs` and `scripts/audit-studio.mjs`. When fbcm
+un-marked them (fbcm PR #31, because they carry church-specific fields) two generic fixes stayed behind in those
+copies. One card, because the two travel in the same resync and share a blast radius. Each part was checked against
+the starter's `origin/main` copy before anything was written (below); both gaps are real.
+**Canonical:** `scripts/generate-llms-full.mjs`, `scripts/audit-studio.mjs`, and four new files under `scripts/lib/`:
+`site-identity.mjs`, `shared-field-consts.mjs` and their tests `site-identity.test.mjs`,
+`shared-field-consts.test.mjs` (all `PORTABLE`).
+
+### Part 1: `llms-full.txt` takes its identity from `brand/brand.config.json`
+
+**The bug.** The script fell back to the literal `Studio Starter` and `https://example.com` whenever `SITE_NAME` and
+`PUBLIC_SITE_URL` were not in the environment. `brand.config.json` is the committed source of truth for identity
+(`apply-brand` writes it into `src/data/site.ts`), but the script never read it, so a fork with a filled config still
+published another business's name and a dead domain in a file written to be ingested and repeated by language models.
+A build, a type check and a test all pass on that; only the noun is wrong (CLAUDE.md rule 11). It is not hypothetical:
+`public/llms-full.txt` on `origin/main` of presacademy, stonesteps-50k and 2ndpreschicago all start
+`# Studio Starter` and have six lines containing `example.com`.
+
+**Proof on a constructed fork** (a scratch repo with `brand/brand.config.json` = `{ "name": "Demo Church", "domain":
+"demochurch.org" }`, no SITE_NAME / PUBLIC_SITE_URL, both scripts run unchanged):
+
+| Script                | First line of `llms-full.txt` |
+| --------------------- | ----------------------------- |
+| starter `origin/main` | `# Studio Starter`            |
+| fbcm's copy           | `# Demo Church`               |
+| this card             | `# Demo Church`               |
+
+**What it is.** `resolveSiteIdentity({ env, brand })` in `scripts/lib/site-identity.mjs`, per field: env
+(`SITE_NAME`; `PUBLIC_SITE_URL`, then `SITE_URL`), then the brand config (`name`; `https://<domain>`), then today's
+placeholder. The URL is the apex, matching `url` in `src/data/site.ts`; a site served from www sets `PUBLIC_SITE_URL`,
+which wins.
+
+**Deliberately NOT fbcm's behaviour.** fbcm exits 1 when it finds no identity. The starter must not become stricter, so
+a missing, unreadable or incomplete config falls back exactly as before and the script prints one `[warn]` line naming
+what fell back (the module never throws or exits, so it cannot fail a build). Checked: with the starter's own
+placeholder config, or with no config at all, the output file is byte-identical to the old script's (`cmp`).
+fbcm's `www.` prefix, its `/post/` link path, its `serviceAreas` and `availabilityStatus` and the other church
+fields stay in fbcm.
+
+### Part 2: `audit-studio` reads module-level `defineField` constants
+
+**The bug.** `audit-studio.mjs` slices a type's source from its `defineType(` to the next one and collects every
+`name: '...'`. A field declared once as `const eyebrow = defineField({ name: 'eyebrow', ... })` and listed as the bare
+identifier `eyebrow` in several types has its `name:` literal where the CONST is declared, outside every slice, so
+each type looks as though it never declared the field and check 3 reports every stored value of it as a key the schema
+does not declare, which is exactly the "Remove field" bait rule 1 warns about. A shared const is the same idea as a
+helper call (`FIELD_HELPERS`), written without the parentheses. The starter's own schema has no such const today, so
+this is latent here and live in any fork that writes one (fbcm did).
+
+**Proof on a constructed schema** (one file: `const eyebrow = defineField(...)` listed in two document types, plus one
+stored document of each type carrying `eyebrow`; the check-3 logic replayed over the schema each script reads):
+
+| Script                | Schema map                             | Check 3                                       |
+| --------------------- | -------------------------------------- | --------------------------------------------- |
+| starter `origin/main` | `heroDemo: {heroDemo, title}`          | 2 findings, both `"eyebrow"` reported as bait |
+| fbcm's copy           | `heroDemo: {heroDemo, title, eyebrow}` | 0 findings                                    |
+| this card             | same as fbcm                           | 0 findings                                    |
+
+(The replay reads the schema exactly as the script does and applies check 3's own comparison. It runs offline because
+the live check needs a Sanity project, and a real run against a fake project id is just a 401.)
+
+**What it is.** `sharedFieldConsts(src)` maps each `const x = defineField({ ... name: 'y' })` to its field name and
+`sharedFieldNames(body, shared)` credits a type that lists `x` by bare identifier. fbcm's parser inline, moved to
+`scripts/lib/shared-field-consts.mjs` so it can be unit-tested (the audit is a CLI that runs at import). One deliberate
+extension over fbcm: the identifier may also be the last element before `]`
+(`fields: [defineField(...), eyebrow]`), which fbcm's `x,` pattern misses; the test pins it. Nothing is removed from
+what the audit finds, so existing callers see the same output.
+
+**Not promoted from fbcm's audit copy:** the `structuredInUse` guard on check 7, the `anchorField` helper and the
+trimmed `STRUCTURED` set. Those are judgements about fbcm's church data, not about the family.
+
+### Tests
+
+`site-identity.test.mjs` (8 cases): brand wins when env is empty, env wins per field, no or empty brand config keeps
+the placeholders and flags them, the starter's placeholder config is unchanged output, one missing field falls back
+alone, scheme and trailing slash normalised, an explicitly empty env value still wins, `readBrandConfig` on missing,
+invalid, array and null JSON. `shared-field-consts.test.mjs` (6 cases): const to field map, a const named differently
+from its field, credited in a type that lists it, last-element-before-`]`, look-alikes (`eyebrowish`, `obj.eyebrow`,
+the declaration itself) do not match, a file with no consts is a no-op. Both run under `npm run test:scripts`, which
+`test:unit` chains, so `ci.yml` needs no change.
+
+### Blast radius (checked 2026-10-03 against each repo's `origin/main`)
+
+| Repo                      | `generate-llms-full.mjs`                           | `audit-studio.mjs`             | CI mode                                                       | Effect of merging this card             |
+| ------------------------- | -------------------------------------------------- | ------------------------------ | ------------------------------------------------------------- | --------------------------------------- |
+| presacademy               | MARKED, byte-identical to the starter's            | none                           | live starter `main`, enforce step in `static` (feeds `build`) | required `build` RED until re-synced    |
+| stonesteps-50k            | MARKED, byte-identical to the starter's            | unmarked, older, own copy      | self-check only                                               | DRIFT under a manual `sync-check` only  |
+| fbcm                      | unmarked (diverged on purpose)                     | unmarked (diverged on purpose) | self-check only                                               | nothing                                 |
+| reid-design-site          | unmarked (hard-coded `SITE`)                       | none                           | live starter `main`, enforce step in `static`                 | nothing (no marked copy of either file) |
+| mas-monograms             | unmarked, still has the placeholder fallback       | none                           | live starter `main`, enforce step in `build`                  | nothing                                 |
+| 2ndpreschicago (archived) | unmarked, still has the placeholder fallback       | none                           | archived, no CI                                               | nothing                                 |
+| nixoncreativestudio       | none                                               | none                           | live starter `main`                                           | nothing                                 |
+| wcp (archived)            | not checked locally (no checkout); archived, no CI | not checked locally            | archived, no CI                                               | nothing                                 |
+
+The two new lib modules and their tests are new marked files, but `sync-check` walks the SITE's marked files, so a site
+that does not have them is not reported. Only the `generate-llms-full.mjs` resync needs the two new files copied with
+it, because the script now imports `./lib/site-identity.mjs`.
+
+**Adopt (per site that carries a marked `generate-llms-full.mjs`: presacademy, stonesteps-50k).** Starter merges first,
+then in each repo: branch from `origin/main`, copy `scripts/generate-llms-full.mjs`, `scripts/lib/site-identity.mjs`
+and (optionally, if the repo has `test:scripts`) `scripts/lib/site-identity.test.mjs` from the starter byte for byte,
+set `name` and `domain` in `brand/brand.config.json` if they are still the placeholders, run `npm run llms:full` with
+`SANITY_API_READ_TOKEN` to regenerate and commit `public/llms-full.txt`, run `node scripts/sync-check.mjs`
+with `NCS_STARTER_DIR` set (expect all `SAME`), push, and let `build` and `test` run. No workflow edit, no marker
+change. A site that wants the audit half copies `scripts/audit-studio.mjs`, `scripts/lib/shared-field-consts.mjs` (and
+its test); none carries a marked audit today.
