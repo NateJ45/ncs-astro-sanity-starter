@@ -194,6 +194,9 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 74  | page-parity `--exclude` (parity-glob helper + test)                    | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
 | 75  | Playwright fixture: Sanity images from a disk cache                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 | 76  | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`  | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 77  | Preview morph keeps client-state classes (reveal state)                | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 78  | `preview-stega.ts` exports `RUN_SOURCE`                                | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 79  | Redirect destinations keep `?query` and `#fragment`                    | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -209,6 +212,11 @@ card). nixoncreativestudio has no Sanity, hence `n/a`. Every other cell is `no` 
 
 Row 76 (2026-10-03): fbcm hard-coded the longer timeout on 2026-09-27 (not a column; see the card). Only fbcm marks
 `playwright.visual.config.ts`; presacademy and stonesteps-50k carry unmarked copies. All `no` until a site re-syncs.
+
+Rows 77 to 79 (2026-10-03) are fbcm fixes promoted into files that several sites carry MARKED and byte-identical to
+the old starter copy (presacademy, reid-design-site, mas-monograms, 2ndpreschicago, stonesteps-50k; see each card's
+blast-radius table). A `no` there means "has the file, without the fix" until that site re-syncs. fbcm already has
+all three (not a column). nixoncreativestudio has no Sanity, hence `n/a`.
 
 Rows 62 to 69 were added on 2026-10-03 and filled from the Ported-to lists of the vault
 gotcha notes they came from (`dependabot-secrets-and-pinned-stacks`,
@@ -6520,3 +6528,105 @@ CI only self-checks, so no required check moves.
 (600 s), and fbcm did not mark or promote that change, so it was out of scope here. Making the main config read the
 same variable is a candidate follow-up: only stonesteps-50k marks a copy of it (and self-checks), so it would not
 turn any repo's required check red.
+
+---
+
+## Card 77: Preview morph keeps client-state classes (reveal state) (2026-10-03)
+
+**Origin:** fbcm, 2026-09-26. In the live draft preview, after any draft edit, the Staff page hero's two arch
+portraits sat clipped to nothing. The morph (`src/lib/preview-morph.ts`, card 29's refresh loop) synced each
+element's `class` attribute to the server's fresh HTML, and the server's HTML never carries the classes the page's
+own scripts add after load: the scroll-reveal observer's `is-visible`, the image curtain's `is-revealed`, the grid
+entrance's `is-staggered` (and fbcm's glyph draw `is-drawn`). Every refresh took them off, and since each observer
+runs once (`querySelectorAll('[data-reveal]:not(.is-visible)')` at load), anything already revealed went back to its
+hidden start state for good. This starter's `BaseLayout.astro` runs the same three observers, so the bug is here too.
+**Canonical:** `src/lib/preview-morph.ts` and `src/lib/preview-morph.test.ts` (both `PORTABLE`; byte-identical to
+fbcm's after this card).
+
+**What it is.** An exported `CLIENT_STATE_CLASSES` list (`is-visible`, `is-drawn`, `is-revealed`, `is-staggered`).
+When the morph syncs `class`, a class the LIVE element has from that list is kept if the server's copy lacks it;
+every other stale class is still removed, and the server's own classes still win. If the server drops the `class`
+attribute entirely, the state classes survive alone. If live and merged lists already agree, nothing is written.
+They are state, not content, so keeping them cannot hide an edit. A site with another post-load state class adds it
+to the list (in the starter, so the file stays canonical).
+
+**Test.** One new case in `preview-morph.test.ts`: reveal classes kept while a stale class goes, a plain sync when
+there is nothing to keep, state classes surviving a dropped attribute, and no write when already in agreement.
+
+**Blast radius (checked 2026-10-03 against each repo's `origin/main`; every marked copy is byte-identical to the
+starter copy BEFORE this card).**
+
+| Repo                | `preview-morph.ts` | `.test.ts` | CI mode                                       | Effect of merging this card            |
+| ------------------- | ------------------ | ---------- | --------------------------------------------- | -------------------------------------- |
+| presacademy         | marked             | marked     | live starter `main`, enforce step in `static` | `build` RED until re-synced            |
+| reid-design-site    | marked             | unmarked   | live starter `main`, enforce step in `static` | `build` RED until re-synced            |
+| mas-monograms       | marked             | marked     | live starter `main`, enforce step in `build`  | `build` RED until re-synced            |
+| 2ndpreschicago      | marked             | marked     | live starter `main`                           | repo archived on GitHub; no CI runs    |
+| stonesteps-50k      | marked             | marked     | self-check only                               | DRIFT under a manual `sync-check` only |
+| fbcm                | marked             | marked     | self-check only                               | becomes SAME                           |
+| wcp, nixoncreative. | none               | none       | live starter `main`                           | nothing                                |
+
+The re-sync in each red repo is a copy-forward of these two files (their copies equal the old starter copy), so the
+fix is mechanical; merge it right after this card, or this card right before the re-syncs are ready.
+
+---
+
+## Card 78: `preview-stega.ts` exports `RUN_SOURCE` (2026-10-03)
+
+**Origin:** fbcm, 2026-09-23. Its `highlight-words.ts` (a site-specific splitter that highlights chosen whole
+words in a band's text) has to find stega runs in a preview string and map cleaned indexes back to raw ones, or it
+splits the invisible payload and click-to-edit stops working. The exact character class already lived in `preview-stega.ts` as the private
+`RUN_SOURCE` (mirroring `@vercel/stega`'s `VERCEL_STEGA_REGEX`, including the legacy alphabet), so fbcm exported it
+rather than copy a regex that must never drift from the decoder. One keyword; no behaviour change.
+**Canonical:** `src/lib/preview-stega.ts` (`PORTABLE`; byte-identical to fbcm's after this card).
+
+**Why it is general.** Any module that measures, splits or rewrites a string that may carry stega (CLAUDE.md:
+"never compare or measure a stega-encoded string") needs the same pattern; importing it is the only way to stay in
+step with the decoder. Use: `new RegExp(RUN_SOURCE, 'gu')` (the `u` flag is required: the class includes astral code
+points).
+
+**Blast radius (checked 2026-10-03; every marked copy equals the starter copy before this card).** Marked in
+presacademy, reid-design-site and mas-monograms (all enforce sync-check against live starter `main`: `build` RED
+until re-synced), 2ndpreschicago (archived, no CI), stonesteps-50k (self-check only: manual DRIFT) and fbcm (becomes
+SAME). The re-sync is a copy-forward of one file.
+
+---
+
+## Card 79: Redirect destinations keep `?query` and `#fragment` (2026-10-03)
+
+**Origin:** fbcm, 2026-09-18, during its Wix migration. `buildRedirectMap` ran `normalizeRedirectPath` over the
+DESTINATION as well as the source, and that function drops everything after `?` or `#` on purpose (a source is a
+key matched on the request path alone). So every anchored or filtered target shipped truncated:
+`/visit#accessibility` went out as `/visit`, `/blog?category=ruminations` as `/blog`. 25 of fbcm's 42 targets were
+wrong, and only the anchor-free ones had been tested. Card 22's redirect stack is the same code here.
+**Canonical:** `src/lib/redirects.ts` and `src/lib/redirects.test.ts` (both `PORTABLE`; byte-identical to fbcm's
+after this card).
+
+**What it is.** A new exported `normalizeRedirectTarget`: the same path arithmetic as `normalizeRedirectPath`
+(leading slash, collapsed `//`, no trailing slash) on the path component only, with the `?query` and `#fragment`
+re-attached byte for byte. A bare `#top` or `?q=1` is anchored to `/`; external targets are untouched; blank is
+`null`. `buildRedirectMap` uses it for `to`. The self-redirect guard now compares PATHS (`from` against
+`normalizeRedirectPath(to)`), because `/a -> /a#top` and `/a -> /a?x=1` are both infinite loops even though the
+strings differ. Sources are normalized exactly as before, so every existing redirect key is unchanged.
+
+**Test.** Ten new cases in `redirects.test.ts` (fragment, query, both in order, bare query/fragment, external and
+blank, three `buildRedirectMap` shapes, the loop guard, and the source side still dropping both).
+
+**Caveat recorded by fbcm.** Its `scripts/verify-redirects.mjs` (not promoted; it reads fbcm's own redirect data)
+found that a `#fragment` in the emitted `Location` is not carried through by Cloudflare's redirect layer, while the
+`?query` is. So the query half is the one that changes visitor behaviour; keeping the fragment costs nothing and is
+correct if the platform ever passes it. Not re-verified on this starter: it has no Sanity project, so its redirect
+map is empty on every build here.
+
+**Blast radius (checked 2026-10-03; every marked copy equals the starter copy before this card).**
+
+| Repo                                                    | `redirects.ts` | `.test.ts` | CI mode                                       | Effect of merging this card            |
+| ------------------------------------------------------- | -------------- | ---------- | --------------------------------------------- | -------------------------------------- |
+| presacademy                                             | marked         | marked     | live starter `main`, enforce step in `static` | `build` RED until re-synced            |
+| reid-design-site                                        | marked         | unmarked   | live starter `main`, enforce step in `static` | `build` RED until re-synced            |
+| stonesteps-50k                                          | marked         | marked     | self-check only                               | DRIFT under a manual `sync-check` only |
+| fbcm                                                    | marked         | marked     | self-check only                               | becomes SAME                           |
+| mas-monograms, 2ndpreschicago, wcp, nixoncreativestudio | none           | none       | n/a                                           | nothing                                |
+
+`redirect-guard.ts` imports only `normalizeRedirectPath` and the `RedirectTarget` type, both unchanged, so it needs
+no edit in any repo.

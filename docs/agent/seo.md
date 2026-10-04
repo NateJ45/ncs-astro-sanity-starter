@@ -106,6 +106,11 @@ redirects are read at build time in `astro.config.mjs` and folded into Astro's `
 map, which the Cloudflare adapter emits as real 301/302s. The editor can also add one by
 hand under Pages -> Redirects for an address that never existed on this site. The path
 normalization rules are shared with the build and unit-tested in `src/lib/redirects.ts`.
+The two sides are normalized differently on purpose (PORTS.md card 79): an OLD address is
+matched on its path alone, so its `?query` and `#fragment` are dropped, while a NEW address
+keeps both byte for byte (`/visit#accessibility` lands on the heading, `/blog?category=x`
+arrives filtered). A redirect from a path to the same path plus a query or fragment is
+dropped as a loop.
 
 One redirect is never served: one whose OLD address is where a published page lives now.
 Cloudflare applies `_redirects` before it serves files, so it would shadow the page, and

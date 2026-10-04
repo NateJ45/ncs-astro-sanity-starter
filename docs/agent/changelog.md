@@ -1,5 +1,17 @@
 # Change history
 
+_2026-10-03: redirect destinations keep `?query` and `#fragment`, promoted from fbcm (PORTS card 79)._
+
+**Decision.** `buildRedirectMap` normalized the destination with the source's rules, which drop the query and fragment, so `/visit#accessibility` shipped as `/visit` (25 of fbcm's 42 targets were wrong). Promoted fbcm's `normalizeRedirectTarget` and its ten tests byte for byte; the self-redirect guard now compares paths so `/a -> /a#top` is still caught. Sources are unchanged, so no redirect key moves. Same site-CI caveat as card 77, for presacademy and reid-design-site.
+
+_2026-10-03: `RUN_SOURCE` is exported from `preview-stega.ts` (PORTS card 78)._
+
+**Decision.** fbcm needed the stega-run pattern in a site module and exported the existing private constant rather than copy a regex that must match the decoder exactly. One keyword, no behaviour change, promoted byte for byte. Same site-CI caveat as card 77: presacademy, reid-design-site and mas-monograms mark this file and go red until they re-sync.
+
+_2026-10-03: the preview morph keeps reveal state, promoted from fbcm (PORTS card 77)._
+
+**Decision.** The preview morph synced `class` to the server's HTML, which never has the classes run-once observers add after load (`is-visible`, `is-revealed`, `is-staggered`), so any draft edit re-hid revealed content until a full reload; fbcm hit it on 2026-09-26 and fixed it with a `CLIENT_STATE_CLASSES` keep-list. Promoted byte for byte with its test. **Not backward compatible for site CI:** presacademy, reid-design-site and mas-monograms carry marked copies and enforce sync-check against live starter `main`, so their `build` goes red until each re-syncs (the card's table). Shipped in a separate draft PR for that reason.
+
 _2026-10-03: the visual suite's webServer timeout is configurable (PORTS card 76)._
 
 **Decision.** fbcm's ~390-page build outran the 180 s `webServer` timeout in `playwright.visual.config.ts` (the timeout covers the build too) and fbcm hard-coded 600 s, which made the marked file drift. Promoted as an environment variable instead of a new literal: `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`, defaulting to 180000 when unset or invalid, so every site that does not set it behaves as before and the file stays byte-identical across the family. fbcm sets the variable in its visual workflow when it re-syncs.
