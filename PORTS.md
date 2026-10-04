@@ -6517,6 +6517,18 @@ that builds its own context. To share the cache across CI runs, add to the Playw
 If the job also caches `node_modules`, exclude `!node_modules/.cache` from that cache so the two do not fight
 (fbcm does both).
 
+**Shared key or per-shard keys: measure first (2026-10-03).** With a sharded Playwright job, every shard shares the
+key above, and `actions/cache` lets only the first shard to finish save under it (`Unable to reserve cache` for the
+rest), so a shard whose pages need different images can re-fetch them every run. Measured: stonesteps-50k re-fetched
+19 images in one shard each run until each shard got its own key (`test-images-${{ runner.os }}-s${{ matrix.shard }}-${{ github.run_id }}`
+with the shard prefix, then the plain prefix, as `restore-keys`); afterwards all three shards held 31 images and fetched 0.
+fbcm's shared cache already held all 206 images (7.7 MB) and every shard fetched 0, so it kept the shared key (per-shard
+keys would triple cache writes for no gain). Rule: add a before and after step that counts `misses.log` lines and prints
+`fetched N images from Sanity this run`, and key per shard only if a shard reports a non-zero count on a warm run.
+End the `grep -c` counts in that report step with `|| true`: Actions runs steps under `bash -e` and `grep -c` exits 1
+on a zero count, which failed a shard's report step on stonesteps-50k (fixed in its #84). Test any such step under
+`bash -e`, not `bash -c`.
+
 **fbcm re-sync (follow-up PR in fbcm, not done here).** `a11y.spec.ts` and `reflow.spec.ts` become `SAME`.
 `tests/fixtures.ts` differs from fbcm's (unmarked) copy in the header comment only: the marker line, the card
 reference, and two fbcm-only references generalised (`this-sunday.spec.ts`, "CI restores the folder, ci.yml").
