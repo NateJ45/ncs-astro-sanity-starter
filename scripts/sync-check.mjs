@@ -64,8 +64,12 @@ const MARKER_SCAN_LINES = 5;
 
 /**
  * Directories never walked. node_modules and dist are volume; .git is binary;
- * .claude/worktrees holds whole extra checkouts of the same repo, which would
- * otherwise report every file twice (once per worktree).
+ * .claude/worktrees and _worktrees (the studio's convention for agent and
+ * developer worktrees) hold whole extra checkouts of the same repo, which would
+ * otherwise report every file twice (once per worktree). Both are skipped by
+ * exact folder name. They are two entries because the names differ: `worktrees`
+ * does not match `_worktrees`, and a looser rule (a substring or a `*worktrees`
+ * suffix) could hide a real folder.
  */
 const SKIP_DIRS = new Set([
   'node_modules',
@@ -78,6 +82,7 @@ const SKIP_DIRS = new Set([
   'coverage',
   'build',
   'worktrees', // .claude/worktrees, and any other worktrees/ pile
+  '_worktrees', // <repo>/_worktrees/<name>: agent and developer worktrees (card 80)
   // The CI gate (PORTS.md card 36) checks the library of record out INTO the
   // site repo, at .ncs-starter, because actions/checkout refuses a path
   // outside the workspace. Without this the walker finds the library's own
