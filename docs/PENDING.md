@@ -259,6 +259,18 @@ staged modules now and eleven archived ones. The file is owned by another agent'
 (the family test standard, PORTS.md card 35), so the sentence was left alone rather than
 edited across an ownership line. One-line fix, next time someone is in there.
 
+### 13. `measure-tap-targets.mjs` reports closed `<details>` content
+
+**Queued, 2026-10-04.** False positive found by the mas-monograms port (PR #72, PORTS.md card 83 lesson 3). Content
+inside a closed `<details>` other than its `<summary>` (a mobile filter panel, say) is not rendered, but the script still
+reads its geometry and hit-tests it, and the point lands on whatever sits underneath. mas-monograms `/style-gallery/`
+reported 68 stolen-tap warnings; with the panel opened it was 0 under 44px and 0 stolen. Teach the script to skip any
+element inside a `<details>` without the `open` attribute unless it is that `<details>`'s own `<summary>`, add a fixture
+check for it, and say so on card 83. The script is `PORTABLE`, so the order in `.claude/rules/library-of-record.md`
+applies: starter PR as a draft first, then the three ported sites (presacademy, mas-monograms, nixoncreativestudio) resync.
+Until then, open the panel in the scan or read the list and ignore warnings under a closed `<details>`. Not done in the
+2026-10-04 docs PR on purpose: it changes a marked file.
+
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 
 Flagged in the topic index (now docs/claude/topic-index.md, formerly in CLAUDE.md) since the fork. The 2026-08-28 pass corrected every
