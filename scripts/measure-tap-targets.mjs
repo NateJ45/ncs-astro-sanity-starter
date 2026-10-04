@@ -1,4 +1,4 @@
-// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+﻿// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // scripts/measure-tap-targets.mjs  (PORTS.md card 83)
 //
 // Counts the links and buttons whose tappable area is under 44px at a phone
