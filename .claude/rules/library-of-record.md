@@ -53,6 +53,10 @@ still carries its column and its historical cards, but nothing syncs to it any m
   byte-exact. Point it at the starter with `NCS_STARTER_DIR`, or let it find a sibling
   `ncs-astro-sanity-starter`. It is dependency-free so it runs in any repo in the family.
   Run with no argument from here for a self-check (everything must be `SAME`).
+  The walker skips folders by exact name (`SKIP_DIRS`): `node_modules`, `dist`, `.git`, `.ncs-starter`,
+  `worktrees` (`.claude/worktrees`) and `_worktrees` (`<repo>/_worktrees/<name>`, a full second copy of the
+  repo, which doubled fbcm's count to 172; card 80). Add a name there, never a substring or suffix pattern:
+  a loose match can hide a real folder, and `scripts/lib/sync-check-skip-dirs.test.mjs` pins that boundary.
 - **If you change a marked file, you are changing the family's copy.** Either the change
   is general (make it here, note it on the card, and the next sync session pushes it out)
   or it is site-specific (then it does not belong in a marked file at all).

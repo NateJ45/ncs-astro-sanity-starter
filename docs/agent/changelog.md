@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-03: `sync-check` skips `_worktrees/` folders (PORTS card 80)._
+
+**Decision.** The walker skipped `worktrees` (so `.claude/worktrees`) but not `_worktrees`, the studio's own worktree folder, so a local run in any checkout with a live worktree counted every marked file twice (fbcm: `86 same, 0 drifted, 86 missing in starter (172 checked)`) and buried real drift. Added `_worktrees` to `SKIP_DIRS` by exact name and a regression test (`scripts/lib/sync-check-skip-dirs.test.mjs`, run by `npm run test:scripts`). CI never saw it (a fresh checkout has no worktrees). Merging turns every site that enforces `sync-check` against live starter `main` red on `build` until it resyncs the file: presacademy, reid-design-site, mas-monograms, nixoncreativestudio. stonesteps-50k and fbcm only self-check; wcp and 2ndpreschicago are archived.
+
 _2026-10-03: cards 77 to 79 rolled out to the sites, matrix rows 74 to 79 updated._
 
 Presacademy (#57), reid-design-site (#108), mas-monograms (#69) and stonesteps-50k (#73) re-synced the marked `preview-morph`, `preview-stega` and `redirects` copies after the starter merge (mas carries no redirects file); fbcm resynced cards 75 and 76 (#33). Each site PR was held as a draft, red on the sync-check enforce step, until starter #70 merged, then re-run green. Docs only in this repo; no code or behaviour change.
