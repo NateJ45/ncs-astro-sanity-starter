@@ -5739,8 +5739,12 @@ the canonical one.
 
 **Verified state (2026-09-28):** this starter (origin), reid-design-site (ported in
 the same session as its full card-54 port, which is where the leak was found).
-nixoncreativestudio and stonesteps-50k run card 54 without this rule and should pull
-it; the rest have no GA4 yet.
+nixoncreativestudio and stonesteps-50k pulled it on 2026-10-05 (nixoncreativestudio#104,
+stonesteps-50k#90; both verified live: the built page carries the allowed-host list for the
+apex and www). Verified live 2026-10-05: reid-design-site, nixoncreativestudio,
+stonesteps-50k. The others carry the same canonical file (md5 530459bb): mas-monograms,
+presacademy, fbcm. Why it mattered: September 2026 held 347 localhost sessions in the
+stonesteps-50k property and 22 of 29 in nixoncreativestudio's.
 
 ## Card 59: `_headers` rules for the same path do not merge (2026-09-29)
 
