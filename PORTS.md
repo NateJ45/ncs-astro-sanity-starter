@@ -206,7 +206,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 86  | Production-write second factor (NCS_PRODUCTION_WRITE) for data scripts         | n/a     | partial     | no       | no               | no            | no             | n/a                | staged              | no             |
 | 87  | Dead-weight scan: unused kits and packages inflate every page's CSS            | n/a     | yes         | no       | no               | no            | yes            | n/a                | staged              | no             |
 | 88  | Cloudflare beacon starts after load and idle, not deferred in head             | n/a     | no          | no       | no               | no            | no             | n/a                | staged              | no             |
-| 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`) | n/a     | pr          | pr       | pr               | pr            | no             | n/a                | no                  | pr             |
+| 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`) | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | no                  | yes            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7472,5 +7472,5 @@ stonesteps-50k named their own helper differently, so reconcile on sync), `src/l
 **Proof.** Grep the built HTML for `href="/..."` without a trailing slash and without a file extension: the count must
 be 0 (starter build: 135 of 231 before, 0 of 231 after).
 
-**Status.** Starter: PR open. Sites listed `pr` have their own PR; mark `yes` once merged. 2ndpreschicago and
+**Status.** Starter: merged with this PR. presacademy, reid-design-site, mas-monograms and stonesteps-50k merged 2026-10-09. 2ndpreschicago and
 nixoncreativestudio: not yet done.
