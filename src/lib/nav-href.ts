@@ -1,3 +1,4 @@
+import { withTrailingSlash } from './href.ts';
 // Foundation, edit with care
 // The ONE place a Sanity `navLink` becomes an href.
 //
@@ -22,13 +23,13 @@
 /** Live route per path-mapped singleton. Mirrors SINGLETON_PREVIEW_PATHS. */
 export const SINGLETON_LIVE_PATHS: Record<string, string> = {
   homePage: '/',
-  aboutPage: '/about', // scaffold: about
-  servicesPage: '/services', // scaffold: services
-  processPage: '/process', // scaffold: process
-  faqPage: '/faq', // scaffold: faq
-  contactPage: '/contact',
-  journalPage: '/journal', // scaffold: journal
-  privacyPage: '/privacy',
+  aboutPage: '/about/', // scaffold: about
+  servicesPage: '/services/', // scaffold: services
+  processPage: '/process/', // scaffold: process
+  faqPage: '/faq/', // scaffold: faq
+  contactPage: '/contact/',
+  journalPage: '/journal/', // scaffold: journal
+  privacyPage: '/privacy/',
   notFoundPage: '/404',
 };
 
@@ -69,6 +70,10 @@ export function plain(value?: string | null): string {
 
 /** Work out where one link points, or undefined when it points nowhere. */
 export function navHref(link?: RawNavLink | null): string | undefined {
+  return withTrailingSlash(rawNavHref(link));
+}
+
+function rawNavHref(link?: RawNavLink | null): string | undefined {
   if (!link) return undefined;
 
   const typed = plain(link.href);

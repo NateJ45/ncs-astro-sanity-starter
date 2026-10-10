@@ -1,4 +1,5 @@
 ---
+import { withTrailingSlash } from '@/lib/href';
 // Safe to edit by hand
 // Server-side static Portable Text renderer. Converts simple Portable Text block
 // arrays to HTML at build time with zero client-side JavaScript. Handles the
@@ -80,7 +81,7 @@ function renderSpans(spans: Span[] | undefined, markDefs: MarkDef[] | undefined)
           // Reference mark — look up in markDefs
           const def = defsMap.get(mark);
           if (def?._type === 'link') {
-            const href = escapeHtml(def.href ?? '#');
+            const href = escapeHtml(withTrailingSlash(def.href) ?? '#');
             const isExternal = /^https?:\/\//.test(def.href ?? '');
             const newTab = def.openInNewTab || isExternal;
             const extras = newTab ? ` target="_blank" rel="noopener noreferrer"` : '';

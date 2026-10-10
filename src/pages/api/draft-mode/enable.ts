@@ -36,5 +36,5 @@ export const GET: APIRoute = async (context) => {
     secure: true,
   });
 
-  return context.redirect(redirectTo || '/preview');
+  return context.redirect(redirectTo || '/preview/');
 };

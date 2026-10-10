@@ -29,7 +29,7 @@ const sections = page?.pageBuilder?.length ? page.pageBuilder : DEFAULT_SERVICES
 const schemas = [
   breadcrumbSchema([
     { name: 'Home', url: site.url },
-    { name: 'Services', url: `${site.url}/services` },
+    { name: 'Services', url: `${site.url}/services/` },
   ]),
   serviceListSchema(servicesForSchema),
 ];

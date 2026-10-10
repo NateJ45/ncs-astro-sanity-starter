@@ -79,7 +79,7 @@ function humanizeRoom(value?: string): string {
 }
 
 const heroRoomLabel = humanizeRoom(hero?.roomType);
-const heroHref = hero?.slug?.current ? `/portfolio/${hero.slug.current}` : '#';
+const heroHref = hero?.slug?.current ? `/portfolio/${hero.slug.current}/` : '#';
 ---
 
 {
@@ -200,7 +200,7 @@ const heroHref = hero?.slug?.current ? `/portfolio/${hero.slug.current}` : '#';
               <div class="h-0.5 bg-primary" aria-hidden="true" />
 
               {companions.map((p, i) => {
-                const cHref = p.slug?.current ? `/portfolio/${p.slug.current}` : '#';
+                const cHref = p.slug?.current ? `/portfolio/${p.slug.current}/` : '#';
                 const cRoom = humanizeRoom(p.roomType);
                 return (
                   <a
@@ -250,7 +250,7 @@ const heroHref = hero?.slug?.current ? `/portfolio/${hero.slug.current}` : '#';
           <CtaLink
             cta={cta}
             variant="secondary"
-            fallbackHref="/portfolio"
+            fallbackHref="/portfolio/"
             fallbackLabel="See all work"
           />
         </div>

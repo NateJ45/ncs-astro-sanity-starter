@@ -148,14 +148,14 @@ export function sectionsProjection(field = 'pageBuilder'): string {
         // scaffold: journal
         source == "journal" => *[_type == "journalEntry"] | order(publishedAt desc)[0...12]{
           _id, "title": title, "meta": publishedAt, "summary": excerpt,
-          "href": "/journal/" + slug.current,
+          "href": "/journal/" + slug.current + "/",
           "coverImage": coverImage${IMAGE_PROJECTION}
         },
         // scaffold:end
         // scaffold: services
         source == "services" => *[_type == "service"] | order(orderRank asc, displayOrder asc)[0...12]{
           _id, "title": name, "meta": price, "summary": shortDescription,
-          "href": "/services#" + slug.current
+          "href": "/services/#" + slug.current
         },
         // scaffold:end
         // scaffold: testimonials

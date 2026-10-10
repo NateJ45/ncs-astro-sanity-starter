@@ -68,7 +68,7 @@ const heroAspectClass = !hasCompanions
   ? 'aspect-[4/5] lg:aspect-[16/10]'
   : 'aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[28rem]';
 
-const heroHref = hero?.slug?.current ? `/journal/${hero.slug.current}` : '#';
+const heroHref = hero?.slug?.current ? `/journal/${hero.slug.current}/` : '#';
 const heroPrimaryCategory = hero?.categories?.[0];
 
 function formatDate(d?: string): string {
@@ -207,7 +207,7 @@ const heroDate = formatDate(hero?.publishedAt);
               <div class="h-0.5 bg-primary" aria-hidden="true" />
 
               {companions.map((p, i) => {
-                const cHref = p.slug?.current ? `/journal/${p.slug.current}` : '#';
+                const cHref = p.slug?.current ? `/journal/${p.slug.current}/` : '#';
                 const cCat = p.categories?.[0];
                 const cDate = formatDate(p.publishedAt);
                 return (
@@ -257,7 +257,7 @@ const heroDate = formatDate(hero?.publishedAt);
           <CtaLink
             cta={cta}
             variant="secondary"
-            fallbackHref="/journal"
+            fallbackHref="/journal/"
             fallbackLabel="Read more from the journal"
           />
         </div>

@@ -1,4 +1,5 @@
 ---
+import { withTrailingSlash } from '@/lib/href';
 // Safe to edit by hand
 // Custom 404. Warm, on-brand, two clear paths back. No search (there isn't one).
 //
@@ -32,15 +33,15 @@ const body =
   "It happens. Maybe a link is old, maybe the URL has a typo. Either way, here's where to head next.";
 
 const primaryLabel = notFoundPage?.primaryCtaLabel ?? 'Back home';
-const primaryHref = notFoundPage?.primaryCtaHref ?? '/';
+const primaryHref = withTrailingSlash(notFoundPage?.primaryCtaHref) ?? '/';
 // A CORE route, not /portfolio: the portfolio is an opt-in module that a fresh
 // clone does not build, so the old default shipped a 404 page whose own button
 // 404s. A project that turns the module on can point this at /portfolio in the
 // Studio.
 const secondaryLabel = notFoundPage?.secondaryCtaLabel ?? 'Back to the home page';
-const secondaryHref = notFoundPage?.secondaryCtaHref ?? '/';
+const secondaryHref = withTrailingSlash(notFoundPage?.secondaryCtaHref) ?? '/';
 const tertiaryLabel = notFoundPage?.tertiaryCtaLabel ?? 'Get in touch';
-const tertiaryHref = notFoundPage?.tertiaryCtaHref ?? '/contact';
+const tertiaryHref = withTrailingSlash(notFoundPage?.tertiaryCtaHref) ?? '/contact/';
 
 const photo = notFoundPage?.heroImage ?? fallbackPhoto;
 const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';

@@ -8,6 +8,7 @@
 // uses text-foreground (dark-mode-aware). Links use text-link with
 // underline for contrast and discoverability. Don't hard-code colors here.
 
+import { withTrailingSlash } from '@/lib/href';
 import { PortableText as PT, type PortableTextComponents } from '@portabletext/react';
 import type { PortableTextBlock } from '@portabletext/types';
 import { urlFor, parseSanityAssetDimensions } from '@/lib/sanity';
@@ -85,7 +86,7 @@ function makeComponents(): PortableTextComponents {
       strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
       em: ({ children }) => <em className="italic">{children}</em>,
       link: ({ children, value }) => {
-        const href = value?.href ?? '#';
+        const href = withTrailingSlash(value?.href) ?? '#';
         const isExternal = /^https?:\/\//.test(href);
         const newTab = value?.openInNewTab || isExternal;
         return (

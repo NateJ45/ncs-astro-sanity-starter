@@ -1,4 +1,5 @@
 ---
+import { withTrailingSlash } from '@/lib/href';
 // Safe to edit by hand
 // Resolves a Sanity ctaBlock to the right <a href>:
 //   - internal: maps the referenced page _type to its route (homePage → /, etc.)
@@ -46,7 +47,7 @@ const {
   cta,
   variant = 'primary',
   onDark = false,
-  fallbackHref = '/contact',
+  fallbackHref = '/contact/',
   fallbackLabel = 'Get in touch',
   class: extraClass = '',
 } = Astro.props as Props;
@@ -56,12 +57,12 @@ const {
 // /journal/[slug] route.
 const TYPE_TO_PATH: Record<string, string> = {
   homePage: '/',
-  aboutPage: '/about',
-  processPage: '/process', // scaffold: process
-  servicesPage: '/services', // scaffold: services
-  faqPage: '/faq',
-  contactPage: '/contact',
-  journalPage: '/journal', // scaffold: journal
+  aboutPage: '/about/',
+  processPage: '/process/', // scaffold: process
+  servicesPage: '/services/', // scaffold: services
+  faqPage: '/faq/',
+  contactPage: '/contact/',
+  journalPage: '/journal/', // scaffold: journal
 };
 
 function resolveHref(c?: CtaBlock | null): string {
@@ -93,7 +94,7 @@ function resolveHref(c?: CtaBlock | null): string {
   }
 }
 
-const href = resolveHref(cta);
+const href = withTrailingSlash(resolveHref(cta));
 const label = cta?.label ?? fallbackLabel;
 const isExternal = cta?.linkType === 'external';
 const newTab = cta?.openInNewTab || isExternal;

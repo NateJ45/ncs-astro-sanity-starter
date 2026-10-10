@@ -29,8 +29,8 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
     subhead:
       'We help people create spaces that work as hard as they do â€” and feel good to come home to.',
     size: 'tall',
-    primaryCta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact' },
-    secondaryCta: { _type: 'ctaBlock', label: 'See Our Work', href: '/portfolio' },
+    primaryCta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact/' },
+    secondaryCta: { _type: 'ctaBlock', label: 'See Our Work', href: '/portfolio/' },
   },
   {
     _type: 'richTextSection',
@@ -51,7 +51,7 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
         ],
       },
     ],
-    cta: { _type: 'ctaBlock', label: 'Learn More About the Studio', href: '/about' },
+    cta: { _type: 'ctaBlock', label: 'Learn More About the Studio', href: '/about/' },
   },
   {
     _type: 'statSection',
@@ -99,7 +99,7 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
         ],
       },
     ],
-    cta: { _type: 'ctaBlock', label: 'See All Services', href: '/services' },
+    cta: { _type: 'ctaBlock', label: 'See All Services', href: '/services/' },
     imageSide: 'right',
   },
   {
@@ -115,7 +115,7 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
     eyebrow: 'Ready to Begin?',
     headline: 'Ready to Love Your Space?',
     subhead: "Let's start with a conversation.",
-    cta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact' },
+    cta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact/' },
   },
 ];
 
@@ -205,7 +205,7 @@ export const DEFAULT_ABOUT_SECTIONS: PageBuilderBlock[] = [
     eyebrow: "Let's Work Together.",
     headline: 'Ready to Start?',
     subhead: 'Send a message and we will be back in touch within two business days.',
-    cta: { _type: 'ctaBlock', label: 'Get in Touch', href: '/contact' },
+    cta: { _type: 'ctaBlock', label: 'Get in Touch', href: '/contact/' },
   },
 ];
 // scaffold:end
@@ -270,7 +270,7 @@ export const DEFAULT_SERVICES_SECTIONS: PageBuilderBlock[] = [
     headline: 'Not sure which service is right?',
     subhead:
       'Send a message with a few details about your space. We will point you toward the best fit.',
-    cta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact' },
+    cta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact/' },
   },
 ];
 
@@ -330,7 +330,7 @@ export const DEFAULT_PROCESS_SECTIONS: PageBuilderBlock[] = [
       },
     ],
     imageSide: 'left',
-    cta: { _type: 'ctaBlock', label: 'Get in Touch', href: '/contact' },
+    cta: { _type: 'ctaBlock', label: 'Get in Touch', href: '/contact/' },
   },
   {
     _type: 'ctaBandSection',
@@ -338,6 +338,6 @@ export const DEFAULT_PROCESS_SECTIONS: PageBuilderBlock[] = [
     eyebrow: 'Ready to Begin?',
     headline: 'Start the Conversation.',
     subhead: 'Fill out the contact form with a few details about your space.',
-    cta: { _type: 'ctaBlock', label: 'Get in Touch', href: '/contact' },
+    cta: { _type: 'ctaBlock', label: 'Get in Touch', href: '/contact/' },
   },
 ];
