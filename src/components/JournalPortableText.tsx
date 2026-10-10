@@ -16,6 +16,7 @@
 // mirror the existing PortableText component, with one extra: "lead" style
 // for the large intro paragraph.
 
+import { withTrailingSlash } from '@/lib/href';
 import { PortableText as PT, type PortableTextComponents } from '@portabletext/react';
 import type { PortableTextBlock } from '@portabletext/types';
 import { urlFor, parseSanityAssetDimensions } from '@/lib/sanity';
@@ -149,7 +150,7 @@ function makeComponents(): PortableTextComponents {
         <span className="rounded-sm bg-accent/60 px-1 text-foreground">{children}</span>
       ),
       link: ({ children, value }) => {
-        const href = value?.href ?? '#';
+        const href = withTrailingSlash(value?.href) ?? '#';
         const isExternal = /^https?:\/\//.test(href);
         const newTab = value?.openInNewTab || isExternal;
         return (

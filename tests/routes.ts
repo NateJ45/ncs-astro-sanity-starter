@@ -20,13 +20,13 @@
 /** Routes that render real content and must pass every check. */
 export const routes: string[] = [
   '/',
-  '/about', // scaffold: about
-  '/services', // scaffold: services
-  '/process', // scaffold: process
-  '/faq', // scaffold: faq
-  '/contact',
-  '/journal', // scaffold: journal
-  '/privacy',
+  '/about/', // scaffold: about
+  '/services/', // scaffold: services
+  '/process/', // scaffold: process
+  '/faq/', // scaffold: faq
+  '/contact/',
+  '/journal/', // scaffold: journal
+  '/privacy/',
 ];
 
 /**
@@ -50,4 +50,4 @@ export const allRoutes: string[] = [...routes, ...hiddenRoutes];
  * enables the lead-magnet module gets a form on /guides/[slug]; add it here
  * once a guide is published and that route builds.
  */
-export const FORM_ROUTES: string[] = ['/contact'];
+export const FORM_ROUTES: string[] = ['/contact/'];

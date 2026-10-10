@@ -86,7 +86,7 @@ interface Props {
 }
 
 /** Built-in drawer button, matching the header's own default. */
-const DEFAULT_CTA = { show: true, label: 'Book a consultation', href: '/contact' };
+const DEFAULT_CTA = { show: true, label: 'Book a consultation', href: '/contact/' };
 
 // ---- Component --------------------------------------------------------------
 

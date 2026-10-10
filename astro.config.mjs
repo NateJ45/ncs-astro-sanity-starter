@@ -121,6 +121,9 @@ const hiddenPagePaths = new Set(
 
 // https://astro.build/config
 export default defineConfig({
+  // Canonical tags and the sitemap use /page/, so every internal link does too
+  // (src/lib/href.ts). Without this, a no-slash link 307s to the slashed URL.
+  trailingSlash: 'always',
   site: 'https://example.com',
   output: 'static',
   // 2026-08-28: no sessions anywhere in this template (there is no gated area

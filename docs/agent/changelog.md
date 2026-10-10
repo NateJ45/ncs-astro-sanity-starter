@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-09: internal links end in a slash (PORTS card 89)._
+
+**Decision.** `astro.config.mjs` sets `trailingSlash: 'always'`, matching the canonical tags and the sitemap. Before this, every internal link was written `/about`, Cloudflare answered each one with a 307, and Search Console reported "Page with redirect". Hand-written hrefs now carry the slash; links built from Sanity data (nav, footer, CTA blocks, Portable Text link marks, `/journal/<slug>` queries, JSON-LD urls) go through `withTrailingSlash()` in `src/lib/href.ts`. `/api/contact/`, `/api/draft-mode/enable/` and the other SSR URLs use the slash form too. Built-HTML check: 135 of 231 internal hrefs lacked the slash before, 0 after.
+
 _2026-10-04: `scripts/measure-tap-targets.mjs` skips closed `<details>` content (PORTS card 83; closes `docs/PENDING.md` item 13 in the starter)._
 
 **Decision.** Content inside a `<details>` without `open` is not rendered, but Chrome still reports its geometry, so the scan listed it as under 44px and its hit test landed on whatever lay underneath (mas-monograms `/style-gallery/`: 68 false stolen taps from a closed mobile filter panel). The script now checks `details:not([open])` on every ancestor at scan time, nested included, and skips the element unless it is that details' own `<summary>` (always measured). `--include-closed-details` is the opt-out. Hidden, `display: none` and `visibility: hidden` were already skipped and are untouched; sticky-element inflation, inline exemption, the stolen-tap test, flags and output format are unchanged. A fixture before/after (3 under 44px and 6 stolen, then 2 and 0, the 2 being undersized summaries) and the starter's own 8 routes (0 before and after) are on card 83. `scripts/lib/measure-tap-targets.test.mjs` is the new starter-only test (skips without Chromium). The file is `PORTABLE`: presacademy, mas-monograms and nixoncreativestudio resync by overwrite.

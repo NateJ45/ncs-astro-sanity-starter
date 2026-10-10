@@ -101,7 +101,7 @@ const mobileNavSettings = siteSettings
 // built-in button. An island's props are serialized into the page, so passing
 // the default every time would rewrite the markup of every page for no change.
 const mobileCtaProps =
-  headerCta.show && headerCta.label === 'Book a consultation' && headerCta.href === '/contact'
+  headerCta.show && headerCta.label === 'Book a consultation' && headerCta.href === '/contact/'
     ? {}
     : { cta: headerCta };
 
@@ -141,7 +141,7 @@ const NAV_LINKS = NAV_ITEMS;
 const pathname = Astro.url.pathname;
 function isActive(href: string) {
   if (href === '/') return pathname === '/';
-  return pathname.startsWith(href);
+  return pathname.startsWith(href.endsWith('/') ? href : `${href}/`);
 }
 // A dropdown group is "active" (its trigger underline locks wide + aria-current
 // is set) when the current route matches any of its child links.
@@ -181,7 +181,7 @@ function isGroupActive(items: { href: string }[]) {
             <>
               <span class="h-3 w-px bg-border-soft" aria-hidden="true" />
               <a
-                href="/contact"
+                href="/contact/"
                 class="inline-flex items-center gap-1.5 text-xs font-semibold tracking-eyebrow text-foreground uppercase transition-colors hover:text-link"
                 aria-label={`${availability}. Get in touch.`}
               >
@@ -278,7 +278,7 @@ function isGroupActive(items: { href: string }[]) {
     {
       availability && (
         <a
-          href="/contact"
+          href="/contact/"
           class="site-header__pill absolute top-1/2 left-m inline-flex h-9 -translate-y-1/2 items-center gap-1.5 rounded-full border border-border-soft bg-muted pr-2.5 pl-2 text-foreground transition-colors hover:border-primary hover:text-primary-dark lg:hidden"
           aria-label={`${availability}. Tap to start a conversation.`}
         >

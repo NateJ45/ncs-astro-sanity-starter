@@ -57,7 +57,7 @@ const list = entries ?? [];
 const schemas = [
   breadcrumbSchema([
     { name: 'Home', url: site.url },
-    { name: 'Journal', url: `${site.url}/journal` },
+    { name: 'Journal', url: `${site.url}/journal/` },
   ]),
 ];
 ---
@@ -119,11 +119,11 @@ const schemas = [
             </p>
             <p class="mt-s text-muted-foreground">
               In the meantime,{' '}
-              <a href="/services" class="text-link underline underline-offset-2">
+              <a href="/services/" class="text-link underline underline-offset-2">
                 see what we do
               </a>{' '}
               or
-              <a href="/contact" class="text-link underline underline-offset-2">
+              <a href="/contact/" class="text-link underline underline-offset-2">
                 {' '}
                 start a conversation
               </a>

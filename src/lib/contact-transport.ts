@@ -4,13 +4,13 @@
 // One place that decides HOW a contact submission leaves the browser, so the
 // form components never have to know.
 //
-// THE SITE'S OWN ENDPOINT FIRST. `/api/contact` runs on the Worker this site
+// THE SITE'S OWN ENDPOINT FIRST. `/api/contact/` runs on the Worker this site
 // already ships, stores the submission before trying to email it, and keeps
 // every key server-side. Web3Forms is the fallback for a build with no Worker
 // at all, where there is no endpoint to post to.
 //
 // The fallback is not dead weight: the starter is meant to deploy anywhere, and
-// on a purely static host `/api/contact` does not exist. Detecting that by
+// on a purely static host `/api/contact/` does not exist. Detecting that by
 // TRYING it is deliberate. A build-time flag would have to be set correctly by
 // whoever deploys, and would be wrong in exactly the case that matters.
 //
@@ -50,7 +50,7 @@ const GENERIC = "Couldn't send right now. Try again in a minute, or contact us d
 async function postToOwnEndpoint(payload: ContactPayload): Promise<ContactResult | null> {
   let res: Response;
   try {
-    res = await fetch('/api/contact', {
+    res = await fetch('/api/contact/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(payload),

@@ -1,4 +1,5 @@
 ---
+import { withTrailingSlash } from '@/lib/href';
 // Safe to edit by hand
 // Dynamic list section: auto-pulls the latest items from a core collection and
 // renders them as a card grid. No manual curation required -- the editor picks
@@ -90,10 +91,10 @@ function formatDate(d?: string | null): string {
 
 // Source-specific fallback CTA link if no cta prop provided.
 const fallbackHref: Record<string, string> = {
-  journal: '/journal', // scaffold: journal
-  services: '/services', // scaffold: services
+  journal: '/journal/', // scaffold: journal
+  services: '/services/', // scaffold: services
   testimonials: '/', // scaffold: testimonials
-  faqs: '/faq', // scaffold: faq
+  faqs: '/faq/', // scaffold: faq
 };
 const fallbackLabel: Record<string, string> = {
   journal: 'Read all posts', // scaffold: journal
@@ -128,7 +129,7 @@ const fallbackLabel: Record<string, string> = {
               <li>
                 {item.href ? (
                   <a
-                    href={item.href}
+                    href={withTrailingSlash(item.href)}
                     class="card-lift group block h-full overflow-hidden rounded-md border border-border-soft bg-card no-underline transition-colors hover:border-primary/40"
                   >
                     {item.coverImage?.asset && (
@@ -182,7 +183,7 @@ const fallbackLabel: Record<string, string> = {
               <li>
                 {item.href ? (
                   <a
-                    href={item.href}
+                    href={withTrailingSlash(item.href)}
                     class="card-lift group block h-full rounded-md border border-border-soft bg-card p-m no-underline transition-colors hover:border-primary/40"
                   >
                     <h3 class="font-display text-h4 text-foreground transition-colors group-hover:text-primary-dark">

@@ -38,7 +38,7 @@ const faqs = page?.faqs ?? [];
 const schemas = [
   breadcrumbSchema([
     { name: 'Home', url: site.url },
-    { name: 'FAQ', url: `${site.url}/faq` },
+    { name: 'FAQ', url: `${site.url}/faq/` },
   ]),
   faqPageSchema(faqs),
 ];
@@ -71,7 +71,7 @@ const schemas = [
           ) : (
             <p class="text-center text-muted-foreground italic">
               FAQ content is being updated.{' '}
-              <a href="/contact" class="text-link underline underline-offset-2">
+              <a href="/contact/" class="text-link underline underline-offset-2">
                 Ask anything
               </a>{' '}
               in the meantime.

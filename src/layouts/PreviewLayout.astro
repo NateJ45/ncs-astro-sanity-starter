@@ -173,7 +173,7 @@ const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
         <>
           <VisualEditingOverlay client:only="react" pageId={pageId} />
           <a
-            href="/api/draft-mode/disable"
+            href="/api/draft-mode/disable/"
             data-exit-preview
             class="fixed right-4 bottom-4 z-50 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-lg hover:bg-primary-dark"
           >
@@ -264,7 +264,7 @@ const footerAttr = docEditAttr('siteSettings', 'siteSettings', 'tagline');
 
           event.preventDefault();
           if (previewable) {
-            window.location.assign(path === '/' ? '/preview' : `/preview${path}`);
+            window.location.assign(path === '/' ? '/preview/' : `/preview${path}/`);
           } else if (!embedded) {
             // Standalone tab: detail routes without a preview open in a new tab.
             window.open(url.href, '_blank', 'noopener');

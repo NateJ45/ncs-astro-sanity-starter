@@ -318,7 +318,7 @@ export default function VisualEditingOverlay({ pageId }: Props) {
 
     const open = () => {
       if (es) return;
-      es = new EventSource(`/preview/live?page=${encodeURIComponent(pageId)}`);
+      es = new EventSource(`/preview/live/?page=${encodeURIComponent(pageId)}`);
       es.addEventListener('change', onChange);
     };
     const close = () => {

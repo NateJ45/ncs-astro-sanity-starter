@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 interface Props {
   /** Visible label. Should read as conversational, not pushy. */
   label: string;
-  /** Where the chip leads. Defaults to /contact. */
+  /** Where the chip leads. Defaults to /contact/. */
   href?: string;
   /** Scroll-percent threshold (0-1) at which the chip first appears. */
   threshold?: number;
@@ -21,7 +21,7 @@ interface Props {
 
 const SESSION_KEY = 'sticky-cta-dismissed';
 
-export default function StickyCTAChip({ label, href = '/contact', threshold = 0.5 }: Props) {
+export default function StickyCTAChip({ label, href = '/contact/', threshold = 0.5 }: Props) {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 

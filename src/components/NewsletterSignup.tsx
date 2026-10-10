@@ -205,7 +205,7 @@ export default function NewsletterSignup({ newsletter, source = 'newsletter' }: 
           <>
             {consentNote.replace('privacy policy', '').trimEnd()}{' '}
             <a
-              href="/privacy"
+              href="/privacy/"
               className="underline underline-offset-2 transition-colors hover:text-link"
             >
               privacy policy

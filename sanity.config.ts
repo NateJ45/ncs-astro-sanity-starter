@@ -139,7 +139,7 @@ export default defineConfig({
       resolve,
       previewUrl: {
         initial: '/preview',
-        previewMode: { enable: '/api/draft-mode/enable' },
+        previewMode: { enable: '/api/draft-mode/enable/' },
       },
       // The Squarespace-style page list beside the preview: click a page, the
       // preview jumps there and the edit panel follows.

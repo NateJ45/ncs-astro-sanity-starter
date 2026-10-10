@@ -246,7 +246,7 @@ const latestProjects = allProjects.slice(0, 3);
               {/* scaffold: about */}
               <li>
                 <a
-                  href="/about"
+                  href="/about/"
                   class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                 >
                   About
@@ -256,7 +256,7 @@ const latestProjects = allProjects.slice(0, 3);
               {/* scaffold: process */}
               <li>
                 <a
-                  href="/process"
+                  href="/process/"
                   class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                 >
                   Process
@@ -266,7 +266,7 @@ const latestProjects = allProjects.slice(0, 3);
               {/* scaffold: services */}
               <li>
                 <a
-                  href="/services"
+                  href="/services/"
                   class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                 >
                   Services &amp; Pricing
@@ -276,7 +276,7 @@ const latestProjects = allProjects.slice(0, 3);
               {/* scaffold: faq */}
               <li>
                 <a
-                  href="/faq"
+                  href="/faq/"
                   class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                 >
                   FAQ
@@ -286,7 +286,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.press && (
                 <li>
                   <a
-                    href="/press"
+                    href="/press/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Press
@@ -305,7 +305,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.portfolio && (
                 <li>
                   <a
-                    href="/portfolio"
+                    href="/portfolio/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Portfolio
@@ -315,7 +315,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.portfolio && (
                 <li>
                   <a
-                    href="/portfolio/before-after"
+                    href="/portfolio/before-after/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Before &amp; After
@@ -326,7 +326,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.journal && (
                 <li>
                   <a
-                    href="/journal"
+                    href="/journal/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Journal
@@ -337,7 +337,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.shop && (
                 <li>
                   <a
-                    href="/shop"
+                    href="/shop/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Shop
@@ -347,7 +347,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.giftCertificates && (
                 <li>
                   <a
-                    href="/gift-certificates"
+                    href="/gift-certificates/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Gift Certificates
@@ -366,7 +366,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.styleQuiz && (
                 <li>
                   <a
-                    href="/quiz"
+                    href="/quiz/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Style Quiz
@@ -376,7 +376,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.budgetCalculator && (
                 <li>
                   <a
-                    href="/calculator"
+                    href="/calculator/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Cost Calculator
@@ -386,7 +386,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.guides && (
                 <li>
                   <a
-                    href="/guides"
+                    href="/guides/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Guides
@@ -396,7 +396,7 @@ const latestProjects = allProjects.slice(0, 3);
               {visible.resources && (
                 <li>
                   <a
-                    href="/resources"
+                    href="/resources/"
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     Resources
@@ -421,7 +421,7 @@ const latestProjects = allProjects.slice(0, 3);
               {latestProjects.map((p) => (
                 <li>
                   <a
-                    href={`/portfolio/${p.slug?.current ?? ''}`}
+                    href={`/portfolio/${p.slug?.current ?? ''}/`}
                     class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
                   >
                     {p.title}
@@ -430,7 +430,7 @@ const latestProjects = allProjects.slice(0, 3);
               ))}
               <li class="pt-xs">
                 <a
-                  href="/portfolio"
+                  href="/portfolio/"
                   class="inline-flex min-h-[44px] items-center gap-xs text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:text-primary-dark"
                 >
                   View all <span aria-hidden="true">→</span>
@@ -441,7 +441,7 @@ const latestProjects = allProjects.slice(0, 3);
             <p class="text-sm text-foreground/85 italic">
               Case studies are coming soon.{' '}
               <a
-                href="/portfolio"
+                href="/portfolio/"
                 class="text-link underline underline-offset-2 hover:text-primary-dark"
               >
                 See the portfolio →
@@ -566,7 +566,7 @@ const latestProjects = allProjects.slice(0, 3);
             ))
           ) : (
             <a
-              href="/privacy"
+              href="/privacy/"
               class="hit-44 relative underline underline-offset-2 transition-colors hover:text-link"
             >
               Privacy policy

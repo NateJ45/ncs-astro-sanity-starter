@@ -149,6 +149,7 @@ Each of these is a command, so none of them is a judgement call.
 - [ ] `npm run format:check` green
 - [ ] `npm run lint` green
 - [ ] `npm run check:links` green
+- [ ] No internal `href` without a trailing slash in the built HTML (files with an extension excepted); `trailingSlash: 'always'` is set (PORTS card 89)
 - [ ] `npm test` green (Playwright: smoke, axe light and dark, reflow, on
       chromium and a WebKit iPhone profile)
 - [ ] `npm run parity compare` green, or every difference deliberate and the

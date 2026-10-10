@@ -116,8 +116,8 @@ const updatedLabel =
 const schemas = [
   breadcrumbSchema([
     { name: 'Home', url: site.url },
-    { name: 'Journal', url: `${site.url}/journal` },
-    { name: entry.title ?? slug, url: `${site.url}/journal/${slug}` },
+    { name: 'Journal', url: `${site.url}/journal/` },
+    { name: entry.title ?? slug, url: `${site.url}/journal/${slug}/` },
   ]),
   blogPostingSchema(entry, coverOg ?? null),
 ];
@@ -140,7 +140,7 @@ const schemas = [
     <header class="bg-background">
       <div class="mx-auto max-w-3xl px-m pt-section-lg pb-l">
         <p class="mb-s text-xs tracking-widest text-foreground/80 uppercase">
-          <a href="/journal" class="transition-colors hover:text-primary-dark">Journal</a>
+          <a href="/journal/" class="transition-colors hover:text-primary-dark">Journal</a>
           {dateLabel && <span class="mx-xs">·</span>}
           {dateLabel && <time datetime={entry.publishedAt}>{dateLabel}</time>}
           {readMinutes > 0 && <span class="mx-xs">·</span>}
@@ -331,7 +331,7 @@ const schemas = [
       <StickyCTAChip
         client:idle
         label={journalPage?.stickyCtaLabel ?? 'Got a question?'}
-        href="/contact"
+        href="/contact/"
       />
     )
   }

@@ -24,7 +24,7 @@ interface Props {
 }
 
 const { entry, featured = false } = Astro.props as Props;
-const href = entry.slug?.current ? `/journal/${entry.slug.current}` : '#';
+const href = entry.slug?.current ? `/journal/${entry.slug.current}/` : '#';
 const primaryCategory = entry.categories?.[0];
 
 function formatDate(d?: string): string {

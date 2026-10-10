@@ -124,7 +124,7 @@ export function serviceListSchema(services: Service[] | null | undefined): strin
       position: i + 1,
       name: s.name,
       description: s.shortDescription,
-      url: s.slug?.current ? `${site.url}/services#${s.slug.current}` : `${site.url}/services`,
+      url: s.slug?.current ? `${site.url}/services/#${s.slug.current}` : `${site.url}/services/`,
       provider: { '@id': `${site.url}/#business` },
       ...(s.price ? { offers: { '@type': 'Offer', price: s.price, priceCurrency: 'USD' } } : {}),
     })),
@@ -198,7 +198,7 @@ export function projectSchema(project: Project, heroImageUrl: string | null): st
     '@type': 'CreativeWork',
     name: project.title,
     description: project.briefSummary,
-    url: project.slug?.current ? `${site.url}/portfolio/${project.slug.current}` : undefined,
+    url: project.slug?.current ? `${site.url}/portfolio/${project.slug.current}/` : undefined,
     image: heroImageUrl ?? undefined,
     creator: { '@id': `${site.url}/#business` },
     locationCreated: project.location ? { '@type': 'Place', name: project.location } : undefined,
@@ -226,8 +226,8 @@ export function blogPostingSchema(
   coverImageUrl: string | null,
 ): string {
   const url = entry.slug?.current
-    ? `${site.url}/journal/${entry.slug.current}`
-    : `${site.url}/journal`;
+    ? `${site.url}/journal/${entry.slug.current}/`
+    : `${site.url}/journal/`;
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
