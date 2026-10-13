@@ -22,6 +22,8 @@ import ServiceCard from '@/components/ServiceCard.astro';
 import TestimonialCard from '@/components/TestimonialCard.astro';
 import JournalCard from '@/components/JournalCard.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
+import ImageText from '@/components/sections/ImageText.astro';
+import ServiceAreaSection from '@/components/sections/ServiceAreaSection.astro';
 import { site } from '@/data/site';
 
 const image = {
@@ -40,6 +42,24 @@ const hero = {
   primaryCta: { label: 'Primary action', linkType: 'external', externalUrl: '/' },
   secondaryCta: { label: 'Secondary', linkType: 'external', externalUrl: '/' },
 } as const;
+
+// Portable Text for the image-and-text bands: one plain paragraph.
+const body = [
+  {
+    _type: 'block',
+    _key: 'fx-body',
+    style: 'normal',
+    markDefs: [],
+    children: [
+      {
+        _type: 'span',
+        _key: 'fx-span',
+        marks: [],
+        text: 'One paragraph of fixed copy so the text column has something to wrap.',
+      },
+    ],
+  },
+];
 
 const service = {
   name: 'Fixture service',
@@ -74,6 +94,45 @@ const entry = {
   </div>
   <div data-fx="hero-editorial">
     <Hero {...hero} backgroundImage={image} headingId="fx-h-editorial" variant="editorial" />
+  </div>
+
+  {
+    /* THE SHARED SPLIT WALL (PORTS.md card 90). Not shot by the visual suite (the pictures are
+      fixtures and the copy is not the point); it exists so `node scripts/measure-columns.mjs
+      <url> --paths /styleguide/layouts/` has real bands to measure: a picture on each side,
+      a text-and-card band, and a plain heading band for the column edge. */
+  }
+  <div data-fx="split-bands">
+    <SectionHeading
+      eyebrow="Columns"
+      headline="One split for every band"
+      headingId="fx-split"
+      class="mx-auto max-w-content px-m py-section-md"
+    />
+    <ImageText
+      image={image}
+      imageSide="right"
+      eyebrow="Picture right"
+      heading="Words on the left"
+      body={body}
+      headingId="fx-split-right"
+    />
+    <ImageText
+      image={image}
+      imageSide="left"
+      surface="muted"
+      eyebrow="Picture left"
+      heading="Words on the right"
+      body={body}
+      headingId="fx-split-left"
+    />
+    <ServiceAreaSection
+      eyebrow="Text and card"
+      headline="A second column that is not a picture"
+      description="It starts at the same seam."
+      travelFees={[{ distanceLabel: 'Up to 10 miles', fee: 'Included' }]}
+      headingId="fx-split-card"
+    />
   </div>
 
   <div data-fx="body">

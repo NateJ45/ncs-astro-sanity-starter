@@ -1136,7 +1136,18 @@ body::before {
 
 /* ---- hero: split. Dark text panel beside the image (stacked on phones, image
    first). The section is already bg-accent-dark with light text, so no colour
-   flips are needed; the scrim and the scroll cue are dropped. ---- */
+   flips are needed; the scrim and the scroll cue are dropped.
+
+   AT `lg` THE HERO TAKES THE SHARED SPLIT TOO (PORTS.md card 90). The section is
+   full width because the picture bleeds off the right edge, so it cannot be a
+   `.split` inside `max-w-content`. It lays the same column out as five tracks:
+   a margin (whatever the viewport has beyond the content column, never less than
+   the `px-m` page gutter), the text track, the gutter, the picture track and a
+   mirror margin. The text sits in the second track, so its left edge is the
+   content column's left edge like every other band; the picture starts at the
+   shared seam and runs to the viewport edge through the right margin track.
+   The two weights and the gutter are the same variables `.split` reads, so
+   changing them moves the hero and the bands together. ---- */
 section[data-hero='split'] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1161,18 +1172,31 @@ section[data-hero='split'] > div.relative {
 }
 @media (min-width: 1024px) {
   section[data-hero='split'] {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    /* `100%` is the section's own width, so the margin is half of what the
+       82.5rem container leaves over, plus the same gutter the bands use. */
+    --split-margin: max(
+      var(--spacing-m),
+      calc((100% - var(--container-content)) / 2 + var(--spacing-m))
+    );
+    grid-template-columns:
+      var(--split-margin) minmax(0, var(--split-text)) var(--split-gutter)
+      minmax(0, var(--split-media)) var(--split-margin);
   }
   section[data-hero='split'] > img,
   section[data-hero='split'] > .hero-slideshow {
-    grid-column: 2;
+    grid-column: 4 / -1;
     height: 100%;
     min-height: 30rem;
   }
   section[data-hero='split'] > div.relative {
-    grid-column: 1;
+    grid-column: 2;
     grid-row: 1;
-    padding-inline: var(--spacing-l);
+    /* The track is the column, so the box takes no width cap and no gutter of
+       its own (its `mx-auto max-w-content px-m` utilities are for the stacked
+       layout). Vertical padding is untouched. */
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
   }
 }
 
@@ -1185,6 +1209,58 @@ section[data-hero='editorial'] h1 {
   font-size: clamp(2.75rem, 7vw, 5.5rem);
   line-height: 0.98;
   letter-spacing: -0.035em;
+}
+
+/* ---- the shared split (PORTS.md card 90): ONE text/picture column split for
+   every band that puts words beside a picture.
+
+   WHY. Before this, the starter's text-plus-picture bands each declared their own
+   grid: equal halves on ImageText, FounderSection and ServiceAreaSection, 1fr/1.2fr
+   on StorySection, 1fr/1.1fr on the 404, and a plain 50/50 on the split hero that
+   also ignored the content column. Five different seams, so scrolling a page felt
+   like the column kept shifting under you, and no single band looked wrong.
+   Measure it with `node scripts/measure-columns.mjs <baseUrl> --paths <routes>`.
+
+   THE TOKENS. `--split-text` and `--split-media` are the two track weights (the
+   picture track is always the narrow one) and `--split-gutter` is the gap. The
+   weights are fr values because .split hands them straight to grid; the split hero
+   below needs the same ratio, so it takes the same two variables and lets the
+   browser share what is left of the content column between them. Nothing here is a
+   pixel value: the column is `max-w-content` (`--container-content`) less the
+   `px-m` gutter, the gap is the spacing scale's `--spacing-l`, and the seam falls
+   out of those. At 1280 that is a 651px text column, a 533px picture column and a
+   seam at x=723 (x=557 with the picture on the left); at the 82.5rem cap, 24px
+   further each side of it. A site changes the feel by changing these three lines,
+   never a band.
+
+   ONE SEAM, TWO ORIENTATIONS. `.split` puts the text first and the picture second.
+   `.split--media-first` mirrors the tracks so the picture leads and is still the
+   narrow one, so a band that flips sides is recognisably the same band flipped and
+   the seam lands on one of exactly two numbers per viewport.
+
+   ONE COLUMN BELOW `lg`, the breakpoint the phone pass already uses. Stacking order
+   is the component's: bands that lead with their picture keep it first in the DOM
+   and flip with `lg:order-*`, so the phone reading order is unchanged.
+
+   THE TRAP. This file is unlayered, so it beats every Tailwind utility: a
+   `lg:gap-12` on an element that carries `.split` silently loses to
+   --split-gutter. A band that really needs another gutter does not want .split. */
+:root {
+  --split-text: 1.1fr;
+  --split-media: 0.9fr;
+  --split-gutter: var(--spacing-l);
+}
+.split {
+  display: grid;
+  gap: var(--split-gutter);
+}
+@media (width >= 64rem) {
+  .split {
+    grid-template-columns: minmax(0, var(--split-text)) minmax(0, var(--split-media));
+  }
+  .split--media-first {
+    grid-template-columns: minmax(0, var(--split-media)) minmax(0, var(--split-text));
+  }
 }
 
 /* ---- density: section rhythm. The section paddings are the two tokens below;

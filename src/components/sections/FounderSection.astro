@@ -29,25 +29,29 @@ const {
 <section class="bg-background" aria-labelledby={headingId}>
   <div
     data-reveal
-    class="mx-auto grid max-w-content grid-cols-1 items-center gap-l px-m py-section-lg md:grid-cols-2 md:gap-section-md"
+    class="split split--media-first mx-auto max-w-content items-center px-m py-section-lg"
   >
     {
+      /* THE SHARED SPLIT (PORTS.md card 90): portrait leads, so it takes the mirrored
+        variant (narrow picture track on the left). See `.split` in globals.css. */
+    }
+    {
       portrait?.asset ? (
-        <div class="order-1 md:order-1">
+        <div class="order-1">
           <SanityImage
             source={portrait}
             width={800}
-            sizes="(min-width: 768px) 45vw, 100vw"
+            sizes="(min-width: 1024px) 45vw, 100vw"
             quality={75}
             class="h-auto w-full rounded-md"
           />
         </div>
       ) : (
-        <div class="order-1 aspect-[4/5] rounded-md bg-muted md:order-1" aria-hidden="true" />
+        <div class="order-1 aspect-[4/5] rounded-md bg-muted" aria-hidden="true" />
       )
     }
 
-    <div class="order-2 md:order-2">
+    <div class="order-2">
       <p class="mb-s text-xs tracking-[0.22em] text-foreground/80 uppercase">{eyebrow}</p>
       <h2 id={headingId} class="font-display text-h2 text-foreground">{headline}</h2>
       {
@@ -62,7 +66,7 @@ const {
           </p>
         )
       }
-      <div class="mt-l flex justify-center md:justify-start">
+      <div class="mt-l flex justify-center lg:justify-start">
         <CtaLink cta={cta} variant="secondary" fallbackHref="/about/" fallbackLabel="Learn More" />
       </div>
     </div>

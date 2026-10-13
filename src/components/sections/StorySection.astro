@@ -35,16 +35,19 @@ const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
 ---
 
 <section class={bg} aria-labelledby={headingId}>
-  <div
-    class="mx-auto grid max-w-content grid-cols-1 items-start gap-l px-m py-section-lg md:grid-cols-[1fr_1.2fr] md:gap-section-md"
-  >
-    <div class="md:sticky md:top-section-lg">
+  {
+    /* THE SHARED SPLIT (PORTS.md card 90): the portrait is the narrow track and leads, so
+      this band takes `.split--media-first`. It used to be 1fr / 1.2fr at `md`, which put
+      its seam somewhere no other band's was. */
+  }
+  <div class="split split--media-first mx-auto max-w-content items-start px-m py-section-lg">
+    <div class="lg:sticky lg:top-section-lg">
       {
         portrait?.asset ? (
           <SanityImage
             source={portrait}
             width={900}
-            sizes="(min-width: 768px) 40vw, 100vw"
+            sizes="(min-width: 1024px) 40vw, 100vw"
             quality={75}
             class="h-auto w-full rounded-md"
           />
