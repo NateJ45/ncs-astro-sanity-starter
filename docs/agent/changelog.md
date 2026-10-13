@@ -1,6 +1,6 @@
 # Change history
 
-_2026-10-13: one text/picture split on every band, and `scripts/measure-columns.mjs` (PORTS card 90)._
+_2026-10-13: one text/picture split on every band, and `scripts/measure-columns.mjs` (PORTS card 91)._
 
 **Decision.** Ported from stonesteps-50k PR #31. The starter's text-plus-picture bands each declared their own grid (equal
 halves, 1fr/1.2fr, 1fr/1.1fr, a 50/50 hero that ignored the content column), so the seam between words and picture sat in

@@ -1,5 +1,5 @@
 // Starter-only test (not PORTABLE): checks scripts/lib/column-alignment.mjs, the
-// judgement half of scripts/measure-columns.mjs (PORTS.md card 90).
+// judgement half of scripts/measure-columns.mjs (PORTS.md card 91).
 //
 // Part 1 feeds the pure analyser measured geometry and needs no browser. Part 2
 // serves a small fixture page, runs the real script against it in headless

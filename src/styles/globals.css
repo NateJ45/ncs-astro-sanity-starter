@@ -1138,7 +1138,7 @@ body::before {
    first). The section is already bg-accent-dark with light text, so no colour
    flips are needed; the scrim and the scroll cue are dropped.
 
-   AT `lg` THE HERO TAKES THE SHARED SPLIT TOO (PORTS.md card 90). The section is
+   AT `lg` THE HERO TAKES THE SHARED SPLIT TOO (PORTS.md card 91). The section is
    full width because the picture bleeds off the right edge, so it cannot be a
    `.split` inside `max-w-content`. It lays the same column out as five tracks:
    a margin (whatever the viewport has beyond the content column, never less than
@@ -1211,7 +1211,7 @@ section[data-hero='editorial'] h1 {
   letter-spacing: -0.035em;
 }
 
-/* ---- the shared split (PORTS.md card 90): ONE text/picture column split for
+/* ---- the shared split (PORTS.md card 91): ONE text/picture column split for
    every band that puts words beside a picture.
 
    WHY. Before this, the starter's text-plus-picture bands each declared their own

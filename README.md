@@ -100,7 +100,7 @@ Chromium and a real WebKit iPhone profile, because that is where a Tailwind focu
 on a `<select>` turns out to be invisible.
 
 Two more workflows ship dormant, gated on repo secrets and variables that do not exist
-in the template: `sanity-backup.yml` (nightly encrypted dataset export) and `uptime.yml`
+in the template: `sanity-backup.yml` (nightly encrypted dataset export: full on Mondays and manual runs, documents only other nights, kept 14 days) and `uptime.yml`
 (hourly 200 check on four key pages). Set the secrets and uncomment the schedule to turn
 either on. `publish-due.yml` works the same way.
 

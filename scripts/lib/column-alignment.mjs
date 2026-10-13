@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// scripts/lib/column-alignment.mjs  (PORTS.md card 90)
+// scripts/lib/column-alignment.mjs  (PORTS.md card 91)
 //
 // The pure half of scripts/measure-columns.mjs: takes the geometry the script
 // reads out of a page with getBoundingClientRect and says whether the page keeps

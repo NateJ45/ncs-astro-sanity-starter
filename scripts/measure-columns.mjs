@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// scripts/measure-columns.mjs  (PORTS.md card 90)
+// scripts/measure-columns.mjs  (PORTS.md card 91)
 //
 // Reports, per page, where every section starts its column and where every
 // text-plus-picture band puts its seam, measured with getBoundingClientRect in
@@ -19,7 +19,7 @@
 //   - the left edge of the first h1/h2/h3 in each section, and the outer left edge of
 //     each split band. The "edge" is the most common value on the page, so a site
 //     with a different container or gutter reports against itself, not a constant.
-//   - a split band is any `.split` element (the shared grid in globals.css, card 90),
+//   - a split band is any `.split` element (the shared grid in globals.css, card 91),
 //     any other two-track grid with a picture in one column (reported as `grid`, so a
 //     site that has not adopted `.split` can still be measured), or a
 //     `section[data-hero="split"]` hero, with two columns side by side. Its seam is
