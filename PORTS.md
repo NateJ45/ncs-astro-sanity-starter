@@ -208,6 +208,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 88  | Cloudflare beacon starts after load and idle, not deferred in head             | n/a     | no          | no       | no               | no            | no             | n/a                | staged              | no             |
 | 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`) | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | no                  | yes            |
 | 90  | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 91  | One text/picture column split (`.split`) and `measure-columns.mjs`             | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 92  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | staged      | yes      | staged           | yes           | no             | n/a                | yes                 | staged         |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -7515,6 +7516,81 @@ the PR).
 **Status.** Workflow: starter, presacademy, reid-design-site, stonesteps-50k, fbcm and mas-monograms, 2026-10-13.
 `docs/RESTORE-DRILL.md` sync to the sites: pending the starter merge. Sites without a `sanity-backup.yml` (wcp,
 2ndpreschicago, nixoncreativestudio): n/a.
+
+## Card 91: Every text-plus-picture band uses one split, and `measure-columns.mjs` measures it (2026-10-13)
+
+**Origin:** stonesteps-50k PR #31 "Every section starts its column in the same place" (merged 2026-09-18). The complaint was
+that section titles and the objects under them did not start at the same place and the site read as unfinished. Measured at
+1280 it was true three ways: seven components carried five different two-column grids (so the seam between words and picture
+landed at x=720, 678, 660, 752 and 749 on five consecutive scrolls), three objects were centred under headings that sat on the
+left edge, and one band set its own 72rem box inside the page's 82.5rem one. The starter had the same disease in a milder
+form: equal halves on `ImageText`, `FounderSection` and `ServiceAreaSection`, 1fr/1.2fr on `StorySection`, 1fr/1.1fr on the
+404, a plain 50/50 on the split hero (whose text started at x=0 plus its own padding, not on the content column), all at `md`.
+
+**The change.** Three custom properties on `:root` in `globals.css` and one grid class:
+
+- `--split-text: 1.1fr`, `--split-media: 0.9fr`, `--split-gutter: var(--spacing-l)`. The ratio is Stone Steps' (the page header
+  and course features already agreed on it, it gives prose about a 65 character measure, and the picture is always the narrow
+  track). Stone Steps wrote the numbers it measured (text 656, picture 536, gutter 40); the starter derives them: the column is
+  `--container-content` (82.5rem) less the `px-m` gutter, and the gutter is the spacing scale's `--spacing-l`. At 1280 that is
+  text 651, picture 533, gutter 48, seam at x=723 (x=605 with the picture on the left). A site changes the feel by editing
+  those three lines, never a band.
+- `.split` (text first) and `.split--media-first` (mirrored, so the picture leads and is still the narrow one). One column
+  below `lg`, so a 768px tablet does not show a half-width picture beside three words. Bands that lead with their picture keep
+  it first in the DOM and flip with `lg:order-*`, so the phone reading order does not change.
+- The split hero (`section[data-hero='split']`) cannot be a `.split` inside `max-w-content` because its picture bleeds to the
+  viewport edge. From `lg` it lays out five tracks (margin, text, gutter, picture, margin) from the same two weights and the
+  same gutter, so its text starts on the content column's left edge and its picture starts at the shared seam.
+- Adopted by `ImageText`, `FounderSection`, `StorySection`, `ServiceAreaSection` and the 404. Not touched, on purpose:
+  `AboutPersonal` (two columns of cards), `FeaturedWork`/`FeaturedJournal` (a lead item and a list, 1.55fr/1fr), the form rows
+  and the grids of three or four cards. A split is a band with words beside a picture; a grid of peers is another thing.
+- Stone Steps' other two rules (objects span the column or sit on its left edge; nothing centred at desktop) are about
+  objects that site draws (a tilted notice, a cut-out portrait), and the starter has none of them: its pictures are
+  `w-full` and its headings are `align` left by default (rule 17).
+
+**The instrument.** `node scripts/measure-columns.mjs <baseUrl> [--width 1280] [--paths /,/about/] [--json out.json]`
+(`PORTABLE`, with `scripts/lib/column-alignment.mjs` the pure analyser, `PORTABLE`, and `column-alignment.test.mjs`, starter
+only, 8 pure cases plus 3 that drive the real script in Chromium and skip without it). It reads each section's first
+heading and each two-column band with `getBoundingClientRect`, takes the page's column edge as the most common left edge
+(not a constant), groups seams by which side the picture is on, and exits 1 on a heading or band off the edge, a seam more
+than 1px from its group, or a `.split` band not in the `--split-text : --split-media` ratio. It also finds any other two-track
+grid with a picture in a column (`grid`), so a site that has NOT adopted `.split` can be measured for the before number.
+Centred headings are listed and exempt. Pass `MSYS_NO_PATHCONV=1` in Git Bash or `--paths /` becomes a Windows path.
+`/styleguide/layouts/` now carries a `data-fx="split-bands"` region (a picture on each side, a text-and-card band, a plain
+heading band) so there is something to measure on a build with no Sanity project; the visual suite does not shoot it.
+
+**Proof (starter build, 7 routes, 1280px):**
+
+|                                | before                                                | after                   |
+| ------------------------------ | ----------------------------------------------------- | ----------------------- |
+| Seams, picture right (3 bands) | 678, 678, 640 (hero), spread 38.4px                   | 723, 723, 723, spread 0 |
+| Seam, picture left             | 678 (equal halves, so it read as "picture right")     | 605                     |
+| Hero text left edge            | 0 (padding inside the box), off the column edge of 24 | 24                      |
+| Misaligned                     | 2                                                     | 0                       |
+
+At 1024 the spread went 30.7 to 0 and at 1920 40 to 0, with the edge on 324. At 390 every band stacks and only the edge rule
+applies (0 misaligned). Reflow sweep at 320, 390, 768, 1023, 1024, 1280 and 1920 over four routes: 0 horizontal overflows.
+Fallback content has no split bands on the real routes, so the numbers come from the layouts wall plus the 404.
+
+**Visual baselines.** Five committed baselines move, all in `tests/visual/__screenshots__/layouts.spec.ts/` and all at 1280:
+`hero-split-1280.png` (the split hero's picture column is now 557px, not 640px, and its text sits on the column edge) and,
+because the split hero's height changed and every region below it sits a sub-pixel lower, `hero-editorial-1280.png` and
+`cards-standard-1280.png`, `cards-outline-1280.png`, `cards-soft-1280.png` (each failed by one pixel of height).
+`hero-split-390.png` is byte-identical, and so are the 390 shots, the density, header and bleed shots (within tolerance)
+and both styleguide shots. The `visual.yml` regenerate (`update: true`) rewrites every baseline with renderer drift, so
+keep only the files that fail the check and restore the rest. Regenerate in CI, never on Windows. The `split-bands` wall
+sits after every shot region on purpose: content placed before them moved the 390 cards shots by a pixel too.
+
+**Which sites take it (optional per site; this card changes no site).** The `.split` block is a stylesheet addition plus a
+class swap on the band components, so it is a per-site port, not a `sync-check` drift. reid-design-site (`ImageText`,
+`AboutStory`, `ServiceArea`) and fbcm (`ImageText`, not a matrix column) carry the starter's own section components and are the
+direct fits. presacademy, mas-monograms, 2ndpreschicago and nixoncreativestudio have no section files by those names; run
+`measure-columns.mjs` on each and adopt only if it reports more than one seam. Adapting: keep the two weights at the site's
+house ratio, replace each band's own grid with `.split` (and `lg:order-*` for the flip), raise any `md` split to `lg`, and
+mind that `.split` is unlayered, so a Tailwind `gap-*` on the same element loses to `--split-gutter`.
+
+**Status.** Starter: merged with this PR. stonesteps-50k: the source, with its own measured numbers and its own
+object-alignment rules. Every other site: not adopted.
 
 ## Card 92: Dependabot pins `astro` with its adapter and gives formatters their own group (2026-10-13)
 

@@ -33,17 +33,27 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
 ---
 
 <section class={bg} aria-labelledby={heading ? headingId : undefined}>
+  {
+    /* THE SHARED SPLIT (PORTS.md card 91). `.split` in globals.css is the one text/picture
+      column split; the picture takes the narrow track on whichever side it is on, so
+      `.split--media-first` mirrors the tracks. The picture stays first in the DOM and the
+      side is chosen with `lg:order-*`, so the stacked phone order (picture, then words) is
+      unchanged. */
+  }
   <div
-    class="mx-auto grid max-w-content grid-cols-1 items-center gap-l px-m py-section-lg md:grid-cols-2 md:gap-section-md"
+    class:list={[
+      'split mx-auto max-w-content items-center px-m py-section-lg',
+      imageFirst && 'split--media-first',
+    ]}
     data-reveal
   >
-    <div class:list={[imageFirst ? 'md:order-1' : 'md:order-2']}>
+    <div class:list={[imageFirst ? 'lg:order-1' : 'lg:order-2']}>
       {
         image?.asset ? (
           <SanityImage
             source={image}
             width={800}
-            sizes="(min-width: 768px) 45vw, 100vw"
+            sizes="(min-width: 1024px) 45vw, 100vw"
             quality={75}
             class="h-auto w-full rounded-md"
           />
@@ -53,7 +63,7 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
       }
     </div>
 
-    <div class:list={[imageFirst ? 'md:order-2' : 'md:order-1']}>
+    <div class:list={[imageFirst ? 'lg:order-2' : 'lg:order-1']}>
       {
         eyebrow && (
           <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">{eyebrow}</p>

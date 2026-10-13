@@ -23,6 +23,8 @@ Use the Playwright MCP for screenshot-and-compare loops:
 4. Compare against the intent (spec, mockup, or prior screenshot)
 5. If something's off, fix and re-screenshot. Don't ship a change you haven't seen rendered.
 
+For a change that touches a band's columns, measure instead of squinting: build, `npm run serve:dist`, then `node scripts/measure-columns.mjs http://localhost:4321 --width 1280 --paths /,/about/,/styleguide/layouts/` (PORTS.md card 91). It reports the column edge and every text-and-picture seam, and exits 1 when a band is off them. Quote the number before and after.
+
 For accessibility-affecting changes, run Lighthouse on the changed page before opening a PR. Targets: 100/100/100/100 desktop. Defend them — when a score drops, find out why before merging.
 
 For Sanity Studio testing (schema or structure changes), run `npm run dev` and open `/studio` in a real browser with the console open. The Studio is the editor's UI; broken Studio = broken editor workflow, and a schema error passes the build and only surfaces at browser runtime.

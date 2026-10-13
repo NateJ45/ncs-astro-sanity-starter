@@ -58,7 +58,7 @@ Numbering is load-bearing; other docs cite it. Rules 1 to 7 and 10 are in full b
 14. **A capability is added with its scaffold markers in the same commit,** or `npm run scaffold -- --remove` silently leaves it behind. Full text: `.claude/rules/scaffold.md`.
 15. **Anything computable from data is derived at build time,** never stored as a field an editor can retype. Full text: `.claude/rules/sanity-schema.md`.
 16. **Retiring data is a backup-then-delete script, run dry first,** never a raw delete. Full text: `.claude/rules/data-scripts.md`.
-17. **One grammar per page:** one heading system, one left edge, one button family. Full text: `.claude/rules/ui-grammar.md`.
+17. **One grammar per page:** one heading system, one left edge, one text/picture split (`.split`, PORTS.md card 91), one button family. Check with `node scripts/measure-columns.mjs`. Full text: `.claude/rules/ui-grammar.md`.
 18. **Layout variants are a config axis** (`brand.config.json` `layout`: header, hero, density, cards); a default emits nothing, so existing sites do not move. Full text: `.claude/rules/brand-reskin.md`.
 19. **Internal page links end in a slash** (`/about/`), matching `trailingSlash: 'always'`, canonicals and the sitemap; a bare `/about` 307s and Search Console reports "Page with redirect". Hand-written hrefs carry it; hrefs built from data go through `withTrailingSlash()` (`src/lib/href.ts`, PORTABLE). Files, `#anchors`, `mailto:`/`tel:`, `/studio`, `/api` are left alone. Full text: PORTS.md card 89.
 

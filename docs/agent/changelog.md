@@ -1,5 +1,26 @@
 # Change history
 
+_2026-10-13: one text/picture split on every band, and `scripts/measure-columns.mjs` (PORTS card 91)._
+
+**Decision.** Ported from stonesteps-50k PR #31. The starter's text-plus-picture bands each declared their own grid (equal
+halves, 1fr/1.2fr, 1fr/1.1fr, a 50/50 hero that ignored the content column), so the seam between words and picture sat in
+four places and the split hero's text did not start on the column edge. `globals.css` now has `--split-text: 1.1fr`,
+`--split-media: 0.9fr` and `--split-gutter: var(--spacing-l)` on `:root`, `.split` and `.split--media-first`, and the split
+hero builds five tracks from the same variables. `ImageText`, `FounderSection`, `StorySection`, `ServiceAreaSection` and the
+404 use it, at `lg` rather than `md`, so a tablet stacks instead of showing a half-width picture. Nothing is a pixel value:
+the numbers come out of the 82.5rem container, the `px-m` gutter and the spacing scale (text 651, picture 533, seam at 723
+at 1280, against Stone Steps' 656, 536 and 720). Stone Steps' rules about centred objects have no counterpart here, because
+the starter's pictures are full width and its headings left aligned.
+
+**The instrument.** `scripts/measure-columns.mjs` (and the pure `scripts/lib/column-alignment.mjs`, with its test) reads each
+section's heading and each two-column band with `getBoundingClientRect` and reports the column edge and the seam per page. On
+the layouts wall at 1280 the seams went from 678, 678 and 640 (spread 38px) to 723 on all three, and the hero text from x=0
+to the column edge at 24. `/styleguide/layouts/` gained a `split-bands` region so a no-Sanity build has bands to measure. Five
+baselines move, regenerated in CI: `hero-split-1280.png` and the four 1280 shots below it that the taller or shorter hero shifted by a pixel (`hero-editorial`, `cards-standard`, `cards-outline`, `cards-soft`). Four lessons from doing it: the `grid`
+fallback (any two-track grid with a picture) is what makes the BEFORE number measurable on a site without `.split`; a band's
+first heading can sit in the second column, so the edge rule judges a band by its outer edge; Git Bash rewrites `--paths /`
+unless `MSYS_NO_PATHCONV=1`; and `.split` is unlayered, so a `gap-*` utility on the same element silently loses.
+
 _2026-10-09: internal links end in a slash (PORTS card 89)._
 
 **Decision.** `astro.config.mjs` sets `trailingSlash: 'always'`, matching the canonical tags and the sitemap. Before this, every internal link was written `/about`, Cloudflare answered each one with a 307, and Search Console reported "Page with redirect". Hand-written hrefs now carry the slash; links built from Sanity data (nav, footer, CTA blocks, Portable Text link marks, `/journal/<slug>` queries, JSON-LD urls) go through `withTrailingSlash()` in `src/lib/href.ts`. `/api/contact/`, `/api/draft-mode/enable/` and the other SSR URLs use the slash form too. Built-HTML check: 135 of 231 internal hrefs lacked the slash before, 0 after.
