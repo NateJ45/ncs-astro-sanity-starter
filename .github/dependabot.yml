@@ -47,6 +47,12 @@ updates:
         update-types:
           - minor
           - patch
+        # Formatters belong to the group above. A refresh of an older bundle
+        # ignores group order and pulls them back in, so exclude them here too
+        # (starter PORTS.md card 92).
+        exclude-patterns:
+          - prettier
+          - 'prettier-plugin-*'
     ignore:
       # No major bumps from Dependabot. Majors wait for ONE planned,
       # starter-first stack upgrade (Astro, the Cloudflare adapter, Sanity,
