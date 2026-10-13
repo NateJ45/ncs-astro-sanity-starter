@@ -15,8 +15,8 @@ the starter's pictures are full width and its headings left aligned.
 **The instrument.** `scripts/measure-columns.mjs` (and the pure `scripts/lib/column-alignment.mjs`, with its test) reads each
 section's heading and each two-column band with `getBoundingClientRect` and reports the column edge and the seam per page. On
 the layouts wall at 1280 the seams went from 678, 678 and 640 (spread 38px) to 723 on all three, and the hero text from x=0
-to the column edge at 24. `/styleguide/layouts/` gained a `split-bands` region so a no-Sanity build has bands to measure. The
-only committed baseline that moves is `hero-split-1280.png`, regenerated in CI. Four lessons from doing it: the `grid`
+to the column edge at 24. `/styleguide/layouts/` gained a `split-bands` region so a no-Sanity build has bands to measure. Five
+baselines move, regenerated in CI: `hero-split-1280.png` and the four 1280 shots below it that the taller or shorter hero shifted by a pixel (`hero-editorial`, `cards-standard`, `cards-outline`, `cards-soft`). Four lessons from doing it: the `grid`
 fallback (any two-track grid with a picture) is what makes the BEFORE number measurable on a site without `.split`; a band's
 first heading can sit in the second column, so the edge rule judges a band by its outer edge; Git Bash rewrites `--paths /`
 unless `MSYS_NO_PATHCONV=1`; and `.split` is unlayered, so a `gap-*` utility on the same element silently loses.

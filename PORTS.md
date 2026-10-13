@@ -7531,10 +7531,14 @@ At 1024 the spread went 30.7 to 0 and at 1920 40 to 0, with the edge on 324. At 
 applies (0 misaligned). Reflow sweep at 320, 390, 768, 1023, 1024, 1280 and 1920 over four routes: 0 horizontal overflows.
 Fallback content has no split bands on the real routes, so the numbers come from the layouts wall plus the 404.
 
-**Visual baselines.** The only committed baseline that moves is `tests/visual/__screenshots__/layouts.spec.ts/hero-split-1280.png`
-(the split hero's picture column is now 557px, not 640px, and its text sits on the column edge). `hero-split-390.png`, every
-other hero, density, header and cards shot and both styleguide shots do not change. Regenerate it in CI
-(`visual.yml` with `update: true`), never on Windows.
+**Visual baselines.** Five committed baselines move, all in `tests/visual/__screenshots__/layouts.spec.ts/` and all at 1280:
+`hero-split-1280.png` (the split hero's picture column is now 557px, not 640px, and its text sits on the column edge) and,
+because the split hero's height changed and every region below it sits a sub-pixel lower, `hero-editorial-1280.png` and
+`cards-standard-1280.png`, `cards-outline-1280.png`, `cards-soft-1280.png` (each failed by one pixel of height).
+`hero-split-390.png` is byte-identical, and so are the 390 shots, the density, header and bleed shots (within tolerance)
+and both styleguide shots. The `visual.yml` regenerate (`update: true`) rewrites every baseline with renderer drift, so
+keep only the files that fail the check and restore the rest. Regenerate in CI, never on Windows. The `split-bands` wall
+sits after every shot region on purpose: content placed before them moved the 390 cards shots by a pixel too.
 
 **Which sites take it (optional per site; this card changes no site).** The `.split` block is a stylesheet addition plus a
 class swap on the band components, so it is a per-site port, not a `sync-check` drift. reid-design-site (`ImageText`,
