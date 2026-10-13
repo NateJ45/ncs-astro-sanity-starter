@@ -208,6 +208,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 88  | Cloudflare beacon starts after load and idle, not deferred in head             | n/a     | no          | no       | no               | no            | no             | n/a                | staged              | no             |
 | 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`) | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | no                  | yes            |
 | 90  | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 92  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | staged      | yes      | staged           | yes           | no             | n/a                | yes                 | staged         |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7514,3 +7515,35 @@ the PR).
 **Status.** Workflow: starter, presacademy, reid-design-site, stonesteps-50k, fbcm and mas-monograms, 2026-10-13.
 `docs/RESTORE-DRILL.md` sync to the sites: pending the starter merge. Sites without a `sanity-backup.yml` (wcp,
 2ndpreschicago, nixoncreativestudio): n/a.
+
+## Card 92: Dependabot pins `astro` with its adapter and gives formatters their own group (2026-10-13)
+
+**Origin:** a family-wide read of every failed `CI` run since 2026-09-20 (2026-10-13). Two mechanical causes kept
+Dependabot's `minor-and-patch` bundle red, so a red bundle stopped meaning a real bug. **Canonical:**
+`.github/dependabot.yml` (not `PORTABLE:` marked: each site keeps its own comments and ignore extras), with
+`docs/agent/deployment.md` "Dependabot" and `.claude/rules/dependencies.md` rule 8.
+
+**1. A lone `astro` minor breaks the build.** The bundle bumped `astro` 7.2.9 to 7.3.8 while `@astrojs/cloudflare`
+stayed on its pin (14.2.4, card 62's ignore list). Astro 7.3 no longer exports `beginContentEntryCollection`, which the
+adapter imports from `astro/app`, so `astro build` died with `[MISSING_EXPORT]` (starter run 38366446442, fbcm
+38366439425, stonesteps-50k 38330683556). The adapter imports Astro internals, so even an Astro patch can do this.
+`astro` now sits on the ignore list next to the adapter and wrangler and moves with them by hand, in a planned stack
+session with a real deploy test (vault gotcha `wrangler-bump-needs-real-deploy-test`). `@astrojs/*` integrations
+(react, sitemap, mdx) still flow as minors and patches; only the adapter couples to Astro's internals.
+
+**2. A formatter bump reds the whole bundle.** `prettier` and the `prettier-plugin-*` packages ride in the bundle, and a
+release that changes output fails `format:check` on files nobody touched. They now get a `formatters` group, listed
+ABOVE `minor-and-patch` (Dependabot puts a dependency in the first group that matches). If it reformats, only that small
+PR goes red: run `npm run format` on its branch and push (a human push re-triggers CI; a `GITHUB_TOKEN` push from a bot
+autofix would not, which is why there is no autofix job). Formatter MAJORS stay under card 62's `'*'` major ignore:
+prettier-plugin-astro 1.x (which reformats 33 to 91 `.astro` files per repo) is taken once per repo in the planned
+starter-first major upgrade, not from a Dependabot PR.
+
+**Adapt per site:** add the two blocks to the npm entry; keep the site's existing comments, quoting style and extra
+ignores. A site whose adapter is newer (14.3.x) still pins `astro`: the next Astro minor can break 14.3 the same way.
+Exception: a site that lets the adapter and wrangler flow too (nixoncreativestudio) does NOT pin `astro`: there astro and the adapter ride the same bundle and cannot split, so it takes only the `formatters` group. When the stack is moved by hand, the `astro` ignore stays; the bump happens in `package.json` and the lockfile.
+
+**Status.** Starter: merged with this PR. mas-monograms #100 and nixoncreativestudio #124 merged 2026-10-13 (their
+comments cite "card 90": this card was renumbered from 90 to 92 after the Sanity backup card took 90 first; fixed in a
+follow-up). presacademy, reid-design-site, stonesteps-50k and fbcm (no matrix column): `staged`, one PR each after
+card 62's major ignore merged there on 2026-10-13. 2ndpreschicago is dormant and wcp archived: not taken.
