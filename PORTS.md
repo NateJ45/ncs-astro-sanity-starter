@@ -210,6 +210,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 90  | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
 | 91  | One text/picture column split (`.split`) and `measure-columns.mjs`             | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 92  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | staged      | yes      | staged           | yes           | no             | n/a                | yes                 | staged         |
+| 93  | SanityImage srcset ladder starts at 160w; `sizes` trims dead steps             | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | n/a                 | staged         |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7623,3 +7624,36 @@ Exception: a site that lets the adapter and wrangler flow too (nixoncreativestud
 comments cite "card 90": this card was renumbered from 90 to 92 after the Sanity backup card took 90 first; fixed in a
 follow-up). presacademy, reid-design-site, stonesteps-50k and fbcm (no matrix column): `staged`, one PR each after
 card 62's major ignore merged there on 2026-10-13. 2ndpreschicago is dormant and wcp archived: not taken.
+
+## Card 93: SanityImage's srcset ladder starts at 160w, not 400w (2026-10-13)
+
+**Origin:** a perf read of presacademy and mas-monograms on 2026-10-13. The ladder started at 400w, so every small slot
+downloaded a file 1.4 to 2x the bytes it painted. The clearest case: presacademy's `CourseCard` thumbnail is 112px wide
+on a phone (`sizes="... 7rem"`) and requested the 400w candidate.
+
+**The change.** `src/lib/imageLadder.ts` (new; pure functions, no imports) holds `LADDER_STEPS =
+[160, 240, 320, 400, 600, 700, 800, 900, 1200, 1600, 2400]` and `buildLadder(width, sizes)`. `SanityImage.astro` replaces
+its inline `BREAKPOINTS` filter with one call. `imageLadder.test.ts` asserts the ladder, the cap at `width`, and that
+every slot needing 400px or more picks the same candidate as the old ladder (a model of the browser rule: the smallest
+candidate at least as wide as slot x DPR). A 112px slot at DPR 1 now picks 160w (was 400w), at DPR 2 240w, at DPR 3 400w.
+
+**`sizes` makes it data-driven.** When the caller passes `sizes` and every entry is a `px`, `vw`, `rem` or `em` length
+(optional media conditions; `min-width` raises the viewport a `vw` is read at, otherwise 320px), steps below 75% of the
+smallest slot are dropped from the srcset: `sizes="600px"` loses 160 and 240, `100vw` loses 160. Anything unreadable
+(`calc()`, `clamp()`, `%`) keeps the full ladder. The last candidate is always `width`, so the srcset is never empty.
+
+**Gotcha: no `sizes`, no gain.** The default `sizes` is `(max-width: {width}px) 100vw, {width}px`, which tells the browser
+the image fills the viewport; the small steps are never picked. Give every thumbnail an honest `sizes`.
+
+**Not `PORTABLE`.** `SanityImage.astro` is "Foundation, edit with care" and each site's copy carries its own props (presacademy
+`defer`, mas-monograms `style`, reid-design-site `defer` and hotspot position, stonesteps-50k `defer`, fbcm `style`), so
+`sync-check` does not gate it and the site PRs were not held for the starter. A site takes the card by: copy
+`src/lib/imageLadder.ts` and its test, add `import { buildLadder } from '@/lib/imageLadder';`, and replace the
+`BREAKPOINTS`/`widths` block with `const widths = buildLadder(width, sizes);`. The ladder block was byte-identical in
+all five site copies, so nothing else in the component changes.
+
+**Proof.** `node --experimental-strip-types --test src/lib/imageLadder.test.ts`: 9 pass. Live image bytes before and after
+per site are in the Status below.
+
+**Status.** Starter: merged with this PR. presacademy, mas-monograms, reid-design-site, stonesteps-50k, fbcm (no matrix
+column): `staged`. wcp, 2ndpreschicago and nixoncreativestudio have no `SanityImage`: n/a.
