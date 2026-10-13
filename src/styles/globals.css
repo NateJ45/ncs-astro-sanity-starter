@@ -1229,7 +1229,7 @@ section[data-hero='editorial'] h1 {
    pixel value: the column is `max-w-content` (`--container-content`) less the
    `px-m` gutter, the gap is the spacing scale's `--spacing-l`, and the seam falls
    out of those. At 1280 that is a 651px text column, a 533px picture column and a
-   seam at x=723 (x=557 with the picture on the left); at the 82.5rem cap, 24px
+   seam at x=723 (x=605 with the picture on the left); at the 82.5rem cap, 24px
    further each side of it. A site changes the feel by changing these three lines,
    never a band.
 

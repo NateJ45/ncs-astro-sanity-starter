@@ -58,14 +58,13 @@ export function collect() {
   const all = [...document.querySelectorAll('section')].filter(
     (s) => !s.closest('header, footer, nav') && !s.parentElement.closest('section') && visible(s),
   );
-  for (const s of all) {
+  for (const [i, s] of all.entries()) {
     const heading = [...s.querySelectorAll('h1, h2, h3')].find(visible);
     const row = {
       label: (
         (heading && heading.textContent) ||
         s.getAttribute('aria-label') ||
-        s.className ||
-        'section'
+        `(no heading) section ${i + 1}`
       )
         .trim()
         .replace(/\s+/g, ' ')
@@ -101,9 +100,10 @@ export function collect() {
       let kind = 'band';
       if (!band) {
         kind = 'grid';
-        band = [...s.querySelectorAll('div')].slice(0, 60).find((el) => {
+        band = [s, ...s.querySelectorAll('div')].slice(0, 60).find((el) => {
           if (getComputedStyle(el).display !== 'grid') return false;
-          if (getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length !== 2) return false;
+          if (getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length !== 2)
+            return false;
           const two = [...el.children].filter(visible).slice(0, 2);
           const pic = 'img, picture, svg, canvas, video, figure';
           return two.length === 2 && two.some((c) => c.matches(pic) || c.querySelector(pic));
@@ -146,7 +146,7 @@ function print(results, width) {
     for (const s of r.sections) {
       const sp = s.split;
       const tag = sp
-        ? `${sp.kind.padEnd(4)} ${sp.orientation === 'media-right' ? 'pic right' : 'pic left '}  text ${String(Math.round(sp.leftWidth)).padStart(4)}  pic ${String(Math.round(sp.rightWidth)).padStart(4)}  seam ${String(Math.round(sp.rightLeft)).padStart(4)}`
+        ? `${sp.kind.padEnd(4)} ${sp.orientation === 'media-right' ? 'pic right' : 'pic left '}  left ${String(Math.round(sp.leftWidth)).padStart(4)}  right ${String(Math.round(sp.rightWidth)).padStart(4)}  seam ${String(Math.round(sp.rightLeft)).padStart(4)}`
         : '';
       const head =
         s.headingLeft == null
