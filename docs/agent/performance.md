@@ -53,7 +53,7 @@ Target: 100 on all four categories (Performance, Accessibility, Best Practices, 
 - Lenis init wrapped in `requestIdleCallback`
 - Logo PNGs moved from `public/` to `src/assets/` so Astro emits WebPs
 - Single-img theme-aware logo (one fetch per page load instead of two)
-- SanityImage emits real width-descriptor srcset with 8 breakpoints (400-2400)
+- SanityImage emits real width-descriptor srcset with 11 breakpoints (160-2400; small steps added in card 93, see images.md)
 - AVIF as default format (`'auto'`) -- Sanity picks AVIF on supporting browsers
 - `fetchpriority="high"` on hero LCP image
 - Portrait inline images capped to `max-w-[600px]` (smaller files at the smaller cap)
