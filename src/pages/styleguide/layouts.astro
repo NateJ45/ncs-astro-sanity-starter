@@ -96,11 +96,31 @@ const entry = {
     <Hero {...hero} backgroundImage={image} headingId="fx-h-editorial" variant="editorial" />
   </div>
 
+  <div data-fx="body">
+    <section class="bg-background py-section-lg" aria-labelledby="fx-cards">
+      <div class="mx-auto max-w-content px-m">
+        <SectionHeading eyebrow="Cards" headline="Card surfaces" headingId="fx-cards" />
+        <div class="mt-l grid gap-m md:grid-cols-3">
+          <ServiceCard service={service} />
+          <TestimonialCard testimonial={testimonial} />
+          <JournalCard entry={entry} />
+        </div>
+      </div>
+    </section>
+    <section class="bg-muted py-section-md" aria-labelledby="fx-density">
+      <div class="mx-auto max-w-content px-m">
+        <SectionHeading eyebrow="Density" headline="Section rhythm" headingId="fx-density" />
+      </div>
+    </section>
+  </div>
+
   {
     /* THE SHARED SPLIT WALL (PORTS.md card 90). Not shot by the visual suite (the pictures are
       fixtures and the copy is not the point); it exists so `node scripts/measure-columns.mjs
       <url> --paths /styleguide/layouts/` has real bands to measure: a picture on each side,
-      a text-and-card band, and a plain heading band for the column edge. */
+      a text-and-card band, and a plain heading band for the column edge. It sits AFTER every shot region on purpose: the
+      screenshots are of element boxes at fractional y, so content placed before them moves their
+      height by a pixel and fails the baselines. */
   }
   <div data-fx="split-bands">
     <SectionHeading
@@ -133,23 +153,5 @@ const entry = {
       travelFees={[{ distanceLabel: 'Up to 10 miles', fee: 'Included' }]}
       headingId="fx-split-card"
     />
-  </div>
-
-  <div data-fx="body">
-    <section class="bg-background py-section-lg" aria-labelledby="fx-cards">
-      <div class="mx-auto max-w-content px-m">
-        <SectionHeading eyebrow="Cards" headline="Card surfaces" headingId="fx-cards" />
-        <div class="mt-l grid gap-m md:grid-cols-3">
-          <ServiceCard service={service} />
-          <TestimonialCard testimonial={testimonial} />
-          <JournalCard entry={entry} />
-        </div>
-      </div>
-    </section>
-    <section class="bg-muted py-section-md" aria-labelledby="fx-density">
-      <div class="mx-auto max-w-content px-m">
-        <SectionHeading eyebrow="Density" headline="Section rhythm" headingId="fx-density" />
-      </div>
-    </section>
   </div>
 </BaseLayout>
