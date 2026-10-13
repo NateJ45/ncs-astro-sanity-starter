@@ -34,7 +34,7 @@ updates:
     # catch-all bundle.
     groups:
       # A formatter bump can reformat files and fail format:check (PORTS.md
-      # card 90). Kept apart so only this small PR goes red, not the whole
+      # card 92). Kept apart so only this small PR goes red, not the whole
       # bundle; fix it with `npm run format` on the branch and push.
       formatters:
         patterns:
@@ -66,7 +66,7 @@ updates:
       # wrangler the pin does not carry.
       - dependency-name: '@astrojs/cloudflare'
       - dependency-name: wrangler
-      # Astro moves only with its adapter, by hand (PORTS.md card 90). The
+      # Astro moves only with its adapter, by hand (PORTS.md card 92). The
       # adapter imports Astro internals: astro 7.3 dropped an export that
       # @astrojs/cloudflare 14.2.4 imports, so a lone astro bump fails the build.
       - dependency-name: astro

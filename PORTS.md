@@ -207,7 +207,8 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 87  | Dead-weight scan: unused kits and packages inflate every page's CSS            | n/a     | yes         | no       | no               | no            | yes            | n/a                | staged              | no             |
 | 88  | Cloudflare beacon starts after load and idle, not deferred in head             | n/a     | no          | no       | no               | no            | no             | n/a                | staged              | no             |
 | 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`) | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | no                  | yes            |
-| 90  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | staged      | yes      | staged           | staged        | no             | n/a                | staged              | staged         |
+| 90  | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 92  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | staged      | yes      | staged           | yes           | no             | n/a                | yes                 | staged         |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -4161,7 +4162,7 @@ It resolves the CLI as `sanity.cmd` on win32. The workflow can hardcode
 whoever's laptop, and a restore is not the moment to discover that path does not
 exist on Windows.
 
-**An R2 copy in the workflow.** Actions artifacts expire at 90 days and live in
+**An R2 copy in the workflow.** Actions artifacts expire at 90 days (the workflow keeps 14 since 2026-10-13, card 90) and live in
 the same GitHub account as the repo they protect, so one lost account loses the
 site and its backups together. The step reuses `CLOUDFLARE_API_TOKEN` and
 `CLOUDFLARE_ACCOUNT_ID`, which every site already has - but the token needs
@@ -7476,7 +7477,46 @@ be 0 (starter build: 135 of 231 before, 0 of 231 after).
 **Status.** Starter: merged with this PR. presacademy, reid-design-site, mas-monograms and stonesteps-50k merged 2026-10-09. 2ndpreschicago and
 nixoncreativestudio: not yet done.
 
-## Card 90: Dependabot pins `astro` with its adapter and gives formatters their own group (2026-10-13)
+## Card 90: Sanity backup: 14-day artifact, documents-only on weekdays, full export weekly (2026-10-13)
+
+**Origin:** the account-wide GitHub Actions artifact storage quota filled up. reid-design-site's daily backup alone is
+about 557 MB, and six repos each kept 90 days of them. Nathan approved two cuts on 2026-10-13.
+
+**The change, in `.github/workflows/sanity-backup.yml`.**
+
+- `retention-days: 90` becomes `14`, and every comment and `::warning::` string that called it a "90-day GitHub
+  artifact" now says 14. The daily artifact is the day-level window; the weekly R2 copy (newest 12 kept by the R2
+  lifecycle rule, which stays at 90 days) covers anything older.
+- Two backup kinds, named in the file: `sanity-backup-<date>-full.tar.gz.enc` (documents and assets: the Monday
+  scheduled run and every manual run) and `-docs.tar.gz.enc` (documents only: the other six nights). The export step
+  decides the kind once and writes `BACKUP_KIND` to `$GITHUB_ENV`; the weekly R2 gate reads it instead of re-testing the
+  date, and the R2 loop only globs `*-full.tar.gz.enc`, so the export and the off-site copy cannot disagree.
+- **Docs-only is `--raw`, not `--no-assets`.** `--no-assets` runs `stripAssets`, which drops every image/file
+  reference out of the exported documents, so a `--replace` restore would wipe the images off production. `--raw`
+  keeps the asset documents and the references and only skips downloading the files (`@sanity/export` 6.2.1,
+  `export.ts`: `raw` selects the no-op stream and skips the download step). A `-docs` restore relies on the assets
+  still existing in the dataset; Sanity assets survive document edits and "Remove field", and only an explicit asset
+  delete removes one.
+- `@sanity/import` refuses asset documents that point at a different dataset, so a `-docs` file only restores into the
+  same project and dataset. Restore drills use a `-full` file.
+
+**Also in this round:** reid-design-site's workflow lacked the 2026-09-18 weekly gate and was copying to R2 every day.
+Ported from presacademy. mas-monograms has no encrypt step (its artifact is a plaintext `.tar.gz` on a public repo) and
+its R2 loop globs `.tar.gz.enc`, so it never uploads to R2; the workflow is disabled in GitHub (2026-10-03), so both
+are noted rather than changed.
+
+**The workflow is not a PORTABLE file**, so a site PR carrying it does not trip `sync-check`. `docs/RESTORE-DRILL.md`
+is PORTABLE and changed in the same PR (the 14 days, the `-full` file for the drill); sites drift on it until synced.
+
+**Proof.** `grep -n "retention-days" .github/workflows/sanity-backup.yml` shows 14 and `grep -n "90-day"` finds
+nothing. A manual run (full) and a docs-only run of the same workflow give very different artifact sizes (numbers in
+the PR).
+
+**Status.** Workflow: starter, presacademy, reid-design-site, stonesteps-50k, fbcm and mas-monograms, 2026-10-13.
+`docs/RESTORE-DRILL.md` sync to the sites: pending the starter merge. Sites without a `sanity-backup.yml` (wcp,
+2ndpreschicago, nixoncreativestudio): n/a.
+
+## Card 92: Dependabot pins `astro` with its adapter and gives formatters their own group (2026-10-13)
 
 **Origin:** a family-wide read of every failed `CI` run since 2026-09-20 (2026-10-13). Two mechanical causes kept
 Dependabot's `minor-and-patch` bundle red, so a red bundle stopped meaning a real bug. **Canonical:**
@@ -7503,6 +7543,7 @@ starter-first major upgrade, not from a Dependabot PR.
 ignores. A site whose adapter is newer (14.3.x) still pins `astro`: the next Astro minor can break 14.3 the same way.
 Exception: a site that lets the adapter and wrangler flow too (nixoncreativestudio) does NOT pin `astro`: there astro and the adapter ride the same bundle and cannot split, so it takes only the `formatters` group. When the stack is moved by hand, the `astro` ignore stays; the bump happens in `package.json` and the lockfile.
 
-**Status.** Starter: merged with this PR. presacademy, reid-design-site, mas-monograms, stonesteps-50k,
-nixoncreativestudio and fbcm (no matrix column): `staged`, one PR each after card 62's major ignore merged there on
-2026-10-13. 2ndpreschicago is dormant and wcp archived: not taken.
+**Status.** Starter: merged with this PR. mas-monograms #100 and nixoncreativestudio #124 merged 2026-10-13 (their
+comments cite "card 90": this card was renumbered from 90 to 92 after the Sanity backup card took 90 first; fixed in a
+follow-up). presacademy, reid-design-site, stonesteps-50k and fbcm (no matrix column): `staged`, one PR each after
+card 62's major ignore merged there on 2026-10-13. 2ndpreschicago is dormant and wcp archived: not taken.

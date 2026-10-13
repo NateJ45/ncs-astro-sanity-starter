@@ -40,10 +40,17 @@ project instead.
 
 ## The drill
 
-**1. Get the newest artifact.** From the repo:
+**1. Get the newest FULL artifact.** The workflow makes two kinds (since
+2026-10-13): `sanity-backup-<date>-full.tar.gz.enc` (documents and assets; the
+Monday scheduled run and every manual run) and
+`sanity-backup-<date>-docs.tar.gz.enc` (documents only; the other six nights).
+Drill with a `-full` file: the importer refuses a `-docs` file in a scratch
+dataset, because its asset documents point at the production dataset, and the
+asset check in step 4 needs the assets in the file. Artifacts are kept 14 days,
+so a `-full` one is at most a week old. From the repo:
 
 ```bash
-gh run list --workflow sanity-backup.yml --limit 1
+gh run list --workflow sanity-backup.yml --limit 10   # pick a Monday, or a manual run
 gh run download <run-id> --name sanity-backup
 ```
 
@@ -51,7 +58,7 @@ gh run download <run-id> --name sanity-backup
 production without a deliberately long flag, and this drill never uses it:
 
 ```bash
-node scripts/restore-dataset.mjs --file sanity-backup-<date>.tar.gz.enc --project <projectId> --dataset restore-drill
+node scripts/restore-dataset.mjs --file sanity-backup-<date>-full.tar.gz.enc --project <projectId> --dataset restore-drill
 ```
 
 **3. Check the number, not the exit code.** The script prints the document
@@ -117,13 +124,13 @@ Common causes, in the order they are worth checking:
 ## Off-site copies
 
 The workflow also pushes the encrypted tarball to R2 when `BACKUP_R2_BUCKET` is
-set, because Actions artifacts expire after 90 days and live in the same GitHub
+set, because Actions artifacts expire after 14 days and live in the same GitHub
 account as the repos they protect. Losing the account loses both. To drill
 against the off-site copy instead of the artifact:
 
 ```bash
-npx wrangler r2 object get "<bucket>/sanity/<site>/<date>.tar.gz.enc" \
-  --file sanity-backup-<date>.tar.gz.enc --remote
+npx wrangler r2 object get "<bucket>/sanity/<site>/sanity-backup-<date>-full.tar.gz.enc" \
+  --file sanity-backup-<date>-full.tar.gz.enc --remote
 ```
 
 then continue from step 2.
