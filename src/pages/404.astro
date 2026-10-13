@@ -48,8 +48,13 @@ const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
 ---
 
 <BaseLayout title={seoTitle} description={seoDescription} siteSettings={siteSettings} noindex>
+  {
+    /* THE SHARED SPLIT (PORTS.md card 91). Words first, photo on the narrow track; it was
+      1fr / 1.1fr at `md`, so its seam sat left of every other band's. The photo stays
+      first in the DOM for the stacked phone order and `lg:order-2` puts it on the right. */
+  }
   <section
-    class="mx-auto grid max-w-content grid-cols-1 items-center gap-section-md px-m py-section-lg md:grid-cols-[1fr_1.1fr]"
+    class="split mx-auto max-w-content items-center px-m py-section-lg"
     aria-labelledby="not-found-heading"
   >
     {
@@ -58,7 +63,7 @@ const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
         "you're off-path" moment; left-aligned on desktop where the
         two-column layout needs the text anchored beside the photo column. */
     }
-    <div class="text-center md:text-left">
+    <div class="text-center lg:text-left">
       <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">{eyebrow}</p>
       <h1
         id="not-found-heading"
@@ -66,11 +71,11 @@ const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
       >
         {headline}
       </h1>
-      <p class="mx-auto mt-m max-w-xl text-lg leading-relaxed text-foreground/80 md:mx-0">
+      <p class="mx-auto mt-m max-w-xl text-lg leading-relaxed text-foreground/80 lg:mx-0">
         {body}
       </p>
 
-      <div class="mt-l flex flex-wrap justify-center gap-m md:justify-start">
+      <div class="mt-l flex flex-wrap justify-center gap-m lg:justify-start">
         <a
           href={primaryHref}
           class="press-tactile inline-flex items-center rounded-sm bg-primary-dark px-l py-s text-xs font-semibold tracking-eyebrow text-white uppercase hover:bg-accent-dark"
@@ -93,14 +98,14 @@ const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
     </div>
 
     {
-      /* Photo column. Stacks above the text on mobile (md:order-2 swaps it on
+      /* Photo column. Stacks above the text on mobile (lg:order-2 swaps it on
         desktop so the eye lands on text first, photo balances right). */
     }
-    <figure class="order-first md:order-2">
+    <figure class="order-first lg:order-2">
       <SanityImage
         source={photo}
         width={1200}
-        sizes="(min-width: 768px) 50vw, 100vw"
+        sizes="(min-width: 1024px) 45vw, 100vw"
         quality={75}
         class="h-auto w-full rounded-md"
       />

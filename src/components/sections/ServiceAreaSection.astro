@@ -35,7 +35,10 @@ const fees = showTravelFees ? travelFees : [];
 {
   show && (
     <section id="service-area" class={`${bg} scroll-mt-24`} aria-labelledby={headingId}>
-      <div class="mx-auto grid max-w-content grid-cols-1 items-start gap-l px-m py-section-lg md:grid-cols-2 md:gap-section-md">
+      {/* THE SHARED SPLIT (PORTS.md card 91). The fee card is not a picture, but it is a
+          second column starting somewhere, and the reader's eye does not tell the
+          difference: it starts at the seam every other band uses. */}
+      <div class="split mx-auto max-w-content items-start px-m py-section-lg">
         <div>
           <SectionHeading
             eyebrow={eyebrow}
