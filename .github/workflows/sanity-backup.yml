@@ -1,6 +1,6 @@
 name: Sanity dataset backup
 
-# Nightly export of the production Sanity dataset (documents + assets) so a bad
+# Nightly export of the production Sanity dataset (see BACKUP KINDS below) so a bad
 # mutation, a bad seed script, or an accidental "Remove field" in Studio is
 # always recoverable. CLAUDE.md's first hard rule warns that "Remove field"
 # deletes that field's data across every document and cannot be undone without
@@ -45,7 +45,7 @@ name: Sanity dataset backup
 # document count in one command, and refuses to target production without a
 # deliberately awkward flag:
 #   BACKUP_PASSPHRASE=*** SANITY_AUTH_TOKEN=*** node scripts/restore-dataset.mjs \
-#     --file sanity-backup-<date>.tar.gz.enc --project <id> --dataset restore-drill --create
+#     --file sanity-backup-<date>-full.tar.gz.enc --project <id> --dataset restore-drill --create
 #
 # DRILL IT, do not assume it. This workflow was green on every site for months
 # before anyone checked that the tarballs restore; a green export proves the
@@ -56,6 +56,22 @@ name: Sanity dataset backup
 # variable missing, the workflow logs a warning and skips rather than failing.
 # That is what makes it safe to commit before any of them exist.
 # workflow_dispatch stays on, so a manual run always works.
+
+# BACKUP KINDS (2026-10-13, after the account-wide GitHub artifact quota filled).
+#   -full  documents + assets. Built by the Monday scheduled run and by every
+#          manual (workflow_dispatch) run. The only kind copied to R2 (weekly).
+#   -docs  documents only (`--raw`: asset documents and references kept, asset
+#          files not downloaded). Built by the other six scheduled nights.
+# Both kinds are encrypted and kept as the 14-day GitHub artifact. The file name says which:
+# sanity-backup-<date>-full.tar.gz.enc or sanity-backup-<date>-docs.tar.gz.enc.
+#
+# RESTORING a docs-only backup relies on the referenced assets still existing in
+# the dataset, and they do: Sanity assets survive document edits and "Remove
+# field"; only an explicit asset delete removes one. Restore a -docs file into
+# the SAME project and dataset only (the importer refuses asset documents that
+# point at a different dataset). For a FULL restore, or a restore drill into a
+# scratch dataset, use the latest Monday -full artifact, or the weekly R2 copy
+# for anything older than 14 days.
 
 on:
   # schedule:
@@ -118,6 +134,26 @@ jobs:
           SANITY_STUDIO_DATASET: production
         run: |
           STAMP=$(date -u +%Y-%m-%d)
+          # Two kinds of backup (2026-10-13), named so the file says which:
+          #   -full  documents + assets: the Monday scheduled run and every
+          #          manual (workflow_dispatch) run. The only kind sent to R2.
+          #   -docs  documents only: every other scheduled night.
+          # Docs-only uses --raw, NOT --no-assets. --no-assets strips the asset
+          # documents AND every image/file reference from the exported
+          # documents, so restoring it with --replace would wipe the images off
+          # production. --raw keeps the asset documents and the references and
+          # only skips downloading the files.
+          # The decision is made here once and handed to the R2 step through
+          # $GITHUB_ENV, so the export kind and the weekly R2 gate cannot
+          # disagree.
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$(date -u +%u)" != "1" ]; then
+            KIND=docs
+            EXPORT_FLAGS="--raw"
+          else
+            KIND=full
+            EXPORT_FLAGS=""
+          fi
+          echo "BACKUP_KIND=$KIND" >> "$GITHUB_ENV"
           # --project-id is required. The sanity CLI walks cwd upward looking
           # for sanity.cli.ts to infer the project, and on a repo that still
           # nests the CLI under studio/ that discovery fails from the repo root
@@ -126,8 +162,8 @@ jobs:
           # the flag was added). Harmless here too, where the CLI already lives
           # at the root. Called by path rather than through npx so the export
           # runs from the repo root and writes the tarball there.
-          ./node_modules/.bin/sanity dataset export production "sanity-backup-$STAMP.tar.gz" \
-            --project-id "$SANITY_STUDIO_PROJECT_ID"
+          ./node_modules/.bin/sanity dataset export production "sanity-backup-$STAMP-$KIND.tar.gz" \
+            --project-id "$SANITY_STUDIO_PROJECT_ID" $EXPORT_FLAGS
 
       # Encrypt BEFORE upload, see the header warning. AES-256-CBC with a
       # PBKDF2-stretched passphrase; openssl ships on every runner and every
@@ -148,11 +184,12 @@ jobs:
         with:
           name: sanity-backup
           path: sanity-backup-*.tar.gz.enc
-          # 90 days is the ceiling GitHub allows, and it is not the durable
-          # copy: see the R2 step below.
-          retention-days: 90
+          # 14 days (was 90 until 2026-10-13, when the account-wide GitHub
+          # artifact storage quota filled up). This is the day-level recovery
+          # window; the weekly R2 copy below is the durable one.
+          retention-days: 14
 
-      # OFF-SITE COPY. The artifact above expires after 90 days and lives in the
+      # OFF-SITE COPY. The artifact above expires after 14 days and lives in the
       # same GitHub account as the repo it protects, so a lost account loses the
       # site AND its backups together. R2 is a different provider and a
       # different blast radius.
@@ -178,7 +215,7 @@ jobs:
           BUCKET: ${{ vars.BACKUP_R2_BUCKET }}
         run: |
           if [ -z "$BUCKET" ] || [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::warning::BACKUP_R2_BUCKET variable and/or Cloudflare credentials not set; the backup exists only as a 90-day GitHub artifact. See the header of sanity-backup.yml."
+            echo "::warning::BACKUP_R2_BUCKET variable and/or Cloudflare credentials not set; the backup exists only as a 14-day GitHub artifact. See the header of sanity-backup.yml."
             exit 0
           fi
           # ONE OFF-SITE COPY A WEEK, not one a day (2026-09-18).
@@ -189,20 +226,23 @@ jobs:
           # "one a week" half, and an R2 lifecycle rule on the bucket (prefix
           # "sanity/", 90 day age, which is 12 weeks plus slack) is the other.
           #
-          # The DAILY run above is untouched on purpose. Its 90-day GitHub
-          # artifact costs nothing extra and gives day-level recovery for a
-          # recent mistake; weekly copies alone would mean losing up to seven
-          # days of edits in a restore. So: daily for "yesterday was fine",
-          # weekly off-site for "three months ago was fine".
+          # The DAILY run above is untouched on purpose. Its 14-day GitHub
+          # artifact gives day-level recovery for a recent mistake; weekly
+          # copies alone would mean losing up to seven days of edits in a
+          # restore. So: the daily artifact covers the last 14 days at day
+          # level, and the weekly R2 copy (keep 12) covers anything older.
           #
           # A MANUAL run always uploads, whatever day it is, so that verifying
           # this step never means waiting for Monday.
-          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$(date -u +%u)" != "1" ]; then
-            echo "Off-site copy is weekly (Mondays). Today's backup is the 90-day GitHub artifact above."
+          #
+          # BACKUP_KIND comes from the export step, so this gate always agrees with
+          # what was exported. Only -full tarballs are picked up below.
+          if [ "$BACKUP_KIND" != "full" ]; then
+            echo "Off-site copy is weekly (the Monday full export). Today's backup is the docs-only 14-day GitHub artifact above."
             exit 0
           fi
 
-          for f in sanity-backup-*.tar.gz.enc; do
+          for f in sanity-backup-*-full.tar.gz.enc; do
             # Keyed by repo so one bucket can hold the whole family, and by date
             # so a bad dataset restored last week has not overwritten the good
             # copy from the week before.
