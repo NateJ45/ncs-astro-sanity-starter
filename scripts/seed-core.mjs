@@ -11,6 +11,18 @@
 // Idempotent: uses client.createOrReplace with deterministic _id values.
 // Re-running this script is safe and will never duplicate documents.
 //
+// DRY BY DEFAULT (2026-10-13, PORTS.md card 86). A bare run prints every
+// document it would create or replace and writes nothing. Writing goes through
+// the same gate as every other data script (scripts/lib/sanity-lib.mjs): it
+// needs --apply, and on the `production` dataset also NCS_PRODUCTION_WRITE=yes
+// in the same command, set by a person who is present:
+//
+//   npm run seed                                          # dry run
+//   NCS_PRODUCTION_WRITE=yes npm run seed -- --apply      # write
+//
+// Before this, `npm run seed` replaced every seeded document on production the
+// moment it ran, which on a live site puts edited pages back to placeholders.
+//
 // Module types (service modules, etc.) have their own per-module seed.mjs.
 // Run ONLY this file for the core pages.
 //
@@ -51,33 +63,25 @@
 
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createClient } from '@sanity/client';
 import { loadEnv } from './lib/loadEnv.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
 const env = loadEnv(root);
-const projectId = env.PUBLIC_SANITY_PROJECT_ID;
-const dataset = env.PUBLIC_SANITY_DATASET ?? 'production';
-const token = env.SANITY_API_WRITE_TOKEN;
-
-if (!projectId) {
+if (!env.PUBLIC_SANITY_PROJECT_ID) {
   console.log('PUBLIC_SANITY_PROJECT_ID is not set. Configure your .env and re-run.');
   process.exit(0);
 }
-if (!token) {
+if (!env.SANITY_API_WRITE_TOKEN) {
   console.log('SANITY_API_WRITE_TOKEN is not set. A write token is required to seed content.');
   process.exit(0);
 }
 
-const client = createClient({
-  projectId,
-  dataset,
-  token,
-  apiVersion: '2026-05-01',
-  useCdn: false,
-});
+// The client, the --apply gate and the production second factor all come from
+// sanity-lib, imported only after the friendly checks above. With --apply and no
+// NCS_PRODUCTION_WRITE=yes on production, this import exits before any request.
+const { client, projectId, dataset, APPLY, apply } = await import('./lib/sanity-lib.mjs');
 
 // ── Helper: portable-text paragraph block ────────────────────────────────
 
@@ -1455,7 +1459,9 @@ docs.push({
 // ── Seed all documents ────────────────────────────────────────────────────
 
 async function seed() {
-  console.log(`Seeding ${docs.length} documents to ${projectId}/${dataset}...`);
+  console.log(
+    `${APPLY ? 'Seeding' : 'DRY RUN: would seed'} ${docs.length} documents to ${projectId}/${dataset}...`,
+  );
 
   let created = 0;
   let replaced = 0;
@@ -1463,19 +1469,25 @@ async function seed() {
   for (const doc of docs) {
     try {
       const existing = await client.fetch(`*[_id == $id][0]._id`, { id: doc._id });
-      await client.createOrReplace(doc);
-      if (existing) {
-        replaced += 1;
-        console.log(`  replaced  ${doc._type}  ${doc._id}`);
-      } else {
-        created += 1;
-        console.log(`  created   ${doc._type}  ${doc._id}`);
-      }
+      await apply(`${existing ? 'replace' : 'create '}  ${doc._type}  ${doc._id}`, () =>
+        client.createOrReplace(doc),
+      );
+      if (existing) replaced += 1;
+      else created += 1;
     } catch (err) {
       console.error(`  ERROR on ${doc._id}: ${err.message}`);
     }
   }
 
+  if (!APPLY) {
+    console.log(
+      `\nDRY RUN: ${created} would be created, ${replaced} replaced. Nothing was written.`,
+    );
+    console.log(
+      'To write: NCS_PRODUCTION_WRITE=yes npm run seed -- --apply (with Nathan present).',
+    );
+    return;
+  }
   console.log(`\nDone. ${created} created, ${replaced} replaced.`);
   console.log('Replace all placeholder text in Sanity before going live.');
 }
