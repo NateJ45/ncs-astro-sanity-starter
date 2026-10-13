@@ -5607,6 +5607,17 @@ querying `eventName` and `eventCount`. Do not query `unifiedScreenName`: it retu
 empty rows for web `page_view` and reads as a false negative. Those hits are real and
 land in the live property.
 
+**Addendum (2026-10-13): Lighthouse's "unused JavaScript" flag on `gtag/js` is the expected residue, not a regression.**
+An audit flagged about 100 KiB of unused Google tag JS on every page across the family. Every site's
+`GoogleAnalytics.astro` is byte-identical to this canonical copy, so the library already loads at idle after the
+load event (decision 1 above). Lighthouse still sees it because it waits for network quiet, and the idle timeout is
+4 s. Measured on reiddesignllc.com with PageSpeed Insights (mobile, Google's machines, 3 runs, medians): `gtag/js`
+transfers 176 KiB, of which 72 KiB is reported unused, with 183 ms of main-thread time (236 ms of JS CPU), all after
+the load event, at performance scores of 91 to 95. That cost is gtag itself. The only way to move it further out is
+to wait for a first interaction, and a visitor who reads and leaves without scrolling or tapping would then never
+send a `page_view`, so the bounce traffic would vanish from GA4. Nothing was changed. Revisit only if the tag ever
+moves in front of LCP, or if a site drops GA4 for the Cloudflare beacon alone.
+
 ## Card 55: Build reads always use the Sanity CDN; a PROD fetch error throws (2026-09-23)
 
 **Origin: fbcm** (`897cec90`, not itself a column in the matrix above — it is a
