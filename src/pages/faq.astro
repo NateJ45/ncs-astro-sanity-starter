@@ -60,24 +60,22 @@ const schemas = [
   <section class="bg-background" aria-label="Frequently asked questions">
     <div class="mx-auto max-w-content px-m py-section-lg">
       <div class="mx-auto max-w-3xl">
-        {
-          faqs.length > 0 ? (
-            <FaqAccordion
-              client:visible
-              faqs={faqs}
-              categoryOrder={categoryOrder}
-              idPrefix="faq-page"
-            />
-          ) : (
-            <p class="text-center text-muted-foreground italic">
-              FAQ content is being updated.{' '}
-              <a href="/contact/" class="text-link underline underline-offset-2">
-                Ask anything
-              </a>{' '}
-              in the meantime.
-            </p>
-          )
-        }
+        {faqs.length > 0 ? (
+          <FaqAccordion
+            client:visible
+            faqs={faqs}
+            categoryOrder={categoryOrder}
+            idPrefix="faq-page"
+          />
+        ) : (
+          <p class="text-center text-muted-foreground italic">
+            FAQ content is being updated.{' '}
+            <a href="/contact/" class="text-link underline underline-offset-2">
+              Ask anything
+            </a>{' '}
+            in the meantime.
+          </p>
+        )}
       </div>
     </div>
   </section>

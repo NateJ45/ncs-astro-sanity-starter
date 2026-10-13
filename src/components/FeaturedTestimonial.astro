@@ -58,20 +58,16 @@ const sourceBadge = testimonial.sourceType ? SOURCE_LABELS[testimonial.sourceTyp
 ---
 
 <figure class="relative mx-auto max-w-3xl text-center">
-  {
-    /* Opening quote — large editorial display mark in Warm Bronze. Negative
+  {/* Opening quote — large editorial display mark in Warm Bronze. Negative
       bottom margin lets the quote text rise into the visual space the mark
-      defines, like an editorial pull quote on a magazine spread. */
-  }
+      defines, like an editorial pull quote on a magazine spread. */}
   <span
     aria-hidden="true"
     class="mb-[-1.5rem] block font-display text-[clamp(5rem,10vw,9rem)] leading-[0.8] text-primary/35 select-none"
   >
     “
   </span>
-  <blockquote
-    class="font-display text-[clamp(1.75rem,3vw,2.75rem)] leading-snug text-foreground italic"
-  >
+  <blockquote class="font-display text-[clamp(1.75rem,3vw,2.75rem)] leading-snug text-foreground italic">
     {testimonial.quote}
   </blockquote>
   {/* Closing quote mark — quieter, off-axis. Read as a deliberate flourish. */}
@@ -82,47 +78,37 @@ const sourceBadge = testimonial.sourceType ? SOURCE_LABELS[testimonial.sourceTyp
     ”
   </span>
   <figcaption class="mt-l flex flex-col items-center gap-s">
-    {
-      hasPhoto && (
-        <SanityImage
-          source={testimonial.photo}
-          width={160}
-          height={160}
-          sizes="80px"
-          class="h-20 w-20 rounded-full object-cover shadow-[0_8px_20px_-12px_rgba(61,61,61,0.35)] ring-2 ring-bg"
-        />
-      )
-    }
+    {hasPhoto && (
+      <SanityImage
+        source={testimonial.photo}
+        width={160}
+        height={160}
+        sizes="80px"
+        class="h-20 w-20 rounded-full object-cover shadow-[0_8px_20px_-12px_rgba(61,61,61,0.35)] ring-2 ring-bg"
+      />
+    )}
     <div>
       <p class="font-display text-h3 text-foreground">{testimonial.attribution}</p>
-      {
-        attributionMeta && (
-          <p class="mt-xs text-xs tracking-eyebrow text-foreground/80 uppercase">
-            {attributionMeta}
-          </p>
-        )
-      }
-      {
-        testimonial.relatedProject?.slug && (
-          <p class="mt-m">
-            <a
-              href={`/portfolio/${testimonial.relatedProject.slug}/`}
-              class="inline-flex items-center gap-xs text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:text-primary-dark"
-            >
-              See this project <span aria-hidden="true">→</span>
-            </a>
-          </p>
-        )
-      }
+      {attributionMeta && (
+        <p class="mt-xs text-xs tracking-eyebrow text-foreground/80 uppercase">{attributionMeta}</p>
+      )}
+      {testimonial.relatedProject?.slug && (
+        <p class="mt-m">
+          <a
+            href={`/portfolio/${testimonial.relatedProject.slug}/`}
+            class="inline-flex items-center gap-xs text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:text-primary-dark"
+          >
+            See this project <span aria-hidden="true">→</span>
+          </a>
+        </p>
+      )}
 
       {/* Source platform badge — same logic as TestimonialCard. */}
-      {
-        sourceBadge && (
-          <p class="mt-m inline-flex items-center rounded-full border border-border-soft bg-muted px-s py-0.5 text-xs text-foreground/75">
-            {sourceBadge}
-          </p>
-        )
-      }
+      {sourceBadge && (
+        <p class="mt-m inline-flex items-center rounded-full border border-border-soft bg-muted px-s py-0.5 text-xs text-foreground/75">
+          {sourceBadge}
+        </p>
+      )}
     </div>
   </figcaption>
 </figure>

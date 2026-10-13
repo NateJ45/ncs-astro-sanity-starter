@@ -67,13 +67,17 @@ const link = `https://www.openstreetmap.org/?mlat=${markerLat}&mlon=${markerLon}
     style="border: 0; border-radius: 0.5rem;"
     title="Map showing the studio's service area"
     aria-label="Map showing the studio's service area"
-    loading="lazy"></iframe>
+    loading="lazy"
+  ></iframe>
   <figcaption class="mt-xs text-xs text-muted-foreground">
-    Studio service area. <a
+    Studio service area.{' '}
+    <a
       href={link}
       target="_blank"
       rel="noopener noreferrer"
-      class="hit-44 relative underline hover:text-primary">View larger map</a
+      class="hit-44 relative underline hover:text-primary"
     >
+      View larger map
+    </a>
   </figcaption>
 </figure>
