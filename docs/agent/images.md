@@ -34,13 +34,15 @@ Files live in `src/assets/` (NOT `public/`). The `src/assets/` location is what 
 - `loading` (default `'lazy'`) -- set to `'eager'` for above-the-fold hero images.
 - `fetchpriority` -- pass `"high"` on the page's LCP image so the browser fetches it ahead of other resources. `Hero.astro` does this on the eager background image.
 
-**Responsive srcset ladder** (hardcoded in `SanityImage.astro`):
+**Responsive srcset ladder** (`LADDER_STEPS` in `src/lib/imageLadder.ts`, unit-tested in `imageLadder.test.ts`):
 
 ```
-[400, 600, 700, 800, 900, 1200, 1600, 2400]
+[160, 240, 320, 400, 600, 700, 800, 900, 1200, 1600, 2400]
 ```
 
-Each entry is a width. The wrapper filters this down to entries <= requested `width` and always includes the explicit `width` as the largest. The 700 entry closes the mobile-retina gap (DPR 1.875 needs ~713 effective px) -- without it, mobile rounds up to 800 unnecessarily.
+Each entry is a width. `buildLadder(width, sizes)` filters this down to entries <= requested `width` and always includes the explicit `width` as the largest. The 700 entry closes the mobile-retina gap (DPR 1.875 needs ~713 effective px) -- without it, mobile rounds up to 800 unnecessarily. The 160, 240 and 320 entries (2026-10-13, PORTS card 93) are for thumbnail slots: with 400 as the first step a 112px course thumbnail downloaded the 400w file, 1.4 to 2x the bytes it needed. The browser picks the smallest candidate at least as wide as slot x DPR, so a slot that needs 400px or more picks the same file as before; the test asserts that.
+
+**Pass `sizes` on every small slot.** Without it the default is `(max-width: {width}px) 100vw, {width}px`, which tells the browser the image fills the viewport, and the new small steps are never chosen. When `sizes` is passed and readable (`px`, `vw`, `rem`, `em`, with optional media conditions; `calc()`, `clamp()` and `%` are not), steps below 75% of its smallest slot are dropped from the markup: `sizes="600px"` loses 160 and 240. Unreadable `sizes` keeps the full ladder.
 
 **Hotspot and crop.** Enable `hotspot: true` on every Sanity image field. Editors can then click to set the focal point, and the URL builder passes that hotspot to Sanity so crops at smaller sizes keep the right part of the image in frame. Faces, key visual elements, anything that matters when the image gets cropped down.
 

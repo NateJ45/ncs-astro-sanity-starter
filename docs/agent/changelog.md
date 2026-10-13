@@ -10,6 +10,10 @@ licence and nothing renders it. Sanity and react unchanged. Verified: build, `as
 real `wrangler deploy` to a throwaway Worker, `astro dev` cold, `/studio/` mounting in a real browser. Visual baselines were not
 touched (the suite runs on Linux CI only).
 
+_2026-10-13: SanityImage's srcset ladder gains 160, 240 and 320 and drops steps below the smallest `sizes` slot (PORTS card 93)._
+
+**Decision.** Measured on presacademy and mas-monograms: the ladder started at 400w, so small slots (presacademy's 112px course thumbnails) downloaded the 400w file, 1.4 to 2x the bytes they needed. The ladder is now `[160, 240, 320, 400, 600, 700, 800, 900, 1200, 1600, 2400]` in `src/lib/imageLadder.ts` (new, pure, with `imageLadder.test.ts`), and `SanityImage.astro` calls `buildLadder(width, sizes)`. When `sizes` is passed and readable, steps below 75% of its smallest slot are dropped. A slot that needs 400px or more picks the same candidate as before (asserted in the test against the old ladder). `SanityImage.astro` is marked "Foundation, edit with care", not `PORTABLE`, so `sync-check` does not gate the site PRs; each site's copy carries its own extras and gets the same three-line change. **Status.** Starter in this PR; presacademy, mas-monograms, reid-design-site, stonesteps-50k and fbcm take it in their own PRs (live before/after bytes on card 93).
+
 _2026-10-13: one text/picture split on every band, and `scripts/measure-columns.mjs` (PORTS card 91)._
 
 **Decision.** Ported from stonesteps-50k PR #31. The starter's text-plus-picture bands each declared their own grid (equal

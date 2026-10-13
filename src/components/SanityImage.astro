@@ -15,6 +15,7 @@
 // `loading` to override the default "lazy". Set `loading="eager"` for
 // above-the-fold hero images.
 
+import { buildLadder } from '@/lib/imageLadder';
 import { urlFor, parseSanityAssetDimensions } from '@/lib/sanity';
 
 import type { SanityImageObject } from '@/lib/pageBuilder.types';
@@ -87,16 +88,13 @@ function buildUrl(targetWidth: number) {
   return format === 'webp' ? b.format('webp').url() : b.auto('format').url();
 }
 
-// Responsive srcset ladder. Capped at the requested width so we never ask
-// Sanity for more than what the layout will display at full-bleed. The fixed
-// breakpoints map to common viewport widths: phones (400), small tablets (600),
-// mobile retina at DPR 1.875 (700, bridges the 600→800 gap Lighthouse flagged),
-// mobile retina at DPR 2 (800), laptops (900), large screens (1200),
-// retina-laptop (1600), retina-desktop (2400).
-const BREAKPOINTS = [400, 600, 700, 800, 900, 1200, 1600, 2400];
-const widths = BREAKPOINTS.filter((w) => w <= width);
-// Always include the explicit width so the largest srcset slot matches it.
-if (widths[widths.length - 1] !== width) widths.push(width);
+// Responsive srcset ladder, from src/lib/imageLadder.ts: steps 160 to 2400, capped
+// at the requested width so we never ask Sanity for more than the layout shows.
+// The small steps (160, 240, 320) are for thumbnail slots, which used to download
+// the 400w file; steps from 400 up are the original ladder, so larger slots pick
+// the same candidate they always did. When `sizes` is passed, steps well below
+// its smallest slot are dropped from the markup.
+const widths = buildLadder(width, sizes);
 
 const srcset = widths.map((w) => `${buildUrl(w)} ${w}w`).join(', ');
 // `src` is the largest variant — used by browsers that don't support srcset
