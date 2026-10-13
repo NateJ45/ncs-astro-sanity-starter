@@ -121,10 +121,11 @@ Drop it during a slop sweep (card 16) if it is still unused then.
 
 ### 4. The adapter and wrangler pins are tighter than the bug requires
 
-`@astrojs/cloudflare` is pinned exact at 14.2.4 and `wrangler` at `~4.110.0`. Verified
-2026-08-28 that 14.2.4 does **not** emit `legacy_env` into the generated config, so card
-14's original failure does not reproduce here; the pin holds the pair together because
-14.2.5 peers `wrangler ^4.125.0`, one minor from the version that rejects the field.
+`@astrojs/cloudflare` is pinned exact at 14.3.4 and `wrangler` at `~4.129.0` (moved from
+14.2.4 and `~4.110.0` on 2026-10-13, card 94, with a real `wrangler deploy`). Verified
+that 14.3.4 does **not** emit `legacy_env` into the generated config, so card 14's
+original failure does not reproduce here; the pin holds the pair together because the
+adapter peers `wrangler ^4.125.0` and every wrangler from 4.126 bundles a miniflare 5 alpha.
 Revisit when a newer adapter's peer range and emitted config are both checked by hand
 against a real `wrangler dev` and a real deploy.
 
@@ -159,7 +160,7 @@ not through the Studio code the browser loads. The three roots:
 **What would actually change this.** Upstream releases, nothing else. The Sanity set moves
 when the family takes PORTS.md card 10 phase 2 (the `@sanity/ui` 4 migration), which is a
 deliberate piece of work and not an audit fix. `wrangler` and `sharp` clear when a wrangler
-release inside the `~4.110.0` line picks up a patched `sharp` and `undici`, or when rule 8's
+release inside the `~4.129.0` line picks up a patched `sharp` and `undici`, or when rule 8's
 pin is revisited on purpose. Lighthouse CI clears when `@lhci/cli` ships a 0.15.x that drops
 the old `puppeteer-core` and `tmp`.
 

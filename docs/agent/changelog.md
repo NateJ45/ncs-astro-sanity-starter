@@ -1,5 +1,15 @@
 # Change history
 
+_2026-10-13: the planned major stack upgrade (PORTS card 94)._
+
+**Decision.** `astro` 7.3.8 with `@astrojs/cloudflare` 14.3.4 (14.2.4 imports an export astro 7.3 removed), `wrangler` ~4.129.0
+(the adapter peers >=4.125.0; 4.126 and up bundle a miniflare 5 alpha), `@astrojs/react` 7, `@astrojs/mdx` 8, `motion` 14,
+`@portabletext/react` 8, `eslint-plugin-astro` 3, `prettier-plugin-astro` 1 (60 `.astro` files reformatted in a separate commit, built
+HTML identical), `cloudflare/wrangler-action` v4. `primereact` is deliberately held at 10.x: v11 is a rewrite under a licence-key
+licence and nothing renders it. Sanity and react unchanged. Verified: build, `astro check`, lint, unit, the Chromium e2e suite, a
+real `wrangler deploy` to a throwaway Worker, `astro dev` cold, `/studio/` mounting in a real browser. Visual baselines were not
+touched (the suite runs on Linux CI only).
+
 _2026-10-13: one text/picture split on every band, and `scripts/measure-columns.mjs` (PORTS card 91)._
 
 **Decision.** Ported from stonesteps-50k PR #31. The starter's text-plus-picture bands each declared their own grid (equal
