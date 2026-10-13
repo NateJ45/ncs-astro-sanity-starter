@@ -32,16 +32,14 @@ interface Props {
 const { confirmed, what, class: className = '' } = Astro.props;
 ---
 
-{
-  confirmed !== true && (
-    <p
-      class={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed border-primary/55 bg-primary/10 px-3 py-2 text-sm ${className}`}
-      role="note"
-    >
-      <span class="rounded-sm bg-primary px-2 py-0.5 font-mono text-[0.6875rem] tracking-[0.2em] text-primary-foreground uppercase">
-        Not confirmed
-      </span>
-      <span class="text-foreground">{what}</span>
-    </p>
-  )
-}
+{confirmed !== true && (
+  <p
+    class={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed border-primary/55 bg-primary/10 px-3 py-2 text-sm ${className}`}
+    role="note"
+  >
+    <span class="rounded-sm bg-primary px-2 py-0.5 font-mono text-[0.6875rem] tracking-[0.2em] text-primary-foreground uppercase">
+      Not confirmed
+    </span>
+    <span class="text-foreground">{what}</span>
+  </p>
+)}

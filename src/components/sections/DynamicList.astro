@@ -104,202 +104,102 @@ const fallbackLabel: Record<string, string> = {
 };
 ---
 
-{
-  hasItems && (
-    <section class="bg-muted" aria-labelledby={headingId}>
-      <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
-        <SectionHeading
-          eyebrow={eyebrow}
-          headline={headline}
-          subhead={subhead}
-          subheadRich={subheadRich}
-          headingId={headingId}
-          align="center"
-          class="mx-auto"
-        />
+{hasItems && (
+  <section class="bg-muted" aria-labelledby={headingId}>
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      <SectionHeading
+        eyebrow={eyebrow}
+        headline={headline}
+        subhead={subhead}
+        subheadRich={subheadRich}
+        headingId={headingId}
+        align="center"
+        class="mx-auto"
+      />
 
-        {/* scaffold: journal */}
-        {/* ── Journal cards ────────────────────────────────────────────── */}
-        {source === 'journal' && (
-          <ul
-            class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
-            data-stagger-grid
-          >
-            {shown.map((item) => (
-              <li>
-                {item.href ? (
-                  <a
-                    href={withTrailingSlash(item.href)}
-                    class="card-lift group block h-full overflow-hidden rounded-md border border-border-soft bg-card no-underline transition-colors hover:border-primary/40"
-                  >
-                    {item.coverImage?.asset && (
-                      <div class="aspect-[16/9] overflow-hidden bg-muted">
-                        <SanityImage
-                          source={item.coverImage}
-                          width={800}
-                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                          class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                        />
-                      </div>
-                    )}
-                    <div class="p-m">
-                      {item.meta && (
-                        <p class="mb-xs text-xs tracking-eyebrow text-foreground/70 uppercase">
-                          {formatDate(item.meta)}
-                        </p>
-                      )}
-                      <h3 class="line-clamp-2 font-display text-h4 leading-tight text-foreground transition-colors group-hover:text-primary-dark">
-                        {item.title}
-                      </h3>
-                      {item.summary && (
-                        <p class="mt-xs line-clamp-3 text-sm leading-relaxed text-foreground/80">
-                          {item.summary}
-                        </p>
-                      )}
+      {/* scaffold: journal */}
+      {/* ── Journal cards ────────────────────────────────────────────── */}
+      {source === 'journal' && (
+        <ul
+          class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
+          data-stagger-grid
+        >
+          {shown.map((item) => (
+            <li>
+              {item.href ? (
+                <a
+                  href={withTrailingSlash(item.href)}
+                  class="card-lift group block h-full overflow-hidden rounded-md border border-border-soft bg-card no-underline transition-colors hover:border-primary/40"
+                >
+                  {item.coverImage?.asset && (
+                    <div class="aspect-[16/9] overflow-hidden bg-muted">
+                      <SanityImage
+                        source={item.coverImage}
+                        width={800}
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      />
                     </div>
-                  </a>
-                ) : (
-                  <div class="h-full rounded-md border border-border-soft bg-card p-m">
-                    <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
-                    {item.summary && (
-                      <p class="mt-xs text-sm leading-relaxed text-foreground/80">{item.summary}</p>
+                  )}
+                  <div class="p-m">
+                    {item.meta && (
+                      <p class="mb-xs text-xs tracking-eyebrow text-foreground/70 uppercase">
+                        {formatDate(item.meta)}
+                      </p>
                     )}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-        {/* scaffold:end */}
-
-        {/* scaffold: services */}
-        {/* ── Service cards ────────────────────────────────────────────── */}
-        {source === 'services' && (
-          <ul
-            class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
-            data-stagger-grid
-          >
-            {shown.map((item) => (
-              <li>
-                {item.href ? (
-                  <a
-                    href={withTrailingSlash(item.href)}
-                    class="card-lift group block h-full rounded-md border border-border-soft bg-card p-m no-underline transition-colors hover:border-primary/40"
-                  >
-                    <h3 class="font-display text-h4 text-foreground transition-colors group-hover:text-primary-dark">
+                    <h3 class="line-clamp-2 font-display text-h4 leading-tight text-foreground transition-colors group-hover:text-primary-dark">
                       {item.title}
                     </h3>
-                    {item.meta && (
-                      <p class="mt-xs text-xs font-semibold tracking-eyebrow text-link uppercase">
-                        {item.meta}
-                      </p>
-                    )}
                     {item.summary && (
-                      <p class="mt-s line-clamp-3 text-sm leading-relaxed text-foreground/80">
-                        {item.summary}
-                      </p>
-                    )}
-                  </a>
-                ) : (
-                  <div class="h-full rounded-md border border-border-soft bg-card p-m">
-                    <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
-                    {item.meta && (
-                      <p class="mt-xs text-xs font-semibold tracking-eyebrow text-link uppercase">
-                        {item.meta}
-                      </p>
-                    )}
-                    {item.summary && (
-                      <p class="mt-s line-clamp-3 text-sm leading-relaxed text-foreground/80">
+                      <p class="mt-xs line-clamp-3 text-sm leading-relaxed text-foreground/80">
                         {item.summary}
                       </p>
                     )}
                   </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-        {/* scaffold:end */}
-
-        {/* scaffold: testimonials */}
-        {/* ── Testimonial cards ────────────────────────────────────────── */}
-        {source === 'testimonials' && (
-          <ul
-            class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
-            data-stagger-grid
-          >
-            {shown.map((item) => (
-              <li class="flex">
-                <blockquote class="flex flex-1 flex-col rounded-md border border-border-soft bg-card p-m">
+                </a>
+              ) : (
+                <div class="h-full rounded-md border border-border-soft bg-card p-m">
+                  <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
                   {item.summary && (
-                    <p class="flex-1 leading-relaxed text-foreground/90 italic before:content-['“'] after:content-['”']">
+                    <p class="mt-xs text-sm leading-relaxed text-foreground/80">{item.summary}</p>
+                  )}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {/* scaffold:end */}
+
+      {/* scaffold: services */}
+      {/* ── Service cards ────────────────────────────────────────────── */}
+      {source === 'services' && (
+        <ul
+          class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
+          data-stagger-grid
+        >
+          {shown.map((item) => (
+            <li>
+              {item.href ? (
+                <a
+                  href={withTrailingSlash(item.href)}
+                  class="card-lift group block h-full rounded-md border border-border-soft bg-card p-m no-underline transition-colors hover:border-primary/40"
+                >
+                  <h3 class="font-display text-h4 text-foreground transition-colors group-hover:text-primary-dark">
+                    {item.title}
+                  </h3>
+                  {item.meta && (
+                    <p class="mt-xs text-xs font-semibold tracking-eyebrow text-link uppercase">
+                      {item.meta}
+                    </p>
+                  )}
+                  {item.summary && (
+                    <p class="mt-s line-clamp-3 text-sm leading-relaxed text-foreground/80">
                       {item.summary}
                     </p>
                   )}
-                  <footer class="mt-m">
-                    <cite class="not-italic">
-                      <p class="text-sm font-semibold text-foreground">{item.title}</p>
-                      {item.meta && <p class="text-xs text-foreground/70">{item.meta}</p>}
-                    </cite>
-                  </footer>
-                </blockquote>
-              </li>
-            ))}
-          </ul>
-        )}
-        {/* scaffold:end */}
-
-        {/* scaffold: faq */}
-        {/* ── FAQ items (mini accordion) ───────────────────────────────── */}
-        {source === 'faqs' && (
-          <dl class="mx-auto mt-section-lg max-w-3xl divide-y divide-border-soft">
-            {shown.map((item) => (
-              <div class="py-m">
-                <dt class="leading-snug font-semibold text-foreground">{item.title}</dt>
-                {item.summary && (
-                  <dd class="mt-xs text-sm leading-relaxed text-foreground/80">{item.summary}</dd>
-                )}
-                {/* answer is a Portable Text array -- render plain text fallback for
-                  the inline block. For full rich text the FaqAccordion island is the
-                  right component (see /faq page). */}
-                {!item.summary &&
-                  Array.isArray((item as any).answer) &&
-                  (item as any).answer.length > 0 && (
-                    <dd class="mt-xs text-sm leading-relaxed text-foreground/80">
-                      {(item as any).answer
-                        .filter((b: any) => b._type === 'block')
-                        .map((b: any) => b.children?.map((c: any) => c.text).join(''))
-                        .filter(Boolean)
-                        .join(' ')}
-                    </dd>
-                  )}
-              </div>
-            ))}
-          </dl>
-        )}
-        {/* scaffold:end */}
-
-        {/* ── Any other source ──────────────────────────────────────────────
-            Every branch above belongs to a scaffold capability and can be
-            removed; this one belongs to none and is what is left when they
-            have been. It renders the flat shape the GROQ projection normalises
-            every source into (title, meta, summary, optional href), so a new
-            source works the day it is added and before anyone writes cards for
-            it, and the block keeps a real grid to lay out however many of its
-            sources a fork has kept. Added 2026-09-18.
-
-            It is also what keeps `colClass` interpolated somewhere in this
-            file, which layout-variants.test.ts reads off disk to confirm the
-            registry's `baseColumns` has not gone stale. Remove every marked
-            branch without this one and that gate fails on a component that was
-            doing exactly what it was asked to. */}
-        {!KNOWN_SOURCES.includes(source) && (
-          <ul
-            class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
-            data-stagger-grid
-          >
-            {shown.map((item) => (
-              <li>
+                </a>
+              ) : (
                 <div class="h-full rounded-md border border-border-soft bg-card p-m">
                   <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
                   {item.meta && (
@@ -313,21 +213,119 @@ const fallbackLabel: Record<string, string> = {
                     </p>
                   )}
                 </div>
-              </li>
-            ))}
-          </ul>
-        )}
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {/* scaffold:end */}
 
-        {/* CTA button */}
-        <div class="mt-section-lg flex justify-center">
-          <CtaLink
-            cta={cta}
-            variant="secondary"
-            fallbackHref={fallbackHref[source]}
-            fallbackLabel={fallbackLabel[source]}
-          />
-        </div>
+      {/* scaffold: testimonials */}
+      {/* ── Testimonial cards ────────────────────────────────────────── */}
+      {source === 'testimonials' && (
+        <ul
+          class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
+          data-stagger-grid
+        >
+          {shown.map((item) => (
+            <li class="flex">
+              <blockquote class="flex flex-1 flex-col rounded-md border border-border-soft bg-card p-m">
+                {item.summary && (
+                  <p class="flex-1 leading-relaxed text-foreground/90 italic before:content-['“'] after:content-['”']">
+                    {item.summary}
+                  </p>
+                )}
+                <footer class="mt-m">
+                  <cite class="not-italic">
+                    <p class="text-sm font-semibold text-foreground">{item.title}</p>
+                    {item.meta && <p class="text-xs text-foreground/70">{item.meta}</p>}
+                  </cite>
+                </footer>
+              </blockquote>
+            </li>
+          ))}
+        </ul>
+      )}
+      {/* scaffold:end */}
+
+      {/* scaffold: faq */}
+      {/* ── FAQ items (mini accordion) ───────────────────────────────── */}
+      {source === 'faqs' && (
+        <dl class="mx-auto mt-section-lg max-w-3xl divide-y divide-border-soft">
+          {shown.map((item) => (
+            <div class="py-m">
+              <dt class="leading-snug font-semibold text-foreground">{item.title}</dt>
+              {item.summary && (
+                <dd class="mt-xs text-sm leading-relaxed text-foreground/80">{item.summary}</dd>
+              )}
+              {/* answer is a Portable Text array -- render plain text fallback for
+                  the inline block. For full rich text the FaqAccordion island is the
+                  right component (see /faq page). */}
+              {!item.summary &&
+                Array.isArray((item as any).answer) &&
+                (item as any).answer.length > 0 && (
+                  <dd class="mt-xs text-sm leading-relaxed text-foreground/80">
+                    {(item as any).answer
+                      .filter((b: any) => b._type === 'block')
+                      .map((b: any) => b.children?.map((c: any) => c.text).join(''))
+                      .filter(Boolean)
+                      .join(' ')}
+                  </dd>
+                )}
+            </div>
+          ))}
+        </dl>
+      )}
+      {/* scaffold:end */}
+
+      {/* ── Any other source ──────────────────────────────────────────────
+            Every branch above belongs to a scaffold capability and can be
+            removed; this one belongs to none and is what is left when they
+            have been. It renders the flat shape the GROQ projection normalises
+            every source into (title, meta, summary, optional href), so a new
+            source works the day it is added and before anyone writes cards for
+            it, and the block keeps a real grid to lay out however many of its
+            sources a fork has kept. Added 2026-09-18.
+
+            It is also what keeps `colClass` interpolated somewhere in this
+            file, which layout-variants.test.ts reads off disk to confirm the
+            registry's `baseColumns` has not gone stale. Remove every marked
+            branch without this one and that gate fails on a component that was
+            doing exactly what it was asked to. */}
+      {!KNOWN_SOURCES.includes(source) && (
+        <ul
+          class={`mt-section-lg grid grid-cols-1 ${colClass} list-none gap-m p-0`}
+          data-stagger-grid
+        >
+          {shown.map((item) => (
+            <li>
+              <div class="h-full rounded-md border border-border-soft bg-card p-m">
+                <h3 class="font-display text-h4 text-foreground">{item.title}</h3>
+                {item.meta && (
+                  <p class="mt-xs text-xs font-semibold tracking-eyebrow text-link uppercase">
+                    {item.meta}
+                  </p>
+                )}
+                {item.summary && (
+                  <p class="mt-s line-clamp-3 text-sm leading-relaxed text-foreground/80">
+                    {item.summary}
+                  </p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* CTA button */}
+      <div class="mt-section-lg flex justify-center">
+        <CtaLink
+          cta={cta}
+          variant="secondary"
+          fallbackHref={fallbackHref[source]}
+          fallbackLabel={fallbackLabel[source]}
+        />
       </div>
-    </section>
-  )
-}
+    </div>
+  </section>
+)}

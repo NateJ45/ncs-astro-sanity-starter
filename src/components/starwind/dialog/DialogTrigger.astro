@@ -22,27 +22,25 @@ if (Astro.slots.has('default')) {
 }
 ---
 
-{
-  asChild && hasChildren ? (
-    <div
-      class:list={['starwind-dialog-trigger', className]}
-      data-as-child
-      data-dialog-for={dialogFor}
-      {...rest}
-      data-slot="dialog-trigger"
-    >
-      <slot />
-    </div>
-  ) : (
-    <button
-      type="button"
-      aria-haspopup="dialog"
-      class:list={['starwind-dialog-trigger', className]}
-      data-dialog-for={dialogFor}
-      {...rest}
-      data-slot="dialog-trigger"
-    >
-      <slot />
-    </button>
-  )
-}
+{asChild && hasChildren ? (
+  <div
+    class:list={['starwind-dialog-trigger', className]}
+    data-as-child
+    data-dialog-for={dialogFor}
+    {...rest}
+    data-slot="dialog-trigger"
+  >
+    <slot />
+  </div>
+) : (
+  <button
+    type="button"
+    aria-haspopup="dialog"
+    class:list={['starwind-dialog-trigger', className]}
+    data-dialog-for={dialogFor}
+    {...rest}
+    data-slot="dialog-trigger"
+  >
+    <slot />
+  </button>
+)}

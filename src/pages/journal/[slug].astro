@@ -140,75 +140,65 @@ const schemas = [
     <header class="bg-background">
       <div class="mx-auto max-w-3xl px-m pt-section-lg pb-l">
         <p class="mb-s text-xs tracking-widest text-foreground/80 uppercase">
-          <a href="/journal/" class="transition-colors hover:text-primary-dark">Journal</a>
+          <a href="/journal/" class="transition-colors hover:text-primary-dark">
+            Journal
+          </a>
           {dateLabel && <span class="mx-xs">·</span>}
           {dateLabel && <time datetime={entry.publishedAt}>{dateLabel}</time>}
           {readMinutes > 0 && <span class="mx-xs">·</span>}
           {readMinutes > 0 && <span>{formatReadingTime(readMinutes)}</span>}
         </p>
         <h1 class="font-display text-h1 leading-tight text-foreground">{entry.title}</h1>
-        {
-          entry.excerpt && (
-            <p class="mt-m text-xl leading-relaxed text-foreground/80">{entry.excerpt}</p>
-          )
-        }
-        {
-          Array.isArray(entry.categories) && entry.categories.length > 0 && (
-            <ul class="mt-l flex list-none flex-wrap gap-xs p-0">
-              {entry.categories.map((cat: any) => (
-                <li>
-                  <JournalCategoryChip title={cat.title} tooltip={cat.description} />
-                </li>
-              ))}
-            </ul>
-          )
-        }
-        {
-          entry.author && (
-            <p class="mt-l text-sm text-muted-foreground">
-              By <span class="font-semibold text-foreground">{entry.author}</span>
-              {updatedLabel && <span> · Updated {updatedLabel}</span>}
-            </p>
-          )
-        }
+        {entry.excerpt && (
+          <p class="mt-m text-xl leading-relaxed text-foreground/80">{entry.excerpt}</p>
+        )}
+        {Array.isArray(entry.categories) && entry.categories.length > 0 && (
+          <ul class="mt-l flex list-none flex-wrap gap-xs p-0">
+            {entry.categories.map((cat: any) => (
+              <li>
+                <JournalCategoryChip title={cat.title} tooltip={cat.description} />
+              </li>
+            ))}
+          </ul>
+        )}
+        {entry.author && (
+          <p class="mt-l text-sm text-muted-foreground">
+            By <span class="font-semibold text-foreground">{entry.author}</span>
+            {updatedLabel && <span> · Updated {updatedLabel}</span>}
+          </p>
+        )}
       </div>
     </header>
 
-    {
-      /* ------- 2. Cover image ----------------------------------------------
+    {/* ------- 2. Cover image ----------------------------------------------
         Same editorial cap as the portfolio hero: max-w-4xl (~896 px) so the
         photo reads as a feature image rather than a billboard. Sanity
         request width matches at 1800 so we're not requesting a 1920 px
-        file for a slot that maxes around 900 px even at 2× retina. */
-    }
-    {
-      entry.coverImage?.asset && (
-        <figure class="mx-auto max-w-4xl px-m">
-          <SanityImage
-            source={entry.coverImage}
-            width={1800}
-            loading="eager"
-            sizes="(min-width: 920px) 896px, 100vw"
-            class="h-auto w-full rounded-md"
-          />
-          {entry.coverImage.caption && (
-            <figcaption class="mt-s text-center text-sm text-foreground/80 italic">
-              {entry.coverImage.caption}
-            </figcaption>
-          )}
-        </figure>
-      )
-    }
+        file for a slot that maxes around 900 px even at 2× retina. */}
+    {entry.coverImage?.asset && (
+      <figure class="mx-auto max-w-4xl px-m">
+        <SanityImage
+          source={entry.coverImage}
+          width={1800}
+          loading="eager"
+          sizes="(min-width: 920px) 896px, 100vw"
+          class="h-auto w-full rounded-md"
+        />
+        {entry.coverImage.caption && (
+          <figcaption class="mt-s text-center text-sm text-foreground/80 italic">
+            {entry.coverImage.caption}
+          </figcaption>
+        )}
+      </figure>
+    )}
 
-    {
-      /* ------- 3. Body + TOC ------------------------------------------------
+    {/* ------- 3. Body + TOC ------------------------------------------------
         Same grid structure as the portfolio case-study body: 260 px TOC
         sidebar on lg+ when the post has h2/h3/h4 headings, single article
         column otherwise. `lg:justify-center` centers the pair within the
         section so empty space splits evenly. The article column is sized
         at minmax(0, 48rem) which matches the previous max-w-3xl reading
-        width the posts were written for. */
-    }
+        width the posts were written for. */}
     <div
       class:list={[
         'mx-auto grid max-w-content grid-cols-1 gap-section-md px-m py-section-lg lg:justify-center',
@@ -218,100 +208,88 @@ const schemas = [
       {hasToc && <CaseStudyTOC client:idle headings={headings} />}
 
       <div>
-        {
-          /* `client:visible` defers Sanity client + the journal-specific renderers
+        {/* `client:visible` defers Sanity client + the journal-specific renderers
             (inline images, before/after slider, source cards, galleries) until
             the visitor scrolls the body into view. The article HTML is still
-            server-rendered above the fold, so reading starts immediately. */
-        }
+            server-rendered above the fold, so reading starts immediately. */}
         <JournalPortableText client:visible value={entry.body} />
 
-        {
-          /* Related project link (if this post walks through a specific portfolio piece).
+        {/* Related project link (if this post walks through a specific portfolio piece).
             Centered on mobile so the cross-link reads as a deliberate "go see
             this project" affordance instead of a stray paragraph clinging to
             the left edge. Desktop keeps left-aligned (still inside the
-            article column). */
-        }
-        {
-          entry.relatedProject?.slug?.current && (
-            <aside class="mt-section-lg border-t border-border-soft pt-l text-center md:text-left">
-              <p class="mb-s text-xs tracking-widest text-foreground/80 uppercase">
-                Related project
-              </p>
-              <a
-                href={`/portfolio/${entry.relatedProject.slug.current}`}
-                class="group inline-flex items-baseline gap-s text-foreground transition-colors hover:text-primary-dark"
+            article column). */}
+        {entry.relatedProject?.slug?.current && (
+          <aside class="mt-section-lg border-t border-border-soft pt-l text-center md:text-left">
+            <p class="mb-s text-xs tracking-widest text-foreground/80 uppercase">Related project</p>
+            <a
+              href={`/portfolio/${entry.relatedProject.slug.current}`}
+              class="group inline-flex items-baseline gap-s text-foreground transition-colors hover:text-primary-dark"
+            >
+              <span class="font-display text-h3">{entry.relatedProject.title}</span>
+              <span
+                aria-hidden="true"
+                class="text-xl transition-transform group-hover:translate-x-1"
               >
-                <span class="font-display text-h3">{entry.relatedProject.title}</span>
-                <span
-                  aria-hidden="true"
-                  class="text-xl transition-transform group-hover:translate-x-1"
-                >
-                  →
-                </span>
-              </a>
-              {(entry.relatedProject.location || entry.relatedProject.year) && (
-                <p class="mt-xs text-sm text-muted-foreground">
-                  {entry.relatedProject.location}
-                  {entry.relatedProject.location && entry.relatedProject.year && <span> · </span>}
-                  {entry.relatedProject.year}
-                </p>
-              )}
-            </aside>
-          )
-        }
+                →
+              </span>
+            </a>
+            {(entry.relatedProject.location || entry.relatedProject.year) && (
+              <p class="mt-xs text-sm text-muted-foreground">
+                {entry.relatedProject.location}
+                {entry.relatedProject.location && entry.relatedProject.year && <span> · </span>}
+                {entry.relatedProject.year}
+              </p>
+            )}
+          </aside>
+        )}
       </div>
     </div>
   </article>
 
   {/* ------- 4. Related posts --------------------------------------------- */}
-  {
-    Array.isArray(entry.relatedPosts) && entry.relatedPosts.length > 0 && (
-      <section class="bg-muted" aria-labelledby="related-posts-heading">
-        <div class="mx-auto max-w-content px-m py-section-lg">
-          <h2 id="related-posts-heading" class="mb-l font-display text-h2 text-foreground">
-            Keep reading
-          </h2>
-          <div class="grid grid-cols-1 gap-l md:grid-cols-3">
-            {entry.relatedPosts.slice(0, 3).map((post: any) => (
-              <JournalCard entry={post} />
-            ))}
-          </div>
+  {Array.isArray(entry.relatedPosts) && entry.relatedPosts.length > 0 && (
+    <section class="bg-muted" aria-labelledby="related-posts-heading">
+      <div class="mx-auto max-w-content px-m py-section-lg">
+        <h2 id="related-posts-heading" class="mb-l font-display text-h2 text-foreground">
+          Keep reading
+        </h2>
+        <div class="grid grid-cols-1 gap-l md:grid-cols-3">
+          {entry.relatedPosts.slice(0, 3).map((post: any) => (
+            <JournalCard entry={post} />
+          ))}
         </div>
-      </section>
-    )
-  }
+      </div>
+    </section>
+  )}
 
   {/* ------- 5. Next / previous post -------------------------------------- */}
-  {
-    (prev || next) && (
-      <nav class="border-t border-border-soft bg-background" aria-label="More journal posts">
-        <div class="mx-auto grid max-w-content grid-cols-1 gap-m px-m py-l md:grid-cols-2">
-          {prev ? (
-            <a href={`/journal/${prev.slug}`} class="group">
-              <p class="mb-xs text-xs tracking-widest text-foreground/80 uppercase">Newer post</p>
-              <p class="font-display text-h4 text-foreground transition-colors group-hover:text-primary-dark">
-                ← {prev.title}
-              </p>
-            </a>
-          ) : (
-            <div />
-          )}
-          {next ? (
-            <a href={`/journal/${next.slug}`} class="group md:text-right">
-              <p class="mb-xs text-xs tracking-widest text-foreground/80 uppercase">Older post</p>
-              <p class="font-display text-h4 text-foreground transition-colors group-hover:text-primary-dark">
-                {next.title} →
-              </p>
-            </a>
-          ) : (
-            <div />
-          )}
-        </div>
-      </nav>
-    )
-  }
+  {(prev || next) && (
+    <nav class="border-t border-border-soft bg-background" aria-label="More journal posts">
+      <div class="mx-auto grid max-w-content grid-cols-1 gap-m px-m py-l md:grid-cols-2">
+        {prev ? (
+          <a href={`/journal/${prev.slug}`} class="group">
+            <p class="mb-xs text-xs tracking-widest text-foreground/80 uppercase">Newer post</p>
+            <p class="font-display text-h4 text-foreground transition-colors group-hover:text-primary-dark">
+              ← {prev.title}
+            </p>
+          </a>
+        ) : (
+          <div />
+        )}
+        {next ? (
+          <a href={`/journal/${next.slug}`} class="group md:text-right">
+            <p class="mb-xs text-xs tracking-widest text-foreground/80 uppercase">Older post</p>
+            <p class="font-display text-h4 text-foreground transition-colors group-hover:text-primary-dark">
+              {next.title} →
+            </p>
+          </a>
+        ) : (
+          <div />
+        )}
+      </div>
+    </nav>
+  )}
 
   {/* ------- 6. Final CTA -------------------------------------------------- */}
   <FinalCta
@@ -321,18 +299,14 @@ const schemas = [
     backgroundImage={journalPage?.finalCtaBackgroundImage}
   />
 
-  {
-    /* Sticky contextual CTA — appears past 50% scroll on long posts.
+  {/* Sticky contextual CTA — appears past 50% scroll on long posts.
       Label is Sanity-editable on journalPage; clearing the field hides the
-      chip across every journal post. */
-  }
-  {
-    journalPage?.stickyCtaLabel !== '' && (
-      <StickyCTAChip
-        client:idle
-        label={journalPage?.stickyCtaLabel ?? 'Got a question?'}
-        href="/contact/"
-      />
-    )
-  }
+      chip across every journal post. */}
+  {journalPage?.stickyCtaLabel !== '' && (
+    <StickyCTAChip
+      client:idle
+      label={journalPage?.stickyCtaLabel ?? 'Got a question?'}
+      href="/contact/"
+    />
+  )}
 </BaseLayout>

@@ -48,43 +48,41 @@ const sandbox = 'allow-scripts allow-forms allow-same-origin allow-popups';
 const iframeTitle = headline || eyebrow || 'Embedded content';
 ---
 
-{
-  hasContent && (
-    <section
-      class="bg-background"
-      aria-labelledby={hasHeading ? headingId : undefined}
-      aria-label={!hasHeading ? 'Embedded content' : undefined}
-    >
-      <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
-        {hasHeading && (
-          <SectionHeading
-            eyebrow={eyebrow}
-            headline={headline}
-            subhead={subhead}
-            headingId={headingId}
-            align="center"
-            class="mx-auto"
-          />
-        )}
+{hasContent && (
+  <section
+    class="bg-background"
+    aria-labelledby={hasHeading ? headingId : undefined}
+    aria-label={!hasHeading ? 'Embedded content' : undefined}
+  >
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      {hasHeading && (
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          subhead={subhead}
+          headingId={headingId}
+          align="center"
+          class="mx-auto"
+        />
+      )}
 
-        <div class:list={['w-full', minHeightClass, hasHeading && 'mt-section-md']}>
-          {embedUrl ? (
-            /* URL-based embed — fully sandboxed iframe */
-            <iframe
-              src={embedUrl}
-              title={iframeTitle}
-              sandbox={sandbox}
-              loading="lazy"
-              class:list={['w-full border-0', minHeightClass]}
-              allowfullscreen
-            />
-          ) : embedCode ? (
-            /* Raw code embed — editor-pasted, same trust level as CMS content.
+      <div class:list={['w-full', minHeightClass, hasHeading && 'mt-section-md']}>
+        {embedUrl ? (
+          /* URL-based embed — fully sandboxed iframe */
+          <iframe
+            src={embedUrl}
+            title={iframeTitle}
+            sandbox={sandbox}
+            loading="lazy"
+            class:list={['w-full border-0', minHeightClass]}
+            allowfullscreen
+          />
+        ) : embedCode ? (
+          /* Raw code embed — editor-pasted, same trust level as CMS content.
              Rendered inside a containing div so it inherits our layout width. */
-            <div class:list={['w-full', minHeightClass]} set:html={embedCode} />
-          ) : null}
-        </div>
+          <div class:list={['w-full', minHeightClass]} set:html={embedCode} />
+        ) : null}
       </div>
-    </section>
-  )
-}
+    </div>
+  </section>
+)}
