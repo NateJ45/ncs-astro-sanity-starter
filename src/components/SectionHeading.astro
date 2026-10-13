@@ -123,77 +123,71 @@ const accentAlign = align === 'center' ? 'mx-auto' : '';
 ---
 
 <div class:list={[wrapperAlign, 'max-w-3xl', extraClass]}>
-  {
-    eyebrow && (
-      <>
-        <p class:list={['text-xs tracking-eyebrow uppercase', toneEyebrow]}>{eyebrow}</p>
-        <div class:list={['mt-s mb-m h-px w-12', accentAlign, accentColor]} aria-hidden="true" />
-      </>
-    )
-  }
-  {
-    headline &&
-      (level === 'h1' ? (
-        <h1 id={headingId} class:list={[headingClass, toneHeadline]}>
-          {scriptFound ? (
-            <>
-              {scriptBefore}
-              <span class="font-script">{scriptWord}</span>
-              {scriptAfter}
-            </>
-          ) : colour.found ? (
-            <>
-              {colour.before}
-              <span class="heading-accent">{colour.word}</span>
-              {colour.after}
-            </>
-          ) : (
-            headline
-          )}
-        </h1>
-      ) : level === 'h2' ? (
-        <h2 id={headingId} class:list={[headingClass, toneHeadline]}>
-          {scriptFound ? (
-            <>
-              {scriptBefore}
-              <span class="font-script">{scriptWord}</span>
-              {scriptAfter}
-            </>
-          ) : colour.found ? (
-            <>
-              {colour.before}
-              <span class="heading-accent">{colour.word}</span>
-              {colour.after}
-            </>
-          ) : (
-            headline
-          )}
-        </h2>
-      ) : (
-        <h3 id={headingId} class:list={[headingClass, toneHeadline]}>
-          {scriptFound ? (
-            <>
-              {scriptBefore}
-              <span class="font-script">{scriptWord}</span>
-              {scriptAfter}
-            </>
-          ) : colour.found ? (
-            <>
-              {colour.before}
-              <span class="heading-accent">{colour.word}</span>
-              {colour.after}
-            </>
-          ) : (
-            headline
-          )}
-        </h3>
-      ))
-  }
-  {
-    (subhead || richSubhead) && (
-      <p class:list={['mt-m text-lg', toneSub]}>
-        {richSubhead ? <InlineRich value={subheadRich} /> : subhead}
-      </p>
-    )
-  }
+  {eyebrow && (
+    <>
+      <p class:list={['text-xs tracking-eyebrow uppercase', toneEyebrow]}>{eyebrow}</p>
+      <div class:list={['mt-s mb-m h-px w-12', accentAlign, accentColor]} aria-hidden="true" />
+    </>
+  )}
+  {headline &&
+    (level === 'h1' ? (
+      <h1 id={headingId} class:list={[headingClass, toneHeadline]}>
+        {scriptFound ? (
+          <>
+            {scriptBefore}
+            <span class="font-script">{scriptWord}</span>
+            {scriptAfter}
+          </>
+        ) : colour.found ? (
+          <>
+            {colour.before}
+            <span class="heading-accent">{colour.word}</span>
+            {colour.after}
+          </>
+        ) : (
+          headline
+        )}
+      </h1>
+    ) : level === 'h2' ? (
+      <h2 id={headingId} class:list={[headingClass, toneHeadline]}>
+        {scriptFound ? (
+          <>
+            {scriptBefore}
+            <span class="font-script">{scriptWord}</span>
+            {scriptAfter}
+          </>
+        ) : colour.found ? (
+          <>
+            {colour.before}
+            <span class="heading-accent">{colour.word}</span>
+            {colour.after}
+          </>
+        ) : (
+          headline
+        )}
+      </h2>
+    ) : (
+      <h3 id={headingId} class:list={[headingClass, toneHeadline]}>
+        {scriptFound ? (
+          <>
+            {scriptBefore}
+            <span class="font-script">{scriptWord}</span>
+            {scriptAfter}
+          </>
+        ) : colour.found ? (
+          <>
+            {colour.before}
+            <span class="heading-accent">{colour.word}</span>
+            {colour.after}
+          </>
+        ) : (
+          headline
+        )}
+      </h3>
+    ))}
+  {(subhead || richSubhead) && (
+    <p class:list={['mt-m text-lg', toneSub]}>
+      {richSubhead ? <InlineRich value={subheadRich} /> : subhead}
+    </p>
+  )}
 </div>

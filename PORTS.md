@@ -211,6 +211,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 91  | One text/picture column split (`.split`) and `measure-columns.mjs`             | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 92  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | yes                 | yes            |
 | 93  | SanityImage srcset ladder starts at 160w; `sizes` trims dead steps             | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | n/a                 | staged         |
+| 94  | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)        | n/a     | staged      | yes      | staged           | staged        | no             | n/a                | staged              | staged         |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7720,3 +7721,41 @@ per site are in the Status below.
 
 **Status.** Starter: merged with this PR. presacademy, mas-monograms, reid-design-site, stonesteps-50k, fbcm (no matrix
 column): `staged`. wcp, 2ndpreschicago and nixoncreativestudio have no `SanityImage`: n/a.
+
+## Card 94: The planned major stack upgrade, starter first (2026-10-13)
+
+**Origin:** card 62 keeps every npm major off Dependabot and card 92 pins `astro` with its adapter, so the family's
+majors are taken once, starter first, in one planned session. This is that session (approved 2026-10-13).
+**Canonical:** `package.json` and the lockfile, `.claude/rules/dependencies.md` rule 8, and the `prettier-plugin-astro`
+reformat of 60 `.astro` files.
+
+**Landed in the starter.** `astro` ^7.3.8, `@astrojs/cloudflare` **14.3.4** exact, `wrangler` **~4.129.0**, `@astrojs/react` 7,
+`@astrojs/mdx` 8, `motion` 14, `eslint-plugin-astro` 3, `prettier-plugin-astro` 1, `@portabletext/react` 8, and
+`cloudflare/wrangler-action` v4 in `deploy.yml` and the external-import template. Sanity, react and the rest of the rule-8 set did not move.
+
+**Decisions worth copying.**
+
+1. **wrangler goes to ~4.129.0, not the newest.** The adapter (14.2.5 onward) peers `wrangler ^4.125.0`, so the old
+   `~4.110.0` pin had to move. Every wrangler from 4.126 up bundles a miniflare 5 alpha or beta (4.150.0 is a `5.x-beta`);
+   4.129 is the line presacademy, reid-design-site and mas-monograms have already deployed with. The generated
+   `dist/server/wrangler.json` on 14.3.4 has no `legacy_env`. A real `wrangler deploy` of the starter to a throwaway Worker
+   uploaded 488 assets, started in 18 ms, and served `/` and `/studio/` with no console errors beyond the placeholder Sanity project.
+2. **`primereact` stays on 10.x.** v11 is a rewrite (compound unstyled primitives; the provider moves to `@primereact/core`;
+   `primereact/api` is gone, which `astro dev` showed as `primereact/api (imported by PrimeIsland.tsx)` not resolving while `astro build`
+   stayed green because no page imports the scaffold) and it moved from MIT to the PrimeUI License: a licence key is required
+   and an unverified key injects a banner. No site renders PrimeReact, so there is nothing to gain. Dependabot's major ignore
+   already keeps it from being proposed.
+3. **`prettier-plugin-astro` 1 is its own commit.** It reformats 60 files in the starter. The built HTML of all 12 prerendered
+   pages is identical after whitespace and class-order normalisation, but the starter builds without Sanity content, so each site
+   must repeat that diff on a build with its real content (gotcha `prettier-on-astro-templates`). Two `PORTABLE:` files are
+   reformatted by it (`InlineRich.astro`, `CloudflareBeacon.astro`), so site PRs go red on `sync-check` until this card merges:
+   push site branches without PRs, merge the starter, then open them.
+4. `@portabletext/react` 8 needs Node 22.12 and React 19 and has no API change; a server render of heading, link-in-strong
+   and bullet blocks matches v6 output. `motion` 14 only reaches `motion/react` in `animated-beam.tsx`.
+
+**Adapt per site:** take the same `package.json` moves where the site uses the package (a site already on 14.3.x or wrangler
+4.129 keeps its own exact pins), run `npm run format` with the new plugin as a separate commit, diff the built HTML on real content,
+and re-check the live page after the deploy. A site that renders PrimeReact must read decision 2 first.
+
+**Status.** Starter: merged with this PR. Sites (presacademy, mas-monograms, reid-design-site, stonesteps-50k, fbcm,
+nixoncreativestudio): `staged` as of 2026-10-13, one PR each after this merges. 2ndpreschicago is dormant and wcp archived: not taken.

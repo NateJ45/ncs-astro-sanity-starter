@@ -19,27 +19,25 @@ if (Astro.slots.has('default')) {
 }
 ---
 
-{
-  asChild && hasChildren ? (
-    <div
-      class:list={['starwind-dropdown-trigger', className]}
-      data-as-child
-      {...rest}
-      data-slot="dropdown-trigger"
-    >
-      <slot />
-    </div>
-  ) : (
-    <button
-      class={dropdownTrigger({ class: className })}
-      type="button"
-      aria-haspopup="true"
-      aria-expanded="false"
-      data-state="closed"
-      {...rest}
-      data-slot="dropdown-trigger"
-    >
-      <slot />
-    </button>
-  )
-}
+{asChild && hasChildren ? (
+  <div
+    class:list={['starwind-dropdown-trigger', className]}
+    data-as-child
+    {...rest}
+    data-slot="dropdown-trigger"
+  >
+    <slot />
+  </div>
+) : (
+  <button
+    class={dropdownTrigger({ class: className })}
+    type="button"
+    aria-haspopup="true"
+    aria-expanded="false"
+    data-state="closed"
+    {...rest}
+    data-slot="dropdown-trigger"
+  >
+    <slot />
+  </button>
+)}

@@ -56,109 +56,107 @@ const cardClass =
   'card-lift bg-card rounded-md border border-border-soft shadow-[0_4px_18px_-14px_rgba(61,61,61,0.18)] overflow-hidden';
 ---
 
-{
-  hasAnything && (
-    <section class="bg-background" aria-labelledby="about-personal-heading">
-      <div class="mx-auto max-w-content px-m py-section-lg">
-        <SectionHeading
-          eyebrow={eyebrow ?? 'Off the Clock.'}
-          headline={headline ?? 'A little more about me.'}
-          headingId="about-personal-heading"
-          align="center"
-          class="mx-auto"
-        />
-        {intro && (
-          <p class="mx-auto mt-m max-w-2xl text-center text-lg leading-relaxed text-foreground/85">
-            {intro}
-          </p>
+{hasAnything && (
+  <section class="bg-background" aria-labelledby="about-personal-heading">
+    <div class="mx-auto max-w-content px-m py-section-lg">
+      <SectionHeading
+        eyebrow={eyebrow ?? 'Off the Clock.'}
+        headline={headline ?? 'A little more about me.'}
+        headingId="about-personal-heading"
+        align="center"
+        class="mx-auto"
+      />
+      {intro && (
+        <p class="mx-auto mt-m max-w-2xl text-center text-lg leading-relaxed text-foreground/85">
+          {intro}
+        </p>
+      )}
+
+      <div class="mt-section-lg grid grid-cols-1 items-start gap-l lg:grid-cols-2">
+        {(currently.length > 0 || hasBeyond) && (
+          <div class="space-y-l">
+            {currently.length > 0 && (
+              <article class={cardClass}>
+                <div class="h-0.5 bg-primary" aria-hidden="true" />
+                <div class="p-l">
+                  <h3 class="font-display text-h3 text-foreground">Currently</h3>
+                  <dl class="mt-m divide-y divide-border-soft">
+                    {currently.map((row) => (
+                      <div class="flex items-baseline justify-between gap-m py-s">
+                        <dt class="shrink-0 text-xs tracking-eyebrow text-foreground/80 uppercase">
+                          {row.label}
+                        </dt>
+                        <dd class="text-right text-foreground">{row.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </article>
+            )}
+            {hasBeyond && (
+              <article class={cardClass}>
+                <div class="h-0.5 bg-primary" aria-hidden="true" />
+                <div class="p-l">
+                  <h3 class="font-display text-h3 text-foreground">Beyond design</h3>
+                  {candidPhoto?.asset && (
+                    <SanityImage
+                      source={candidPhoto}
+                      width={900}
+                      sizes="(min-width: 1024px) 40vw, 100vw"
+                      quality={75}
+                      class="mt-m h-auto w-full rounded-md"
+                    />
+                  )}
+                  {beyondDesign && (
+                    <p class="mt-m leading-relaxed whitespace-pre-line text-foreground/85">
+                      {beyondDesign}
+                    </p>
+                  )}
+                </div>
+              </article>
+            )}
+          </div>
         )}
 
-        <div class="mt-section-lg grid grid-cols-1 items-start gap-l lg:grid-cols-2">
-          {(currently.length > 0 || hasBeyond) && (
-            <div class="space-y-l">
-              {currently.length > 0 && (
-                <article class={cardClass}>
-                  <div class="h-0.5 bg-primary" aria-hidden="true" />
-                  <div class="p-l">
-                    <h3 class="font-display text-h3 text-foreground">Currently</h3>
-                    <dl class="mt-m divide-y divide-border-soft">
-                      {currently.map((row) => (
-                        <div class="flex items-baseline justify-between gap-m py-s">
-                          <dt class="shrink-0 text-xs tracking-eyebrow text-foreground/80 uppercase">
-                            {row.label}
-                          </dt>
-                          <dd class="text-right text-foreground">{row.value}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </div>
-                </article>
-              )}
-              {hasBeyond && (
-                <article class={cardClass}>
-                  <div class="h-0.5 bg-primary" aria-hidden="true" />
-                  <div class="p-l">
-                    <h3 class="font-display text-h3 text-foreground">Beyond design</h3>
-                    {candidPhoto?.asset && (
-                      <SanityImage
-                        source={candidPhoto}
-                        width={900}
-                        sizes="(min-width: 1024px) 40vw, 100vw"
-                        quality={75}
-                        class="mt-m h-auto w-full rounded-md"
-                      />
-                    )}
-                    {beyondDesign && (
-                      <p class="mt-m leading-relaxed whitespace-pre-line text-foreground/85">
-                        {beyondDesign}
-                      </p>
-                    )}
-                  </div>
-                </article>
-              )}
-            </div>
-          )}
-
-          {(rapid.length > 0 || spots.length > 0) && (
-            <div class="space-y-l">
-              {rapid.length > 0 && (
-                <article class={cardClass}>
-                  <div class="h-0.5 bg-primary" aria-hidden="true" />
-                  <div class="p-l">
-                    <h3 class="font-display text-h3 text-foreground">Rapid fire</h3>
-                    <dl class="mt-m grid grid-cols-1 gap-m sm:grid-cols-2">
-                      {rapid.map((row) => (
-                        <div>
-                          <dt class="text-xs tracking-eyebrow text-foreground/80 uppercase">
-                            {row.prompt}
-                          </dt>
-                          <dd class="mt-xs text-foreground">{row.answer}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </div>
-                </article>
-              )}
-              {spots.length > 0 && (
-                <article class={cardClass}>
-                  <div class="h-0.5 bg-primary" aria-hidden="true" />
-                  <div class="p-l">
-                    <h3 class="font-display text-h3 text-foreground">Favorite local spots</h3>
-                    <ul class="mt-m space-y-s">
-                      {spots.map((row) => (
-                        <li class="flex flex-col">
-                          <span class="font-semibold text-foreground">{row.name}</span>
-                          {row.note && <span class="text-sm text-foreground/80">{row.note}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </article>
-              )}
-            </div>
-          )}
-        </div>
+        {(rapid.length > 0 || spots.length > 0) && (
+          <div class="space-y-l">
+            {rapid.length > 0 && (
+              <article class={cardClass}>
+                <div class="h-0.5 bg-primary" aria-hidden="true" />
+                <div class="p-l">
+                  <h3 class="font-display text-h3 text-foreground">Rapid fire</h3>
+                  <dl class="mt-m grid grid-cols-1 gap-m sm:grid-cols-2">
+                    {rapid.map((row) => (
+                      <div>
+                        <dt class="text-xs tracking-eyebrow text-foreground/80 uppercase">
+                          {row.prompt}
+                        </dt>
+                        <dd class="mt-xs text-foreground">{row.answer}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </article>
+            )}
+            {spots.length > 0 && (
+              <article class={cardClass}>
+                <div class="h-0.5 bg-primary" aria-hidden="true" />
+                <div class="p-l">
+                  <h3 class="font-display text-h3 text-foreground">Favorite local spots</h3>
+                  <ul class="mt-m space-y-s">
+                    {spots.map((row) => (
+                      <li class="flex flex-col">
+                        <span class="font-semibold text-foreground">{row.name}</span>
+                        {row.note && <span class="text-sm text-foreground/80">{row.note}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
+            )}
+          </div>
+        )}
       </div>
-    </section>
-  )
-}
+    </div>
+  </section>
+)}

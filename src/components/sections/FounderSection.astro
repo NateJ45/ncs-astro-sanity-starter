@@ -31,41 +31,34 @@ const {
     data-reveal
     class="split split--media-first mx-auto max-w-content items-center px-m py-section-lg"
   >
-    {
-      /* THE SHARED SPLIT (PORTS.md card 91): portrait leads, so it takes the mirrored
-        variant (narrow picture track on the left). See `.split` in globals.css. */
-    }
-    {
-      portrait?.asset ? (
-        <div class="order-1">
-          <SanityImage
-            source={portrait}
-            width={800}
-            sizes="(min-width: 1024px) 45vw, 100vw"
-            quality={75}
-            class="h-auto w-full rounded-md"
-          />
-        </div>
-      ) : (
-        <div class="order-1 aspect-[4/5] rounded-md bg-muted" aria-hidden="true" />
-      )
-    }
+    {/* THE SHARED SPLIT (PORTS.md card 91): portrait leads, so it takes the mirrored
+        variant (narrow picture track on the left). See `.split` in globals.css. */}
+    {portrait?.asset ? (
+      <div class="order-1">
+        <SanityImage
+          source={portrait}
+          width={800}
+          sizes="(min-width: 1024px) 45vw, 100vw"
+          quality={75}
+          class="h-auto w-full rounded-md"
+        />
+      </div>
+    ) : (
+      <div class="order-1 aspect-[4/5] rounded-md bg-muted" aria-hidden="true" />
+    )}
 
     <div class="order-2">
       <p class="mb-s text-xs tracking-[0.22em] text-foreground/80 uppercase">{eyebrow}</p>
-      <h2 id={headingId} class="font-display text-h2 text-foreground">{headline}</h2>
-      {
-        content ? (
-          <PortableText
-            value={content}
-            className="mt-m text-foreground/85 text-lg leading-relaxed"
-          />
-        ) : (
-          <p class="mt-m text-lg leading-relaxed text-foreground/85">
-            Add your founder intro in Sanity Studio under the Founder Bio section.
-          </p>
-        )
-      }
+      <h2 id={headingId} class="font-display text-h2 text-foreground">
+        {headline}
+      </h2>
+      {content ? (
+        <PortableText value={content} className="mt-m text-foreground/85 text-lg leading-relaxed" />
+      ) : (
+        <p class="mt-m text-lg leading-relaxed text-foreground/85">
+          Add your founder intro in Sanity Studio under the Founder Bio section.
+        </p>
+      )}
       <div class="mt-l flex justify-center lg:justify-start">
         <CtaLink cta={cta} variant="secondary" fallbackHref="/about/" fallbackLabel="Learn More" />
       </div>

@@ -54,4 +54,4 @@ Copy individual component passthrough objects from that repo, then replace any h
 
 ## Installed version
 
-`primereact` v10.9.8 -- stable, React 19 compatible peer dep. PrimeReact v11 is in alpha as of June 2026; upgrade when it reaches stable. The install is `primereact` on npm; the provider is imported from `primereact/api`.
+`primereact` v10.9.x -- stable, React 19 compatible peer dep, held at v10 on purpose. PrimeReact v11 reached stable but is a different library: unstyled compound primitives (`Select.Root`, `Select.Trigger`, ...), the provider moves to `@primereact/core`, `primereact/api` and the `pt` objects below no longer exist, and it ships under the PrimeUI License, which needs a licence key (free Community tier, annual renewal) and shows a banner when the key cannot be verified. See `.claude/rules/dependencies.md` and PORTS.md card 94. The install is `primereact` on npm; the provider is imported from `primereact/api`.

@@ -100,17 +100,15 @@ const SECONDARY_CTA = { label: 'See the work', linkType: 'external' as const, ex
 
       <h2 class="mt-14 font-display text-h3">Brand palette</h2>
       <ul class="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {
-          BRAND_TOKENS.map((t) => (
-            <li class="rounded-lg border border-border p-3">
-              <span
-                class="block h-12 w-full rounded border border-foreground/20"
-                style={`background: var(${t})`}
-              />
-              <code class="mt-2 block font-mono text-[0.6875rem] break-all">{t}</code>
-            </li>
-          ))
-        }
+        {BRAND_TOKENS.map((t) => (
+          <li class="rounded-lg border border-border p-3">
+            <span
+              class="block h-12 w-full rounded border border-foreground/20"
+              style={`background: var(${t})`}
+            />
+            <code class="mt-2 block font-mono text-[0.6875rem] break-all">{t}</code>
+          </li>
+        ))}
       </ul>
 
       <h2 class="mt-14 font-display text-h3">Semantic tokens</h2>
@@ -119,22 +117,22 @@ const SECONDARY_CTA = { label: 'See the work', linkType: 'external' as const, ex
         baselines is a token that forgot to.
       </p>
       <ul class="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {
-          SEMANTIC_TOKENS.map((t) => (
-            <li class="rounded-lg border border-border p-3">
-              <span
-                class="block h-12 w-full rounded border border-foreground/20"
-                style={`background: var(${t})`}
-              />
-              <code class="mt-2 block font-mono text-[0.6875rem] break-all">{t}</code>
-            </li>
-          ))
-        }
+        {SEMANTIC_TOKENS.map((t) => (
+          <li class="rounded-lg border border-border p-3">
+            <span
+              class="block h-12 w-full rounded border border-foreground/20"
+              style={`background: var(${t})`}
+            />
+            <code class="mt-2 block font-mono text-[0.6875rem] break-all">{t}</code>
+          </li>
+        ))}
       </ul>
 
       <h2 class="mt-14 font-display text-h3">Type, on the page ground</h2>
       <div class="mt-5">
-        {HEADINGS.map(([label, cls]) => <p class={`font-display ${cls}`}>{label}</p>)}
+        {HEADINGS.map(([label, cls]) => (
+          <p class={`font-display ${cls}`}>{label}</p>
+        ))}
         <p class="mt-3 max-w-[60ch]">
           Body copy on the page ground. The quick brown fox jumps over the lazy dog, twice, so the
           line has enough letters in it for a rasterisation change to show.
@@ -144,17 +142,18 @@ const SECONDARY_CTA = { label: 'See the work', linkType: 'external' as const, ex
           Eyebrow, uppercase, tracked
         </p>
         <p class="mt-4">
-          A <a class="nav-underline text-primary-dark" href="#">link with the nav underline</a> in a sentence,
-          so its rule sits against real type.
+          A{' '}
+          <a class="nav-underline text-primary-dark" href="#">
+            link with the nav underline
+          </a>{' '}
+          in a sentence, so its rule sits against real type.
         </p>
       </div>
 
       <h2 class="mt-14 font-display text-h3">Type, on a card</h2>
-      {
-        /* The exact combination that failed elsewhere: a heading inside a card,
+      {/* The exact combination that failed elsewhere: a heading inside a card,
            where a base-layer heading colour would otherwise win over the card's
-           own foreground token. */
-      }
+           own foreground token. */}
       <div class="card-lift mt-5 max-w-[30rem] rounded-lg border border-border bg-card p-7">
         <h3 class="font-display text-h3 text-card-foreground">Heading on a card</h3>
         <p class="mt-2 text-sm text-card-foreground">Body copy on a card.</p>
@@ -188,10 +187,8 @@ const SECONDARY_CTA = { label: 'See the work', linkType: 'external' as const, ex
     </div>
   </section>
 
-  {
-    /* A dark panel, because the inverse tone has its own contrast problems and
-      they are invisible in a light-only shot. */
-  }
+  {/* A dark panel, because the inverse tone has its own contrast problems and
+      they are invisible in a light-only shot. */}
   <section class="bg-accent-dark py-section-lg">
     <div class="mx-auto w-full max-w-content px-6">
       <SectionHeading
