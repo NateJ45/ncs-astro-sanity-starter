@@ -7615,7 +7615,14 @@ autofix would not, which is why there is no autofix job). Formatter MAJORS stay 
 prettier-plugin-astro 1.x (which reformats 33 to 91 `.astro` files per repo) is taken once per repo in the planned
 starter-first major upgrade, not from a Dependabot PR.
 
-**Adapt per site:** add the two blocks to the npm entry; keep the site's existing comments, quoting style and extra
+**Correction (same day): first match is not enough.** GitHub documents that a dependency goes into the first group it
+matches, and a fresh run does that (stonesteps-50k #108 was prettier alone, #109 the bundle without it). But when Dependabot
+refreshes an OLDER bundle PR (title "... across 1 directory ..."), it rebuilds that one group without regard to the
+others: fbcm #55 and starter #106 pulled prettier back into `minor-and-patch` and closed the formatters PR as
+"superseded". So `minor-and-patch` also carries `exclude-patterns: [prettier, 'prettier-plugin-*']`, which holds on
+either path. Shipped in one PR per repo on 2026-10-13.
+
+**Adapt per site:** add the two blocks (plus the `exclude-patterns` line) to the npm entry; keep the site's existing comments, quoting style and extra
 ignores. A site whose adapter is newer (14.3.x) still pins `astro`: the next Astro minor can break 14.3 the same way.
 Exception: a site that lets the adapter and wrangler flow too (nixoncreativestudio) does NOT pin `astro`: there astro and the adapter ride the same bundle and cannot split, so it takes only the `formatters` group. When the stack is moved by hand, the `astro` ignore stays; the bump happens in `package.json` and the lockfile.
 
