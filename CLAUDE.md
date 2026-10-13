@@ -29,7 +29,7 @@ The must-knows:
 - `npm run parity list | capture | compare [page] [--exclude globs]`: rendered-HTML parity. Build first. Use on any render-neutral change. `npm run test:scripts` tests the helpers in `scripts/lib/` (also run at the end of `test:unit`, so CI and deploy cover it).
 - `npm run preview`: `wrangler dev` on the last build; the only way to exercise SSR routes locally.
 - `npm run references -- <urls>` (reference screenshots into `docs/references/`), `npm run directions:shoot -- <folder>` (390/768/1280 shots of design-direction mockups), and the `/design-directions` command: see "Design flow" below.
-- `npm run apply-brand`, `npm run seed`, `npm run scaffold`, `npm run audit:studio`, `npm run og`, `npm run sync-check [site-repo]`, `npm run free-dist`: see `docs/claude/build-and-scripts.md` (seed and scaffold detail in `.claude/rules/scaffold.md`).
+- `npm run apply-brand`, `npm run seed` (dry by default), `npm run scaffold`, `npm run audit:studio`, `npm run audit:data` (live data against the compiled schema, card 95), `npm run og`, `npm run sync-check [site-repo]`, `npm run free-dist`: see `docs/claude/build-and-scripts.md` (seed and scaffold detail in `.claude/rules/scaffold.md`).
 
 ## Branch, CI and deploy
 
@@ -57,7 +57,7 @@ Numbering is load-bearing; other docs cite it. Rules 1 to 7 and 10 are in full b
 13. **Run `npm run build` after `apply-brand`.** Full text: `.claude/rules/brand-reskin.md`.
 14. **A capability is added with its scaffold markers in the same commit,** or `npm run scaffold -- --remove` silently leaves it behind. Full text: `.claude/rules/scaffold.md`.
 15. **Anything computable from data is derived at build time,** never stored as a field an editor can retype. Full text: `.claude/rules/sanity-schema.md`.
-16. **Retiring data is a backup-then-delete script, run dry first,** never a raw delete. Full text: `.claude/rules/data-scripts.md`.
+16. **Retiring data is a backup-then-delete script, run dry first,** never a raw delete. Every data script is dry by default, and a write to the production dataset needs `--apply` AND `NCS_PRODUCTION_WRITE=yes` in the same command, set only by Nathan (PORTS.md card 86). Never put backticked text in a shell string. Full text: `.claude/rules/data-scripts.md`.
 17. **One grammar per page:** one heading system, one left edge, one text/picture split (`.split`, PORTS.md card 91), one button family. Check with `node scripts/measure-columns.mjs`. Full text: `.claude/rules/ui-grammar.md`.
 18. **Layout variants are a config axis** (`brand.config.json` `layout`: header, hero, density, cards); a default emits nothing, so existing sites do not move. Full text: `.claude/rules/brand-reskin.md`.
 19. **Internal page links end in a slash** (`/about/`), matching `trailingSlash: 'always'`, canonicals and the sitemap; a bare `/about` 307s and Search Console reports "Page with redirect". Hand-written hrefs carry it; hrefs built from data go through `withTrailingSlash()` (`src/lib/href.ts`, PORTABLE). Files, `#anchors`, `mailto:`/`tel:`, `/studio`, `/api` are left alone. Full text: PORTS.md card 89.
@@ -105,7 +105,7 @@ Path-scoped rules (`.claude/rules/`, load when matching files are touched):
 - `sanity-schema.md`: rules 1, 8b, 9, 10, 15.
 - `brand-reskin.md`: rules 11 to 13 and 18 (layout variants).
 - `scaffold.md`: rule 14, seeding, scaffold, modules and archive.
-- `data-scripts.md`: rule 16.
+- `data-scripts.md`: rule 16 and the production write gate.
 - `ui-grammar.md`: rule 17.
 - `foundation-files.md`: the edit-with-care file list.
 - `library-of-record.md`: PORTS.md, PORTABLE markers, sync-check.

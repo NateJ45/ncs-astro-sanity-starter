@@ -275,12 +275,18 @@ Seed the singletons, then replace the placeholder text with real copy.
 
 ```powershell
 npm run seed
+$env:NCS_PRODUCTION_WRITE = 'yes'; npm run seed -- --apply; Remove-Item Env:NCS_PRODUCTION_WRITE
+npm run audit:data
 ```
 
-This needs `PUBLIC_SANITY_PROJECT_ID` and `SANITY_API_WRITE_TOKEN` in `.env`. It
-uses `createOrReplace` with deterministic ids, so re-running is safe. Its
-sections are scaffold-marked, so a capability you removed in Step 2 is not
-seeded.
+This needs `PUBLIC_SANITY_PROJECT_ID` and `SANITY_API_WRITE_TOKEN` in `.env`. A
+bare `npm run seed` is a dry run that lists what it would write; the second
+line writes, and needs both `--apply` and `NCS_PRODUCTION_WRITE=yes` because
+the dataset is `production` (PORTS.md card 86; run it yourself, never through an
+agent). It uses `createOrReplace` with deterministic ids, so re-running is
+safe. Its sections are scaffold-marked, so a capability you removed in Step 2
+is not seeded. `npm run audit:data` then checks every stored value against the
+schema (PORTS.md card 95).
 
 If the project has an archive to import, import it now rather than later.
 Building pages against real content is what turns a layout question into an

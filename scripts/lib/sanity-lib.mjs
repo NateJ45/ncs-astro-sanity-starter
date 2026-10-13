@@ -10,7 +10,9 @@
 //
 //   1. A token-authed client built from the root .env.
 //   2. A DRY-RUN-BY-DEFAULT apply gate: scripts print exactly what they would
-//      change and write nothing unless run with --apply.
+//      change and write nothing unless run with --apply. On the `production`
+//      dataset --apply is not enough: the run also needs NCS_PRODUCTION_WRITE=yes
+//      in the real process environment (the second factor, PORTS.md card 86).
 //   3. Portable Text builders, _key generation, and an IDEMPOTENT asset
 //      uploader (re-runs never re-upload: asset ids cache in
 //      scripts/.asset-map.json, which is gitignored).
@@ -35,6 +37,25 @@
 //   await apply(`page-about: set hero title`, () =>
 //     client.patch('aboutPage').set({ heroTitle: '...' }).commit());
 //   done(count);
+//
+//   node scripts/my-script.mjs                                   # dry run
+//   NCS_PRODUCTION_WRITE=yes node scripts/my-script.mjs --apply  # write to production
+//   (PowerShell: $env:NCS_PRODUCTION_WRITE='yes'; node scripts/my-script.mjs --apply;
+//    Remove-Item Env:NCS_PRODUCTION_WRITE)
+//
+// THE SECOND FACTOR (2026-10-13, PORTS.md card 86)
+// A delegated agent once wrote a markdown plan through a shell string; the
+// backticked command inside it ran, and it already carried its own --yes, so
+// real content went to production. Anything a command line can carry, an
+// accident can carry too. The process environment is the one thing a stray
+// argument cannot set, so a production write needs NCS_PRODUCTION_WRITE=yes as
+// well, set in the same command by a person who is present. It is read from
+// process.env DIRECTLY, never from the loadEnv() merge: if `.env` could hold it,
+// someone would put it there once and the guard would be open for good. The
+// check runs at import, before any request, so it also covers scripts that test
+// APPLY themselves instead of calling apply(). SANITY_API_HOST (process.env or
+// .env) points the client at another host; the unit test uses it to aim at
+// https://example.invalid so the guard is never tested against production.
 // =============================================================================
 import { readFileSync, existsSync, writeFileSync, createReadStream } from 'node:fs';
 import { resolve, dirname } from 'node:path';
@@ -66,10 +87,34 @@ export const client = createClient({
   apiVersion: '2026-05-01',
   token,
   useCdn: false,
+  ...(env.SANITY_API_HOST ? { apiHost: env.SANITY_API_HOST } : {}),
 });
 
-// --- dry-run gate ------------------------------------------------------------
+// --- dry-run gate + production second factor ---------------------------------
 export const APPLY = process.argv.includes('--apply');
+
+/**
+ * Pure: why this run may not write, or null when it may. A dry run always may
+ * (it writes nothing); --apply on the production dataset needs
+ * NCS_PRODUCTION_WRITE=yes in `processEnv`, which callers pass as process.env
+ * itself, never the merged .env.
+ */
+export function productionWriteRefusal({ apply, dataset: ds, processEnv }) {
+  if (!apply || ds !== 'production') return null;
+  if (processEnv.NCS_PRODUCTION_WRITE === 'yes') return null;
+  return [
+    'Refusing to write: --apply targets the production dataset, and --apply alone is not enough.',
+    'Set NCS_PRODUCTION_WRITE=yes in the same command, and only with Nathan present',
+    '(bash: NCS_PRODUCTION_WRITE=yes node <script> --apply). A delegated agent never sets it.',
+    'Run without --apply to see the plan. PORTS.md card 86.',
+  ].join('\n');
+}
+
+const refusal = productionWriteRefusal({ apply: APPLY, dataset, processEnv: process.env });
+if (refusal) {
+  console.error(refusal);
+  process.exit(2);
+}
 
 /** Log one planned change; run it only under --apply. */
 export async function apply(label, fn) {

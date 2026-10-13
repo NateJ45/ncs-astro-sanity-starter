@@ -203,7 +203,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 83  | `measure-tap-targets.mjs` 390px tap-target scan                                | no      | yes         | yes      | no               | yes           | no             | n/a                | yes                 | no             |
 | 84  | Linux-runner font-swap layout-shift check (fallback faces, preload)            | no      | no          | no       | yes              | no            | no             | n/a                | no                  | no             |
 | 85  | MapLibre 6.x: `setMissingStyleImageResolver` for generated icons               | n/a     | n/a         | n/a      | n/a              | n/a           | no             | n/a                | n/a                 | yes            |
-| 86  | Production-write second factor (NCS_PRODUCTION_WRITE) for data scripts         | n/a     | partial     | no       | no               | no            | no             | n/a                | staged              | no             |
+| 86  | Production-write second factor (NCS_PRODUCTION_WRITE) for data scripts         | n/a     | partial     | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 | 87  | Dead-weight scan: unused kits and packages inflate every page's CSS            | n/a     | yes         | no       | no               | no            | yes            | n/a                | staged              | no             |
 | 88  | Cloudflare beacon starts after load and idle, not deferred in head             | n/a     | no          | no       | no               | no            | no             | n/a                | staged              | no             |
 | 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`) | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | no                  | yes            |
@@ -212,6 +212,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 92  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | yes                 | yes            |
 | 93  | SanityImage srcset ladder starts at 160w; `sizes` trims dead steps             | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | n/a                 | staged         |
 | 94  | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)        | n/a     | staged      | yes      | staged           | staged        | no             | n/a                | staged              | staged         |
+| 95  | `audit:data`: live data vs compiled schema; `_type` backfill                   | n/a     | no          | yes      | no               | fork          | no             | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7341,8 +7342,8 @@ MapLibre dependency was found, `no` where it was not checked.
 **Origin:** nixoncreativestudio, redesign-2026 branch, commit `c631a66` (not merged to that repo's `main` when this
 card was written; the hash may change if the branch is squash-merged). **Canonical:** guidance plus a reference
 implementation in that repo (`scripts/cms/args.mjs`, `scripts/cms/production-load.mjs`,
-`.claude/rules/live-writes.md`). The starter's `scripts/lib/sanity-lib.mjs` is `PORTABLE` and does NOT have the guard
-yet; adding it is the follow-up below, and it follows the marked-file ordering in the Projects `CLAUDE.md`.
+`.claude/rules/live-writes.md`). The starter's `scripts/lib/sanity-lib.mjs` (`PORTABLE`) has carried the guard since
+2026-10-13; see "Adopted in the starter" at the end of this card.
 
 **The incident.** A delegated agent wrote a markdown plan with `node -e "..."` in Git Bash. The text held backticked
 commands, and the shell ran them as command substitutions, including a content load that already carried its own
@@ -7409,6 +7410,29 @@ backtick rule and the variable to each repo's data-scripts rule. Do the starter 
 cell is `no` or `partial`: `partial` = every write script is dry by default behind one flag, so only the second factor is
 missing; `no` = at least one script writes on a bare run. wcp is a Bricks (WordPress) site with no Sanity scripts and
 ncs-church-starter is archived, hence `n/a`. fbcm has no matrix column; its row above is recorded here.
+
+**Adopted in the starter, 2026-10-13.** Steps (1), (2) and (4) above are done here:
+
+- `scripts/lib/sanity-lib.mjs` exports `productionWriteRefusal({ apply, dataset, processEnv })` and calls it at import with
+  `process.env` itself (never the `loadEnv` merge). With `--apply` on the `production` dataset and no
+  `NCS_PRODUCTION_WRITE=yes`, it prints why and exits 2 before any request, so it also covers scripts that test `APPLY`
+  themselves instead of calling `apply()`. A dry run and a non-production dataset are unaffected. It also takes an optional
+  `SANITY_API_HOST`, which the test uses to aim at `https://example.invalid`.
+- `scripts/lib/sanity-lib.test.mjs` (`PORTABLE`, runs in `test:scripts`): the pure check (only the exact value `yes` opens it),
+  then the real module in child processes with a fake project, a fake token and `SANITY_API_HOST=https://example.invalid`, all
+  in `process.env` so a real `.env` cannot leak in. Without the variable the child exits 2 with no request; with it, it passes
+  the guard and the write fails to resolve the dummy host, which proves it was attempted. Production is never touched.
+- `scripts/seed-core.mjs` now takes its client, `APPLY` and `apply()` from `sanity-lib`, so `npm run seed` is a dry run and
+  the write is `NCS_PRODUCTION_WRITE=yes npm run seed -- --apply`.
+- `.claude/rules/data-scripts.md` carries the gate, the dummy-host testing rule and the backtick rule; CLAUDE.md rule 16,
+  `OPERATIONS.md`, `docs/bootstrap/NEW-PROJECT.md` and the setup checklist point at it.
+
+**Rollout of the lib, 2026-10-13.** The new `sanity-lib.mjs` and its test were synced to presacademy, mas-monograms,
+stonesteps-50k, fbcm and reid-design-site (all five carried the identical old copy), one PR each after this one merged. That
+gives every script already built on `sanity-lib` the second factor. It does not change a script that builds its own client
+and writes on a bare run, so those cells stay `no` (or `partial` for presacademy) until step (3) is done per site; that is
+the next batch. nixoncreativestudio is `n/a`: its static rollback on 2026-10-09 removed the CMS write scripts and the
+guard with them.
 
 ---
 
@@ -7770,3 +7794,52 @@ and re-check the live page after the deploy. A site that renders PrimeReact must
 
 **Status.** Starter: merged with this PR. Sites (presacademy, mas-monograms, reid-design-site, stonesteps-50k, fbcm,
 nixoncreativestudio): `staged` as of 2026-10-13, one PR each after this merges. 2ndpreschicago is dormant and wcp archived: not taken.
+
+---
+
+## Card 95: `audit:data` checks live data against the compiled schema; `backfill-array-types` adds the missing `_type` (2026-10-13)
+
+**Origin:** mas-monograms, 2026-10-05 (`scripts/audit-data-vs-schema.mjs`, `scripts/backfill-array-types.mjs`,
+`scripts/lib/array-types.mjs`, run through `tsx`). **Canonical:** this starter, generalised and with no `tsx`:
+`scripts/audit-data-vs-schema.mjs`, `scripts/backfill-array-types.mjs`, `scripts/lib/array-types.mjs`,
+`scripts/lib/load-schema.mjs`, and the tests `scripts/lib/array-types.test.mjs` and `scripts/lib/load-schema.test.mjs`.
+All six are `PORTABLE`. `npm run audit:data` runs the audit. Vault gotchas: `array-items-without-type-break-the-studio`,
+`removed-schema-field-leaves-data-and-unknown-fields-banner`.
+
+**The bug.** Seed scripts on mas-monograms stored footer, nav, steps and add-on items as `{ _key, label, href }` with no
+`_type`. The site rendered them (it reads fields, not types), and no build, type check or test noticed. In the Studio, where
+the array allows more than one kind of item, each one was a red "Item of type object not valid for this list" row the editor
+could not open. `npm run audit:studio` reads the schema as text, so it cannot see the data at all.
+
+**What the audit checks.** It fetches every non-system document (published and `drafts.` twins) and walks it against the
+schema Sanity itself builds (`Schema.compile` from `@sanity/schema`, which arrives with `sanity`): an array object with no
+`_type` or no `_key`, a `_type` the array does not allow, a stored key the schema does not declare (the orphan behind the
+"Unknown fields" banner when a field is removed but its data is not unset), a value of the wrong kind, a dropdown value outside
+its list, and documents of a type the schema no longer has. Read only; exit 1 on any finding.
+
+**No `tsx`.** The schema is TypeScript with extensionless imports, which is why mas-monograms used `tsx`. The family decided
+against adding it, so `scripts/lib/load-schema.mjs` loads the schema in plain Node instead: Node 22.18+ and 24 strip types by
+default, and `module.registerHooks` adds the three things Node will not do on its own, retry an extensionless relative import
+with `.ts`/`.tsx`/`/index.ts`, map the `@/` alias to `src/`, and load each `.tsx` Studio component (and any CSS or image) as a
+stub, since a data audit never renders them. It loaded all five site schemas unchanged on 2026-10-13 (presacademy 66 types,
+mas-monograms 27, stonesteps-50k 77, fbcm 48, reid-design-site 42). A schema elsewhere sets `SANITY_SCHEMA_INDEX` (and
+`SANITY_SCHEMA_EXPORT` if the array is not called `schemaTypes`). CI's `node-version: 22` resolves to the newest 22.x, which has
+both features; an older Node gets a clear error.
+
+**The backfill.** `scripts/backfill-array-types.mjs` infers each typeless item's member (the only object member, or the
+member whose declared fields cover the item's keys with the fewest fields; a tie or no fit is reported `UNPLACED` and left
+alone), then patches only the top-level fields that change, guarded by `_rev`. It never changes a value, and a second run
+reports 0. It writes through `sanity-lib`, so it is dry by default and a production write needs `--apply` plus
+`NCS_PRODUCTION_WRITE=yes` (card 86). Back up the dataset first.
+
+**The seed rule that goes with it.** Every object in an array carries `_type` and `_key`, in `seed-core.mjs` and every site
+seed or patch script (`.claude/rules/scaffold.md`, `.claude/rules/data-scripts.md`).
+
+**Adapt per site:** copy the six files and add `"audit:data": "node scripts/audit-data-vs-schema.mjs"`; no new dependency.
+Run the audit read only against the live dataset; if it finds typeless items, back up, dry-run the backfill, have Nathan run
+it with the second factor, then re-run the audit. Orphan fields need their own idempotent unset script (mas-monograms
+`scripts/fix-orphan-data.mjs` is the model). mas-monograms replaces its `tsx` copies with these and can drop `tsx`.
+
+**Status, 2026-10-13.** Starter: `yes` with this PR. mas-monograms: `fork` (its own `tsx` copies, unmarked, applied
+2026-10-05). presacademy, reid-design-site, stonesteps-50k and fbcm: `no`, queued as the next batch (copy, run, backfill).
+fbcm has no matrix column; it is `no`.

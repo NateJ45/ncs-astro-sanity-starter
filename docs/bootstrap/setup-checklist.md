@@ -71,8 +71,13 @@ is right and this one needs fixing.
 - [ ] Sanity CORS allows every origin the Studio runs on:
       `npx sanity cors add https://<origin> --credentials` for localhost, the
       `.workers.dev` URL and the real domain
-- [ ] Core content seeded (`npm run seed`) and real copy in place, with no
-      starter placeholder text visible in the Studio or on any page
+- [ ] Core content seeded (`npm run seed` is a dry run; the write is
+      `NCS_PRODUCTION_WRITE=yes npm run seed -- --apply`, PORTS.md card 86) and
+      real copy in place, with no starter placeholder text visible in the
+      Studio or on any page
+- [ ] `npm run audit:data` exits 0: every stored value matches the compiled
+      schema (no array item without `_type` or `_key`, no orphan field). PORTS.md
+      card 95
 - [ ] `npm run typegen` run after the final schema state, and the regenerated
       types committed
 - [ ] Site redeployed after the final schema state. That deploy is what
@@ -138,6 +143,14 @@ is right and this one needs fixing.
       the token to skip the beacon entirely
 - [ ] Confirmed no cookie consent banner is needed (Cloudflare Web Analytics is
       cookieless)
+- [ ] If setting `PUBLIC_GA_ID` (GA4 sets `_ga` cookies): BEFORE the tag goes
+      live, read the WHOLE stored `privacyPage` document (every section, not one
+      guessed field) and fix any "no cookies", "no tracking" or "cookie-free"
+      sentence in Sanity, then in the seed script that carries the same copy, so
+      a reseed cannot restore it. Only then set `PUBLIC_GA_ID`, and after the
+      rebuild fetch the live privacy page to confirm the new wording. The same
+      in reverse when GA4 is turned off. Vault gotcha:
+      `turning-analytics-on-falsifies-stored-privacy-copy`
 
 ---
 
