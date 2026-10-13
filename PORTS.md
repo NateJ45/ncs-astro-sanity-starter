@@ -209,7 +209,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`) | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | no                  | yes            |
 | 90  | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
 | 91  | One text/picture column split (`.split`) and `measure-columns.mjs`             | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
-| 92  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | staged      | yes      | staged           | yes           | no             | n/a                | yes                 | staged         |
+| 92  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | yes                 | yes            |
 | 94  | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)        | n/a     | staged      | yes      | staged           | staged        | no             | n/a                | staged              | staged         |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -7620,10 +7620,10 @@ starter-first major upgrade, not from a Dependabot PR.
 ignores. A site whose adapter is newer (14.3.x) still pins `astro`: the next Astro minor can break 14.3 the same way.
 Exception: a site that lets the adapter and wrangler flow too (nixoncreativestudio) does NOT pin `astro`: there astro and the adapter ride the same bundle and cannot split, so it takes only the `formatters` group. When the stack is moved by hand, the `astro` ignore stays; the bump happens in `package.json` and the lockfile.
 
-**Status.** Starter: merged with this PR. mas-monograms #100 and nixoncreativestudio #124 merged 2026-10-13 (their
-comments cite "card 90": this card was renumbered from 90 to 92 after the Sanity backup card took 90 first; fixed in a
-follow-up). presacademy, reid-design-site, stonesteps-50k and fbcm (no matrix column): `staged`, one PR each after
-card 62's major ignore merged there on 2026-10-13. 2ndpreschicago is dormant and wcp archived: not taken.
+**Status.** Live in the starter (#99) and all six live sites, merged 2026-10-13: presacademy #81, reid-design-site
+#135, mas-monograms #100 (+ #103), stonesteps-50k #104, nixoncreativestudio #124 (+ #126, formatters group only, see the
+exception above) and fbcm #50 (no matrix column). This card was renumbered from 90 to 92 after the Sanity backup card took
+90 first; the two follow-ups fixed the comments that cited 90. 2ndpreschicago is dormant and wcp archived: not taken.
 
 ## Card 94: The planned major stack upgrade, starter first (2026-10-13)
 
