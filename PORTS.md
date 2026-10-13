@@ -162,7 +162,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 42  | External link health, on its own schedule                                      | yes     | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
 | 43  | Contrast for what axe declines to judge                                        | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 44  | Fork residue audit                                                             | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
-| 45  | The site's own contact endpoint                                                | yes     | no          | yes      | no               | no            | no             | no                 | no                  | yes            |
+| 45  | The site's own contact endpoint                                                | yes     | staged      | yes      | no               | no            | no             | no                 | no                  | yes            |
 | 46  | Share cards in the brand's real typeface                                       | no      | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
 | 47  | The icon set, from one drawing                                                 | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
 | 48  | Domain cutover script + zone audit                                             | no      | no          | yes      | no               | no            | no             | n/a                | no                  | partial        |
@@ -4808,6 +4808,61 @@ its own subdomain and it aligns on its own.
 `TURNSTILE_SECRET` stays unset and the endpoint skips the check entirely. The honeypot and
 the timing check carried the load on a live form for a day with no spam. Wire Turnstile
 when a site actually attracts some.
+
+### Addendum, 2026-10-13: presacademy, the second site, and its differences
+
+presacademy applied the card on 2026-10-13 (presacademy PR #92; `staged` in the matrix until
+it merges and the live step 6 passes). Four things differ from Stone Steps, and each one is
+the likely shape for the next site:
+
+1. **Email ROUTING, not Email Sending.** presbyterianacademy.org had no mail provider at
+   all, so nothing stood in the way of Cloudflare taking the apex MX. Routing was enabled
+   on the root domain and the notification goes to a **verified destination address**: the
+   free path the card describes, with no sending-domain onboarding (`wrangler email sending
+enable` was never run) and no Workers Paid dependency. The catch is the same one the card
+   quotes: it sends only from the routing domain, so `CONTACT_FROM` is
+   `website@presbyterianacademy.org`. Two follow-ons a session must plan for: the
+   destination is live only after its owner clicks Cloudflare's verification email (until
+   then every row lands `notified = 0`, which is exactly what store-first is for), and once
+   the apex MX moves, mail to the domain's public address goes nowhere until a forwarding
+   rule exists for it.
+2. **D1 created through the API, ahead of the code.** The database and the remote migration
+   (card step 2) and the Worker secrets (step 4) were done by the main session before the
+   code branch existed, which is the hand-off the 2026-09-18 addendum recommends. The code
+   PR then only had to add the bindings, so its first deploy can be read on its own.
+3. **Turnstile wired for the first time, in a Sanity form-BUILDER renderer.** The starter's
+   `ContactForm.tsx` has fixed fields; presacademy's `FormRenderer.tsx` renders whatever an
+   editor built in Studio. A site-specific `src/lib/form-to-contact.ts` (unit-tested) maps
+   any form onto the endpoint's contract: `name` from a Name field or First + Last joined,
+   `email` from the Email field, `subject` naming the form, every other answer folded into
+   `message` as `Label: value` lines in form order. It also treats the email and first name
+   box as required even when an editor left them optional, because the endpoint refuses
+   without them. Turnstile notes that generalise:
+   - Explicit render (`?render=explicit&onload=...`), re-rendered on a light/dark class
+     toggle, the same pattern the old hCaptcha wiring used.
+   - **`size: "compact"` when the container is under 300px.** The normal and flexible
+     widgets are at least 300px wide, which overflows a 320px phone inside the page gutters.
+   - Remove the widget BEFORE swapping the form for its success message; removing it in the
+     effect cleanup, after React has already dropped the container, logs a Turnstile
+     "Cannot find Widget" warning.
+   - The honeypot input stays named `botcheck` and is SENT as `company`. A visible-to-autofill
+     input named `company` could be filled by a real visitor's browser and silently dropped.
+   - The live sitekey only works on the production domain, so a local `wrangler dev` of the
+     production build needs `PUBLIC_TURNSTILE_SITEKEY=1x00000000000000000000AA` at build
+     time and `--var TURNSTILE_SECRET:1x0000000000000000000000000000000AA` (or `2x...` to
+     exercise the refusal). The starter's comment names the variable
+     `PUBLIC_TURNSTILE_SITE_KEY`; presacademy uses `PUBLIC_TURNSTILE_SITEKEY`. Pick one
+     when the starter's own form wires Turnstile.
+   - CSP: `https://challenges.cloudflare.com` in `script-src` and `frame-src` only; the
+     widget's own requests run inside its iframe.
+4. **Local D1 lives under `dist/server/.wrangler`, so every `npm run build` wipes it.**
+   Re-apply the migration (`--local -c dist/server/wrangler.json`) after each build, or the
+   endpoint answers "no such table" again and looks like the per-config-path gotcha above.
+
+Also found: the Sanity form query projected `provider`, which serialized a stored Web3Forms
+access key into every form page's HTML as an island prop. Dropping it from the projection
+is part of the port for any site whose forms carry a stored key. The schema field itself was
+hidden, not removed, so Studio never offers "Remove field" on the stored data.
 
 ## Card 44: Fork residue, and the audit that finds it (2026-09-08)
 
