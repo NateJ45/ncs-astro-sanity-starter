@@ -7501,7 +7501,7 @@ starter-first major upgrade, not from a Dependabot PR.
 
 **Adapt per site:** add the two blocks to the npm entry; keep the site's existing comments, quoting style and extra
 ignores. A site whose adapter is newer (14.3.x) still pins `astro`: the next Astro minor can break 14.3 the same way.
-When the stack is moved by hand, the `astro` ignore stays; the bump happens in `package.json` and the lockfile.
+Exception: a site that lets the adapter and wrangler flow too (nixoncreativestudio) does NOT pin `astro`: there astro and the adapter ride the same bundle and cannot split, so it takes only the `formatters` group. When the stack is moved by hand, the `astro` ignore stays; the bump happens in `package.json` and the lockfile.
 
 **Status.** Starter: merged with this PR. presacademy, reid-design-site, mas-monograms, stonesteps-50k,
 nixoncreativestudio and fbcm (no matrix column): `staged`, one PR each after card 62's major ignore merged there on
