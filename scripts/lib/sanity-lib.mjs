@@ -49,7 +49,7 @@
 // real content went to production. Anything a command line can carry, an
 // accident can carry too. The process environment is the one thing a stray
 // argument cannot set, so a production write needs NCS_PRODUCTION_WRITE=yes as
-// well, set in the same command by a person who is present. It is read from
+// well, set in the same command under the write protocol. It is read from
 // process.env DIRECTLY, never from the loadEnv() merge: if `.env` could hold it,
 // someone would put it there once and the guard would be open for good. The
 // check runs at import, before any request, so it also covers scripts that test
@@ -104,8 +104,8 @@ export function productionWriteRefusal({ apply, dataset: ds, processEnv }) {
   if (processEnv.NCS_PRODUCTION_WRITE === 'yes') return null;
   return [
     'Refusing to write: --apply targets the production dataset, and --apply alone is not enough.',
-    'Set NCS_PRODUCTION_WRITE=yes in the same command, and only with Nathan present',
-    '(bash: NCS_PRODUCTION_WRITE=yes node <script> --apply). A delegated agent never sets it.',
+    'Set NCS_PRODUCTION_WRITE=yes in the same command, after a backup and a dry run',
+    '(bash: NCS_PRODUCTION_WRITE=yes node <script> --apply). A delegated agent may set it only under the write protocol (backup, dry run, apply, verify).',
     'Run without --apply to see the plan. PORTS.md card 86.',
   ].join('\n');
 }
