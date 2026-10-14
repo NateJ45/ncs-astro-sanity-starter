@@ -208,7 +208,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 88  | Cloudflare beacon starts after load and idle, not deferred in head             | n/a     | no          | no       | no               | no            | no             | n/a                | staged              | no             |
 | 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`) | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | no                  | yes            |
 | 90  | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
-| 91  | One text/picture column split (`.split`) and `measure-columns.mjs`             | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 91  | One text/picture column split (`.split`) and `measure-columns.mjs`             | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
 | 92  | Dependabot pins `astro` with its adapter; formatters in their own group        | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | yes                 | yes            |
 | 93  | SanityImage srcset ladder starts at 160w; `sizes` trims dead steps             | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | n/a                 | staged         |
 | 94  | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)        | n/a     | staged      | yes      | staged           | staged        | no             | n/a                | staged              | staged         |
@@ -7682,7 +7682,26 @@ house ratio, replace each band's own grid with `.split` (and `lg:order-*` for th
 mind that `.split` is unlayered, so a Tailwind `gap-*` on the same element loses to `--split-gutter`.
 
 **Status.** Starter: merged with this PR. stonesteps-50k: the source, with its own measured numbers and its own
-object-alignment rules. Every other site: not adopted.
+object-alignment rules.
+
+reid-design-site (#145, 2026-10-13): tokens at Reid's house ratio (words 7fr, picture 5fr, gutter
+`clamp(2rem, 5vw, 5rem)`, the page hero's existing numbers). On `.split`: the page and project heroes, Meet Staci, the
+About story, ImageText (its `md:order-*` pair became `lg:order-*`, test updated), both service-area bands, the contact
+map and the call band; the full-bleed home hero lays the same five tracks out (its photo now starts on x=765 at 1280,
+was 747) and the contact form band takes the tokens with its grid areas. AboutPersonal (two columns of cards) is left
+alone. Before/after at 1280 on `/`, `/about/`, `/contact/`: 7 misaligned to 2 (AboutPersonal, and an OFF RATIO on
+the call band whose heading is capped at 14ch inside its track); `/contact/` went from seams 765/833/728 to four bands
+on 765. Note for other sites: `measure-columns` does not see a band laid out on a 12-column grid or a flex row (Reid's
+Meet Staci and About story), only as an off-edge heading, so read the "before" with that in mind.
+
+fbcm (#63, 2026-10-13, not a matrix column): fbcm's `ImageText` is no longer the starter's (577 lines; the photo's
+shape picks a 4, 5, 6 or 7 column width by design), so it is NOT on the split. Tokens at FBCM's ratio (7fr/5fr,
+`clamp(40px, 6vw, 104px)`); `.split` sets only `column-gap` there so Tailwind `gap-y-*` row gaps survive. On it: the
+Sunday access band, "Our building" and the pastors' letter. The pledge was tried and backed out (its liturgy lines
+wrapped at 7fr). `/visit/` spread 40.7px to 0; 7 misaligned to 6 over `/`, `/visit/`, `/who-we-are/` (the rest are
+the hero window, the pledge and headings centred by design).
+
+Every other site: not adopted.
 
 ## Card 92: Dependabot pins `astro` with its adapter and gives formatters their own group (2026-10-13)
 
