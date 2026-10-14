@@ -7358,21 +7358,30 @@ a command line can carry by accident:
 1. **Dry by default.** No write without `--apply` (or `--yes`), exactly the gate card 4's `sanity-lib` already gives.
 2. **A production second factor.** When the target is production (a Sanity `production` dataset, an EmDash instance
    that is not the CI Worker or a local address), the run also needs `NCS_PRODUCTION_WRITE=yes` in the real process
-   environment, set in the same command by a person who is present. The reference implementation:
+   environment, set in the same command under the write protocol. The reference implementation:
 
 ```js
 // scripts/cms/args.mjs (nixoncreativestudio)
 if (!args.yes) fail('... rerun with --yes (or add --dry-run to read only).');
 if (process.env.NCS_PRODUCTION_WRITE !== 'yes') {
   fail(
-    '--yes is not enough: set NCS_PRODUCTION_WRITE=yes in the same command, and only with Nathan present.',
+    '--yes is not enough: set NCS_PRODUCTION_WRITE=yes in the same command, after a backup and a dry run.',
   );
 }
 ```
 
 A wrapper that already asks a person to type "yes" (`production-load.mjs`) sets the variable for its own child
-processes only after that answer. A delegated agent never sets it, never passes the production URL to a write script,
-and tests the guard against a dummy host such as `https://example.invalid`, never against production.
+processes only after that answer. Tests of the guard use a dummy host such as `https://example.invalid`, never
+production.
+
+**Who may set it (policy wording changed 2026-10-13, Nathan's decision).** Nathan or a delegated agent may set
+`NCS_PRODUCTION_WRITE=yes`, but only under the write protocol, in this order: (1) back up first
+(`sanity dataset export production <file> --raw`, saved outside the repo); (2) do a dry run and read its output; (3) run
+the write with `--apply` plus the variable, set in the same command; (4) verify afterwards. The guard exists to stop
+accidental writes: a stray or pasted command line can carry `--apply` but never an environment variable. So the
+variable never goes in `.env`, a shell profile or a scheduled CI job (a site-specific CI allowance, such as the one in
+stonesteps-50k's write gate, is the only exception). This replaced "only with Nathan present" and "a delegated agent
+never sets it"; the code behaves exactly as before.
 
 **Two details that make it work.**
 

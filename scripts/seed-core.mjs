@@ -15,7 +15,7 @@
 // document it would create or replace and writes nothing. Writing goes through
 // the same gate as every other data script (scripts/lib/sanity-lib.mjs): it
 // needs --apply, and on the `production` dataset also NCS_PRODUCTION_WRITE=yes
-// in the same command, set by a person who is present:
+// in the same command, set under the write protocol:
 //
 //   npm run seed                                          # dry run
 //   NCS_PRODUCTION_WRITE=yes npm run seed -- --apply      # write
@@ -1484,7 +1484,7 @@ async function seed() {
       `\nDRY RUN: ${created} would be created, ${replaced} replaced. Nothing was written.`,
     );
     console.log(
-      'To write: NCS_PRODUCTION_WRITE=yes npm run seed -- --apply (with Nathan present).',
+      'To write: NCS_PRODUCTION_WRITE=yes npm run seed -- --apply (after a backup and a dry run).',
     );
     return;
   }
