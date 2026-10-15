@@ -213,6 +213,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 93  | SanityImage srcset ladder starts at 160w; `sizes` trims dead steps             | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | n/a                 | staged         |
 | 94  | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)        | n/a     | staged      | yes      | staged           | staged        | no             | n/a                | staged              | staged         |
 | 95  | `audit:data`: live data vs compiled schema; `_type` backfill                   | n/a     | no          | yes      | no               | fork          | no             | n/a                | n/a                 | no             |
+| 96  | GA4 skips automated browsers (WebDriver, Lighthouse, PageSpeed, GTmetrix)      | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | staged              | staged         |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7871,3 +7872,35 @@ it with the second factor, then re-run the audit. Orphan fields need their own i
 **Status, 2026-10-13.** Starter: `yes` with this PR. mas-monograms: `fork` (its own `tsx` copies, unmarked, applied
 2026-10-05). presacademy, reid-design-site, stonesteps-50k and fbcm: `no`, queued as the next batch (copy, run, backfill).
 fbcm has no matrix column; it is `no`.
+
+---
+
+## Card 96: GA4 skips automated browsers (2026-10-15)
+
+**Origin: Foundation for Reformed Theology** (WordPress, `frt-theme` PR 41), found 2026-10-15. **Canonical:**
+`src/components/analytics/GoogleAnalytics.astro` (rule 4 in its header). Amends cards 54 and 58. Vault gotcha:
+`test-browsers-count-as-ga4-visitors`.
+
+**The hole in card 58.** Card 58 keeps localhost out of the property, which stops a developer's `.env` leaking. It does
+nothing for a Playwright sweep or Lighthouse run against PRODUCTION, because the hostname is right. Every fresh test
+browser is a new GA4 "visitor": on 2026-10-14 a day of sweeps and audits against the live FRT site filed 194 visitors and
+244 page views (28-day totals read 1,244 against 508 the month before). GA4 cannot delete past data; it only washes out of a
+28-day window.
+
+**The rule.** The inline script computes
+`navigator.webdriver || /HeadlessChrome|Lighthouse|PTST|GTmetrix|Speed Insights/i.test(navigator.userAgent)` and runs the
+whole existing block (dataLayer, gtag, config, deferred loader) only when that is false AND the card-58 hostname rule
+passes. Playwright, Selenium and other WebDriver tools set `navigator.webdriver`; the pattern covers headless Chrome,
+Lighthouse and PageSpeed Insights, WebPageTest (PTST) and GTmetrix. **Fails open for real browsers:** a normal visitor has
+neither signal and is counted exactly as before. Nothing else in the file changes.
+
+**What it does not break.** Specs that assert GA events stub `window.gtag` themselves (stonesteps-50k
+`tests/ga-events.spec.ts`), so no test in the family needs the real tag to run under WebDriver. A spec that expects
+`window.dataLayer` to exist under Playwright on an allowed hostname would now see it undefined; none does today.
+
+**Porting.** Pull the one file. Same props, same variable, no config. Then check the live page with a headless
+Playwright load: requests to `googletagmanager` and `/g/collect` must be 0.
+
+**Status, 2026-10-15.** Starter: `yes` with this PR. presacademy, reid-design-site, mas-monograms, nixoncreativestudio,
+stonesteps-50k and fbcm: `staged` on branch `chore/ga-skip-automated` (no PRs until this merges, because their
+`sync-check` reads live starter `main`). fbcm has no matrix column. wcp is archived and 2ndpreschicago dormant: not taken.

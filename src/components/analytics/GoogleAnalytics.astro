@@ -53,6 +53,20 @@
       FAILS OPEN when `site` is unset: the tag then runs everywhere, as it
       did before this rule. Failing closed would recreate the silent-dark
       failure this whole card exists to prevent.
+
+   4. IT DOES NOT RUN IN AUTOMATED BROWSERS (PORTS.md card 96).
+      Every fresh test browser is a brand-new visitor to GA4. On 2026-10-14 a
+      day of Playwright sweeps and Lighthouse runs against the live FRT site
+      filed 194 "visitors" and 244 page views, and GA4 cannot delete the past,
+      so they sit in the totals for four weeks. Rule 3 only covers localhost;
+      a sweep against PRODUCTION passes it. So the snippet also does nothing
+      when navigator.webdriver is true (Playwright, Selenium and other
+      WebDriver tools set it) or the user agent matches HeadlessChrome,
+      Lighthouse, PTST (WebPageTest), GTmetrix or Speed Insights (PageSpeed).
+      Test suites in this family stub window.gtag themselves, so nothing
+      depends on the real tag running under WebDriver.
+      FAILS OPEN for real browsers: a normal visitor has neither signal and
+      is counted exactly as before.
    ============================================================================ */
 
 interface Props {
@@ -70,8 +84,12 @@ const gaHosts: string[] | null = apex ? [apex, `www.${apex}`] : null;
 ---
 
 <script is:inline define:vars={{ gaId, gaHosts }}>
+  // Rule 4: automated browsers (test runs, audits) are not visitors.
+  var automated =
+    navigator.webdriver ||
+    /HeadlessChrome|Lighthouse|PTST|GTmetrix|Speed Insights/i.test(navigator.userAgent);
   // Rule 3: off the production hostname, do nothing at all.
-  if (!gaHosts || gaHosts.indexOf(location.hostname) !== -1) {
+  if (!automated && (!gaHosts || gaHosts.indexOf(location.hostname) !== -1)) {
     window.dataLayer = window.dataLayer || [];
     // gtag.js inspects a real `arguments` object here, so rest parameters would
     // silently break every queued call. This shape is required, not stylistic.
