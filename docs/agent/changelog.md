@@ -1,5 +1,12 @@
 # Change history
 
+_2026-10-15: GA4 skips automated browsers (PORTS card 96)._
+
+**Decision.** `GoogleAnalytics.astro` gains rule 4: it does nothing when `navigator.webdriver` is true or the user agent matches
+`HeadlessChrome|Lighthouse|PTST|GTmetrix|Speed Insights`. FRT's property took 194 test "visitors" in one day of Playwright and
+Lighthouse runs against production; card 58's hostname rule cannot stop that because the hostname is the real one. Fails open for
+real browsers. Site branches `chore/ga-skip-automated` are pushed without PRs; open them after this merges.
+
 _2026-10-13: the planned major stack upgrade (PORTS card 94)._
 
 **Decision.** `astro` 7.3.8 with `@astrojs/cloudflare` 14.3.4 (14.2.4 imports an export astro 7.3 removed), `wrangler` ~4.129.0
