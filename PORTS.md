@@ -220,7 +220,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 100 | Scaffold prunes the Lighthouse, smoke and uptime route lists                   | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 101 | Preview renders "no document" inside the layout, so Presentation connects      | n/a     | open        | yes      | open             | open          | n/a            | n/a                | n/a                 | open           |
 | 102 | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)  | n/a     | yes         | yes      | yes              | n/a           | no             | n/a                | staged              | n/a            |
-| 103 | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)              | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 103 | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)              | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8263,4 +8263,7 @@ sync-check reports DRIFT for those seven files on that site, which is expected. 
   built site). And a hash-only navigation does not reload the page, so after swapping `astro dev` for `wrangler dev` on the
   same port, reload before reading the console, or the old dev page's errors show up.
 
-**Status, 2026-10-17.** Starter: `yes` with this PR. Every site: `no` (phase-1 set) until its own PR.
+**Status, 2026-10-17.** Starter: `yes` (#128). Every site merged the same day, one PR each, each Studio and
+Presentation checked signed in: first-baptist-auburn (fbc-auburn#15, no matrix column), presacademy (#103),
+reid-design-site (#153), mas-monograms (#114), stonesteps-50k (#123), fbcm (#68, no matrix column). 2ndpreschicago is
+archived and stays on the phase-1 set (`no`).
