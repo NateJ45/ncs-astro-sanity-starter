@@ -19,8 +19,8 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Hero from '@/components/Hero.astro';
 import ServiceCard from '@/components/ServiceCard.astro';
-import TestimonialCard from '@/components/TestimonialCard.astro';
-import JournalCard from '@/components/JournalCard.astro';
+import TestimonialCard from '@/components/TestimonialCard.astro'; // scaffold: testimonials
+import JournalCard from '@/components/JournalCard.astro'; // scaffold: journal
 import SectionHeading from '@/components/SectionHeading.astro';
 import ImageText from '@/components/sections/ImageText.astro';
 import ServiceAreaSection from '@/components/sections/ServiceAreaSection.astro';
@@ -68,17 +68,21 @@ const service = {
   features: ['First feature', 'Second feature', 'Third feature'],
   ctaLabel: 'Learn more',
 };
+// scaffold: testimonials
 const testimonial = {
   quote: 'A fixed quotation so the card has a body to wrap.',
   attribution: 'A Client',
   date: '2026-01-15',
 };
+// scaffold:end
+// scaffold: journal
 const entry = {
   title: 'A fixed journal entry title',
   slug: { current: 'fixture' },
   excerpt: 'A fixed excerpt for the journal card.',
   publishedAt: '2026-01-15',
 };
+// scaffold:end
 ---
 
 <BaseLayout
@@ -102,8 +106,8 @@ const entry = {
         <SectionHeading eyebrow="Cards" headline="Card surfaces" headingId="fx-cards" />
         <div class="mt-l grid gap-m md:grid-cols-3">
           <ServiceCard service={service} />
-          <TestimonialCard testimonial={testimonial} />
-          <JournalCard entry={entry} />
+          <TestimonialCard testimonial={testimonial} /> {/* scaffold: testimonials */}
+          <JournalCard entry={entry} /> {/* scaffold: journal */}
         </div>
       </div>
     </section>

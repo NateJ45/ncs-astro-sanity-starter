@@ -101,15 +101,17 @@ const FIELD_HELPERS = {
  *
  * PER SITE. The left side is the collection document type whose "Used on"
  * entry in src/sanity/resolve.ts is being checked; the right is every
- * page-builder section that reads it. A section that is scaffold-removed loses
- * its collection with it, so an entry left behind here is itself a finding.
+ * page-builder section that reads it. No scaffold markers here on purpose: this
+ * file is PORTABLE, so a fork that removes a capability keeps the entry, and an
+ * entry whose type has no documents and no resolve.ts location reports nothing
+ * (PORTS.md card 99).
  */
 const RENDERED_BY = {
-  service: ['servicesGridSection'], // scaffold: services
-  processStep: ['processSection'], // scaffold: process
-  philosophyPoint: ['valuesSection'], // scaffold: philosophy
-  testimonial: ['testimonialsSection'], // scaffold: testimonials
-  faqItem: ['faqSection'], // scaffold: faq
+  service: ['servicesGridSection'],
+  processStep: ['processSection'],
+  philosophyPoint: ['valuesSection'],
+  testimonial: ['testimonialsSection'],
+  faqItem: ['faqSection'],
 };
 
 /** Sanity's own object types, whose keys we do not police. */
