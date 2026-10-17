@@ -954,9 +954,23 @@ body::before {
   mix-blend-mode: screen;
 }
 
+/* ---------- Native scrolling ------------------------------------------ */
+/* Lenis was removed on 2026-10-17 (PORTS.md card 102; BaseLayout.astro says
+   why). In-page anchors and programmatic scrolls glide natively instead, and
+   only for a visitor who has not asked for less motion. [data-smooth-scroll]
+   arrives with the visitor's first press and leaves with every router swap, so
+   neither the browser's restore on a reload nor the router's own placement
+   (the top on a forward navigation, the saved position on Back) is ever
+   animated. The wheel is the browser's own, untouched. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-smooth-scroll] {
+    scroll-behavior: smooth;
+  }
+}
+
 /* ---------- Reduced motion -------------------------------------------- */
 /* Disables animations, transitions, and smooth scroll for users who
-   prefer reduced motion. Lenis init must also check this flag.
+   prefer reduced motion.
 
    Transitions are ZERO, duration AND delay, never the usual 0.01ms (PORTS.md
    card 61, 2026-09-30). `transition-property` defaults to `all`, so 0.01ms

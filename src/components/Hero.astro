@@ -173,11 +173,8 @@ const wrapperHeight =
           if (!hero) return;
           var hh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 0;
           var top = hero.offsetTop + hero.offsetHeight - hh;
-          if (window.lenis && typeof window.lenis.scrollTo === 'function') {
-            window.lenis.scrollTo(top);
-          } else {
-            window.scrollTo({ top: top, behavior: 'smooth' });
-          }
+          var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
         });
       }
       setHeaderH();

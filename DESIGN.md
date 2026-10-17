@@ -87,7 +87,7 @@ Soft and light by default: marketing cards rest on a low-opacity shadow that dee
 
 ## 6. Do's and Don'ts
 
-Motion defaults: interaction easing `cubic-bezier(0.16, 1, 0.3, 1)` at 440ms; `[data-reveal]` scroll reveals, a grid stagger, a hero entry stagger and an image curtain exist as opt-ins; Lenis handles smooth scroll and the navigation scroll reset (rule 5); reduced motion zeroes all of it. Each fork decides which of these to keep: Stone Steps and FBCM both pruned reveals.
+Motion defaults: interaction easing `cubic-bezier(0.16, 1, 0.3, 1)` at 440ms; `[data-reveal]` scroll reveals, a grid stagger, a hero entry stagger and an image curtain exist as opt-ins; scrolling is the browser's own (anchors glide under `no-preference`, the router resets the position on navigation; rule 5); reduced motion zeroes all of it. Each fork decides which of these to keep: Stone Steps and FBCM both pruned reveals.
 
 **Do**
 
