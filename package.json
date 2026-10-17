@@ -2,7 +2,7 @@
   "name": "ncs-astro-sanity-starter",
   "type": "module",
   "version": "0.0.1",
-  "license": "MIT",
+  "license": "PolyForm-Strict-1.0.0",
   "engines": {
     "node": ">=22.12.0"
   },
