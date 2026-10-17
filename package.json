@@ -51,7 +51,7 @@
     "audit:data": "node scripts/audit-data-vs-schema.mjs"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "14.3.4",
+    "@astrojs/cloudflare": "14.4.0",
     "@astrojs/mdx": "^8.0.3",
     "@astrojs/react": "^7.0.1",
     "@astrojs/rss": "^4.0.19",
@@ -73,7 +73,7 @@
     "@tabler/icons-react": "^3.44.0",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
-    "astro": "^7.3.8",
+    "astro": "^7.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lenis": "^1.3.23",
