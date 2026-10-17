@@ -223,8 +223,12 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 103 | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)              | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
 | 104 | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file        | n/a     | no          | yes      | n/a              | no            | no             | n/a                | n/a                 | no             |
 | 105 | A text hero (no photo, or editorial) still renders its buttons                 | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
+
+Row 106 (2026-10-17): first-baptist-auburn has no column; it is the origin and resyncs to the marked copies right
+after the starter merges. 2ndpreschicago, ncs-church-starter and nixoncreativestudio have no Studio for staff, hence `n/a`.
 
 Row 105 (2026-10-17): every site with the starter's `Hero.astro` text branch is `no` until it copies the change;
 nixoncreativestudio has no Sanity hero, hence `n/a`.
@@ -8351,3 +8355,49 @@ render exactly as before.
 has buttons, and regenerate visual baselines if the home hero has no photo.
 
 **Status, 2026-10-17.** Starter `yes`.
+
+## Card 106: the Studio kit: Home, Site Guide, Checkup, staff view, Trash (2026-10-17)
+
+**Origin:** the family's WordPress sites give staff a plain admin (a Home page, a printable guide, a fix-it list, a
+staff menu with no permanent deletes, a safer trash). The Sanity sites had pieces of it scattered across client repos
+(mas-monograms' Checkup, Trash and publish note; presacademy's tour) and nothing shared. first-baptist-auburn built the
+kit first (fbc-auburn#23), with every generic file free of site names and one site file, so it could come back here
+unchanged.
+**Canonical:** PORTABLE: `src/sanity/kit/` (`index.tsx`, `types.ts`, `shared.tsx`, `HomeTool.tsx`, `GuideTool.tsx`,
+`CheckupTool.tsx`, `StudioTour.tsx`, `trash.tsx`, `publishNote.tsx`), `src/lib/studio-kit.ts`,
+`src/lib/studio-checkup.ts`, `src/lib/studio-trash.ts` and their three `.test.ts` files, `src/pages/build-info.json.ts`,
+`docs/agent/studio-kit.md`. Per site (NOT portable): `src/sanity/kit.config.ts`, the `structure.ts` desk changes, the
+`astro.config.mjs` define, and the plugin line in `sanity.config.ts`.
+
+**What it adds.** `ncsStudioKit(kitConfig)`, LAST in `plugins`: Home (first tool, so the Studio opens on it: welcome,
+This week, Is it live?, Site health, Recent edits, Visitors placeholder, Ask), Site Guide (the existing guides, searched
+and printable), Checkup (pure rules over one fetch, unit-tested), plain tool names ("Content", "Live preview"), the
+staff view (listed Sanity user ids, or non-administrators when the list is empty: fewer tools, no Delete, no perspective
+menu or Releases link), Move to Trash with a `trashedItem` type and "Bring it back", a note after Publish, and a
+first-run tour. Detail: `docs/agent/studio-kit.md`.
+
+**Desk changes in `structure.ts`** (take them with the kit): singleton items get `.id(schemaType)` (an intent link from
+Home or the Checkup resolves to `pages;aboutPage`, and a title-derived id opened a blank pane); `.id('start-here')` and
+`.id('content')` so `staffHiddenPanes` can name them; a Trash list item with id `trash` (the Checkup links to it); the
+safety net filters every `media.*` type (sanity-plugin-media 6 added `media.folder`, which leaked a "Media Folder" list
+into the desk root); and the desk is wrapped as `staffDesk(fullDesk(S, context), context, kitConfig)`.
+
+**The bug fixed on the way.** `/build-info.json` read `process.env.GITHUB_SHA` in the route. The route prerenders inside
+workerd, which cannot see the build machine's environment, so Auburn's deployed file always said `"commit": null`.
+`astro.config.mjs` now reads the SHA in Node (`GITHUB_SHA`, then `git rev-parse --short=7 HEAD`, else null) and hands it
+to the route as the Vite define `__NCS_BUILD_COMMIT__`. Verified with a local `npm run build`: `dist/client/build-info.json`
+carried the short HEAD SHA.
+
+**Starter defaults.** `kit.config.ts` is neutral: `staff: []`, `thisWeek: []`, `genericRules()` with the starter's SEO page
+types, trash types for the everyday lists, tour words with no site in them, helper "your web designer". Entries tied to
+a capability carry scaffold markers, so `npm run scaffold -- --remove` keeps the file compiling; the PORTABLE kit files
+carry none (card 99).
+
+**Adopting it in a site.** Copy the PORTABLE files, write `kit.config.ts` from the starter's, take the four
+`structure.ts` changes and the define, add the plugin last, run `npm run typegen` (new `trashedItem` type), then open
+`/studio`, check Home opens first and read the console. Follow the marked-file order: starter first, then the site PR.
+`@sanity/ui` 4 only (card 103).
+
+**Status, 2026-10-17.** Starter `yes`. first-baptist-auburn (no matrix column) is the origin and swaps its copies for the
+marked ones in the PR that follows this card. Every other site `no`; the Worker half (visitors, Ask form, deploy status,
+monthly report) is `docs/PENDING.md` item 14.

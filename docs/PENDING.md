@@ -287,6 +287,14 @@ applies: starter PR as a draft first, then the three ported sites (presacademy, 
 Until then, open the panel in the scan or read the list and ignore warnings under a closed `<details>`. Not done in the
 2026-10-04 docs PR on purpose: it changes a marked file.
 
+### 14. Studio kit: the Worker half and the rest of the plan (opened 2026-10-17)
+
+PORTS.md card 106 brought the Studio kit's Studio half from first-baptist-auburn. Still to build, starter first: the
+Worker routes under `src/pages/api/studio/*` (Studio auth by the session token, visitors from GA4 for Home's Visitors
+card, the Ask form, deploy status, link check, monthly report), the live publish checklist inspector, and recorded
+tutorial videos. The spike findings for auth and cron are in `docs/agent/studio-kit.md`. Until then `features.visitors`
+stays false and Ask is a mailto (`PUBLIC_STUDIO_HELP_EMAIL`). No other site but first-baptist-auburn has the kit yet.
+
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 
 Flagged in the topic index (now docs/claude/topic-index.md, formerly in CLAUDE.md) since the fork. The 2026-08-28 pass corrected every

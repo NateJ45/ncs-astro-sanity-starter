@@ -46,6 +46,8 @@ import { SaveSectionPresetAction } from './src/sanity/actions/saveSectionPreset'
 import { CheckPageAction } from './src/sanity/actions/checkPage';
 import { UndoAction, RedoAction, undoRedoShortcuts } from './src/sanity/components/UndoRedo';
 import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
+import { ncsStudioKit } from './src/sanity/kit';
+import { kitConfig } from './src/sanity/kit.config';
 
 // =============================================================================
 // Studio theme
@@ -168,6 +170,12 @@ export default defineConfig({
     // plugin only adds the keyboard layer, and it stays out of text boxes so
     // their own undo keeps working. See src/sanity/components/UndoRedo.tsx.
     undoRedoShortcuts(),
+    // The Studio kit (src/sanity/kit/, settings in src/sanity/kit.config.ts):
+    // Home, Site Guide and Checkup tools, plain tool names, the staff view,
+    // Trash instead of Delete, the note after Publish and the first-run tour.
+    // KEEP IT LAST: its tools reducer has to see every other plugin's tools.
+    // See docs/agent/studio-kit.md and PORTS.md card 106.
+    ncsStudioKit(kitConfig),
   ],
 
   schema: {

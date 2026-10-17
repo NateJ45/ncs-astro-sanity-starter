@@ -22,6 +22,7 @@ Core routes that ship with the starter. None of them is toggleable in the Studio
 | `/preview/live`      | `src/pages/preview/live.ts`         | --         | SSE proxy for preview auto-refresh (403 without the Studio cookie)                                                       |
 | `/api/draft-mode/*`  | `src/pages/api/draft-mode/`         | --         | Turns draft mode on/off for the preview                                                                                  |
 | `/robots.txt`        | `src/pages/robots.txt.ts`           | --         | Generated; reads production URL from `site.ts`                                                                           |
+| `/build-info.json`   | `src/pages/build-info.json.ts`      | --         | Prerendered `{ builtAt, commit }` for the Studio kit's "Is it live?" card (PORTS.md card 106)                            |
 | `/sitemap-index.xml` | `@astrojs/sitemap` (auto)           | --         | Production sitemap                                                                                                       |
 | `/404`               | `src/pages/404.astro`               | --         | Custom 404                                                                                                               |
 
