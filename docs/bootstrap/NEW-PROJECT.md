@@ -496,7 +496,7 @@ taxonomy in `.claude/rules/foundation-files.md` and `docs/claude/safe-to-edit.md
 
 - `src/styles/globals.css` beyond the design-seam tokens (polish-layer
   utilities, shadcn overrides, base resets)
-- `src/layouts/BaseLayout.astro` (anti-FOUC script, scroll wiring, Lenis init)
+- `src/layouts/BaseLayout.astro` (anti-FOUC script, scroll wiring, native-scroll listener)
 - `src/lib/sanity.ts` (the `isSanityUnconfigured` guard is load-bearing for
   fresh-clone builds)
 - `src/sanity/schemaTypes/*.ts` (field changes reach existing content)

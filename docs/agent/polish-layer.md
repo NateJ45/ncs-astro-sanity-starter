@@ -2,7 +2,7 @@
 
 > Custom CSS utilities and JS behaviors layered on Tailwind: brand stripe, card-lift, surface-warm, reading-progress, sticky-header, nav-underline, paper-grain, and print stylesheet.
 
-Animation behaviors (Lenis, scroll reveals, stagger grid, hero entry, view transitions, Ken Burns slideshow, script accent opt-in) are documented separately in `animation.md`.
+Animation behaviors (native scrolling, scroll reveals, stagger grid, hero entry, view transitions, Ken Burns slideshow, script accent opt-in) are documented separately in `animation.md`.
 
 ## Polish layer
 
@@ -100,8 +100,8 @@ initThing();
 document.addEventListener('astro:page-load', initThing);
 ```
 
-Pattern used by: scroll-reveal observer, sticky-header listener, reading-progress, sticky CTA chip. See `animation.md` for details on the Lenis + view-transitions interaction, which is a special case.
+Pattern used by: scroll-reveal observer, sticky-header listener, reading-progress, sticky CTA chip. See `animation.md` for the native-scroll + view-transitions interaction, which is a special case.
 
 ---
 
-Cross-reference: `animation.md` covers Lenis smooth scroll, scroll reveals, stagger reveals, hero entry stagger, Ken Burns slideshow, view-transition cross-fade, and the opt-in script accent.
+Cross-reference: `animation.md` covers native scrolling, scroll reveals, stagger reveals, hero entry stagger, Ken Burns slideshow, view-transition cross-fade, and the opt-in script accent.

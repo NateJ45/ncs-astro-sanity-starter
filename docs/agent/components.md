@@ -38,7 +38,7 @@ The core component set, by role. All in `src/components/` unless noted.
 - `Header.astro` -- two-row desktop (eyebrow strip + main nav), single-row mobile. Sticky-with-hide-on-scroll-down behavior wired via `.site-header`. The eyebrow strip carries availability status, email, and phone; on mobile the availability shows a compact pill.
 - `Footer.astro` -- a responsive link grid, brand logo, auto-year copyright, and "Site by..." credit on a thin bottom bar.
 - `MobileNav.tsx` -- shadcn Sheet drawer (`client:idle`; the closed Sheet server-renders its trigger, so the hamburger is in the server HTML). Primary CTA, tagline, nav links, email + phone + socials + theme toggle, logo at bottom.
-- `BaseLayout.astro` -- anti-FOUC theme bootstrap, View Transitions, Lenis init, scroll-reveal observer, sticky-header scroll listener.
+- `BaseLayout.astro` -- anti-FOUC theme bootstrap, View Transitions, the native-scroll press listener, scroll-reveal observer, sticky-header scroll listener.
 
 **Hero + page-top:**
 

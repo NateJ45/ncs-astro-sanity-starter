@@ -219,6 +219,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 99  | Scaffold markers stay out of PORTABLE files; styleguide wall marked            | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 100 | Scaffold prunes the Lighthouse, smoke and uptime route lists                   | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 101 | Preview renders "no document" inside the layout, so Presentation connects      | n/a     | open        | yes      | open             | open          | n/a            | n/a                | n/a                 | open           |
+| 102 | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)  | n/a     | no          | yes      | yes              | n/a           | no             | n/a                | staged              | n/a            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7493,12 +7494,10 @@ leaves the files. Component hits from the 2026-10-04 run that are worth a look: 
 2ndpreschicago `FaqAccordion`; fbcm `ProcessStepIllustration`. Unverified: these are what the script printed, not
 confirmed dead.
 
-**Lenis (a design call, not a defect).** The smooth-scroll library is still installed and initialised in the starter,
-presacademy and 2ndpreschicago (`import('lenis')` in `BaseLayout.astro`, `"lenis"` in `package.json`; read
-2026-10-04). It was removed in fbcm on 2026-09-24, in reid-design-site on 2026-09-30 and in nixoncreativestudio in
-`1d580e1` (native scrolling). mas-monograms and stonesteps-50k never carried it. The starter's rule 5 still tells a fork
-to keep the Lenis navigation reset, so removing it from the starter is Nathan's decision; this card only records which
-repos still ship it and that three siblings dropped it without a card.
+**Lenis (settled 2026-10-17).** The smooth-scroll library was still installed in the starter, presacademy and
+2ndpreschicago when this card was written (2026-10-04); fbcm, reid-design-site and nixoncreativestudio had dropped it
+without a card, and mas-monograms and stonesteps-50k never carried it. Nathan decided on 2026-10-17 to remove it from the
+starter and use the browser's own scrolling: see Card 102.
 
 **Inlined CSS is a measurement, not a rule.** nixoncreativestudio chose `inlineStylesheets: 'always'` because its
 sheet is about 25 KB and it measured faster (home 94 to 97 Lighthouse locally); a 130 to 200 KB sheet like the ones above
@@ -7506,8 +7505,7 @@ is the case where it hurts, which is why shrinking the sheet comes first. fbcm u
 
 **Status.** starter, reid-design-site, mas-monograms and stonesteps-50k: kit present, `no`. presacademy and
 2ndpreschicago: no kit, `yes`. nixoncreativestudio: done on its unmerged branch (`staged`). fbcm: scan already excludes
-the kit but the files and packages remain (no matrix column; recorded here). Lenis: starter, presacademy and
-2ndpreschicago still ship it.
+the kit but the files and packages remain (no matrix column; recorded here). Lenis: see Card 102.
 
 ---
 
@@ -8082,3 +8080,52 @@ first-baptist-auburn. stonesteps-50k phrases it differently; check before portin
 Step 6 now says to seed before the first Presentation check.
 
 **Status, 2026-10-17.** Starter: `yes` with this PR.
+
+## Card 102: native scrolling replaces Lenis in the starter (2026-10-17)
+
+**Origin:** fbcm, `feat/print-motion`, 2026-09-24 (reid-design-site followed on 2026-09-30, nixoncreativestudio in
+`1d580e1` on its unmerged `redesign-2026` branch). Nathan decided on 2026-10-17 that the starter drops it too; this settles
+the "Lenis (a design call)" paragraph of Card 87. **Canonical:** `src/layouts/BaseLayout.astro` (the press listener),
+`src/styles/globals.css` ("Native scrolling" block), `tests/native-scroll.spec.ts`, `docs/agent/animation.md`. The layout and
+stylesheet are per-site, not `PORTABLE`; port the pattern.
+
+**What Lenis did and what replaced it.**
+
+| Lenis job                                                                                       | Now                                                                                                                                                                                                                   |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Wheel glide                                                                                     | Dropped. The wheel is the browser's own.                                                                                                                                                                              |
+| Forward navigation lands at the top (an `after-swap` `lenis.scrollTo(0, { immediate, force })`) | Astro's router: `scrollTo({ top: 0, behavior: 'instant' })` inside the swap. The reset only existed because Lenis momentum overrode the router.                                                                       |
+| Back/Forward restores the position (the reset skipped `traverse`)                               | Astro's router restores the saved `scrollX`/`scrollY` on a traverse.                                                                                                                                                  |
+| Anchor and control glide (`window.lenis.scrollTo`)                                              | `html[data-smooth-scroll] { scroll-behavior: smooth }` under `prefers-reduced-motion: no-preference`; the hero cue and the case-study TOC call `scrollTo` / `scrollIntoView` with `'smooth'` (`'auto'` under reduce). |
+| Sticky-header clearance (Lenis honoured `scroll-mt-*`)                                          | Native scrolling honours `scroll-mt-*` too (`scroll-mt-24` on headings and sections).                                                                                                                                 |
+
+**Why the attribute is set on the first press, not at load.** With smooth scrolling on from the first paint, Chrome GLIDES
+its own scroll restoration on a reload (fbcm measured 0 to 600px over 400 ms), which is visible and leaves scroll-driven UI
+unseeded. BaseLayout's script sets `data-smooth-scroll` on the first `pointerdown` or `keydown`; every anchor click and
+scroll control follows a press. The router's swap copies the incoming document's `<html>` attributes onto the live one, which
+removes the attribute before the router places the page, so its placement is never animated either.
+
+**Files (starter).** `src/layouts/BaseLayout.astro` (Lenis block replaced by the press listener), `src/layouts/PreviewLayout.astro`
+(comment), `src/components/Hero.astro` (cue uses `scrollTo` only), `src/components/CaseStudyTOC.tsx` (`scrollIntoView` only),
+`src/styles/globals.css`, `package.json` and `package-lock.json` (`npm uninstall lenis`), CLAUDE.md rule 5 (rewritten,
+number kept), `OPERATIONS.md`, `DESIGN.md`, `.claude/rules/foundation-files.md`, `docs/agent/{animation,accessibility,components,performance,polish-layer,stack-and-config}.md`,
+`docs/claude/topic-index.md`, `docs/bootstrap/NEW-PROJECT.md`, and the new `tests/native-scroll.spec.ts`.
+
+**Applying it to a fork.**
+
+1. `npm uninstall lenis` (never edit the lockfile by hand; CLAUDE.md rule 8).
+2. In `BaseLayout.astro` delete the `startLenis` script and add the press listener (`pointerdown` and `keydown`, capture and
+   passive, setting `data-smooth-scroll` on `<html>`).
+3. In `globals.css` add the `@media (prefers-reduced-motion: no-preference)` `html[data-smooth-scroll]` block and drop the
+   "Lenis init must also check this flag" comment.
+4. Replace every `window.lenis` caller with `scrollTo` / `scrollIntoView` and an explicit `behavior`. Any code that must place
+   the page exactly (a correction loop, a fragment landing) uses `behavior: 'instant'`, and a Playwright setup that sets
+   a scroll position does the same.
+5. Add `tests/native-scroll.spec.ts` (it asserts no `lenis` global, the attribute arrives on a press and not before, the
+   router resets to the top at `astro:after-swap` and Back restores). Rewrite the site's rule 5 and `animation.md`.
+6. Grep for `lenis` in `src`, `tests`, `docs` and the layouts; check each page that scrolls (anchors under the sticky header).
+
+**Status, 2026-10-17.** Starter: `yes` with this PR. fbcm (not a matrix column), reid-design-site: done. nixoncreativestudio: done on
+its unmerged `redesign-2026` branch, still listed in its `main` (`staged`). mas-monograms and stonesteps-50k never had it
+(`n/a`). presacademy and 2ndpreschicago still ship it (`no`). first-baptist-auburn (forked from the starter with Lenis;
+no matrix column) is next. wcp is archived.
