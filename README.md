@@ -10,7 +10,7 @@
 ![Tailwind 4](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![React 19](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
-![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![License: PolyForm Strict](https://img.shields.io/badge/License-PolyForm%20Strict-lightgrey.svg)
 [![Use this template](https://img.shields.io/badge/Use%20this-template-2ea44f?logo=github)](https://github.com/NateJ45/ncs-astro-sanity-starter/generate)
 
 </div>
@@ -21,7 +21,7 @@
 - **Reskin in one command.** Palette, fonts, radius and a layout block (header, hero, density, card style) come from one brand config, so the next site does not look like the last one.
 - **Improvements travel.** `PORTS.md` is the registry of port cards that carry fixes to every site built from this starter (85 cards so far), and `scripts/sync-check.mjs` reports when a site's shared files have drifted.
 
-Quality gates in CI: Playwright on Chromium and a WebKit iPhone profile, axe accessibility checks, Lighthouse, and visual regression. A workflow for encrypted Sanity dataset backups ships in the template, and extra capabilities are opt-in modules (`modules/events`, `modules/resources`). Licensed under the [MIT License](LICENSE); security reports go through [SECURITY.md](SECURITY.md).
+Quality gates in CI: Playwright on Chromium and a WebKit iPhone profile, axe accessibility checks, Lighthouse, and visual regression. A workflow for encrypted Sanity dataset backups ships in the template, and extra capabilities are opt-in modules (`modules/events`, `modules/resources`). Licensed under the [PolyForm Strict License 1.0.0](LICENSE); security reports go through [SECURITY.md](SECURITY.md).
 
 ---
 
@@ -110,4 +110,4 @@ Maintained by [Nixon Creative Studio](https://nixoncreativestudio.com).
 
 ## License
 
-Released under the [MIT License](LICENSE), copyright 2026 Nathan Nixon / Nixon Creative Studio.
+Copyright 2026 Nathan Nixon / Nixon Creative Studio. Released under the [PolyForm Strict License 1.0.0](LICENSE): you may read and use it for noncommercial purposes, but not redistribute it, change it or build on it.
