@@ -216,6 +216,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 96  | GA4 skips automated browsers (WebDriver, Lighthouse, PageSpeed, GTmetrix)      | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | staged              | staged         |
 | 97  | astro 7.4 with adapter 14.4.0 (wrangler stays 4.129)                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 98  | Date labels independent of build-machine timezone (`formatDate`)               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 99  | Scaffold markers stay out of PORTABLE files; styleguide wall marked            | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7985,3 +7986,34 @@ times: a time of day needs the site's zone, never UTC, so pass it explicitly the
 **Status, 2026-10-17.** Starter: `yes` with this PR. Sites: `no`. Every live site in the matrix formats dates at build time
 (presacademy 16 files, stonesteps-50k 17, fbcm 8, reid-design-site 5, mas-monograms 5, nixoncreativestudio 3), so each one
 has the bug on a local build.
+
+## Card 99: scaffold markers stay out of PORTABLE files (2026-10-17)
+
+**Origin:** first-baptist-auburn's fork, 2026-10-17. `npm run scaffold -- --remove services,process,philosophy,testimonials --write`
+left two faults that the scaffold reported as success. **Canonical:** `scripts/lib/portable-scaffold-markers.test.mjs` (the
+guard), `scripts/audit-studio.mjs`, `src/pages/styleguide/layouts.astro`.
+
+**Fault 1, a broken import.** `/styleguide/layouts` (card 72's fixed-data wall) imported `TestimonialCard` and `JournalCard`
+with no markers. Removing `testimonials` deleted the component and left the import, so `astro check` failed with ts(2307);
+removing `journal` would have done the same. The imports, the fixture objects and the two template lines now carry
+`testimonials` and `journal` markers (`{/* scaffold: name */}` in the template, rule 14).
+
+**Fault 2, guaranteed drift.** `audit-studio.mjs` is PORTABLE, and its `RENDERED_BY` map carried five line markers, so the
+scaffold edited it in every fork that removed one of those capabilities, and the fork's `sync-check` reported DRIFT on day one.
+The markers are gone. Nothing else was needed: for a removed type, `resolve.ts` has no entry and no page holds the section,
+so check 5 reports nothing for it.
+
+**The rule.** A file marked `PORTABLE: canonical copy` never carries a scaffold marker: the scaffold edits whatever it marks,
+and a PORTABLE file must stay byte-identical. Make the code tolerate the missing capability instead.
+`portable-scaffold-markers.test.mjs` (runs in `test:scripts`, so CI and deploy cover it) fails on any marker in a tracked
+PORTABLE file; `scripts/scaffold.mjs` and the test itself are exempt because they document the syntax.
+
+**Verification.** In the starter: `check`, `test:unit` and prettier green; then `--remove testimonials,journal --write`, typegen,
+`check`, build and `test:unit` all green, discarded. In first-baptist-auburn: `sync-check` 126/126 same.
+
+**Not covered, by hand after a removal.** Three route lists name pages and carry no markers: `lighthouserc.json` (JSON takes no comments), the smoke loop in `.github/workflows/deploy.yml` and the route loop in `.github/workflows/uptime.yml`. Auburn edited all three by hand after removing `services` and `process`; left alone, Lighthouse 404s and the first deploy smoke fails (gotcha `lhci-url-list-404s-on-redirected-page`). PENDING item 14.
+
+**Porting.** Nothing to copy into existing sites: none carries `audit-studio.mjs` as a PORTABLE copy, and none has run the
+scaffold since the wall arrived. A new fork gets both fixes from the starter.
+
+**Status, 2026-10-17.** Starter: `yes` with this PR. first-baptist-auburn: `yes` (forked from it).

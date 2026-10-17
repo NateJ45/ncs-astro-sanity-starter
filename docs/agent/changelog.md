@@ -1,5 +1,12 @@
 # Change history
 
+_2026-10-17: scaffold markers stay out of PORTABLE files (PORTS card 99)._
+
+**Decision.** First Baptist Auburn's fork found two scaffold gaps: `/styleguide/layouts` imported `TestimonialCard` and
+`JournalCard` unmarked (removing `testimonials` broke `astro check`), and the PORTABLE `audit-studio.mjs` carried line
+markers, so every trimmed fork drifted from the starter. The wall is marked, the audit map unmarked, and a scripts test fails on
+any scaffold marker in a PORTABLE file. Verified: gates green, and a real `--remove testimonials,journal --write` builds.
+
 _2026-10-17: date labels do not depend on the build machine's timezone (PORTS card 98)._
 
 **Decision.** Every build-time date label goes through `formatDate()` in `src/lib/format-date.ts` (PORTABLE). Seven

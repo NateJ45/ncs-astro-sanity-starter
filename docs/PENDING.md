@@ -266,6 +266,10 @@ staged modules now and eleven archived ones. The file is owned by another agent'
 (the family test standard, PORTS.md card 35), so the sentence was left alone rather than
 edited across an ownership line. One-line fix, next time someone is in there.
 
+### 14. Three route lists the scaffold cannot reach
+
+`lighthouserc.json`, the deploy smoke loop in `deploy.yml` and the uptime loop in `uptime.yml` list `/services/`, `/process/` and friends with no scaffold markers, so a fork that removes a capability edits them by hand (card 99; first-baptist-auburn did, 2026-10-17). Open: teach `scaffold.mjs` to rewrite the Lighthouse URL list and mark the two YAML loops, or derive all three from `tests/routes.ts`.
+
 ### 13. `measure-tap-targets.mjs` reports closed `<details>` content
 
 **Closed 2026-10-04 in the starter (PR: fix/tap-scan-closed-details).** The script now skips anything inside a closed
