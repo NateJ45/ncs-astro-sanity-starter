@@ -19,6 +19,7 @@ import SanityImage from '@/components/SanityImage.astro';
 import CtaLink from '@/components/CtaLink.astro';
 import type { ProjectedDynamicListSection } from '@/lib/pageBuilder.types';
 import { columnsClass } from '@/lib/layout-variants';
+import { formatDate, SHORT_DATE } from '@/lib/format-date';
 
 type Props = {
   eyebrow?: string;
@@ -81,14 +82,6 @@ const KNOWN_SOURCES: string[] = [
   'faqs', // scaffold: faq
 ];
 
-// Format a datetime string to a short readable date.
-function formatDate(d?: string | null): string {
-  if (!d) return '';
-  const date = new Date(d);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
 // Source-specific fallback CTA link if no cta prop provided.
 const fallbackHref: Record<string, string> = {
   journal: '/journal/', // scaffold: journal
@@ -144,7 +137,7 @@ const fallbackLabel: Record<string, string> = {
                   <div class="p-m">
                     {item.meta && (
                       <p class="mb-xs text-xs tracking-eyebrow text-foreground/70 uppercase">
-                        {formatDate(item.meta)}
+                        {formatDate(item.meta, SHORT_DATE)}
                       </p>
                     )}
                     <h3 class="line-clamp-2 font-display text-h4 leading-tight text-foreground transition-colors group-hover:text-primary-dark">

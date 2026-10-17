@@ -215,6 +215,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 95  | `audit:data`: live data vs compiled schema; `_type` backfill                   | n/a     | no          | yes      | no               | fork          | no             | n/a                | n/a                 | no             |
 | 96  | GA4 skips automated browsers (WebDriver, Lighthouse, PageSpeed, GTmetrix)      | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | staged              | staged         |
 | 97  | astro 7.4 with adapter 14.4.0 (wrangler stays 4.129)                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 98  | Date labels independent of build-machine timezone (`formatDate`)               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7939,3 +7940,48 @@ of `/` and `/studio/` in a browser. A site with locally bundled images also chec
 
 **Status, 2026-10-17.** Starter: `yes` with this PR, verified by dry run and `wrangler dev`, not yet by a real deploy (PENDING
 item 4). Sites: `no`; port after the starter's first real deploy on this pair.
+
+---
+
+## Card 98: Date labels do not depend on the build machine's timezone (2026-10-17)
+
+**Origin:** found 2026-10-17 while verifying card 97: `npm run parity compare` on Nathan's PC (US Eastern) failed
+`styleguide/layouts`, where `<time datetime="2026-01-15">` rendered "January 14, 2026". CI builds in UTC, so the live sites
+were right; any local build or local `npm run deploy` west of Greenwich was a day early. **Canonical:** `src/lib/format-date.ts`
+and `src/lib/format-date.test.ts` (both PORTABLE). Vault gotcha: `build-zone-shifts-date-only-values`.
+
+**The bug.** Every component formatted dates with `new Date(value).toLocaleDateString('en-US', {...})` and no `timeZone`.
+That formats in the zone of the machine running the build. A Sanity `date` ("2026-01-15") parses as UTC midnight, which is the
+evening before anywhere in the Americas, so the label lost a day. A Sanity `datetime` moved too, by whatever the zone offset was.
+
+**The rule.** One helper, `formatDate(value, options?, timeZone = 'UTC', locale = 'en-US')`:
+
+1. A date-only value (`YYYY-MM-DD`) is a calendar day, not an instant. It is always formatted in UTC, the zone it was parsed
+   in, so it keeps its day whatever `timeZone` is passed.
+2. A full datetime is formatted in `timeZone`. **Default UTC**, chosen because the starter has no site timezone setting
+   (`src/data/site.ts` has none; card 20's "timezone honesty" note is about the publish cron, not display) and UTC is what CI
+   has always built with, so the change is render-neutral for production. A site that wants a late-evening post dated by its
+   own clock passes its IANA zone, for example `'America/New_York'`, from one constant.
+3. Missing or unparseable input returns `''`, as every local copy did, so callers keep rendering it conditionally.
+
+Presets: `LONG_DATE` (default, "January 15, 2026"), `SHORT_DATE` ("Jan 15, 2026"), `LONG_MONTH_YEAR`, `SHORT_MONTH_YEAR`.
+
+**Call sites moved.** `JournalCard`, `FeaturedJournal`, `FeaturedTestimonial`, `TestimonialCard`, `sections/DynamicList`,
+`pages/privacy.astro` and both labels in `pages/journal/[slug].astro`. The Studio preview subtitles in `announcement.ts` and
+`journalEntry.ts` are left alone on purpose: they run in the editor's browser, where the editor's own zone is the right one.
+
+**The test proves the zone, not just the output.** `format-date.test.ts` sets `process.env.TZ` (Node re-reads it) to UTC,
+New York, Pago Pago (UTC-11) and Kiritimati (UTC+14), and opens with a control assertion that the naive call really does
+drift under New York, so the test cannot pass vacuously on a UTC machine.
+
+**Verification.** `npm run parity compare` against the committed baseline passes 12/12 with the build run under
+`TZ=America/New_York` and again under `TZ=UTC`.
+
+**Porting.** Copy the two marked files, then grep the site for `toLocaleDateString` and `toLocaleString(` in `src/` (not the
+Studio schema previews) and replace each with `formatDate`. Sites with events (stonesteps-50k, fbcm, presacademy) also format
+times: a time of day needs the site's zone, never UTC, so pass it explicitly there and check an evening event. Build once with
+`TZ=America/New_York` and once with `TZ=UTC` and diff the HTML, or run parity under both.
+
+**Status, 2026-10-17.** Starter: `yes` with this PR. Sites: `no`. Every live site in the matrix formats dates at build time
+(presacademy 16 files, stonesteps-50k 17, fbcm 8, reid-design-site 5, mas-monograms 5, nixoncreativestudio 3), so each one
+has the bug on a local build.

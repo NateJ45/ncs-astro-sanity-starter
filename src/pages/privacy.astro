@@ -22,6 +22,7 @@ import { getPrivacyPage, getSiteSettings } from '@/lib/queries';
 import { hasCfAnalytics, hasGa } from '@/lib/analytics-config';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
+import { formatDate } from '@/lib/format-date';
 
 const [page, siteSettings] = await Promise.all([getPrivacyPage(), getSiteSettings()]);
 
@@ -35,12 +36,6 @@ const heroHeadline = page?.heroHeadline ?? 'Privacy Policy';
 const heroSubhead = page?.heroSubhead ?? '';
 
 // Format the lastUpdated date from Sanity or fall back to a static string.
-function formatDate(d?: string): string {
-  if (!d) return '';
-  const date = new Date(d);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-}
 const lastUpdated = formatDate(page?.lastUpdated);
 
 const schemas = [

@@ -9,6 +9,7 @@
 import SanityImage from '@/components/SanityImage.astro';
 
 import type { SanityImageObject } from '@/lib/pageBuilder.types';
+import { formatDate, SHORT_MONTH_YEAR } from '@/lib/format-date';
 
 interface Props {
   testimonial: {
@@ -34,14 +35,7 @@ interface Props {
 
 const { testimonial } = Astro.props as Props;
 
-function formatDate(d?: string): string {
-  if (!d) return '';
-  const date = new Date(d);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-}
-
-const dateLabel = formatDate(testimonial.date);
+const dateLabel = formatDate(testimonial.date, SHORT_MONTH_YEAR);
 const sourceLabel = testimonial.source && testimonial.source !== 'Other' ? testimonial.source : '';
 // Location + date + source — location leads when present (local trust signal).
 const attributionMeta = [testimonial.location, dateLabel, sourceLabel].filter(Boolean).join(' · ');

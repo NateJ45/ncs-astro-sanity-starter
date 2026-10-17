@@ -1,5 +1,14 @@
 # Change history
 
+_2026-10-17: date labels do not depend on the build machine's timezone (PORTS card 98)._
+
+**Decision.** Every build-time date label goes through `formatDate()` in `src/lib/format-date.ts` (PORTABLE). Seven
+components and pages called `toLocaleDateString` with no `timeZone`, so a local build in US Eastern rendered a Sanity `date`
+of 2026-01-15 as "January 14, 2026" while CI (UTC) rendered the 15th. Date-only values now always keep their calendar day;
+full datetimes format in UTC, because the starter has no site timezone setting and UTC is what production has always built
+with, so live output does not move. Studio preview subtitles stay in the editor's zone. Verified: parity 12/12 with builds under
+`TZ=America/New_York` and `TZ=UTC`, `check`, `build:full`, `test:unit`.
+
 _2026-10-17: astro 7.4 with `@astrojs/cloudflare` 14.4.0 (PORTS card 97)._
 
 **Decision.** `astro` ^7.4.0 and `@astrojs/cloudflare` 14.4.0 exact, together (14.4.0 peers `astro ^7.4.0`). `wrangler` stays
