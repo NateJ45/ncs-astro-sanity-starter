@@ -4,7 +4,8 @@
 //   1) "image" hero (home, optionally Process/Services if a hero photo is added)
 //      — full-bleed Sanity background image with a dark scrim, h1 + subhead + CTAs overlay.
 //   2) "text" hero (About, Contact, FAQ, Process by default)
-//      — clean editorial heading on Soft Linen with eyebrow + headline + subhead.
+//      — clean editorial heading on Soft Linen with eyebrow + headline + subhead, and the
+//      CTAs when the block has them.
 //
 // The image hero is the LCP element on the homepage. SanityImage is set to loading="eager"
 // in that case and the headline uses font-display (Cormorant Garamond), which BaseLayout
@@ -329,13 +330,24 @@ const wrapperHeight =
     data-hero={heroVariant === 'editorial' ? 'editorial' : undefined}
   >
     <div class:list={['mx-auto max-w-content px-m py-section-lg flex items-end', wrapperHeight]}>
-      <SectionHeading
-        eyebrow={eyebrow}
-        headline={headline}
-        subhead={subhead}
-        headingId={headingId}
-        level="h1"
-      />
+      <div>
+        <SectionHeading
+          eyebrow={eyebrow}
+          headline={headline}
+          subhead={subhead}
+          headingId={headingId}
+          level="h1"
+        />
+        {/* The buttons render here too: until 2026-10-17 a text hero (no photo, or the
+            editorial variant) dropped them, so a home page without a hero image had
+            no buttons at all (PORTS.md card 105). */}
+        {(primaryCta || secondaryCta) && (
+          <div class="mt-l flex flex-wrap gap-s">
+            {primaryCta && <CtaLink cta={primaryCta} variant="primary" />}
+            {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" />}
+          </div>
+        )}
+      </div>
     </div>
   </section>
 )}

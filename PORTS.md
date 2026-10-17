@@ -222,8 +222,12 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 102 | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)  | n/a     | yes         | yes      | yes              | n/a           | no             | n/a                | staged              | n/a            |
 | 103 | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)              | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
 | 104 | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file        | n/a     | no          | yes      | n/a              | no            | no             | n/a                | n/a                 | no             |
+| 105 | A text hero (no photo, or editorial) still renders its buttons                 | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
+
+Row 105 (2026-10-17): every site with the starter's `Hero.astro` text branch is `no` until it copies the change;
+nixoncreativestudio has no Sanity hero, hence `n/a`.
 
 Row 104 (2026-10-17): first-baptist-auburn found all four on its first reskin and carries fixes 1 to 3 plus
 `og-theme.mjs` (fbc-auburn PR #17; no matrix column, recorded on the card); its apply-brand still writes `render-og.mjs`. presacademy and stonesteps-50k still have the CtaLink `fallbackHref` line,
@@ -8304,8 +8308,7 @@ copies the change by hand.
    is PORTABLE, so `sync-check` reported DRIFT the moment a fork took its own colours. The brand now goes in
    `scripts/og-theme.mjs` (`OG_THEME`, safe to edit, fork-owned), which both OG generators pass as renderOg's existing
    `theme` option; apply-brand rewrites `og-theme.mjs` by the same regexes and never touches `render-og.mjs`.
-   render-og's header comment still says apply-brand rewrites its DEFAULTS; it is PORTABLE, so that one stale comment
-   waits for the next change that has to touch it (a comment-only edit would turn every site's sync-check red).
+   render-og's header comment, which still said apply-brand rewrites its DEFAULTS, was corrected in the follow-up below.
 
 **Adopting it in a site.** Copy the four test/data/component changes where the site still has the starter's form (grep
 for `if (!c?.linkType) return fallbackHref`, `ships the defaults`, `headline` inside richText/imageText defaults).
@@ -8319,5 +8322,32 @@ change). A site with a hand-written `defaultSections.ts` runs `default-sections.
 `og-theme.mjs` with "no changes" (the theme file holds the starter's own values); gates as listed in the changelog.
 
 **Status, 2026-10-17.** Starter `yes`. first-baptist-auburn carries 1 to 3 and `scripts/og-theme.mjs` (fbc-auburn #17;
-the starter's file has the same shape). Still to take there: `rewriteOgTheme` in its `apply-brand.mjs`, the
-`default-sections` test and the spacer fix, until then re-check `render-og.mjs` after any apply-brand run.
+the starter's file has the same shape). The rest (`rewriteOgTheme` in its `apply-brand.mjs`, the
+`default-sections` test, the spacer and its own leftover `headline` defaults) goes in its resync PR after the follow-up below.
+
+**Follow-up, 2026-10-17 (same day).** `defaultSections.ts` had carried mis-encoded characters since before the
+scaffold work: UTF-8 em-dashes read once as Windows-1252, so two default sentences rendered `â€”` on the page (and
+would have been em-dashes in site copy anyway, rule 2). The copy now uses a comma and a colon, the comments' box-drawing
+rules are repaired, and `default-sections.test.ts` fails on an em-dash or a stray `â` outside a comment. The stale
+`render-og.mjs` header comment now says the brand goes in through `theme` from `scripts/og-theme.mjs`. That file is
+PORTABLE, and of the matrix sites only first-baptist-auburn marks it, so fbc-auburn is the one site resync (its PR also
+takes `rewriteOgTheme`, the test and the spacer fix).
+
+## Card 105: a text hero still renders its buttons (2026-10-17)
+
+**Origin:** found while verifying card 104 in the starter. `Hero.astro` has two branches: the photo hero (CTAs over the
+image) and the text hero, used when there is no image or the `editorial` hero variant is chosen. The text branch rendered
+only `SectionHeading`, so its `primaryCta` and `secondaryCta` were silently dropped. A home page without a hero photo,
+which is every fresh fork and every unseeded build, had no buttons above the fold, and a site that picks the editorial hero
+lost them for good.
+**Canonical:** `src/components/Hero.astro` (not PORTABLE).
+
+**The fix.** The text branch wraps `SectionHeading` and, when the block has CTAs, the same `mt-l flex flex-wrap gap-s` button
+row the photo hero uses, without `onDark` (the text hero sits on `bg-background`). Interior pages whose hero carries no CTAs
+render exactly as before.
+
+**Adopting it in a site.** Only where the site still has the starter's text branch (grep `Hero.astro` for a
+`SectionHeading ... level="h1"` with no `CtaLink` after it). Check light and dark at 375 and 1280 on a page whose text hero
+has buttons, and regenerate visual baselines if the home hero has no photo.
+
+**Status, 2026-10-17.** Starter `yes`.

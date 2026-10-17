@@ -33,9 +33,9 @@
 // tagline is three lines at most, and nothing depends on small type being
 // readable. Keep it that way when a project restyles this.
 //
-// `apply-brand` rewrites the DEFAULTS below by regex, matching two-space
-// indentation and single quotes. Keep that shape or a rebrand silently skips
-// this file.
+// A site never edits the DEFAULTS below: this file is PORTABLE. Its brand goes
+// in through the `theme` option, which both OG generators fill from the
+// site's own scripts/og-theme.mjs (written by `apply-brand`; PORTS.md card 104).
 // =============================================================================
 
 import { mkdirSync, existsSync, readFileSync, readdirSync } from 'node:fs';

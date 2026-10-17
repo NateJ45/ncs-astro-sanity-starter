@@ -1,5 +1,12 @@
 # Change history
 
+_2026-10-17: a text hero keeps its buttons; default copy is clean (PORTS cards 105 and 104)._
+
+**Decision.** The text hero (no photo, or the editorial variant) dropped its CTAs, so an unseeded home had no buttons; it now
+renders them under the heading. The default copy's mis-encoded em-dashes are gone (a comma and a colon), and the
+default-sections test fails on any em-dash or mis-encoding in default copy. render-og's header comment points at
+`scripts/og-theme.mjs` instead of saying apply-brand rewrites its DEFAULTS.
+
 _2026-10-17: a reskinned fork keeps working (PORTS card 104)._
 
 **Decision.** Four starter bugs that First Baptist Auburn's first reskin hit, fixed at the source. The richText and
