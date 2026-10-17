@@ -8235,10 +8235,32 @@ sync-check reports DRIFT for those seven files on that site, which is expected. 
 2. Copy the seven PORTABLE files from the starter and add `'react/compiler-runtime'` to `optimizeDeps.include`.
 3. Run `astro check` and fix items 1 to 4 in the site's OWN Studio files (most sites have 20 to 30 files importing
    `@sanity/ui` or `@sanity/icons`; mas-monograms has 52).
-4. Rewrite the icon imports (item 5), then `grep -rn "from '@sanity/icons'" src` must print nothing but `Icon` / `icons`.
+4. Rewrite the icon imports (item 5) in `src` AND in root files (`sanity.config.ts`, `sanity.cli.ts`: mas-monograms
+   imports `ActivityIcon` in its root config, which a `src`-only codemod missed and only the build caught), then
+   `grep -rn "from '@sanity/icons'" src *.ts` must print nothing but `Icon` / `icons`.
    Then `npm run build`, because only the build catches a missed icon.
 5. `typegen`, `check`, `build:full`, `test:unit`, `npm test`, `parity compare` (expect only `studio` to move).
 6. `astro dev`, open `/studio` signed in, read the console, open every custom pane and action; then the built site under
    `npm run preview` for Presentation.
+
+**Learned on the site branches (2026-10-17).**
+
+- **vite moves with it.** `@sanity/cli-build` (under `sanity` 6.19) requires `vite ^8.3.3`, so a site still on vite 8.2.x
+  gets 8.3.4 (and rolldown 1.2.14) from the one `npm install`. stonesteps-50k did; the starter and first-baptist-auburn were
+  already there. Expected, not lockfile drift. Other non-Sanity movement in that install is Sanity's own subtree (Sentry,
+  Mux, groq, i18next).
+- **`grep -l "errors.md#"` can list two files.** reid-design-site and mas-monograms bundle `polished` (a `sanity`
+  dependency) into its own chunk, and polished links its own `errors.md`. Grep the styled-components path instead:
+  `grep -lF 'packages/styled-components/src/utils/errors.md#' dist/client/_astro/*.js` must list ONE file.
+- **The Presentation enable URL needs its slash** on a site with `trailingSlash: 'always'` (card 89):
+  `previewMode: { enable: '/api/draft-mode/enable/' }`. presacademy, reid-design-site and fbcm still had the slash-less
+  path, which answers a 301 before the real 302 into `/preview/`. Fixed in their phase-2 PRs.
+- **Testing Presentation locally on a site with `upgrade-insecure-requests` in its CSP** (presacademy's `_headers`):
+  under `wrangler dev` on plain http, the iframe's redirect into `/preview/` is upgraded to `https://localhost`, fails,
+  and Presentation says "Unable to connect to visual editing". Production is https and unaffected. For a local check only,
+  delete `; upgrade-insecure-requests` from the BUILT `dist/client/_headers` (never from `public/_headers`).
+- **Embedded-Studio hash routes.** Deep links are `/studio/#/presentation`, not `/studio/presentation` (a 404 on the
+  built site). And a hash-only navigation does not reload the page, so after swapping `astro dev` for `wrangler dev` on the
+  same port, reload before reading the console, or the old dev page's errors show up.
 
 **Status, 2026-10-17.** Starter: `yes` with this PR. Every site: `no` (phase-1 set) until its own PR.
