@@ -8047,8 +8047,10 @@ the "see what we do" link to `/services/` in the journal's empty state, which `c
 and no `/services/` or `/process/` reference was left in the four files; `typegen`, `check`, `build`, `test:unit` and
 `check:links` all exit 0. Discarded.
 
-**Porting.** `scaffold.mjs` is PORTABLE, so fbcm and first-baptist-auburn (the two sites carrying a copy) will report DRIFT
-on a local `sync-check` against the starter until they take the new copy. Both only self-check in CI, so nothing goes red.
-A site that has already trimmed itself gains nothing from the new markers; a fresh fork gets all of it.
+**Porting.** `scaffold.mjs` is PORTABLE and two sites carry it. first-baptist-auburn runs `sync-check` against the live
+starter `main` in CI, so it takes the new copy in the marked-file order (site branch pushed without a PR, starter merged,
+then the site PR). fbcm only self-checks in CI, so it shows DRIFT on a local `sync-check` until resynced and never goes red.
+presacademy, reid-design-site, mas-monograms, nixoncreativestudio and stonesteps-50k do not carry the file. A site that has
+already trimmed itself gains nothing from the new markers; a fresh fork gets all of it.
 
 **Status, 2026-10-17.** Starter: `yes` with this PR.
