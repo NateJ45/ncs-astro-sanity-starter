@@ -32,6 +32,7 @@ import ReadingProgress from '@/components/ReadingProgress.astro';
 import StickyCTAChip from '@/components/StickyCTAChip';
 import CaseStudyTOC from '@/components/CaseStudyTOC';
 import FinalCta from '@/components/FinalCta.astro';
+import { formatDate } from '@/lib/format-date';
 
 // Enumerate slugs + carry prev/next refs (newest-first iteration).
 // Returns [] when journal is off — no detail pages build and they 404.
@@ -97,21 +98,9 @@ const readMinutes = readingTimeFromPortableText(entry.body);
 // so we don't reserve a phantom 260 px sidebar slot.
 const headings = extractHeadings(entry.body);
 const hasToc = headings.length > 0;
-const dateLabel = entry.publishedAt
-  ? new Date(entry.publishedAt).toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    })
-  : '';
+const dateLabel = formatDate(entry.publishedAt);
 const updatedLabel =
-  entry.updatedAt && entry.updatedAt !== entry.publishedAt
-    ? new Date(entry.updatedAt).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : '';
+  entry.updatedAt && entry.updatedAt !== entry.publishedAt ? formatDate(entry.updatedAt) : '';
 
 const schemas = [
   breadcrumbSchema([
