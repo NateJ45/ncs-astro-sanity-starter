@@ -1,8 +1,9 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 import { useMemo, useState } from 'react';
 import { useClient, type DocumentActionComponent, type DocumentActionProps } from 'sanity';
-import { BlockElementIcon } from '@sanity/icons';
-import { Box, Button, Card, Flex, Stack, Text, TextInput, useToast } from '@sanity/ui';
+import { BlockElementIcon } from '@sanity/icons/BlockElement';
+import { Box, Button, Card, Flex, Stack, Text, TextInput } from '@sanity/ui';
+import { useToast } from '@sanity/ui/toast';
 import { sectionLabel } from '../../lib/page-checks';
 import { PAGE_CHECK_CONFIG } from '../pageBuilderConfig';
 import { regenerateKeys } from '../pageOps';
@@ -174,12 +175,12 @@ export const SaveSectionPresetAction: DocumentActionComponent = (props: Document
       width: 'medium' as const,
       onClose: close,
       content: (
-        <Stack space={4}>
+        <Stack gap={4}>
           <Text size={1} muted>
             Pick a section from this page. It is copied, so changing the saved copy later never
             changes this page, and changing this page never changes the copy.
           </Text>
-          <Stack space={2}>
+          <Stack gap={2}>
             {choices.map((choice) => (
               <Card
                 key={choice.key}
@@ -192,7 +193,7 @@ export const SaveSectionPresetAction: DocumentActionComponent = (props: Document
                 style={{ cursor: 'pointer', textAlign: 'left', width: '100%' }}
                 onClick={() => pick(choice)}
               >
-                <Stack space={2}>
+                <Stack gap={2}>
                   <Text size={1} weight="semibold">
                     {choice.label}
                   </Text>
@@ -206,7 +207,7 @@ export const SaveSectionPresetAction: DocumentActionComponent = (props: Document
             ))}
           </Stack>
           {picked && (
-            <Stack space={3}>
+            <Stack gap={3}>
               <Text size={1} weight="semibold">
                 Name this saved section so you can find it again
               </Text>

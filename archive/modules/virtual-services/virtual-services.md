@@ -53,10 +53,7 @@ const SINGLETON_TYPES = [
 **b) Add `DesktopIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  DesktopIcon,
-} from '@sanity/icons';
+import { DesktopIcon } from '@sanity/icons/Desktop';
 ```
 
 **c) Add the Virtual Services page singleton inside the Pages list item** (after the other service pages, before the divider above Privacy):
@@ -117,10 +114,7 @@ singletonWithPreview(S, 'virtualServicesPage', 'Virtual Services Page', DesktopI
 Add this import if `DesktopIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  DesktopIcon,
-} from '@sanity/icons';
+import { DesktopIcon } from '@sanity/icons/Desktop';
 ```
 
 ### Header nav entry

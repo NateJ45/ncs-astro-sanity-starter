@@ -73,7 +73,7 @@ export default function StudioGuide() {
 
   return (
     <Container width={1} padding={4}>
-      <Stack space={6}>
+      <Stack gap={6}>
         <Box>
           <Heading as="h1" size={3}>
             {doc.guideTitle ?? 'How the website works'}
@@ -93,11 +93,11 @@ export default function StudioGuide() {
 
         {doc.studioMap && doc.studioMap.length > 0 && (
           <Card padding={4} radius={2} shadow={1} tone="default">
-            <Stack space={4}>
+            <Stack gap={4}>
               <Heading as="h2" size={1}>
                 The map: where everything lives
               </Heading>
-              <Stack space={3}>
+              <Stack gap={3}>
                 {doc.studioMap.map((row, i) => (
                   <Box key={i}>
                     <Text size={1} weight="semibold">
@@ -120,14 +120,14 @@ export default function StudioGuide() {
             <Heading as="h2" size={1} style={{ marginBottom: '1rem' }}>
               Step-by-step how-tos
             </Heading>
-            <Stack space={4}>
+            <Stack gap={4}>
               {doc.howTos.map((howTo, i) => (
                 <Card key={i} padding={4} radius={2} shadow={1} tone="default">
-                  <Stack space={3}>
+                  <Stack gap={3}>
                     <Heading as="h3" size={0}>
                       {i + 1}. {howTo.title}
                     </Heading>
-                    <Stack space={2}>
+                    <Stack gap={2}>
                       {(howTo.steps ?? []).map((step, j) => (
                         <Text key={j} size={1}>
                           {step}
@@ -145,7 +145,7 @@ export default function StudioGuide() {
           doc.tips.length > 0 &&
           doc.tips.map((tip, i) => (
             <Card key={i} padding={4} radius={2} shadow={1} tone={tip.tone ?? 'default'}>
-              <Stack space={3}>
+              <Stack gap={3}>
                 <Heading as="h2" size={1}>
                   {tip.heading}
                 </Heading>

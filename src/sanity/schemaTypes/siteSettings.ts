@@ -2,7 +2,9 @@
 // One instance only; singleton enforcement happens in sanity.config.ts.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
-import { LinkIcon, ChevronDownIcon, ListIcon } from '@sanity/icons';
+import { LinkIcon } from '@sanity/icons/Link';
+import { ChevronDownIcon } from '@sanity/icons/ChevronDown';
+import { ListIcon } from '@sanity/icons/List';
 
 export const siteSettings = defineType({
   name: 'siteSettings',

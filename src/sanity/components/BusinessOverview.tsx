@@ -115,7 +115,7 @@ export default function BusinessOverview() {
 
   return (
     <Container width={1} padding={4}>
-      <Stack space={6}>
+      <Stack gap={6}>
         {/* Header */}
         <Box>
           <Heading as="h1" size={3}>
@@ -131,7 +131,7 @@ export default function BusinessOverview() {
 
         {/* ── LIVE: Services + prices ─────────────────────────────────────── */}
         <Card padding={4} radius={2} shadow={1} tone="default">
-          <Stack space={4}>
+          <Stack gap={4}>
             <Heading as="h2" size={1}>
               Your services and prices (live)
             </Heading>
@@ -149,10 +149,10 @@ export default function BusinessOverview() {
               </Text>
             )}
             {services !== null && services.length > 0 && (
-              <Stack space={3}>
+              <Stack gap={3}>
                 {services.map((svc, i) => (
                   <Card key={i} padding={3} radius={2} tone="transparent" shadow={1}>
-                    <Stack space={2}>
+                    <Stack gap={2}>
                       <Box
                         style={{
                           display: 'flex',
@@ -182,7 +182,7 @@ export default function BusinessOverview() {
 
         {/* ── LIVE: Contact + availability + service areas ─────────────────── */}
         <Card padding={4} radius={2} shadow={1} tone="default">
-          <Stack space={4}>
+          <Stack gap={4}>
             <Heading as="h2" size={1}>
               Contact, availability, and service areas (live)
             </Heading>
@@ -195,7 +195,7 @@ export default function BusinessOverview() {
 
             {/* Data */}
             {settings !== null && (
-              <Stack space={3}>
+              <Stack gap={3}>
                 {settings.availabilityStatus ? (
                   <Box>
                     <Text size={1} weight="semibold">
@@ -268,7 +268,7 @@ export default function BusinessOverview() {
                       Travel fee tiers
                     </Text>
                     <Box marginTop={1}>
-                      <Stack space={1}>
+                      <Stack gap={1}>
                         {settings.travelFees.map((tier, i) => (
                           <Text key={i} size={1}>
                             {tier.distanceLabel}: {tier.fee}
@@ -286,7 +286,7 @@ export default function BusinessOverview() {
         {/* ── EDITABLE: Who you are ───────────────────────────────────────── */}
         {notes?.businessSummary && (
           <Card padding={4} radius={2} shadow={1} tone="default">
-            <Stack space={3}>
+            <Stack gap={3}>
               <Heading as="h2" size={1}>
                 Who you are
               </Heading>
@@ -302,7 +302,7 @@ export default function BusinessOverview() {
         {/* ── EDITABLE: Your ideal client ─────────────────────────────────── */}
         {notes?.idealClient && (
           <Card padding={4} radius={2} shadow={1} tone="default">
-            <Stack space={3}>
+            <Stack gap={3}>
               <Heading as="h2" size={1}>
                 Your ideal client
               </Heading>
@@ -318,7 +318,7 @@ export default function BusinessOverview() {
         {/* ── EDITABLE: Your voice ────────────────────────────────────────── */}
         {(notes?.voiceSummary || (notes?.wordsToAvoid && notes.wordsToAvoid.length > 0)) && (
           <Card padding={4} radius={2} shadow={1} tone="default">
-            <Stack space={3}>
+            <Stack gap={3}>
               <Heading as="h2" size={1}>
                 Your voice (how you sound in writing)
               </Heading>

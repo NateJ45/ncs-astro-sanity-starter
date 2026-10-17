@@ -2038,6 +2038,23 @@ export type Testimonial = {
   reviewUrl?: string;
 };
 
+export type MediaFolderReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'media.folder';
+};
+
+export type MediaFolder = {
+  _id: string;
+  _type: 'media.folder';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  parent?: MediaFolderReference;
+};
+
 export type MediaTag = {
   _id: string;
   _type: 'media.tag';
@@ -2214,6 +2231,8 @@ export type AllSanitySchemaTypes =
   | AboutPage
   | HomePage
   | Testimonial
+  | MediaFolderReference
+  | MediaFolder
   | MediaTag
   | SanityImagePaletteSwatch
   | SanityImagePalette

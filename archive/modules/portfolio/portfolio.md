@@ -64,10 +64,7 @@ const ORDERABLE_TYPES = [
 **c) Add `ImagesIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  ImagesIcon,
-} from '@sanity/icons';
+import { ImagesIcon } from '@sanity/icons/Images';
 ```
 
 **d) Add the Portfolio page singleton inside the Pages list item** (after the Journal entry, before the divider above Privacy):
@@ -163,10 +160,7 @@ orderableDocumentListDeskItem({
 Add this import if `ImagesIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  ImagesIcon,
-} from '@sanity/icons';
+import { ImagesIcon } from '@sanity/icons/Images';
 ```
 
 ### Header nav entry

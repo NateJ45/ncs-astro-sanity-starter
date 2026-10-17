@@ -1,5 +1,17 @@
 # Change history
 
+_2026-10-17: Sanity phase 2, `@sanity/ui` 4 and `@sanity/icons` 5 (PORTS card 103)._
+
+**Decision.** The family leaves the phase-1 pin (`sanity` 6.9.1, `@sanity/ui` 3.5.4) for `sanity` 6.19.0, `@sanity/ui`
+4.4.9, `@sanity/icons` 5.2.3, `@sanity/client` 8.9.0 and `@sanity/visual-editing` 6.1.3, so the richer Studio admin is
+written once, on current Sanity, instead of against a pin it would have to be ported off. Starter first; each site follows
+in its own PR. Studio code: `space` to `gap` (47), `Grid columns` to `gridTemplateColumns`, `Badge mode` dropped,
+`Menu*` and `useToast` to their subpaths, every icon to `@sanity/icons/<Name>` (scaffold markers carried onto the new
+lines), and `react/compiler-runtime` added to `optimizeDeps.include` so the dev Studio hydrates. Verified: one
+`@sanity/ui` and one `@sanity/icons` on disk, one `errors.md#` chunk, typegen, check, build, 692 unit tests, 120
+Playwright tests, parity 12/12 after recapturing `studio` (the new `@sanity/ui` stylesheet link), and a signed-in Studio
+plus Presentation in a real browser against first-baptist-auburn's project.
+
 _2026-10-17: the scaffold prunes the Lighthouse, smoke and uptime route lists (PORTS card 100)._
 
 **Decision.** Removing a capability no longer leaves its pages in `lighthouserc.json`, the deploy smoke loop, the uptime loop

@@ -68,10 +68,7 @@ const ORDERABLE_TYPES = [
 `ThListIcon` is already imported for other orderable types. Add `BasketIcon`:
 
 ```ts
-import {
-  // ... existing icons ...
-  BasketIcon,
-} from '@sanity/icons';
+import { BasketIcon } from '@sanity/icons/Basket';
 ```
 
 **d) Add the Shop Page singleton inside the Pages list item:**
@@ -177,10 +174,7 @@ Add this import if `BasketIcon` is not already imported from `@sanity/icons`
 (`ThListIcon` is already imported):
 
 ```ts
-import {
-  // ... existing icons ...
-  BasketIcon,
-} from '@sanity/icons';
+import { BasketIcon } from '@sanity/icons/Basket';
 ```
 
 ### Header nav entry

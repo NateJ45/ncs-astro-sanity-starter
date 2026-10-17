@@ -72,10 +72,10 @@ export function CharacterCountInput(props: InputProps) {
     len > max ? 'critical' : ratio >= 0.9 ? 'caution' : ratio >= 0.5 ? 'positive' : 'default';
 
   return (
-    <Stack space={2}>
+    <Stack gap={2}>
       {props.renderDefault(props)}
       <Flex justify="flex-end">
-        <Badge tone={tone} mode="outline" fontSize={1} padding={2} radius={2}>
+        <Badge tone={tone} fontSize={1} padding={2} radius={2}>
           {len} / {max}
         </Badge>
       </Flex>

@@ -220,6 +220,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 100 | Scaffold prunes the Lighthouse, smoke and uptime route lists                   | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 101 | Preview renders "no document" inside the layout, so Presentation connects      | n/a     | open        | yes      | open             | open          | n/a            | n/a                | n/a                 | open           |
 | 102 | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)  | n/a     | yes         | yes      | yes              | n/a           | no             | n/a                | staged              | n/a            |
+| 103 | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)              | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -772,6 +773,8 @@ in isolation breaks it. The working set as of the phase-1 migration (2026-09-06)
 6.4.3, `react` / `react-dom` / `react-is` 19.2.7, plus `sanity-plugin-media` 5.0.11,
 `sanity-plugin-utils` 2.0.6 (pinned through `overrides`; the default 2.0.17 drags in
 `@sanity/ui` v4) and `sanity-plugin-asset-source-unsplash` 7.0.15.
+
+**Superseded 2026-10-17 by Card 103 (phase 2 taken: `sanity` 6.19.0, `@sanity/ui` 4.4.9, `@sanity/icons` 5.2.3).** The phase-1 history below stays for the reasoning.
 
 **`sanity` 6.9.2 is the wall.** A PATCH release moved the core to `@sanity/ui` 4, which is
 a genuine migration (ESM only, a required `@sanity/ui/styles.css` import, heavy components
@@ -8130,3 +8133,112 @@ its unmerged `redesign-2026` branch, still listed in its `main` (`staged`). mas-
 (`n/a`). presacademy: done in its own PR #97 (`bbb15c6`, before this card; corrected 2026-10-17). 2ndpreschicago still
 ships it (`no`). first-baptist-auburn (forked from the starter with Lenis; no matrix column): done in fbc-auburn#14, 2026-10-17.
 wcp is archived.
+
+## Card 103: Sanity phase 2, the `@sanity/ui` 4 / `@sanity/icons` 5 set (2026-10-17)
+
+**Origin:** the starter, `deps/sanity-phase2`. Closes the "phase 2" Card 10 has deferred since 2026-09-06. The reason to
+take it now: the richer Studio admin (dashboards, guides, video help) is going to be built on current Sanity, and Studio
+files do not port across the `@sanity/ui` 3 to 4 boundary, so the family moves first and the new admin is written once.
+**Canonical:** `package.json` / `package-lock.json`, `astro.config.mjs` (`optimizeDeps.include`), the Studio files under
+`src/sanity/`, `scripts/.parity/studio.html`.
+
+**The set (exact pins).**
+
+| Package                               | Phase 1 | Phase 2 | Note                                                                        |
+| ------------------------------------- | ------- | ------- | --------------------------------------------------------------------------- |
+| `sanity`, `@sanity/vision`            | 6.9.1   | 6.19.0  | 6.9.2 was the wall (first release on `@sanity/ui` 4)                        |
+| `@sanity/ui`                          | 3.5.4   | 4.4.9   | every Sanity package below wants `^4.4.4` or `^4.4.5`                       |
+| `@sanity/icons`                       | 3.8.0   | 5.2.3   | now ONE copy on disk; the old 3.8-hoisted, v5-nested split is gone          |
+| `styled-components`                   | 6.4.3   | 6.6.0   | peers want `^6.1`                                                           |
+| `@sanity/client`                      | 7.26.2  | 8.9.0   | `sanity` 6.19 depends on `^8.9.0`; our `createClient` calls are unchanged   |
+| `@sanity/preview-url-secret`          | 4.1.5   | 4.1.5   | already the latest; peers `@sanity/client ^7.26.2 or ^8`                    |
+| `@sanity/visual-editing` (+overrides) | 5.7.3   | 6.1.3   | both entries, same pass, or EOVERRIDE; every subpath we import still exists |
+| `@sanity/astro`                       | 3.4.2   | 3.5.1   | depends on visual-editing `^5.5.0`; the override lifts it to 6.1.3          |
+| `@sanity/orderable-document-list`     | 2.0.9   | 2.0.28  |                                                                             |
+| `sanity-plugin-media`                 | 5.0.11  | 6.3.5   | adds a `media.folder` type (typegen grows by two types; nothing else moves) |
+| `sanity-plugin-asset-source-unsplash` | 7.0.15  | 7.0.29  |                                                                             |
+| `sanity-plugin-utils` (overrides)     | 2.0.6   | 2.0.22  | the override was a hold-back; it now pins what orderable wants              |
+
+How it was found: the committed lockfile, `npm ci`, then the `package.json` edit and ONE `npm install` (card 68), which
+moved only the Sanity subtree (`added 73, removed 151, changed 180`). `npm install` prints `ERESOLVE overriding peer
+dependency`: that is `@sanity/astro`'s `^5.5.0` peer meeting the visual-editing override, and it is expected.
+
+**Invariants, measured.** `find node_modules -path "*@sanity/ui/package.json"`: one line (4.4.9).
+`find node_modules -path "*@sanity/icons/package.json"`: one line (5.2.3). `grep -l "errors.md#" dist/client/_astro/*.js`:
+one file. Four `@sanity/client` 7.27.0 copies stay nested, under `@sanity/presentation-comlink` (types only; its dist never
+imports the client) and three `@sanity/workflow-*` CLI packages. Those are upstream's own ranges and the client is
+stateless, so leave them.
+
+**Migration notes, per change.** Most of it is mechanical and `astro check` finds it, with two exceptions marked.
+
+1. **`space` is gone; use `gap`.** `Stack`, `Inline`, `Select`, `Hotkeys` and friends type `space?: never`. 47 uses across
+   `checkPage`, `saveSectionPreset`, `BrandKit`, `BusinessOverview`, `CharacterCountInput`, `GuideView`, `PreviewNavigator`,
+   `SeoSnippetInput` and `StudioGuide`. `sed -i 's/\bspace={/gap={/g'` on the files `astro check` names. The error reads
+   `Type 'number' is not assignable to type 'undefined'`, which does not say "renamed".
+2. **`Grid columns` is `gridTemplateColumns`** (and `rows`, `column`, `columnStart` and the rest become `grid*`). One use,
+   `BrandKit`.
+3. **`Badge mode` is gone** ("No longer used"). One use, `CharacterCountInput` (`mode="outline"` dropped; the tone still
+   colours it).
+4. **Subpath-only components.** `Menu`, `MenuButton`, `MenuItem`, `MenuDivider`, `MenuGroup` come from `@sanity/ui/menu`;
+   `useToast`, `Toast`, `ToastProvider` from `@sanity/ui/toast`; also `/tooltip`, `/popover`, `/autocomplete`,
+   `/breadcrumbs`, `/code`. The root still declares them, as `never`, so the error is `This expression is not callable` or
+   `JSX element type 'MenuItem' does not have any construct or call signatures`. Eight files (`useToast` in seven, `Menu*`
+   in `PreviewNavigator`).
+5. **`@sanity/icons` 5 has no named root exports (NOT caught by `astro check`).** The root exports only `Icon` and `icons`;
+   every icon is `import { BellIcon } from '@sanity/icons/Bell'`. The root declares the old names as `never`, and a `never`
+   passed to `icon:` type-checks, so `astro check` is clean and `astro build` then fails with
+   `[MISSING_EXPORT] "BellIcon" is not exported by "node_modules/@sanity/icons/dist/index.js"`. 16 files, about 70 imports,
+   rewritten as one import line per icon. **A `// scaffold: x` comment on a name's line must move onto that icon's new
+   line** (`structure.ts` carries one on `OlistIcon`), or `npm run scaffold -- --remove` stops removing it (rule 14).
+6. **The dev Studio needs `react/compiler-runtime` pre-bundled (NOT caught by the build or CI).** `astro.config.mjs` excludes
+   `@sanity/ui` from `optimizeDeps` (a v3-era workaround, kept). `@sanity/ui` 4 is React Compiler output and imports React's
+   CommonJS `react/compiler-runtime`; an excluded package's imports are served raw, so `astro dev` serves a blank `/studio`
+   with `[astro-island] Error hydrating ... studio-component.tsx SyntaxError: The requested module
+'/node_modules/react/compiler-runtime.js' does not provide an export named 'c'`. @sanity/astro's own include list names
+   the older `react-compiler-runtime` package, not this one. Fix: `optimizeDeps.include: ['react/compiler-runtime']`.
+   `astro build` never hits it. Same symptom as card 60's rejected alternative, different cause.
+7. **`@sanity/ui/styles.css` is imported by `sanity` itself** (`sanity/lib/index.js`), so an embedded Studio needs no import
+   of its own. It lands as one more `<link rel="stylesheet">` on `/studio`, which is the only parity diff (12/12 after
+   recapturing `studio` alone; every content page byte-identical).
+8. **The module docs' code snippets** (`docs/modules/*.md`, `archive/modules/*/*.md`) carried the old icon imports and are
+   rewritten the same way, so installing a module does not bring the root import back.
+
+Unchanged and verified: `buildTheme({ font })` from `@sanity/ui/theme` (light and dark), `useClient`,
+`usePresentationNavigate` / `usePresentationParams`, `createPreviewSecret`, `validatePreviewUrl`, `perspectiveCookieName`,
+every `@sanity/visual-editing` subpath the overlay uses (`/react`, `/optimistic`, `/create-data-attribute`), and
+`fixSanityDedupeAlias()` (card 60; @sanity/astro 3.5.1 still has the forward-slash regex).
+
+**Gates (starter, 2026-10-17, Windows 11, Node 24.16.0).** `npm run typegen` passes; `astro check` 0 errors; lint 0 errors
+(the 7 known warnings); `test:unit` 638 + 54 pass; `npm run build` passes; `npm test` 120/120; `npm run parity compare`
+12/12 after the studio recapture. `npm audit`: 42 (`origin/main`'s lockfile the same day: 44; phase 2 drops
+`@module-federation/*`, `@sanity/workbench-cli` and `adm-zip`, and adds the CLI-only `@sanity/cli-build` and
+`@sanity/runtime-cli`).
+
+**Browser verification.** The starter has no Sanity project, so the worktree was pointed at first-baptist-auburn's
+pre-launch project through an uncommitted `.env` and `.dev.vars` and opened in a signed-in Chrome. On `astro dev`: the desk,
+Help & Guide (GuideView), Start Here (StudioGuide, BusinessOverview, BrandKit with its two-column grid), a page document
+(CharacterCountInput badge, SeoSnippetInput, the custom document actions menu, the Check this page dialog) and Media, all
+with a clean console. On the BUILT site under `wrangler dev`: Presentation (`/studio/#/presentation`) with PreviewNavigator,
+the preview iframe on `/preview/`, `GET /preview/live/ 200` (the SSE proxy), stega present in the iframe text, and the
+overlay box drawing on hover; light and dark appearance both correct. **Not exercised:** an in-canvas control writing back,
+which would leave a draft in a client dataset. Each site's PR repeats the check against its own project.
+
+**Rolling it to a site.** One PR per site, in this order: first-baptist-auburn (pre-launch), presacademy, reid-design-site,
+mas-monograms, stonesteps-50k, fbcm. Seven of the changed files are `PORTABLE` (`checkPage`, `saveSectionPreset`,
+`SeoSnippetInput`, `UndoRedo`, `pageActions`, `shareDraftLink`, `slugRedirect`), so the marked-file order applies: the
+starter merges first, then each site PR carries the new copies and is green on its first run. Until a site's PR lands,
+sync-check reports DRIFT for those seven files on that site, which is expected. In each site:
+
+1. `npm ci`, then set the exact versions above in `package.json` (both `@sanity/visual-editing` entries, and the
+   `sanity-plugin-utils` override to 2.0.22), then ONE `npm install`. Keep the site's other overrides. Check the disk
+   invariants.
+2. Copy the seven PORTABLE files from the starter and add `'react/compiler-runtime'` to `optimizeDeps.include`.
+3. Run `astro check` and fix items 1 to 4 in the site's OWN Studio files (most sites have 20 to 30 files importing
+   `@sanity/ui` or `@sanity/icons`; mas-monograms has 52).
+4. Rewrite the icon imports (item 5), then `grep -rn "from '@sanity/icons'" src` must print nothing but `Icon` / `icons`.
+   Then `npm run build`, because only the build catches a missed icon.
+5. `typegen`, `check`, `build:full`, `test:unit`, `npm test`, `parity compare` (expect only `studio` to move).
+6. `astro dev`, open `/studio` signed in, read the console, open every custom pane and action; then the built site under
+   `npm run preview` for Presentation.
+
+**Status, 2026-10-17.** Starter: `yes` with this PR. Every site: `no` (phase-1 set) until its own PR.

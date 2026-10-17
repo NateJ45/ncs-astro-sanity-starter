@@ -51,10 +51,7 @@ const SINGLETON_TYPES = [
 **b) Add `CreditCardIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  CreditCardIcon,
-} from '@sanity/icons';
+import { CreditCardIcon } from '@sanity/icons/CreditCard';
 ```
 
 **c) Add the Gift Certificates page singleton inside the Pages list item** (after the other service pages, before the divider above Privacy):
@@ -115,10 +112,7 @@ singletonWithPreview(S, 'giftPage', 'Gift Certificates Page', CreditCardIcon),
 Add this import if `CreditCardIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  CreditCardIcon,
-} from '@sanity/icons';
+import { CreditCardIcon } from '@sanity/icons/CreditCard';
 ```
 
 ### Header nav entry

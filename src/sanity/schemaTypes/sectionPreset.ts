@@ -38,7 +38,7 @@
 // =============================================================================
 
 import { defineType, defineField } from 'sanity';
-import { BlockElementIcon } from '@sanity/icons';
+import { BlockElementIcon } from '@sanity/icons/BlockElement';
 import { SECTION_TYPES, sectionArrayOptions } from './sections';
 import { RICH_SECTION_TYPES } from './richSections';
 

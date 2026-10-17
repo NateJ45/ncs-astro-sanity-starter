@@ -1,8 +1,9 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 import { useCallback, useState } from 'react';
 import { useClient, type DocumentActionComponent, type DocumentActionProps } from 'sanity';
-import { SearchIcon } from '@sanity/icons';
-import { Box, Button, Card, Flex, Stack, Text, useToast } from '@sanity/ui';
+import { SearchIcon } from '@sanity/icons/Search';
+import { Box, Button, Card, Flex, Stack, Text } from '@sanity/ui';
+import { useToast } from '@sanity/ui/toast';
 import { checkPage, countFindings, type CheckGroup } from '../../lib/page-checks';
 import { PAGE_CHECK_CONFIG } from '../pageBuilderConfig';
 import { readSlug } from '../pageOps';
@@ -33,14 +34,14 @@ function GroupCard({ group }: { group: CheckGroup }) {
   const clear = group.findings.length === 0;
   return (
     <Card padding={3} radius={2} border tone={clear ? 'positive' : 'caution'}>
-      <Stack space={3}>
+      <Stack gap={3}>
         <Text size={1} weight="semibold">
           {clear
             ? `${group.title}: nothing to flag`
             : `${group.title}: ${group.findings.length} to look at`}
         </Text>
         {!clear && (
-          <Stack space={2} as="ul" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          <Stack gap={2} as="ul" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {group.findings.map((f, i) => (
               <Text key={`${f.where}-${i}`} size={1} as="li">
                 <strong>{f.where}</strong> - {f.detail}
@@ -105,7 +106,7 @@ export const CheckPageAction: DocumentActionComponent = (props: DocumentActionPr
       width: 'medium' as const,
       onClose: close,
       content: (
-        <Stack space={4}>
+        <Stack gap={4}>
           {groups === null ? (
             <Text size={1} muted>
               Reading the page...

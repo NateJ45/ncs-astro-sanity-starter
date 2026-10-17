@@ -48,10 +48,7 @@ const SINGLETON_TYPES = [
 **b) Add `BillIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  BillIcon,
-} from '@sanity/icons';
+import { BillIcon } from '@sanity/icons/Bill';
 ```
 
 **c) Add the Budget Calculator page singleton inside the Pages list item** (after the Style Quiz entry if that module is also enabled, otherwise after the Journal entry before the Privacy Policy divider):
@@ -113,10 +110,7 @@ singletonWithPreview(S, 'budgetCalculator', 'Budget Calculator', BillIcon),
 Add this import if `BillIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  BillIcon,
-} from '@sanity/icons';
+import { BillIcon } from '@sanity/icons/Bill';
 ```
 
 ### Header nav entry

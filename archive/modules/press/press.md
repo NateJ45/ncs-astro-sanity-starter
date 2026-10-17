@@ -62,10 +62,7 @@ const ORDERABLE_TYPES = [
 **c) Add `CaseIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  CaseIcon,
-} from '@sanity/icons';
+import { CaseIcon } from '@sanity/icons/Case';
 ```
 
 **d) Add the Press page singleton inside the Pages list item** (after the other page singletons, before the divider above Privacy):
@@ -150,10 +147,7 @@ orderableDocumentListDeskItem({
 Add this import if `CaseIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  CaseIcon,
-} from '@sanity/icons';
+import { CaseIcon } from '@sanity/icons/Case';
 ```
 
 ### Header nav entry

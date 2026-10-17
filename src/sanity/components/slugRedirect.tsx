@@ -34,7 +34,7 @@
 // documents - a draft redirect would look filed and never fire.
 // =============================================================================
 import { useClient, type DocumentActionComponent, type DocumentActionProps } from 'sanity';
-import { useToast } from '@sanity/ui';
+import { useToast } from '@sanity/ui/toast';
 import { pathForDoc } from '../urls';
 
 const API = { apiVersion: '2026-05-01' } as const;
