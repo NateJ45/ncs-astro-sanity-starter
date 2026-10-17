@@ -217,6 +217,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 97  | astro 7.4 with adapter 14.4.0 (wrangler stays 4.129)                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 98  | Date labels independent of build-machine timezone (`formatDate`)               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 99  | Scaffold markers stay out of PORTABLE files; styleguide wall marked            | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 100 | Scaffold prunes the Lighthouse, smoke and uptime route lists                   | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8011,9 +8012,45 @@ PORTABLE file; `scripts/scaffold.mjs` and the test itself are exempt because the
 **Verification.** In the starter: `check`, `test:unit` and prettier green; then `--remove testimonials,journal --write`, typegen,
 `check`, build and `test:unit` all green, discarded. In first-baptist-auburn: `sync-check` 126/126 same.
 
-**Not covered, by hand after a removal.** Three route lists name pages and carry no markers: `lighthouserc.json` (JSON takes no comments), the smoke loop in `.github/workflows/deploy.yml` and the route loop in `.github/workflows/uptime.yml`. Auburn edited all three by hand after removing `services` and `process`; left alone, Lighthouse 404s and the first deploy smoke fails (gotcha `lhci-url-list-404s-on-redirected-page`). PENDING item 14.
+**Not covered, by hand after a removal.** Three route lists name pages and carry no markers: `lighthouserc.json` (JSON takes no comments), the smoke loop in `.github/workflows/deploy.yml` and the route loop in `.github/workflows/uptime.yml`. Auburn edited all three by hand after removing `services` and `process`; left alone, Lighthouse 404s and the first deploy smoke fails (gotcha `lhci-url-list-404s-on-redirected-page`). Closed by card 100, which also covers the journal empty-state link.
 
 **Porting.** Nothing to copy into existing sites: none carries `audit-studio.mjs` as a PORTABLE copy, and none has run the
 scaffold since the wall arrived. A new fork gets both fixes from the starter.
 
 **Status, 2026-10-17.** Starter: `yes` with this PR. first-baptist-auburn: `yes` (forked from it).
+
+## Card 100: the scaffold prunes the Lighthouse, smoke and uptime route lists (2026-10-17)
+
+**Origin:** first-baptist-auburn's fork, 2026-10-17, the part card 99 left open (PENDING item 14). After
+`--remove services,process`, four places still named the removed pages and were edited by hand: the `url` list in
+`lighthouserc.json`, the smoke loop in `.github/workflows/deploy.yml`, the route loop in `.github/workflows/uptime.yml`, and
+the "see what we do" link to `/services/` in the journal's empty state, which `check:links` 404s. **Canonical:**
+`scripts/scaffold.mjs` (PORTABLE); the markers live in the three per-site files.
+
+**What changed.**
+
+- `scaffold.mjs` now walks `.github` and reads `.yml`, so a workflow takes `# scaffold: name` like any other file.
+- The two workflow loops read a `ROUTES` variable built one marked line at a time
+  (`ROUTES="$ROUTES /services/" # scaffold: services`), because a `for path in a b c` loop is one line and a line marker
+  would take all of it. Paths now carry their trailing slash (rule 19).
+- `lighthouserc.json` takes no comments, so the scaffold prunes it instead: a URL goes when every page file that could build
+  it (`src/pages/x.astro`, `src/pages/x/index.astro`) is deleted by the same run. A URL with no page file (`/404.html`, a
+  `[slug]` page) is never touched. The edit is line-exact, fixes the new last entry's comma, and refuses to write a file that
+  no longer parses. First cut checked existence after `--write` had already deleted the pages and dropped nothing; the pass
+  now counts this run's deletions as present.
+- The journal link sits in a `<Fragment>` holding a `{/* scaffold: services */}` block. Written inline, prettier pulled the
+  opener onto the "In the meantime," line, and removal would have taken that text with it. Rendered text is identical
+  (whitespace only; `scripts/.parity/journal.html` re-captured).
+
+**Verification.** Starter: parity 12/12 after the re-capture. Then `npm run scaffold -- --remove services,process,testimonials --write`:
+`lighthouserc.json` lost `/services/` and `/process/` and parses, both workflow loops and the journal link lost their lines,
+and no `/services/` or `/process/` reference was left in the four files; `typegen`, `check`, `build`, `test:unit` and
+`check:links` all exit 0. Discarded.
+
+**Porting.** `scaffold.mjs` is PORTABLE and two sites carry it. first-baptist-auburn runs `sync-check` against the live
+starter `main` in CI, so it takes the new copy in the marked-file order (site branch pushed without a PR, starter merged,
+then the site PR). fbcm only self-checks in CI, so it shows DRIFT on a local `sync-check` until resynced and never goes red.
+presacademy, reid-design-site, mas-monograms, nixoncreativestudio and stonesteps-50k do not carry the file. A site that has
+already trimmed itself gains nothing from the new markers; a fresh fork gets all of it.
+
+**Status, 2026-10-17.** Starter: `yes` with this PR.

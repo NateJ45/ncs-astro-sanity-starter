@@ -1,5 +1,13 @@
 # Change history
 
+_2026-10-17: the scaffold prunes the Lighthouse, smoke and uptime route lists (PORTS card 100)._
+
+**Decision.** Removing a capability no longer leaves its pages in `lighthouserc.json`, the deploy smoke loop, the uptime loop
+or the journal's empty-state link (First Baptist Auburn edited all four by hand). The scaffold walks `.github` YAML, the two
+loops read a marked `ROUTES` variable, the journal link is a marked block, and `lighthouserc.json` is pruned of URLs whose
+page files the run deletes. Verified: a real `--remove services,process,testimonials --write` passes typegen, check, build,
+unit tests and check:links with no leftover reference. Closes PENDING item 14.
+
 _2026-10-17: scaffold markers stay out of PORTABLE files (PORTS card 99)._
 
 **Decision.** First Baptist Auburn's fork found two scaffold gaps: `/styleguide/layouts` imported `TestimonialCard` and

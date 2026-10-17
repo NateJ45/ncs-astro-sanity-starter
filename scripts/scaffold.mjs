@@ -62,6 +62,11 @@
 //
 // A capability name is a bare word: journal, services, process, faq, about.
 //
+// IN A WORKFLOW (.github/**/*.yml), USE `# scaffold: journal`. A `for path in
+// a b c` loop is one line, so a route list there is built one marked line at a
+// time instead (`ROUTES="$ROUTES /journal/" # scaffold: journal`) and the loop
+// reads the variable.
+//
 // IN AN ASTRO TEMPLATE, USE `{/* scaffold: journal */}`. Below the frontmatter
 // fence a `//` is not a comment, it is TEXT, and it renders. Marking a footer
 // nav link that way printed "// scaffold: process" into the page between two
@@ -88,6 +93,12 @@
 // - It does not run typegen or the build. It prints what to run next.
 // - It does not reformat. Everything it writes is line-exact, so the diff is
 //   only the lines that carried a marker.
+//
+// ONE FILE IS EDITED WITHOUT MARKERS: lighthouserc.json. JSON takes no
+// comments, so its `url` list is pruned instead: a URL is dropped when every
+// page file that could build it (src/pages/x.astro, src/pages/x/index.astro)
+// is being deleted. Left alone, Lighthouse CI fails on the 404 of a removed
+// page (first-baptist-auburn, 2026-10-17; PORTS.md card 100).
 // =============================================================================
 
 import { readdirSync, readFileSync, writeFileSync, statSync, rmSync } from 'node:fs';
@@ -100,9 +111,20 @@ const root = resolve(__dirname, '..');
 // Where a capability can be registered. Everything else in the repo is either
 // generated, vendored or irrelevant, and walking it would only find matches
 // inside this file's own documentation.
-const SEARCH_ROOTS = ['src', 'scripts', 'tests', 'modules'];
+// `.github` holds the deploy smoke loop and the uptime loop, which name routes.
+const SEARCH_ROOTS = ['src', 'scripts', 'tests', 'modules', '.github'];
 const SKIP_DIRS = new Set(['node_modules', 'dist', '.astro', '.git', '.parity']);
-const EXTENSIONS = new Set(['.ts', '.tsx', '.astro', '.mjs', '.js', '.json', '.css', '.md']);
+const EXTENSIONS = new Set([
+  '.ts',
+  '.tsx',
+  '.astro',
+  '.mjs',
+  '.js',
+  '.json',
+  '.css',
+  '.md',
+  '.yml',
+]);
 
 // This file documents the markers, so it must never be treated as carrying one.
 const SELF = resolve(__dirname, 'scaffold.mjs');
@@ -328,6 +350,60 @@ if (unknown.length) {
 let deleted = 0;
 let editedFiles = 0;
 let editedLines = 0;
+// Every file this run deletes, across all capabilities, for the Lighthouse pass.
+const allDeleted = new Set();
+
+/**
+ * Prune lighthouserc.json's `url` list of pages this run deletes.
+ *
+ * Line-exact like everything else here: it drops the URL lines and fixes the
+ * trailing comma of the new last entry, and refuses to write anything that no
+ * longer parses. A URL with no page file at all (404.html, a [slug] page) is
+ * left alone, because nothing here can tell whether it still builds.
+ */
+function pruneLighthouse(deletedFiles) {
+  const file = resolve(root, 'lighthouserc.json');
+  let text;
+  try {
+    text = readFileSync(file, 'utf8');
+  } catch {
+    return null;
+  }
+  const URL_LINE = /^\s*"https?:\/\/[^/"]+(\/[^"]*)",?\s*$/;
+  const pageFiles = (path) => {
+    const p = path.replace(/\/+$/, '');
+    if (p === '') return [resolve(root, 'src/pages/index.astro')];
+    return [`src/pages${p}.astro`, `src/pages${p}/index.astro`].map((x) => resolve(root, x));
+  };
+  const exists = (f) => {
+    try {
+      return statSync(f).isFile();
+    } catch {
+      return false;
+    }
+  };
+  const lines = text.split('\n');
+  const dropped = [];
+  const kept = lines.filter((line) => {
+    const m = URL_LINE.exec(line);
+    if (!m) return true;
+    // With --write the pages are already gone by now, so a deleted file still
+    // counts as present: the question is what built this URL before the run.
+    const present = pageFiles(m[1]).filter((f) => deletedFiles.has(f) || exists(f));
+    if (present.length === 0 || !present.every((f) => deletedFiles.has(f))) return true;
+    dropped.push(m[1]);
+    return false;
+  });
+  if (!dropped.length) return null;
+  // The entry now before a closing `]` must not keep its comma.
+  for (let i = 0; i < kept.length - 1; i++) {
+    if (URL_LINE.test(kept[i]) && /^\s*\]/.test(kept[i + 1]))
+      kept[i] = kept[i].replace(/,(\s*)$/, '$1');
+  }
+  const out = kept.join('\n');
+  JSON.parse(out); // throws rather than write a broken config
+  return { file, dropped, out };
+}
 
 for (const capability of wanted) {
   const { deleteFiles, edits } = plan(capability);
@@ -335,6 +411,7 @@ for (const capability of wanted) {
   for (const f of deleteFiles.sort()) {
     console.log(`  delete  ${relative(root, f)}`);
     if (write) rmSync(f, { force: true });
+    allDeleted.add(f);
     deleted++;
   }
   for (const [f, edit] of [...edits].sort()) {
@@ -344,6 +421,14 @@ for (const capability of wanted) {
     editedLines += edit.lines.length;
   }
   if (deleteFiles.length === 0 && edits.size === 0) console.log('  nothing marked');
+}
+
+const lhci = pruneLighthouse(allDeleted);
+if (lhci) {
+  console.log(`\nlighthouserc.json\n  drop url  ${lhci.dropped.join(', ')}`);
+  if (write) writeFileSync(lhci.file, lhci.out, 'utf8');
+  editedFiles++;
+  editedLines += lhci.dropped.length;
 }
 
 console.log(

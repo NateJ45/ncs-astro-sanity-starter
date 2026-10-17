@@ -261,15 +261,6 @@ seeder plants a block of a type the schema no longer declares. It is a dataset p
 rather than a build one and the boundary is defended in the file's header, but a fork
 doing exactly that combination will see an unknown-type block in the Studio.
 
-**`lighthouserc.json` still says "the nine module routes under modules/".** There are two
-staged modules now and eleven archived ones. The file is owned by another agent's wave
-(the family test standard, PORTS.md card 35), so the sentence was left alone rather than
-edited across an ownership line. One-line fix, next time someone is in there.
-
-### 14. Three route lists the scaffold cannot reach
-
-`lighthouserc.json`, the deploy smoke loop in `deploy.yml` and the uptime loop in `uptime.yml` list `/services/`, `/process/` and friends with no scaffold markers, so a fork that removes a capability edits them by hand (card 99; first-baptist-auburn did, 2026-10-17). Open: teach `scaffold.mjs` to rewrite the Lighthouse URL list and mark the two YAML loops, or derive all three from `tests/routes.ts`.
-
 ### 13. `measure-tap-targets.mjs` reports closed `<details>` content
 
 **Closed 2026-10-04 in the starter (PR: fix/tap-scan-closed-details).** The script now skips anything inside a closed
