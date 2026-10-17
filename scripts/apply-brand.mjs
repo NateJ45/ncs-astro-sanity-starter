@@ -708,10 +708,15 @@ function rewriteBaseLayout(config) {
   });
 }
 
-// ---- Rewrite: scripts/lib/render-og.mjs ---------------------------------
+// ---- Rewrite: scripts/og-theme.mjs ---------------------------------------
+// The share-image colours and display font. They used to be written into the
+// DEFAULTS of scripts/lib/render-og.mjs, but that file is PORTABLE, so every
+// reskinned fork then failed sync-check with DRIFT (PORTS.md card 104). The brand
+// now lives in this fork-owned file, which both OG generators pass to renderOg
+// as its `theme` option; render-og.mjs is never touched.
 
-function rewriteRenderOg(config) {
-  rewriteFile(resolve(root, 'scripts/lib/render-og.mjs'), function (text, filePath) {
+function rewriteOgTheme(config) {
+  rewriteFile(resolve(root, 'scripts/og-theme.mjs'), function (text, filePath) {
     const bg = config.palette.light['--background'];
     const primary = config.palette.theme['--color-primary'];
     const primaryDark = config.palette.theme['--color-primary-dark'];
@@ -720,42 +725,42 @@ function rewriteRenderOg(config) {
     const fontDisplay = config.fonts.display.ogFontStack;
     const subs = [
       {
-        label: 'DEFAULTS.bg',
+        label: 'OG_THEME.bg',
         pattern: /(  bg:\s*')((?:[^'\\]|\\.)*)(')/,
         replacer: function (_, g1, _quote, g3) {
           return g1 + bg + g3;
         },
       },
       {
-        label: 'DEFAULTS.primary',
+        label: 'OG_THEME.primary',
         pattern: /(  primary:\s*')((?:[^'\\]|\\.)*)(')/,
         replacer: function (_, g1, _quote, g3) {
           return g1 + primary + g3;
         },
       },
       {
-        label: 'DEFAULTS.primaryDark',
+        label: 'OG_THEME.primaryDark',
         pattern: /(  primaryDark:\s*')((?:[^'\\]|\\.)*)(')/,
         replacer: function (_, g1, _quote, g3) {
           return g1 + primaryDark + g3;
         },
       },
       {
-        label: 'DEFAULTS.accent',
+        label: 'OG_THEME.accent',
         pattern: /(  accent:\s*')((?:[^'\\]|\\.)*)(')/,
         replacer: function (_, g1, _quote, g3) {
           return g1 + accent + g3;
         },
       },
       {
-        label: 'DEFAULTS.taupe',
+        label: 'OG_THEME.taupe',
         pattern: /(  taupe:\s*')((?:[^'\\]|\\.)*)(')/,
         replacer: function (_, g1, _quote, g3) {
           return g1 + secondary + g3;
         },
       },
       {
-        label: 'DEFAULTS.fontDisplay',
+        label: 'OG_THEME.fontDisplay',
         pattern: /(  fontDisplay:\s*')((?:[^'\\]|\\.)*)(')/,
         replacer: function (_, g1, _quote, g3) {
           return g1 + fontDisplay + g3;
@@ -902,9 +907,9 @@ async function main() {
       },
     ],
     [
-      'render-og.mjs',
+      'og-theme.mjs',
       function () {
-        rewriteRenderOg(config);
+        rewriteOgTheme(config);
       },
     ],
     [

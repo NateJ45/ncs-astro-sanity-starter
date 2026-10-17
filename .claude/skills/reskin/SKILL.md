@@ -191,7 +191,7 @@ This rewrites:
 - `src/data/layout.ts` -- the `layout` block (header, hero, density, cards); defaults reproduce the original layout
 - `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json; the Studio's colours come from @sanity/ui's built-in light/dark theme and are not brand-driven)
 - `scripts/generate-og-default.mjs` -- `wordmark`, `tagline`
-- `scripts/lib/render-og.mjs` -- `DEFAULTS` object colors and font stack
+- `scripts/og-theme.mjs` -- `OG_THEME` share-image colors and font stack (never `scripts/lib/render-og.mjs`, which is PORTABLE; card 104)
 - `scripts/generate-og-pages.mjs` -- `WORDMARK` fallback string
 - `wrangler.jsonc` -- `"name"` field (only when `workerName` is non-null in config)
 - `astro.config.mjs` -- `site:` URL (only when `domain` is not "example.com")

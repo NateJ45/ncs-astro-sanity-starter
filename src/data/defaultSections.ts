@@ -30,13 +30,13 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
       'We help people create spaces that work as hard as they do â€” and feel good to come home to.',
     size: 'tall',
     primaryCta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact/' },
-    secondaryCta: { _type: 'ctaBlock', label: 'See Our Work', href: '/portfolio/' },
+    secondaryCta: { _type: 'ctaBlock', label: 'About the Studio', href: '/about/' }, // scaffold: about
   },
   {
     _type: 'richTextSection',
     _key: 'default-home-intro',
     eyebrow: 'Meet the Founder.',
-    headline: 'Good design starts with a real conversation.',
+    heading: 'Good design starts with a real conversation.',
     body: [
       {
         _type: 'block',
@@ -51,7 +51,6 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
         ],
       },
     ],
-    cta: { _type: 'ctaBlock', label: 'Learn More About the Studio', href: '/about/' },
   },
   {
     _type: 'statSection',
@@ -84,7 +83,7 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
     _type: 'imageTextSection',
     _key: 'default-home-services-intro',
     eyebrow: 'The Studio.',
-    headline: 'Design Services for Every Space.',
+    heading: 'Design Services for Every Space.',
     body: [
       {
         _type: 'block',
@@ -99,7 +98,7 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
         ],
       },
     ],
-    cta: { _type: 'ctaBlock', label: 'See All Services', href: '/services/' },
+    cta: { _type: 'ctaBlock', label: 'See All Services', href: '/services/' }, // scaffold: services
     imageSide: 'right',
   },
   {
@@ -135,7 +134,7 @@ export const DEFAULT_ABOUT_SECTIONS: PageBuilderBlock[] = [
     _type: 'richTextSection',
     _key: 'default-about-story',
     eyebrow: 'My Story.',
-    headline: 'Why I Started This Studio.',
+    heading: 'Why I Started This Studio.',
     body: [
       {
         _type: 'block',
@@ -182,7 +181,7 @@ export const DEFAULT_ABOUT_SECTIONS: PageBuilderBlock[] = [
     _type: 'imageTextSection',
     _key: 'default-about-philosophy',
     eyebrow: 'How We Work.',
-    headline: 'Principles that guide every project.',
+    heading: 'Principles that guide every project.',
     body: [
       {
         _type: 'block',
@@ -226,7 +225,7 @@ export const DEFAULT_SERVICES_SECTIONS: PageBuilderBlock[] = [
     _type: 'richTextSection',
     _key: 'default-services-intro',
     eyebrow: 'The Tiers.',
-    headline: 'Find the right fit for your project.',
+    heading: 'Find the right fit for your project.',
     body: [
       {
         _type: 'block',
@@ -246,7 +245,7 @@ export const DEFAULT_SERVICES_SECTIONS: PageBuilderBlock[] = [
     _type: 'imageTextSection',
     _key: 'default-services-area',
     eyebrow: 'Service Area.',
-    headline: 'Where We Work.',
+    heading: 'Where We Work.',
     body: [
       {
         _type: 'block',
@@ -289,7 +288,7 @@ export const DEFAULT_PROCESS_SECTIONS: PageBuilderBlock[] = [
     _type: 'richTextSection',
     _key: 'default-process-overview',
     eyebrow: 'How It Works.',
-    headline: 'A clear process, start to finish.',
+    heading: 'A clear process, start to finish.',
     body: [
       {
         _type: 'block',
@@ -308,13 +307,12 @@ export const DEFAULT_PROCESS_SECTIONS: PageBuilderBlock[] = [
   {
     _type: 'spacerSection',
     _key: 'default-process-spacer',
-    size: 'md',
   },
   {
     _type: 'imageTextSection',
     _key: 'default-process-consultation',
     eyebrow: 'Step 1.',
-    headline: 'Initial Inquiry.',
+    heading: 'Initial Inquiry.',
     body: [
       {
         _type: 'block',

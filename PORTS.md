@@ -221,8 +221,14 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 101 | Preview renders "no document" inside the layout, so Presentation connects      | n/a     | open        | yes      | open             | open          | n/a            | n/a                | n/a                 | open           |
 | 102 | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)  | n/a     | yes         | yes      | yes              | n/a           | no             | n/a                | staged              | n/a            |
 | 103 | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)              | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
+| 104 | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file        | n/a     | no          | yes      | n/a              | no            | no             | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
+
+Row 104 (2026-10-17): first-baptist-auburn found all four on its first reskin and carries fixes 1 to 3 plus
+`og-theme.mjs` (fbc-auburn PR #17; no matrix column, recorded on the card); its apply-brand still writes `render-og.mjs`. presacademy and stonesteps-50k still have the CtaLink `fallbackHref` line,
+mas-monograms and stonesteps-50k an apply-brand that writes `render-og.mjs`; reid-design-site and nixoncreativestudio carry
+none of the four files in this form, hence `n/a`. Every `no` stays `no` until that site copies the change.
 
 Row 74 (2026-10-03): fbcm built this on 2026-09-20 and is the one site that already carries it; fbcm is not a
 column of this matrix, so it is recorded on the card. Of the columns here only stonesteps-50k carries a
@@ -8267,3 +8273,51 @@ sync-check reports DRIFT for those seven files on that site, which is expected. 
 Presentation checked signed in: first-baptist-auburn (fbc-auburn#15, no matrix column), presacademy (#103),
 reid-design-site (#153), mas-monograms (#114), stonesteps-50k (#123), fbcm (#68, no matrix column). 2ndpreschicago is
 archived and stays on the phase-1 set (`no`).
+
+## Card 104: a reskinned fork keeps working: default fields, default hrefs, layout gate, OG theme (2026-10-17)
+
+**Origin:** first-baptist-auburn's first reskin (fbc-auburn PR #17, branch `reskin/auburn-mockups`), the first fork to
+change its layout slots and brand colours with `apply-brand` and then run every gate. Four starter bugs, each one that
+every later fork would hit. A fifth turned up while writing the guard test.
+**Canonical:** `src/data/defaultSections.ts`, `src/components/CtaLink.astro`, `src/lib/site-layout.test.ts`,
+`src/lib/default-sections.test.ts` (new), `scripts/apply-brand.mjs`, `scripts/og-theme.mjs` (new),
+`scripts/generate-og-default.mjs`, `scripts/generate-og-pages.mjs`. None is PORTABLE, so no site turns red; each site
+copies the change by hand.
+
+1. **Default section headings never rendered.** The `richTextSection` and `imageTextSection` defaults named their
+   heading `headline`; the schema and both components use `heading`. The home richText default also carried a `cta`
+   the block has no field for, and the process spacer a `size` (the field is `variant`). Fixed in the data, and
+   `default-sections.test.ts` now reads both files as text and fails on any default field the block's schema lacks
+   (a text parse because `defaultSections.ts` imports through the `@/` alias, which plain node cannot resolve).
+   `npm run seed` writes these arrays, so a seeded project got the wrong field too.
+2. **Every default button went to `/contact/`.** `resolveHref` in `CtaLink.astro` returned `fallbackHref` whenever a
+   CTA had no `linkType`, and the built-in defaults never have one: they name an `href`. Now
+   `if (!c?.linkType) return c?.href ?? fallbackHref;`, with `href?: string` on the type. Two default hrefs that had
+   been hidden by the bug were then wrong: the home hero's `/portfolio/` (no such route; now "About the Studio",
+   `/about/`) and the home services button's `/services/` (now carries `// scaffold: services` so a fork without
+   services loses the button instead of a 404; the hero button carries `// scaffold: about`).
+3. **The layout gate failed any fork that picks a layout.** `site-layout.test.ts` asserted
+   `brand.config.json` layout equalled `DEFAULT_LAYOUT`, so choosing a hero or header variant (the point of card 72's
+   slots) failed `test:unit`. It now checks the config names only real values (`resolveLayout(config.layout)` returns
+   it unchanged) and that `src/data/layout.ts` carries each value, i.e. apply-brand was run after the config changed.
+4. **apply-brand made every reskinned fork DRIFT.** It rewrote the `DEFAULTS` in `scripts/lib/render-og.mjs`, which
+   is PORTABLE, so `sync-check` reported DRIFT the moment a fork took its own colours. The brand now goes in
+   `scripts/og-theme.mjs` (`OG_THEME`, safe to edit, fork-owned), which both OG generators pass as renderOg's existing
+   `theme` option; apply-brand rewrites `og-theme.mjs` by the same regexes and never touches `render-og.mjs`.
+   render-og's header comment still says apply-brand rewrites its DEFAULTS; it is PORTABLE, so that one stale comment
+   waits for the next change that has to touch it (a comment-only edit would turn every site's sync-check red).
+
+**Adopting it in a site.** Copy the four test/data/component changes where the site still has the starter's form (grep
+for `if (!c?.linkType) return fallbackHref`, `ships the defaults`, `headline` inside richText/imageText defaults).
+For the OG half: add `scripts/og-theme.mjs` with the site's CURRENT colours (read them from its `render-og.mjs`
+DEFAULTS), import it in both generators as `theme: OG_THEME`, copy `rewriteOgTheme` into `apply-brand.mjs`, then
+restore `render-og.mjs` to the starter's copy and confirm `npm run sync-check` and `npm run og` (the image must not
+change). A site with a hand-written `defaultSections.ts` runs `default-sections.test.ts` first; it may find more.
+
+**Verified (starter).** `default-sections.test.ts` fails on `origin/main`'s `defaultSections.ts` (richText
+`headline`, spacer `size`) and passes after; `npm run apply-brand -- --check` matches every pattern in
+`og-theme.mjs` with "no changes" (the theme file holds the starter's own values); gates as listed in the changelog.
+
+**Status, 2026-10-17.** Starter `yes`. first-baptist-auburn carries 1 to 3 and `scripts/og-theme.mjs` (fbc-auburn #17;
+the starter's file has the same shape). Still to take there: `rewriteOgTheme` in its `apply-brand.mjs`, the
+`default-sections` test and the spacer fix, until then re-check `render-og.mjs` after any apply-brand run.

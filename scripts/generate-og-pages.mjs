@@ -16,6 +16,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
 import { renderOg } from './lib/render-og.mjs';
+import { OG_THEME } from './og-theme.mjs';
 import { loadEnv } from './lib/loadEnv.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -56,7 +57,12 @@ const WORDMARK = env.SITE_NAME ?? 'Studio Starter';
 
 let count = 0;
 async function render(slug, tagline) {
-  await renderOg({ wordmark: WORDMARK, tagline, outPath: resolve(outDir, `${slug}.png`) });
+  await renderOg({
+    wordmark: WORDMARK,
+    tagline,
+    outPath: resolve(outDir, `${slug}.png`),
+    theme: OG_THEME,
+  });
   count += 1;
   const t = String(tagline);
   console.log(`  ${slug}.png — ${t.slice(0, 60)}${t.length > 60 ? '…' : ''}`);
