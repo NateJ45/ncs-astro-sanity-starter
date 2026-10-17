@@ -48,6 +48,10 @@ import { guides, GUIDE_CATEGORIES } from './guides/content';
 import StudioGuide from './components/StudioGuide';
 import BusinessOverview from './components/BusinessOverview';
 import BrandKit from './components/BrandKit';
+import { TrashIcon } from '@sanity/icons/Trash';
+import { staffDesk } from './kit/shared';
+import { kitConfig } from './kit.config';
+import { TRASH_TYPE } from '../lib/studio-trash';
 
 const SINGLETON_TYPES = [
   'siteSettings',
@@ -84,6 +88,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'page', // custom pages, placed explicitly under "Pages"
   'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
+  TRASH_TYPE, // the Studio kit's Trash, placed explicitly at the bottom
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
   'media.tag',
@@ -102,13 +107,23 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
  * and that is where the per-type extra tabs are added.
  */
 function singletonWithPreview(S: StructureBuilder, schemaType: string, title: string, icon: any) {
+  // The id is the document id ON PURPOSE: an intent link ("open the About
+  // page", from the Studio kit's Home and Checkup) resolves to the path
+  // pages;aboutPage, and a title-derived id ("about") left that pane blank
+  // (PORTS.md card 106).
   return S.listItem()
+    .id(schemaType)
     .title(title)
     .icon(icon)
     .child(S.document().schemaType(schemaType).documentId(schemaType).views([S.view.form()]));
 }
 
+// The Studio kit's staff view hides kitConfig.staffHiddenPanes from this desk
+// (src/sanity/kit/shared.tsx, staffDesk); everyone else sees all of it.
 export const deskStructure = (S: StructureBuilder, context: StructureResolverContext) =>
+  staffDesk(fullDesk(S, context), context, kitConfig);
+
+const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
   S.list()
     .title('Studio Starter')
     .items([
@@ -164,6 +179,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
       // Panel 2: live business overview (services + site settings fetched from Sanity).
       // Panel 3: brand kit — colors + fonts for Canva (static).
       S.listItem()
+        .id('start-here')
         .title('Start Here')
         .icon(InfoOutlineIcon)
         .child(
@@ -265,6 +281,7 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
       // Content — reusable collections. Orderable types get drag-and-drop;
       // non-orderable use standard lists.
       S.listItem()
+        .id('content')
         .title('Content')
         .icon(ThListIcon)
         .child(
@@ -335,9 +352,28 @@ export const deskStructure = (S: StructureBuilder, context: StructureResolverCon
         ),
       // scaffold:end
 
+      S.divider(),
+
+      // The Studio kit's Trash: "Move to Trash" keeps a copy here, and "Bring
+      // it back" puts it where it was (src/sanity/kit/trash.tsx). The id is
+      // load-bearing: the Checkup's "Open the Trash" links to it.
+      S.listItem()
+        .id('trash')
+        .title('Trash (bring things back)')
+        .icon(TrashIcon)
+        .child(
+          S.documentTypeList(TRASH_TYPE)
+            .id('trash-list')
+            .title('Trash')
+            .defaultOrdering([{ field: 'deletedAt', direction: 'desc' }]),
+        ),
+
       // Safety net: surface any document type we have NOT explicitly placed above
-      // (and keep the hidden set, including media.tag, out of the desk root).
-      ...S.documentTypeListItems().filter(
-        (item) => !HIDDEN_FROM_DEFAULT.has(item.getId() as string),
-      ),
+      // (and keep the hidden set out of the desk root). Every media.* type
+      // belongs to sanity-plugin-media's own tool: newer versions add more than
+      // media.tag (a "Media Folder" list leaked into the desk on 2026-10-17).
+      ...S.documentTypeListItems().filter((item) => {
+        const id = item.getId() as string;
+        return !HIDDEN_FROM_DEFAULT.has(id) && !id.startsWith('media.');
+      }),
     ]);

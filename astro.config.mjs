@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import { loadEnv } from 'vite';
+import { execSync } from 'node:child_process';
 
 import cloudflare from '@astrojs/cloudflare';
 import mdx from '@astrojs/mdx';
@@ -119,6 +120,23 @@ const hiddenPagePaths = new Set(
     .map((/** @type {string} */ slug) => `/${slug}`),
 );
 
+// The commit this build came from, for /build-info.json (Studio kit, PORTS.md
+// card 106). Read HERE, in Node, because the route prerenders inside workerd,
+// where process.env.GITHUB_SHA is not visible (the deployed file said
+// "commit": null). GitHub Actions sets GITHUB_SHA; a local build asks git; no
+// git (a tarball) gives null. Handed to the route as a Vite define below.
+const BUILD_COMMIT = (() => {
+  const sha = process.env.GITHUB_SHA || process.env.WORKERS_CI_COMMIT_SHA;
+  if (sha) return sha.slice(0, 7);
+  try {
+    return execSync('git rev-parse --short=7 HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+  } catch {
+    return null;
+  }
+})();
+
 // https://astro.build/config
 export default defineConfig({
   // Canonical tags and the sitemap use /page/, so every internal link does too
@@ -185,6 +203,8 @@ export default defineConfig({
     react(),
   ],
   vite: {
+    // Read by src/pages/build-info.json.ts (see BUILD_COMMIT above).
+    define: { __NCS_BUILD_COMMIT__: JSON.stringify(BUILD_COMMIT) },
     // fixSanityDedupeAlias() repairs @sanity/astro's dev-only alias, which is
     // broken on Windows (it points `sanity` at a package.json FILE, so `astro
     // dev` dies with MISSING_EXPORT). It does nothing in `astro build` and on
