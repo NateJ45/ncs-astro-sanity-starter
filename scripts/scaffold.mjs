@@ -387,7 +387,9 @@ function pruneLighthouse(deletedFiles) {
   const kept = lines.filter((line) => {
     const m = URL_LINE.exec(line);
     if (!m) return true;
-    const present = pageFiles(m[1]).filter(exists);
+    // With --write the pages are already gone by now, so a deleted file still
+    // counts as present: the question is what built this URL before the run.
+    const present = pageFiles(m[1]).filter((f) => deletedFiles.has(f) || exists(f));
     if (present.length === 0 || !present.every((f) => deletedFiles.has(f))) return true;
     dropped.push(m[1]);
     return false;
