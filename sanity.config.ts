@@ -153,8 +153,8 @@ export default defineConfig({
     }),
     // Unsplash plugin - adds an "Unsplash" tab to every image picker. The
     // package's correct registration is via the plugins array (not
-    // form.image.assetSources). Held at 7.0.15: newer versions demand
-    // @sanity/ui ^3.4, which would drag the pinned 3.3.5 forward.
+    // form.image.assetSources). Version is part of the matched Sanity set
+    // (.claude/rules/dependencies.md rule 8, PORTS.md card 103).
     unsplashImageAsset(),
     // Media browser - a top-level "Media" icon in the Studio sidebar for
     // browsing every uploaded image at once with tag + filter + bulk-edit.

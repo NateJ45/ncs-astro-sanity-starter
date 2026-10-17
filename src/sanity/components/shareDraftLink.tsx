@@ -51,8 +51,8 @@
 // =============================================================================
 import { useCallback, useState } from 'react';
 import { useClient, type DocumentActionComponent, type DocumentActionDescription } from 'sanity';
-import { useToast } from '@sanity/ui';
-import { ShareIcon } from '@sanity/icons';
+import { useToast } from '@sanity/ui/toast';
+import { ShareIcon } from '@sanity/icons/Share';
 import { createPreviewSecret } from '@sanity/preview-url-secret/create-secret';
 import {
   urlSearchParamPreviewPathname,

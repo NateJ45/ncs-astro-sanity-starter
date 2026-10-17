@@ -16,7 +16,7 @@
 // removing a capability takes its slug out of both consumers at once.
 
 import { defineType, defineField } from 'sanity';
-import { DocumentsIcon } from '@sanity/icons';
+import { DocumentsIcon } from '@sanity/icons/Documents';
 import { SECTION_TYPES, sectionArrayOptions } from './sections';
 import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
 import { seoFields } from './_seoFields';

@@ -56,10 +56,7 @@ const SINGLETON_TYPES = [
 **b) Add `UsersIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  UsersIcon,
-} from '@sanity/icons';
+import { UsersIcon } from '@sanity/icons/Users';
 ```
 
 **c) Add the Team page singleton inside the Pages list item** (after the other page singletons, before the divider above Privacy):
@@ -132,10 +129,7 @@ S.documentTypeListItem('teamMember').title('Team Members').icon(UsersIcon),
 Add this import if `UsersIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  UsersIcon,
-} from '@sanity/icons';
+import { UsersIcon } from '@sanity/icons/Users';
 ```
 
 ### Header nav entry

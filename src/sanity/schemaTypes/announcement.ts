@@ -21,7 +21,7 @@
 //   urgent    -> bg-destructive / text-destructive-foreground (red, closures)
 
 import { defineType, defineField } from 'sanity';
-import { BellIcon } from '@sanity/icons';
+import { BellIcon } from '@sanity/icons/Bell';
 
 export const announcement = defineType({
   name: 'announcement',

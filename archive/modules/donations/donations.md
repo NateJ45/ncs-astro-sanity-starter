@@ -54,10 +54,7 @@ const SINGLETON_TYPES = [
 **b) Add `HeartIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  HeartIcon,
-} from '@sanity/icons';
+import { HeartIcon } from '@sanity/icons/Heart';
 ```
 
 **c) Add the Donations page singleton inside the Pages list item** (after the other page singletons, before the divider above Privacy):
@@ -120,10 +117,7 @@ singletonWithPreview(S, 'donationsPage', 'Donations Page', HeartIcon),
 Add this import if `HeartIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  HeartIcon,
-} from '@sanity/icons';
+import { HeartIcon } from '@sanity/icons/Heart';
 ```
 
 ### Header nav entry

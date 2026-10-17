@@ -204,8 +204,17 @@ export default defineConfig({
     // surfacing as "TypeError: Cannot read properties of undefined (reading
     // 'v2')" from inside styled-components' generateAndInjectStyles. Leave the
     // bundler's default chunking alone.
+    //
+    // `react/compiler-runtime` has to be INCLUDED because of that exclusion
+    // (Sanity phase 2, PORTS.md card 103). @sanity/ui 4 is compiled with the
+    // React Compiler and imports React's own CommonJS `react/compiler-runtime`.
+    // An excluded package's imports are served raw, so without this the dev
+    // Studio fails to hydrate with "react/compiler-runtime.js does not provide
+    // an export named 'c'". @sanity/astro only includes the older
+    // `react-compiler-runtime` package. Dev only; `astro build` is unaffected.
     optimizeDeps: {
       exclude: ['@sanity/ui', 'styled-components'],
+      include: ['react/compiler-runtime'],
     },
     environments: {
       // A MID-REQUEST OPTIMIZER RELOAD BREAKS REACT SSR IN `astro dev`, AND THESE
@@ -247,10 +256,11 @@ export default defineConfig({
     // useTheme in the other, which kills the signed-in Studio while leaving the
     // login screen (core code only) working.
     //
-    // @sanity/icons is deliberately NOT here: sanity core wants v5 while
-    // @sanity/ui v3 wants v3.8, and icons are stateless SVG components with no
-    // React context, so two instances are harmless. Deduping them broke the
-    // build (CogIcon is gone in v5).
+    // @sanity/icons is deliberately NOT here. Since Sanity phase 2 (PORTS.md
+    // card 103) every package wants v5 and npm hoists a single copy anyway, and
+    // icons are stateless SVG components with no React context, so a second
+    // copy would be harmless. On the phase-1 set, where core wanted v5 and the
+    // hoisted copy was 3.8, deduping them broke the build (CogIcon).
     //
     // Verify after any Sanity dependency work:
     //   grep -l "errors.md#" dist/client/_astro/*.js   # must list ONE file

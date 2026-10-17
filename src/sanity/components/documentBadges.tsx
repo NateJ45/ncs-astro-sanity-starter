@@ -13,7 +13,9 @@
 // Brand-new empty drafts are left alone (no nagging before there's anything to
 // nag about).
 
-import { StarIcon, ImageIcon, SearchIcon } from '@sanity/icons';
+import { StarIcon } from '@sanity/icons/Star';
+import { ImageIcon } from '@sanity/icons/Image';
+import { SearchIcon } from '@sanity/icons/Search';
 import type { DocumentBadgeComponent, DocumentBadgeProps } from 'sanity';
 
 // Indexable page singletons that carry seoTitle + seoDescription and are

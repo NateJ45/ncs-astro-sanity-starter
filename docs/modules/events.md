@@ -54,10 +54,7 @@ const SINGLETON_TYPES = [
 **b) Add `CalendarIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  CalendarIcon,
-} from '@sanity/icons';
+import { CalendarIcon } from '@sanity/icons/Calendar';
 ```
 
 **c) Add the Events page singleton inside the Pages list item** (after the other page singletons, before the divider above Privacy):
@@ -130,10 +127,7 @@ S.documentTypeListItem('event').title('Events').icon(CalendarIcon),
 Add this import if `CalendarIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  CalendarIcon,
-} from '@sanity/icons';
+import { CalendarIcon } from '@sanity/icons/Calendar';
 ```
 
 ### Header nav entry

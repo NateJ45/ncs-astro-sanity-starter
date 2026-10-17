@@ -20,7 +20,7 @@
 // typed address, exactly as before.
 
 import { defineType, defineField } from 'sanity';
-import { LinkIcon } from '@sanity/icons';
+import { LinkIcon } from '@sanity/icons/Link';
 
 export const navLink = defineType({
   name: 'navLink',

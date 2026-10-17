@@ -56,22 +56,19 @@ carry a verified-in-anger note rather than an installed-and-gated one.
 
 ---
 
-### 1a. Sign in to a Studio built on the phase-1 Sanity set
+### 1a. Drive an in-canvas control on the phase-2 Sanity set until it writes back
 
-**Blocker: no agent can do this, and this template has no Sanity project.**
+**Blocker: this template has no Sanity project, and the write lands in a real dataset.**
 
-2026-09-06 moved this repo onto the family's phase-1 Sanity set (`sanity` 6.9.1,
-`@sanity/ui` 3.5.4, `@sanity/client` 7.26.2, `@sanity/visual-editing` 5.7.3). Every
-automated gate is green and the single-instance invariant holds on disk and in the
-lockfile, but the login screen is core code and renders fine even when the
-styled-components theme context is broken. The set is already human-verified on
-presacademy, reid-design-site and mas-monograms, so the risk here is low; what is
-unverified is this repo's own custom Studio panes and the in-canvas overlay against it.
-Whoever forks this next should sign in, open the desk, and drive the Presentation tool
-until an in-canvas control draws and writes back, then note it here.
-
-Do NOT take `sanity` 6.9.2: that PATCH release crosses to `@sanity/ui` 4, which is a real
-migration (PORTS.md card 10, phase 2).
+2026-10-17 moved this repo onto the family's phase-2 Sanity set (`sanity` 6.19.0, `@sanity/ui`
+4.4.9, `@sanity/icons` 5.2.3, `@sanity/client` 8.9.0, `@sanity/visual-editing` 6.1.3; PORTS.md
+card 103). Unlike phase 1, the signed-in Studio WAS checked in a browser, against
+first-baptist-auburn's pre-launch project through an uncommitted `.env`: the desk, every custom
+pane and document action, Media, and on the built site Presentation with the SSE proxy, stega and
+the overlay box drawing. What is still unverified is an in-canvas control (the text popover or the
+heading accent picker) writing a change back, because that leaves a draft in a client dataset.
+Each site's phase-2 PR is the place to do it, against that site's own project, with the editor's
+say-so; note the first one here and close this item.
 
 ### 1b. Run `npm run cutover --write` against a real zone, once
 
@@ -139,8 +136,18 @@ Worker (or watch the first production deploy after merge) before porting it to t
 
 **Checked 2026-09-18. `npm audit` reports 30: 14 high, 14 moderate, 2 low, 0 critical.**
 
+**Rechecked 2026-10-17, with Sanity phase 2 (PORTS.md card 103): 42 (28 high, 11 moderate, 2 low,
+1 critical).** The rise since 2026-09-18 is new upstream advisories, not the upgrade: `origin/main`'s
+lockfile the same day (still the phase-1 set) reports 44. Phase 2 removes four (`@module-federation/vite`,
+`@module-federation/dts-plugin`, `@sanity/workbench-cli`, `adm-zip`) and adds two CLI-only packages
+(`@sanity/cli-build`, `@sanity/runtime-cli`). New since September, and flagged `fixAvailable` without
+`--force`: `proxy-addr` (the critical), `compression`, `postcss-selector-parser` and
+`@modelcontextprotocol/sdk`, all dev or CLI tooling. A plain `npm audit fix` is therefore no longer a
+no-op; take it in its own PR, read its lockfile diff, and run the gates, rather than folding it into
+a stack move. The counts below are the September baseline.
+
 **NEVER RUN `npm audit fix --force` IN THIS REPO.** Its offered fix for the Sanity half of
-the list is a DOWNGRADE of `sanity` from 6.9.1 to 5.14.1 and of `@sanity/vision` from 6.9.1
+the list is a DOWNGRADE of `sanity` from 6.19.0 to 5.14.1 and of `@sanity/vision` from 6.19.0
 to 5.31.2, each across a major version. That takes the embedded Studio back a major line
 with it, and the Studio ships with the site, so the damage lands on editors, not on a
 developer's machine. It would also downgrade `@lhci/cli` from 0.15.1 to 0.6.1 and push
@@ -164,7 +171,7 @@ not through the Studio code the browser loads. The three roots:
   `.github/workflows/lighthouse.yml`.
 
 **What would actually change this.** Upstream releases, nothing else. The Sanity set moves
-when the family takes PORTS.md card 10 phase 2 (the `@sanity/ui` 4 migration), which is a
+as one planned set (phase 2 was taken on 2026-10-17, PORTS.md card 103), which is a
 deliberate piece of work and not an audit fix. `wrangler` and `sharp` clear when a wrangler
 release inside the `~4.129.0` line picks up a patched `sharp` and `undici`, or when rule 8's
 pin is revisited on purpose. Lighthouse CI clears when `@lhci/cli` ships a 0.15.x that drops

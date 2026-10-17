@@ -17,7 +17,7 @@
 // any other content change. The path rules live in src/lib/redirects.ts.
 
 import { defineType, defineField } from 'sanity';
-import { ArrowRightIcon } from '@sanity/icons';
+import { ArrowRightIcon } from '@sanity/icons/ArrowRight';
 
 export const redirect = defineType({
   name: 'redirect',

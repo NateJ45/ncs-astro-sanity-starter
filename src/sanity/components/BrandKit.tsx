@@ -103,7 +103,7 @@ function SwatchCard({ s }: { s: Swatch }) {
   return (
     <Card padding={0} radius={3} border overflow="hidden">
       <Box padding={4} style={{ background: hex, color: inkFor(hex) }}>
-        <Stack space={2}>
+        <Stack gap={2}>
           <Text size={2} weight="semibold" style={{ color: 'inherit' }}>
             {s.role}
           </Text>
@@ -131,8 +131,8 @@ export default function BrandKit() {
 
   return (
     <Box padding={4}>
-      <Stack space={5} style={{ maxWidth: 720, margin: '0 auto' }}>
-        <Stack space={3}>
+      <Stack gap={5} style={{ maxWidth: 720, margin: '0 auto' }}>
+        <Stack gap={3}>
           <Text size={3} weight="semibold">
             Brand colours and type
           </Text>
@@ -143,11 +143,11 @@ export default function BrandKit() {
         </Stack>
 
         {GROUPS.map((g) => (
-          <Stack key={g.label} space={3}>
+          <Stack key={g.label} gap={3}>
             <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase' }}>
               {g.label}
             </Text>
-            <Grid columns={[1, 2, 2]} gap={3}>
+            <Grid gridTemplateColumns={[1, 2, 2]} gap={3}>
               {g.swatches.map((s) => (
                 <SwatchCard key={s.token} s={s} />
               ))}
@@ -155,12 +155,12 @@ export default function BrandKit() {
           </Stack>
         ))}
 
-        <Stack space={3}>
+        <Stack gap={3}>
           <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase' }}>
             Type
           </Text>
           <Card padding={4} radius={3} border>
-            <Stack space={3}>
+            <Stack gap={3}>
               <Flex align="baseline" gap={3}>
                 <Text size={2} weight="semibold">
                   {faceOf(fonts.display?.familyValue) || 'Not set'}
@@ -182,7 +182,7 @@ export default function BrandKit() {
         </Stack>
 
         <Card padding={4} radius={3} tone="primary" border>
-          <Stack space={2}>
+          <Stack gap={2}>
             <Text size={1} weight="semibold">
               Changing any of this
             </Text>

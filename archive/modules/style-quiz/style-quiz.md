@@ -63,10 +63,7 @@ const SINGLETON_TYPES = [
 **b) Add `SearchIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  SearchIcon,
-} from '@sanity/icons';
+import { SearchIcon } from '@sanity/icons/Search';
 ```
 
 **c) Add the Style Quiz page singleton inside the Pages list item** (after the Journal entry, before the Privacy Policy divider):
@@ -128,10 +125,7 @@ singletonWithPreview(S, 'styleQuiz', 'Style Quiz', SearchIcon),
 Add this import if `SearchIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  SearchIcon,
-} from '@sanity/icons';
+import { SearchIcon } from '@sanity/icons/Search';
 ```
 
 ### Header nav entry

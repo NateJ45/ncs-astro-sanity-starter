@@ -60,10 +60,7 @@ const SINGLETON_TYPES = [
 **b) Add `BulbOutlineIcon` to the icon imports at the top of the file:**
 
 ```ts
-import {
-  // ... existing icons ...
-  BulbOutlineIcon,
-} from '@sanity/icons';
+import { BulbOutlineIcon } from '@sanity/icons/BulbOutline';
 ```
 
 **c) Add the Resources page singleton inside the Pages list item** (after the Journal entry, before the divider above Privacy):
@@ -133,10 +130,7 @@ singletonWithPreview(S, 'resourcesPage', 'Resources Page', BulbOutlineIcon),
 Add this import if `BulbOutlineIcon` is not already imported from `@sanity/icons`:
 
 ```ts
-import {
-  // ... existing icons ...
-  BulbOutlineIcon,
-} from '@sanity/icons';
+import { BulbOutlineIcon } from '@sanity/icons/BulbOutline';
 ```
 
 ### Header nav entry

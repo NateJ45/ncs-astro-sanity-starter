@@ -19,32 +19,30 @@
 
 import type { StructureBuilder, StructureResolverContext } from 'sanity/structure';
 import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list';
-import {
-  BellIcon,
-  BlockElementIcon,
-  CogIcon,
-  HomeIcon,
-  UserIcon,
-  PackageIcon,
-  HelpCircleIcon,
-  InfoOutlineIcon,
-  EnvelopeIcon,
-  DocumentTextIcon,
-  DocumentsIcon,
-  StarIcon,
-  HeartIcon,
-  ThListIcon,
-  EditIcon,
-  TagIcon,
-  BookIcon,
-  LockIcon,
-  PinIcon,
-  PresentationIcon,
-  ThumbsUpIcon,
-  ColorWheelIcon,
-  OlistIcon, // scaffold: process
-  ArrowRightIcon,
-} from '@sanity/icons';
+import { BellIcon } from '@sanity/icons/Bell';
+import { BlockElementIcon } from '@sanity/icons/BlockElement';
+import { CogIcon } from '@sanity/icons/Cog';
+import { HomeIcon } from '@sanity/icons/Home';
+import { UserIcon } from '@sanity/icons/User';
+import { PackageIcon } from '@sanity/icons/Package';
+import { HelpCircleIcon } from '@sanity/icons/HelpCircle';
+import { InfoOutlineIcon } from '@sanity/icons/InfoOutline';
+import { EnvelopeIcon } from '@sanity/icons/Envelope';
+import { DocumentTextIcon } from '@sanity/icons/DocumentText';
+import { DocumentsIcon } from '@sanity/icons/Documents';
+import { StarIcon } from '@sanity/icons/Star';
+import { HeartIcon } from '@sanity/icons/Heart';
+import { ThListIcon } from '@sanity/icons/ThList';
+import { EditIcon } from '@sanity/icons/Edit';
+import { TagIcon } from '@sanity/icons/Tag';
+import { BookIcon } from '@sanity/icons/Book';
+import { LockIcon } from '@sanity/icons/Lock';
+import { PinIcon } from '@sanity/icons/Pin';
+import { PresentationIcon } from '@sanity/icons/Presentation';
+import { ThumbsUpIcon } from '@sanity/icons/ThumbsUp';
+import { ColorWheelIcon } from '@sanity/icons/ColorWheel';
+import { OlistIcon } from '@sanity/icons/Olist'; // scaffold: process
+import { ArrowRightIcon } from '@sanity/icons/ArrowRight';
 import { makeGuideView } from './components/GuideView';
 import { guides, GUIDE_CATEGORIES } from './guides/content';
 import StudioGuide from './components/StudioGuide';

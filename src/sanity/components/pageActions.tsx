@@ -27,9 +27,11 @@
 // =============================================================================
 import { useState } from 'react';
 import { useClient, type DocumentActionComponent, type DocumentActionDescription } from 'sanity';
-import { useToast } from '@sanity/ui';
+import { useToast } from '@sanity/ui/toast';
 import { useRouter } from 'sanity/router';
-import { CopyIcon, ArchiveIcon, RestoreIcon } from '@sanity/icons';
+import { CopyIcon } from '@sanity/icons/Copy';
+import { ArchiveIcon } from '@sanity/icons/Archive';
+import { RestoreIcon } from '@sanity/icons/Restore';
 import { duplicatePage, setPageArchived, type PageOpsClient } from '../pageOps';
 
 const API = { apiVersion: '2026-05-01' } as const;

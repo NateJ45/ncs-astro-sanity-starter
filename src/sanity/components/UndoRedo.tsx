@@ -7,8 +7,9 @@ import {
   type DocumentActionProps,
   type LayoutProps,
 } from 'sanity';
-import { UndoIcon, RedoIcon } from '@sanity/icons';
-import { useToast } from '@sanity/ui';
+import { UndoIcon } from '@sanity/icons/Undo';
+import { RedoIcon } from '@sanity/icons/Redo';
+import { useToast } from '@sanity/ui/toast';
 import {
   redoDepth,
   redoLast,
