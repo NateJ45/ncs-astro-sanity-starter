@@ -58,6 +58,10 @@ jobs:
         # it fails only if the deploy itself is broken. If Sanity goes down,
         # /privacy/ still answers and the diff in the log says where the
         # failure actually is.
+        #
+        # ROUTES is built a line at a time so `npm run scaffold -- --remove`
+        # takes a removed page out of it (PORTS.md card 100). A fork that drops
+        # services or the FAQ loses that data path here; add one of its own.
         run: |
           if [ -z "$SITE_URL" ]; then
             echo "::warning::SITE_URL variable not set; skipping uptime check. Expected in the unforked template."
@@ -65,7 +69,10 @@ jobs:
           fi
           base="${SITE_URL%/}"
           fail=0
-          for path in "/" "/services/" "/faq/" "/privacy/"; do
+          ROUTES="/ /privacy/"
+          ROUTES="$ROUTES /services/" # scaffold: services
+          ROUTES="$ROUTES /faq/" # scaffold: faq
+          for path in $ROUTES; do
             code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 25 "${base}${path}")
             echo "${code}  ${base}${path}"
             if [ "$code" != "200" ]; then fail=1; fi

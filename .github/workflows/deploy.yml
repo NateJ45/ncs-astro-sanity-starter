@@ -160,6 +160,10 @@ jobs:
       # has changed neither still has the placeholder domain, and smoking
       # example.com would be a test of somebody else's server, so the step says
       # so and skips.
+      #
+      # ROUTES is built a line at a time so `npm run scaffold -- --remove` can
+      # take a removed page out of it (PORTS.md card 100); a smoke that 404s on
+      # a page the fork deleted on purpose fails the first deploy.
       - name: Smoke the deployed site
         env:
           PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
@@ -177,7 +181,13 @@ jobs:
           esac
           echo "Smoking $BASE"
           FAIL=0
-          for path in / /about /services /process /faq /contact /journal /privacy; do
+          ROUTES="/ /contact/ /privacy/"
+          ROUTES="$ROUTES /about/" # scaffold: about
+          ROUTES="$ROUTES /services/" # scaffold: services
+          ROUTES="$ROUTES /process/" # scaffold: process
+          ROUTES="$ROUTES /faq/" # scaffold: faq
+          ROUTES="$ROUTES /journal/" # scaffold: journal
+          for path in $ROUTES; do
             CODE=$(curl -sL -o /dev/null -w '%{http_code}' "$BASE$path")
             echo "$CODE $path"
             [ "$CODE" = "200" ] || FAIL=1

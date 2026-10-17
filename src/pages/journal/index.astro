@@ -115,11 +115,15 @@ const schemas = [
             The first journal entries are on their way.
           </p>
           <p class="mt-s text-muted-foreground">
-            In the meantime,{' '}
-            <a href="/services/" class="text-link underline underline-offset-2">
-              see what we do
-            </a>{' '}
-            or
+            In the meantime,
+            <Fragment>
+              {/* scaffold: services */}
+              <a href="/services/" class="text-link underline underline-offset-2">
+                see what we do
+              </a>{' '}
+              or
+              {/* scaffold:end */}
+            </Fragment>
             <a href="/contact/" class="text-link underline underline-offset-2">
               {' '}
               start a conversation
