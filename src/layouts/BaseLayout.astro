@@ -204,10 +204,19 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
         replaces <html>'s className with the new page's (empty), so without
         this listener a user who set dark mode would see the next page
         render in light. The listener registers exactly once via the
-        __themeBootstrapBound flag. */}
+        __themeBootstrapBound flag.
+        It also adds html.motion (PORTS.md card 107): every hidden starting
+        state in globals.css ([data-reveal], [data-stagger-grid], .img-curtain)
+        is scoped to it, so with JavaScript off the page renders finished.
+        Reduced-motion visitors never get the class, so they see the page at
+        rest too. The swap resets className, so it rides the same re-apply. */}
     <script is:inline define:vars={{ key: site.themeStorageKey }}>
       (function () {
         function applyTheme() {
+          document.documentElement.classList.toggle(
+            'motion',
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+          );
           let dark = false;
           try {
             const stored = localStorage.getItem(key) ?? 'system';
