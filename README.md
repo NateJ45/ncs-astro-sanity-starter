@@ -11,7 +11,6 @@
 ![React 19](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
 ![License: PolyForm Strict](https://img.shields.io/badge/License-PolyForm%20Strict-lightgrey.svg)
-[![Use this template](https://img.shields.io/badge/Use%20this-template-2ea44f?logo=github)](https://github.com/NateJ45/ncs-astro-sanity-starter/generate)
 
 </div>
 
