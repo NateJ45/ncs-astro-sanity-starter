@@ -5,6 +5,7 @@
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderOg, closeRenderer } from './lib/render-og.mjs';
+import { OG_THEME } from './og-theme.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -13,6 +14,7 @@ const result = await renderOg({
   wordmark: 'Studio Starter',
   tagline: ['Your tagline goes here.'],
   outPath: resolve(root, 'public/og-default.png'),
+  theme: OG_THEME,
 });
 
 // Not optional: the renderer holds one chromium open for the whole run and

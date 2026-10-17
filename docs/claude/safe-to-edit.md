@@ -19,7 +19,7 @@ These are the files where a project maintainer can make changes without risk of 
 - Images in `src/assets/` (logo variants, OG image)
 - Copy strings and `href` values in static page components
 - Tailwind utility classes on existing components when content needs different visual weight
-- Brand colors, tagline, and wordmark inputs in `scripts/generate-og-default.mjs` (re-run `npm run og` after editing)
+- Tagline and wordmark inputs in `scripts/generate-og-default.mjs`, and the share-image colors and font in `scripts/og-theme.mjs` (normally written by `npm run apply-brand`; re-run `npm run og` after editing)
 - `docs/brand/voice.md` -- per-project voice and copy guidelines (fill in per project; the `/reskin` skill rewrites this during a full rebrand)
 
 **Enabling the script accent (opt-in):** The calligraphic script accent is OFF by default. No script font loads unless you opt in. To enable it for a project: (1) add a `@fontsource` import for your chosen calligraphic face (e.g. `@fontsource/great-vibes/400.css`), and (2) update `--font-script` in the `@theme` block to name that face first. Components using the `font-script` utility class will then render the calligraphic accent.

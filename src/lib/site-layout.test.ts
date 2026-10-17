@@ -1,6 +1,7 @@
-// Gate: the layout slots in brand.config.schema.json, the defaults in
-// brand.config.json and src/lib/site-layout.ts must agree, and a default site
-// must emit no layout attributes (so existing sites render unchanged).
+// Gate: the layout slots in brand.config.schema.json and src/lib/site-layout.ts
+// must agree, brand.config.json must name real values that src/data/layout.ts
+// carries, and a default site must emit no layout attributes (so existing sites
+// render unchanged). A fork may pick its own layout (PORTS.md card 104).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -17,11 +18,20 @@ test('schema enums match the slot lists', () => {
   }
 });
 
-test('every slot default is its first value, and brand.config.json ships the defaults', () => {
+test('every slot default is its first value, and brand.config.json names only real values', () => {
   for (const [slot, values] of Object.entries(LAYOUT_SLOTS)) {
     assert.equal(DEFAULT_LAYOUT[slot as keyof typeof DEFAULT_LAYOUT], values[0]);
   }
-  assert.deepEqual(config.layout, DEFAULT_LAYOUT);
+  // A fork may pick its own layout (apply-brand writes it), so the config is not held to the
+  // defaults; it must name real values, which resolveLayout passes through unchanged.
+  assert.deepEqual(resolveLayout(config.layout), config.layout);
+});
+
+test('src/data/layout.ts carries what brand.config.json says (apply-brand was run)', () => {
+  const src = readFileSync('src/data/layout.ts', 'utf-8');
+  for (const [slot, value] of Object.entries(config.layout as Record<string, string>)) {
+    assert.match(src, new RegExp(slot + ": '" + value + "'"), slot);
+  }
 });
 
 test('a default or missing config emits no attributes', () => {

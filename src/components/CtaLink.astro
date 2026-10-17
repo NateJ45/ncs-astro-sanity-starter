@@ -29,6 +29,9 @@ interface CtaBlock {
   emailAddress?: string;
   phoneNumber?: string;
   openInNewTab?: boolean;
+  /** A plain path. Only the built-in default sections (src/data/defaultSections.ts) use it;
+      Studio buttons always carry a linkType. */
+  href?: string;
 }
 
 interface Props {
@@ -66,7 +69,9 @@ const TYPE_TO_PATH: Record<string, string> = {
 };
 
 function resolveHref(c?: CtaBlock | null): string {
-  if (!c?.linkType) return fallbackHref;
+  // No linkType: a built-in default button, which names its path directly. Before this line
+  // read only fallbackHref, every default button went to /contact/ whatever it said.
+  if (!c?.linkType) return c?.href ?? fallbackHref;
   switch (c.linkType) {
     case 'internal': {
       const t = c.internalLink?._type;

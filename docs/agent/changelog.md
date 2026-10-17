@@ -1,5 +1,15 @@
 # Change history
 
+_2026-10-17: a reskinned fork keeps working (PORTS card 104)._
+
+**Decision.** Four starter bugs that First Baptist Auburn's first reskin hit, fixed at the source. The richText and
+imageText defaults named their heading `headline` (the blocks read `heading`), so default headings never rendered; a new
+`default-sections` test fails on any default field a block's schema lacks, and found a fifth (the spacer's `size`).
+CtaLink ignored a default button's `href`, sending every built-in button to /contact/. The layout gate demanded the
+default layout, failing any fork that picks one; it now checks the config names real values and `src/data/layout.ts`
+matches. apply-brand wrote the brand into the PORTABLE `render-og.mjs`, so every reskinned fork drifted; it now writes
+`scripts/og-theme.mjs`, which the OG generators pass as renderOg's `theme`.
+
 _2026-10-17: Sanity phase 2, `@sanity/ui` 4 and `@sanity/icons` 5 (PORTS card 103)._
 
 **Decision.** The family leaves the phase-1 pin (`sanity` 6.9.1, `@sanity/ui` 3.5.4) for `sanity` 6.19.0, `@sanity/ui`
