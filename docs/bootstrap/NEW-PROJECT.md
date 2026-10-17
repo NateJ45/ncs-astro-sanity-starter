@@ -165,6 +165,12 @@ npx wrangler secret put SANITY_TOKEN    # the same token, for production
 Without it the public site is unaffected and the preview routes answer 503
 naming what is missing.
 
+Seed before the first Presentation check: take a backup
+(`npx sanity dataset export production backup.tar.gz`), run `npm run seed`
+dry, then `$env:NCS_PRODUCTION_WRITE = 'yes'; npm run seed -- --apply` (Step 7
+has the full lines). On an empty dataset the preview has no page to show and
+says "No document found" inside the frame (PORTS.md card 101).
+
 **There is no separate Studio deploy.** The Studio is built by `astro build` and
 published with the site, so a schema change reaches editors on your next deploy.
 Do not run `npx sanity deploy`. Never click "Remove field" in the Studio: it

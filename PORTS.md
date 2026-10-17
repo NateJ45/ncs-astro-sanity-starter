@@ -218,6 +218,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 98  | Date labels independent of build-machine timezone (`formatDate`)               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 99  | Scaffold markers stay out of PORTABLE files; styleguide wall marked            | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 100 | Scaffold prunes the Lighthouse, smoke and uptime route lists                   | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 101 | Preview renders "no document" inside the layout, so Presentation connects      | n/a     | open        | yes      | open             | open          | n/a            | n/a                | n/a                 | open           |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8052,5 +8053,32 @@ starter `main` in CI, so it takes the new copy in the marked-file order (site br
 then the site PR). fbcm only self-checks in CI, so it shows DRIFT on a local `sync-check` until resynced and never goes red.
 presacademy, reid-design-site, mas-monograms, nixoncreativestudio and stonesteps-50k do not carry the file. A site that has
 already trimmed itself gains nothing from the new markers; a fresh fork gets all of it.
+
+**Status, 2026-10-17.** Starter: `yes` with this PR.
+
+## Card 101: the preview says "no document" inside the layout, so Presentation connects (2026-10-17)
+
+**Origin:** first-baptist-auburn's fork, 2026-10-17. On a fresh dataset with no documents, the Studio's Presentation tool
+showed "Unable to connect" on every page. `src/pages/preview/[...slug].astro` answered a missing document with a bare
+text `new Response('No document found ...', { status: 404 })`. That body has no `<VisualEditing>` island, so the
+Studio never got its handshake and the editor never saw the message telling them what to do. Seeding fixed Auburn; this
+card makes the route fail gracefully. Vault gotcha: `presentation-unable-to-connect-on-an-empty-dataset`.
+
+**Canonical:** `src/pages/preview/[...slug].astro` (per-site, NOT PORTABLE: each site's copy carries its own path map and
+page shapes, so port the pattern, not the file).
+
+**What changed.** A missing document now renders through `PreviewLayout` with an empty stand-in doc
+(`_id` = the singleton type, or `missing-page` for a custom page) and a note: "No document found for ... yet. Create it in
+the Studio, then reopen the preview." The status stays 404 (`Astro.response.status`) and `Cache-Control: no-store` is set
+before the fetch, as before. The bespoke-page and empty-builder notes are suppressed while `missing`. Because
+`/preview/live` signals on any change to a non-`page` document, creating a missing singleton refreshes the frame into the
+real page; a new custom page still needs the preview reopened. Nothing else in the refresh loop (cards 29-29d) is touched;
+the overlay's refetch reads the response text whatever its status.
+
+**Porting to a site.** Find the `if (!doc) return new Response(...)` in the site's preview route and apply the same three
+moves: keep the fetch result as `fetched`, set `Astro.response.status = 404` and fall back to a stand-in doc, and render the
+note inside the layout. Sites with the bare response on 2026-10-17: presacademy, reid-design-site, mas-monograms, fbcm,
+first-baptist-auburn. stonesteps-50k phrases it differently; check before porting. Also: `docs/bootstrap/NEW-PROJECT.md`
+Step 6 now says to seed before the first Presentation check.
 
 **Status, 2026-10-17.** Starter: `yes` with this PR.
