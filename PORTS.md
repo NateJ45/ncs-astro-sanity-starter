@@ -219,7 +219,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 99  | Scaffold markers stay out of PORTABLE files; styleguide wall marked            | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 100 | Scaffold prunes the Lighthouse, smoke and uptime route lists                   | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 101 | Preview renders "no document" inside the layout, so Presentation connects      | n/a     | open        | yes      | open             | open          | n/a            | n/a                | n/a                 | open           |
-| 102 | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)  | n/a     | no          | yes      | yes              | n/a           | no             | n/a                | staged              | n/a            |
+| 102 | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)  | n/a     | yes         | yes      | yes              | n/a           | no             | n/a                | staged              | n/a            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8127,5 +8127,6 @@ number kept), `OPERATIONS.md`, `DESIGN.md`, `.claude/rules/foundation-files.md`,
 
 **Status, 2026-10-17.** Starter: `yes` with this PR. fbcm (not a matrix column), reid-design-site: done. nixoncreativestudio: done on
 its unmerged `redesign-2026` branch, still listed in its `main` (`staged`). mas-monograms and stonesteps-50k never had it
-(`n/a`). presacademy and 2ndpreschicago still ship it (`no`). first-baptist-auburn (forked from the starter with Lenis;
-no matrix column) is next. wcp is archived.
+(`n/a`). presacademy: done in its own PR #97 (`bbb15c6`, before this card; corrected 2026-10-17). 2ndpreschicago still
+ships it (`no`). first-baptist-auburn (forked from the starter with Lenis; no matrix column): done in fbc-auburn#14, 2026-10-17.
+wcp is archived.
