@@ -8011,6 +8011,8 @@ PORTABLE file; `scripts/scaffold.mjs` and the test itself are exempt because the
 **Verification.** In the starter: `check`, `test:unit` and prettier green; then `--remove testimonials,journal --write`, typegen,
 `check`, build and `test:unit` all green, discarded. In first-baptist-auburn: `sync-check` 126/126 same.
 
+**Not covered, by hand after a removal.** Three route lists name pages and carry no markers: `lighthouserc.json` (JSON takes no comments), the smoke loop in `.github/workflows/deploy.yml` and the route loop in `.github/workflows/uptime.yml`. Auburn edited all three by hand after removing `services` and `process`; left alone, Lighthouse 404s and the first deploy smoke fails (gotcha `lhci-url-list-404s-on-redirected-page`). PENDING item 14.
+
 **Porting.** Nothing to copy into existing sites: none carries `audit-studio.mjs` as a PORTABLE copy, and none has run the
 scaffold since the wall arrived. A new fork gets both fixes from the starter.
 
