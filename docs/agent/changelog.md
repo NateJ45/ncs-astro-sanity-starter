@@ -1,5 +1,15 @@
 # Change history
 
+_2026-10-17: astro 7.4 with `@astrojs/cloudflare` 14.4.0 (PORTS card 97)._
+
+**Decision.** `astro` ^7.4.0 and `@astrojs/cloudflare` 14.4.0 exact, together (14.4.0 peers `astro ^7.4.0`). `wrangler` stays
+~4.129.0; the adapter's newer `@cloudflare/vite-plugin` nests its own wrangler 4.151 for prerender only. Lockfile: 45 version
+moves, all in the astro, adapter, vite, rolldown, shiki and workerd subtree, plus 118 nested duplicates collapsed. Rendered HTML
+of all 12 parity pages identical apart from Astro's island bootstrap script, which the new minifier writes 3 bytes shorter
+(`{...;return}try` becomes `...;else try`). Verified: typegen, build, `astro check`, lint, unit and scripts tests, format,
+links, `wrangler deploy --dry-run`, and `wrangler dev` in Chromium at 375 and 1280 in light and dark with `/studio` mounting.
+Not verified: a real deploy (see PENDING item 4).
+
 _2026-10-15: GA4 skips automated browsers (PORTS card 96)._
 
 **Decision.** `GoogleAnalytics.astro` gains rule 4: it does nothing when `navigator.webdriver` is true or the user agent matches

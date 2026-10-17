@@ -214,6 +214,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 94  | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)        | n/a     | staged      | yes      | staged           | staged        | no             | n/a                | staged              | staged         |
 | 95  | `audit:data`: live data vs compiled schema; `_type` backfill                   | n/a     | no          | yes      | no               | fork          | no             | n/a                | n/a                 | no             |
 | 96  | GA4 skips automated browsers (WebDriver, Lighthouse, PageSpeed, GTmetrix)      | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | staged              | staged         |
+| 97  | astro 7.4 with adapter 14.4.0 (wrangler stays 4.129)                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -7904,3 +7905,37 @@ Playwright load: requests to `googletagmanager` and `/g/collect` must be 0.
 **Status, 2026-10-15.** Starter: `yes` with this PR. presacademy, reid-design-site, mas-monograms, nixoncreativestudio,
 stonesteps-50k and fbcm: `staged` on branch `chore/ga-skip-automated` (no PRs until this merges, because their
 `sync-check` reads live starter `main`). fbcm has no matrix column. wcp is archived and 2ndpreschicago dormant: not taken.
+
+---
+
+## Card 97: astro 7.4 with `@astrojs/cloudflare` 14.4.0 (2026-10-17)
+
+**Origin:** astro 7.4.0 and `@astrojs/cloudflare` 14.4.0 were both released 2026-10-15. **Canonical:** `package.json` and
+the lockfile, `.claude/rules/dependencies.md` rule 8. Follows card 94 and keeps card 92's rule: `astro` and the adapter move
+together.
+
+**The move.** `astro` `^7.3.8` to `^7.4.0`, `@astrojs/cloudflare` `14.3.4` to `14.4.0` (exact). 14.4.0 peers `astro ^7.4.0`, so
+neither can move alone. `wrangler` stays `~4.129.0`. Nothing else in the rule-8 set moves.
+
+**Decisions worth copying.**
+
+1. **Install with the committed lockfile in place.** Edit the two versions in `package.json`, then run a plain `npm install`.
+   Do not run `npm install astro@... @astrojs/cloudflare@...`: it rewrote the exact adapter pin to a caret. The result is 45
+   version moves, all in the astro, adapter, vite (8.3.4), rolldown, shiki and workerd subtree, and 118 nested duplicates
+   collapsed (for example `@astrojs/react`'s private vite and rolldown copies).
+2. **Two wranglers is expected.** The adapter now needs `@cloudflare/vite-plugin` ^1.63.1, which nests wrangler 4.151 and a
+   miniflare 5 beta for build-time prerender. The deploy CLI is still the top-level wrangler 4.129.1 with its own miniflare and
+   workerd. Check with `npm ls wrangler miniflare`.
+3. **`k2` warning is expected.** The generated `dist/server/wrangler.json` gains `k2: []` and `upload_source_maps: true`.
+   Wrangler 4.129.1 prints `Unexpected fields found in top-level field: "k2"` and continues; the dry run exits 0. No
+   `legacy_env`.
+4. **Parity.** Markup is identical on all 12 pages. The only change is Astro's island bootstrap script, minified 3 bytes
+   shorter with the same behaviour. Re-capture the baseline in the same PR.
+
+**Adapt per site:** the same two `package.json` lines, `npm install`, `npm run build:full`, `npm run parity compare` (expect
+only the bootstrap script to differ), `wrangler deploy --dry-run -c dist/server/wrangler.json`, then a real deploy and a live check
+of `/` and `/studio/` in a browser. A site with locally bundled images also checks that optimized images land in
+`dist/client/_astro/` (the starter has none to check).
+
+**Status, 2026-10-17.** Starter: `yes` with this PR, verified by dry run and `wrangler dev`, not yet by a real deploy (PENDING
+item 4). Sites: `no`; port after the starter's first real deploy on this pair.

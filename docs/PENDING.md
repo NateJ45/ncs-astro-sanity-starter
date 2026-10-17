@@ -121,13 +121,19 @@ Drop it during a slop sweep (card 16) if it is still unused then.
 
 ### 4. The adapter and wrangler pins are tighter than the bug requires
 
-`@astrojs/cloudflare` is pinned exact at 14.3.4 and `wrangler` at `~4.129.0` (moved from
-14.2.4 and `~4.110.0` on 2026-10-13, card 94, with a real `wrangler deploy`). Verified
-that 14.3.4 does **not** emit `legacy_env` into the generated config, so card 14's
+`@astrojs/cloudflare` is pinned exact at 14.4.0 (with `astro` ^7.4.0 since 2026-10-17, card 97)
+and `wrangler` at `~4.129.0` (moved from 14.2.4 and `~4.110.0` on 2026-10-13, card 94, with a
+real `wrangler deploy`). Verified that 14.3.4 and 14.4.0 do **not** emit `legacy_env` into the
+generated config, so card 14's
 original failure does not reproduce here; the pin holds the pair together because the
 adapter peers `wrangler ^4.125.0` and every wrangler from 4.126 bundles a miniflare 5 alpha.
 Revisit when a newer adapter's peer range and emitted config are both checked by hand
 against a real `wrangler dev` and a real deploy.
+
+**Open, card 97 (2026-10-17):** the astro 7.4 / adapter 14.4.0 move was checked with a
+`wrangler deploy --dry-run` (exit 0, one `k2` unexpected-field warning) and a local `wrangler dev`,
+not a real deploy: this session had no Cloudflare credentials. Do one real deploy to a throwaway
+Worker (or watch the first production deploy after merge) before porting it to the sites.
 
 ### 4a. Thirty npm advisories, accepted rather than fixed
 
