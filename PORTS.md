@@ -9125,7 +9125,7 @@ first-baptist-auburn.
 `SearchPanel.astro`, `SearchButton.astro`, `SearchMeta.astro`, `src/components/ShareButtons.astro`,
 `src/pages/search/[...search].astro`, `tests/search.spec.ts`. Per site (NOT portable): `src/data/site.ts` `search`
 (the switch, placeholder, suggestions), where Header and MobileNav put the button, which templates pass `searchType`
-and carry `<SearchMeta>` / `<ShareButtons>`, `SHARE_ROUTES` in `tests/routes.ts`, the `package.json` lines, and
+and carry `<SearchMeta>` / `<ShareButtons>`, the `package.json` lines, and
 `'search'` in the reserved slugs (both copies and the test).
 
 **What it adds.**
@@ -9175,7 +9175,7 @@ add the `search` block to `src/data/site.ts`, chain `node scripts/build-search-i
 `searchType` prop and the two `<main>` attributes to BaseLayout, put `<SearchButton>` in the header (desktop and
 mobile), `{site.search.enabled && <SiteSearch />}` once in Header, the MobileNav `search` prop, `searchType` and
 `<SearchMeta>` on the templates, `<ShareButtons>` where wanted, reserve `'search'`, keep `/search/` out of the sitemap,
-list `SHARE_ROUTES`, then build and run `npx playwright test tests/search.spec.ts`. Marked-file order: the starter
+then build and run `npx playwright test tests/search.spec.ts`. Marked-file order: the starter
 merges first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes` (switch off). first-baptist-auburn on branch `feat/site-search`, on, PR after

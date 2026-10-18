@@ -2,14 +2,16 @@
 import { test, expect, type Page } from './fixtures';
 import AxeBuilder from '@axe-core/playwright';
 import { settle } from './helpers';
-import { SHARE_ROUTES } from './routes';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 
 // Visitor site search and share buttons (PORTS.md card 123).
 //
 // Search is opt-in (src/data/site.ts search.enabled). A site with it off has
 // no /pagefind/ index, and every search test skips itself; the starter ships
-// with it off. Share tests run on the routes in tests/routes.ts SHARE_ROUTES,
-// which is empty on a site with no posts built.
+// with it off. Share tests run on the built pages that carry <ShareButtons>,
+// found in dist/client (one per section, at most three), so a build with no
+// posts or sermons (no Sanity project, as on CI) simply has none to check.
 //
 // The known page: /contact/ is a core route in every site of the family, so
 // the tests search for the longest word in its <h1> and expect /contact/ in
@@ -126,8 +128,30 @@ test.describe('site search', () => {
   });
 });
 
+/** Built pages with a share block: the first found under each top-level folder. */
+function shareRoutes(): string[] {
+  const root = join(process.cwd(), 'dist', 'client');
+  if (!existsSync(root)) return [];
+  const found = new Map<string, string>();
+  const walk = (dir: string) => {
+    for (const name of readdirSync(dir)) {
+      if (found.size >= 3) return;
+      const p = join(dir, name);
+      if (name === '_astro' || name === 'pagefind') continue;
+      if (statSync(p).isDirectory()) walk(p);
+      else if (name === 'index.html' && readFileSync(p, 'utf8').includes('data-share-url')) {
+        const route = '/' + relative(root, dir).split(sep).join('/') + '/';
+        const section = route.split('/')[1] ?? '';
+        if (!found.has(section)) found.set(section, route);
+      }
+    }
+  };
+  walk(root);
+  return [...found.values()];
+}
+
 test.describe('share buttons', () => {
-  for (const route of SHARE_ROUTES) {
+  for (const route of shareRoutes()) {
     test(`share links on ${route} are plain, correct URLs`, async ({ page }) => {
       await page.goto(route, { waitUntil: 'domcontentloaded' });
       const block = page.locator('[data-share]').first();

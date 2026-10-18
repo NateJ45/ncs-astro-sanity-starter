@@ -51,11 +51,3 @@ export const allRoutes: string[] = [...routes, ...hiddenRoutes];
  * once a guide is published and that route builds.
  */
 export const FORM_ROUTES: string[] = ['/contact/'];
-
-/**
- * Prerendered routes that carry <ShareButtons> (PORTS.md card 123), for the
- * share checks in search.spec.ts. Empty in the starter: its only share block
- * is on journal posts, and with no Sanity project none are built. A site lists
- * one post, one sermon and so on that it knows will exist.
- */
-export const SHARE_ROUTES: string[] = [];
