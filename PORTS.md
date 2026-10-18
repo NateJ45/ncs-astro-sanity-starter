@@ -953,6 +953,15 @@ unexplainable, read the lines **above** the `MiniflareCoreError`.
 `react-dom` and `react-is` all `19.2.7`, no caret. `react-is` was added at the same time
 (the Sanity stack needs it, and it drifts the same way).
 
+**Note, 2026-10-18 (experiment, not a card yet):** branch `exp/react-19.3` moves all three
+to `19.3.1` exact. The bump removes five nested 19.3.1 copies the Sanity 6.19 tree had
+already pulled in (`sanity`, `@sanity/ui`, `@sanity/visual-editing`, `@sanity/cli-build`)
+and clears the `npm ci` ERESOLVE warning (`@portabletext/editor@8.2.4` peers
+`react@^19.2.8`); scheduler goes 0.27.0 to 0.28.0. Gates, Playwright, build, `wrangler dev`
+and the dev Studio were unchanged. It also makes `@sanity/themer` installable (peers
+`react ^19.3.0`). If it merges it needs its own card (site rollout: react, react-dom,
+react-is to 19.3.1 exact, `npm install` on the committed lockfile, `npm ls react` single).
+
 **Adjacent, learned in that session:** a stale `package-lock.json` can hide the fix. An
 `overrides` entry added to collapse a nested duplicate did nothing on `npm install`
 because npm kept the already-resolved nested tree; the duplicate only disappeared after
