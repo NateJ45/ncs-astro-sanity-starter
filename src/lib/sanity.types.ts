@@ -412,7 +412,9 @@ export type SiteSettings = {
     | 'RealEstateAgent'
     | 'TravelAgency'
     | 'EducationalOrganization'
-    | 'NGO';
+    | 'NGO'
+    | 'Church'
+    | 'PlaceOfWorship';
   seoImage?: {
     asset?: SanityImageAssetReference;
     media?: unknown;

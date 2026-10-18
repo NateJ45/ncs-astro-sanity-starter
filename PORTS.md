@@ -230,6 +230,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 110 | Studio looks like the site: name, mark, colours, status line, help panel       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 112 | React 19.3.1, one copy in the tree                                             | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | staged              | staged         |
+| 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -238,6 +239,10 @@ are `n/a` as in row 106. first-baptist-auburn has no column.
 
 Row 111 (2026-10-18): needs cards 106 and 110 first, so the same cells as row 110. first-baptist-auburn has no column; it
 took the card on branch `feat/studio-remembers` the same day.
+
+Row 113 (2026-10-18): the hotspot half suits every site with `SanityImage.astro`; the JSON-LD half only matters to a
+site whose Site settings `businessType` feeds `localBusinessSchema()`. first-baptist-auburn and fbcm have no column;
+see the card.
 
 Row 107 (2026-10-17): mas-monograms (`html.reveal-ready`) and nixoncreativestudio (`.js`) already gate
 their reveal on a head-script class, a divergent form of the same idea, hence `partial`; neither was changed. presacademy
@@ -8685,3 +8690,34 @@ gone. It also makes `@sanity/themer` installable (peers `react ^19.3.0`); the st
 starts breaking a page.
 
 **Status, 2026-10-18.** Starter `yes`. Site rollout in progress the same day (see the matrix row).
+
+## Card 113: SanityImage aims CSS crops at the hotspot; Church business type without a price range (2026-10-18)
+
+**Origin:** first-baptist-auburn's Home audit (2026-10-17). Two small faults that every site in the family has.
+
+1. **Faces cut off in CSS-cropped slots.** Many slots crop with `object-fit: cover` (a fixed-ratio card, a hero band)
+   rather than asking Sanity for a cropped image, and CSS crops from the centre, so the head at the top of a phone
+   photo is the part that goes. The editor's hotspot already says where the subject is; nothing read it.
+2. **A church told Google it was a "$$" local business.** Site settings > Business type had no `Church`, and
+   `localBusinessSchema()` emitted `priceRange: '$$'` for every type, which is noise for a church, a charity or a
+   school.
+
+**Canonical (not PORTABLE; copy by hand):**
+
+- `src/components/SanityImage.astro`: when the image has a hotspot, an inline `style="object-position: X% Y%"` from
+  `hotspot.x` / `hotspot.y`. A no-op for images not cropped by CSS, and an image without a hotspot renders exactly as
+  before. A class that sets `object-position` loses to the inline style, so a slot that must pin its own position
+  needs `!important` or a wrapper.
+- `src/lib/schemas.ts`: `NON_SELLING_TYPES` (`Church`, `PlaceOfWorship`, `NGO`, `EducationalOrganization`) get no
+  `priceRange`; every other type keeps `'$$'`.
+- `src/sanity/schemaTypes/siteSettings.ts`: `Church` and `Place of Worship` added to the `businessType` list (the
+  default stays `LocalBusiness`). A list change only, no data moves; run `npm run typegen` after copying it.
+
+**Adopting it in a site.** Copy the three hunks, `npm run typegen`, build. A church site then sets Business type to
+Church in the Studio (first-baptist-auburn went further: it defaults the field to Church and hides it). A site with its
+own church JSON-LD (fbcm's `church-schema.ts` already emits `['Church', 'Organization']` with no price range) needs
+only the SanityImage half.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn has both (branch `claude/home-before-jacob`, PR #35).
+fbcm: SanityImage half to adopt; JSON-LD half n/a. Crestview has no site repo, so n/a. Every other site `no`
+(SanityImage half worth taking; the JSON-LD half changes nothing for a business).

@@ -56,6 +56,9 @@ interface Breadcrumb {
   url: string;
 }
 
+// schema.org types that do not sell anything, so they get no `priceRange`.
+const NON_SELLING_TYPES = ['Church', 'PlaceOfWorship', 'NGO', 'EducationalOrganization'];
+
 // ---------- LocalBusiness (site-wide, BaseLayout injects on every page) ----
 
 export function localBusinessSchema(settings: SiteSettings | null | undefined): string {
@@ -68,7 +71,6 @@ export function localBusinessSchema(settings: SiteSettings | null | undefined): 
     url: site.url,
     image: `${site.url}${site.assets.ogDefault}`,
     email: s.email ?? undefined,
-    priceRange: '$$',
     // Merge legacy fields + socialLinks urls, deduplicating by url string.
     sameAs: Array.from(
       new Set(
@@ -105,6 +107,12 @@ export function localBusinessSchema(settings: SiteSettings | null | undefined): 
   const areas = (s.serviceAreas ?? []).filter((a) => a && a !== PLACEHOLDER_CITY);
   if (areas.length > 0) {
     schema.areaServed = areas.map((city) => ({ '@type': 'City', name: city }));
+  }
+
+  // A price range only means something for a business that sells (PORTS.md card 113):
+  // never for a church, a charity or a school.
+  if (!NON_SELLING_TYPES.includes(schema['@type'])) {
+    schema.priceRange = '$';
   }
 
   if (s.phone) schema.telephone = s.phone;
