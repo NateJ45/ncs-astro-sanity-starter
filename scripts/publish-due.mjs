@@ -11,9 +11,10 @@
 // It runs 48 times a day. `npm ci` on each run would spend a couple of minutes
 // of Actions time installing several hundred megabytes in order to make three
 // HTTP calls. So it talks to Sanity's HTTP API directly with global fetch, and
-// the workflow is checkout + setup-node + node. The only local import is
+// the workflow is checkout + setup-node + node. The only local imports are
 // scripts/lib/loadEnv.mjs, which is itself dependency-free and only used for
-// local runs (in CI the values come from the workflow env).
+// local runs (in CI the values come from the workflow env), and
+// scripts/lib/write-gate.mjs, which is dependency-free too.
 //
 // ENDPOINTS USED (api version pinned in API_VERSION below)
 //   POST https://<projectId>.api.sanity.io/v<ver>/data/query/<dataset>
@@ -40,11 +41,14 @@
 // SAFETY: DRY RUN BY DEFAULT
 // Running it bare prints what it would publish and writes nothing. Pass
 // --apply to actually publish. The workflow passes --apply. This is the same
-// gate every other Sanity script in scripts/ uses.
+// gate every other Sanity script in scripts/ uses. Run by hand against
+// production, --apply also needs NCS_PRODUCTION_WRITE=yes in the same command;
+// in GitHub Actions the workflow's --apply is enough (scripts/lib/write-gate.mjs,
+// PORTS.md card 86).
 //
 // USAGE
 //   node scripts/publish-due.mjs             # dry run, prints the queue
-//   node scripts/publish-due.mjs --apply     # publish them
+//   NCS_PRODUCTION_WRITE=yes node scripts/publish-due.mjs --apply  # publish them
 // ENV (from the repo .env locally, from workflow env in CI)
 //   SANITY_AUTH_TOKEN   required, needs write access to the dataset
 //   SANITY_PROJECT_ID   (or PUBLIC_SANITY_PROJECT_ID / SANITY_STUDIO_PROJECT_ID)
@@ -57,6 +61,7 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnv } from './lib/loadEnv.mjs';
+import { writeGate } from './lib/write-gate.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const env = loadEnv(ROOT);
@@ -66,14 +71,14 @@ const env = loadEnv(ROOT);
 // cannot change what this script sees.
 const API_VERSION = '2025-02-19';
 
-const APPLY = process.argv.includes('--apply');
-const DRY = !APPLY;
-
 const token = env.SANITY_AUTH_TOKEN || env.SANITY_API_WRITE_TOKEN;
 const projectId =
   env.SANITY_PROJECT_ID || env.PUBLIC_SANITY_PROJECT_ID || env.SANITY_STUDIO_PROJECT_ID;
 const dataset =
   env.SANITY_DATASET || env.PUBLIC_SANITY_DATASET || env.SANITY_STUDIO_DATASET || 'production';
+
+const APPLY = writeGate({ dataset, ci: true, quiet: true });
+const DRY = !APPLY;
 
 if (!projectId) {
   console.error('publish-due: no Sanity project id (SANITY_PROJECT_ID). Nothing to do.');
