@@ -4,7 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { settle } from './helpers';
 import { SHARE_ROUTES } from './routes';
 
-// Visitor site search and share buttons (PORTS.md card 121).
+// Visitor site search and share buttons (PORTS.md card 123).
 //
 // Search is opt-in (src/data/site.ts search.enabled). A site with it off has
 // no /pagefind/ index, and every search test skips itself; the starter ships

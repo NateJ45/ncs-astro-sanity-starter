@@ -46,7 +46,7 @@ interface Props {
   ogType?: 'website' | 'article';
   /** Article metadata. Only used when ogType is 'article'. */
   ogArticle?: { publishedAt?: string; author?: string };
-  /** What kind of page this is in visitor search results (PORTS.md card 121): 'page' (the default), 'sermon', 'series', 'news', 'question' and so on. Only used when src/data/site.ts search.enabled is on. */
+  /** What kind of page this is in visitor search results (PORTS.md card 123): 'page' (the default), 'sermon', 'series', 'news', 'question' and so on. Only used when src/data/site.ts search.enabled is on. */
   searchType?: string;
 }
 
@@ -63,7 +63,7 @@ const {
   searchType = 'page',
 } = Astro.props as Props;
 
-// Visitor search (PORTS.md card 121). With search on, <main> carries
+// Visitor search (PORTS.md card 123). With search on, <main> carries
 // data-pagefind-body so scripts/build-search-index.mjs indexes main content
 // only, never the header, footer or nav. noindex pages (404, /search/, the
 // styleguide walls, any page an editor keeps out of Google) stay out of the

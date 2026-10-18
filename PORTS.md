@@ -238,7 +238,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering            | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 119 | Studio icons by meaning, a picture on every list row                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 121 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 123 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -9114,7 +9114,7 @@ optionally `StudioSplashMotif.astro`), remove `studioBasePath` from the `sanity(
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-edges`, PR after this merges. Other
 sites `no`.
 
-## Card 121: visitor site search (Pagefind) and share buttons with no third-party code (2026-10-18)
+## Card 123: visitor site search (Pagefind) and share buttons with no third-party code (2026-10-18)
 
 **Origin:** first-baptist-auburn wanted visitors to find a sermon, a news post or "where do I park" without knowing
 which page it is on, and to pass a sermon on to a friend. Built in the starter, opt-in, then switched on in

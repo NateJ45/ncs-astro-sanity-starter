@@ -68,7 +68,7 @@ export const site = {
     favicon: '/favicon.svg',
   },
 
-  // Visitor site search (PORTS.md card 121). Opt-in: false builds no search
+  // Visitor site search (PORTS.md card 123). Opt-in: false builds no search
   // button, no /search/ page and no index, so a site that does not want it
   // carries no weight for it. true adds a search button to the header and the
   // mobile menu, a /search/ page, and a Pagefind index of every page's main

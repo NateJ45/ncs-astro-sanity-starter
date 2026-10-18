@@ -1,6 +1,6 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// site-search-client.ts - the browser half of visitor search (PORTS.md card 121)
+// site-search-client.ts - the browser half of visitor search (PORTS.md card 123)
 // =============================================================================
 // Wires one <SearchPanel> to Pagefind. Imported lazily (a dynamic import from
 // SiteSearch.astro and the /search/ page), so neither this file nor Pagefind's

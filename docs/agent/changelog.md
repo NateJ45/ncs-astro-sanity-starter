@@ -1,6 +1,6 @@
 # Change history
 
-_2026-10-18: visitor site search and share buttons (PORTS card 121)._
+_2026-10-18: visitor site search and share buttons (PORTS card 123)._
 
 **Decision.** Sites can switch on search (`site.search.enabled`, off in the starter). Pagefind 1.5.2, pinned as a
 devDependency, indexes the built HTML straight after `astro build`, main content only, skipping noindex pages; the

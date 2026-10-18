@@ -18,7 +18,7 @@ Core routes that ship with the starter. None of them is toggleable in the Studio
 | `/privacy`           | `src/pages/privacy.astro`            | --         | Privacy policy from singleton, with static fallback when doc is absent                                                     |
 | `/journal/rss.xml`   | `src/pages/journal/rss.xml.ts`       | `journal`  | Journal RSS feed                                                                                                           |
 | `/studio`            | `src/pages/studio/index.astro`       | --         | The embedded Sanity Studio                                                                                                 |
-| `/search`            | `src/pages/search/[...search].astro` | --         | Visitor search page (card 121); built only when `site.search.enabled`. noindex, sitemap-excluded. Index under `/pagefind/` |
+| `/search`            | `src/pages/search/[...search].astro` | --         | Visitor search page (card 123); built only when `site.search.enabled`. noindex, sitemap-excluded. Index under `/pagefind/` |
 | `/preview/**`        | `src/pages/preview/[...slug].astro`  | --         | SSR draft preview for the Studio's Presentation tool. noindex, sitemap-excluded                                            |
 | `/preview/live`      | `src/pages/preview/live.ts`          | --         | SSE proxy for preview auto-refresh (403 without the Studio cookie)                                                         |
 | `/api/draft-mode/*`  | `src/pages/api/draft-mode/`          | --         | Turns draft mode on/off for the preview                                                                                    |
