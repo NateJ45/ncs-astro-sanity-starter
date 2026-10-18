@@ -321,6 +321,14 @@ the status line and on Home, and Try again starting a run (needs `GITHUB_DEPLOY_
 375px, signed in, creating a published document; an empty list's pane and its button; the i18n empty words; and
 `restore-doc.mjs` against a real backup artifact. first-baptist-auburn is that site; its PENDING lists the same.
 
+### 18. Card 114 (workflow tools): the signed-in and deployed checks (opened 2026-10-18)
+
+Unit-tested (`change-summary.test.mjs`, `preview-share.test.ts`, `studio-messages.test.ts`, `studio-table.test.ts`),
+`astro check` and the build clean, the two endpoints answered as designed under `wrangler dev` signed out. Not yet
+seen signed in: the Share a preview dialog making, opening (in a private window) and stopping a link; Messages against
+a real D1 with a Studio session; a table pane sorting and opening a document; the change note posting a real issue.
+first-baptist-auburn is the first site; its PENDING lists the same.
+
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 
 PORTS.md card 109 (page templates, picture picker, patterns, synced sections, guardrails) was built, type-checked,

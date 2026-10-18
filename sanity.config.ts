@@ -51,6 +51,7 @@ import { UndoAction, RedoAction, undoRedoShortcuts } from './src/sanity/componen
 import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 import { ncsStudioKit } from './src/sanity/kit';
 import { kitConfig } from './src/sanity/kit.config';
+import { ncsWorkflowTools } from './src/sanity/workflow';
 
 // =============================================================================
 // Studio theme
@@ -181,6 +182,21 @@ export default defineConfig({
     // Trash instead of Delete, the note after Publish and the first-run tour.
     // KEEP IT LAST: its tools reducer has to see every other plugin's tools.
     // See docs/agent/studio-kit.md and PORTS.md card 106.
+    // Share a preview, Messages, the previewShare type (PORTS.md card 114).
+    // Before the kit, so the kit's tool order and staff view place "messages".
+    ncsWorkflowTools({
+      shareTypes: [
+        'homePage',
+        'aboutPage', // scaffold: about
+        'servicesPage', // scaffold: services
+        'processPage', // scaffold: process
+        'faqPage', // scaffold: faq
+        'contactPage',
+        'journalPage', // scaffold: journal
+        'privacyPage',
+        'page',
+      ],
+    }),
     ncsStudioKit(kitConfig),
   ],
 

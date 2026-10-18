@@ -173,6 +173,26 @@ always gave `commit: null`. `astro.config.mjs` reads the SHA in Node (`GITHUB_SH
 HEAD`, else null) and passes it as the Vite define `__NCS_BUILD_COMMIT__`. A site whose config lacks the define still
 builds and reports null. Check after a build: `dist/client/build-info.json` must show a seven-character commit.
 
+## The workflow tools (card 114)
+
+A second plugin, `ncsWorkflowTools` (`src/sanity/workflow/`), registered just before the kit so the kit's tool order
+and staff view place `messages`. PORTS.md card 114 has the full file list.
+
+- **Share a preview** (`SharePreviewAction.tsx`): a document action on the types in `shareTypes`. Writes a
+  `previewShare.<nonce>` record with the editor's own session, asks `POST /api/studio/share-preview/` to sign it
+  (same origin + `/users/me`, then HMAC-SHA256 under `SHARE_PREVIEW_SECRET`), and shows the link once. The
+  `/preview` route honours `?share=` only while the signature, expiry, path and record all agree, and then renders
+  drafts without stega and without draft mode. "Stop this link" sets `revoked`. With no secret the dialog says links
+  are not set up. `src/lib/preview-share.ts` is the tested half.
+- **Messages** (`MessagesTool.tsx`, `/api/studio/messages/`): D1's `contact_submissions` and `form_submissions`,
+  newest first, status pills, a detail view with Mark as. Auth on every method, before the database is touched. The
+  status table is `message_status` (migration per site). Prayer requests: only that one arrived. No binding: "Forms
+  are not set up yet". `src/lib/studio-messages.ts` is the tested half.
+- **Table panes** (`DocumentTable.tsx`, `tableListItem()`): columns per site in `src/sanity/tables.config.ts`;
+  `studio-table.test.ts` fails if a column is missing from its projection. Always an extra desk item beside the
+  normal list.
+- **Morning change note**: not Studio code. `.github/workflows/change-note.yml` + `scripts/change-note.mjs`.
+
 ## Rules that bite
 
 - Desk items that a link can reach need an **explicit `.id()`**. A singleton's id is its document id (`aboutPage`),

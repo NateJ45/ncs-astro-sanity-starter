@@ -94,6 +94,12 @@
   // its old behaviour, so the template ships it commented out.
   // "vars": { "GITHUB_REPO": "<owner>/<repo>" },
 
+  // ── Private preview links (src/pages/api/studio/share-preview.ts) ───────────
+  // PORTS.md card 114. "Share a preview" in the Studio needs one secret, 32+
+  // random characters: npx wrangler secret put SHARE_PREVIEW_SECRET
+  // Without it the dialog says links are not set up and the /preview route
+  // ignores ?share=. The Messages tool reads CONTACT_DB above (no new binding).
+
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     // @astrojs/cloudflare v14 splits the build into dist/client (static assets)

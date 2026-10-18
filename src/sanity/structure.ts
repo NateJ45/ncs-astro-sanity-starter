@@ -53,6 +53,8 @@ import { staffDesk } from './kit/shared';
 import { kitConfig } from './kit.config';
 import { TRASH_TYPE } from '../lib/studio-trash';
 import { WEEK_TYPE } from '../lib/studio-kit';
+import { tableListItem } from './workflow';
+import { TABLES } from './tables.config';
 
 const SINGLETON_TYPES = [
   'siteSettings',
@@ -95,6 +97,8 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'media.tag',
   // The Studio kit's weekly tick document (card 111): Home's bookkeeping, never edited here.
   WEEK_TYPE,
+  // Private preview link records (card 114): managed from "Share a preview" only.
+  'previewShare',
   // processStep is placed explicitly under Content → Process Steps
   'processStep', // scaffold: process
 ]);
@@ -350,6 +354,8 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
             .title('Journal')
             .items([
               S.documentTypeListItem('journalEntry').title('Posts').icon(EditIcon),
+              // The same posts as a sortable table (card 114, tables.config.ts).
+              ...TABLES.filter((c) => c.type === 'journalEntry').map((c) => tableListItem(S, c)),
               S.documentTypeListItem('journalCategory').title('Categories').icon(TagIcon),
             ]),
         ),

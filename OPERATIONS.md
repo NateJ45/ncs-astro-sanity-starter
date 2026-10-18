@@ -236,6 +236,23 @@ For the complete schema-change sequence, see the "Schema-change procedure" secti
 
 ---
 
+## Studio workflow tools (PORTS.md card 114)
+
+Switching each one on, per site:
+
+- **Private preview links.** `npx wrangler secret put SHARE_PREVIEW_SECRET` with any random string of 32 or more
+  characters (`node -e "console.log(crypto.randomBytes(32).toString('base64url'))"`), plus the preview stack's
+  `SANITY_TOKEN`. Locally, put it in `.dev.vars`. Rotating the secret stops every link at once; "Stop this link" in
+  the dialog stops one. Add `"previewShare"` to the publish webhook's deny-list so making a link does not rebuild
+  the site. Links are HTTPS-agnostic, so they work against `npm run preview` too.
+- **Messages.** Needs the forms switched on (the `CONTACT_DB` binding, wrangler.jsonc) and the status migration:
+  `npx wrangler d1 migrations apply <db> --remote`. Locally: `npx wrangler d1 migrations apply <db> --local -c
+dist/server/wrangler.json`, then `npm run preview`.
+- **Morning change note.** Repo secret `SANITY_AUTH_TOKEN` (read), variable `SANITY_PROJECT_ID`, optional variable
+  `SITE_URL`, then uncomment the schedule in `.github/workflows/change-note.yml`. The person who should get it
+  watches the repo. Try it by hand: `node --experimental-strip-types scripts/change-note.mjs --dry --hours 72`.
+- **Table panes.** Nothing to switch on; edit `src/sanity/tables.config.ts`.
+
 ## Seed placeholder content
 
 Seed scripts bootstrap document types with placeholder content for a fresh dataset. The reusable scripts in `scripts/` cover the core content types. Modules may include their own seed scripts documented in `docs/modules/`.
