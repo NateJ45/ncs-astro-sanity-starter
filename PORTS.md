@@ -236,6 +236,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 116 | Studio as the site's admin: paper, navy chrome, fonts, text in site type       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 117 | Studio workflow: change note, expiring preview links, Messages, table panes    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering            | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 119 | Studio icons by meaning, a picture on every list row                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -8990,6 +8991,65 @@ order: starter PR first, then the site PR.
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-home-banner`, PR after this
 merges. Other sites `no`.
 
+## Card 119: Studio icons by meaning, and a picture on every list row (2026-10-18)
+
+**Origin:** the studio-branding research (2026-10-18, items 1 and 2 of its ranked list): after cards 110 and 116 the
+Studio's colours, fonts and chrome were the site's, but every list row, desk item, group tab and tool still wore
+Sanity's generic line icons, and a row with no photo showed a bare glyph or nothing. Built in the starter, then
+first-baptist-auburn with its eight stone icons.
+
+**Canonical:** PORTABLE: `src/sanity/brandIcons.tsx` (new), `src/sanity/artIcon.tsx` (new), `src/lib/studio-icons.ts`
+(+ `studio-icons.test.ts`), `docs/agent/studio-kit.md` (new section), `brand/brand.config.schema.json`
+(`studio.icons`). Per site (NOT portable): `src/sanity/brandIconArt.tsx` (the art), `brand/brand.config.json`
+`studio.icons` (which type, group and tool means what), the two lines in `sanity.config.ts`, `structure.ts` calls,
+and each type's `preview.prepare` subtitle.
+
+**What it does.**
+
+- **Icons are named by meaning, not by look:** `times`, `give`, `scripture`, `sections`, `place`, `people`,
+  `download`, `question`, `post`... (`BRAND_ICON_KEYS`). `brandIcon(key)` draws one with `@sanity/icons` unless the
+  site's `brandIconArt.tsx` supplies art for it. `typeIcon(type)` is the icon a document type means.
+- **Art from the brand kit, as drawn:** `artIcon(url, title)` places an SVG file (a Vite `?url` import) inside a 1em
+  `<svg data-sanity-icon>`, the shape of `@sanity/icons`, so Sanity sizes it like its own icons in every slot. A
+  bare `<img>` does not work: Sanity's preview media box stretches any `img` to fill it. Nothing redraws or recolours
+  the art; full-colour icons keep their colours.
+- **Where they land:** `withBrandPreviews()` around the schema types in `sanity.config.ts` sets each document type's
+  `icon` (lists, search, references, the create menu) and an icon on every field group whose name is mapped;
+  `brandIcons()`, registered after the kit, does the same for plugin types and puts an icon on every tool (shown in
+  the phone's sidebar; the top bar draws none). `structure.ts` asks the registry instead of importing icons; page
+  templates take `typeIcon('page')`. Singleton editors name their one view "Edit".
+- **Every list row has a picture:** the decorator wraps each document type's `prepare` and fills a missing `media`
+  with `IconTile`: the type's icon centred on a square of the brand's tint, colours read from the theme's scheme.
+  The document's own image still wins. Tile colours: a wash of the accent on the paper (light) and on the dark ground
+  (dark), or `studio.icons.tile.light` / `.dark`; a one-colour icon on it is kept at 3:1.
+- **Plain subtitles:** `previewDate()` ("Sun, Nov 9, 2026") and `previewSubtitle()` (joins the non-empty parts with
+  " · "). Starter posts read "Featured · Sun, Nov 9, 2026"; announcements "Off", "Starts ..." or "Shows until ...".
+- **The gate:** `studio-icons.test.ts` parses every document type in `src/sanity/schemaTypes/` plus the kit's and the
+  workflow's, and fails if one has no meaning or no `preview`; it checks the config wiring (decorator present,
+  plugin after the kit), the tile contrast for awkward accents and the site's own, and the art file's keys.
+
+**Auburn's dressing (for reference).** The eight stone icons in `src/assets/brand/stone-icon-*.svg`, unchanged:
+Bible for sermons, series and downloads; clock for service times and the church facts group; coffee for notices,
+events and news; giving hand for giving and people; map pin for the address, plan a visit and the questions; music
+for the podcast group; praying hands for prayer and forms; blocks for pages and sections. The accent-on-navy dark tile
+sank the stones' navy and green, so the dark tile is a warm stone tone (`#CDC3AF`); the light tile is the default
+wash. They read at 16, 20 and 24px in both schemes.
+
+**Verified.** Unit tests (49). A throwaway page rendering Sanity's own `DefaultPreview` rows from the real decorated
+schema, and every meaning at 16, 20 and 24px, under the real Studio theme in light and dark, for the starter and for
+first-baptist-auburn. `npm run typegen` loads the `?url` imports fine. Not yet seen in a signed-in Studio (desk, group
+tabs, create menu, phone sidebar): the same gap as cards 116 and 118.
+
+**Adopting it in a site.** Needs cards 110 and 116 (`STUDIO_COLORS`). Copy the four PORTABLE files and the test, the
+schema file, and the doc; write `brandIconArt.tsx` (empty is fine); add `studio.icons.types` for every document type
+the starter does not know; in `sanity.config.ts` wrap the schema types in `withBrandPreviews(...)` and add
+`brandIcons()` after `ncsStudioKit(kitConfig)`; swap `structure.ts`'s icon imports for `typeIcon` / `brandIcon`;
+make each `prepare` return `media: image?.asset ? image : undefined` rather than an icon. Then `npm run typegen`,
+`npm run test:unit` and `npm run sync-check`. Marked-file order: starter PR first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-brand-icons`, PR after this merges.
+Other sites `no`.
+
 ## Card 120: the Studio's edges: its own /studio page and splash, the site's words, a wordmark (2026-10-18)
 
 **Origin:** the research pass on branding the embedded Studio (first-baptist-auburn, 2026-10-18). After cards 110 and
@@ -9042,7 +9102,7 @@ card.
 **Verified, signed out.** `astro dev` and `wrangler dev` on the built output: title and icons in the HTML, the splash
 before hydration in light and dark at 1280 and 375 and on a throttled first paint, React replacing it, the sign-in card
 with the subtitle, the "project not found" diagnostics screen still appearing (the request handler is intact), and
-`#/structure` and `#/presentation` deep links keeping their hash. Signed-in checks: `docs/PENDING.md` item 22.
+`#/structure` and `#/presentation` deep links keeping their hash. Signed-in checks: `docs/PENDING.md` item 23.
 
 **Adopting it in a site.** Needs cards 110 and 116. Copy the PORTABLE files, write `studioEdges.config.ts` (and
 optionally `StudioSplashMotif.astro`), remove `studioBasePath` from the `sanity()` integration and add

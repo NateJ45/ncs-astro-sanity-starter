@@ -19,37 +19,13 @@
 
 import type { StructureBuilder, StructureResolverContext } from 'sanity/structure';
 import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list';
-import { BellIcon } from '@sanity/icons/Bell';
-import { BlockElementIcon } from '@sanity/icons/BlockElement';
-import { CogIcon } from '@sanity/icons/Cog';
-import { HomeIcon } from '@sanity/icons/Home';
-import { UserIcon } from '@sanity/icons/User';
-import { PackageIcon } from '@sanity/icons/Package';
-import { HelpCircleIcon } from '@sanity/icons/HelpCircle';
-import { InfoOutlineIcon } from '@sanity/icons/InfoOutline';
-import { EnvelopeIcon } from '@sanity/icons/Envelope';
-import { DocumentTextIcon } from '@sanity/icons/DocumentText';
-import { DocumentsIcon } from '@sanity/icons/Documents';
-import { StarIcon } from '@sanity/icons/Star';
-import { HeartIcon } from '@sanity/icons/Heart';
-import { ThListIcon } from '@sanity/icons/ThList';
-import { EditIcon } from '@sanity/icons/Edit';
-import { TagIcon } from '@sanity/icons/Tag';
-import { BookIcon } from '@sanity/icons/Book';
-import { LockIcon } from '@sanity/icons/Lock';
-import { PinIcon } from '@sanity/icons/Pin';
-import { PresentationIcon } from '@sanity/icons/Presentation';
-import { ThumbsUpIcon } from '@sanity/icons/ThumbsUp';
-import { ColorWheelIcon } from '@sanity/icons/ColorWheel';
-import { OlistIcon } from '@sanity/icons/Olist'; // scaffold: process
-import { ArrowRightIcon } from '@sanity/icons/ArrowRight';
 import { makeGuideView } from './components/GuideView';
 import { guides, GUIDE_CATEGORIES } from './guides/content';
 import StudioGuide from './components/StudioGuide';
 import BusinessOverview from './components/BusinessOverview';
 import BrandKit from './components/BrandKit';
-import { TrashIcon } from '@sanity/icons/Trash';
 import { staffDesk } from './kit/shared';
+import { brandIcon, typeIcon, type BrandIcon } from './brandIcons';
 import { kitConfig } from './kit.config';
 import { TRASH_TYPE } from '../lib/studio-trash';
 import { WEEK_TYPE } from '../lib/studio-kit';
@@ -113,7 +89,12 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
  * S.document().views([...]) bypasses defaultDocumentNode in sanity.config.ts,
  * and that is where the per-type extra tabs are added.
  */
-function singletonWithPreview(S: StructureBuilder, schemaType: string, title: string, icon: any) {
+function singletonWithPreview(
+  S: StructureBuilder,
+  schemaType: string,
+  title: string,
+  icon: BrandIcon = typeIcon(schemaType),
+) {
   // The id is the document id ON PURPOSE: an intent link ("open the About
   // page", from the Studio kit's Home and Checkup) resolves to the path
   // pages;aboutPage, and a title-derived id ("about") left that pane blank
@@ -122,7 +103,12 @@ function singletonWithPreview(S: StructureBuilder, schemaType: string, title: st
     .id(schemaType)
     .title(title)
     .icon(icon)
-    .child(S.document().schemaType(schemaType).documentId(schemaType).views([S.view.form()]));
+    .child(
+      S.document()
+        .schemaType(schemaType)
+        .documentId(schemaType)
+        .views([S.view.form().title('Edit')]),
+    );
 }
 
 // The Studio kit's staff view hides kitConfig.staffHiddenPanes from this desk
@@ -151,7 +137,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
       S.listItem()
         .id('help-and-guide')
         .title('Help & Guide')
-        .icon(InfoOutlineIcon)
+        .icon(brandIcon('guide'))
         .child(
           S.list()
             .id('help-and-guide-list')
@@ -188,14 +174,14 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
       S.listItem()
         .id('start-here')
         .title('Start Here')
-        .icon(InfoOutlineIcon)
+        .icon(brandIcon('guide'))
         .child(
           S.list()
             .title('Start Here')
             .items([
               S.listItem()
                 .title('How the website works')
-                .icon(PresentationIcon)
+                .icon(brandIcon('guide'))
                 .child(
                   S.document()
                     .schemaType('studioGuide')
@@ -207,7 +193,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
                 ),
               S.listItem()
                 .title('Your business at a glance')
-                .icon(ThumbsUpIcon)
+                .icon(typeIcon('studioNotes'))
                 .child(
                   S.document()
                     .schemaType('studioNotes')
@@ -219,7 +205,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
                 ),
               S.listItem()
                 .title('Brand kit')
-                .icon(ColorWheelIcon)
+                .icon(brandIcon('brandKit'))
                 .child(S.component(BrandKit).title('Brand kit')),
             ]),
         ),
@@ -227,30 +213,30 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
       S.divider(),
 
       // Site Settings — pinned singleton (no preview; not a page)
-      singletonWithPreview(S, 'siteSettings', 'Site Settings', CogIcon),
+      singletonWithPreview(S, 'siteSettings', 'Site Settings'),
 
       S.divider(),
 
       // Pages — every page singleton lives here.
       S.listItem()
         .title('Pages')
-        .icon(DocumentTextIcon)
+        .icon(brandIcon('pages'))
         .child(
           S.list()
             .title('Pages')
             .items([
-              singletonWithPreview(S, 'homePage', 'Home', HomeIcon),
-              singletonWithPreview(S, 'aboutPage', 'About', UserIcon), // scaffold: about
-              singletonWithPreview(S, 'servicesPage', 'Services', PackageIcon), // scaffold: services
-              singletonWithPreview(S, 'processPage', 'Process', OlistIcon), // scaffold: process
-              singletonWithPreview(S, 'faqPage', 'FAQ', HelpCircleIcon), // scaffold: faq
-              singletonWithPreview(S, 'contactPage', 'Contact', EnvelopeIcon),
-              singletonWithPreview(S, 'journalPage', 'Journal (index page)', BookIcon), // scaffold: journal
-              singletonWithPreview(S, 'notFoundPage', '404 Page', DocumentTextIcon),
+              singletonWithPreview(S, 'homePage', 'Home'),
+              singletonWithPreview(S, 'aboutPage', 'About'), // scaffold: about
+              singletonWithPreview(S, 'servicesPage', 'Services'), // scaffold: services
+              singletonWithPreview(S, 'processPage', 'Process'), // scaffold: process
+              singletonWithPreview(S, 'faqPage', 'FAQ'), // scaffold: faq
+              singletonWithPreview(S, 'contactPage', 'Contact'),
+              singletonWithPreview(S, 'journalPage', 'Journal (index page)'), // scaffold: journal
+              singletonWithPreview(S, 'notFoundPage', '404 Page'),
 
               S.divider(),
 
-              singletonWithPreview(S, 'privacyPage', 'Privacy Policy Page', LockIcon),
+              singletonWithPreview(S, 'privacyPage', 'Privacy Policy Page'),
 
               S.divider(),
 
@@ -258,7 +244,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               // Multi-instance (not a singleton), so it is a normal document list.
               S.documentTypeListItem('page')
                 .title('Custom pages (build your own)')
-                .icon(DocumentsIcon),
+                .icon(typeIcon('page')),
 
               S.divider(),
 
@@ -269,7 +255,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               // you find one again.
               S.documentTypeListItem('sectionPreset')
                 .title('Saved sections')
-                .icon(BlockElementIcon),
+                .icon(typeIcon('sectionPreset')),
 
               S.divider(),
 
@@ -279,7 +265,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               // hand for an address that never existed on this site.
               S.documentTypeListItem('redirect')
                 .title('Redirects (old links)')
-                .icon(ArrowRightIcon),
+                .icon(typeIcon('redirect')),
             ]),
         ),
 
@@ -290,14 +276,14 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
       S.listItem()
         .id('content')
         .title('Content')
-        .icon(ThListIcon)
+        .icon(brandIcon('content'))
         .child(
           S.list()
             .title('Content')
             .items([
               // Business info: service areas, travel fees, availability, geo.
               // Moved here from Site Settings so Settings is identity + infrastructure only.
-              singletonWithPreview(S, 'businessInfo', 'Business info', PinIcon),
+              singletonWithPreview(S, 'businessInfo', 'Business info'),
 
               S.divider(),
 
@@ -305,7 +291,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               orderableDocumentListDeskItem({
                 type: 'service',
                 title: 'Services',
-                icon: PackageIcon,
+                icon: typeIcon('service'),
                 S,
                 context,
               }),
@@ -314,7 +300,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               orderableDocumentListDeskItem({
                 type: 'philosophyPoint',
                 title: 'Philosophy Values',
-                icon: HeartIcon,
+                icon: typeIcon('philosophyPoint'),
                 S,
                 context,
               }),
@@ -323,14 +309,18 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               orderableDocumentListDeskItem({
                 type: 'processStep',
                 title: 'Process Steps',
-                icon: OlistIcon,
+                icon: typeIcon('processStep'),
                 S,
                 context,
               }),
               // scaffold:end
-              S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon), // scaffold: testimonials
-              S.documentTypeListItem('faqCategory').title('FAQ Categories').icon(TagIcon), // scaffold: faq
-              S.documentTypeListItem('faqItem').title('FAQ Items').icon(HelpCircleIcon), // scaffold: faq
+              S.documentTypeListItem('testimonial')
+                .title('Testimonials')
+                .icon(typeIcon('testimonial')), // scaffold: testimonials
+              S.documentTypeListItem('faqCategory')
+                .title('FAQ Categories')
+                .icon(typeIcon('faqCategory')), // scaffold: faq
+              S.documentTypeListItem('faqItem').title('FAQ Items').icon(typeIcon('faqItem')), // scaffold: faq
 
               S.divider(),
 
@@ -338,7 +328,9 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               // Each one has a date window (startDate / endDate) and an on/off toggle.
               // The active announcement is picked at build time; a rebuild is required
               // for the banner to appear or disappear on the live site.
-              S.documentTypeListItem('announcement').title('Announcements').icon(BellIcon),
+              S.documentTypeListItem('announcement')
+                .title('Announcements')
+                .icon(typeIcon('announcement')),
             ]),
         ),
 
@@ -348,15 +340,17 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
       // Journal — its own section so the editor can find posts + categories at a glance
       S.listItem()
         .title('Journal')
-        .icon(BookIcon)
+        .icon(brandIcon('journal'))
         .child(
           S.list()
             .title('Journal')
             .items([
-              S.documentTypeListItem('journalEntry').title('Posts').icon(EditIcon),
+              S.documentTypeListItem('journalEntry').title('Posts').icon(typeIcon('journalEntry')),
               // The same posts as a sortable table (card 117, tables.config.ts).
               ...TABLES.filter((c) => c.type === 'journalEntry').map((c) => tableListItem(S, c)),
-              S.documentTypeListItem('journalCategory').title('Categories').icon(TagIcon),
+              S.documentTypeListItem('journalCategory')
+                .title('Categories')
+                .icon(typeIcon('journalCategory')),
             ]),
         ),
       // scaffold:end
@@ -369,7 +363,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
       S.listItem()
         .id('trash')
         .title('Trash (bring things back)')
-        .icon(TrashIcon)
+        .icon(brandIcon('trash'))
         .child(
           S.documentTypeList(TRASH_TYPE)
             .id('trash-list')

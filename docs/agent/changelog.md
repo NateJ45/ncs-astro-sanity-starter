@@ -13,6 +13,15 @@ beside the square icon in the navy bar (root-level navbar middleware, hidden und
 custom `auth` store was weighed and left out: Sanity uses a custom store as-is and drops its own expired-session and
 CORS handling.
 
+_2026-10-18: Studio icons by meaning, and a picture on every list row (PORTS card 119)._
+
+**Decision.** Every icon in the Studio is now named by what it means (service times, giving, scripture, pages...),
+and a site can draw any meaning with its own brand-kit art, shown exactly as drawn. The same icon then appears on the
+document type, its desk item, its field-group tabs, the create menu and the tools in the phone sidebar. Every list row
+has a picture: the document's own image, else the type's icon on a small square of the brand's tint that suits light
+and dark. Subtitles say the date and status in plain words. Which type means what lives in brand.config.json, so a
+fork adds a line, not code. A unit test fails when a new document type has no icon or no preview. No new dependency.
+
 _2026-10-18: Home's welcome becomes a branded banner (PORTS card 118)._
 
 **Decision.** The plain header at the top of the Studio's Home is now a banner in the navbar's deep brand colour,

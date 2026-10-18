@@ -358,7 +358,14 @@ Unit-tested (`studio-banner.test.ts`) and rendered in a throwaway page with the 
 1280 and 375. Not yet seen in a signed-in Studio: the banner under the real navbar (the two should be one colour),
 the editor's real first name, and View the website opening the live site in a new tab.
 
-### 22. Card 120 (the Studio's edges): the signed-in checks (opened 2026-10-18)
+### 22. Card 119 (icons and list-row pictures): see them in a signed-in Studio (opened 2026-10-18)
+
+Unit-tested (`studio-icons.test.ts`) and rendered in a throwaway page (Sanity's own preview rows from the decorated
+schema, every icon at 16, 20 and 24px, light and dark). Not yet seen signed in: the desk items and document lists with
+their tiles, a row with its own photo next to rows without, field-group tabs with icons, the create menu and page
+templates, a reference field's preview, and the tools' icons in the phone sidebar at 375px.
+
+### 23. Card 120 (the Studio's edges): the signed-in checks (opened 2026-10-18)
 
 Unit-tested (`studio-edges.test.ts`, including every reworded key against the installed sanity), `tests/studio-boot.spec.ts`
 on the built page, and seen signed out under `astro dev` and `wrangler dev`: the splash before hydration (light, dark,
