@@ -170,7 +170,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 50  | Production deploy workflow                                                     | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 51  | Compressed static server for Lighthouse                                        | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 52  | Radix islands hydrate at client:idle, not client:only                          | n/a     | partial     | yes      | yes              | no            | no             | n/a                | yes                 | partial        |
-| 53  | One accent splitter (heading-accent absorbs scriptAccent)                      | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 53  | One accent splitter (heading-accent absorbs scriptAccent)                      | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
 | 54  | Analytics component (GA4 + Cloudflare beacon, canonical)                       | no      | no          | yes      | yes              | no            | no             | n/a                | yes                 | yes            |
 | 55  | Build reads always use the Sanity CDN; a PROD fetch error throws               | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
 | 56  | No page-level `.catch()` swallows the PROD throw                               | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | partial        |
@@ -5502,6 +5502,8 @@ were moved into `heading-accent.test.ts` under a describe block that names where
 came from, and two of them were rewritten to record the deliberate behaviour change
 rather than dropped. 74 assertions before, 83 after. A refactor that comes out with
 fewer assertions than it went in with has lost coverage, not gained simplicity.
+
+**Adopted in stonesteps-50k, 2026-10-18** (with card 114): three call sites, the test moved, `npm run parity compare` 32/32 unchanged.
 
 **Porting it.** Delete `src/lib/scriptAccent.ts` and its test, point every
 `splitScriptAccent(` call at `splitHeadingAccent(`, drop the now-redundant `?? ''`
