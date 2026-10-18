@@ -1,15 +1,22 @@
 ---
 // Safe to edit by hand
-// Page-builder block: sandboxed iframe embed.
-// Accepts either a URL (Calendly, Cal.com, Tally, Google Forms, etc.) or a raw
-// iframe code snippet for providers that supply their own HTML.
-//
-// TRUST MODEL: embedCode is rendered via set:html and has the same trust level
-// as any other CMS content — only paste code from providers you trust.
-// The /faq and /contact page editors are trusted contributors.
+// Page-builder block: "Custom code or embed" (PORTS.md card 121).
+// Three ways in, decided by the fields:
+//   embedUrl                 a provider's page in a sandboxed iframe (Calendly,
+//                            Cal.com, Tally, Google Forms). Unchanged.
+//   embedCode                pasted HTML/CSS/JS in its OWN BOX: CustomCodeFrame,
+//                            an srcdoc iframe with no allow-same-origin, so it
+//                            cannot read the site's cookies, storage or page.
+//                            Sizes itself to its content. The default.
+//   embedCode + runsOnPage   the old behaviour, set:html straight into the page,
+//                            for trusted provider snippets that need the page
+//                            itself. Listed by the Checkup ("Code that runs
+//                            directly on the page").
+// Trust model in full: docs/agent/custom-code.md.
 //
 // SELF_CONTAINED — manages its own bg-background surface (no surface prop).
 import SectionHeading from '@/components/SectionHeading.astro';
+import CustomCodeFrame from '@/components/CustomCodeFrame.astro';
 
 interface Props {
   eyebrow?: string;
@@ -17,6 +24,8 @@ interface Props {
   subhead?: string;
   embedUrl?: string;
   embedCode?: string;
+  /** Run embedCode directly on the page instead of in its own box. Off by default. */
+  runsOnPage?: boolean;
   heightHint?: 'short' | 'medium' | 'tall';
   headingId?: string;
 }
@@ -27,11 +36,14 @@ const {
   subhead,
   embedUrl,
   embedCode,
+  runsOnPage = false,
   heightHint = 'medium',
   headingId = 'embed-section-heading',
 } = Astro.props as Props;
 
 const hasContent = !!(embedUrl || embedCode);
+// Boxed custom code sizes itself, so the wrapper must not hold the min-height.
+const boxedCode = !embedUrl && !!embedCode && !runsOnPage;
 const hasHeading = !!(eyebrow || headline);
 
 // Map height hint to sensible min-height values.
@@ -41,6 +53,8 @@ const minHeightClass =
     : heightHint === 'tall'
       ? 'min-h-[900px]'
       : 'min-h-[640px]';
+// The space boxed code holds while it loads (and keeps without JavaScript).
+const initialHeight = heightHint === 'short' ? 240 : heightHint === 'tall' ? 640 : 400;
 
 // Sandbox policy: allow forms + scripts for widgets like Tally, Calendly, Cal.
 // allow-same-origin is required for Calendly to post messages to parent window.
@@ -66,7 +80,7 @@ const iframeTitle = headline || eyebrow || 'Embedded content';
         />
       )}
 
-      <div class:list={['w-full', minHeightClass, hasHeading && 'mt-section-md']}>
+      <div class:list={['w-full', !boxedCode && minHeightClass, hasHeading && 'mt-section-md']}>
         {embedUrl ? (
           /* URL-based embed — fully sandboxed iframe */
           <iframe
@@ -77,10 +91,17 @@ const iframeTitle = headline || eyebrow || 'Embedded content';
             class:list={['w-full border-0', minHeightClass]}
             allowfullscreen
           />
+        ) : boxedCode ? (
+          /* Pasted code in its own box (the default). */
+          <CustomCodeFrame code={embedCode!} title={iframeTitle} initialHeight={initialHeight} />
         ) : embedCode ? (
-          /* Raw code embed — editor-pasted, same trust level as CMS content.
-             Rendered inside a containing div so it inherits our layout width. */
-          <div class:list={['w-full', minHeightClass]} set:html={embedCode} />
+          /* "Runs directly on the page" switched on: editor-pasted code with the
+             same trust as the site itself. Kept for trusted provider snippets. */
+          <div
+            class:list={['w-full', minHeightClass]}
+            data-custom-code-on-page
+            set:html={embedCode}
+          />
         ) : null}
       </div>
     </div>

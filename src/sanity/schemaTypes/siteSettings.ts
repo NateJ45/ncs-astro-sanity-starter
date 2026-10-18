@@ -5,6 +5,8 @@ import { defineType, defineField, defineArrayMember } from 'sanity';
 import { LinkIcon } from '@sanity/icons/Link';
 import { ChevronDownIcon } from '@sanity/icons/ChevronDown';
 import { ListIcon } from '@sanity/icons/List';
+import { CodeTextInput } from '../components/CodeTextInput';
+import { codeWarningMessage } from '../../lib/custom-code';
 
 export const siteSettings = defineType({
   name: 'siteSettings',
@@ -19,6 +21,8 @@ export const siteSettings = defineType({
     { name: 'social', title: 'Social & footer' },
     { name: 'newsletter', title: 'Newsletter' },
     { name: 'reviews', title: 'Reviews' },
+    // PORTS.md card 121: site-wide extra code, rendered by BaseLayout only.
+    { name: 'code', title: 'Code on every page' },
   ],
   fields: [
     defineField({
@@ -697,6 +701,33 @@ export const siteSettings = defineType({
       rows: 2,
       description:
         'In-scope satisfaction guarantee shown near CTAs on the Services and Contact pages. Leave blank to hide.',
+    }),
+
+    // ── Code on every page (PORTS.md card 121) ────────────────────────────────
+    // Rendered by BaseLayout on public pages only, never on /studio or
+    // /preview (isSiteCodeRoute in src/lib/custom-code.ts). Not part of
+    // SITE_SETTINGS_PROJECTION, so the preview never even fetches it.
+    defineField({
+      name: 'headCode',
+      title: 'Code for the page head',
+      type: 'text',
+      rows: 8,
+      group: 'code',
+      components: { input: CodeTextInput },
+      description:
+        'Goes at the end of <head> on every page: a verification tag, an analytics or chat script. It runs directly on every page of the website, not in a box, so it can do anything the website can. Only paste code from a provider you trust (an analytics or chat service, say). It never runs in the Studio or the preview. The Checkup lists it while it is here.',
+      validation: (Rule) => Rule.custom((value) => codeWarningMessage(value, true)).warning(),
+    }),
+    defineField({
+      name: 'bodyEndCode',
+      title: 'Code for the end of every page',
+      type: 'text',
+      rows: 8,
+      group: 'code',
+      components: { input: CodeTextInput },
+      description:
+        'Goes just before </body> on every page. It runs directly on every page of the website, not in a box, so it can do anything the website can. Only paste code from a provider you trust (an analytics or chat service, say). It never runs in the Studio or the preview. The Checkup lists it while it is here.',
+      validation: (Rule) => Rule.custom((value) => codeWarningMessage(value, true)).warning(),
     }),
   ],
   preview: {

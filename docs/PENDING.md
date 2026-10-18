@@ -373,7 +373,15 @@ on the built page, and seen signed out under `astro dev` and `wrangler dev`: the
 navbar wordmark beside the square icon (and gone under 600px), the user-menu labels, the signed-out notice after a real
 session expires, and Presentation opening a page through the new route.
 
-### 24. Card 124 (Studio app, Post a photo, Earlier versions): the signed-in and on-device checks (opened 2026-10-18)
+### 24. Card 121 (custom code): the signed-in Studio checks (opened 2026-10-18)
+
+Unit-tested (`custom-code.test.ts`, the two Checkup rules in `studio-checkup.test.ts`), proved in Playwright
+(`tests/custom-code.spec.ts`: the boxed probe cannot read `parent.document`, the page's localStorage or cookies; the
+on-page probe can), and seen under `wrangler dev` with the site fonts loading in the box, light and dark, 375 and 1280. Not yet seen signed in: the monospace code box and its count, the warning under it, the switch appearing only
+once there is code, Site settings' "Code on every page" tab, both Checkup findings opening the right field, and the
+boxed frame in Presentation.
+
+### 25. Card 124 (Studio app, Post a photo, Earlier versions): the signed-in and on-device checks (opened 2026-10-18)
 
 Unit-tested (`studio-app.test.ts`, `photo-post.test.ts`, `earlier-versions.test.ts`, `restore-doc.test.mjs`) and
 `tests/studio-app.spec.ts` on the build (manifest valid, worker on /studio/ only, offline page, Chrome's installability
