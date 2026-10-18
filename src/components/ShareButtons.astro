@@ -12,7 +12,8 @@
 // whatever else the visitor has.
 //
 // Buttons are the site's secondary button (the outline style CtaLink uses), so
-// they stay in the page's one button family (rule 17).
+// they stay in the page's one button family (rule 17). A site whose buttons are
+// its own classes passes them as `buttonClass` (keep a gap for the icon).
 //
 //   <ShareButtons title={sermon.title} path={`/sermons/${slug}/`} />
 // =============================================================================
@@ -29,6 +30,8 @@ interface Props {
   /** Visible label over the buttons. */
   heading?: string;
   class?: string;
+  /** Replaces the built-in outline button classes with the site's own. */
+  buttonClass?: string;
 }
 
 const {
@@ -36,12 +39,14 @@ const {
   path = Astro.url.pathname,
   heading = 'Share this',
   class: extra = '',
+  buttonClass,
 } = Astro.props as Props;
 const url = absoluteUrl(site.url, path);
 const links = shareLinks({ url, title });
 const headingId = `share-${path.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home'}`;
 
 const button =
+  buttonClass ??
   'share-buttons__btn press-tactile inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sm border border-primary px-m py-s text-xs font-semibold tracking-[0.12em] text-link uppercase transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none';
 ---
 

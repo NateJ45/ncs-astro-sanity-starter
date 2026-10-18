@@ -56,7 +56,7 @@ closes. The live region reads "6 results for "grace" in Sermons." after each sea
 `<ShareButtons title={...} path={`/sermons/${slug}/`} />` renders Facebook, X, Email and Copy link as plain links in
 the outline button style, plus a "Share" button for the phone's own share sheet where the browser supports it and the
 pointer is coarse. URLs come from `src/lib/share-links.ts` and use `site.url`, so they are right before and after a
-domain move once `site.ts` is updated. No third-party script is loaded. List one built page per template that carries
+domain move once `site.ts` is updated. No third-party script is loaded. A site with its own button classes passes them as `buttonClass` (for example `"btn-auburn btn-auburn--secondary gap-2"`) so share stays in the page's one button family (rule 17). List one built page per template that carries
 it in `SHARE_ROUTES` (`tests/routes.ts`) so `tests/search.spec.ts` checks the links and the copy button.
 
 ## Tests
