@@ -224,14 +224,14 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 104 | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file        | n/a     | no          | yes      | n/a              | no            | no             | n/a                | n/a                 | no             |
 | 105 | A text hero (no photo, or editorial) still renders its buttons                 | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 | 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 107 | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page  | n/a     | no          | yes      | no               | partial       | n/a            | n/a                | partial             | no             |
+| 107 | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page  | n/a     | yes         | yes      | yes              | partial       | n/a            | n/a                | partial             | yes            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
 Row 107 (2026-10-17): mas-monograms (`html.reveal-ready`) and nixoncreativestudio (`.js`) already gate
-their reveal on a head-script class, a divergent form of the same idea, hence `partial`; neither was changed. presacademy,
-reid-design-site and stonesteps-50k hide `[data-reveal]`, `[data-stagger-grid] > *` and `.img-curtain` unconditionally
-and stay `no` until each copies the change. first-baptist-auburn and fbcm have no column; see the card.
+their reveal on a head-script class, a divergent form of the same idea, hence `partial`; neither was changed. presacademy
+(#104), reid-design-site (#155) and stonesteps-50k (#125) took the change on 2026-10-17, hence `yes`. first-baptist-auburn
+and fbcm have no column; see the card.
 
 Row 106 (2026-10-17): first-baptist-auburn has no column; it is the origin and resyncs to the marked copies right
 after the starter merges. 2ndpreschicago, ncs-church-starter and nixoncreativestudio have no Studio for staff, hence `n/a`.
@@ -8437,6 +8437,14 @@ JavaScript disabled (Playwright `javaScriptEnabled: false`: no element under `[d
 still plays. Visual baselines should not move, since the Playwright settle helper adds the end classes anyway.
 
 **Status, 2026-10-17.** Starter `yes`. mas-monograms and nixoncreativestudio `partial` (already gated on their own head
-class). presacademy, reid-design-site and stonesteps-50k `no`. first-baptist-auburn (no column) already sets
+class). presacademy, reid-design-site and stonesteps-50k `yes` (2026-10-17). first-baptist-auburn (no column) already sets
 `html.motion` for its own `motion.css` and scopes its `globals.css` copies in the PR that follows this card. fbcm (no column)
-has the unconditional rules and stays `no`.
+took it too (fbcm#70).
+
+**Watch for site variants when adopting.** `html.motion [data-reveal]` is (0,2,1), so a site rule such as
+`[data-reveal='arch'] { opacity: 1 }` or `[data-reveal].reveal-l { translate: -1.5rem 0 }` now LOSES to the base start
+state: with JS on the figure fades as a whole box, or the directional slide becomes a plain rise. Prefix those variants
+with `html.motion` too (fbcm did its whole arch/mark/draw/ink/sign block, presacademy its `.reveal-l`/`.reveal-r`,
+`.reveal-rise` and eyebrow rules). Descendant start states that hide content (`[data-reveal] .wx__bar { scaleY(0) }`, a
+clipped `.reveal-rise` headline) take it as well, start AND end, or the prefixed start outranks the old end. In an Astro
+scoped `<style>`, write `:global(html.motion) .x[data-reveal] ...`.
