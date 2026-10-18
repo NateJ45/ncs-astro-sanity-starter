@@ -245,6 +245,35 @@
         "accent": {
           "$ref": "#/definitions/hex",
           "description": "Optional. The Studio's accent (primary buttons, links, focus rings) when the site's palette.light --primary is wrong for UI chrome. Only its hue and saturation are used; src/lib/studio-theme.ts solves the lightness and guards contrast (PORTS.md card 110)."
+        },
+        "icons": {
+          "type": "object",
+          "description": "Optional. The Studio's icons by meaning (PORTS.md card 119, src/lib/studio-icons.ts lists the meanings). The art for a meaning is src/sanity/brandIconArt.tsx; these maps say which document type, field group or tool means what, on top of the starter's defaults.",
+          "properties": {
+            "types": {
+              "type": "object",
+              "description": "Document type name -> meaning, e.g. \"sermon\": \"scripture\".",
+              "additionalProperties": { "type": "string" }
+            },
+            "groups": {
+              "type": "object",
+              "description": "Field group name -> meaning, e.g. \"media\": \"image\".",
+              "additionalProperties": { "type": "string" }
+            },
+            "tools": {
+              "type": "object",
+              "description": "Tool name -> meaning, e.g. \"home\": \"home\".",
+              "additionalProperties": { "type": "string" }
+            },
+            "tile": {
+              "type": "object",
+              "description": "The square behind a type's icon in a list row when the document has no image of its own. Unset: a wash of the accent on the paper (light) and on the dark ground (dark).",
+              "properties": {
+                "light": { "$ref": "#/definitions/hex" },
+                "dark": { "$ref": "#/definitions/hex" }
+              }
+            }
+          }
         }
       }
     }

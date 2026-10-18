@@ -54,6 +54,7 @@ import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 import { ncsStudioKit } from './src/sanity/kit';
 import { kitConfig } from './src/sanity/kit.config';
 import { ncsWorkflowTools } from './src/sanity/workflow';
+import { brandIcons, typeIcon, withBrandPreviews } from './src/sanity/brandIcons';
 
 // =============================================================================
 // Studio theme
@@ -185,11 +186,16 @@ export default defineConfig({
     // KEEP IT LAST: its tools reducer has to see every other plugin's tools.
     // See docs/agent/studio-kit.md and PORTS.md card 106.
     ncsStudioKit(kitConfig),
+    // Icons by meaning on every tool, and on plugin-registered types (card 119,
+    // src/sanity/brandIcons.tsx). After the kit so its tools get icons too; it
+    // only swaps icons, so the kit still decides what shows and in what order.
+    brandIcons(),
   ],
 
   schema: {
     // Portable Text styles drawn in the site's fonts (StudioLook.tsx, card 116).
-    types: withEditorTypography(schemaTypes, STUDIO_FONTS),
+    // Every document type gets its icon and a picture in list rows (card 119).
+    types: withBrandPreviews(withEditorTypography(schemaTypes, STUDIO_FONTS)),
     // Page templates (the authoring kit, PORTS.md card 109): the starting
     // points offered when someone makes a Custom page. The list is the site's
     // own, in src/sanity/pageTemplates.ts. `value` is a function so every new
@@ -203,6 +209,7 @@ export default defineConfig({
         title: t.title,
         description: t.description,
         schemaType: 'page',
+        icon: typeIcon('page'),
         value: () => ({ pageBuilder: t.sections() }),
       })),
     ],

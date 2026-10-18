@@ -21,6 +21,7 @@
 //   urgent    -> bg-destructive / text-destructive-foreground (red, closures)
 
 import { defineType, defineField } from 'sanity';
+import { previewDate, previewSubtitle } from '../../lib/studio-icons';
 import { BellIcon } from '@sanity/icons/Bell';
 
 export const announcement = defineType({
@@ -113,16 +114,19 @@ export const announcement = defineType({
       start: 'startDate',
       end: 'endDate',
     },
+    // "Off", "Starts Mon, Nov 3, 2026" or "Shows until Sun, Nov 9, 2026" (card 119).
     prepare: ({ message, style, enabled, start, end }) => {
-      const window = [
-        start ? new Date(start).toLocaleDateString() : null,
-        end ? new Date(end).toLocaleDateString() : null,
-      ]
-        .filter(Boolean)
-        .join(' to ');
+      const now = new Date().toISOString();
+      const when = !enabled
+        ? 'Off'
+        : start && start > now
+          ? `Starts ${previewDate(start)}`
+          : end
+            ? `Shows until ${previewDate(end)}`
+            : 'Showing, no end date';
       return {
         title: message || 'Announcement',
-        subtitle: `${enabled ? '' : 'OFF: '}${style ?? 'info'}${window ? ` (${window})` : ''}`,
+        subtitle: previewSubtitle(when, style),
       };
     },
   },
