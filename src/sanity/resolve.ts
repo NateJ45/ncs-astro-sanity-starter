@@ -42,6 +42,18 @@ export const SINGLETON_PREVIEW_PATHS: Record<string, string> = {
   notFoundPage: '/preview/404',
 };
 
+/**
+ * Shared content (PORTS.md card 110): documents that change EVERY page (the
+ * header, the footer, the banner), so Presentation and the document's
+ * "Used on" list say so in amber before the editor changes a phone number
+ * or a menu. Home stands in as the page to preview it on.
+ */
+const EVERY_PAGE = {
+  locations: [{ title: 'Home', href: '/preview' }],
+  message: 'Shown on every page',
+  tone: 'caution' as const,
+};
+
 const previewHref = (slug?: string) => (slug === 'home' ? '/preview' : `/preview/${slug}`);
 
 // One static location entry per singleton.
@@ -86,8 +98,14 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     faqItem: { locations: [{ title: 'FAQ', href: '/preview/faq' }] }, // scaffold: faq
     faqCategory: { locations: [{ title: 'FAQ', href: '/preview/faq' }] }, // scaffold: faq
     journalCategory: { locations: [{ title: 'Journal', href: '/preview/journal' }] }, // scaffold: journal
-    announcement: { locations: [{ title: 'Home', href: '/preview' }] },
-    siteSettings: { locations: [{ title: 'Home', href: '/preview' }] },
-    businessInfo: { locations: [{ title: 'Contact', href: '/preview/contact' }] },
+    // The banner, the header and footer, and the contact details all render
+    // site-wide (BaseLayout, Header, Footer, and the siteSettings query, which
+    // folds businessInfo in), so each one is "Shown on every page".
+    announcement: EVERY_PAGE,
+    siteSettings: EVERY_PAGE,
+    businessInfo: {
+      ...EVERY_PAGE,
+      locations: [...EVERY_PAGE.locations, { title: 'Contact', href: '/preview/contact' }],
+    },
   },
 };

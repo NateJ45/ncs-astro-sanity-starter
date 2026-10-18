@@ -15,7 +15,7 @@ A production-ready **Astro 7 + Sanity v6 + Cloudflare Workers** site template, f
 The must-knows:
 
 - TypeScript strict, `output: 'static'` with a handful of SSR routes (`/preview/**`, `/api/draft-mode/*`). Node 22.12+. Tailwind 4 via `@tailwindcss/vite` (no `tailwind.config.mjs`; tokens in `@theme` in `src/styles/globals.css`). React 19 islands only where interactive.
-- The Sanity Studio is **embedded at `/studio`**. There is no separate studio dev server or deploy. Never run `npx sanity deploy`.
+- The Sanity Studio is **embedded at `/studio`**. There is no separate studio dev server or deploy. Never run `npx sanity deploy`. Its name, mark (`public/favicon.svg`) and accent and background colours come from `brand/brand.config.json` at build time, contrast-guarded by `studio-theme.test.ts` (PORTS.md card 110); `studio.components.logo` is dead in Sanity 6, so never use it.
 - `sanityFetch(query, params, fallback)` in `src/lib/sanity.ts` is the single chokepoint for Sanity reads; with no project configured it returns the fallback, so `npm run build` works on a fresh clone.
 - Hosting is **Cloudflare Workers**, not Pages. Deploy with `npm run deploy` (`wrangler deploy -c dist/server/wrangler.json`). A bare `wrangler deploy` 404s every sub-route.
 

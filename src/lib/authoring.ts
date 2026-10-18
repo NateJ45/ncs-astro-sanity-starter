@@ -6,7 +6,7 @@
 // does: start from a page template, pick sections from a picture grid, drop in
 // a saved pattern, or place a SYNCED section that changes everywhere when its
 // saved copy changes. The Studio pieces live in src/sanity/ (pageTemplates.ts,
-// components/PageBuilderInput.tsx, guardrails.ts); everything here is plain data
+// components/PageBuilderInput.tsx, ../lib/page-guardrails.ts); everything here is plain data
 // in, plain data out, so node --test can pin it without a Studio.
 //
 // Four jobs:

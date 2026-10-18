@@ -185,7 +185,8 @@ const SECTION_ARMS = `
 // the SAME arms, and SectionRenderer swaps the block for them in place
 // (expandSyncedSections in src/lib/authoring.ts). One level only: a saved
 // section cannot hold a synced section, so there is nothing deeper to resolve.
-// A missing or deleted saved section resolves to null and renders nothing.
+// A missing saved section resolves to null and renders nothing. (The reference is strong, so
+// Sanity refuses to delete a saved section that a page still uses.)
 export function sectionsProjection(field = 'pageBuilder'): string {
   return `${field}[]{
     ...,

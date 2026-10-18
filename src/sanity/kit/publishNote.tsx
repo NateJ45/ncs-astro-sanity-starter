@@ -19,6 +19,7 @@
 import { useEffect, useRef } from 'react';
 import type { DocumentActionComponent, DocumentActionProps } from 'sanity';
 import { useToast } from '@sanity/ui/toast';
+import { PUBLISHED_EVENT } from './shared';
 
 export const PUBLISHED_NOTE =
   'The website updates itself in a few minutes. Home shows "Up to date" once your change is live.';
@@ -41,6 +42,8 @@ export function withPublishNote(publishAction: DocumentActionComponent): Documen
       if (armed.current === null) return;
       if (!draftRev && publishedRev && publishedRev !== armed.current) {
         armed.current = null;
+        // The navbar line and Home re-check soon after (PORTS.md card 110).
+        window.dispatchEvent(new Event(PUBLISHED_EVENT));
         toast.push({
           status: 'success',
           title: 'Published',

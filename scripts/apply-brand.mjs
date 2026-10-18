@@ -650,6 +650,50 @@ function rewriteSanityConfig(config) {
 
 // ---- Rewrite: scripts/generate-og-default.mjs ---------------------------
 
+// ---- Check: the Studio's name, mark and colours (PORTS.md card 110) -------
+//
+// Nothing to rewrite: sanity.config.ts reads `title` from brand.config.json
+// `name`, the workspace icon and the Studio tab use public/favicon.svg, and
+// src/sanity/studioTheme.ts reads the accent and the two backgrounds from the
+// JSON at build time. What CAN drift is the artwork, so this says so, and it
+// rejects a studio.accent that is not a hex colour. The contrast guard itself
+// is the unit test src/lib/studio-theme.test.ts.
+
+const HEX6 = /^#[0-9A-Fa-f]{6}$/;
+
+function checkStudioIdentity(config) {
+  const accent = config.studio.accent;
+  if (accent !== undefined && !HEX6.test(accent)) {
+    throw new Error(`apply-brand: studio.accent must be a #RRGGBB hex colour, got "${accent}"`);
+  }
+  console.log(`[apply-brand] Studio title: "${config.name}" (read from brand.config.json)`);
+
+  const faviconPath = resolve(root, 'public/favicon.svg');
+  const favicon = existsSync(faviconPath) ? readFileSync(faviconPath, 'utf-8') : '';
+  if (!favicon) {
+    console.warn('[apply-brand] WARNING: public/favicon.svg is missing; the Studio has no mark.');
+  } else if (config.name !== 'Studio Starter' && favicon.includes('Studio Starter favicon')) {
+    console.warn(
+      '[apply-brand] WARNING: public/favicon.svg is still the starter\'s "S" mark. ' +
+        'Draw the brand mark there, then run `npm run favicon`; the Studio uses the same file.',
+    );
+  }
+
+  const source = accent ?? config.palette.light['--primary'];
+  const notes = [
+    ['Studio accent', source],
+    ['Studio light background', config.palette.light['--background']],
+    ['Studio dark background', config.palette.dark['--background']],
+  ];
+  for (const [label, value] of notes) {
+    if (!HEX6.test(String(value))) {
+      console.warn(
+        `[apply-brand] ${label}: "${value}" is not a #RRGGBB hex, so the Studio uses Sanity's own.`,
+      );
+    }
+  }
+}
+
 function rewriteOgDefault(config) {
   rewriteFile(resolve(root, 'scripts/generate-og-default.mjs'), function (text, filePath) {
     // Escape single quotes in tagline to avoid breaking the JS single-quoted string
@@ -892,6 +936,12 @@ async function main() {
       'sanity.config.ts',
       function () {
         rewriteSanityConfig(config);
+      },
+    ],
+    [
+      'Studio identity',
+      function () {
+        checkStudioIdentity(config);
       },
     ],
     [

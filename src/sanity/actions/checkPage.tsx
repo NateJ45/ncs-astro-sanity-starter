@@ -1,6 +1,11 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 import { useCallback, useState } from 'react';
-import { useClient, type DocumentActionComponent, type DocumentActionProps } from 'sanity';
+import {
+  useClient,
+  type DocumentActionComponent,
+  type DocumentActionProps,
+  type SanityClient,
+} from 'sanity';
 import { SearchIcon } from '@sanity/icons/Search';
 import { Box, Button, Card, Flex, Stack, Text } from '@sanity/ui';
 import { useToast } from '@sanity/ui/toast';
@@ -28,6 +33,21 @@ import { readSlug } from '../pageOps';
 // =============================================================================
 
 const API = { apiVersion: '2025-01-01' } as const;
+
+/**
+ * The whole check for one document. Reads every custom-page address that
+ * exists, so a link to one of them is not reported (both twins: an address
+ * that only exists in a draft is still one the editor is heading for;
+ * `readSlug` accepts either slug shape the family uses), then runs the three
+ * checks. Shared with the kit's "Help for this page" panel (kit.config.ts
+ * `pageCheck`, PORTS.md card 110). Throws when the address list cannot be
+ * read; each caller decides how to fall back.
+ */
+export async function runPageCheck(client: SanityClient, doc: unknown): Promise<CheckGroup[]> {
+  const raw = await client.fetch<unknown[]>('*[_type == "page" && defined(slug)].slug');
+  const slugs = (raw ?? []).map(readSlug).filter((s): s is string => Boolean(s));
+  return checkPage(doc, PAGE_CHECK_CONFIG, slugs);
+}
 
 /** Green tick / amber count line for one check. */
 function GroupCard({ group }: { group: CheckGroup }) {
@@ -75,13 +95,7 @@ export const CheckPageAction: DocumentActionComponent = (props: DocumentActionPr
     setOpen(true);
     setGroups(null);
     try {
-      // Every custom-page address that exists, so a link to one of them is not
-      // reported. Both twins: an address that only exists in a draft is still
-      // an address the editor is heading for. `readSlug` accepts either slug
-      // shape the family uses (a plain string, or Sanity's slug object).
-      const raw = await client.fetch<unknown[]>('*[_type == "page" && defined(slug)].slug');
-      const slugs = (raw ?? []).map(readSlug).filter((s): s is string => Boolean(s));
-      setGroups(checkPage(doc, PAGE_CHECK_CONFIG, slugs));
+      setGroups(await runPageCheck(client, doc));
     } catch (err) {
       console.error('[check-page] could not read the page list', err);
       toast.push({

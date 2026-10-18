@@ -454,3 +454,83 @@ export const guides: Guide[] = [
     ],
   },
 ];
+
+// ── Studio kit helpers (PORTS.md card 110) ───────────────────────────────────
+// Appended rather than written into the list above, so a site rewriting its
+// guides keeps these two by default. Both describe kit features, not the site.
+guides.push(
+  {
+    slug: 'website-status',
+    category: 'Start here',
+    title: 'The line under the top bar',
+    icon: '🕒',
+    lead: 'A quiet answer to "is my change on the website yet?", wherever you are in the Studio.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Under the top bar there is a thin line that says how the website is doing. It reads the same thing as the **Is it live?** card on Home, so the two always agree.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '**Website up to date**: everything you have published is on the website.',
+          '**Updating the website, about 3 minutes**: you published something and the website is rebuilding. The minutes count down. You do not need to wait for it.',
+          '**The website update is taking longer than usual**: it has been a while. Nothing is lost, your change is safe and published. Click `Details`, and if it still says this an hour later, ask ' +
+            SITE.contactName +
+            '.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'No line at all?',
+        text:
+          'The line only appears once the website has said when it was last built. On a brand new site, or while ' +
+          SITE.contactName +
+          ' is working on it, it can be missing. That is fine.',
+      },
+      { kind: 'seealso', items: ['Start here: how this all works'] },
+    ],
+  },
+  {
+    slug: 'help-panel',
+    category: 'Start here',
+    title: 'Help for this page',
+    icon: '💡',
+    lead: 'Help beside whatever you are editing, without leaving it.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'When something is open for editing, click `Help for this page` at the top of it (it can also sit in the menu with three dots). A panel opens beside the boxes you are typing in.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '**Worth a look** lists photos with no description, empty sections and links that go nowhere, and anything the Checkup found on this page. It updates as you type. None of it stops you publishing.',
+          '**How to** shows the Site Guide steps for this kind of page, so you can follow them while you work.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Close it with the cross at the top of the panel. It never changes anything on the page.',
+      },
+      { kind: 'seealso', items: ['Change the words on a page'] },
+    ],
+  },
+);
+
+/**
+ * Which guides "Help for this page" shows for each document type (kit.config.ts
+ * guide.forType, PORTS.md card 110). '*' is the fallback for anything unlisted.
+ * A site that rewrites its guides rewrites this map with them.
+ */
+export const GUIDES_FOR_TYPE: Record<string, string[]> = {
+  '*': ['edit-a-page', 'help-panel'],
+  page: ['edit-a-page', 'rename-a-page', 'seo-fields'],
+  homePage: ['edit-a-page', 'images-and-alt', 'seo-fields'],
+  siteSettings: ['menus-and-footer', 'website-status'],
+  businessInfo: ['menus-and-footer'],
+  redirect: ['rename-a-page'],
+};

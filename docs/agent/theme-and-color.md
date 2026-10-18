@@ -225,6 +225,6 @@ For reference, the four areas `apply-brand` touches. Described here so you know 
    Rewrites `name`, `domain`, `tagline`, and `brandColors`.
 
 4. **Studio theme + OG generator**
-   Rewrites the Studio theme's font stacks in `sanity.config.ts` (DISPLAY_STACK / BODY_STACK) and the OG generator inputs, then regenerates `public/og-default.png`. The Studio's COLOURS are no longer brand-driven: since 2026-08-28 it uses @sanity/ui's `buildTheme`, which ships a tested light and dark scheme, in place of the light-only `buildLegacyTheme` palette.
+   Rewrites the Studio theme's font stacks in `sanity.config.ts` (DISPLAY_STACK / BODY_STACK) and the OG generator inputs, then regenerates `public/og-default.png`. The Studio's colours are brand-driven again since 2026-10-18 (PORTS.md card 110), without a rewrite: `src/sanity/studioTheme.ts` reads `palette.light --primary` (or `studio.accent`) and the two `--background` values from `brand.config.json` and hands them to @sanity/ui's own `buildTheme({ palette })`, which still builds both schemes. Only the hue of the accent is the brand's; `src/lib/studio-theme.ts` solves each step's lightness against Sanity's tuned blue and pushes the button steps to 4.5:1, and `studio-theme.test.ts` checks the rendered theme. `apply-brand` prints the Studio title and warns when `public/favicon.svg` is still the starter's mark.
 
 No other files need to change for a brand swap. The `--tint-rgb` token propagates your hue through all the polish-layer overlays automatically.
