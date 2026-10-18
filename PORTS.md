@@ -231,6 +231,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 112 | React 19.3.1, one copy in the tree                                             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)              | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8730,3 +8731,36 @@ only the SanityImage half.
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn has both (branch `claude/home-before-jacob`, PR #35).
 fbcm: SanityImage half to adopt; JSON-LD half n/a. Crestview has no site repo, so n/a. Every other site `no`
 (SanityImage half worth taking; the JSON-LD half changes nothing for a business).
+
+## Card 114: publish-due.mjs takes the production write gate (2026-10-18)
+
+**Origin:** stonesteps-50k, 2026-10-13 (its card 86 rollout, PR #117). Its `scripts/publish-due.mjs` gained the
+second factor before the starter's did, so sync-check reported the site copy AHEAD of the starter. Ported back here.
+
+**What was wrong.** Card 86 put the production second factor into `sanity-lib.mjs`, but `publish-due.mjs` cannot
+import `sanity-lib` (that pulls in `@sanity/client`, and the publish-due workflow runs without `npm ci`). So a
+local `node scripts/publish-due.mjs --apply` still published every due document in production on one flag.
+
+**Canonical (PORTABLE):**
+
+- `scripts/lib/write-gate.mjs` (new): `writeGate({ dataset, flag, ci, ciBare })` and `gateClient()`, node builtins
+  only. Dry by default; on `production` a write needs the flag AND `NCS_PRODUCTION_WRITE=yes` in the process
+  environment as it was when the module loaded; a `.env` that names the variable is refused. A script that opts in
+  with `ci: true` may write inside GitHub Actions on its flag alone (the scheduled job has no person present, and
+  its workflow file is reviewed code). The code is byte-for-byte stonesteps-50k's; only the header is generic.
+- `scripts/publish-due.mjs`: `const APPLY = writeGate({ dataset, ci: true, quiet: true })`. In Actions the
+  workflow's `--apply` still publishes, so no workflow changes. By hand, `--apply` alone now exits 2:
+  `NCS_PRODUCTION_WRITE=yes node scripts/publish-due.mjs --apply`.
+
+**Not PORTABLE:** `scripts/lib/write-gate.test.mjs`. Its `GATED` list is the site's own (the starter's names only
+`publish-due.mjs`; stonesteps-50k lists 24 scripts). It runs in `test:scripts`, so CI and deploy cover it. The test
+needs `@sanity/client` installed for its dummy-host probe; every site has it.
+
+**Adopting it in a site.** Copy both PORTABLE files and the test (trim `GATED` to the scripts the site gates), run
+`npm run test:scripts` and `node scripts/sync-check.mjs`. A site that checks against the live starter `main` in CI
+(presacademy, first-baptist-auburn) goes red on its next run until it takes the copy, so per the Projects
+`CLAUDE.md` order: this card's PR merges first, then each site's.
+
+**Status, 2026-10-18.** Starter `yes`. stonesteps-50k `yes` (origin; it now takes the starter's header). fbcm,
+presacademy and first-baptist-auburn adopt it in PRs opened the same day. Sites with no `publish-due.mjs`
+(reid-design-site, mas-monograms, nixoncreativestudio) `n/a`.
