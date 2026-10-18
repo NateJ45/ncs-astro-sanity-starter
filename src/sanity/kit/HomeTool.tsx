@@ -7,8 +7,9 @@
 // It is the first tool in the top bar, so the Studio opens here. Cards, in the
 // order an editor needs them:
 //
-//   1. Welcome: a greeting by first name and the site's name in the display
-//      font, on a soft brand tint, with the one reassurance that matters most.
+//   1. Welcome: the navy banner (HomeBanner.tsx, card 118): the date, a
+//      greeting by first name, the site's name in the display font, the one
+//      reassurance that matters most, and "View the website".
 //      Then this site's quick actions (kitConfig.quickActions, card 110).
 //   1b. Pick up where you left off: unpublished drafts with Open, Publish and
 //      Discard (card 110). Publish here is the stock publish operation, so it
@@ -33,7 +34,8 @@
 //      (guide videos; hidden when no guide has one).
 //   7. Ask for help, "Need help?" line, the tour again, the staff view switch.
 // Card 115's cards live in HomeCards.tsx and GuideVideos.tsx; the dated
-// greeting line ("Sunday, October 18") is todayLine() in src/lib/studio-home.ts.
+// greeting line ("Sunday, October 18") is todayLine() in src/lib/studio-home.ts;
+// the banner is HomeBanner.tsx (card 118).
 //
 // Every card fails soft: a failed fetch shows a quiet sentence, never a blank.
 // =============================================================================
@@ -55,7 +57,6 @@ import {
   Dialog,
   Flex,
   Grid,
-  Heading,
   Spinner,
   Stack,
   Text,
@@ -75,7 +76,6 @@ import {
   type LiveState,
 } from '../../lib/studio-kit';
 import { publishedIdOf, type CheckResult } from '../../lib/studio-checkup';
-import { todayLine } from '../../lib/studio-home';
 import {
   API_VERSION,
   PUBLISHED_EVENT,
@@ -97,6 +97,7 @@ import {
   Visitors,
 } from './HomeCards';
 import { GuideVideos } from './GuideVideos';
+import { HomeBanner } from './HomeBanner';
 import type { KitConfig, QuickAction, ThisWeekTask } from './types';
 
 const NOT_SYSTEM = `!(_type match "sanity.*") && !(_type match "system.*") && !(_type match "media.*") && !(_id in path("versions.**")) && !(_id match "_.**")`;
@@ -390,36 +391,22 @@ function RecentEdits({ ignoreTypes }: { ignoreTypes: string[] }) {
 }
 
 // -----------------------------------------------------------------------------
-// The header: greeting, the site's name, the reassurance (card 110)
+// The header: the navy welcome banner (card 118, was card 110's tinted card)
 // -----------------------------------------------------------------------------
 
 function Welcome({ config }: { config: KitConfig }) {
   const user = useCurrentUser();
   const { title } = useWorkspace();
+  const now = new Date();
   return (
-    // tone="primary" is the branded accent at its softest tint (studioTheme.ts),
-    // so the header carries the brand without a literal colour or a gradient.
-    <Card tone="primary" padding={[4, 5, 6]} radius={4}>
-      <Stack gap={4}>
-        <Stack gap={3}>
-          <Text size={1} muted weight="semibold">
-            {todayLine(new Date())}
-          </Text>
-          <Text size={2} muted>
-            {`${greeting(new Date())}, ${firstName(user?.name)}`}
-          </Text>
-        </Stack>
-        {/* Heading uses the theme's heading font: the site's display face. */}
-        <Heading as="h1" size={[3, 4, 5]} style={{ lineHeight: 1.15 }}>
-          {title}
-        </Heading>
-        <Box style={{ maxWidth: 620 }}>
-          <Text size={2} muted style={{ lineHeight: 1.6 }}>
-            {`This is where you look after ${config.siteName}. Nothing you change here is public until you press Publish, so it is safe to look around.`}
-          </Text>
-        </Box>
-      </Stack>
-    </Card>
+    <HomeBanner
+      now={now}
+      hello={greeting(now)}
+      firstName={firstName(user?.name)}
+      title={title}
+      intro={`This is where you look after ${config.siteName}. Nothing you change here is public until you press Publish, so it is safe to look around.`}
+      banner={config.homeBanner}
+    />
   );
 }
 

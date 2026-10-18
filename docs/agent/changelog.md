@@ -1,5 +1,15 @@
 # Change history
 
+_2026-10-18: Home's welcome becomes a branded banner (PORTS card 118)._
+
+**Decision.** The plain header at the top of the Studio's Home is now a banner in the navbar's deep brand colour,
+like the dark welcome banner on the family's WordPress dashboards: the date, a greeting with the editor's name in the
+site's accent, the site's name in the heading font, the reassurance line, and "View the website". It reuses card 116's
+chrome theme, so it matches the top bar exactly and its text contrast is already gated. Each site dresses it from
+`kitConfig.homeBanner`: its mark (on a light disc, or a reversed mark bare), a decorative strip along the foot, and
+optionally part of its name in its own display lettering. Colours that would not read on the banner are dropped by
+the kit, not left to the config. No new dependency, no animation.
+
 _2026-10-18: the Studio's safety net (PORTS card 117)._
 
 **Decision.** Four tools modelled on what the Theology Matters WordPress admin gives its editors. A morning GitHub

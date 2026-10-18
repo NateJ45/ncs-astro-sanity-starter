@@ -38,6 +38,7 @@ are commented in that site's `src/sanity/kit.config.ts`.
 | Desk: Trash, staff, ids | `src/sanity/structure.ts`                                                                     | Trash list (id `trash`), `staffDesk()` filter (in `kit/shared.tsx`), singleton items carry their document id as their id                                |
 | Deploy status (111)     | `src/pages/api/studio/deploy-status.ts`, `src/lib/deploy-status.ts`, `src/lib/studio-auth.ts` | GET the newest deploy run's outcome; POST "Try again" (same origin + Sanity session); tests in `deploy-status.test.ts`                                  |
 | Home cards (115)        | `src/sanity/kit/HomeCards.tsx`, `src/lib/studio-home.ts`                                      | Coming up, Fix-it list, Visitors, Your pages, and the Panel frame; pure parts tested in `studio-home.test.ts`                                           |
+| Home banner (118)       | `src/sanity/kit/HomeBanner.tsx`, `src/lib/studio-banner.ts`                                   | The navy welcome at the top of Home; `kitConfig.homeBanner`; pure parts tested in `studio-banner.test.ts`                                               |
 | Guide videos (115)      | `src/sanity/kit/GuideVideos.tsx`                                                              | "Watch how it is done" on Home and in the Site Guide; `videoSource()` in `studio-home.ts`                                                               |
 | Visitors route (115)    | `src/pages/api/studio/visitors.ts`, `src/lib/studio-analytics.ts`                             | Cloudflare Web Analytics GraphQL through the Worker (same origin + Sanity session); tests in `studio-analytics.test.ts`                                 |
 | Weekly ticks (111)      | `src/sanity/kit/weekType.ts`                                                                  | `studioWeek` document per week for hand-ticked jobs; `checklist()` and `weekKey()` in `studio-kit.ts`                                                   |
@@ -95,9 +96,8 @@ person or a document type; everything site-specific comes in through `kitConfig`
   at the top of the Site Guide, and a Watch button on an open guide. Hidden when no guide has one. See "Guide videos".
 - **Dated greeting** (card 115): "Sunday, October 18" above "Good morning, Ann" (`todayLine()`), and a footer line
   "Need help? Site Guide or Ask <helper>" (the Ask link is the mailto when `PUBLIC_STUDIO_HELP_EMAIL` is set).
-- **Welcome** (card 110): "Good morning, Ann", the workspace title (the site's name, from `brand.config.json`) in the
-  theme's heading font (the site's display face), on a `tone="primary"` card, which the branded theme makes a soft tint
-  of the brand accent. No literal colours, no gradient.
+- **Welcome** (card 110, a banner since card 118): "Good morning, Ann" and the workspace title (the site's name, from
+  `brand.config.json`) in the theme's heading font, on the navy banner. See "Home's banner" below.
 - **Quick actions** (`kitConfig.quickActions`, card 110): up to four large buttons for this site's real jobs, each a
   `StudioTarget` (edit a document, create one from a type or template, open a tool) with an `@sanity/icons` icon.
   Missing or empty shows nothing extra; the "Edit the website" and "How do I...?" buttons stay either way.
@@ -212,6 +212,34 @@ plus every Checkup finding whose target is this document. "How to": the Site Gui
 `kitConfig.guide.forType` (`GUIDES_FOR_TYPE` in `guides/content.ts`, `'*'` as the fallback), rendered by the site's
 `GuideView`. Read-only; uses only `documentId`, `documentType` and `onClose`, because inspector props have changed
 between Sanity majors. `features.helpPanel: false` removes it.
+
+## Home's banner (card 118)
+
+The welcome at the top of Home (`src/sanity/kit/HomeBanner.tsx`, pure parts in `src/lib/studio-banner.ts`), modelled
+on the dark welcome banner of the family's WordPress dashboards. It is drawn in the navbar's own theme
+(`buildChromeTheme`, card 116), so it is the same deep brand colour as the top bar, in both appearances, and every
+text colour on it comes from a theme whose contrast the colour gate already checks. It holds the date, "Good
+afternoon, Ann", the site's name in the heading font, the reassurance line, and **View the website** (the address the
+Studio is open on, since the Studio lives at `/studio` on the site; new tab). From 600px the mark sits beside the
+words; from 900px the button moves to the right. No animation.
+
+Everything site-specific is optional, in `kitConfig.homeBanner`:
+
+| Field         | What it does                                                                                                      |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `mark`        | The full-colour mark (an SVG in `public/`), drawn on a light disc in the paper colour so it reads on navy.        |
+| `markOnDark`  | A white or reversed mark made for dark grounds; drawn bare instead of `mark`.                                     |
+| `motif`       | A decorative strip along the foot: a wide, short SVG in `public/`, full width at its own proportions.             |
+| `motifNarrow` | The same strip drawn for a phone (about 390 by 56), used under 600px so it keeps its scale.                       |
+| `accent`      | The colour of the editor's name. The greeting is 24px (large text), so it needs 3:1 on the banner, or is ignored. |
+| `lettering`   | `{ text, family, src, colors }`: part of the name in the site's own display font, letters cycling `colors`.       |
+| `siteUrl`     | Where View the website goes, when it is not the address the Studio is open on.                                    |
+
+The lettering's font file must be the site's own (a path starting `/`, same origin), loaded by a small `@font-face`
+the banner writes; colours under 3:1 on the banner are dropped, and the heading font shows until the file loads. The
+mark and motif are decorative (`alt=""`); the heading carries the name, with an `aria-label` when it is lettered.
+The starter sets only `mark: '/favicon.svg'`. Keep a site's banner files out of `public/studio/`, which is the Studio's
+own address; a folder such as `public/studio-banner/` is clear of it.
 
 ## The look (card 116)
 
