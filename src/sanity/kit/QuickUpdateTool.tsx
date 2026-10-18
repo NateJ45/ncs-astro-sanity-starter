@@ -195,7 +195,7 @@ function QuickFormView({ form, onBack }: { form: QuickForm; onBack: () => void }
       )}
       <Button
         text={busy ? 'Saving...' : (form.submitLabel ?? 'Put it on the website')}
-        tone="positive"
+        tone="primary"
         fontSize={2}
         padding={4}
         disabled={busy}

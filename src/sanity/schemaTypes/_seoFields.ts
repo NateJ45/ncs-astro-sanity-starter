@@ -54,7 +54,7 @@ export function seoFields(opts: SeoFieldsOptions): FieldDefinition[] {
     reuse?.title ??
     defineField({
       name: 'seoTitle',
-      title: 'SEO title',
+      title: 'Google title',
       type: 'string',
       group,
       description:
@@ -69,7 +69,7 @@ export function seoFields(opts: SeoFieldsOptions): FieldDefinition[] {
     reuse?.description ??
     defineField({
       name: 'seoDescription',
-      title: 'SEO description',
+      title: 'Google description',
       type: 'text',
       rows: 3,
       group,
