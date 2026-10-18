@@ -1,0 +1,34 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Safe to edit by hand
+// The header's search button (PORTS.md card 121). A real link to /search/,
+// which SiteSearch.astro's script turns into "open the search dialog" through
+// data-site-search-open; with JavaScript off it still reaches the page.
+// Renders nothing when src/data/site.ts search.enabled is false.
+//
+// Style it from the call site with `class` so it sits in the header's own
+// button family; `showLabel` adds the word "Search" next to the icon.
+import { site } from '@/data/site';
+import { Search } from 'lucide-react';
+
+interface Props {
+  class?: string;
+  showLabel?: boolean;
+  /** Icon size in px. */
+  size?: number;
+}
+
+const { class: extra = '', showLabel = false, size = 20 } = Astro.props as Props;
+---
+
+{site.search.enabled && (
+  <a
+    href="/search/"
+    class:list={['site-search-trigger', extra]}
+    aria-label={showLabel ? undefined : 'Search the site'}
+    data-site-search-open
+  >
+    <Search size={size} aria-hidden="true" />
+    {showLabel && <span>Search</span>}
+  </a>
+)}

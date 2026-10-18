@@ -40,6 +40,9 @@ export const RESERVED_SLUGS = new Set([
   // The embedded Sanity Studio, a src/pages route since card 120. A custom
   // page called "studio" would take the editor's own address.
   'studio',
+  // Visitor search (PORTS.md card 121). Built only when site.search.enabled,
+  // but reserved either way so turning search on later never collides.
+  'search',
   '404',
   'sitemap-index.xml',
   'og',

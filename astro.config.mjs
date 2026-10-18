@@ -195,7 +195,9 @@ export default defineConfig({
           page.includes('/404') ||
           page.includes('/studio') ||
           page.includes('/preview') ||
-          page.includes('/styleguide')
+          page.includes('/styleguide') ||
+          // Visitor search (card 121): noindex, nothing of its own for Google.
+          new URL(page).pathname === '/search/'
         )
           return false;
         try {

@@ -68,6 +68,22 @@ export const site = {
     favicon: '/favicon.svg',
   },
 
+  // Visitor site search (PORTS.md card 121). Opt-in: false builds no search
+  // button, no /search/ page and no index, so a site that does not want it
+  // carries no weight for it. true adds a search button to the header and the
+  // mobile menu, a /search/ page, and a Pagefind index of every page's main
+  // content, written after `astro build` by scripts/build-search-index.mjs.
+  // `suggestions` are the friendly links shown before a search and when
+  // nothing matches: two or three, hrefs ending in a slash (rule 19).
+  search: {
+    enabled: false as boolean,
+    placeholder: 'Search the site',
+    suggestions: [
+      { label: 'Get in touch', href: '/contact/' },
+      { label: 'Questions people ask', href: '/faq/' },
+    ],
+  },
+
   // Public repo URL (used in footer credit if shown)
   repo: '',
 };

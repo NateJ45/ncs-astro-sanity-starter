@@ -1,0 +1,334 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// SearchPanel - the search box, filters and results (PORTS.md card 121)
+// =============================================================================
+// One panel, two homes: inside the header's search dialog (SiteSearch.astro)
+// and on the /search/ page. The markup here is the empty shell; the browser
+// half (src/lib/site-search-client.ts) loads Pagefind on first use and draws
+// the results into it with textContent, never innerHTML.
+//
+// Without JavaScript the form still submits to /search/?q=..., which is the
+// most a static page can do; the page then says search needs JavaScript.
+//
+// Accessibility:
+//   - a real <form role="search"> with a labelled input
+//   - one polite live region reads "6 results for "grace"" after each search
+//   - Down arrow from the box moves into the results, Up/Down walk them, Up
+//     from the first result returns to the box; Escape closes the dialog
+//   - filter buttons are toggle buttons (aria-pressed)
+//
+// Look: the site's own tokens (--background, --foreground, --border, --muted,
+// --link, --ring, --font-display), so a reskin restyles search for free. The
+// styles are global because the client renders the result rows.
+// =============================================================================
+import { site } from '@/data/site';
+import { Search } from 'lucide-react';
+
+interface Props {
+  /** Unique per page: "dialog" for the header dialog, "page" for /search/. */
+  id: string;
+  /** Heading level for the suggestion list title, so the page outline holds. */
+  suggestHeading?: 'h2' | 'h3';
+}
+
+const { id, suggestHeading: SuggestHeading = 'h2' } = Astro.props as Props;
+const inputId = `site-search-${id}-input`;
+const statusId = `site-search-${id}-status`;
+const resultsId = `site-search-${id}-results`;
+const suggestions = site.search.suggestions ?? [];
+const placeholder = site.search.placeholder;
+---
+
+<div class="site-search" data-site-search-panel>
+  <form class="site-search__form" role="search" action="/search/" method="get">
+    <label for={inputId} class="sr-only">
+      Search this site
+    </label>
+    <Search className="site-search__icon" size={20} aria-hidden="true" />
+    <input
+      id={inputId}
+      class="site-search__input"
+      type="search"
+      name="q"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="search"
+      placeholder={placeholder}
+      aria-describedby={statusId}
+      aria-controls={resultsId}
+      data-search-input
+    />
+  </form>
+
+  <div
+    class="site-search__filters"
+    role="group"
+    aria-label="Show only"
+    data-search-filters
+    hidden
+  ></div>
+
+  <p
+    id={statusId}
+    class="site-search__status"
+    role="status"
+    aria-live="polite"
+    data-search-status
+  ></p>
+
+  <ol
+    id={resultsId}
+    class="site-search__results"
+    aria-label="Search results"
+    data-search-results
+  ></ol>
+
+  <button type="button" class="site-search__more" data-search-more hidden>
+    Show more results
+  </button>
+
+  {suggestions.length > 0 && (
+    <div class="site-search__suggest" data-search-suggest>
+      <SuggestHeading class="site-search__suggest-title">Not sure where to start?</SuggestHeading>
+      <ul class="site-search__suggest-list">
+        {suggestions.map((s) => (
+          <li>
+            <a href={s.href} class="site-search__suggest-link">
+              {s.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+</div>
+
+<style is:global>
+  .site-search {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    color: var(--foreground);
+  }
+
+  .site-search__form {
+    position: relative;
+  }
+  .site-search__icon {
+    position: absolute;
+    top: 50%;
+    left: 0.875rem;
+    transform: translateY(-50%);
+    color: var(--muted-foreground);
+    pointer-events: none;
+  }
+  .site-search__input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 0.375rem);
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    font-size: 1.0625rem;
+  }
+  .site-search__input::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
+  }
+  .site-search__input:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-color: var(--ring);
+  }
+  /* The browser's own clear button clashes with the field; Escape and the
+     close button do the job. */
+  .site-search__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .site-search__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .site-search__filters[hidden] {
+    display: none;
+  }
+  .site-search__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.25rem;
+    padding: 0.25rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+  .site-search__chip:hover {
+    border-color: var(--link);
+    color: var(--link);
+  }
+  .site-search__chip[aria-pressed='true'] {
+    border-color: var(--color-primary-dark);
+    background: var(--color-primary-dark);
+    color: #fff;
+  }
+  .site-search__chip:focus-visible,
+  .site-search__more:focus-visible,
+  .site-search__suggest-link:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .site-search__chip-count {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.8;
+  }
+
+  .site-search__status {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+  .site-search__status:empty {
+    display: none;
+  }
+
+  .site-search__results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--border);
+  }
+  .site-search__results:empty {
+    display: none;
+  }
+  .site-search__result {
+    border-bottom: 1px solid var(--border);
+  }
+  .site-search__result-link {
+    display: block;
+    padding: 0.875rem 0.5rem;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-sm, 0.25rem);
+  }
+  .site-search__result-link:hover,
+  .site-search__result-link:focus-visible {
+    background: var(--muted);
+  }
+  .site-search__result-link:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+  .site-search__result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.625rem;
+    margin: 0 0 0.25rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .site-search__result-type {
+    font-weight: 600;
+    color: var(--link);
+  }
+  .site-search__result-title {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    line-height: 1.3;
+    color: var(--foreground);
+  }
+  .site-search__result-link:hover .site-search__result-title {
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .site-search__result-excerpt {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--muted-foreground);
+    overflow-wrap: anywhere;
+  }
+  .site-search__result-excerpt mark {
+    background: transparent;
+    color: var(--foreground);
+    font-weight: 600;
+  }
+
+  .site-search__more {
+    align-self: flex-start;
+    min-height: 2.75rem;
+    padding: 0.5rem 1.25rem;
+    border: 1px solid var(--color-primary, var(--border));
+    border-radius: var(--radius-sm, 0.25rem);
+    background: transparent;
+    color: var(--link);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .site-search__more:hover {
+    background: var(--accent);
+  }
+  .site-search__more[hidden] {
+    display: none;
+  }
+
+  .site-search__suggest[hidden] {
+    display: none;
+  }
+  .site-search__suggest-title {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .site-search__suggest-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-search__suggest-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-search__chip {
+      transition: none;
+    }
+  }
+</style>

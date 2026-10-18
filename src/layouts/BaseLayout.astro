@@ -46,6 +46,8 @@ interface Props {
   ogType?: 'website' | 'article';
   /** Article metadata. Only used when ogType is 'article'. */
   ogArticle?: { publishedAt?: string; author?: string };
+  /** What kind of page this is in visitor search results (PORTS.md card 121): 'page' (the default), 'sermon', 'series', 'news', 'question' and so on. Only used when src/data/site.ts search.enabled is on. */
+  searchType?: string;
 }
 
 const {
@@ -58,7 +60,15 @@ const {
   noindex = false,
   ogType = 'website',
   ogArticle,
+  searchType = 'page',
 } = Astro.props as Props;
+
+// Visitor search (PORTS.md card 121). With search on, <main> carries
+// data-pagefind-body so scripts/build-search-index.mjs indexes main content
+// only, never the header, footer or nav. noindex pages (404, /search/, the
+// styleguide walls, any page an editor keeps out of Google) stay out of the
+// search index too: a page hidden from Google should not turn up here either.
+const searchable = site.search.enabled && !noindex;
 
 const canonical = new URL(Astro.url.pathname, site.url).toString();
 
@@ -299,7 +309,12 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
 
     <Header siteSettings={siteSettings} />
 
-    <main id="main" class="flex-1">
+    <main
+      id="main"
+      class="flex-1"
+      data-pagefind-body={searchable ? '' : undefined}
+      data-pagefind-filter={searchable ? `type:${searchType}` : undefined}
+    >
       <slot />
     </main>
 

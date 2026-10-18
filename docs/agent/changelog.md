@@ -1,5 +1,15 @@
 # Change history
 
+_2026-10-18: visitor site search and share buttons (PORTS card 121)._
+
+**Decision.** Sites can switch on search (`site.search.enabled`, off in the starter). Pagefind 1.5.2, pinned as a
+devDependency, indexes the built HTML straight after `astro build`, main content only, skipping noindex pages; the
+index ships as static files under `/pagefind/`. A search button in the header and a row in the mobile menu open a
+native dialog styled from the theme tokens, with type filters, dates and sermon passages, keyboard movement, a live
+result count and friendly suggestions when nothing matches. Nothing loads until search is opened. Share buttons
+(Facebook, X, email, copy link, and the phone's share sheet) are plain links with no third-party code. Pagefind's own
+UI was left out: heavier, its own look.
+
 _2026-10-18: the Studio's edges: its own /studio page, the site's words, a wordmark (PORTS card 120)._
 
 **Decision.** The site now owns `/studio` (`src/pages/studio/index.astro`) instead of @sanity/astro's page from

@@ -434,6 +434,58 @@ export const guides: Guide[] = [
   },
 
   {
+    slug: 'site-search',
+    category: 'Housekeeping',
+    title: 'How visitors search the site',
+    icon: '🔎',
+    lead: 'What the search box finds, and how to help it find the right page.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'If your site has search switched on, visitors see a magnifying glass at the top of every page and a `Search the site` row in the phone menu. They type a word and get a list of pages, each with a short snippet showing where the word appears.',
+      },
+      {
+        kind: 'h',
+        text: 'What it searches',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          'The **main words of every published page**: headings, paragraphs, questions and answers. Not the menu or the footer, which are on every page and would only get in the way.',
+          'Pages you have kept out of Google are kept out of search too.',
+          'Nothing in the Studio, and no drafts. A page shows up in search once it is published and the site has rebuilt.',
+        ],
+      },
+      {
+        kind: 'h',
+        text: 'Helping the right page come first',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Use the words people actually type. If everyone calls it "parking", say "parking" on the page, not only "where to leave your car".',
+          'Give each page a clear heading. The heading is the title in the results list.',
+          'Try it yourself after you publish: search for what a visitor would look for, and see which page comes first.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'New words appear after the rebuild.',
+        text: 'Search reads the live site, so a change you publish is searchable a couple of minutes later, at the same time it appears on the page.',
+      },
+      {
+        kind: 'p',
+        text:
+          'The friendly links shown when nothing matches, and whether search is on at all, are set in the site code. Ask ' +
+          SITE.contactName +
+          ' to change them.',
+      },
+    ],
+  },
+
+  {
     slug: 'housekeeping',
     category: 'Housekeeping',
     title: 'The occasional tidy-up',

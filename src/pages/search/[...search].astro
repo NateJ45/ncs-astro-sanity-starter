@@ -1,0 +1,65 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// /search/ - the full-page search (PORTS.md card 121)
+// =============================================================================
+// The header's search button opens a dialog; this page is where that button
+// goes with JavaScript off or a Ctrl/Cmd-click, where the mobile menu can
+// point, and what a "?q=" link lands on. It reads ?q= and runs that search.
+//
+// A rest route only so it can build NOTHING when search is off: a plain
+// search.astro would always be emitted. getStaticPaths returns one path
+// (/search/) when src/data/site.ts search.enabled is true, none otherwise.
+// 'search' is in RESERVED_SLUGS so a Studio page cannot take the address.
+//
+// noindex: a search page has nothing of its own for Google, and noindex also
+// keeps it out of the search index itself (BaseLayout drops data-pagefind-body).
+// =============================================================================
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SearchPanel from '@/components/search/SearchPanel.astro';
+import { getSiteSettings } from '@/lib/queries';
+import { site } from '@/data/site';
+
+export function getStaticPaths() {
+  return site.search.enabled ? [{ params: { search: undefined } }] : [];
+}
+
+const siteSettings = await getSiteSettings();
+---
+
+<BaseLayout
+  title={`Search · ${site.name}`}
+  description={`Search ${site.name}.`}
+  {siteSettings}
+  noindex
+>
+  <section class="mx-auto w-full max-w-3xl px-m pt-section-md pb-section-lg">
+    <h1 class="mb-l font-display text-h1 leading-tight text-foreground">Search</h1>
+    <noscript>
+      <p class="mb-m text-foreground/80">
+        Search needs JavaScript turned on. The menu at the top of the page reaches every part of the
+        site.
+      </p>
+    </noscript>
+    <div data-search-page>
+      <SearchPanel id="page" />
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  async function initSearchPage() {
+    const host = document.querySelector<HTMLElement>('[data-search-page]');
+    const panel = host?.querySelector<HTMLElement>('[data-site-search-panel]');
+    if (!panel) return;
+    const { mountSearchPanel } = await import('@/lib/site-search-client');
+    const handle = mountSearchPanel(panel, { syncUrl: true });
+    const q = new URL(window.location.href).searchParams.get('q') ?? '';
+    if (q) handle.run(q);
+    handle.focus();
+  }
+  // astro:page-load fires on the first load as well as after each
+  // View Transitions navigation, so this one listener covers both.
+  document.addEventListener('astro:page-load', initSearchPage);
+</script>

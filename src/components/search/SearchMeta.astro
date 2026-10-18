@@ -1,0 +1,32 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Safe to edit by hand
+// Extra facts a page hands the search index (PORTS.md card 121): the date a
+// sermon was preached or a post went up, and a sermon's Bible passage. Search
+// results show them under the title. Put it anywhere inside the page's main
+// content; it renders nothing visible and nothing at all when search is off.
+//
+//   <SearchMeta date={formatDate(sermon.date)} passage={sermon.passage} />
+//
+// The values go in as element text, not as "key:value" attribute text, so a
+// passage like "John 3:16-18, 21" survives intact (Pagefind splits attribute
+// values on colons and commas).
+import { site } from '@/data/site';
+
+interface Props {
+  /** Already formatted for reading, e.g. "October 12, 2026". */
+  date?: string | null;
+  /** A Bible reference, e.g. "Ephesians 2:1-10". */
+  passage?: string | null;
+}
+
+const { date, passage } = Astro.props as Props;
+const on = site.search.enabled && (date || passage);
+---
+
+{on && (
+  <div hidden data-pagefind-ignore="index">
+    {date && <span data-pagefind-meta="date">{date}</span>}
+    {passage && <span data-pagefind-meta="passage">{passage}</span>}
+  </div>
+)}

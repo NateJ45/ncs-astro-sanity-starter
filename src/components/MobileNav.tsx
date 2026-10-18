@@ -35,8 +35,8 @@
 // the Header, with sensible defaults so the menu renders cleanly before
 // content is wired up.
 
-import { useState } from 'react';
-import { Menu, Mail, Phone, ChevronRight } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Menu, Mail, Phone, ChevronRight, Search } from 'lucide-react';
 import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import ThemeToggle from './ThemeToggle';
@@ -83,6 +83,12 @@ interface Props {
    * island props.
    */
   cta?: { show: boolean; label: string; href: string };
+  /**
+   * Visitor search is on (src/data/site.ts search.enabled, PORTS.md card 121):
+   * show a "Search the site" row that closes the drawer and opens the header's
+   * search dialog. Header.astro passes it only when search is on.
+   */
+  search?: boolean;
 }
 
 /** Built-in drawer button, matching the header's own default. */
@@ -96,8 +102,13 @@ export default function MobileNav({
   logoLightUrl,
   logoDarkUrl,
   cta = DEFAULT_CTA,
+  search = false,
 }: Props) {
   const [open, setOpen] = useState(false);
+  // Set when the visitor picks "Search the site": the drawer closes first, and
+  // the search dialog opens once Radix has finished handing focus back, so the
+  // two modals never fight over focus (see onCloseAutoFocus below).
+  const searchNext = useRef(false);
 
   const tagline = siteSettings?.tagline ?? 'Your tagline goes here.';
   const email = siteSettings?.email;
@@ -120,6 +131,12 @@ export default function MobileNav({
           </button>
         </SheetTrigger>
         <SheetContent
+          onCloseAutoFocus={(e) => {
+            if (!searchNext.current) return;
+            searchNext.current = false;
+            e.preventDefault();
+            window.dispatchEvent(new CustomEvent('site-search:open'));
+          }}
           side="right"
           className="flex w-[min(380px,90vw)] flex-col gap-0 overflow-y-auto border-t-4 border-t-primary bg-background p-0 sm:max-w-none"
         >
@@ -139,6 +156,26 @@ export default function MobileNav({
                 className="block w-full rounded-md bg-primary-dark px-m py-m text-center text-xs font-semibold tracking-eyebrow text-white uppercase transition-colors hover:bg-accent-dark"
               >
                 {cta.label}
+              </a>
+            </div>
+          )}
+
+          {/* Visitor search (card 121). A real link to /search/, so it works
+              before React or the dialog script is ready. */}
+          {search && (
+            <div className="px-l pb-l">
+              <a
+                href="/search/"
+                onClick={(e) => {
+                  if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+                  e.preventDefault();
+                  searchNext.current = true;
+                  close();
+                }}
+                className="flex min-h-11 w-full items-center gap-s rounded-md border border-border px-m py-s text-left text-base text-foreground/80 transition-colors hover:border-primary hover:text-link"
+              >
+                <Search size={18} aria-hidden="true" />
+                Search the site
               </a>
             </div>
           )}
