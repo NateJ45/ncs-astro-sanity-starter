@@ -9,6 +9,9 @@
 // ("I want to..."), a search box that reads the whole text of every guide, and
 // a Print button that prints just the open guide (a recipe for the fridge).
 //
+// Card 115: guides with a `video` show first under "Watch how it is done", and
+// an open guide with one has a Watch button (GuideVideos.tsx). No videos, no row.
+//
 // The open guide is kept in component state, not in the URL, on purpose: the
 // tool is small, and a reload landing on the index is a fine place to restart.
 // =============================================================================
@@ -17,6 +20,7 @@ import { useMemo, useState } from 'react';
 import { BookIcon } from '@sanity/icons/Book';
 import { Box, Button, Card, Flex, Stack, Text, TextInput } from '@sanity/ui';
 import { strings } from '../../lib/studio-checkup';
+import { GuideVideos, WatchButton } from './GuideVideos';
 import { ToolHeading } from './shared';
 import type { KitConfig, KitGuide } from './types';
 
@@ -51,6 +55,7 @@ export function makeGuideTool(config: KitConfig) {
     );
     const View = useMemo(() => (open ? view(open) : null), [open]);
     const shown = guides.filter((g) => matches(g, words));
+    const openGuide = open ? guides.find((g) => g.slug === open) : undefined;
 
     if (View) {
       return (
@@ -72,6 +77,9 @@ export function makeGuideTool(config: KitConfig) {
                 padding={3}
                 onClick={() => window.print()}
               />
+              {openGuide?.video && (
+                <WatchButton guide={openGuide} text="Watch how it is done" fontSize={2} />
+              )}
             </Flex>
             <div data-kit-print="">
               <View />
@@ -99,6 +107,15 @@ export function makeGuideTool(config: KitConfig) {
             onChange={(e) => setQuery(e.currentTarget.value)}
             aria-label="Search the guides"
           />
+
+          {shown.some((g) => g.video) && (
+            <Stack gap={3}>
+              <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase' }}>
+                Watch how it is done
+              </Text>
+              <GuideVideos guides={shown} />
+            </Stack>
+          )}
 
           {shown.length === 0 && (
             <Text size={2} muted>

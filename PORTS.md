@@ -232,6 +232,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 112 | React 19.3.1, one copy in the tree                                             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)              | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 115 | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8766,3 +8767,45 @@ needs `@sanity/client` installed for its dummy-host probe; every site has it.
 **Status, 2026-10-18.** Starter `yes`. stonesteps-50k `yes` (origin; it now takes the starter's header). fbcm,
 presacademy and first-baptist-auburn adopt it in PRs opened the same day. Sites with no `publish-due.mjs`
 (reid-design-site, mas-monograms, nixoncreativestudio) `n/a`.
+
+## Card 115: the Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, guide videos (2026-10-18)
+
+**Origin:** first-baptist-auburn, measured against the Theology Matters WordPress admin dashboard, which the same studio
+built: a dated greeting, "Coming up", a Fix-it list with names and Edit buttons, "What readers do" (visitors chart,
+most read, how people found the site), a "Your pages" map and "Watch how it is done" videos. The kit's Home had a
+greeting, quick actions, the weekly checklist, Is it live?, Site health (counts only), Recent edits and a Visitors
+placeholder. Counts say something is wrong without saying where; a placeholder says nothing at all.
+
+**Canonical (PORTABLE):** `src/lib/studio-home.ts` + `studio-home.test.ts`, `src/lib/studio-analytics.ts` +
+`studio-analytics.test.ts`, `src/pages/api/studio/visitors.ts`, `src/sanity/kit/HomeCards.tsx`,
+`src/sanity/kit/GuideVideos.tsx`, and the card-115 changes to `kit/HomeTool.tsx`, `kit/GuideTool.tsx`,
+`kit/shared.tsx` (`studioToken` exported), `kit/types.ts`, `src/lib/studio-checkup.ts` and
+`docs/agent/studio-kit.md`. Per site (NOT portable): `kit.config.ts` (`pages`, `features.visitors: true`),
+`guides/content.ts` (`video?` on `Guide`, the "What the Home page shows you" guide), `wrangler.jsonc` vars, the
+Worker secret, OPERATIONS.md.
+
+**What it adds.**
+
+- **Fix-it list** (replaces Site health): the Checkup's findings one row per page, by name, with Edit (at the field).
+  The Checkup's generic rules now return `items` and an `itemLabel` (`itemsOf()`); `fixItList()` flattens them. Same
+  rules, same run (`useCheckup`), nothing duplicated. A site rule without items still shows as one row.
+- **Coming up**: drafts with card 111's `publishAt`, soonest first, "Tomorrow at 9:00 AM" (`comingUp()`,
+  `whenWords()`). Shown only where the schema has a `publishAt` field.
+- **Visitors**: `GET /api/studio/visitors/` (same origin AND a Sanity session checked with `/users/me`, else 403/401;
+  fail closed) asks Cloudflare Web Analytics' GraphQL API with a Worker secret `CF_ANALYTICS_TOKEN` (Account Analytics:
+  Read only) plus vars `CF_ACCOUNT_ID` and `CF_WEB_ANALYTICS_SITE_TAG`, caches ten minutes, and returns the last 7 days
+  against the 7 before, 28 daily points, the top five pages and referrer groups (search, direct, social, other). The
+  card draws the chart in plain SVG; no chart dependency. No settings: "Not set up yet".
+- **Your pages**: `kitConfig.pages`, groups of one-click links; `listType` lists every custom page by name
+  (`resolvePageMap()`).
+- **Watch how it is done**: a guide's optional `video` (a file in `public/`, YouTube, Vimeo, or a link) shows on Home
+  and in the Site Guide, in a dialog on demand (`videoSource()`); hidden when no guide has one.
+- A dated greeting line ("Sunday, October 18", `todayLine()`) and a "Need help? Site Guide or Ask <helper>" footer.
+
+**Adopting it in a site.** Needs cards 106, 110 and 111. Copy the PORTABLE files, add `video?: string` to the `Guide`
+interface in `guides/content.ts`, write `pages` in `kit.config.ts` and set `features.visitors: true`, then follow
+OPERATIONS.md "Visitor numbers" for the token and the two vars. Marked-file order: starter first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes` (unit-tested; the route's 403/401 checked under `wrangler dev`; signed-in views and
+real numbers unverified, PENDING item 18). first-baptist-auburn: branch pushed, PR after this card merges. Every other
+site `no`.
