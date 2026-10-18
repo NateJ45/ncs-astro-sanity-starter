@@ -8,6 +8,19 @@ public (a password on an ordinary page would leave its words readable over the A
 route with a hashed password, a signed cookie and a rate limit, and never built. The Checkup gained dead external
 links (from the weekly link check), internal links to missing pages, skipped headings, vague link words, long Google
 text, pages nobody can reach, and private-page guards. Detail and the security note: `docs/agent/private-pages.md`.
+_2026-10-18: custom code, safe by default (PORTS card 121)._
+
+**Decision.** Editors can paste a widget (a countdown, a sign-up gadget, a map, something an AI wrote) into the block
+now called "Custom code or embed". Pasted code runs in its own box by default: an `srcdoc` iframe sandboxed without
+`allow-same-origin`, so it gets an opaque origin and cannot read the site's cookies or localStorage, where the
+embedded Studio keeps a signed-in editor's session, or touch the page. The box sizes itself (a height message the
+parent checks by source, origin and shape, then clamps), and a base stylesheet gives it the site's fonts and light
+colours. Before this, embed code was `set:html` straight into the page. Two deliberate opt-outs keep that power for
+trusted providers: a "Runs directly on the page" switch on the block, and "Code on every page" in Site settings (head
+and end of body, never on /studio or /preview). The Checkup lists both while they are in use. Field names are
+unchanged (rule 1); `runsOnPage`, `headCode` and `bodyEndCode` are new. The "not both URL and code" check now reads
+the block (`context.parent`) instead of the document, so it finally fires. A full CSP was weighed and left for later:
+it would not stop same-origin script reading localStorage, which is the actual risk here.
 
 _2026-10-18: the Studio's edges: its own /studio page, the site's words, a wordmark (PORTS card 120)._
 

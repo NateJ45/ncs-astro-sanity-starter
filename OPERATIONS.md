@@ -80,7 +80,7 @@ The four core pages (home, about, services, process) and any custom `page` docum
 
 **Once a Sanity project is connected:** seed the pages with `npm run seed`, then edit sections in Studio → the relevant page singleton → the "Sections" tab.
 
-**Available block types:** the eleven general blocks (heroSection, richTextSection, imageTextSection, gallerySection, quoteSection, statSection, ctaBandSection, videoSection, spacerSection, logoStripSection, embedSection) plus the page-specific rich blocks (founderSection, servicesGridSection, testimonialsSection, processSection, faqSection, teamSection on Home; storySection, valuesSection, faqSection, teamSection on About; servicesGridSection, serviceAreaSection, guaranteeSection, faqSection on Services; processSection, faqSection on Process).
+**Available block types:** the eleven general blocks (heroSection, richTextSection, imageTextSection, gallerySection, quoteSection, statSection, ctaBandSection, videoSection, spacerSection, logoStripSection, embedSection ("Custom code or embed", card 121)) plus the page-specific rich blocks (founderSection, servicesGridSection, testimonialsSection, processSection, faqSection, teamSection on Home; storySection, valuesSection, faqSection, teamSection on About; servicesGridSection, serviceAreaSection, guaranteeSection, faqSection on Services; processSection, faqSection on Process).
 
 Blocks carry no background color field. `SectionRenderer` owns the alternating surface cadence automatically.
 
@@ -264,6 +264,27 @@ then commit both files together. CI fails the build if the committed types are s
 For the complete schema-change sequence, see the "Schema-change procedure" section above.
 
 ---
+
+## Custom code and site-wide code (PORTS.md card 121)
+
+The "Custom code or embed" block runs pasted code in its own box: an `srcdoc` iframe sandboxed WITHOUT
+`allow-same-origin`, so it cannot read the site's cookies or localStorage (where the embedded Studio keeps an editor's
+session) or touch the page. Two opt-outs run code directly on the page: the block's "Runs directly on the page" switch,
+and Site settings' "Code on every page" (head and end of body, public pages only, never `/studio` or `/preview`).
+Both are listed by the Checkup while in use. Trust model: `docs/agent/custom-code.md`.
+
+- **An editor's widget does not work in the box.** Read the Studio's yellow warning first: `document.cookie`,
+  `localStorage`, `top.location` or `parent.` are blocked in the box. Ask for a version without them before
+  reaching for the switch. Turn the switch on only for a provider you trust, and only after reading the code.
+- **Fonts in the box look wrong.** Check `/_astro/*` answers `Access-Control-Allow-Origin: *` under
+  `npm run preview` (public/_headers). `npm run dev` never sends it, so system fonts there are expected.
+- **Auditing what runs on the page.** Studio, Checkup: "Code that runs directly on the page" names every page; "Code on
+  every page" opens Site settings at the field. Or GROQ:
+  `*[count(pageBuilder[_type == "embedSection" && runsOnPage == true]) > 0]{_id, title}` (use the field name your
+  page types use for sections).
+- **Proof the box holds.** `tests/custom-code.spec.ts` stores a secret in the page's localStorage and checks the
+  boxed probe on /styleguide/sections/ reports `parent-dom:blocked storage:blocked cookie:blocked`, while the on-page
+  probe can read it.
 
 ## Studio workflow tools (PORTS.md card 117)
 

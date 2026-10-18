@@ -286,6 +286,22 @@ export const SITE_SETTINGS_PROJECTION = `{
     }
   }`;
 
+// Site settings' "Code on every page" (PORTS.md card 121). Its own memoized
+// query, deliberately NOT in SITE_SETTINGS_PROJECTION: that projection also
+// feeds the preview shell, and this code must never reach the preview or the
+// Studio. BaseLayout calls it only on public routes (isSiteCodeRoute).
+let _siteCodePromise: Promise<{ headCode?: string; bodyEndCode?: string } | null> | null = null;
+
+export async function getSiteCode() {
+  if (_siteCodePromise) return _siteCodePromise;
+  _siteCodePromise = sanityFetch<{ headCode?: string; bodyEndCode?: string } | null>(
+    `*[_type == "siteSettings"][0]{ headCode, bodyEndCode }`,
+    {},
+    null,
+  );
+  return _siteCodePromise;
+}
+
 export async function getSiteSettings() {
   if (_siteSettingsPromise) return _siteSettingsPromise;
   _siteSettingsPromise = sanityFetch(
