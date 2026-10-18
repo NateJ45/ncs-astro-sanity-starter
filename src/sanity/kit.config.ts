@@ -205,6 +205,15 @@ export const kitConfig: KitConfig = {
 
   liveSlowAfterMinutes: 15,
 
+  // Home's banner (card 118): the navy welcome at the top of Home. A fork sets
+  // its full-colour mark (or a reversed one in markOnDark), a decorative strip
+  // for the foot (motif, a wide short SVG in public/), the greeting's accent and,
+  // if the site has one, its display lettering for part of the name. Paths are
+  // files in public/. Detail: docs/agent/studio-kit.md, "Home's banner".
+  homeBanner: {
+    mark: '/favicon.svg',
+  },
+
   features: {
     home: true,
     guide: true,
