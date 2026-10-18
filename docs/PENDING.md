@@ -358,6 +358,14 @@ Unit-tested (`studio-banner.test.ts`) and rendered in a throwaway page with the 
 1280 and 375. Not yet seen in a signed-in Studio: the banner under the real navbar (the two should be one colour),
 the editor's real first name, and View the website opening the live site in a new tab.
 
+### 22. Card 120 (the Studio's edges): the signed-in checks (opened 2026-10-18)
+
+Unit-tested (`studio-edges.test.ts`, including every reworded key against the installed sanity), `tests/studio-boot.spec.ts`
+on the built page, and seen signed out under `astro dev` and `wrangler dev`: the splash before hydration (light, dark,
+1280, 375, throttled), the sign-in card with the site's subtitle, hash deep links kept. Not yet seen signed in: the
+navbar wordmark beside the square icon (and gone under 600px), the user-menu labels, the signed-out notice after a real
+session expires, and Presentation opening a page through the new route.
+
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 
 PORTS.md card 109 (page templates, picture picker, patterns, synced sections, guardrails) was built, type-checked,

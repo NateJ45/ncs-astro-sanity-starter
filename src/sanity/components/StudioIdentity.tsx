@@ -33,6 +33,11 @@ export function StudioIcon() {
 }
 
 /**
+ * @deprecated Since card 120 the site owns /studio (src/pages/studio/index.astro)
+ * and its <head> already carries the site's title and icons, so the starter no
+ * longer calls this. Kept for a site that has not taken that page yet; remove
+ * the call from sanity.config.ts when it does.
+ *
  * Point the browser tab at the site's mark. @sanity/astro's /studio page
  * hard-codes Sanity's logo as a data: URI in its <head>, and that file lives in
  * node_modules, so the swap happens here, once, when the config module loads

@@ -37,6 +37,9 @@ export const RESERVED_SLUGS = new Set([
   // noindex and out of the sitemap, but a real built route, so a custom page
   // must not be able to shadow it.
   'styleguide',
+  // The embedded Sanity Studio, a src/pages route since card 120. A custom
+  // page called "studio" would take the editor's own address.
+  'studio',
   '404',
   'sitemap-index.xml',
   'og',

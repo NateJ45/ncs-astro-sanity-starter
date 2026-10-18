@@ -32,9 +32,16 @@ import { deskStructure } from './src/sanity/structure';
 import { resolve } from './src/sanity/resolve';
 import { PreviewNavigator } from './src/sanity/components/PreviewNavigator';
 import { envVal } from './src/sanity/urls';
-import { StudioIcon, applySiteFavicon } from './src/sanity/components/StudioIdentity';
+import { StudioIcon } from './src/sanity/components/StudioIdentity';
 import { buildStudioTheme, seedLightScheme } from './src/sanity/studioTheme';
-import { studioLook, withEditorTypography } from './src/sanity/components/StudioLook';
+import {
+  studioLook,
+  StudioWordmarkNavbar,
+  withEditorTypography,
+} from './src/sanity/components/StudioLook';
+// The Studio's edges: sign-in line, wording, navbar wordmark (card 120).
+import { studioWording } from './src/sanity/studioWording';
+import { studioEdges } from './src/sanity/studioEdges.config';
 // The site's own font files for the Studio (rewritten by apply-brand; card 116).
 import './src/sanity/studioFonts.css';
 import brand from './brand/brand.config.json';
@@ -78,8 +85,9 @@ const STUDIO_FONTS = { display: DISPLAY_STACK, body: BODY_STACK };
 const studioTheme = buildStudioTheme(STUDIO_FONTS);
 seedLightScheme();
 
-// The Studio tab shows the site's own mark, not Sanity's (StudioIdentity.tsx).
-applySiteFavicon(brand.name);
+// The Studio tab's title and icons come from the site's own /studio page
+// (src/pages/studio/index.astro, card 120), so no runtime swap is needed.
+const wording = studioWording(brand.name, studioEdges);
 
 // Dev detection must FAIL CLOSED. An earlier version elsewhere in the family
 // also treated `process.env.NODE_ENV !== 'production'` as dev, but the
@@ -98,6 +106,13 @@ export default defineConfig({
   // deprecated and was never drawn; the login screen showed "My Studio".)
   title: brand.name,
   icon: StudioIcon,
+  // The line under the name on the sign-in card (card 120).
+  subtitle: wording.subtitle,
+  // The site's words on Sanity's screens: signed-out notice, user menu.
+  i18n: { bundles: wording.bundles },
+  // The wordmark beside the icon. At the ROOT on purpose: the root's middleware
+  // sits innermost, right around Sanity's bar (see StudioLook.tsx).
+  studio: { components: { navbar: StudioWordmarkNavbar } },
 
   projectId:
     envVal('SANITY_STUDIO_PROJECT_ID', 'PUBLIC_SANITY_PROJECT_ID') || 'placeholder-project-id',

@@ -13,6 +13,7 @@ import sanity from '@sanity/astro';
 import { buildRedirectMap } from './src/lib/redirects.ts';
 import { dropRedirectsOverLivePages } from './src/lib/redirect-guard.ts';
 import { fixSanityDedupeAlias } from './src/lib/sanity-dedupe-alias.ts';
+import { studioConfigModule } from './src/lib/studio-route.ts';
 
 // The Sanity project id is PUBLIC by design: it ships in every client bundle.
 // A fresh clone with no .env still builds; the Studio then shows a project-not-
@@ -167,11 +168,16 @@ export default defineConfig({
     // studio: it rebuilds with every deploy, so it can never drift stale the
     // way a hosted *.sanity.studio deploy does. The config it loads is the
     // repo-root sanity.config.ts.
+    //
+    // NO studioBasePath (PORTS.md card 120): the site owns the /studio page
+    // (src/pages/studio/index.astro: its title, icons and a branded splash).
+    // Setting studioBasePath would also inject Sanity's own page at /studio.
+    // studioConfigModule() in vite.plugins below serves the Studio its config
+    // instead, exactly as the integration did (hash history, basePath "/").
     sanity({
       projectId: SANITY_PROJECT_ID,
       dataset: SANITY_DATASET,
       useCdn: false,
-      studioBasePath: '/studio',
     }),
     sitemap({
       // /studio and /preview are Studio plumbing (SSR, noindex). The sitemap
@@ -211,7 +217,8 @@ export default defineConfig({
     // macOS/Linux. Do not delete it, and do not "fix" this with
     // SANITY_ASTRO_DISABLE_MODULE_DEDUPE=1 (the Studio then fails to hydrate).
     // Full story: src/lib/sanity-dedupe-alias.ts and PORTS.md card 60.
-    plugins: [tailwindcss(), fixSanityDedupeAlias()],
+    // studioConfigModule(): the `sanity:studio` module for /studio (see above).
+    plugins: [tailwindcss(), fixSanityDedupeAlias(), studioConfigModule()],
     // @sanity/ui ships an ESM build that Vite's dependency pre-bundler
     // mis-scans on this stack (MISSING_EXPORT errors for styled-components).
     // Excluding it from pre-bundling matches presacademy's working config; it

@@ -249,6 +249,30 @@ the brand's deep colour (a navbar middleware that always calls `renderDefault`, 
 `withEditorTypography(types, fonts)` gives every Portable Text style a `component` in the site's fonts. A new rich
 text field picks it up with no extra work, as long as it lists its `styles`.
 
+## The edges: /studio page, words, wordmark (card 120)
+
+Also outside the kit plugin; site choices in `src/sanity/studioEdges.config.ts`.
+
+- **The /studio page is the site's own** (`src/pages/studio/index.astro`). The tab says the site's name with the
+  site's icons from the first byte, the page ground is the Studio's paper or dark background (the editor's last
+  Appearance pick, else light, as `seedLightScheme` seeds it), and a plain HTML splash (the mark, the name in the
+  display font, "Opening the editor", an optional motif from `src/sanity/StudioSplashMotif.astro`) shows until React
+  mounts and replaces it (the island's `fallback` slot). React is still @sanity/astro's `StudioComponentHash`, so
+  hash routing and deep links (`/studio/#/structure/...`) are unchanged. astro.config.mjs no longer sets
+  `studioBasePath` (that would inject Sanity's page on top of ours); `studioConfigModule()` in
+  `src/lib/studio-route.ts` serves the `sanity:studio` config module instead.
+- **The site's words** (`src/sanity/studioWording.ts`): the workspace `subtitle` under the name on the sign-in card,
+  and an `i18n.bundles` entry for the signed-out notice and user-menu labels (Appearance and Sign out stay Sanity's).
+  "Choose login provider", the "Not authorized" dialog and the request-access form are hard-coded English in sanity
+  6.19 and stay Sanity's. `studio-edges.test.ts` fails if a key we override disappears from the installed sanity.
+- **The wordmark** (`StudioWordmarkNavbar` in `StudioLook.tsx`): the brand logo named by `wordmark.logo` (a
+  `logoPaths` entry; `view` crops an SVG lockup to its words) beside the square icon, hidden under 600px. It is
+  registered at the ROOT of sanity.config (`studio.components.navbar`), the innermost middleware, so it wraps only
+  Sanity's bar and not the kit's status line. The page hands it the built URL in `#ncs-studio-boot`.
+- **Not done, on purpose:** a branded heading inside the sign-in card through a custom `auth` store. Sanity uses a
+  custom store as-is, which drops its own request handler (expired-session handling, the CORS and project-not-found
+  screens). Not worth that for a heading.
+
 ## Checkup rules
 
 Generic (`genericRules()`): pictures with no description (skipping `altExemptFields` such as the logo), pages with no
@@ -290,7 +314,7 @@ and staff view place `messages`. PORTS.md card 117 has the full file list.
 - Desk items that a link can reach need an **explicit `.id()`**. A singleton's id is its document id (`aboutPage`),
   because an intent link resolves to `pages;aboutPage`; a title-derived id (`about`) left that pane blank.
 - The deployed Studio is hash-routed: every kit link goes through `useStudioLink()` (router), never a bare href.
-- The kit plugin stays **last** in `plugins`.
+- The kit plugin stays **last** in `plugins`. The wordmark navbar is the one middleware at the config root (card 120).
 - The navbar wrapper renders `props.renderDefault(props)` first, always; a wrapper that drops it silently disables every
   plugin's navbar after it.
 - Home's Publish and Discard use `useDocumentOperation`; they never call the client directly, so history, undo and

@@ -236,6 +236,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 116 | Studio as the site's admin: paper, navy chrome, fonts, text in site type       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 117 | Studio workflow: change note, expiring preview links, Messages, table panes    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering            | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8988,3 +8989,66 @@ order: starter PR first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-home-banner`, PR after this
 merges. Other sites `no`.
+
+## Card 120: the Studio's edges: its own /studio page and splash, the site's words, a wordmark (2026-10-18)
+
+**Origin:** the research pass on branding the embedded Studio (first-baptist-auburn, 2026-10-18). After cards 110 and
+116 the Studio itself looked like the site's, but its edges did not: @sanity/astro served `/studio` from node_modules
+with "Sanity Studio" in the tab, Sanity's red icon and no background, so every load opened on a blank white page (a
+white flash in dark mode) until React arrived; the sign-in card and Sanity's notices spoke in Sanity's words; the top
+bar showed only the square mark. Built in the starter, then first-baptist-auburn.
+
+**Canonical:** PORTABLE: `src/pages/studio/index.astro`, `src/lib/studio-route.ts`, `src/sanity/studioWording.ts`,
+`src/lib/studio-edges.test.ts`, `tests/studio-boot.spec.ts`, `StudioWordmarkNavbar` in
+`src/sanity/components/StudioLook.tsx`, `applySiteFavicon` marked deprecated in `StudioIdentity.tsx`, the
+`docs/agent/studio-kit.md` "The edges" section. Per site (NOT portable): `src/sanity/studioEdges.config.ts` (wordmark
+logo and crop, sign-in subtitle, word overrides), `src/sanity/StudioSplashMotif.astro` (optional art), the
+`astro.config.mjs` lines, the `sanity.config.ts` lines, and `'studio'` in the reserved slugs (both copies and the test).
+
+**What it adds.**
+
+- **The page.** `src/pages/studio/index.astro` (prerendered, `/studio/`): the brand name as `<title>`, the site's icon
+  set, `theme-color` in the navbar colour, `noindex`. An inline script picks the scheme the Studio is about to use
+  (Sanity's stored Appearance; else light, because `seedLightScheme` seeds a first visit; else the computer's) and the
+  CSS paints the Studio's own paper or dark background from `STUDIO_COLORS`, so the hand-over to React does not flash.
+  The splash (mark, name in the display font, "Opening the editor", optional motif) is the island's `slot="fallback"`,
+  so Astro swaps it out when React mounts; no script of ours removes it.
+- **The plumbing.** The page renders @sanity/astro's public `StudioComponentHash`, which imports its config from the
+  `sanity:studio` module. The integration only provides that module when `studioBasePath` is set, and that option also
+  injects Sanity's own page at the same address. So astro.config drops `studioBasePath` and adds
+  `studioConfigModule()` (`enforce: 'pre'`) to `vite.plugins`, which serves exactly what the integration did for one
+  workspace in hash mode: sanity.config with `basePath: '/'`. Hash routing, deep links and Presentation are unchanged;
+  `sanity.cli.ts`'s `basePath` stays.
+- **The words.** `studioWording(brand.name, studioEdges)` returns the workspace `subtitle` (shown under the name on the
+  sign-in card) and an `i18n.bundles` entry in Sanity's `studio` namespace for the signed-out notice
+  (`login.logged-out.*`) and user-menu labels (Manage project, Invite members, Help and resources). Appearance and Sign
+  out stay Sanity's. `studio-edges.test.ts` reads the installed sanity's English bundle and fails if any key we reword
+  has gone, because Sanity would otherwise fall back to its own text without a sound.
+- **The wordmark.** `StudioWordmarkNavbar` puts the `logoPaths` entry named by `studioEdges.wordmark.logo` beside the
+  square icon, inside a Card that takes the bar's navy and rule from the chrome theme; hidden under 600px. An optional
+  `view` crops an SVG lockup to its words with an `#svgView(viewBox(...))` fragment, since the square mark is already
+  right beside it. It is registered at the ROOT of sanity.config: Sanity nests navbar middleware with the earliest
+  plugin outermost and the root innermost, so only the root wraps Sanity's bar alone (inside `studioLook` it would also
+  wrap the kit's status line). The page resolves the built URL at build time into `#ncs-studio-boot`.
+- **`/studio` reserved** as a page slug, now that a src/pages route serves it.
+
+**Weighed and left out.** A branded heading inside the sign-in card through a custom `auth` store (`createAuthStore`
+plus our `LoginComponent`): Sanity's `getAuthStore` uses a custom store as-is, so it loses the request handler Sanity
+wires into its own (invalid-session handling, the CORS and project-not-found screens, request diagnostics). Not worth
+that for a heading; the subtitle does the job. Also left alone: "Choose login provider", the "Not authorized" dialog and
+the request-access form (hard-coded English in sanity 6.19, no i18n key), and Sanity's wordmark and links under the
+card.
+
+**Verified, signed out.** `astro dev` and `wrangler dev` on the built output: title and icons in the HTML, the splash
+before hydration in light and dark at 1280 and 375 and on a throttled first paint, React replacing it, the sign-in card
+with the subtitle, the "project not found" diagnostics screen still appearing (the request handler is intact), and
+`#/structure` and `#/presentation` deep links keeping their hash. Signed-in checks: `docs/PENDING.md` item 22.
+
+**Adopting it in a site.** Needs cards 110 and 116. Copy the PORTABLE files, write `studioEdges.config.ts` (and
+optionally `StudioSplashMotif.astro`), remove `studioBasePath` from the `sanity()` integration and add
+`studioConfigModule()` to `vite.plugins`, take the `sanity.config.ts` lines (`studioWording`, `subtitle`,
+`i18n.bundles`, `studio.components.navbar: StudioWordmarkNavbar`, drop `applySiteFavicon`), reserve `'studio'`, then
+`npm run build`, `npm run test:unit` and open `/studio`. Marked-file order: the starter merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-edges`, PR after this merges. Other
+sites `no`.
