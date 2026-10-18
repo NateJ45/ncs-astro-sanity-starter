@@ -343,6 +343,8 @@ test('a look a block does not offer, or nonsense, is Standard', () => {
 });
 
 test('stega markers on a look are ignored', () => {
-  const rows = classifySections([block('quoteSection', { look: 'feature​‌‍' })]);
+  const rows = classifySections([
+    block('quoteSection', { look: 'feature' + String.fromCharCode(0x200b, 0x200c, 0x200d) }),
+  ]);
   assert.equal(rows[0].look, 'feature');
 });
