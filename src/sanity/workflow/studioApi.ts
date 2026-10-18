@@ -2,7 +2,7 @@
 // Foundation, edit with care
 // =============================================================================
 // studioApi - call the site's own /api/studio/* routes with the Studio session
-// (PORTS.md card 114)
+// (PORTS.md card 117)
 // =============================================================================
 // Every /api/studio/* route checks the caller with Sanity (src/lib/studio-auth.ts),
 // so the Studio sends its own session token as a bearer. The signed-in embedded

@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// preview-share-server - the Worker half of private preview links (card 114)
+// preview-share-server - the Worker half of private preview links (card 117)
 // =============================================================================
 // Used by the /preview/** route (is this `?share=` link still good?) and by
 // /api/studio/share-preview/ (sign a link for a record the Studio just wrote).

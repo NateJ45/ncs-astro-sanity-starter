@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// Private preview links (src/lib/preview-share.ts, card 114): signing, expiry, scope
+// Private preview links (src/lib/preview-share.ts, card 117): signing, expiry, scope
 // and the share-record rules.
 
 import { describe, it } from 'node:test';

@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// The morning change note's summary builder (scripts/lib/change-summary.mjs, card 114).
+// The morning change note's summary builder (scripts/lib/change-summary.mjs, card 117).
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';

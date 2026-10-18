@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// DocumentTable - a sortable table pane for a long list (PORTS.md card 114)
+// DocumentTable - a sortable table pane for a long list (PORTS.md card 117)
 // =============================================================================
 // One component, configured per site in src/sanity/tables.config.ts: which
 // type, which columns. Click a column heading to sort by it (again to reverse);

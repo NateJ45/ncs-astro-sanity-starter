@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// preview-share - private preview links that expire (PORTS.md card 114)
+// preview-share - private preview links that expire (PORTS.md card 117)
 // =============================================================================
 // "Share a preview" in the Studio makes a link that someone with no login can
 // open for 1, 3, 7 or 14 days. It shows ONE document's draft, noindex, and the

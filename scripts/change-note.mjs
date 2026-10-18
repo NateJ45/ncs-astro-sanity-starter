@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// change-note.mjs - the morning "What changed" note (PORTS.md card 114)
+// change-note.mjs - the morning "What changed" note (PORTS.md card 117)
 // =============================================================================
 // Run by .github/workflows/change-note.yml once a day. It asks Sanity which
 // documents were created, changed, published or moved to the Trash in the last

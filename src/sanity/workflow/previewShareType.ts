@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// previewShare - one record per private preview link (PORTS.md card 114)
+// previewShare - one record per private preview link (PORTS.md card 117)
 // =============================================================================
 // Written by the "Share a preview" dialog, read by the Worker on every visit to
 // the link (src/lib/preview-share-server.ts). It holds NO token: the signed

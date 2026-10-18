@@ -321,7 +321,7 @@ the status line and on Home, and Try again starting a run (needs `GITHUB_DEPLOY_
 375px, signed in, creating a published document; an empty list's pane and its button; the i18n empty words; and
 `restore-doc.mjs` against a real backup artifact. first-baptist-auburn is that site; its PENDING lists the same.
 
-### 18. Card 114 (workflow tools): the signed-in and deployed checks (opened 2026-10-18)
+### 18. Card 117 (workflow tools): the signed-in and deployed checks (opened 2026-10-18)
 
 Unit-tested (`change-summary.test.mjs`, `preview-share.test.ts`, `studio-messages.test.ts`, `studio-table.test.ts`),
 `astro check` and the build clean, the two endpoints answered as designed under `wrangler dev` signed out. Not yet

@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// studio-messages - the Studio's "Messages" inbox, pure half (PORTS.md card 114)
+// studio-messages - the Studio's "Messages" inbox, pure half (PORTS.md card 117)
 // =============================================================================
 // The site's forms write to the Worker's own D1 database (binding CONTACT_DB):
 // /api/contact/ into contact_submissions, and on sites with the form builder

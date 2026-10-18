@@ -173,10 +173,10 @@ always gave `commit: null`. `astro.config.mjs` reads the SHA in Node (`GITHUB_SH
 HEAD`, else null) and passes it as the Vite define `__NCS_BUILD_COMMIT__`. A site whose config lacks the define still
 builds and reports null. Check after a build: `dist/client/build-info.json` must show a seven-character commit.
 
-## The workflow tools (card 114)
+## The workflow tools (card 117)
 
 A second plugin, `ncsWorkflowTools` (`src/sanity/workflow/`), registered just before the kit so the kit's tool order
-and staff view place `messages`. PORTS.md card 114 has the full file list.
+and staff view place `messages`. PORTS.md card 117 has the full file list.
 
 - **Share a preview** (`SharePreviewAction.tsx`): a document action on the types in `shareTypes`. Writes a
   `previewShare.<nonce>` record with the editor's own session, asks `POST /api/studio/share-preview/` to sign it

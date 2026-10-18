@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// The Messages inbox (src/lib/studio-messages.ts, card 114): endpoint auth order,
+// The Messages inbox (src/lib/studio-messages.ts, card 117): endpoint auth order,
 // row mapping, statuses and the prayer-request privacy rule.
 
 import { describe, it } from 'node:test';

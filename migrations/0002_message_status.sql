@@ -1,4 +1,4 @@
--- The Studio's Messages inbox (PORTS.md card 114): one status per form message.
+-- The Studio's Messages inbox (PORTS.md card 117): one status per form message.
 -- Copied from MESSAGE_STATUS_DDL in src/lib/studio-messages.ts;
 -- studio-messages.test.ts fails if the two differ, so edit the DDL there first.
 --

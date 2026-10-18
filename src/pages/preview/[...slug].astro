@@ -53,7 +53,7 @@ if (!config.ok) {
 // fingerprint /api/draft-mode/enable writes (src/lib/preview-auth.ts).
 const draftMode = await isStudioPreview(Astro.cookies.get(perspectiveCookieName)?.value);
 
-// A private preview link (PORTS.md card 114): `?share=<signed token>` shows
+// A private preview link (PORTS.md card 117): `?share=<signed token>` shows
 // THIS page's draft to someone with no login, until the link expires or an
 // editor stops it. It never turns on draftMode: no overlay, no live channel,
 // no stega, and every other page stays published. src/lib/preview-share.ts.

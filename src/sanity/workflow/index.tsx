@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// ncsWorkflowTools - the Studio's safety-net and workflow tools (PORTS.md card 114)
+// ncsWorkflowTools - the Studio's safety-net and workflow tools (PORTS.md card 117)
 // =============================================================================
 // One plugin for the pieces that sit beside the Studio kit:
 //   - "Share a preview": a private draft link that expires (SharePreviewAction).

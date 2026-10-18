@@ -97,7 +97,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'media.tag',
   // The Studio kit's weekly tick document (card 111): Home's bookkeeping, never edited here.
   WEEK_TYPE,
-  // Private preview link records (card 114): managed from "Share a preview" only.
+  // Private preview link records (card 117): managed from "Share a preview" only.
   'previewShare',
   // processStep is placed explicitly under Content → Process Steps
   'processStep', // scaffold: process
@@ -354,7 +354,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
             .title('Journal')
             .items([
               S.documentTypeListItem('journalEntry').title('Posts').icon(EditIcon),
-              // The same posts as a sortable table (card 114, tables.config.ts).
+              // The same posts as a sortable table (card 117, tables.config.ts).
               ...TABLES.filter((c) => c.type === 'journalEntry').map((c) => tableListItem(S, c)),
               S.documentTypeListItem('journalCategory').title('Categories').icon(TagIcon),
             ]),

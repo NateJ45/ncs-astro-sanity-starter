@@ -1,6 +1,6 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// change-summary.mjs - the pure half of the morning change note (PORTS.md card 114)
+// change-summary.mjs - the pure half of the morning change note (PORTS.md card 117)
 // =============================================================================
 // scripts/change-note.mjs asks Sanity what moved in the last 24 hours and hands
 // the raw answers to buildChangeSummary(), which turns them into the plain list

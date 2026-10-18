@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /api/studio/messages/ - the Studio's Messages inbox (PORTS.md card 114)
+// /api/studio/messages/ - the Studio's Messages inbox (PORTS.md card 117)
 // =============================================================================
 // Lists the form submissions in the Worker's D1 database (CONTACT_DB) and
 // stores each one's status (New, Needs a person, Replied, Spam) back in D1.

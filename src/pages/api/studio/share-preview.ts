@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /api/studio/share-preview/ - sign a private preview link (PORTS.md card 114)
+// /api/studio/share-preview/ - sign a private preview link (PORTS.md card 117)
 // =============================================================================
 // The Studio's "Share a preview" dialog writes a share record (previewShare.<nonce>,
 // with the document, its preview path and the expiry the editor picked), then

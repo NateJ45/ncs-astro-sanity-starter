@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// Table panes (src/lib/studio-table.ts, card 114): draft merging, status, sorting,
+// Table panes (src/lib/studio-table.ts, card 117): draft merging, status, sorting,
 // cell text, and the site's own src/sanity/tables.config.ts.
 
 import { describe, it } from 'node:test';

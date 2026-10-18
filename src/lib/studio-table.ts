@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// studio-table - the pure half of the Studio's table panes (PORTS.md card 114)
+// studio-table - the pure half of the Studio's table panes (PORTS.md card 117)
 // =============================================================================
 // A long list (sermons, downloads, people) reads better as a sortable table
 // with a status pill per row than as the desk's one-line list. The component is

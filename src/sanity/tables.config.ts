@@ -1,6 +1,6 @@
 // Safe to edit by hand
 // =============================================================================
-// Table panes for long lists (PORTS.md card 114) - THIS SITE'S columns
+// Table panes for long lists (PORTS.md card 117) - THIS SITE'S columns
 // =============================================================================
 // Each entry adds a "<title>" item to the desk (src/sanity/structure.ts) that
 // opens a sortable table of one document type, with a status pill per row and

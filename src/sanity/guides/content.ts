@@ -521,7 +521,7 @@ guides.push(
   },
 );
 
-// ── Workflow tools (PORTS.md card 114) ───────────────────────────────────────
+// ── Workflow tools (PORTS.md card 117) ───────────────────────────────────────
 // Appended like the kit helpers above, so a site rewriting its guides keeps them.
 guides.push(
   {

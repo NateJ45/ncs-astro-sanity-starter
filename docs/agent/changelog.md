@@ -1,6 +1,6 @@
 # Change history
 
-_2026-10-18: the Studio's safety net (PORTS card 114)._
+_2026-10-18: the Studio's safety net (PORTS card 117)._
 
 **Decision.** Four tools modelled on what the Theology Matters WordPress admin gives its editors. A morning GitHub
 issue "What changed on <date>" from `change-note.yml` (read token only; quiet days post nothing). "Share a preview":
