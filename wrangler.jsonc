@@ -92,7 +92,19 @@
   // (a fine-grained GitHub token on that one repo, "Actions: Read and write"
   // only). Without them the route says configured: false and the Studio keeps
   // its old behaviour, so the template ships it commented out.
-  // "vars": { "GITHUB_REPO": "<owner>/<repo>" },
+  //
+  // ── Home's Visitors card (src/pages/api/studio/visitors.ts) ───────────────
+  // PORTS.md card 115. Cloudflare Web Analytics numbers for signed-in Studio
+  // members. The token is a secret (Account Analytics: Read only):
+  //   npx wrangler secret put CF_ANALYTICS_TOKEN
+  // and the account id and Web Analytics site tag (NOT the beacon token) are
+  // plain vars. Without all three the card says "not set up yet". Steps:
+  // OPERATIONS.md, "Visitor numbers".
+  // "vars": {
+  //   "GITHUB_REPO": "<owner>/<repo>",
+  //   "CF_ACCOUNT_ID": "<32 hex>",
+  //   "CF_WEB_ANALYTICS_SITE_TAG": "<32 hex>"
+  // },
 
   // ── Private preview links (src/pages/api/studio/share-preview.ts) ───────────
   // PORTS.md card 117. "Share a preview" in the Studio needs one secret, 32+

@@ -11,7 +11,9 @@ document, and a warmer Home (greeting and site name, quick actions, "Pick up whe
 (2026-10-18, PORTS.md card 111, "the Studio remembers") is for an editor alone on Sanity's free plan (three days of
 history, administrators only): a failed deploy said plainly with "Try again", a weekly checklist with hand ticks,
 a phone-sized Quick update tool, empty lists that explain themselves, and `scripts/restore-doc.mjs` for "put it back
-the way it was on Tuesday".
+the way it was on Tuesday". Round four (2026-10-18, PORTS.md card 115) brought Home up to the WordPress staff
+dashboard: a dated greeting, "Coming up" (what publishes by itself), a Fix-it list by name with Edit buttons, real
+visitor numbers from Cloudflare Web Analytics, a "Your pages" map and a "Watch how it is done" row of guide videos.
 
 This doc is PORTABLE: it describes the kit, never one site. A site's own choices (its staff, weekly jobs, extra rules)
 are commented in that site's `src/sanity/kit.config.ts`.
@@ -35,6 +37,9 @@ are commented in that site's `src/sanity/kit.config.ts`.
 | Build time              | `src/pages/build-info.json.ts`                                                                | Prerendered `{ builtAt, commit }` for Home's "Is it live?"; the commit comes from a Vite define in `astro.config.mjs`                                   |
 | Desk: Trash, staff, ids | `src/sanity/structure.ts`                                                                     | Trash list (id `trash`), `staffDesk()` filter (in `kit/shared.tsx`), singleton items carry their document id as their id                                |
 | Deploy status (111)     | `src/pages/api/studio/deploy-status.ts`, `src/lib/deploy-status.ts`, `src/lib/studio-auth.ts` | GET the newest deploy run's outcome; POST "Try again" (same origin + Sanity session); tests in `deploy-status.test.ts`                                  |
+| Home cards (115)        | `src/sanity/kit/HomeCards.tsx`, `src/lib/studio-home.ts`                                      | Coming up, Fix-it list, Visitors, Your pages, and the Panel frame; pure parts tested in `studio-home.test.ts`                                           |
+| Guide videos (115)      | `src/sanity/kit/GuideVideos.tsx`                                                              | "Watch how it is done" on Home and in the Site Guide; `videoSource()` in `studio-home.ts`                                                               |
+| Visitors route (115)    | `src/pages/api/studio/visitors.ts`, `src/lib/studio-analytics.ts`                             | Cloudflare Web Analytics GraphQL through the Worker (same origin + Sanity session); tests in `studio-analytics.test.ts`                                 |
 | Weekly ticks (111)      | `src/sanity/kit/weekType.ts`                                                                  | `studioWeek` document per week for hand-ticked jobs; `checklist()` and `weekKey()` in `studio-kit.ts`                                                   |
 | Quick update (111)      | `src/sanity/kit/QuickUpdateTool.tsx`                                                          | Tool `quick-update`, forms from `kitConfig.quickUpdate`; `quickFormErrors()` in `studio-kit.ts`                                                         |
 | Empty lists (111)       | `src/sanity/kit/emptyList.tsx`                                                                | `emptyAwareList()` for `structure.ts`, plus `EMPTY_LIST_BUNDLE` (the default empty words)                                                               |
@@ -68,8 +73,28 @@ person or a document type; everything site-specific comes in through `kitConfig`
   up, a publish waits for the next deploy, and the card says so after `liveSlowAfterMinutes`. Card 111: when the
   deploy route says the newest deploy failed, the card says "The last update didn't go through" with "Try again".
 - **Quick update** button (card 111): beside "Edit the website" when `kitConfig.quickUpdate` has forms.
-- **Site health**: the Checkup's counts. **Recent edits**: the last eight things changed, unpublished ones flagged.
-- **Visitors**: "not set up yet" until the analytics route exists (`features.visitors`).
+- **Fix-it list** (card 115, replaced Site health): the Checkup's counts, then its findings one row per page, by name,
+  with what is wrong and an **Edit** button that opens the page at the field (`fixItList()` in `studio-home.ts`, at
+  most six rows, the urgent ones first), and **See the whole list** for the Checkup. It reuses the Checkup's own run
+  (`useCheckup`): the generic rules now return `items` (`{ name, target }` per document, built by `itemsOf()`) and a
+  short `itemLabel`. A site rule without `items` still shows, as one row from its label. "For information" never shows.
+- **Coming up** (card 115): drafts with a `publishAt` ("Publish automatically at", card 111), soonest first, the time in
+  plain words ("Tomorrow at 9:00 AM"; a passed time reads "Any minute now", since the job runs half-hourly), each with
+  Open (`comingUp()` and `whenWords()`). It appears only when some document type in the schema has a `publishAt`
+  field, and `features.comingUp: false` hides it. Empty: one sentence on how to schedule a page.
+- **Recent edits**: the last eight things changed, unpublished ones flagged.
+- **Visitors** (card 115): the last seven days' visits against the seven before, a four-week daily bar chart in plain
+  SVG (the last week at full strength, a `<title>` per bar), the five most-read pages and how people found the site
+  (search, typed it in, social, other sites). From `/api/studio/visitors/`, below. Without the Worker settings the card
+  says "Not set up yet"; `features.visitors: false` says so without asking.
+- **Your pages** (card 115, `kitConfig.pages`): groups of one-click links (`PageMapGroup`: a title, `links` of
+  `{ title, target, detail?, icon? }`, and optionally `listType`, which lists every document of that type by name, so a
+  custom page built tomorrow appears without a config change; `resolvePageMap()` skips anything already linked and marks
+  never-published ones). Missing or empty hides the card.
+- **Watch how it is done** (card 115): the guides with a `video`, three on Home ("N more in the Site Guide"), all of them
+  at the top of the Site Guide, and a Watch button on an open guide. Hidden when no guide has one. See "Guide videos".
+- **Dated greeting** (card 115): "Sunday, October 18" above "Good morning, Ann" (`todayLine()`), and a footer line
+  "Need help? Site Guide or Ask <helper>" (the Ask link is the mailto when `PUBLIC_STUDIO_HELP_EMAIL` is set).
 - **Welcome** (card 110): "Good morning, Ann", the workspace title (the site's name, from `brand.config.json`) in the
   theme's heading font (the site's display face), on a `tone="primary"` card, which the branded theme makes a soft tint
   of the brand accent. No literal colours, no gradient.
@@ -116,6 +141,37 @@ Settings, all on the Worker: secret `GITHUB_DEPLOY_TOKEN` (a fine-grained token 
 Read and write** only), var `GITHUB_REPO` (`owner/name`, in `wrangler.jsonc`), optional `DEPLOY_WORKFLOW` (default
 `deploy.yml`) and `DEPLOY_BRANCH` (default `main`). Without the token the route answers `configured: false` and the
 Studio behaves exactly as before.
+
+## Visitor numbers (card 115)
+
+`GET /api/studio/visitors/` answers only a signed-in Studio member: the site's own Origin (or `Sec-Fetch-Site:
+same-origin`) else 403, then the Studio's session token as `Authorization: Bearer`, checked with Sanity's `/users/me`
+(`studio-auth.ts`), else 401. Only then does it say `{ configured: false }` (no settings) or ask Cloudflare. One
+GraphQL call (`rumPageloadEventsAdaptiveGroups`, three aliases: visits by `date` over 28 days, page views by
+`requestPath` and visits by `refererHost` over the last seven days) is mapped by `visitorsReport()`: missing days are
+zero, the week totals come from the series so they always agree, `/studio`, `/preview` and `/api` paths are left out
+of the most-read list, the site's own host is left out of the sources, and an answer with GraphQL errors throws (the
+card says "could not load", never false zeros). Cached ten minutes per Worker instance; `Cache-Control: private,
+no-store`.
+
+Settings, all on the Worker: secret `CF_ANALYTICS_TOKEN` (a Cloudflare API token with **Account Analytics: Read** only),
+vars `CF_ACCOUNT_ID` and `CF_WEB_ANALYTICS_SITE_TAG` (32 hex each; the site tag is not the beacon token). The step by
+step is in OPERATIONS.md, "Visitor numbers". The query's field names were taken from the Web Analytics dashboard's own
+query; check the card against the dashboard the first time a site switches it on.
+
+## Guide videos (card 115)
+
+A guide in `src/sanity/guides/content.ts` takes an optional `video`:
+
+- a file in `public/`, written as its path (`video: '/guides/post-a-notice.mp4'`), played in a `<video>` player;
+- a YouTube link (watch, youtu.be, shorts or embed; played through `youtube-nocookie.com`) or a Vimeo link, played in
+  their own player;
+- any other https address, opened in a new tab.
+
+Anything else (`javascript:`, `//host`, empty) is ignored (`videoSource()`, tested). Nothing loads until Watch is pressed
+(a dialog), so Home never pulls in YouTube on its own. Keep clips under two minutes, record at 1280 wide, and say the
+job in the guide's title. A site with a full CSP must allow `frame-src https://www.youtube-nocookie.com
+https://player.vimeo.com` on `/studio/*`.
 
 ## Quick update (card 111)
 
@@ -210,9 +266,9 @@ and staff view place `messages`. PORTS.md card 117 has the full file list.
 
 ## Not built yet
 
-Tracked in the starter's `docs/PENDING.md` item 14: the rest of the Worker routes (visitors from GA4, Ask form, link
-check, monthly report), the live publish checklist inspector and recorded tutorial videos. Studio auth and deploy status
-landed with card 111.
+Tracked in the starter's `docs/PENDING.md` item 14: the rest of the Worker routes (Ask form, link check, monthly report),
+the live publish checklist inspector and the recorded tutorial videos themselves (the slot exists, card 115). Studio
+auth and deploy status landed with card 111; visitors (from Cloudflare Web Analytics, not GA4) with card 115.
 
 Findings from the step 0 spike (2026-10-17), for the Worker half:
 

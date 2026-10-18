@@ -106,6 +106,46 @@ export const kitConfig: KitConfig = {
     forType: GUIDES_FOR_TYPE,
   },
 
+  // Home's "Your pages" card (card 115): every page the editor can change, in
+  // groups, each one click away. Links are StudioTargets (a document, a field
+  // of one, a desk pane). `listType: 'page'` lists every custom page by name, so
+  // a page built tomorrow shows up without touching this file. A fork regroups
+  // these in its own words (a church: Main pages, Sermons and people, Settings).
+  pages: [
+    {
+      title: 'Main pages',
+      links: [
+        { title: 'Home', target: { doc: 'homePage' } },
+        { title: 'About', target: { doc: 'aboutPage' } }, // scaffold: about
+        { title: 'Services', target: { doc: 'servicesPage' } }, // scaffold: services
+        { title: 'Process', target: { doc: 'processPage' } }, // scaffold: process
+        { title: 'Questions', target: { doc: 'faqPage' } }, // scaffold: faq
+        { title: 'Journal (the list page)', target: { doc: 'journalPage' } }, // scaffold: journal
+        { title: 'Contact', target: { doc: 'contactPage' } },
+        { title: 'Privacy policy', target: { doc: 'privacyPage' } },
+      ],
+    },
+    { title: 'Pages you built', listType: 'page' },
+    {
+      title: 'Lists',
+      links: [
+        { title: 'Announcements', target: { pane: 'content;announcement' } },
+        { title: 'Journal posts', target: { pane: 'journal;journalEntry' } }, // scaffold: journal
+        { title: 'Questions and answers', target: { pane: 'content;faqItem' } }, // scaffold: faq
+        { title: 'Testimonials', target: { pane: 'content;testimonial' } }, // scaffold: testimonials
+      ],
+    },
+    {
+      title: 'Site-wide',
+      links: [
+        { title: 'Contact details and hours', target: { doc: 'businessInfo' } },
+        { title: 'Menus', target: { doc: 'siteSettings', field: 'navItems' } },
+        { title: 'Footer', target: { doc: 'siteSettings', field: 'footerColumns' } },
+        { title: 'Site settings', target: { doc: 'siteSettings' } },
+      ],
+    },
+  ],
+
   // Home's big buttons (card 110): this site's most common jobs, as intent
   // links. Keep it to four. A church might use "Add this week's sermon",
   // "Change service times", "Post an announcement", "Edit the homepage".
@@ -172,9 +212,10 @@ export const kitConfig: KitConfig = {
     tour: true,
     trash: true,
     publishNote: true,
-    // The Visitors card needs an analytics route the starter does not ship
-    // yet; until then Home says "not set up yet".
-    visitors: false,
+    // The Visitors card (card 115) asks /api/studio/visitors/, which says "not
+    // set up yet" until the Worker has CF_ANALYTICS_TOKEN, CF_ACCOUNT_ID and
+    // CF_WEB_ANALYTICS_SITE_TAG (OPERATIONS.md, "Visitor numbers").
+    visitors: true,
     // Card 110: the status line under the top bar, and the help panel.
     navbarStatus: true,
     helpPanel: true,

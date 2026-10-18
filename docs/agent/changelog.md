@@ -10,6 +10,14 @@ A Messages tool over the forms' D1 tables with New / Needs a person / Replied / 
 reduced to "one arrived", nothing personal in Sanity. Sortable table panes beside the normal lists. Built first for
 first-baptist-auburn.
 
+_2026-10-18: the Studio Home dashboard (PORTS card 115)._
+
+**Decision.** Home now matches the WordPress staff dashboard: a dated greeting, "Coming up" (scheduled drafts, soonest
+first), a Fix-it list naming each page with an Edit button (the Checkup's own rules, now returning per-page items),
+visitor numbers from Cloudflare Web Analytics through a signed-in-only Worker route (`/api/studio/visitors/`, a
+read-only token as a Worker secret), a config-driven "Your pages" map, and a "Watch how it is done" row for guide videos
+that hides itself until a guide has one. Charts are plain SVG; no new dependency.
+
 _2026-10-18: the Studio remembers (PORTS card 111)._
 
 **Decision.** For an editor alone on Sanity's free plan: a failed deploy now says "The last update didn't go through"

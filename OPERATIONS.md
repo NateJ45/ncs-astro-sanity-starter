@@ -218,6 +218,35 @@ Sanity Studio includes a built-in Comments feature (the speech-bubble icon that 
 
 Comments stay attached to the specific field until resolved. Comments do not affect published content in any way.
 
+### Visitor numbers (Home's Visitors card, PORTS.md card 115)
+
+Home's Visitors card reads Cloudflare Web Analytics through `/api/studio/visitors/` (signed-in Studio members only).
+Until the Worker has three settings, the card says "Not set up yet". Once per site:
+
+1. **Turn on Web Analytics** for the site if it is not already (Cloudflare dashboard, Analytics & Logs, Web Analytics,
+   Add a site). The beacon token it shows goes in `PUBLIC_CF_ANALYTICS_TOKEN` as before; that is NOT the site tag.
+2. **Find the site tag.** Open the site in Web Analytics: the address bar ends in `siteTag~in=<32 characters>`. That
+   value is the site tag. (Or, with the token from step 3:
+   `curl -H "Authorization: Bearer <token>" https://api.cloudflare.com/client/v4/accounts/<account id>/rum/site_info/list`
+   and read `site_tag`.)
+3. **Create the read-only token.** Cloudflare dashboard, top-right profile menu, My Profile, API Tokens, Create Token,
+   then "Create Custom Token" (Get started):
+   - Token name: `<site> Studio visitors (read only)`.
+   - Permissions: one row, **Account**, **Account Analytics**, **Read**. Nothing else.
+   - Account Resources: Include, the account the site is on.
+   - Leave IP filtering and TTL empty. Continue to summary, Create Token, and copy the token (it is shown once).
+4. **Give it to the Worker as a secret** (it never goes in the repo or in chat). From the site repo:
+   `npx wrangler secret put CF_ANALYTICS_TOKEN` and paste it at the prompt. Keep a copy in 1Password.
+5. **Add the two plain values** to `wrangler.jsonc` `vars` (they are not secret): `"CF_ACCOUNT_ID"` (the account id,
+   on the dashboard's account home or from `npx wrangler whoami`) and `"CF_WEB_ANALYTICS_SITE_TAG"` (step 2). Both are
+   32 hex characters; anything else is ignored.
+6. Deploy (`npm run deploy`, or merge to `main`), open `/studio`, and check the Visitors card shows numbers. It caches
+   for ten minutes per Worker instance. "Could not load just now" means Cloudflare refused: check the token's permission
+   and the account id first (`npx wrangler tail` shows `visitors: Cloudflare answered <status>`).
+
+Numbers are Cloudflare's sampled estimates, by UTC day; visits to `/studio`, `/preview` and `/api` are left out of the
+most-read list. To rotate the token, create a new one, `secret put` it, then delete the old one in the dashboard.
+
 ### Studio deploy
 
 There isn't one. The Studio is **embedded at `/studio`** and built by `astro build`, so
