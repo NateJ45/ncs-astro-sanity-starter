@@ -31,7 +31,7 @@ What replaced each thing it did:
 
 ### `[data-reveal]`
 
-Any element marked `data-reveal` starts at `opacity: 0; transform: translateY(0.75rem)`. An IntersectionObserver in BaseLayout adds `.is-visible` when the element crosses the viewport edge, transitioning to opacity 1 + no translate. Reduced-motion users get content immediately (the global reset short-circuits the start-hidden state).
+Once JavaScript runs, any element marked `data-reveal` starts at `opacity: 0; translate: 0 0.75rem`. An IntersectionObserver in BaseLayout adds `.is-visible` when the element crosses the viewport edge, transitioning to opacity 1 + no translate. The hidden start is scoped to `html.motion`, a class the inline theme bootstrap in `<head>` adds before first paint (and re-adds after every view-transition swap). With JavaScript off or blocked the class never appears and the page renders finished; `[data-stagger-grid]` children and `.img-curtain` follow the same rule (PORTS.md card 107). Reduced-motion users never get the class, and the global reset forces the end state as a backstop. A new hidden-until-JS state goes under `html.motion` too.
 
 Apply selectively to section blocks. Don't add `data-reveal` to above-the-fold content -- it defeats the purpose and hides content from users with slow connections before the observer fires.
 

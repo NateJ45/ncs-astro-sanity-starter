@@ -224,8 +224,14 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 104 | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file        | n/a     | no          | yes      | n/a              | no            | no             | n/a                | n/a                 | no             |
 | 105 | A text hero (no photo, or editorial) still renders its buttons                 | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 | 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 107 | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page  | n/a     | no          | yes      | no               | partial       | n/a            | n/a                | partial             | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
+
+Row 107 (2026-10-17): mas-monograms (`html.reveal-ready`) and nixoncreativestudio (`.js`) already gate
+their reveal on a head-script class, a divergent form of the same idea, hence `partial`; neither was changed. presacademy,
+reid-design-site and stonesteps-50k hide `[data-reveal]`, `[data-stagger-grid] > *` and `.img-curtain` unconditionally
+and stay `no` until each copies the change. first-baptist-auburn and fbcm have no column; see the card.
 
 Row 106 (2026-10-17): first-baptist-auburn has no column; it is the origin and resyncs to the marked copies right
 after the starter merges. 2ndpreschicago, ncs-church-starter and nixoncreativestudio have no Studio for staff, hence `n/a`.
@@ -8401,3 +8407,36 @@ carry none (card 99).
 **Status, 2026-10-17.** Starter `yes`. first-baptist-auburn (no matrix column) is the origin and swaps its copies for the
 marked ones in the PR that follows this card. Every other site `no`; the Worker half (visitors, Ask form, deploy status,
 monthly report) is `docs/PENDING.md` item 14.
+
+## Card 107: hidden reveal states wait for `html.motion`, so no-JS shows the finished page (2026-10-17)
+
+**Origin:** found on first-baptist-auburn while checking reported "blank sections" on the home page. The blanks were only
+the 600ms reveal fade, but the check showed that `globals.css` set `[data-reveal] { opacity: 0 }` (and the same for
+`[data-stagger-grid] > *` and a covering `.img-curtain`) unconditionally, and only BaseLayout's IntersectionObserver
+ever adds the class that shows them. With JavaScript off, blocked or failed to load, most sections of every page stayed
+invisible for good. Only reduced-motion visitors were safe, because the reduced-motion block forces the end state.
+**Canonical:** `src/styles/globals.css` and `src/layouts/BaseLayout.astro` (both foundation files, not PORTABLE).
+
+**The fix.** The inline theme bootstrap in BaseLayout's `<head>` now also toggles `motion` on `<html>` (on unless the
+visitor prefers reduced motion). It runs before first paint and again on `astro:after-swap`, because the view-transition
+swap resets `<html>`'s className. In `globals.css` every hidden START state moved under that class:
+`html.motion [data-reveal]`, `html.motion [data-stagger-grid] > *` and `html.motion .img-curtain` (the curtain now
+defaults to `scaleY(0)`, open). The matching end states took the same prefix
+(`html.motion [data-reveal].is-visible`, `html.motion [data-stagger-grid].is-staggered > *`,
+`html.motion .img-curtain.is-revealed`) so they still outrank the start states. The transition declarations stay on the
+unprefixed selectors, so nothing that overrides their timing (`[data-stagger-grid] > .card-lift-slow`,
+`.is-filtered-out`) changes specificity. With JS on, the picture and timing are unchanged; with JS off the page renders
+finished. Any new hidden-until-JS state goes under `html.motion` too. Not covered: a page whose inline head script runs but
+whose bundled module fails, which still waits on the observer.
+
+**Adopting it in a site.** Where `globals.css` still has `[data-reveal] {` with `opacity: 0` at top level (grep it with
+one line of context): copy the three CSS blocks and the head-script toggle. A site that already sets a class like this
+(`js`, `motion`, `reveal-ready`) can scope to that class instead of adding a second. Verify in a real browser with
+JavaScript disabled (Playwright `javaScriptEnabled: false`: no element under `[data-reveal]`, `[data-stagger-grid]` or
+`.img-curtain` should compute to opacity 0 or cover the image), then with JS on, scrolling a long page, to check the fade
+still plays. Visual baselines should not move, since the Playwright settle helper adds the end classes anyway.
+
+**Status, 2026-10-17.** Starter `yes`. mas-monograms and nixoncreativestudio `partial` (already gated on their own head
+class). presacademy, reid-design-site and stonesteps-50k `no`. first-baptist-auburn (no column) already sets
+`html.motion` for its own `motion.css` and scopes its `globals.css` copies in the PR that follows this card. fbcm (no column)
+has the unconditional rules and stays `no`.

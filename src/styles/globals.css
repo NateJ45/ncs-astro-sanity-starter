@@ -408,21 +408,28 @@
 /* Scroll-triggered reveal. Pair with the IntersectionObserver in
    BaseLayout.astro — elements with [data-reveal] start hidden and gain
    .is-visible when they enter the viewport. Optional [data-reveal-delay]
-   takes ms via inline style on the element itself. */
+   takes ms via inline style on the element itself.
+   The hidden START state is scoped to `html.motion`, which BaseLayout's head
+   script adds before first paint (PORTS.md card 107). With JavaScript off or
+   blocked the class never appears, so the page renders finished instead of
+   with invisible sections. The same scoping applies to the stagger grid and
+   the image curtain below. */
 [data-reveal] {
-  opacity: 0;
   /* The entrance slide uses the `translate` property (not `transform`) so a
      `transform`-based hover (e.g. a card lift) on the same element eases
      independently at the standard hover speed instead of inheriting the 600ms
      reveal timing. The hover properties are listed here too, at hover speed, so
      they ease the instant the element changes them. */
-  translate: 0 0.75rem;
   transition-property: opacity, translate, transform, box-shadow, border-color;
   transition-duration: 600ms, 600ms, 440ms, 440ms, 440ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, translate;
 }
-[data-reveal].is-visible {
+html.motion [data-reveal] {
+  opacity: 0;
+  translate: 0 0.75rem;
+}
+html.motion [data-reveal].is-visible {
   opacity: 1;
   translate: 0 0;
 }
@@ -794,17 +801,20 @@
 /* ---- Grid stagger entrance. Add data-stagger-grid to any card grid container.
    The BaseLayout observer adds .is-staggered on intersection. ---- */
 [data-stagger-grid] > * {
-  opacity: 0;
   /* Same translate-not-transform trick as [data-reveal]: the entrance uses
      `translate` so a card's `transform` hover lift eases independently. The
      hover properties ride along at hover speed; their stagger delay is zeroed
      below so a later card's hover never waits out its entrance delay. */
-  translate: 0 14px;
   transition-property: opacity, translate, transform, box-shadow, border-color;
   transition-duration: 600ms, 600ms, 440ms, 440ms, 440ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
-[data-stagger-grid].is-staggered > * {
+/* Hidden start only once the head script has added html.motion (card 107). */
+html.motion [data-stagger-grid] > * {
+  opacity: 0;
+  translate: 0 14px;
+}
+html.motion [data-stagger-grid].is-staggered > * {
   opacity: 1;
   translate: 0;
 }
@@ -853,14 +863,19 @@
   inset: 0;
   background: var(--background);
   transform-origin: top center;
-  transform: scaleY(1);
+  /* Open by default: the panel only covers the image once html.motion is set
+     (card 107), so a no-JS visitor sees the picture. */
+  transform: scaleY(0);
   transition: transform 900ms cubic-bezier(0.77, 0, 0.175, 1);
   pointer-events: none;
   /* Sits above all in-wrapper overlays. FeaturedWork's hero layers gradient/
      chips/text at z-[1]..z-[3]; the curtain must cover them during the reveal. */
   z-index: 10;
 }
-.img-curtain.is-revealed {
+html.motion .img-curtain {
+  transform: scaleY(1);
+}
+html.motion .img-curtain.is-revealed {
   transform: scaleY(0);
 }
 
