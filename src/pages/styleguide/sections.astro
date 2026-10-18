@@ -1,0 +1,299 @@
+---
+// Foundation, edit with care
+//
+// THE SECTIONS WALL: one of every page-builder block, rendered through the real
+// SectionRenderer with FIXED data (the authoring kit, PORTS.md card 109).
+//
+// WHAT IT IS FOR. `npm run thumbnails` (scripts/shoot-section-thumbnails.mjs)
+// shoots each `[data-section-type]` box below into
+// public/section-thumbnails/<type>.jpg, and those pictures are what the
+// "+ Add item" menu's grid view shows in the Studio. So the picture an editor
+// picks from is the block as this site actually draws it, in this site's
+// brand, not a generic drawing. Re-run the script after a reskin.
+//
+// src/lib/authoring.test.ts fails if a block type in sections.ts or
+// richSections.ts has no fixture here (it looks for `_type: '<name>'`) or no
+// picture on disk, so a new block cannot ship without a thumbnail.
+//
+// Fixed data on purpose (see styleguide.astro). Collection-fed blocks get their
+// collection rows inline, already in the shape the GROQ projection produces.
+// The images are fake Sanity references; the script answers the CDN request
+// with a local fixture, so no network is needed. NOT shot by the visual suite,
+// and like the other walls: noindex, out of the sitemap ('/styleguide' is
+// filtered in astro.config.mjs) and under a reserved slug.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import { site } from '@/data/site';
+
+const image = (alt = 'Fixture image') => ({
+  _type: 'image',
+  alt,
+  asset: {
+    _type: 'reference',
+    _ref: 'image-0123456789abcdef0123456789abcdef01234567-1600x900-jpg',
+  },
+});
+
+const para = (key: string, text: string) => ({
+  _type: 'block',
+  _key: key,
+  style: 'normal',
+  markDefs: [],
+  children: [{ _type: 'span', _key: `${key}-s`, marks: [], text }],
+});
+
+const cta = (label: string) => ({
+  _type: 'ctaBlock',
+  label,
+  linkType: 'external',
+  externalUrl: '#',
+});
+
+const SECTIONS: Record<string, unknown>[] = [
+  {
+    _type: 'heroSection',
+    _key: 'hero',
+    eyebrow: 'Welcome',
+    headline: 'A clear promise in a few words',
+    subhead: 'Who this is for, and what they get.',
+    size: 'short',
+    backgroundImage: image(),
+    primaryCta: cta('Get in touch'),
+    secondaryCta: cta('Learn more'),
+  },
+  {
+    _type: 'richTextSection',
+    _key: 'text',
+    eyebrow: 'About',
+    heading: 'A heading over some text',
+    body: [
+      para(
+        't1',
+        'Paragraphs of text, with a heading above them. Good for most of what a page says.',
+      ),
+      para('t2', 'A second paragraph, so the block reads as a block of text.'),
+    ],
+  },
+  {
+    _type: 'imageTextSection',
+    _key: 'imagetext',
+    imageSide: 'right',
+    eyebrow: 'Picture and text',
+    heading: 'Words beside a photo',
+    body: [para('i1', 'Two or three sentences next to a picture, with a button underneath.')],
+    image: image(),
+    cta: cta('Find out more'),
+  },
+  {
+    _type: 'gallerySection',
+    _key: 'gallery',
+    heading: 'A gallery of photos',
+    columns: 3,
+    images: [image('One'), image('Two'), image('Three')].map((img, i) => ({
+      ...img,
+      _key: `g${i}`,
+    })),
+  },
+  {
+    _type: 'quoteSection',
+    _key: 'quote',
+    quote: 'A short, warm quote from someone you have helped.',
+    attribution: 'A happy visitor',
+    detail: 'Since 2020',
+  },
+  {
+    _type: 'statSection',
+    _key: 'stats',
+    heading: 'At a glance',
+    stats: [
+      { _key: 's1', _type: 'statItem', number: 12, suffix: '+', label: 'years' },
+      { _key: 's2', _type: 'statItem', number: 300, label: 'people helped' },
+      { _key: 's3', _type: 'statItem', number: 5, label: 'things we do' },
+    ],
+  },
+  {
+    _type: 'ctaBandSection',
+    _key: 'ctaband',
+    eyebrow: 'Next step',
+    headline: 'Ready to talk?',
+    subhead: 'One line that says what happens when you press the button.',
+    cta: cta('Contact us'),
+  },
+  {
+    _type: 'videoSection',
+    _key: 'video',
+    heading: 'A video',
+    url: 'https://www.youtube.com/watch?v=aaaaaaaaaaa',
+    caption: 'A short caption under the video.',
+  },
+  { _type: 'spacerSection', _key: 'spacer', variant: 'ornament' },
+  {
+    _type: 'logoStripSection',
+    _key: 'logos',
+    eyebrow: 'Trusted by',
+    headline: 'Friends and partners',
+    layout: 'row',
+    logos: [
+      image('Partner one'),
+      image('Partner two'),
+      image('Partner three'),
+      image('Partner four'),
+    ].map((img, i) => ({ ...img, _key: `l${i}` })),
+  },
+  {
+    _type: 'embedSection',
+    _key: 'embed',
+    eyebrow: 'Embed',
+    headline: 'A map, form or calendar from another site',
+    subhead: 'Paste a link or a snippet and it shows here.',
+    heightHint: 'short',
+    embedUrl: 'https://embed.example.com/map',
+  },
+  // scaffold: about
+  {
+    _type: 'founderSection',
+    _key: 'founder',
+    eyebrow: 'Meet the founder',
+    headline: 'A person, a photo and a few words',
+    content: [para('f1', 'A short introduction, in their own voice.')],
+    portrait: image('Portrait'),
+    cta: cta('Read more'),
+  },
+  {
+    _type: 'storySection',
+    _key: 'story',
+    eyebrow: 'Our story',
+    headline: 'How it started',
+    content: [para('st1', 'A few paragraphs that tell the story, beside a photo.')],
+    portrait: image('Portrait'),
+    attribution: 'The founder',
+  },
+  // scaffold:end
+  // scaffold: services
+  {
+    _type: 'servicesGridSection',
+    _key: 'services',
+    eyebrow: 'Services',
+    headline: 'What we do',
+    variant: 'grid',
+    services: ['First service', 'Second service', 'Third service'].map((name, i) => ({
+      _id: `svc${i}`,
+      name,
+      price: 'From $100',
+      shortDescription: 'A short description of this service.',
+      slug: { current: `service-${i}` },
+    })),
+  },
+  // scaffold:end
+  // scaffold: testimonials
+  {
+    _type: 'testimonialsSection',
+    _key: 'testimonials',
+    eyebrow: 'Kind words',
+    headline: 'What people say',
+    testimonialsToShow: [1, 2, 3].map((n) => ({
+      _id: `t${n}`,
+      quote: 'A fixed quotation so the card has a body to wrap.',
+      attribution: `Person ${n}`,
+    })),
+  },
+  // scaffold:end
+  // scaffold: philosophy
+  {
+    _type: 'valuesSection',
+    _key: 'values',
+    eyebrow: 'What we believe',
+    headline: 'Our values',
+    points: ['Care', 'Honesty', 'Craft'].map((title) => ({
+      title,
+      description: 'One sentence on what this means in practice.',
+    })),
+  },
+  // scaffold:end
+  // scaffold: process
+  {
+    _type: 'processSection',
+    _key: 'process',
+    eyebrow: 'How it works',
+    headline: 'Three simple steps',
+    variant: 'preview',
+    steps: ['Talk', 'Plan', 'Do'].map((title, i) => ({
+      stepNumber: i + 1,
+      title,
+      shortDescription: 'What happens at this step.',
+    })),
+  },
+  // scaffold:end
+  {
+    _type: 'serviceAreaSection',
+    _key: 'area',
+    eyebrow: 'Where we work',
+    headline: 'Our area',
+    description: 'The towns and neighbourhoods we cover.',
+    travelFees: [
+      { distanceLabel: 'Up to 10 miles', fee: 'Included' },
+      { distanceLabel: '10 to 25 miles', fee: 'A small fee' },
+    ],
+  },
+  {
+    _type: 'guaranteeSection',
+    _key: 'guarantee',
+    text: 'If something is not right, tell us and we will put it right.',
+  },
+  // scaffold: faq
+  {
+    _type: 'faqSection',
+    _key: 'faq',
+    eyebrow: 'Questions',
+    headline: 'Common questions',
+    items: ['How do I get started?', 'What does it cost?', 'How long does it take?'].map(
+      (question, i) => ({
+        _id: `q${i}`,
+        question,
+        answer: [para(`a${i}`, 'A short, friendly answer.')],
+      }),
+    ),
+  },
+  // scaffold:end
+  {
+    _type: 'teamSection',
+    _key: 'team',
+    eyebrow: 'Our team',
+    headline: 'The people you will meet',
+    members: ['Alex', 'Sam', 'Jo'].map((name, i) => ({
+      _key: `m${i}`,
+      name,
+      role: 'Their role',
+      photo: image(name),
+    })),
+  },
+  {
+    _type: 'dynamicListSection',
+    _key: 'dynamic',
+    eyebrow: 'Latest',
+    headline: 'Recent posts',
+    source: 'journal',
+    limit: 3,
+    items: ['First post', 'Second post', 'Third post'].map((title, i) => ({
+      _id: `d${i}`,
+      title,
+      meta: '2026-01-15',
+      summary: 'A short summary of the post.',
+      href: '#',
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title={`Sections wall | ${site.name}`}
+  description="Fixed-data wall of every page-builder section. Not for visitors."
+  noindex
+>
+  {SECTIONS.map((section) => (
+    <div data-section-type={String(section._type)}>
+      <SectionRenderer sections={[section]} idPrefix={`fx-${String(section._key)}`} />
+    </div>
+  ))}
+</BaseLayout>

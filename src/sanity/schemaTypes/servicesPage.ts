@@ -9,6 +9,7 @@
 import { defineType, defineField } from 'sanity';
 import { SERVICES_SECTION_TYPES } from './richSections';
 import { sectionArrayOptions } from './sections';
+import { pageBuilderAuthoring } from '../pageBuilderAuthoring';
 
 export const servicesPage = defineType({
   name: 'servicesPage',
@@ -36,6 +37,8 @@ export const servicesPage = defineType({
       of: SERVICES_SECTION_TYPES,
       // Grouped + searchable insert menu, in the form AND in the preview canvas.
       options: sectionArrayOptions,
+      // The authoring kit (card 109): Insert a saved section, plus gentle warnings.
+      ...pageBuilderAuthoring,
     }),
 
     defineField({

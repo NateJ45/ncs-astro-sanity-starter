@@ -28,6 +28,7 @@ import { visionTool } from '@sanity/vision';
 import { media } from 'sanity-plugin-media';
 import { unsplashImageAsset } from 'sanity-plugin-asset-source-unsplash';
 import { schemaTypes } from './src/sanity/schemaTypes';
+import { PAGE_TEMPLATES } from './src/sanity/pageTemplates';
 import { deskStructure } from './src/sanity/structure';
 import { resolve } from './src/sanity/resolve';
 import { PreviewNavigator } from './src/sanity/components/PreviewNavigator';
@@ -180,6 +181,22 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
+    // Page templates (the authoring kit, PORTS.md card 109): the starting
+    // points offered when someone makes a Custom page. The list is the site's
+    // own, in src/sanity/pageTemplates.ts. `value` is a function so every new
+    // page gets fresh _keys. The stock 'page' template stays registered (links
+    // and intents that name it keep working); newDocumentOptions below hides it
+    // from the menus, where "Blank page" stands in for it.
+    templates: (prev) => [
+      ...prev,
+      ...PAGE_TEMPLATES.map((t) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        schemaType: 'page',
+        value: () => ({ pageBuilder: t.sections() }),
+      })),
+    ],
   },
 
   // Singleton enforcement: hide these from the global "+" create menu so editors
@@ -190,10 +207,15 @@ export default defineConfig({
     // append ours.
     badges: (prev) => [...prev, ...documentBadges],
     newDocumentOptions: (prev, { creationContext }) => {
+      // Custom pages are made from a page template; the bare stock one is
+      // hidden because "Blank page" is the same thing with a clearer name.
+      const options = PAGE_TEMPLATES.length
+        ? prev.filter((option) => option.templateId !== 'page')
+        : prev;
       if (creationContext.type === 'global') {
-        return prev.filter((option) => !SINGLETON_TYPES.has(option.templateId));
+        return options.filter((option) => !SINGLETON_TYPES.has(option.templateId));
       }
-      return prev;
+      return options;
     },
     actions: (prev, { schemaType }) => {
       let base = SINGLETON_TYPES.has(schemaType)

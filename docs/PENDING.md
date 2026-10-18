@@ -295,6 +295,16 @@ card, the Ask form, deploy status, link check, monthly report), the live publish
 tutorial videos. The spike findings for auth and cron are in `docs/agent/studio-kit.md`. Until then `features.visitors`
 stays false and Ask is a mailto (`PUBLIC_STUDIO_HELP_EMAIL`). No other site but first-baptist-auburn has the kit yet.
 
+### 15. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
+
+PORTS.md card 109 (page templates, picture picker, patterns, synced sections, guardrails) was built, type-checked,
+unit-tested and the `/studio` route was loaded logged OUT. Nobody has yet, logged in: made a page from each template,
+opened "+ Add item" in grid view (and the in-canvas insert menu in Presentation, which serialises the same
+`insertMenu` options), inserted a pattern as a copy and as synced, published a preset and watched a synced page
+change, or seen the yellow warnings. Do that on the first site that adopts it, read the console, and close this item.
+Known limit: "Save a section as preset..." (PORTABLE) still saves one section; a pattern is made by opening the saved
+section and adding more.
+
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 
 Flagged in the topic index (now docs/claude/topic-index.md, formerly in CLAUDE.md) since the fork. The 2026-08-28 pass corrected every

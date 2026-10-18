@@ -53,6 +53,9 @@ const SELF_FILLING_SECTIONS = [
   'serviceAreaSection',
   'servicesGridSection', // scaffold: services
   'spacerSection',
+  // Holds no words of its own: they live in the saved section it shows
+  // (the authoring kit, card 109). Nothing picked is its own warning.
+  'syncedSection',
   'testimonialsSection', // scaffold: testimonials
   'valuesSection', // scaffold: philosophy
 ];

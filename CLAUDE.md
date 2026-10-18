@@ -29,7 +29,7 @@ The must-knows:
 - `npm run parity list | capture | compare [page] [--exclude globs]`: rendered-HTML parity. Build first. Use on any render-neutral change. `npm run test:scripts` tests the helpers in `scripts/lib/` (also run at the end of `test:unit`, so CI and deploy cover it).
 - `npm run preview`: `wrangler dev` on the last build; the only way to exercise SSR routes locally.
 - `npm run references -- <urls>` (reference screenshots into `docs/references/`), `npm run directions:shoot -- <folder>` (390/768/1280 shots of design-direction mockups), and the `/design-directions` command: see "Design flow" below.
-- `npm run apply-brand`, `npm run seed` (dry by default), `npm run scaffold`, `npm run audit:studio`, `npm run audit:data` (live data against the compiled schema, card 95), `npm run og`, `npm run sync-check [site-repo]`, `npm run free-dist`: see `docs/claude/build-and-scripts.md` (seed and scaffold detail in `.claude/rules/scaffold.md`).
+- `npm run apply-brand`, `npm run seed` (dry by default), `npm run scaffold`, `npm run audit:studio`, `npm run audit:data` (live data against the compiled schema, card 95), `npm run thumbnails` (the Studio block-picker pictures, card 109), `npm run og`, `npm run sync-check [site-repo]`, `npm run free-dist`: see `docs/claude/build-and-scripts.md` (seed and scaffold detail in `.claude/rules/scaffold.md`).
 
 ## Branch, CI and deploy
 
@@ -65,6 +65,10 @@ Numbering is load-bearing; other docs cite it. Rules 1 to 7 and 10 are in full b
 ## Design flow
 
 A new brand goes **brief -> references -> design-directions -> reskin**, in that order, so a site does not come out as the last site in new colours. Brief: `docs/templates/design-brief.md` (becomes PRODUCT.md / DESIGN.md). References: `npm run references`. Directions: `/design-directions` (3 or 4 static mockups that must differ in layout, type, density and imagery; Nathan picks one and the pick is recorded as a dated entry). Reskin: the reskin skill, which reads that entry. `brand.config.json` carries colours, fonts, radius and four coarse layout slots only (card 72). Full rules: `.claude/rules/design-flow.md`.
+
+## Authoring kit
+
+Clients build their own pages (PORTS.md card 109): page templates (`src/sanity/pageTemplates.ts`, the site's own), a picture grid in the "+ Add item" menu (`npm run thumbnails` after a reskin or a new block), saved sections that can hold several sections and go in as a copy or SYNCED (`syncedSection`, resolved in `sectionsProjection()` and expanded by `SectionRenderer`), and page-builder WARNINGS (`pageRules` in `kit.config.ts`; never errors). A new block needs a fixture on `/styleguide/sections/` and a thumbnail, or the `authoring` unit test fails. Full notes: `docs/agent/sanity.md`.
 
 ## Live draft preview
 

@@ -24,6 +24,7 @@ import { PlayIcon } from '@sanity/icons/Play';
 import { ThLargeIcon } from '@sanity/icons/ThLarge';
 import { EarthGlobeIcon } from '@sanity/icons/EarthGlobe';
 import { CodeBlockIcon } from '@sanity/icons/CodeBlock';
+import { SyncIcon } from '@sanity/icons/Sync';
 import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
 
@@ -561,6 +562,52 @@ export const embedSection = defineType({
   },
 });
 
+// ── Synced section (the authoring kit, PORTS.md card 109) ────────────────────
+// "Edit once, everywhere." A synced section holds no words of its own: it points
+// at a saved section (a `sectionPreset` document), and the page shows whatever
+// that saved section holds today. Change the saved section, publish it, and every
+// page using it changes on the next rebuild. A plain copy (the "Add a copy"
+// button in the pattern picker) is the opposite: it never changes again.
+//
+// Rendering: the GROQ projection resolves the reference into a `sections`
+// array (src/lib/queries.ts) and SectionRenderer expands it in place
+// (expandSyncedSections in src/lib/authoring.ts), so the alternating-surface
+// cadence runs across the expanded list exactly as if the sections were typed in.
+// Like every block, it carries no colour or surface field (rule 9).
+//
+// Deliberately NOT in pageSectionSchemas, so a saved section can never hold a
+// synced section: that is what makes a loop (A shows B shows A) impossible.
+export const syncedSection = defineType({
+  name: 'syncedSection',
+  title: 'Synced section',
+  type: 'object',
+  icon: SyncIcon,
+  description:
+    'Shows a saved section. Edit the saved section once and every page using it changes.',
+  fields: [
+    defineField({
+      name: 'preset',
+      title: 'Saved section to show',
+      type: 'reference',
+      to: [{ type: 'sectionPreset' }],
+      description:
+        'Pick a saved section. To change what it says, open the saved section itself (Content, then Saved sections) and publish it: every page that uses it updates together.',
+    }),
+  ],
+  preview: {
+    select: { title: 'preset.title', sections: 'preset.section' },
+    prepare: ({ title, sections }) => {
+      const count = Array.isArray(sections) ? sections.length : 0;
+      return {
+        title: title ? `Synced: ${title}` : 'Synced: nothing picked yet',
+        subtitle: title
+          ? `${count === 1 ? '1 section' : `${count} sections`}. Edit the saved section to change every page using it.`
+          : 'Pick a saved section to show here.',
+      };
+    },
+  },
+});
+
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 // All section schema objects, to register in the schema index.
@@ -578,9 +625,23 @@ export const pageSectionSchemas = [
   embedSection,
 ];
 
+// The general blocks on their own. A saved section accepts these (plus the rich
+// blocks) but NOT a synced section; see syncedSection above.
+export const LIBRARY_SECTION_TYPES = pageSectionSchemas.map((s) => ({ type: s.name }));
+
 // The list a pageBuilder array uses for `of`. Single source of truth so every
-// builder offers the same blocks.
-export const SECTION_TYPES = pageSectionSchemas.map((s) => ({ type: s.name }));
+// builder offers the same blocks: the general library plus the synced section.
+export const SECTION_TYPES = [...LIBRARY_SECTION_TYPES, { type: syncedSection.name }];
+
+/**
+ * Where the insert menu's grid view finds a picture of each block type (the
+ * authoring kit, card 109). The pictures are shot from /styleguide/sections/ by
+ * `npm run thumbnails` into public/section-thumbnails/ and served by the site
+ * itself, which is the Studio's own origin. A type without a picture (a block a
+ * fork added and has not shot yet) falls back to its icon, so nothing breaks.
+ */
+export const sectionThumbnailUrl = (type: string): string | undefined =>
+  type === 'syncedSection' ? undefined : `/section-thumbnails/${type}.jpg`;
 
 // =============================================================================
 // The grouped, searchable insert menu (2026-08-28, PORTS.md card 17)
@@ -600,6 +661,9 @@ export const SECTION_TYPES = pageSectionSchemas.map((s) => ({ type: s.name }));
 // not named in a group falls under "All".
 export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
   filter: true,
+  // Grid first, so the picker opens on pictures; the list view stays one click
+  // away and keeps the search box (the authoring kit, card 109).
+  views: [{ name: 'grid', previewImageUrl: sectionThumbnailUrl }, { name: 'list' }],
   groups: [
     {
       name: 'basics',
@@ -617,6 +681,13 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
         'guaranteeSection',
         'faqSection', // scaffold: faq
       ],
+    },
+    {
+      // The authoring kit (card 109). A saved section can also be dropped in as
+      // a COPY from the "Insert a saved section" button under the sections list.
+      name: 'saved',
+      title: 'Saved and synced',
+      of: ['syncedSection'],
     },
     {
       name: 'media',

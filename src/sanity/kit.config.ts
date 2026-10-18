@@ -20,6 +20,7 @@ import { genericRules, unconfirmedRule } from '../lib/studio-checkup';
 import { guides, GUIDE_CATEGORIES } from './guides/content';
 import { makeGuideView } from './components/GuideView';
 import { envVal } from './urls';
+import type { PageRules } from '../lib/page-guardrails';
 
 /**
  * Page types with a Google description (seoDescription). Not journalEntry: a
@@ -133,4 +134,24 @@ export const kitConfig: KitConfig = {
     // yet; until then Home says "not set up yet".
     visitors: false,
   },
+};
+
+/**
+ * The site's own page-builder rules (the authoring kit, PORTS.md card 109).
+ * Each one shows as a yellow WARNING beside a page's sections, never an error,
+ * so nothing here can stop Publish or break content that is already live. The
+ * built-in warnings (empty sections, leftover template example text, a synced
+ * section with nothing picked) apply everywhere whatever this says. Logic and
+ * tests: src/lib/page-guardrails.ts.
+ *
+ * The starter's defaults suit a custom page: open with a hero, one hero only,
+ * and a nudge past twenty sections. A fork tunes these, or empties them.
+ */
+export const pageRules: PageRules = {
+  // Document types the rules below apply to ('page' is a Custom page). The
+  // built-in pages often open with something else on purpose, so they are off.
+  appliesTo: ['page'],
+  mustStartWith: ['heroSection'],
+  atMostOnce: ['heroSection'],
+  maxSections: 20,
 };

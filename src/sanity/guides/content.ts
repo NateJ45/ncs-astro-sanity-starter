@@ -161,8 +161,9 @@ export const guides: Guide[] = [
         kind: 'steps',
         items: [
           'Open `Pages` in the menu, then the `+` button.',
+          'Pick a starting point: `Simple page`, `Landing page`, `Questions page` or `Blank page`. The guide on page templates says what each one gives you.',
           'Give it a title. The **slug**, which is the part of the web address after the slash, is generated from it.',
-          'Add sections until it says what you want.',
+          'Replace the example text, and add or remove sections until it says what you want.',
           'Publish.',
         ],
       },
@@ -176,7 +177,135 @@ export const guides: Guide[] = [
         kind: 'p',
         text: '_Some slugs are reserved because a built-in page already uses them. The Studio will tell you if you pick one._',
       },
-      { kind: 'seealso', items: ['Rename a page without breaking links'] },
+      {
+        kind: 'seealso',
+        items: ['Start a page from a template', 'Rename a page without breaking links'],
+      },
+    ],
+  },
+
+  {
+    slug: 'page-templates',
+    category: 'Pages and words',
+    title: 'Start a page from a template',
+    icon: '🧩',
+    lead: 'A new page can start with its sections already in place.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'When you make a new page the Studio asks where to start. A **template** is a page that is already laid out, with example text in every box, so you are filling in rather than starting from nothing.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '`Simple page`: a heading and some text. Right for most pages.',
+          '`Landing page`: a banner, a picture with text, three numbers, a quote and a band with a button. Good for one event, one offer or one campaign.',
+          '`Questions page`: questions and answers, then a way to ask more.',
+          '`Blank page`: no sections at all. Add your own with `+ Add item`.',
+        ],
+      },
+      { kind: 'h', text: 'Replace every line that starts "Example:"' },
+      {
+        kind: 'p',
+        text: 'Every piece of example text starts with the word **Example:**, so it is easy to spot. Type over it with your own words. Any section that still has some shows a small yellow warning beside it, so nothing example-shaped goes live by accident.',
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'A template is only a starting point.',
+        text: 'Once the page is made it is yours. Add, remove and drag sections exactly as on any other page; the template does not come back and change anything.',
+      },
+      {
+        kind: 'seealso',
+        items: ['Add a new page', 'Reuse a section on other pages'],
+      },
+    ],
+  },
+
+  {
+    slug: 'reuse-sections',
+    category: 'Pages and words',
+    title: 'Reuse a section on other pages',
+    icon: '♻️',
+    lead: 'Build a section once, then drop it onto any page as a copy.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'A **saved section** is a section (or a group of sections that belong together, like a banner, a picture with text and a call to action) kept so you can add it again. Saved sections live under `Content`, then `Saved sections`.',
+      },
+      { kind: 'h', text: 'Save one' },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page that has the section you like.',
+          'Open the menu next to `Publish` and choose `Save a section as preset...`.',
+          'Pick the section, give it a name you will recognise, and save.',
+          'To keep several sections together, open the saved section under `Saved sections` and add more sections to it with `+ Add item`. Then publish it.',
+        ],
+      },
+      { kind: 'h', text: 'Add one to a page' },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page and scroll to its sections.',
+          'Click `Insert a saved section` under the list.',
+          'Pick one and click `Add a copy`. It goes at the bottom of the page; drag it where you want it.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'A copy is yours to change.',
+        text: 'Changing a copied section on one page never changes the saved section or any other page. If you want one section that stays the same everywhere, use a synced section instead.',
+      },
+      {
+        kind: 'p',
+        text: '_The `+ Add item` menu opens on pictures of every kind of section. Type in its search box to find one by name, or switch it to a plain list with the buttons at the top._',
+      },
+      { kind: 'seealso', items: ['Keep a section the same on every page'] },
+    ],
+  },
+
+  {
+    slug: 'synced-sections',
+    category: 'Pages and words',
+    title: 'Keep a section the same on every page',
+    icon: '🔗',
+    lead: 'Edit it once and every page that uses it changes.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'A **synced section** shows a saved section, live. It holds no words of its own: the words live in the saved section. Change the saved section, publish it, and every page using it changes together. Good for a band that must say the same thing everywhere, like opening times or a "Get in touch" strip.',
+      },
+      { kind: 'h', text: 'Add one' },
+      {
+        kind: 'steps',
+        items: [
+          'Make and publish the saved section first (see the guide on reusing sections).',
+          'Open a page and click `Insert a saved section` under its sections.',
+          'Pick the saved section and click `Add synced`.',
+          'In the sections list it shows as **Synced:** and the saved section name.',
+        ],
+      },
+      { kind: 'h', text: 'Change it everywhere' },
+      {
+        kind: 'steps',
+        items: [
+          'Go to `Content`, then `Saved sections`, and open the one you want to change.',
+          'Edit it, then `Publish`.',
+          'Every page that shows it updates when the website rebuilds, in a few minutes.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'Changing it changes it everywhere.',
+        text: 'That is the point, but check which pages use it before you rewrite it. If one page needs different words, remove the synced section from that page and add a copy instead.',
+      },
+      { kind: 'seealso', items: ['Reuse a section on other pages'] },
     ],
   },
 

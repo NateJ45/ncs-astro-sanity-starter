@@ -21,6 +21,7 @@ import { SECTION_TYPES, sectionArrayOptions } from './sections';
 import { PUBLISH_AT_GROUP, publishAtField } from './_publishAt';
 import { seoFields } from './_seoFields';
 import { RESERVED_SLUGS } from '../../lib/reservedSlugs';
+import { pageBuilderAuthoring } from '../pageBuilderAuthoring';
 
 export const page = defineType({
   name: 'page',
@@ -71,6 +72,8 @@ export const page = defineType({
       of: SECTION_TYPES,
       // Grouped + searchable insert menu, in the form AND in the preview canvas.
       options: sectionArrayOptions,
+      // The authoring kit (card 109): Insert a saved section, plus gentle warnings.
+      ...pageBuilderAuthoring,
     }),
 
     // ── Menu placement ────────────────────────────────────────────────────────
