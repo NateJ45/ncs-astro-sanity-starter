@@ -58,8 +58,8 @@ export const kitConfig: KitConfig = {
   // entry, anyone who is not a Sanity administrator gets the staff view.
   staff: [],
 
-  staffTools: ['home', 'structure', 'presentation', 'site-guide', 'checkup'],
-  toolOrder: ['home', 'structure', 'presentation', 'site-guide', 'checkup', 'media'],
+  staffTools: ['home', 'structure', 'presentation', 'messages', 'site-guide', 'checkup'],
+  toolOrder: ['home', 'structure', 'presentation', 'messages', 'site-guide', 'checkup', 'media'],
   toolTitles: { structure: 'Content', presentation: 'Live preview' },
 
   // Desk item ids only a developer needs (ids from src/sanity/structure.ts,

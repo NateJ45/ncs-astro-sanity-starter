@@ -234,6 +234,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)              | n/a     | yes         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
 | 115 | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 116 | Studio as the site's admin: paper, navy chrome, fonts, text in site type       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 117 | Studio workflow: change note, expiring preview links, Messages, table panes    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -249,6 +250,9 @@ Row 116 (2026-10-18): needs card 110 first, so the same cells as row 110; first-
 Row 113 (2026-10-18): the hotspot half suits every site with `SanityImage.astro`; the JSON-LD half only matters to a
 site whose Site settings `businessType` feeds `localBusinessSchema()`. first-baptist-auburn and fbcm have no column;
 see the card.
+
+Row 117 (2026-10-18): needs cards 106 and 111 (the kit and `studio-auth.ts`), so the same cells as row 111.
+first-baptist-auburn has no column; it took the card on branch `feat/studio-workflow-tools` the same day.
 
 Row 107 (2026-10-17): mas-monograms (`html.reveal-ready`) and nixoncreativestudio (`.js`) already gate
 their reveal on a head-script class, a divergent form of the same idea, hence `partial`; neither was changed. presacademy
@@ -8878,3 +8882,58 @@ brand's imports), then `npm run test:unit`. Marked-file order: the starter merge
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-branded-look`, PR after this
 merges. Other sites `no`.
+
+## Card 117: the Studio's safety net: morning change note, expiring preview links, Messages, table panes (2026-10-18)
+
+**Origin:** first-baptist-auburn, modelled on what the Theology Matters WordPress admin already gives its editors: a
+morning email of what changed, private preview links that expire, a form inbox with triage, and long lists as
+scannable tables. Four pieces, three of them generic kit and one generic component with per-site columns.
+
+**Canonical (PORTABLE):** `scripts/change-note.mjs`, `scripts/lib/change-summary.mjs` + `.test.mjs`,
+`src/lib/preview-share.ts` + `.test.ts`, `src/lib/preview-share-server.ts`, `src/pages/api/studio/share-preview.ts`,
+`src/lib/studio-messages.ts` + `.test.ts`, `src/pages/api/studio/messages.ts`, `src/lib/studio-table.ts` + `.test.ts`,
+and `src/sanity/workflow/` (`index.tsx`, `studioApi.ts`, `previewShareType.ts`, `SharePreviewAction.tsx`,
+`MessagesTool.tsx`, `DocumentTable.tsx`). Per site (NOT portable): `.github/workflows/change-note.yml` (template;
+the schedule is commented out in the starter), `migrations/*_message_status.sql` (numbered after the site's own),
+`src/sanity/tables.config.ts` (which tables, which columns), the `ncsWorkflowTools({ shareTypes })` line in
+`sanity.config.ts` (before `ncsStudioKit`), `'messages'` in `kit.config.ts` `staffTools` / `toolOrder`,
+`structure.ts` (`'previewShare'` in the default-list hidden set, a `tableListItem()` beside each normal list), and
+the ~20-line `?share=` block in `src/pages/preview/[...slug].astro`.
+
+**What it adds.**
+
+- **Morning change note.** `change-note.yml` runs at 10:00 UTC (6 AM Eastern in summer). `change-note.mjs` reads
+  the last 24 hours from Sanity with the READ token (`_updatedAt` in the raw perspective, the kit's `trashedItem`
+  records for deletions, the history API for authors, `/projects/<id>/users` for names) and, when anything changed,
+  opens or updates the issue "What changed on <date>": who, what, which page, a Studio link and a live link.
+  GitHub's issue email is the delivery. Quiet days post nothing. Dependency-free; no `npm ci` in the job.
+  `buildChangeSummary()` is pure and tested. A permanent delete from outside the kit's Trash is not reported.
+- **Share a preview.** A document action on the `shareTypes` (types whose own page `/preview` renders). The editor
+  picks 1, 3, 7 or 14 days; the dialog writes a `previewShare.<nonce>` record (a path id, served to signed-in
+  requests only), `POST /api/studio/share-preview/` checks the caller (same origin + Sanity session, as card 111)
+  and the record, and signs `{nonce, doc id, path, expiry}` with HMAC-SHA256 under `SHARE_PREVIEW_SECRET`. The link
+  is `/preview/<page>/?share=<token>`. The preview route checks the signature, expiry, path and record (not revoked,
+  same doc) on every load, fetches drafts WITHOUT stega and WITHOUT turning on draftMode (no overlay, no live
+  channel), sends `Referrer-Policy: no-referrer`, keeps `no-store` and `noindex`, shows a banner with the end
+  date, and falls back to the published page when anything fails. "Stop this link" sets `revoked`. No Sanity
+  token is ever in a URL. The older one-hour "Copy share link" (card 19) stays.
+- **Messages.** A Studio tool listing `contact_submissions` and (where present) `form_submissions` from D1 through
+  `/api/studio/messages/`, protected like the deploy route on every method (GET included), failing closed.
+  Columns: from, which form, received, a status pill (New, Needs a person, Replied, Spam); a detail view with "Mark
+  as". Status lives in D1 (`message_status`, the test checks the migration matches the DDL); unmarked is New, or
+  Needs a person when the email did not go out. Prayer-mode messages never show a name, email or words, only that
+  one arrived. No binding: "Forms are not set up yet". Nothing personal is written to Sanity.
+- **Table panes.** `tableListItem(S, config)` opens a sortable table (click a heading; blanks sink) with a status
+  pill (Published / Changes not published / Draft) and an Open button. Added BESIDE the normal list, never instead.
+
+**Worker settings.** `SHARE_PREVIEW_SECRET` (32+ random characters, `npx wrangler secret put`; rotating it stops
+every link). Messages needs the `CONTACT_DB` binding (forms switched on) and the status migration applied. The change
+note needs the `SANITY_AUTH_TOKEN` repo secret, the `SANITY_PROJECT_ID` variable, optionally `SITE_URL`, the
+schedule uncommented, and the owner watching the repo.
+
+**Adopting it in a site.** Needs cards 106 and 111. Copy the PORTABLE files byte-identically, add the per-site pieces
+above, run `npm run typegen` (`previewShare` is new), add `"previewShare"` to the publish webhook's deny-list so a
+new link does not rebuild the site, and follow the marked-file order (starter PR first, then the site PR).
+
+**Status, 2026-10-18.** Starter `yes` (unit-tested; built; endpoints checked under `wrangler dev` signed out; the
+signed-in Studio views are unverified). first-baptist-auburn took it the same day. Every other site `no`.
