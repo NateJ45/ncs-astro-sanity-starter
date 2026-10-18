@@ -11,6 +11,7 @@ import {
 } from './css-tokens.ts';
 import { HEADING_ACCENT, SECTION_SURFACES, surfaceClass } from './surfaces.ts';
 import { CONTENT_TYPES } from './sectionCadence.ts';
+import { SECTION_LOOKS } from './section-looks.ts';
 
 // =============================================================================
 // The contrast gate for the section surfaces (PORTS.md card 26, 2026-08-28)
@@ -94,14 +95,19 @@ describe('surface pairs resolve', () => {
     }
   });
 
-  it('the two surfaces the cadence assigns are exactly the two it can assign', () => {
-    // sectionCadence.ts hands every CONTENT block one of 'background' | 'muted'.
-    // If that vocabulary ever grows, this registry has to grow with it or a
-    // section will render a surface nothing has measured.
+  it('the surfaces the cadence assigns are exactly the ones it can assign', () => {
+    // sectionCadence.ts hands every CONTENT block 'background' | 'muted', or the
+    // surface an editor's look asks for (section-looks.ts). If that vocabulary
+    // ever grows, this registry has to grow with it or a section will render a
+    // surface nothing has measured.
     assert.ok(CONTENT_TYPES.size > 0, 'the cadence has no content types at all');
+    const lookSurfaces = SECTION_LOOKS.map((l) => l.surface).filter(Boolean);
+    const expected = [...new Set(['background', 'muted', ...lookSurfaces])].sort();
     assert.deepEqual(
-      SECTION_SURFACES.filter((s) => s.inCadence).map((s) => s.value),
-      ['background', 'muted'],
+      SECTION_SURFACES.filter((s) => s.inCadence)
+        .map((s) => s.value)
+        .sort(),
+      expected,
     );
   });
 
@@ -145,6 +151,27 @@ describe('the heading accent word', () => {
   // Display-size text, SC 1.4.3 large, 3:1. Measured on every surface it can
   // land on, which is every surface a section paints.
   for (const s of SECTION_SURFACES) {
+    if (s.accentToken) {
+      // A band that sets its own --section-accent (the Feature look).
+      const token = s.accentToken;
+      for (const [theme, v] of themes) {
+        it(`reads on the "${s.value}" band's own accent in ${theme}`, () => {
+          const ratio = contrastRatio(v(token), v(s.tokens.bg));
+          assert.ok(ratio >= AA_LARGE_TEXT, `${token} on ${s.tokens.bg} is ${ratio}:1`);
+        });
+      }
+      it(`globals.css really points the "${s.value}" band's accent at ${token}`, () => {
+        const selector = `.${s.className.split(' ')[0]}`;
+        const at = css.indexOf(`${selector} {`);
+        assert.ok(at >= 0, `globals.css has no ${selector} rule`);
+        const body = css.slice(at, css.indexOf('}', at));
+        assert.ok(
+          body.includes(`--section-accent: var(${token})`),
+          `${selector} does not set --section-accent to var(${token})`,
+        );
+      });
+      continue;
+    }
     if (s.themeStatic) {
       it(`reads on the fixed "${s.value}" band`, () => {
         const ratio = contrastRatio(HEADING_ACCENT.onDarkBand, themes[0][1](s.tokens.bg));

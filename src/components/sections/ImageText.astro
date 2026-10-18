@@ -2,6 +2,7 @@
 // Page-builder block: image and text side by side. Image side is
 // editor-controlled; surface comes from SectionRenderer. Safe to edit by hand.
 import SanityImage from '@/components/SanityImage.astro';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
 import PortableText from '@/components/PortableText';
 import CtaLink from '@/components/CtaLink.astro';
 
@@ -12,7 +13,8 @@ interface Props {
   heading?: string;
   body?: any;
   cta?: any;
-  surface?: 'background' | 'muted';
+  /** From SectionRenderer's cadence, including the band an editor's look asks for. */
+  surface?: CadenceSurface;
   headingId: string;
 }
 
@@ -27,7 +29,9 @@ const {
   headingId,
 } = Astro.props as Props;
 
-const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+// Surface classes come from src/lib/surfaces.ts (the measured pairs). Same
+// strings as the ternary that was here for 'background' and 'muted'.
+const bg = surfaceClass(surface);
 const imageFirst = imageSide === 'left';
 const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebrow ? 'mt-m' : ''}`;
 ---

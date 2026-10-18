@@ -238,6 +238,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering            | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 119 | Studio icons by meaning, a picture on every list row                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 122 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -9111,4 +9112,66 @@ optionally `StudioSplashMotif.astro`), remove `studioBasePath` from the `sanity(
 `npm run build`, `npm run test:unit` and open `/studio`. Marked-file order: the starter merges first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-edges`, PR after this merges. Other
+sites `no`.
+
+## Card 122: section looks instead of colours, and a photo viewer for galleries (2026-10-18)
+
+**Origin:** the Squarespace-parity pass on first-baptist-auburn (2026-10-18). Editors wanted what Squarespace gives
+them, a per-section background choice and photos that open full screen, without the design drift a free colour picker
+causes. Built in the starter, then first-baptist-auburn (which adds a Stone look).
+
+**Canonical:** PORTABLE: `src/lib/lightbox.ts` (+ test), `src/components/Lightbox.astro`,
+`src/components/LightboxLink.astro`, `src/styles/lightbox.css`, `tests/lightbox.spec.ts`. Per site (NOT portable, the
+look vocabulary and palette differ): `src/lib/section-looks.ts`, the `look` handling in `src/lib/sectionCadence.ts`
+(+ tests), the `feature` pair in `src/lib/surfaces.ts` (+ the gate's `accentToken` branch in `surfaces.test.ts`),
+`.surface-feature` and the `--feature*` tokens in `globals.css`, `lookField()` in `_appearanceFields.ts`,
+`src/sanity/components/SectionLookInput.tsx`, the `look` gate in `section-fields.test.ts`, `'look'` in
+`NON_STEGA_FIELDS`, the five section components (surface through `surfaceClass`), `src/pages/styleguide/looks.astro`
+and the Site Guide entry.
+
+**What it adds.**
+
+- **Looks, not colours (rule 9 amended).** The five content blocks (text, image + text, gallery, quote, video) get a
+  `look` radio: Standard (follow the cadence; unset means this), Quiet (always the plain page surface; the rhythm
+  restarts after it, so the next Standard is soft) and Feature (the brand's deep band, `--color-primary-dark` with
+  paper text, theme-static like the Ink CTA band). `classifySections()` resolves the look with the neighbours in view:
+  Feature sits outside the alternation and takes no divider, and a Feature that would touch another dark band (a
+  Feature, a photo hero, the CTA band) renders as Standard. Each row now carries its resolved `look`.
+- **No component dark styles.** `.surface-feature` re-points the page tokens (`--background`, `--foreground`,
+  `--link`, `--muted-foreground`, `--primary`, `--border`, `--section-accent`, ...) inside the band, so every section
+  component paints it through `surfaceClass()` with no per-component classes. The contrast gate measures the pair and
+  the accent word on it.
+- **The Studio.** `lookField(type)` takes its options from the registry; `SectionLookInput` draws each as a small card
+  with a band picture (from the surface swatches) and one line of plain words. Choosing Standard clears the field.
+- **The gate.** `section-fields.test.ts` allows `look` only through `lookField()`, only on blocks the cadence paints,
+  with 2 to 4 registered looks including Standard; it still fails on `tone`, `surface`, `background`, `accent`,
+  `bandColor` and now also `color`, `backgroundColor`, `bgColor` and any `type: 'color'`.
+- **The photo viewer.** Gallery photos and journal post photos (inline images and image galleries) open a native
+  `<dialog>`: caption and "3 of 8" in a polite live region, arrow keys, buttons and swipe (wrapping, within one
+  `data-lightbox-group`), Escape or a click on the surround to close, Tab kept to the viewer's buttons, focus back on
+  the photo, page scroll locked, fade only without reduced motion. The full-size picture is `fit=max` from Sanity's
+  CDN with a srcset ladder capped at the photo's own width, so the crop is kept and nothing the hotspot marks is cut.
+  With JavaScript off each photo is a link to that picture. No dependency. The styles ride in `globals.css` via
+  `@import './lightbox.css'`, so pages without a gallery get no extra inline `<style>` (parity).
+- **The looks wall.** `/styleguide/looks/` stacks every look through the real renderer; `tests/lightbox.spec.ts` drives
+  the viewer there (keyboard, focus trap and return, swipe, JS off, two galleries) and runs axe on the wall and the
+  open viewer.
+
+**Weighed and left out.** A Squarespace-style background picker (any colour, per section): it is how a site drifts, and
+it would trade the reorder guarantee. Looks on the self-contained blocks (they draw their own band) and on the business
+blocks (story, service area, guarantee). Lightbox on the image + text block's single picture (one photo beside its own
+words; a zoom there reads as an accident).
+
+**Verified.** Parity: every existing page byte-identical; the sections wall differs only by the gallery's viewer links.
+Unit: cadence with looks, the contrast gate (feature pair, accent), the amended rule 9 gate, the viewer's helpers.
+Playwright on the looks wall; screenshots of each look and the open viewer, light and dark, 375 and 1280.
+
+**Adopting it in a site.** Copy the PORTABLE files and add `@import './lightbox.css';` to `globals.css`. Wrap gallery
+photos in `<LightboxLink>`, mark the grid `data-lightbox-group`, and render `<Lightbox />` once in the component. For
+looks: write the site's `section-looks.ts` (its looks and which blocks offer them), give each look's surface a measured
+pair in `surfaces.ts`, teach `sectionCadence.ts` the resolution, add `lookField('<type>')` to the eligible blocks, add
+`'look'` to `NON_STEGA_FIELDS`, run `npm run typegen`, and amend rule 9 in CLAUDE.md and `.claude/rules/sanity-schema.md`.
+Marked-file order: the starter merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/section-looks`, PR after this merges. Other
 sites `no`.

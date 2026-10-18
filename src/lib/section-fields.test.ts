@@ -16,11 +16,16 @@
 //
 // It also pins the architectural rule the feature is built around: CLAUDE.md #9
 // says a page-builder block carries no surface or colour field, so there is no
-// band control here and there must never be a field for one to write to.
+// band control here and there must never be a field for one to write to. Since
+// 2026-10-18 the one exception is `look`: an ENUM of designed looks from
+// src/lib/section-looks.ts that SectionRenderer's cadence resolves into a
+// measured surface. The gate below allows exactly that and nothing freer.
 // =============================================================================
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { LOOKS_BY_TYPE, SECTION_LOOKS } from './section-looks.ts';
+import { CONTENT_TYPES } from './sectionCadence.ts';
 import {
   HEADING_ACCENT_FIELDS,
   HERO_TEXT_FIELDS,
@@ -140,16 +145,72 @@ describe('the registry matches the schema', () => {
 
   // CLAUDE.md #9, as a test rather than a promise. If this ever fails, the fix
   // is to remove the field, not to add a control for it: SectionRenderer owns
-  // the band cadence so that reordering a page cannot break its rhythm.
+  // the band cadence so that reordering a page cannot break its rhythm. The
+  // amended rule (2026-10-18) allows `look`, an enum the cadence resolves, and
+  // still forbids every free colour field by name and by type.
   it('no page-builder block carries a surface or colour field', () => {
+    const forbiddenNames = [
+      'tone',
+      'surface',
+      'background',
+      'accent',
+      'bandColor',
+      'color',
+      'backgroundColor',
+      'bgColor',
+    ];
     for (const file of BLOCK_LIBRARIES) {
       const source = readLibrary(file);
-      for (const forbidden of ['tone', 'surface', 'background', 'accent', 'bandColor']) {
+      for (const forbidden of forbiddenNames) {
         assert.ok(
           !source.includes(`name: '${forbidden}'`),
           `${file}.ts declares a '${forbidden}' field; see CLAUDE.md #9`,
         );
       }
+      // A colour PICKER is a colour field whatever it is called.
+      assert.ok(
+        !/type:\s*'color'/.test(source),
+        `${file}.ts declares a colour picker; see CLAUDE.md #9`,
+      );
+    }
+  });
+
+  it('a look is only ever the registered enum, on a block the cadence paints', () => {
+    // Every block that calls lookField() is listed in LOOKS_BY_TYPE, and every
+    // block listed there calls it. lookField() takes its list from the
+    // registry, so the Studio cannot offer a look the renderer does not know.
+    const withLook = new Set<string>();
+    for (const file of BLOCK_LIBRARIES) {
+      for (const chunk of readLibrary(file).split('defineType({').slice(1)) {
+        const name = chunk.match(/name:\s*'([A-Za-z0-9_]+)'/)?.[1] ?? '';
+        const call = chunk.match(/lookField\('([A-Za-z0-9_]+)'\)/)?.[1];
+        if (call) {
+          assert.equal(call, name, `${name} calls lookField('${call}'), not its own name`);
+          withLook.add(name);
+        }
+        // `look` may only arrive through lookField(), never hand-written.
+        assert.ok(
+          !chunk.includes(`name: 'look'`),
+          `${name} writes its own 'look' field; use lookField() so it stays the enum`,
+        );
+      }
+    }
+    assert.deepEqual([...withLook].sort(), Object.keys(LOOKS_BY_TYPE).sort());
+    // Only content blocks: a self-contained block draws its own band, and a
+    // look on one would be a colour control in disguise.
+    for (const type of withLook) {
+      assert.ok(CONTENT_TYPES.has(type), `${type} has a look but the cadence does not paint it`);
+    }
+    // Every look a block offers is one the registry defines, and Standard is
+    // always offered, so "back to normal" is always one click.
+    const known = new Set(SECTION_LOOKS.map((l) => l.value));
+    for (const [type, offered] of Object.entries(LOOKS_BY_TYPE)) {
+      assert.ok(offered.includes('standard'), `${type} does not offer Standard`);
+      for (const look of offered) assert.ok(known.has(look), `${type} offers unknown look ${look}`);
+      assert.ok(
+        offered.length >= 2 && offered.length <= 4,
+        `${type} offers ${offered.length} looks`,
+      );
     }
   });
 });

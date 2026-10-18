@@ -253,3 +253,96 @@ test('dynamicListSection appears in SELF_CONTAINED_TYPES and not CONTENT_TYPES',
     'dynamicListSection must not be in CONTENT_TYPES',
   );
 });
+
+// ── Looks (src/lib/section-looks.ts, rule 9 as amended 2026-10-18) ─────────────
+const looks = (rows: ReturnType<typeof classifySections>) => rows.map((r) => r.look);
+
+test('an unset or Standard look is the old cadence exactly', () => {
+  const plain = classifySections([
+    block('heroSection'),
+    block('richTextSection'),
+    block('gallerySection'),
+    block('quoteSection'),
+  ]);
+  const standard = classifySections([
+    block('heroSection'),
+    block('richTextSection', { look: 'standard' }),
+    block('gallerySection', { look: 'standard' }),
+    block('quoteSection'),
+  ]);
+  assert.deepEqual(surfaces(standard), surfaces(plain));
+  assert.deepEqual(dividers(standard), dividers(plain));
+  assert.deepEqual(looks(plain), ['standard', 'standard', 'standard', 'standard']);
+});
+
+test('Quiet is always the plain surface, and the rhythm restarts after it', () => {
+  const rows = classifySections([
+    block('richTextSection'), // background
+    block('imageTextSection'), // muted
+    block('quoteSection', { look: 'quiet' }), // background (would have been background anyway)
+    block('richTextSection', { look: 'quiet' }), // background again: two plain bands join
+    block('gallerySection'), // muted: the cadence alternates away from the quiet one
+  ]);
+  assert.deepEqual(surfaces(rows), ['background', 'muted', 'background', 'background', 'muted']);
+  // A divider only where the colour changes, as before.
+  assert.deepEqual(dividers(rows), [false, true, true, false, true]);
+});
+
+test('Feature is the deep band, sits outside the alternation, and takes no divider', () => {
+  const rows = classifySections([
+    block('richTextSection'), // background (idx 0)
+    block('quoteSection', { look: 'feature' }), // feature, counter does not move
+    block('imageTextSection'), // muted (idx 1)
+    block('gallerySection'), // background (idx 2)
+  ]);
+  assert.deepEqual(surfaces(rows), ['background', 'feature', 'muted', 'background']);
+  assert.deepEqual(looks(rows), ['standard', 'feature', 'standard', 'standard']);
+  assert.deepEqual(dividers(rows), [false, false, false, true]);
+});
+
+test('two Feature bands never touch: the second renders as Standard', () => {
+  const rows = classifySections([
+    block('richTextSection', { look: 'feature' }),
+    block('quoteSection', { look: 'feature' }),
+    block('videoSection', { look: 'feature' }),
+  ]);
+  assert.deepEqual(looks(rows), ['feature', 'standard', 'feature']);
+  assert.deepEqual(surfaces(rows), ['feature', 'background', 'feature']);
+});
+
+test('a Feature band never touches a dark self-contained band', () => {
+  const imageHero = block('heroSection', { backgroundImage: { asset: { _ref: 'image-a' } } });
+  const rows = classifySections([
+    imageHero,
+    block('richTextSection', { look: 'feature' }), // after a photo hero: Standard
+    block('quoteSection', { look: 'feature' }), // fine here
+    block('gallerySection'),
+    block('imageTextSection', { look: 'feature' }), // before the CTA band: Standard
+    block('ctaBandSection'),
+  ]);
+  assert.deepEqual(rows[1].look, 'standard');
+  assert.deepEqual(rows[2].look, 'feature');
+  assert.deepEqual(rows[4].look, 'standard');
+  // A TEXT hero is light, so a Feature may follow it.
+  const textHero = classifySections([
+    block('heroSection'),
+    block('quoteSection', { look: 'feature' }),
+  ]);
+  assert.equal(textHero[1].look, 'feature');
+});
+
+test('a look a block does not offer, or nonsense, is Standard', () => {
+  const rows = classifySections([
+    block('richTextSection', { look: 'neon' }),
+    block('richTextSection', { look: 42 }),
+    // Self-contained blocks never take a look, even if the data says one.
+    block('faqSection', { look: 'feature' }),
+  ]);
+  assert.deepEqual(looks(rows), ['standard', 'standard', 'standard']);
+  assert.equal(rows[2].surface, null);
+});
+
+test('stega markers on a look are ignored', () => {
+  const rows = classifySections([block('quoteSection', { look: 'feature​‌‍' })]);
+  assert.equal(rows[0].look, 'feature');
+});

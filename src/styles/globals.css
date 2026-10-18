@@ -9,6 +9,8 @@
 @import '@fontsource/libre-baskerville/400.css';
 @import '@fontsource/libre-baskerville/700.css';
 @import '@fontsource-variable/inter';
+/* The photo viewer (src/components/Lightbox.astro), PORTABLE. */
+@import './lightbox.css';
 
 /* Tailwind v4 scans every non-gitignored file for class names. The committed
    parity baselines (scripts/.parity/*.html) and the Markdown docs name hundreds
@@ -235,6 +237,16 @@
   --input: #e6e7e5;
   --ring: #586577;
   --link: #434e5c; /* ~8:1 on #FBFBFA — passes AA */
+
+  /* The Feature look's band (src/lib/section-looks.ts, 2026-10-18). Brand tokens
+     only, so apply-brand moves it with the palette; src/lib/surfaces.test.ts
+     measures every pair. Declared here and NOT in .dark: the band is the same
+     deep colour on a light or a dark page, like the Ink CTA band. */
+  --feature: var(--color-primary-dark); /* ~8:1 under Paper text */
+  --feature-foreground: var(--color-bg);
+  --feature-muted-foreground: var(--color-border-soft); /* captions, ~6.8:1 */
+  --feature-link: var(--color-bg);
+  --feature-accent: var(--color-secondary); /* accent word, display size, ~3.9:1 */
 
   /* Charts (kept neutral, not used at launch) */
   --chart-1: oklch(0.87 0 0);
@@ -571,6 +583,28 @@ html.motion [data-reveal].is-visible {
    pin it to the lifted slate that reads on near-black in either theme. */
 .bg-accent-dark {
   --section-accent: #8a96a6;
+}
+
+/* The Feature look (src/lib/section-looks.ts). A band in the brand's deep colour.
+   Rather than give every section component a set of dark-band classes, the
+   band re-points the page tokens for everything inside it: `text-foreground`,
+   `text-link`, `bg-primary` and friends all read the band's values here. The
+   tokens are the measured pair in src/lib/surfaces.ts. */
+.surface-feature {
+  --background: var(--feature);
+  --foreground: var(--feature-foreground);
+  --muted: var(--feature);
+  --muted-foreground: var(--feature-muted-foreground);
+  --card: var(--feature);
+  --card-foreground: var(--feature-foreground);
+  --link: var(--feature-link);
+  --primary: var(--feature-foreground);
+  --primary-foreground: var(--feature);
+  --ring: var(--feature-foreground);
+  --border: rgb(255 255 255 / 0.22);
+  --section-accent: var(--feature-accent);
+  background-color: var(--feature);
+  color: var(--feature-foreground);
 }
 
 /* Tactile press on primary CTAs. Tap/click depresses ~1px so the press
