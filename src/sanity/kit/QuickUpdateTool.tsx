@@ -13,6 +13,10 @@
 //
 // Nothing site-specific here: the forms, their words and their documents all
 // come from kit.config.ts.
+//
+// "Post a photo" (card 124, kit.config.ts postPhoto) is the first button when
+// it is set up. It is different on purpose: it saves a DRAFT and the editor
+// presses Publish (src/sanity/kit/PostPhoto.tsx).
 // =============================================================================
 
 import { useMemo, useState } from 'react';
@@ -20,6 +24,8 @@ import { useClient } from 'sanity';
 import { Box, Button, Card, Flex, Stack, Text, TextArea, TextInput } from '@sanity/ui';
 import { ArrowLeftIcon } from '@sanity/icons/ArrowLeft';
 import { BoltIcon } from '@sanity/icons/Bolt';
+import { ImageIcon } from '@sanity/icons/Image';
+import { PostPhoto } from './PostPhoto';
 import { quickFormErrors } from '../../lib/studio-kit';
 import { API_VERSION, PUBLISHED_EVENT, ToolHeading, useStudioLink } from './shared';
 import type { KitConfig, QuickField, QuickForm } from './types';
@@ -208,11 +214,14 @@ function QuickFormView({ form, onBack }: { form: QuickForm; onBack: () => void }
 export function makeQuickUpdateTool(config: KitConfig) {
   const forms = config.quickUpdate ?? [];
   return function QuickUpdateTool() {
-    const [open, setOpen] = useState<QuickForm | null>(null);
+    const [open, setOpen] = useState<QuickForm | 'photo' | null>(null);
+    const photo = config.postPhoto;
     return (
       <Box padding={[3, 4, 5]} style={{ overflowY: 'auto', height: '100%' }}>
         <Stack gap={5} style={{ maxWidth: 560, margin: '0 auto' }}>
-          {open ? (
+          {open === 'photo' && photo ? (
+            <PostPhoto config={photo} onBack={() => setOpen(null)} />
+          ) : open && open !== 'photo' ? (
             <QuickFormView key={open.id} form={open} onBack={() => setOpen(null)} />
           ) : (
             <>
@@ -223,6 +232,33 @@ export function makeQuickUpdateTool(config: KitConfig) {
                 Quick update
               </ToolHeading>
               <Stack gap={3}>
+                {photo && (
+                  <Card
+                    as="button"
+                    type="button"
+                    padding={4}
+                    radius={3}
+                    border
+                    data-quick="post-photo"
+                    onClick={() => setOpen('photo')}
+                    style={{ textAlign: 'left', width: '100%', cursor: 'pointer', minHeight: 72 }}
+                  >
+                    <Flex gap={3} align="center">
+                      <Text size={4} muted>
+                        <ImageIcon />
+                      </Text>
+                      <Stack gap={2} flex={1}>
+                        <Text size={3} weight="semibold">
+                          Post a photo
+                        </Text>
+                        <Text size={1} muted style={{ lineHeight: 1.5 }}>
+                          From your camera or your photos, into a gallery or a new post. Saved as a
+                          draft for you to publish.
+                        </Text>
+                      </Stack>
+                    </Flex>
+                  </Card>
+                )}
                 {forms.map((f) => {
                   const Icon = f.icon;
                   return (

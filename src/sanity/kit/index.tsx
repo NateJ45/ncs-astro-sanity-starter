@@ -39,6 +39,7 @@ import { makeHomeTool } from './HomeTool';
 import { makeNavbarStatus } from './NavbarStatus';
 import { withPublishNote } from './publishNote';
 import { makeQuickUpdateTool } from './QuickUpdateTool';
+import { makeEarlierVersions } from './EarlierVersions';
 import { staffViewFor, useStaffView } from './shared';
 import { StudioTour } from './StudioTour';
 import {
@@ -78,12 +79,17 @@ export function ncsStudioKit(config: KitConfig) {
   const HomeTool = makeHomeTool(config);
   const GuideTool = makeGuideTool(config);
   const CheckupTool = makeCheckupTool(config);
-  const QuickUpdateTool = config.quickUpdate?.length ? makeQuickUpdateTool(config) : null;
+  // Card 124: "Post a photo" alone is enough to give the tool.
+  const QuickUpdateTool =
+    config.quickUpdate?.length || config.postPhoto ? makeQuickUpdateTool(config) : null;
   const MoveToTrash = makeMoveToTrashAction(config.trashTypes, config.helper.name);
   const trashTypes = new Set(Object.keys(config.trashTypes));
   // Card 110 features: on unless kit.config.ts turns them off.
   const KitNavbar = config.features.navbarStatus === false ? undefined : makeNavbarStatus(config);
   const helpPanel = config.features.helpPanel === false ? null : makeHelpPanel(config);
+  // Card 124: "Earlier versions" beside every document but the Trash.
+  const earlierVersions =
+    config.features.earlierVersions === false ? null : makeEarlierVersions(config);
 
   function KitLayout(props: LayoutProps) {
     const { staffView } = useStaffView(config);
@@ -155,10 +161,15 @@ export function ncsStudioKit(config: KitConfig) {
         prev.filter((o) => o.templateId !== TRASH_TYPE && o.templateId !== WEEK_TYPE),
 
       // "Help for this page" beside every document but the Trash (card 110).
+      // "Earlier versions" beside them too (card 124).
       inspectors: (prev, { documentType }) =>
-        helpPanel && documentType !== TRASH_TYPE && documentType !== WEEK_TYPE
-          ? [...prev, helpPanel]
-          : prev,
+        documentType === TRASH_TYPE || documentType === WEEK_TYPE
+          ? prev
+          : [
+              ...prev,
+              ...(helpPanel ? [helpPanel] : []),
+              ...(earlierVersions ? [earlierVersions] : []),
+            ],
 
       actions: (prev, { schemaType, currentUser }) => {
         const staff = staffViewFor(currentUser, config);

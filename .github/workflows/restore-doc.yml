@@ -1,0 +1,158 @@
+# PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+name: Restore one document from a backup
+
+# "Earlier versions" in the Studio (PORTS.md card 124).
+#
+# Sanity's free plan keeps three days of history. The nightly backups
+# (sanity-backup.yml) keep fourteen, but they are ENCRYPTED with
+# BACKUP_PASSPHRASE, a GitHub secret, and that secret must never reach the
+# Worker or the browser. So the Studio never decrypts anything: its "Earlier
+# versions" panel asks the Worker (src/pages/api/studio/earlier-versions.ts),
+# the Worker starts THIS workflow with the GitHub token it already holds for
+# "Try again" (GITHUB_DEPLOY_TOKEN, Actions: Read and write), and this job
+# decrypts the backups here, inside CI, with scripts/restore-doc.mjs.
+#
+# TWO MODES
+#   scan     reads the last 14 backups, finds the document in each and logs
+#            which fields differ from now. Writes nothing.
+#   restore  takes ONE backup (backup_run) and puts the document back as a
+#            DRAFT: a dry run first, then the write, in this one job. The
+#            production write gate (NCS_PRODUCTION_WRITE=yes, CLAUDE.md rule 16,
+#            card 86) is set on the write step ONLY, nowhere else in the repo.
+#            Nothing reaches the website until an editor presses Publish, and
+#            the Studio's "Discard changes" undoes it.
+#
+# THE LOG IS PUBLIC on a public repository, and the Worker reads the answer back
+# out of it. So the script always runs with --no-values here: document id,
+# field names, list lengths and dates, never what a field said.
+#
+# THE INPUTS COME FROM A BROWSER (via the Worker, which checks them too), so
+# they are checked again below before use and only ever reach a shell as
+# environment variables, never pasted into a script with ${{ }}.
+#
+# NEEDS (repo settings, the same ones the other workflows use):
+#   secrets.SANITY_API_WRITE_TOKEN   reads the document now, writes the draft
+#   secrets.BACKUP_PASSPHRASE        decrypts the backups
+#   vars.SANITY_PROJECT_ID           this site's Sanity project
+# Missing any of them, the job fails at "Check the settings" and the Studio says
+# it did not work; nothing is read or written.
+
+run-name: restore-doc ${{ inputs.mode }} ${{ inputs.request }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'scan (list the versions, writes nothing) or restore (dry run, then ONE draft)'
+        type: choice
+        options: [scan, restore]
+        default: scan
+        required: true
+      document:
+        description: 'The document id (the end of its Studio address)'
+        type: string
+        required: true
+      backup_run:
+        description: 'restore only: the sanity-backup run id to take the version from'
+        type: string
+        required: false
+        default: ''
+      request:
+        description: 'Set by the Studio so it can find this run; anything short for a manual run'
+        type: string
+        required: false
+        default: 'manual'
+      requested_by:
+        description: 'Set by the Studio: the Sanity user id of the editor who asked'
+        type: string
+        required: false
+        default: 'manual'
+
+permissions:
+  contents: read
+  actions: read # gh run list / gh run download of the backup artifacts
+
+# One at a time across the repo: a scan and a restore never race, and a burst
+# of clicks queues instead of running side by side.
+concurrency:
+  group: restore-doc
+  cancel-in-progress: false
+
+jobs:
+  restore-doc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MODE: ${{ inputs.mode }}
+      DOC_ID: ${{ inputs.document }}
+      BACKUP_RUN: ${{ inputs.backup_run }}
+      REQUEST: ${{ inputs.request }}
+      REQUESTED_BY: ${{ inputs.requested_by }}
+    steps:
+      - name: Check the request
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+          case "$MODE" in scan|restore) ;; *) fail "mode must be scan or restore" ;; esac
+          [[ "$DOC_ID" =~ ^(drafts\.)?[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$ ]] || fail "not a document id"
+          [[ "$DOC_ID" != *..* ]] || fail "not a document id"
+          [[ "$REQUEST" =~ ^[A-Za-z0-9-]{1,64}$ ]] || fail "not a request id"
+          [[ "$REQUESTED_BY" =~ ^[A-Za-z0-9_.@-]{1,64}$ ]] || fail "not a user id"
+          if [ "$MODE" = "restore" ]; then
+            [[ "$BACKUP_RUN" =~ ^[0-9]{1,15}$ ]] || fail "restore needs backup_run, a run id"
+          fi
+          # The audit line: who asked for what, when (the run itself records the time).
+          echo "::notice::$MODE of document $DOC_ID${BACKUP_RUN:+ from backup run $BACKUP_RUN}, asked by Sanity user $REQUESTED_BY (request $REQUEST, started by $GITHUB_ACTOR)"
+
+      - name: Check the settings
+        env:
+          TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$PASSPHRASE" ] || [ -z "$PROJECT_ID" ]; then
+            echo "::error::SANITY_API_WRITE_TOKEN, BACKUP_PASSPHRASE or SANITY_PROJECT_ID is not set. Nothing was read or written. See the header of restore-doc.yml."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Look through the backups (writes nothing)
+        if: inputs.mode == 'scan'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          SANITY_API_WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: production
+        run: node scripts/restore-doc.mjs "$DOC_ID" --scan --no-values
+
+      - name: Dry run (writes nothing)
+        if: inputs.mode == 'restore'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          SANITY_API_WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: production
+        run: node scripts/restore-doc.mjs "$DOC_ID" --run "$BACKUP_RUN" --no-values
+
+      # The ONLY place NCS_PRODUCTION_WRITE is set. It writes one draft; the
+      # editor still presses Publish.
+      - name: Put it back as a draft
+        if: inputs.mode == 'restore'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+          SANITY_API_WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: production
+          NCS_PRODUCTION_WRITE: 'yes'
+        run: node scripts/restore-doc.mjs "$DOC_ID" --run "$BACKUP_RUN" --no-values --apply

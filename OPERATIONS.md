@@ -282,6 +282,22 @@ dist/server/wrangler.json`, then `npm run preview`.
   watches the repo. Try it by hand: `node --experimental-strip-types scripts/change-note.mjs --dry --hours 72`.
 - **Table panes.** Nothing to switch on; edit `src/sanity/tables.config.ts`.
 
+## The Studio app and Earlier versions (PORTS.md card 124)
+
+- **The Studio on a phone.** Nothing to switch on: `/studio/manifest.webmanifest` and `/studio/sw.js` ship with
+  every build. Check after a deploy: open `/studio/` in Chrome, DevTools, Application, Manifest (no errors, the
+  maskable icon looks right in the "Show only the minimum safe area" preview) and Service workers (scope `/studio/`).
+  To make it drop everything it keeps, bump `VERSION` in `public/studio/sw.js`. A new brand mark: `npm run favicon`.
+- **Post a photo.** `kitConfig.postPhoto` in `src/sanity/kit.config.ts`. Drafts only.
+- **Earlier versions.** Needs three things already used elsewhere: the nightly backup running
+  (`sanity-backup.yml`, with `BACKUP_PASSPHRASE`), the repo secret `SANITY_API_WRITE_TOKEN` and variable
+  `SANITY_PROJECT_ID` (read by `restore-doc.yml`), and the Worker's `GITHUB_DEPLOY_TOKEN` secret plus
+  `GITHUB_REPO` var (the "Try again" settings). The token must be fine-grained, this repository only, with
+  **Actions: Read and write**; that one permission covers starting the workflow, listing the backups and reading the
+  run log. Without any of it the panel offers "Ask for help" instead. Try it by hand first: Actions, "Restore one
+  document from a backup", Run workflow, mode `scan`, a document id. A restore from the Studio shows in the Actions
+  list as `restore-doc restore <request id>`, with an audit line naming the Sanity user who asked.
+
 ## Seed placeholder content
 
 Seed scripts bootstrap document types with placeholder content for a fresh dataset. The reusable scripts in `scripts/` cover the core content types. Modules may include their own seed scripts documented in `docs/modules/`.

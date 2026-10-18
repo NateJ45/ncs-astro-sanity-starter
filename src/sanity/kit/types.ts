@@ -13,6 +13,7 @@ import type { SanityClient } from 'sanity';
 import type { CheckGroup } from '../../lib/page-checks';
 import type { CheckupRule } from '../../lib/studio-checkup';
 import type { QuickFieldKind, StudioTarget } from '../../lib/studio-kit';
+import type { GallerySpec } from '../../lib/photo-post';
 
 /**
  * One recurring job on Home's "This week" card. It is ticked one of three ways
@@ -82,6 +83,38 @@ export interface QuickForm {
   ) => QuickDoc | Promise<QuickDoc>;
   /** One sentence after it is saved ("The notice shows until the day you picked."). */
   doneMessage?: string;
+}
+
+/**
+ * "Post a photo" on the Quick update tool (card 124): a photo from the phone's
+ * camera or gallery, with a required description, added to a gallery on a page
+ * or to a new post. Always a DRAFT: the editor presses Publish.
+ */
+export interface PostPhotoConfig {
+  /** Document types whose page builder can hold a gallery ([...PAGE_BUILDER_TYPES]). */
+  galleryTypes: string[];
+  /** Where a gallery and its photos live. Default: pageBuilder / gallerySection / images / alt / caption. */
+  gallery?: Partial<GallerySpec>;
+  /** A new post made from the photo, saved as a draft. Missing: galleries only. */
+  post?: {
+    /** "A new journal post", as the choice reads. */
+    label: string;
+    /** The document type ("journalEntry"). */
+    type: string;
+    /**
+     * The new post's fields (the kit adds the draft id). `image` is a complete
+     * image value with its description; put it in the post's cover image field.
+     */
+    build: (input: {
+      title: string;
+      alt: string;
+      caption: string;
+      image: Record<string, unknown>;
+      now: Date;
+    }) => QuickDoc;
+  };
+  /** One line above the picker, for a site rule ("Only post children with a parent's permission."). */
+  note?: string;
 }
 
 /** One large button on Home for a job this site does often (PORTS.md card 110). */
@@ -224,6 +257,9 @@ export interface KitConfig {
    */
   quickUpdate?: QuickForm[];
 
+  /** "Post a photo" on the Quick update tool (card 124). Missing: no photo action. */
+  postPhoto?: PostPhotoConfig;
+
   /** First day of the week for "This week": 0 Sunday, 1 Monday. */
   weekStartsOn: 0 | 1;
 
@@ -296,6 +332,12 @@ export interface KitConfig {
     navbarStatus?: boolean;
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
     helpPanel?: boolean;
+    /**
+     * The "Earlier versions" document panel (card 124): the nightly backups,
+     * through /api/studio/earlier-versions/. Without the Worker's GitHub
+     * settings it offers "Ask <helper> to restore this". Missing counts as on.
+     */
+    earlierVersions?: boolean;
     /**
      * Plain words in an empty desk list, and emptyAwareList() (card 111).
      * Missing counts as on.

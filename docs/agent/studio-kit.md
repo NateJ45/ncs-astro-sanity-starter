@@ -20,32 +20,35 @@ are commented in that site's `src/sanity/kit.config.ts`.
 
 ## Where it lives
 
-| Piece                   | File                                                                                          | Notes                                                                                                                                                   |
-| ----------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The plugin              | `src/sanity/kit/index.tsx`                                                                    | `ncsStudioKit(kitConfig)`, added **last** in `sanity.config.ts` plugins (its tools reducer must see every other tool)                                   |
-| Site settings           | `src/sanity/kit.config.ts`                                                                    | The ONE site-specific file (NOT portable): staff list, This week jobs, checkup rules, trash types, tour words, feature switches                         |
-| Settings shape          | `src/sanity/kit/types.ts`                                                                     | `KitConfig`                                                                                                                                             |
-| Home                    | `src/sanity/kit/HomeTool.tsx`                                                                 | First tool, so the Studio opens on it                                                                                                                   |
-| Site Guide              | `src/sanity/kit/GuideTool.tsx`                                                                | Reads the existing guides (`src/sanity/guides/content.ts`) and renders each with `GuideView`; search reads every word; Print prints only the open guide |
-| Checkup                 | `src/sanity/kit/CheckupTool.tsx`, `src/lib/studio-checkup.ts`                                 | Pure rules over one fetch of every content document; tests in `studio-checkup.test.ts`                                                                  |
-| Trash                   | `src/sanity/kit/trash.tsx`, `src/lib/studio-trash.ts`                                         | Snapshot-to-Trash in one transaction; `trashedItem` type; tests in `studio-trash.test.ts`                                                               |
-| Staff view, links, live | `src/sanity/kit/shared.tsx`, `src/lib/studio-kit.ts`                                          | Pure parts tested in `studio-kit.test.ts`                                                                                                               |
-| Status line             | `src/sanity/kit/NavbarStatus.tsx`                                                             | `studio.components.navbar` middleware; words from `navbarStatus()` in `src/lib/studio-kit.ts`                                                           |
-| Help for this page      | `src/sanity/kit/HelpPanel.tsx`                                                                | A document inspector: page check plus Checkup findings for the document, then its Site Guide entries                                                    |
-| Tour                    | `src/sanity/kit/StudioTour.tsx`                                                               | Mounted by the kit's layout; once per Sanity user per browser                                                                                           |
-| After-Publish note      | `src/sanity/kit/publishNote.tsx`                                                              | Wraps the stock Publish; keeps `action === 'publish'`                                                                                                   |
-| Build time              | `src/pages/build-info.json.ts`                                                                | Prerendered `{ builtAt, commit }` for Home's "Is it live?"; the commit comes from a Vite define in `astro.config.mjs`                                   |
-| Desk: Trash, staff, ids | `src/sanity/structure.ts`                                                                     | Trash list (id `trash`), `staffDesk()` filter (in `kit/shared.tsx`), singleton items carry their document id as their id                                |
-| Deploy status (111)     | `src/pages/api/studio/deploy-status.ts`, `src/lib/deploy-status.ts`, `src/lib/studio-auth.ts` | GET the newest deploy run's outcome; POST "Try again" (same origin + Sanity session); tests in `deploy-status.test.ts`                                  |
-| Home cards (115)        | `src/sanity/kit/HomeCards.tsx`, `src/lib/studio-home.ts`                                      | Coming up, Fix-it list, Visitors, Your pages, and the Panel frame; pure parts tested in `studio-home.test.ts`                                           |
-| Home banner (118)       | `src/sanity/kit/HomeBanner.tsx`, `src/lib/studio-banner.ts`                                   | The navy welcome at the top of Home; `kitConfig.homeBanner`; pure parts tested in `studio-banner.test.ts`                                               |
-| Icons (119)             | `src/sanity/brandIcons.tsx`, `src/sanity/artIcon.tsx`, `src/lib/studio-icons.ts`              | Not the kit plugin: icons by meaning and list-row pictures; the site's art in `brandIconArt.tsx`; tests in `studio-icons.test.ts`                       |
-| Guide videos (115)      | `src/sanity/kit/GuideVideos.tsx`                                                              | "Watch how it is done" on Home and in the Site Guide; `videoSource()` in `studio-home.ts`                                                               |
-| Visitors route (115)    | `src/pages/api/studio/visitors.ts`, `src/lib/studio-analytics.ts`                             | Cloudflare Web Analytics GraphQL through the Worker (same origin + Sanity session); tests in `studio-analytics.test.ts`                                 |
-| Weekly ticks (111)      | `src/sanity/kit/weekType.ts`                                                                  | `studioWeek` document per week for hand-ticked jobs; `checklist()` and `weekKey()` in `studio-kit.ts`                                                   |
-| Quick update (111)      | `src/sanity/kit/QuickUpdateTool.tsx`                                                          | Tool `quick-update`, forms from `kitConfig.quickUpdate`; `quickFormErrors()` in `studio-kit.ts`                                                         |
-| Empty lists (111)       | `src/sanity/kit/emptyList.tsx`                                                                | `emptyAwareList()` for `structure.ts`, plus `EMPTY_LIST_BUNDLE` (the default empty words)                                                               |
-| Restore one document    | `scripts/restore-doc.mjs`, `scripts/lib/restore-doc.mjs`                                      | One document from a nightly backup, written back as a draft; dry by default; tests in `restore-doc.test.mjs`                                            |
+| Piece                   | File                                                                                                                                                 | Notes                                                                                                                                                   |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The plugin              | `src/sanity/kit/index.tsx`                                                                                                                           | `ncsStudioKit(kitConfig)`, added **last** in `sanity.config.ts` plugins (its tools reducer must see every other tool)                                   |
+| Site settings           | `src/sanity/kit.config.ts`                                                                                                                           | The ONE site-specific file (NOT portable): staff list, This week jobs, checkup rules, trash types, tour words, feature switches                         |
+| Settings shape          | `src/sanity/kit/types.ts`                                                                                                                            | `KitConfig`                                                                                                                                             |
+| Home                    | `src/sanity/kit/HomeTool.tsx`                                                                                                                        | First tool, so the Studio opens on it                                                                                                                   |
+| Site Guide              | `src/sanity/kit/GuideTool.tsx`                                                                                                                       | Reads the existing guides (`src/sanity/guides/content.ts`) and renders each with `GuideView`; search reads every word; Print prints only the open guide |
+| Checkup                 | `src/sanity/kit/CheckupTool.tsx`, `src/lib/studio-checkup.ts`                                                                                        | Pure rules over one fetch of every content document; tests in `studio-checkup.test.ts`                                                                  |
+| Trash                   | `src/sanity/kit/trash.tsx`, `src/lib/studio-trash.ts`                                                                                                | Snapshot-to-Trash in one transaction; `trashedItem` type; tests in `studio-trash.test.ts`                                                               |
+| Staff view, links, live | `src/sanity/kit/shared.tsx`, `src/lib/studio-kit.ts`                                                                                                 | Pure parts tested in `studio-kit.test.ts`                                                                                                               |
+| Status line             | `src/sanity/kit/NavbarStatus.tsx`                                                                                                                    | `studio.components.navbar` middleware; words from `navbarStatus()` in `src/lib/studio-kit.ts`                                                           |
+| Help for this page      | `src/sanity/kit/HelpPanel.tsx`                                                                                                                       | A document inspector: page check plus Checkup findings for the document, then its Site Guide entries                                                    |
+| Tour                    | `src/sanity/kit/StudioTour.tsx`                                                                                                                      | Mounted by the kit's layout; once per Sanity user per browser                                                                                           |
+| After-Publish note      | `src/sanity/kit/publishNote.tsx`                                                                                                                     | Wraps the stock Publish; keeps `action === 'publish'`                                                                                                   |
+| Build time              | `src/pages/build-info.json.ts`                                                                                                                       | Prerendered `{ builtAt, commit }` for Home's "Is it live?"; the commit comes from a Vite define in `astro.config.mjs`                                   |
+| Desk: Trash, staff, ids | `src/sanity/structure.ts`                                                                                                                            | Trash list (id `trash`), `staffDesk()` filter (in `kit/shared.tsx`), singleton items carry their document id as their id                                |
+| Deploy status (111)     | `src/pages/api/studio/deploy-status.ts`, `src/lib/deploy-status.ts`, `src/lib/studio-auth.ts`                                                        | GET the newest deploy run's outcome; POST "Try again" (same origin + Sanity session); tests in `deploy-status.test.ts`                                  |
+| Home cards (115)        | `src/sanity/kit/HomeCards.tsx`, `src/lib/studio-home.ts`                                                                                             | Coming up, Fix-it list, Visitors, Your pages, and the Panel frame; pure parts tested in `studio-home.test.ts`                                           |
+| Home banner (118)       | `src/sanity/kit/HomeBanner.tsx`, `src/lib/studio-banner.ts`                                                                                          | The navy welcome at the top of Home; `kitConfig.homeBanner`; pure parts tested in `studio-banner.test.ts`                                               |
+| Icons (119)             | `src/sanity/brandIcons.tsx`, `src/sanity/artIcon.tsx`, `src/lib/studio-icons.ts`                                                                     | Not the kit plugin: icons by meaning and list-row pictures; the site's art in `brandIconArt.tsx`; tests in `studio-icons.test.ts`                       |
+| Guide videos (115)      | `src/sanity/kit/GuideVideos.tsx`                                                                                                                     | "Watch how it is done" on Home and in the Site Guide; `videoSource()` in `studio-home.ts`                                                               |
+| Visitors route (115)    | `src/pages/api/studio/visitors.ts`, `src/lib/studio-analytics.ts`                                                                                    | Cloudflare Web Analytics GraphQL through the Worker (same origin + Sanity session); tests in `studio-analytics.test.ts`                                 |
+| Weekly ticks (111)      | `src/sanity/kit/weekType.ts`                                                                                                                         | `studioWeek` document per week for hand-ticked jobs; `checklist()` and `weekKey()` in `studio-kit.ts`                                                   |
+| Quick update (111)      | `src/sanity/kit/QuickUpdateTool.tsx`                                                                                                                 | Tool `quick-update`, forms from `kitConfig.quickUpdate`; `quickFormErrors()` in `studio-kit.ts`                                                         |
+| Empty lists (111)       | `src/sanity/kit/emptyList.tsx`                                                                                                                       | `emptyAwareList()` for `structure.ts`, plus `EMPTY_LIST_BUNDLE` (the default empty words)                                                               |
+| Restore one document    | `scripts/restore-doc.mjs`, `scripts/lib/restore-doc.mjs`                                                                                             | One document from a nightly backup, written back as a draft; dry by default; tests in `restore-doc.test.mjs`                                            |
+| Post a photo (124)      | `src/sanity/kit/PostPhoto.tsx`, `src/lib/photo-post.ts`                                                                                              | Quick update's photo action, `kitConfig.postPhoto`; draft only; tests in `photo-post.test.ts`                                                           |
+| Earlier versions (124)  | `src/sanity/kit/EarlierVersions.tsx`, `src/pages/api/studio/earlier-versions.ts`, `src/lib/earlier-versions.ts`, `.github/workflows/restore-doc.yml` | Document inspector; nightly backups via CI; tests in `earlier-versions.test.ts`                                                                         |
+| Studio app (124)        | `src/lib/studio-app.ts`, `src/pages/studio/manifest.webmanifest.ts`, `src/pages/studio/offline.astro`, `public/studio/sw.js`                         | Manifest, offline page and service worker scoped to /studio/; tests in `studio-app.test.ts`, `tests/studio-app.spec.ts`                                 |
 
 Every file above except `kit.config.ts` and `structure.ts` carries the PORTABLE marker. Nothing in them names a site, a
 person or a document type; everything site-specific comes in through `kitConfig`.
@@ -182,7 +185,8 @@ that returns the whole document. The tool shows the forms as big buttons, opens 
 screen (no page builder, no tabs), checks the answers with `quickFormErrors()`, then **creates the document published**
 and fires `PUBLISHED_EVENT`. Because it skips the Studio's validation, `build` must return a document that is complete
 and valid for its type (slugs, required fields). Afterwards it offers "Open it in the full editor". Built for 375px
-first: one column, 72px buttons, 16px-plus inputs. Add `'quick-update'` to `staffTools` for the staff view.
+first: one column, 72px buttons, 16px-plus inputs. With `kitConfig.postPhoto` set, "Post a photo" (card 124) is the
+first button, and it alone is enough to give the tool; unlike the forms it saves a DRAFT. Add `'quick-update'` to `staffTools` for the staff view.
 `lastSunday()` and `comingSunday()` in `studio-kit.ts` are there for `initial` values.
 
 ## Empty lists (card 111)
@@ -203,6 +207,52 @@ week" goes to the developer: `node scripts/restore-doc.mjs <docId> [--from <date
 (the published copy, else its draft), prints a field-by-field summary against what is there now, and with `--apply`
 (plus `NCS_PRODUCTION_WRITE=yes` on production) writes it back **as a draft**, so the editor reviews it and publishes,
 or presses Discard changes to undo the restore. Artifacts last 14 days; pass an R2 copy's file for anything older.
+
+## Earlier versions (card 124)
+
+A document inspector ("Earlier versions" in the document's menu) that reaches the nightly backups, so an editor can go
+back further than the free plan's three days without asking anyone. It never decrypts anything itself:
+
+1. **Panel** (`EarlierVersions.tsx`): `GET /api/studio/earlier-versions/?backups=1` lists the nights GitHub still
+   keeps (newest first, one per night, at most 14). "Look for this page in the backups" POSTs `{ action: 'scan', id }`
+   and polls `?request=<id>` every 8 seconds (the request id survives closing the panel, in sessionStorage). Each night
+   that has the document shows which fields differ from now by their form TITLES and list lengths ("Title, Sections (6
+   now, 5 then)"); "Put this version back as a draft", then a confirm, POSTs `{ action: 'restore', id, run }`.
+2. **Worker** (`earlier-versions.ts`): every call needs the same origin AND a signed-in project member who is not
+   only a viewer (`canEdit()` over the roles `verifyStudioUser` now returns); fails closed without
+   `GITHUB_DEPLOY_TOKEN`/`GITHUB_REPO`. A restore must name a backup run it just listed. Rate limit per Worker
+   instance: one start per editor per 20 seconds, 10 an hour each, 30 an hour in all. It dispatches
+   `restore-doc.yml` with a fresh request id in the run's title, finds the run by that title, and when it finishes
+   reads the job log for the marker line (`NCS_EARLIER_VERSIONS` or `NCS_RESTORE`, JSON).
+3. **CI** (`restore-doc.yml`): checks the inputs again (they reach the shell only as env vars), then runs
+   `scripts/restore-doc.mjs`: `--scan --no-values` (reads 14 backups, writes nothing) or `--run <id> --no-values`
+   (dry run) followed by the same with `--apply` and `NCS_PRODUCTION_WRITE=yes` on that one step. One run at a time
+   (concurrency group). The draft is `createOrReplace` of `drafts.<id>`: Publish puts it live, Discard changes undoes it.
+
+**Why value-free.** The answer travels through the run log, and a public repository's logs are public. So in CI the
+script prints field names and list lengths, never what a field said. The editor sees the words in the restored draft
+and in Sanity's "Review changes".
+
+**Without the settings** (or for a viewer) the panel says why and offers "Ask <helper> to restore this" (email when
+`PUBLIC_STUDIO_HELP_EMAIL` is set, and "Copy the details"). `features.earlierVersions: false` hides it.
+
+## The Studio on a phone (card 124)
+
+- **Manifest**: `/studio/manifest.webmanifest` from `studioManifest()` (`src/lib/studio-app.ts`): `id` and
+  `scope` `/studio/`, `display: standalone`, the brand name, `theme_color` the navy chrome, `background_color`
+  the paper, icons `/icon-192.png`, `/icon-512.png` and `/icon-maskable-512.png` (`npm run favicon`, or
+  `npm run favicon -- --maskable-only` for just that one). `studioEdges.app` sets `shortName` and `start`
+  (`'home'` or `'quick-update'`). Only the boot page links it; the public site keeps `/site.webmanifest`
+  (display browser).
+- **Service worker**: `public/studio/sw.js`, registered by the boot page in a production build only, scope
+  `/studio/`. `cacheRule()` is the whole policy: the boot page network-first with `/studio/offline/` as the
+  fallback; `/_astro/*` cache-first (named by content); icons, the manifest and the offline page served from the
+  cache and refreshed behind. Never: another origin (all of Sanity), `/api/**`, `/preview/**`, non-GET, a request
+  with `Authorization`, a range request. Bump `VERSION` to drop everything kept.
+- **Post a photo**: `kitConfig.postPhoto` (`galleryTypes`, optional `gallery` field names, optional `post`
+  builder, optional `note`). The galleries are found with the drafts perspective. A gallery photo is appended to the
+  page's draft (made from the published copy first if there is none) in one transaction, then checked; a post is a new
+  `drafts.<uuid>`. The done screen opens it in the full editor for the Studio's own Publish.
 
 ## Help for this page (card 110)
 

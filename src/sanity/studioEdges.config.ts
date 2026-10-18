@@ -14,6 +14,7 @@
 // =============================================================================
 
 import type { StudioWordingInput } from './studioWording';
+import type { StudioStart } from '../lib/studio-app';
 
 export interface StudioEdgesConfig extends StudioWordingInput {
   wordmark: {
@@ -26,6 +27,17 @@ export interface StudioEdgesConfig extends StudioWordingInput {
      */
     view?: string | null;
   };
+  /**
+   * The Studio as a phone app (card 124): what the home-screen icon is called
+   * and where it opens. Optional; the default is the site's name, opening on
+   * Home. 'quick-update' needs the Quick update tool (kit.config.ts
+   * quickUpdate or postPhoto).
+   */
+  app?: {
+    /** Under the icon. About 12 characters fits every phone. */
+    shortName?: string;
+    start?: StudioStart;
+  };
 }
 
 export const studioEdges: StudioEdgesConfig = {
@@ -35,4 +47,6 @@ export const studioEdges: StudioEdgesConfig = {
   // loginSubtitle: 'Sign in to edit the website',
   // Any Studio text key Sanity translates (see studioWording.ts STUDIO_WORDS).
   // words: { 'user-menu.action.invite-members': 'Invite someone to edit' },
+  // The phone app (card 124): the name under its icon and where it opens.
+  app: { start: 'home' },
 };

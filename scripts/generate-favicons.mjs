@@ -15,7 +15,13 @@
 //   apple-touch-icon.png 180x180, iOS home screen
 //   icon-192.png         Android home screen and the manifest
 //   icon-512.png         install prompts and splash screens
+//   icon-maskable-512.png the Studio app's Android icon (card 124): the mark in
+//                        the middle 60% on its own plate colour, so a circle or
+//                        squircle crop never cuts it
 //   site.webmanifest     name, colours and the icon list, from brand.config.json
+//
+//     npm run favicon -- --maskable-only   writes just icon-maskable-512.png
+//                                          (a fork adding the Studio app)
 //
 // -----------------------------------------------------------------------------
 // A FAVICON IS A MARK, NOT A SIGNATURE
@@ -91,6 +97,39 @@ function buildIco(entries) {
   return Buffer.concat([header, ...dir, ...entries.map((x) => x.buffer)]);
 }
 
+/**
+ * The maskable icon (card 124). Android masks an app icon to a circle or a
+ * squircle, keeping only the middle 80% for sure, so the mark is drawn at 60%
+ * in the middle of a square filled with the mark's own plate colour (the pixel
+ * at the middle of its top edge; the brand primary when that is transparent).
+ * Only the Studio app's manifest (src/lib/studio-app.ts) lists it: the public
+ * site's manifest stays display: browser with no maskable entry (see below).
+ */
+async function maskable(size = 512) {
+  const inner = Math.round(size * 0.6);
+  const probe = await sharp(svg, { density: 1024 })
+    .resize(size, size)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const at = (Math.round(size * 0.01) * size + Math.round(size / 2)) * 4;
+  const [r, g, b, a] = probe.data.subarray(at, at + 4);
+  const fallback = brand.palette?.light?.['--primary'] ?? '#111111';
+  const background = a > 200 ? { r, g, b, alpha: 1 } : fallback;
+  const mark = await png(inner);
+  return sharp({ create: { width: size, height: size, channels: 4, background } })
+    .composite([{ input: mark, gravity: 'centre' }])
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+}
+
+if (process.argv.includes('--maskable-only')) {
+  const buf = await maskable();
+  writeFileSync(resolve(pub, 'icon-maskable-512.png'), buf);
+  console.log(`icon-maskable-512.png 512x512  (${buf.length} bytes)`);
+  process.exit(0);
+}
+
 const icoSizes = [16, 32, 48];
 const icoEntries = [];
 for (const size of icoSizes) icoEntries.push({ size, buffer: await png(size) });
@@ -107,6 +146,11 @@ for (const [name, size] of [
   writeFileSync(resolve(pub, name), buf);
   console.log(`${name.padEnd(19)}${size}x${size}  (${buf.length} bytes)`);
 }
+{
+  const buf = await maskable();
+  writeFileSync(resolve(pub, 'icon-maskable-512.png'), buf);
+  console.log(`icon-maskable-512.png 512x512  (${buf.length} bytes)`);
+}
 
 // The manifest, from the brand config, so a rebrand carries it and nobody has
 // to remember that the project's name is written down in a fourth place.
@@ -118,6 +162,8 @@ for (const [name, size] of [
 // No `purpose: maskable` entry either. A maskable icon needs its mark inside
 // the middle 80%, and the starter's favicon fills its square, so declaring one
 // would crop the mark on Android. Add it only alongside artwork drawn for it.
+// (The Studio app's manifest does list icon-maskable-512.png, drawn above with
+// the padding a maskable icon needs; that is a different manifest, card 124.)
 const manifest = {
   name: brand.name,
   short_name: brand.name,
