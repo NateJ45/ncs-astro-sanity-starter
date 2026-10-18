@@ -123,7 +123,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 10  | Embedded-studio live-preview stack                                             | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
 | 11  | Preview click interceptor                                                      | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
 | 12  | Parity-gated page-builder conversion                                           | partial | yes         | partial  | partial          | no            | no             | no                 | no                  | partial        |
-| 13  | react/react-dom exact pin                                                      | no      | yes         | yes      | yes              | staged        | no             | yes                | no                  | yes            |
+| 13  | react/react-dom exact pin                                                      | no      | yes         | yes      | yes              | yes           | no             | yes                | yes                 | yes            |
 | 14  | wrangler legacy_env pin                                                        | no      | yes         | yes      | yes              | staged        | no             | yes                | no                  | yes            |
 | 15  | PENDING.md / TESTING.md docs registry                                          | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
 | 16  | Quarterly slop sweep                                                           | no      | no          | no       | no               | no            | no             | no                 | no                  | no             |
@@ -229,7 +229,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 109 | Authoring kit: page templates, picture picker, patterns, synced sections       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 110 | Studio looks like the site: name, mark, colours, status line, help panel       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 112 | React 19.3.1, one copy in the tree                                             | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | staged              | staged         |
+| 112 | React 19.3.1, one copy in the tree                                             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -8689,7 +8689,16 @@ gone. It also makes `@sanity/themer` installable (peers `react ^19.3.0`); the st
 19.2.7 and 19.3.1 alike. It does not appear in `astro build` or the deployed site. Not investigated; leave it unless it
 starts breaking a page.
 
-**Status, 2026-10-18.** Starter `yes`. Site rollout in progress the same day (see the matrix row).
+**Status, 2026-10-18.** Starter `yes`. Rolled out the same day, one PR per site, each merged green and checked live
+(the deployed bundles report React 19.3.1; Studio sign-in renders with a clean console): first-baptist-auburn #54,
+fbcm #71, presacademy #105, reid-design-site #156, mas-monograms #116, stonesteps-50k #127, nixoncreativestudio #134
+(no Sanity; it was on `^19.3.0` and is now exact, so card 13 is `yes` there too). `npm ls` showed one React in every
+tree. presacademy and reid-design-site also took the starter's card-110 `checkPage.tsx` refactor in the same PR, because
+their CI runs sync-check against the live starter and it had drifted that morning.
+
+**Gotcha from the rollout:** two `astro build`s at once on one machine fail with `EADDRINUSE 127.0.0.1:9230` (the
+workerd inspector port the prerender server opens). Run builds, and any Playwright config whose `webServer` builds,
+one at a time.
 
 ## Card 113: SanityImage aims CSS crops at the hotspot; Church business type without a price range (2026-10-18)
 
