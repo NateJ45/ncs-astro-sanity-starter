@@ -8610,7 +8610,7 @@ nothing else. And "put the page back the way it was on Tuesday" had no answer at
 `scripts/lib/restore-doc.mjs` + `restore-doc.test.mjs`, and the card-111 changes to `kit/HomeTool.tsx`,
 `kit/NavbarStatus.tsx`, `kit/shared.tsx`, `kit/index.tsx`, `kit/types.ts`, `src/lib/studio-kit.ts` (+ test) and
 `docs/agent/studio-kit.md`. Per site (NOT portable): `kit.config.ts` (`thisWeek` hand and Checkup jobs,
-`thisWeekTitle`, `quickUpdate` forms, `'quick-update'` in `staffTools`), `structure.ts` (`emptyAwareList` on the
+`thisWeekTitle`, `quickUpdate` forms, `'quick-update'` in `staffTools`), `structure.ts` (`WEEK_TYPE` in the default-list hidden set, `emptyAwareList` on the
 editor's lists), `wrangler.jsonc` (`vars.GITHUB_REPO`), `deploy.yml` and `publish-due.yml` (template changes below,
 copied by hand), `package.json` (`restore:doc`), and the publish webhook's filter.
 
@@ -8634,7 +8634,8 @@ copied by hand), `package.json` (`restore:doc`), and the publish webhook's filte
   the site.
 - **Quick update**, a tool for phones: `kitConfig.quickUpdate` forms (a few plain fields and a `build()` returning the
   whole document), opened one at a time with nothing else on screen, checked by `quickFormErrors()`, then created
-  PUBLISHED. `build` must return a valid document because the Studio's validation is skipped.
+  PUBLISHED. `build` (it may be async, and gets the client) must return a valid document because the Studio's
+  validation is skipped.
 - **Empty lists** say what goes there: `emptyAwareList()` for `structure.ts` (counts first; empty shows an explaining
   pane with "Create the first one"), and `EMPTY_LIST_BUNDLE` replacing Sanity's default empty words everywhere.
 - **restore-doc.mjs**: one document from the newest (or a dated) nightly backup, via `gh`, decrypted in memory, a

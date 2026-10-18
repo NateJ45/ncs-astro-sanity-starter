@@ -120,7 +120,7 @@ Studio behaves exactly as before.
 ## Quick update (card 111)
 
 A tool for the jobs an editor does from a phone: `kitConfig.quickUpdate` is a list of forms, each a few plain fields
-(`string`, `text`, `date`, `datetime`, `url`; `required`, `max`, an `initial(now)` value) and a `build(values, now)`
+(`string`, `text`, `date`, `datetime`, `url`; `required`, `max`, an `initial(now)` value) and a `build(values, { now, client })` (it may be async)
 that returns the whole document. The tool shows the forms as big buttons, opens one at a time with nothing else on the
 screen (no page builder, no tabs), checks the answers with `quickFormErrors()`, then **creates the document published**
 and fires `PUBLISHED_EVENT`. Because it skips the Studio's validation, `build` must return a document that is complete
@@ -213,4 +213,5 @@ Copy the PORTABLE files listed above, write the site's `kit.config.ts` (start fr
 `astro.config.mjs` define, add `ncsStudioKit(kitConfig)` last in plugins, run `npm run typegen` (the `trashedItem` type
 is new), then open `/studio` and check Home opens first. PORTS.md card 106 has the full list; card 111 adds the deploy
 route's Worker settings, the two workflow changes (`deploy.yml` tells someone; `publish-due.yml` rebuilds after a
-publish) and `"studioWeek"` in the publish webhook's filter.
+publish), `"studioWeek"` in the publish webhook's filter, and `WEEK_TYPE` in `structure.ts`'s default-list hidden set
+(else the safety net lists "Weekly checklist" in the desk).

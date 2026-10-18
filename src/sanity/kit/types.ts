@@ -54,6 +54,9 @@ export interface QuickField {
   initial?: (now: Date) => string;
 }
 
+/** What a Quick update form saves: a whole document, without its id. */
+export type QuickDoc = { _type: string } & Record<string, unknown>;
+
 /**
  * One big button on the Quick update tool, and the short form behind it
  * (card 111). `build` turns the answers into a whole document; the kit adds the
@@ -69,7 +72,14 @@ export interface QuickForm {
   fields: QuickField[];
   /** The button at the bottom of the form ("Put it on the website"). */
   submitLabel?: string;
-  build: (values: Record<string, string>, now: Date) => { _type: string } & Record<string, unknown>;
+  /**
+   * The answers (trimmed; a datetime as ISO) to a whole document. May be async, to look
+   * something up with the client (the pastor's person id, say).
+   */
+  build: (
+    values: Record<string, string>,
+    ctx: { now: Date; client: SanityClient },
+  ) => QuickDoc | Promise<QuickDoc>;
   /** One sentence after it is saved ("The notice shows until the day you picked."). */
   doneMessage?: string;
 }

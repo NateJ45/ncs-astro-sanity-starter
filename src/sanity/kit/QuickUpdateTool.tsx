@@ -114,7 +114,7 @@ function QuickFormView({ form, onBack }: { form: QuickForm; onBack: () => void }
       const clean = Object.fromEntries(
         form.fields.map((f) => [f.name, normalise(f, values[f.name] ?? '')]),
       );
-      const doc = form.build(clean, new Date());
+      const doc = await form.build(clean, { now: new Date(), client });
       const id = crypto.randomUUID();
       await client.create({ ...doc, _id: id });
       window.dispatchEvent(new Event(PUBLISHED_EVENT));
