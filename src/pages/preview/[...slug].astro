@@ -32,6 +32,8 @@ export const prerender = false;
 
 import { perspectiveCookieName } from '@sanity/preview-url-secret/constants';
 import { isStudioPreview } from '@/lib/preview-auth';
+import { SHARE_PARAM } from '@/lib/preview-share';
+import { sharedPreviewAccess, sharedPreviewFetch } from '@/lib/preview-share-server';
 import PreviewLayout from '@/layouts/PreviewLayout.astro';
 import Hero from '@/components/Hero.astro';
 import FinalCta from '@/components/FinalCta.astro';
@@ -50,6 +52,15 @@ if (!config.ok) {
 // drafts through the server's token. isStudioPreview compares it with the
 // fingerprint /api/draft-mode/enable writes (src/lib/preview-auth.ts).
 const draftMode = await isStudioPreview(Astro.cookies.get(perspectiveCookieName)?.value);
+
+// A private preview link (PORTS.md card 117): `?share=<signed token>` shows
+// THIS page's draft to someone with no login, until the link expires or an
+// editor stops it. It never turns on draftMode: no overlay, no live channel,
+// no stega, and every other page stays published. src/lib/preview-share.ts.
+const share = draftMode
+  ? null
+  : await sharedPreviewAccess(Astro.url.searchParams.get(SHARE_PARAM), Astro.url.pathname);
+if (share) Astro.response.headers.set('Referrer-Policy', 'no-referrer');
 
 // Never let a browser cache a preview page (2026-08-28, measured on
 // presacademy). These SSR responses carried NO Cache-Control, so browsers
@@ -132,13 +143,23 @@ interface PreviewDoc {
 
 const singletonType = SINGLETON_BY_PATH[slug];
 
-const fetched = await previewFetch<PreviewDoc | null>(
-  draftMode,
-  singletonType
-    ? `*[_type == $type][0]${PREVIEW_FIELDS}`
-    : `*[_type == "page" && slug.current == $slug][0]${PREVIEW_FIELDS}`,
-  singletonType ? { type: singletonType } : { slug },
-);
+const docQuery = singletonType
+  ? `*[_type == $type][0]${PREVIEW_FIELDS}`
+  : `*[_type == "page" && slug.current == $slug][0]${PREVIEW_FIELDS}`;
+const docParams = singletonType ? { type: singletonType } : { slug };
+let fetched = share
+  ? await sharedPreviewFetch<PreviewDoc | null>(docQuery, docParams)
+  : await previewFetch<PreviewDoc | null>(draftMode, docQuery, docParams);
+// A share link shows ONE document's draft. If this path resolves to another
+// document (a slug moved), fall back to the published page.
+if (share && fetched && fetched._id.replace(/^drafts\./, '') !== share.d) {
+  fetched = await previewFetch<PreviewDoc | null>(false, docQuery, docParams);
+}
+const sharedUntil = share
+  ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'America/New_York' }).format(
+      new Date(share.e * 1000),
+    )
+  : null;
 
 // No document yet (a fresh fork with an empty dataset, or a page not created).
 // This used to answer a bare text 404, which has no visual-editing island, so
@@ -192,6 +213,14 @@ const title = `${label} - Preview`;
 ---
 
 <PreviewLayout {title} {draftMode} {pageId}>
+  {sharedUntil && (
+    <div class="mx-auto max-w-3xl px-4 pt-6" data-share-banner>
+      <p class="rounded-md border border-border-soft bg-bg-soft px-4 py-3 text-sm text-foreground/80">
+        You are looking at a draft of this page that has not been published yet. This private link
+        works until {sharedUntil}.
+      </p>
+    </div>
+  )}
   {showHero && (
     <Hero
       eyebrow={heroEyebrow}

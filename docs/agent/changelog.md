@@ -1,5 +1,15 @@
 # Change history
 
+_2026-10-18: the Studio's safety net (PORTS card 117)._
+
+**Decision.** Four tools modelled on what the Theology Matters WordPress admin gives its editors. A morning GitHub
+issue "What changed on <date>" from `change-note.yml` (read token only; quiet days post nothing). "Share a preview":
+a private draft link for one page that expires after 1, 3, 7 or 14 days and can be stopped, signed with HMAC under a
+Worker secret and checked against a share record on every load, never a Sanity token in the URL and never draft mode.
+A Messages tool over the forms' D1 tables with New / Needs a person / Replied / Spam stored in D1, prayer requests
+reduced to "one arrived", nothing personal in Sanity. Sortable table panes beside the normal lists. Built first for
+first-baptist-auburn.
+
 _2026-10-18: the Studio reads as the site's own admin (PORTS card 116)._
 
 **Decision.** The Studio opens light by default on a warm paper (`studio.paper`, else the site's light background
