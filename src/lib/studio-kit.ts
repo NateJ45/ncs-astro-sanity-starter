@@ -206,3 +206,48 @@ export function isDone(answer: unknown): boolean {
   if (typeof answer === 'number') return answer > 0;
   return answer === true;
 }
+
+// -----------------------------------------------------------------------------
+// The navbar status line (PORTS.md card 110)
+// -----------------------------------------------------------------------------
+// The same answer as Home's "Is it live?", cut to a few words for a thin line
+// under the top bar, so "I pressed Publish and nothing happened" is answered on
+// every screen. Null means "say nothing" (no build time to compare with).
+// -----------------------------------------------------------------------------
+
+/** How long a rebuild usually takes, for the "about N minutes" countdown. */
+export const TYPICAL_UPDATE_MINUTES = 3;
+
+export interface NavbarStatus {
+  /** @sanity/ui tone: neutral when settled, primary while updating, caution when slow. */
+  tone: 'default' | 'primary' | 'caution';
+  text: string;
+}
+
+export function navbarStatus(
+  builtAt: string | null | undefined,
+  lastPublishAt: string | null | undefined,
+  now: number,
+  slowAfterMinutes = 15,
+  typicalMinutes = TYPICAL_UPDATE_MINUTES,
+): NavbarStatus | null {
+  const status = liveStatus(builtAt, lastPublishAt, now, slowAfterMinutes);
+  if (status.state === 'unknown') return null;
+  if (status.state === 'live') return { tone: 'default', text: 'Website up to date' };
+  if (status.state === 'slow') {
+    return { tone: 'caution', text: 'The website update is taking longer than usual' };
+  }
+  const waited = (now - Date.parse(lastPublishAt ?? '')) / MINUTE;
+  const left = Math.ceil(typicalMinutes - waited);
+  if (left >= 2) return { tone: 'primary', text: `Updating the website, about ${left} minutes` };
+  if (left === 1) return { tone: 'primary', text: 'Updating the website, about a minute' };
+  return { tone: 'primary', text: 'Updating the website, nearly there' };
+}
+
+/** "Good morning" / "Good afternoon" / "Good evening" by the browser's clock (Home's header). */
+export function greeting(now: Date): string {
+  const h = now.getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
+}
