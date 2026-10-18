@@ -352,6 +352,12 @@ seen signed in: the Share a preview dialog making, opening (in a private window)
 a real D1 with a Studio session; a table pane sorting and opening a document; the change note posting a real issue.
 first-baptist-auburn is the first site; its PENDING lists the same.
 
+### 21. Card 118 (Home banner): see it in a signed-in Studio (opened 2026-10-18)
+
+Unit-tested (`studio-banner.test.ts`) and rendered in a throwaway page with the real Studio theme, light and dark,
+1280 and 375. Not yet seen in a signed-in Studio: the banner under the real navbar (the two should be one colour),
+the editor's real first name, and View the website opening the live site in a new tab.
+
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 
 PORTS.md card 109 (page templates, picture picker, patterns, synced sections, guardrails) was built, type-checked,

@@ -145,6 +145,40 @@ export interface KitGuide {
   video?: string;
 }
 
+/**
+ * Home's banner (card 118): the welcome at the top of Home, on the navbar's deep
+ * brand colour. Every field is optional; with none the banner is the date, the
+ * greeting, the site's name and "View the website". All paths are files in
+ * public/, served from the site itself (the Studio runs at /studio on it).
+ */
+export interface HomeBannerConfig {
+  /** The site's full-colour mark ("/favicon.svg"), drawn on a light disc so it reads on the dark banner. */
+  mark?: string;
+  /** A light or reversed mark made for dark grounds. When set it is drawn bare instead of `mark`. */
+  markOnDark?: string;
+  /**
+   * A decorative strip along the banner's foot: an SVG in public/, drawn full width at
+   * its own proportions (so make it wide and short, about 1000 by 60). Hidden from
+   * screen readers.
+   */
+  motif?: string;
+  /** The same strip drawn for a phone (about 390 by 56), used under 600px. Optional. */
+  motifNarrow?: string;
+  /**
+   * The colour of the editor's name in the greeting (a hex). The greeting is set at
+   * 24px, so it needs 3:1 on the banner; a colour under that is ignored.
+   */
+  accent?: string;
+  /**
+   * Part of the site's name set in the site's own display lettering, as the site
+   * sets its headings. The font file is the site's own, in public/. Colours cycle
+   * letter by letter, as on the site; any under 3:1 on the banner are left out.
+   */
+  lettering?: { text: string; family: string; src: string; colors?: string[] };
+  /** Where "View the website" goes. Default: the address the Studio is open on. */
+  siteUrl?: string;
+}
+
 export interface KitConfig {
   /** The site's name as the editor says it ("the website"). */
   siteName: string;
@@ -219,6 +253,9 @@ export interface KitConfig {
 
   /** Home's quick actions, in order. Empty or missing shows the two plain buttons. */
   quickActions?: QuickAction[];
+
+  /** Home's banner: the mark, the motif and the lettering (card 118). Missing: the plain banner. */
+  homeBanner?: HomeBannerConfig;
 
   /** The "Help for this page" panel's page check (card 110). Missing: Checkup findings only. */
   pageCheck?: {

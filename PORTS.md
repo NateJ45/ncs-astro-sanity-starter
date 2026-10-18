@@ -235,6 +235,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 115 | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 116 | Studio as the site's admin: paper, navy chrome, fonts, text in site type       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 117 | Studio workflow: change note, expiring preview links, Messages, table panes    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering            | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8937,3 +8938,53 @@ new link does not rebuild the site, and follow the marked-file order (starter PR
 
 **Status, 2026-10-18.** Starter `yes` (unit-tested; built; endpoints checked under `wrangler dev` signed out; the
 signed-in Studio views are unverified). first-baptist-auburn took it the same day. Every other site `no`.
+
+## Card 118: the Studio Home banner: navy welcome, the site's mark, motif and lettering (2026-10-18)
+
+**Origin:** the Theology Matters WordPress dashboard, whose welcome is a deep navy banner holding the date, a warm
+greeting with an accent, a one-line intro and a "View the website" button. The family's Studio Home, after cards
+110 and 115, opened on plain text on the paper. Built in the starter, then first-baptist-auburn.
+
+**Canonical:** PORTABLE: `src/sanity/kit/HomeBanner.tsx` (new), `src/lib/studio-banner.ts` (+
+`studio-banner.test.ts`), and the kit files it touches: `src/sanity/kit/HomeTool.tsx` (Welcome now renders the
+banner) and `src/sanity/kit/types.ts` (`HomeBannerConfig`, `KitConfig.homeBanner`). Per site (NOT portable):
+`kitConfig.homeBanner` in `src/sanity/kit.config.ts` and the files it names in `public/`.
+
+**What it does.**
+
+- The banner is drawn in card 116's chrome theme (`buildChromeTheme`, the navbar's own dark theme on
+  `studio.chrome`), so it is the top bar's colour exactly, in light and dark appearance, and every text colour on it
+  is one the colour gate already checks. The fonts come from the Studio's root theme, so nothing new is configured.
+- Contents: the date, "Good afternoon, <first name>" at 24px with the name in `homeBanner.accent`, the site's name
+  (the workspace title) as the H1 in the heading font, the reassurance line, and **View the website** (a new tab; by
+  default the address the Studio is open on, since the Studio is `/studio` on the site; `siteUrl` overrides).
+- `mark` is drawn on a light disc in the paper colour; `markOnDark` (a white or reversed mark) is drawn bare
+  instead. `motif` is a decorative strip along the foot, full width at its own proportions; `motifNarrow` is the
+  phone version used under 600px. Both are `alt=""`.
+- `lettering: { text, family, src, colors }` sets the last match of `text` in the name in the site's own display
+  font, letters cycling `colors` (spaces take none, as the family's mosaic headings do). The @font-face points at
+  the site's own file (a same-origin path; anything else is refused) with `swap`, falling back to the heading font.
+  The H1 then carries the whole name as its `aria-label`.
+- **The kit guards the colours, not the config:** an accent under 3:1 on the banner (the greeting is large text),
+  or a lettering colour under 3:1, is dropped. Measured on first-baptist-auburn's #1B4A75: gold #E8A93A 4.4:1 (fine
+  as large text, not as body text), white 9.2:1, water #96C3EA 4.9:1; green #2C5B3A would vanish and is dropped.
+- Layout: stacked on a phone; mark beside the words from 600px; the button on the right from 900px. No animation,
+  so reduced motion has nothing to switch off. No new dependency.
+
+**Auburn's dressing (for reference).** The full-colour mark on the disc (the white mark loses the story colours),
+the stone path from the water to the red cross along the foot (two new presets in its `scripts/lib/stone-mosaic.mjs`,
+`banner` and `bannerPhone`, with the share card's stricter filters so every stone is rounded; `npm run gen:stones`
+writes `public/studio-banner/stone-path{,-phone}.svg`), the name in gold, and "Auburn" in Auburn Stone in the footer
+signature's on-navy colours (white, water, gold).
+
+**Verified.** Unit tests for the pure half. The banner rendered in a throwaway page with the real Studio theme, light
+and dark appearance, 1280 and 375 (no horizontal scroll), for the starter and for first-baptist-auburn. Not yet seen
+in a signed-in Studio (the same gap as card 116, `docs/PENDING.md`).
+
+**Adopting it in a site.** Needs cards 110, 115 and 116. Copy the four PORTABLE kit and lib files and the test
+byte-identically, add `homeBanner` to `kit.config.ts` (at least `mark`), put any files it names in `public/` (not
+under `public/studio/`, the Studio's own address), then `npm run test:unit` and `npm run sync-check`. Marked-file
+order: starter PR first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-home-banner`, PR after this
+merges. Other sites `no`.
