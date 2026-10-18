@@ -17,9 +17,16 @@
 
 import type { KitConfig } from './kit/types';
 import { genericRules, unconfirmedRule } from '../lib/studio-checkup';
-import { guides, GUIDE_CATEGORIES } from './guides/content';
+import { guides, GUIDE_CATEGORIES, GUIDES_FOR_TYPE } from './guides/content';
 import { makeGuideView } from './components/GuideView';
 import { envVal } from './urls';
+import type { PageRules } from '../lib/page-guardrails';
+import { AddDocumentIcon } from '@sanity/icons/AddDocument';
+import { BellIcon } from '@sanity/icons/Bell';
+import { EditIcon } from '@sanity/icons/Edit';
+import { PinIcon } from '@sanity/icons/Pin';
+import { runPageCheck } from './actions/checkPage';
+import { PAGE_BUILDER_TYPES } from './pageBuilderConfig';
 
 /**
  * Page types with a Google description (seoDescription). Not journalEntry: a
@@ -95,7 +102,43 @@ export const kitConfig: KitConfig = {
     guides,
     categories: GUIDE_CATEGORIES,
     view: makeGuideView,
+    // "Help for this page" (card 110): which guides each document type shows.
+    forType: GUIDES_FOR_TYPE,
   },
+
+  // Home's big buttons (card 110): this site's most common jobs, as intent
+  // links. Keep it to four. A church might use "Add this week's sermon",
+  // "Change service times", "Post an announcement", "Edit the homepage".
+  quickActions: [
+    {
+      title: 'Edit the homepage',
+      detail: 'Words, photos and sections.',
+      target: { doc: 'homePage' },
+      icon: EditIcon,
+    },
+    {
+      title: 'Post an announcement',
+      detail: 'The banner across the top of every page.',
+      target: { create: 'announcement' },
+      icon: BellIcon,
+    },
+    {
+      title: 'Add a page',
+      detail: 'A new page with its own address.',
+      target: { create: 'page' },
+      icon: AddDocumentIcon,
+    },
+    {
+      title: 'Change contact details',
+      detail: 'Phone, email, address and hours.',
+      target: { doc: 'businessInfo' },
+      icon: PinIcon,
+    },
+  ],
+
+  // The page check inside "Help for this page" (card 110): the same three
+  // checks as the "Check this page..." action, on the page-builder types.
+  pageCheck: { types: [...PAGE_BUILDER_TYPES], run: (doc, client) => runPageCheck(client, doc) },
 
   tourSteps: [
     {
@@ -132,5 +175,28 @@ export const kitConfig: KitConfig = {
     // The Visitors card needs an analytics route the starter does not ship
     // yet; until then Home says "not set up yet".
     visitors: false,
+    // Card 110: the status line under the top bar, and the help panel.
+    navbarStatus: true,
+    helpPanel: true,
   },
+};
+
+/**
+ * The site's own page-builder rules (the authoring kit, PORTS.md card 109).
+ * Each one shows as a yellow WARNING beside a page's sections, never an error,
+ * so nothing here can stop Publish or break content that is already live. The
+ * built-in warnings (empty sections, leftover template example text, a synced
+ * section with nothing picked) apply everywhere whatever this says. Logic and
+ * tests: src/lib/page-guardrails.ts.
+ *
+ * The starter's defaults suit a custom page: open with a hero, one hero only,
+ * and a nudge past twenty sections. A fork tunes these, or empties them.
+ */
+export const pageRules: PageRules = {
+  // Document types the rules below apply to ('page' is a Custom page). The
+  // built-in pages often open with something else on purpose, so they are off.
+  appliesTo: ['page'],
+  mustStartWith: ['heroSection'],
+  atMostOnce: ['heroSection'],
+  maxSections: 20,
 };

@@ -20,7 +20,9 @@ These are the files where a project maintainer can make changes without risk of 
 - Copy strings and `href` values in static page components
 - Tailwind utility classes on existing components when content needs different visual weight
 - Tagline and wordmark inputs in `scripts/generate-og-default.mjs`, and the share-image colors and font in `scripts/og-theme.mjs` (normally written by `npm run apply-brand`; re-run `npm run og` after editing)
-- `src/sanity/kit.config.ts` -- the Studio kit's settings for this site: staff ids, Home's weekly jobs, Checkup rules, trash types, tour words, feature switches (PORTS.md card 106, `docs/agent/studio-kit.md`). The kit itself in `src/sanity/kit/` is PORTABLE: change it in the starter.
+- `src/sanity/kit.config.ts` -- the Studio kit's settings for this site: staff ids, Home's weekly jobs, Checkup rules, trash types, tour words, feature switches (PORTS.md card 106, `docs/agent/studio-kit.md`), and `pageRules`, the page-builder warnings for this site (card 109).
+- `src/sanity/pageTemplates.ts` -- the starting points offered when a Custom page is made (card 109, `docs/agent/sanity.md`). Each site writes its own; keep every example line wrapped in `example()`.
+- `src/sanity/pageBuilderAuthoring.ts`, `src/sanity/components/PageBuilderInput.tsx`, `src/pages/styleguide/sections.astro` -- the authoring kit's wiring, insert dialog and thumbnail wall (card 109). Add a fixture to the wall for any new block, then `npm run thumbnails`. The kit itself in `src/sanity/kit/` is PORTABLE: change it in the starter.
 - `docs/brand/voice.md` -- per-project voice and copy guidelines (fill in per project; the `/reskin` skill rewrites this during a full rebrand)
 
 **Enabling the script accent (opt-in):** The calligraphic script accent is OFF by default. No script font loads unless you opt in. To enable it for a project: (1) add a `@fontsource` import for your chosen calligraphic face (e.g. `@fontsource/great-vibes/400.css`), and (2) update `--font-script` in the `@theme` block to name that face first. Components using the `font-script` utility class will then render the calligraphic accent.

@@ -6,10 +6,12 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   firstName,
+  greeting,
   isDone,
   isStaffUser,
   isStaffView,
   liveStatus,
+  navbarStatus,
   readOverride,
   studioTargetPath,
   timeAgo,
@@ -141,5 +143,63 @@ describe('weekStart and isDone', () => {
     assert.equal(isDone(0), false);
     assert.equal(isDone(null), false);
     assert.equal(isDone('yes'), false);
+  });
+});
+
+describe('navbarStatus', () => {
+  const t = (iso: string) => Date.parse(iso);
+  const built = '2026-10-17T12:00:00Z';
+
+  it('says nothing when the build time is unknown', () => {
+    assert.equal(navbarStatus(null, built, t('2026-10-17T13:00:00Z')), null);
+  });
+
+  it('is neutral when everything published is live', () => {
+    assert.deepEqual(navbarStatus(built, '2026-10-17T11:00:00Z', t('2026-10-17T13:00:00Z')), {
+      tone: 'default',
+      text: 'Website up to date',
+    });
+  });
+
+  it('counts down while the website updates', () => {
+    const pub = '2026-10-17T12:30:00Z';
+    assert.equal(
+      navbarStatus(built, pub, t('2026-10-17T12:30:10Z'))?.text,
+      'Updating the website, about 3 minutes',
+    );
+    assert.equal(
+      navbarStatus(built, pub, t('2026-10-17T12:32:30Z'))?.text,
+      'Updating the website, about a minute',
+    );
+    const late = navbarStatus(built, pub, t('2026-10-17T12:40:00Z'));
+    assert.deepEqual(late, { tone: 'primary', text: 'Updating the website, nearly there' });
+  });
+
+  it('turns to caution after liveSlowAfterMinutes', () => {
+    const s = navbarStatus(built, '2026-10-17T12:30:00Z', t('2026-10-17T12:50:00Z'), 15);
+    assert.equal(s?.tone, 'caution');
+    assert.equal(
+      navbarStatus(built, '2026-10-17T12:30:00Z', t('2026-10-17T12:50:00Z'), 30)?.tone,
+      'primary',
+    );
+  });
+
+  it('never uses an em-dash', () => {
+    for (const now of ['12:30:10', '12:32:30', '12:40:00', '12:59:00']) {
+      const s = navbarStatus(built, '2026-10-17T12:30:00Z', t(`2026-10-17T${now}Z`));
+      assert.ok(!s?.text.includes('—'));
+    }
+  });
+});
+
+describe('greeting', () => {
+  const at = (h: number) => new Date(2026, 9, 18, h, 5);
+  it('follows the clock', () => {
+    assert.equal(greeting(at(6)), 'Good morning');
+    assert.equal(greeting(at(11)), 'Good morning');
+    assert.equal(greeting(at(12)), 'Good afternoon');
+    assert.equal(greeting(at(17)), 'Good afternoon');
+    assert.equal(greeting(at(18)), 'Good evening');
+    assert.equal(greeting(at(0)), 'Good morning');
   });
 });

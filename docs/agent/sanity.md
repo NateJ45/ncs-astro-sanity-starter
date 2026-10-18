@@ -154,7 +154,7 @@ All GROQ queries live in `src/lib/queries.ts`. Each page has a typed query funct
 
 **All-fields default.** The `default: true` property is removed from every schema field group definition. Without it, Studio opens documents on the "All fields" tab instead of a single group, so editors see everything without needing to know which group a field lives in.
 
-**Studio branding.** `sanity.config.ts` (repo root) configures the Studio title (shown in the browser tab), the theme, and a custom logo component wired via `studio.components.logo`. The theme is @sanity/ui's `buildTheme` with the brand font stacks swapped in, so the Studio has a real light AND dark mode; `npm run apply-brand` rewrites the two font stacks. Replace the placeholder title and logo asset for each project.
+**Studio branding (PORTS.md card 110).** `sanity.config.ts` (repo root) sets the workspace `title` from `brand.config.json` `name` and the workspace `icon` to `StudioIcon` (`src/sanity/components/StudioIdentity.tsx`), which draws `public/favicon.svg`; the same file replaces Sanity's mark in the Studio's browser tab. The old `studio.components.logo` is deprecated in Sanity 6 and was never drawn (the login screen said "My Studio"), so do not bring it back. The theme is @sanity/ui's own `buildTheme` with the brand font stacks (rewritten by `npm run apply-brand`) and the brand colours from `src/sanity/studioTheme.ts`: the accent replaces Sanity's blue (buttons, links, focus, the selected row) and the site's two backgrounds replace white and black; status colours stay Sanity's. The contrast guard is `src/lib/studio-theme.ts`, tested against the real `buildTheme` in `studio-theme.test.ts`. A brand whose web primary is wrong for UI chrome sets `studio.accent` in `brand.config.json`.
 
 **SEO length warnings.** `.warning()` validations on `seoTitle` (warns around 60 characters) and `seoDescription` (warns around 160 characters) across all page singletons and `journalEntry`. Editors see an amber warning if the text is getting too long for Google to show in full. A warning, not an error, so it does not block publishing.
 
@@ -222,3 +222,46 @@ The `page` document type carries three verbs and one extra field beyond its cont
 
 Page SINGLETONS deliberately get none of this: one-per-site means duplicating or archiving
 one would leave the site with a route and no document.
+
+## The authoring kit: templates, the picture picker, patterns, synced sections, guardrails (PORTS.md card 109)
+
+What a WordPress block-editor handover gives a client, built on the page builder that is already here. Five parts:
+
+1. **Page templates.** `src/sanity/pageTemplates.ts` (the site's OWN file, not PORTABLE) lists the starting points
+   offered when a Custom page is made: Simple page, Landing page, Questions page, Blank page in the starter.
+   `sanity.config.ts` registers each as an initial value template on `page` (`value` is a function, so every new page
+   gets fresh `_key`s from `freshKeys()` in `src/lib/authoring.ts`) and `newDocumentOptions` hides the stock `page`
+   template, which stays registered so intents that name it keep working. Every example line starts `Example:`.
+   `src/lib/authoring.test.ts` fails if a template uses a block a custom page does not accept, leaves an array member
+   without a `_key`, repeats keys between two pages, or forgets the marker.
+2. **The picture picker.** `SECTION_INSERT_MENU` in `schemaTypes/sections.ts` carries
+   `views: [grid, list]`; the grid's `previewImageUrl` is `/section-thumbnails/<type>.jpg`, served by the site (the
+   Studio's own origin). The pictures are shot by `npm run thumbnails` (`scripts/shoot-section-thumbnails.mjs`, build
+   first) from `/styleguide/sections/`, a fixed-data wall of every block rendered by the real `SectionRenderer`, so the
+   pictures are in the site's brand. Re-run it after a reskin. A type with no picture falls back to its icon. The
+   authoring test fails if a block in `sections.ts` or `richSections.ts` has no fixture on the wall or no picture.
+3. **Patterns.** A `sectionPreset` (Saved section) can hold up to 12 sections now (it was capped at one; one-section
+   presets stay valid). Every `pageBuilder` field spreads `pageBuilderAuthoring` (`src/sanity/pageBuilderAuthoring.ts`),
+   whose input (`components/PageBuilderInput.tsx`) adds **Insert a saved section** under Sanity's own list: **Add a copy**
+   (deep copy, fresh keys, the page's own from then on) or **Add synced**. A preset holding a block the list does not
+   accept is shown greyed out with the reason. The Presentation navigator's Saved sections panel adds every section of
+   a pattern, in order. The "Save a section as preset..." action still saves one section; make a pattern by opening the
+   saved section and adding more.
+4. **Synced sections.** `syncedSection` (in `sections.ts`, in `SECTION_TYPES`, NOT in `pageSectionSchemas` or
+   `LIBRARY_SECTION_TYPES`) holds one reference to a `sectionPreset`. `sectionsProjection()` in `src/lib/queries.ts`
+   resolves it into `sections` through the same per-type arms (`SECTION_ARMS`), and `SectionRenderer` swaps it for
+   those sections before the cadence runs (`expandSyncedSections()`), so the surfaces alternate as if they were typed
+   in (rule 9: the block has no colour field and the section-fields gate scans it). Expanded sections carry
+   `_editKey`, the synced block's own key, so the preview's in-canvas controls act on the synced block. A saved section
+   cannot hold a synced section, so no loop can be built. Publishing a preset triggers the normal rebuild webhook, which
+   is how "edit once, everywhere" reaches the live site. Studio preview: "Synced: <name>". Not a scaffold capability:
+   it belongs to no removable feature, so it carries no markers.
+5. **Guardrails.** `pageBuilderAuthoring.validation` returns WARNINGS only (never errors, so nothing can stop a Publish
+   that worked before): an empty section, `Example:` text left in, a synced section with nothing picked, and the
+   site's `pageRules` from `kit.config.ts` (`appliesTo`, `mustStartWith`, `atMostOnce`, `maxSections`; the starter
+   applies "open with a hero, one hero, nudge past 20" to custom pages only). Logic and tests:
+   `src/lib/page-guardrails.ts`. Self-filling sections (`selfFillingSections` in `pageBuilderConfig.ts`, which now
+   includes `syncedSection`) are never called empty.
+
+The Site Guide has a guide for each: "Start a page from a template", "Reuse a section on other pages", "Keep a section
+the same on every page" (`src/sanity/guides/content.ts`).

@@ -99,8 +99,10 @@ interface PresetRow {
   id: string;
   title: string;
   sectionType: string;
-  /** The captured section object, exactly as it will be appended. */
+  /** The first captured section (null when the saved section is empty). */
   section: Record<string, unknown> | null;
+  /** Every section it holds, appended in order. One for a plain saved section. */
+  sections: Record<string, unknown>[];
 }
 
 /** A raw sectionPreset document, as the list query returns it. */
@@ -202,14 +204,21 @@ async function fetchRows(client: ReturnType<typeof useClient>): Promise<NavRow[]
 function buildPresets(docs: PresetDoc[]): PresetRow[] {
   const rows: PresetRow[] = [];
   for (const [id, { doc }] of collapse(docs)) {
-    const held = Array.isArray(doc.section) ? doc.section[0] : null;
-    const section =
-      held && typeof held === 'object' && !Array.isArray(held)
-        ? (held as Record<string, unknown>)
-        : null;
+    // A saved section can hold several sections (a pattern, PORTS.md card
+    // 109); every one of them is added, in order.
+    const sections = (Array.isArray(doc.section) ? doc.section : []).filter(
+      (s): s is Record<string, unknown> => Boolean(s) && typeof s === 'object' && !Array.isArray(s),
+    );
+    const section = sections[0] ?? null;
     const type =
       doc.sectionType || (section && typeof section._type === 'string' ? section._type : '');
-    rows.push({ id, title: doc.title || '(unnamed saved section)', sectionType: type, section });
+    rows.push({
+      id,
+      title: doc.title || '(unnamed saved section)',
+      sectionType: type,
+      section,
+      sections,
+    });
   }
   rows.sort((a, b) => a.title.localeCompare(b.title));
   return rows;
@@ -444,12 +453,16 @@ export function PreviewNavigator() {
       if (!currentRow || !currentField || !preset.section) return;
       setBusyId(preset.id);
       try {
-        await addSectionToPage(
-          client as unknown as PageOpsClient,
-          currentRow.id,
-          currentField,
-          preset.section,
-        );
+        // One at a time, in order: each call appends to the end, so the
+        // pattern lands on the page in the order it was saved.
+        for (const section of preset.sections) {
+          await addSectionToPage(
+            client as unknown as PageOpsClient,
+            currentRow.id,
+            currentField,
+            section,
+          );
+        }
         refetch();
         toast.push({
           status: 'success',
@@ -670,10 +683,16 @@ export function PreviewNavigator() {
                             <Text size={1} textOverflow="ellipsis">
                               {p.title}
                             </Text>
-                            {p.sectionType && (
+                            {p.sections.length > 1 ? (
                               <Text size={0} muted textOverflow="ellipsis">
-                                {sectionLabel(p.sectionType)}
+                                {`Pattern of ${p.sections.length} sections`}
                               </Text>
+                            ) : (
+                              p.sectionType && (
+                                <Text size={0} muted textOverflow="ellipsis">
+                                  {sectionLabel(p.sectionType)}
+                                </Text>
+                              )
                             )}
                           </Stack>
                         </Card>

@@ -226,8 +226,13 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 107 | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page  | n/a     | yes         | yes      | yes              | partial       | n/a            | n/a                | partial             | yes            |
 | 108 | The header logo renders with JS off (`<noscript>` light variant)               | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 109 | Authoring kit: page templates, picture picker, patterns, synced sections       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 110 | Studio looks like the site: name, mark, colours, status line, help panel       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
+
+Row 110 (2026-10-18): needs card 106 (the kit) and card 103 (`@sanity/ui` 4) first; the sites without a Studio for staff
+are `n/a` as in row 106. first-baptist-auburn has no column.
 
 Row 107 (2026-10-17): mas-monograms (`html.reveal-ready`) and nixoncreativestudio (`.js`) already gate
 their reveal on a head-script class, a divergent form of the same idea, hence `partial`; neither was changed. presacademy
@@ -8483,3 +8488,105 @@ always had a `src`.
 **Status, 2026-10-17.** Starter `yes`. stonesteps-50k had the same src-less header logo and took it the same day
 (stonesteps-50k#126), hence `yes`. The other matrix sites have no theme-aware header logo (`n/a`). first-baptist-auburn
 (no column) took it in fbc-auburn#31.
+
+## Card 109: the authoring kit: page templates, a picture picker, patterns, synced sections, guardrails (2026-10-18)
+
+**Origin:** the starter, so a client can build pages themselves the way a WordPress block-editor handover allows. The
+page builder already had the blocks, the grouped insert menu (card 17) and saved sections (card 24); what was missing
+was a start that is not an empty page, a way to choose a block by how it looks, a way to reuse a GROUP of blocks, a
+block that stays the same everywhere, and a word of warning before an easy mistake goes live.
+**Canonical:** the starter. No file in it is marked PORTABLE: templates and rules are per site by design, and the rest
+touches foundation files each site has adapted (`sections.ts`, `queries.ts`, `SectionRenderer.astro`).
+
+**What it is.**
+
+- **Page templates.** `src/sanity/pageTemplates.ts` (the site's own list) becomes initial value templates on `page` in
+  `sanity.config.ts`; `value` is a function so each new page gets fresh `_key`s (`freshKeys()`); `newDocumentOptions`
+  hides the stock `page` template behind "Blank page". Example text starts `Example:`.
+- **Picture picker.** `SECTION_INSERT_MENU.views` is `[grid, list]`; `previewImageUrl` points at
+  `/section-thumbnails/<type>.jpg`, shot by `npm run thumbnails` from `/styleguide/sections/` (every block, fixed data,
+  the real `SectionRenderer`), so the pictures carry the site's brand. Missing picture: Sanity falls back to the icon.
+- **Patterns.** `sectionPreset.section` holds up to 12 sections (was max 1; old presets stay valid). Every
+  `pageBuilder` spreads `pageBuilderAuthoring`, whose input adds "Insert a saved section": Add a copy (deep, fresh keys)
+  or Add synced (published presets only). The navigator's Saved sections panel adds a whole pattern in order.
+- **Synced sections.** `syncedSection` references a preset; `sectionsProjection()` resolves it through the shared
+  `SECTION_ARMS`; `SectionRenderer` expands it before the cadence (`expandSyncedSections()`), so rule 9 holds and the
+  section-fields gate scans it. `_editKey` points in-canvas controls at the synced block. A preset's member list
+  (`LIBRARY_SECTION_TYPES`) excludes `syncedSection`, so no loop can exist.
+- **Guardrails.** Validation WARNINGS only, never errors, so nothing valid before can be blocked from Publish: empty
+  section, leftover `Example:` text, synced section with nothing picked, plus `pageRules` in `kit.config.ts`
+  (`appliesTo`, `mustStartWith`, `atMostOnce`, `maxSections`).
+- Three Site Guide guides; detail in `docs/agent/sanity.md`.
+
+**Tests.** `src/lib/authoring.test.ts` (keys, patterns, expansion, example marker, every template, and "every block has
+a fixture on the wall and a thumbnail on disk") and `src/lib/page-guardrails.test.ts`.
+
+**Adopting it in a site.** Copy `src/lib/authoring.ts`, `src/lib/page-guardrails.ts` and their tests,
+`src/sanity/pageBuilderAuthoring.ts`, `components/PageBuilderInput.tsx`, `scripts/shoot-section-thumbnails.mjs` and the
+`thumbnails` npm script. Write the site's own `pageTemplates.ts` (only block types its custom page accepts) and
+`pageRules`. Hand-merge: the `syncedSection` type, `LIBRARY_SECTION_TYPES` and the grid view in `sections.ts`; the
+preset changes; `SECTION_ARMS` in `queries.ts`; the expansion and `editKeyOf` in `SectionRenderer.astro`; the spread
+into each `pageBuilder`; `syncedSection` in `SELF_FILLING_SECTIONS`; the navigator's pattern loop; the templates in
+`sanity.config.ts`. Build `/styleguide/sections/` from the site's own blocks, `npm run build`, `npm run thumbnails`,
+commit the pictures. Then `npm run typegen` (new `syncedSection` type) and open `/studio` logged in: make a page from
+each template, open "+ Add item" in grid view, insert a pattern as a copy and as synced, and read the console.
+
+**Status, 2026-10-18.** Starter `yes` (draft PR). Every site `no`; 2ndpreschicago and ncs-church-starter `n/a`
+(archived), wcp `n/a` (retired). Not yet verified logged in to a Studio: the picker grid, the insert dialog and the
+template menu were type-checked and built, not clicked.
+
+## Card 110: the Studio looks like the site: name, mark, colours, status line, help panel, Home round two (2026-10-18)
+
+**Origin:** the Studio research of 2026-10-18 (plan items 1, 2, 7, 9, 10 and 12). Two findings started it. Every fork
+registered a `StudioLogo` wordmark as `studio.components.logo`, which Sanity 6 marks deprecated and never draws: checked
+in a dev server, the login screen showed Sanity's generated "MS" chip and "My Studio", and the tab showed Sanity's logo.
+And the Studio's colours were stock Sanity blue and grey on every client, so it read as someone else's software.
+
+**Canonical:** PORTABLE: `src/sanity/components/StudioIdentity.tsx`, `src/sanity/studioTheme.ts`,
+`src/lib/studio-theme.ts` and `studio-theme.test.ts`, `src/sanity/kit/NavbarStatus.tsx`, `src/sanity/kit/HelpPanel.tsx`,
+and the card-110 changes to `kit/HomeTool.tsx`, `kit/shared.tsx`, `kit/index.tsx`, `kit/types.ts`, `kit/publishNote.tsx`,
+`src/lib/studio-kit.ts` (+ test), `src/sanity/actions/checkPage.tsx` (`runPageCheck`) and `docs/agent/studio-kit.md`.
+Per site (NOT portable): the `sanity.config.ts` lines (title, icon, `applySiteFavicon`, `...studioThemeColors`),
+`kit.config.ts` (`quickActions`, `guide.forType`, `pageCheck`, `features.navbarStatus`, `features.helpPanel`),
+`resolve.ts` (the every-page locations), the two guides and `GUIDES_FOR_TYPE` appended to `guides/content.ts`, and the
+`apply-brand.mjs` / schema check. `StudioLogo.tsx` is deleted.
+
+**What it adds.**
+
+- **Name and mark.** Workspace `title` is `brand.config.json` `name`; workspace `icon` draws `public/favicon.svg` (the one
+  drawing the whole icon set comes from, already legible at 16px with its own dark colours); the same file replaces
+  Sanity's logo in the Studio tab, and the login tab is titled with the site name. `apply-brand` prints the title and
+  warns when the brand name has changed but `favicon.svg` is still the starter's "S".
+- **Colours, without a new dependency.** `@sanity/themer` wants React `^19.3.0`, outside the matched set (rule 8), so
+  the theme stays on `@sanity/ui`'s own `buildTheme({ palette, color })`: the accent (`studio.accent`, else
+  `palette.light --primary`) replaces Sanity's blue scale (primary buttons, links, focus rings, the selected row), the
+  site's light and dark `--background` replace palette white and black, and one token makes the dark page background
+  palette black. Green, amber, red and purple are Sanity's own on every client. `@sanity/color` (the default palette) is
+  imported as the transitive dependency both `sanity` and `@sanity/ui` pin, so package.json does not change.
+- **The contrast guard.** The brand gives the scale its hue and saturation only; each step's lightness is solved to match
+  the luminance of Sanity's tuned blue step, then 500 (light buttons) and 400 (dark buttons) are pushed to 4.5:1 (stock
+  Sanity's own 500 is 4.29:1). A background that is not light (or dark) enough, or any non-hex value, falls back to
+  Sanity's with a note. `studio-theme.test.ts` runs the real `buildTheme` for this site's brand and three awkward ones
+  (pale gold, near-white sage, pastel pink) and asserts button labels and links at 4.5:1, focus rings at 3:1, the
+  backgrounds, and unchanged status hues, in both schemes. A reskin that breaks it fails `test:unit`.
+- **Status line** under the top bar ("Website up to date" / "Updating the website, about 3 minutes" / caution after
+  `liveSlowAfterMinutes`), a navbar middleware that always calls `renderDefault`, sharing `useLiveData()` with Home.
+- **Help for this page**, a document inspector: the page check and the Checkup findings for the document, then its Site
+  Guide entries by type.
+- **Home round two**: a greeting and the site's name in the display font on a `tone="primary"` card; quick actions from
+  `kitConfig.quickActions`; "Pick up where you left off" with Open, Publish (valid drafts with an unchanged address only)
+  and Discard (with a confirm), all through `useDocumentOperation`.
+- **Presentation locations**: `siteSettings`, `businessInfo` and `announcement` say "Shown on every page" in caution.
+
+**Not done here.** Plan items 3, 4, 5, 6, 8 (the authoring kit, card 109, has the insert-menu thumbnails), 11 and 13.
+`@sanity/themer` and its `themerTool()` stay a note for the next matched-set bump; nothing here needs them.
+
+**Adopting it in a site.** Needs `@sanity/ui` 4 (card 103) and card 106. Copy the PORTABLE files, delete `StudioLogo.tsx`
+and its `studio.components.logo` entry, take the `sanity.config.ts` lines, add the card-110 keys to `kit.config.ts`, the
+`resolve.ts` entries for the site's shared types, and the guides map; check `public/favicon.svg` is the site's own mark.
+Then `npm run test:unit` (the colour gate) and open `/studio`: the login screen shows the site's name, mark and
+background in both schemes. Signed in, check the status line, Home and the help panel (the list is in `docs/PENDING.md`
+item 15). Follow the marked-file order: starter first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes` (login screen verified in a dev server; the signed-in views are unverified, see
+PENDING item 15). Every other site `no`.

@@ -16,8 +16,8 @@
 // sanity CLI (sanity.cli.ts) uses it for typegen and dataset commands.
 //
 // FOR A NEW PROJECT: set PUBLIC_SANITY_PROJECT_ID in .env (and
-// SANITY_STUDIO_PROJECT_ID if you also drive the CLI), change `name` and
-// `title` below, and add your deployed origin to the project's CORS allow list
+// SANITY_STUDIO_PROJECT_ID if you also drive the CLI), change `name` below
+// (the title comes from brand.config.json), and add your deployed origin to the project's CORS allow list
 // (`npx sanity cors add https://your-site.workers.dev --credentials`).
 
 import { defineConfig } from 'sanity';
@@ -28,11 +28,14 @@ import { visionTool } from '@sanity/vision';
 import { media } from 'sanity-plugin-media';
 import { unsplashImageAsset } from 'sanity-plugin-asset-source-unsplash';
 import { schemaTypes } from './src/sanity/schemaTypes';
+import { PAGE_TEMPLATES } from './src/sanity/pageTemplates';
 import { deskStructure } from './src/sanity/structure';
 import { resolve } from './src/sanity/resolve';
 import { PreviewNavigator } from './src/sanity/components/PreviewNavigator';
 import { envVal } from './src/sanity/urls';
-import StudioLogo from './src/sanity/components/StudioLogo';
+import { StudioIcon, applySiteFavicon } from './src/sanity/components/StudioIdentity';
+import { studioThemeColors } from './src/sanity/studioTheme';
+import brand from './brand/brand.config.json';
 import { CharacterCountInput } from './src/sanity/components/CharacterCountInput';
 import { documentBadges } from './src/sanity/components/documentBadges';
 import { shareDraftLinkAction } from './src/sanity/components/shareDraftLink';
@@ -84,7 +87,13 @@ const studioTheme: RootTheme = buildTheme({
     label: withFamily(themeDefaults.fonts.label, BODY_STACK),
     heading: withFamily(themeDefaults.fonts.heading, DISPLAY_STACK),
   },
+  // Brand accent and backgrounds from brand.config.json, contrast-guarded
+  // (src/sanity/studioTheme.ts, PORTS.md card 110). Status colours stay Sanity's.
+  ...studioThemeColors,
 });
+
+// The Studio tab shows the site's own mark, not Sanity's (StudioIdentity.tsx).
+applySiteFavicon(brand.name);
 
 // Dev detection must FAIL CLOSED. An earlier version elsewhere in the family
 // also treated `process.env.NODE_ENV !== 'production'` as dev, but the
@@ -97,21 +106,18 @@ const IS_DEV =
 
 export default defineConfig({
   name: 'my-studio',
-  // Short title shown in the browser tab when editing. Update per project.
-  title: 'My Studio',
+  // The site's own name and mark (PORTS.md card 110). Both come from the brand,
+  // so a reskin renames the Studio too: `title` is brand.config.json `name`,
+  // the icon is public/favicon.svg. (The old `studio.components.logo` is
+  // deprecated and was never drawn; the login screen showed "My Studio".)
+  title: brand.name,
+  icon: StudioIcon,
 
   projectId:
     envVal('SANITY_STUDIO_PROJECT_ID', 'PUBLIC_SANITY_PROJECT_ID') || 'placeholder-project-id',
   dataset: envVal('SANITY_STUDIO_DATASET', 'PUBLIC_SANITY_DATASET') || 'production',
 
   theme: studioTheme,
-
-  // Studio chrome overrides. Logo replaces the default Sanity wordmark.
-  studio: {
-    components: {
-      logo: StudioLogo,
-    },
-  },
 
   // Global form customization. Registering the character-count input once here
   // applies it to every capped text field across all schemas. The component
@@ -180,6 +186,22 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
+    // Page templates (the authoring kit, PORTS.md card 109): the starting
+    // points offered when someone makes a Custom page. The list is the site's
+    // own, in src/sanity/pageTemplates.ts. `value` is a function so every new
+    // page gets fresh _keys. The stock 'page' template stays registered (links
+    // and intents that name it keep working); newDocumentOptions below hides it
+    // from the menus, where "Blank page" stands in for it.
+    templates: (prev) => [
+      ...prev,
+      ...PAGE_TEMPLATES.map((t) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        schemaType: 'page',
+        value: () => ({ pageBuilder: t.sections() }),
+      })),
+    ],
   },
 
   // Singleton enforcement: hide these from the global "+" create menu so editors
@@ -190,10 +212,15 @@ export default defineConfig({
     // append ours.
     badges: (prev) => [...prev, ...documentBadges],
     newDocumentOptions: (prev, { creationContext }) => {
+      // Custom pages are made from a page template; the bare stock one is
+      // hidden because "Blank page" is the same thing with a clearer name.
+      const options = PAGE_TEMPLATES.length
+        ? prev.filter((option) => option.templateId !== 'page')
+        : prev;
       if (creationContext.type === 'global') {
-        return prev.filter((option) => !SINGLETON_TYPES.has(option.templateId));
+        return options.filter((option) => !SINGLETON_TYPES.has(option.templateId));
       }
-      return prev;
+      return options;
     },
     actions: (prev, { schemaType }) => {
       let base = SINGLETON_TYPES.has(schemaType)

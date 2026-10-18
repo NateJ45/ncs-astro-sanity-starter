@@ -84,6 +84,7 @@ Custom `page` documents expose `SECTION_TYPES` (the eleven general blocks only).
 
 `src/components/SectionRenderer.astro` is the page-builder runtime. It receives the resolved section array from the GROQ query and:
 
+0. Expands any **synced section** into the sections its saved copy holds (`expandSyncedSections()` in `src/lib/authoring.ts`, PORTS.md card 109), so everything below sees ordinary blocks and the cadence runs across them.
 1. Classifies each block as **self-contained** (`heroSection`, `ctaBandSection`, `statSection`, `spacerSection`, `logoStripSection`, `embedSection`, `founderSection`, `servicesGridSection`, `testimonialsSection`, `valuesSection`, `processSection`, `faqSection`, `teamSection`) or **content** (the rest).
 2. Assigns alternating `surface` / `surface-muted` classes to content blocks in sequence, skipping self-contained blocks in the count.
 3. Inserts `SectionDivider.astro` between adjacent content blocks of differing surfaces automatically.
