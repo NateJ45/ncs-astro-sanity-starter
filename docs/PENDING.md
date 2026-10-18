@@ -327,7 +327,8 @@ The theme, the fonts and light-by-default are verified signed out (login and "pr
 dark, 1280 and 390) and by the colour gate. Only a signed-in Studio shows the rest: the navbar in the chrome colour in
 both appearances (tool tabs, search, the user menu and its Appearance switch, the kit's status line under it), a
 release perspective tinting the navbar, and a Portable Text field (journal body, rich text section) showing body,
-H2, H3 and a quote in the site's fonts, with the style menu readable and list bullets lined up.
+H2, H3 and a quote in the site's fonts, with the style menu readable and list bullets lined up. Known and left alone: the login screen's small "Sanity"
+wordmark follows the computer's light or dark setting, not the Studio's.
 
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 

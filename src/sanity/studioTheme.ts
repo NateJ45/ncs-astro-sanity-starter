@@ -85,7 +85,7 @@ export const HEADING_WEIGHT = displayWeight(
 );
 
 function fontsFor({ display, body }: StudioFonts): NonNullable<ThemeConfig['font']> {
-  const f = DEFAULTS.fonts;
+  const f = DEFAULTS.v2!.font;
   const heading: ThemeFont = { ...f.heading, family: display };
   if (HEADING_WEIGHT) {
     // A one- or two-weight display face: never ask the browser for a weight it

@@ -8783,7 +8783,13 @@ used: sites do not carry it, and nothing here needs it.
 Publish 5.0:1; dark text 14.0:1; navbar white 9.2:1, muted 6.5:1, primary button 6.5:1, focus ring 3.7:1.
 
 **Signed out only, so far.** Verified in a dev server on the login and "project not found" screens, light and dark, 1280
-and 390. The navbar and the Portable Text editor only render signed in: check them once in a real Studio (`docs/PENDING.md`).
+and 390, and in first-baptist-auburn on its real login screen. The navbar and the editor typography were also rendered in a
+throwaway page using the same themes and components. In a real signed-in Studio they are still unchecked
+(`docs/PENDING.md` item 19).
+
+**Known, Sanity's own:** the small "Sanity" wordmark under the login box follows the computer's light or dark setting,
+not the Studio's, so a light Studio on a dark-mode computer shows it white on the paper. Leave it; fixing it means
+styling Sanity's internals.
 
 **Adopting it in a site.** Needs card 110. Copy the three PORTABLE source files and the test, take the
 `sanity.config.ts` lines (`import './src/sanity/studioFonts.css'`, `STUDIO_FONTS`, `buildStudioTheme`,
