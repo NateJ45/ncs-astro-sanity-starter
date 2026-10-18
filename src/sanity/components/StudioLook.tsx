@@ -13,6 +13,15 @@
 //    calls props.renderDefault(props), so every other navbar middleware (the
 //    kit's status line) still runs.
 //
+//    StudioWordmarkNavbar: the site's wide wordmark beside the square icon at
+//    the left of that bar (card 120), hidden under 600px where the bar is
+//    tight. It is a SEPARATE middleware registered at the ROOT of
+//    sanity.config, not part of studioLook: Sanity nests plugin middleware
+//    with the earliest plugin outermost and the root config innermost, so only
+//    the root sits directly around Sanity's own bar. Inside studioLook it would
+//    also wrap the kit's status line and push it right. It always calls
+//    renderDefault.
+//
 // 2. withEditorTypography(types, fonts): walks the schema and gives every
 //    Portable Text style that does not already have one a `component` (the
 //    block style render Sanity documents for this), so body text, headings and
@@ -28,7 +37,7 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 import { definePlugin, type NavbarProps } from 'sanity';
-import { ThemeProvider } from '@sanity/ui';
+import { Box, Card, Flex, ThemeProvider } from '@sanity/ui';
 import { buildChromeTheme, HEADING_WEIGHT, type StudioFonts } from '../studioTheme';
 
 // -----------------------------------------------------------------------------
@@ -49,6 +58,72 @@ export const studioLook = definePlugin<StudioFonts>((fonts) => {
     studio: { components: { navbar: BrandNavbar } },
   };
 });
+
+// -----------------------------------------------------------------------------
+// 1b. The wordmark beside the square icon (card 120)
+// -----------------------------------------------------------------------------
+
+/** The page's boot data (src/pages/studio/index.astro, #ncs-studio-boot). */
+function readWordmark(): { src: string; ratio: number | null } | null {
+  if (typeof document === 'undefined') return null;
+  try {
+    const el = document.getElementById('ncs-studio-boot');
+    const data = el?.textContent
+      ? (JSON.parse(el.textContent) as { wordmark?: { src?: unknown; ratio?: unknown } | null })
+      : null;
+    const src = data?.wordmark?.src;
+    if (typeof src !== 'string' || !src) return null;
+    const ratio = Number(data?.wordmark?.ratio);
+    return { src, ratio: ratio > 0 && ratio < 20 ? ratio : null };
+  } catch {
+    return null;
+  }
+}
+
+/** The wordmark's height in the bar, in px (the square icon is 25). */
+const WORDMARK_HEIGHT = 34;
+
+/**
+ * Navbar middleware for the ROOT of sanity.config (studio.components.navbar).
+ * With no wordmark (none configured, or not loaded from /studio) it is just
+ * Sanity's bar. The Card takes the bar's own navy and bottom rule from the
+ * chrome theme studioLook has already put around it.
+ */
+export function StudioWordmarkNavbar(props: NavbarProps) {
+  const wordmark = readWordmark();
+  if (!wordmark) return props.renderDefault(props);
+  return (
+    <Flex align="stretch">
+      <Card
+        borderBottom
+        display={['none', 'none', 'flex']}
+        paddingLeft={3}
+        style={{ alignItems: 'center', flexShrink: 0 }}
+      >
+        <img
+          src={wordmark.src}
+          alt=""
+          aria-hidden
+          draggable={false}
+          data-testid="ncs-studio-wordmark"
+          height={WORDMARK_HEIGHT}
+          width={wordmark.ratio ? Math.round(WORDMARK_HEIGHT * wordmark.ratio) : undefined}
+          style={{
+            display: 'block',
+            height: WORDMARK_HEIGHT,
+            // The crop's own shape, so the box is the crop (no letterboxing).
+            width: wordmark.ratio ? Math.round(WORDMARK_HEIGHT * wordmark.ratio) : 'auto',
+            maxWidth: 240,
+            objectFit: 'contain',
+          }}
+        />
+      </Card>
+      <Box flex={1} style={{ minWidth: 0 }}>
+        {props.renderDefault(props)}
+      </Box>
+    </Flex>
+  );
+}
 
 // -----------------------------------------------------------------------------
 // 2. Portable Text in the site's typography

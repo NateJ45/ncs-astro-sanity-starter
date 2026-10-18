@@ -1,0 +1,213 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// /studio: the embedded Sanity Studio, on the site's own page (PORTS.md card 120)
+// =============================================================================
+// Before this page, @sanity/astro served /studio from node_modules: "Sanity
+// Studio" in the tab, Sanity's red icon, no background, so the editor opened on
+// a blank white page (a white flash in dark mode) while the Studio's code
+// loaded. This page gives the browser, from the first byte:
+//   - the site's name as the tab title and the site's own icon set;
+//   - theme-color in the navbar's colour, and the page ground in the Studio's
+//     own paper (light) or dark background, following the Appearance the
+//     editor last picked (Sanity keeps it in localStorage) or, failing that,
+//     the computer's setting;
+//   - a plain HTML/CSS splash (the site's mark, its name in the brand font, an
+//     optional site motif from src/sanity/StudioSplashMotif.astro) that React
+//     replaces as soon as the Studio mounts. It is the island's `fallback`
+//     slot, so Astro swaps it out; no script of ours removes it.
+//
+// The React side is still @sanity/astro's StudioComponentHash (hash history:
+// deep links are /studio/#/structure/...). Its config module `sanity:studio` is
+// served by studioConfigModule() in src/lib/studio-route.ts, which is why
+// astro.config.mjs no longer sets `studioBasePath` (that would also inject
+// Sanity's page here and collide with this one).
+//
+// The navbar wordmark's URL is resolved here at build time and handed to the
+// Studio in #ncs-studio-boot (read by StudioLook.tsx). Site choices live in
+// src/sanity/studioEdges.config.ts.
+// =============================================================================
+import { StudioComponentHash } from '@sanity/astro/studio/studio-component.tsx';
+import brand from '../../../brand/brand.config.json';
+import { STUDIO_COLORS } from '../../sanity/studioTheme';
+import { studioEdges } from '../../sanity/studioEdges.config';
+import { pickWordmark, type StudioBootData } from '../../lib/studio-route';
+import StudioSplashMotif from '../../sanity/StudioSplashMotif.astro';
+// The brand's font files, the same ones the Studio loads (card 116).
+import '../../sanity/studioFonts.css';
+
+export const prerender = true;
+
+const name = brand.name;
+const fonts = (brand as { studio?: { fonts?: { display?: string; body?: string } } }).studio?.fonts;
+const displayFont = fonts?.display ?? 'Georgia, serif';
+const bodyFont = fonts?.body ?? 'system-ui, sans-serif';
+
+// Palette: exactly what the Studio paints, so the hand-over does not flash.
+const paper = STUDIO_COLORS.white;
+const dark = STUDIO_COLORS.black;
+const chrome = STUDIO_COLORS.chrome.bg;
+const gray = STUDIO_COLORS.gray;
+
+// The navbar wordmark (a built asset URL, or null).
+const logoAssets = import.meta.glob('/src/assets/**/*.{svg,png,webp}', {
+  eager: true,
+  import: 'default',
+});
+const logoPaths = (brand as { logoPaths?: Record<string, string> }).logoPaths ?? {};
+const wordmarkLogo = studioEdges.wordmark.logo;
+const boot: StudioBootData = {
+  wordmark: wordmarkLogo
+    ? pickWordmark(logoAssets, logoPaths[wordmarkLogo], studioEdges.wordmark.view)
+    : null,
+};
+
+const splashVars = [
+  `--splash-paper: ${paper}`,
+  `--splash-dark: ${dark}`,
+  `--splash-chrome: ${chrome}`,
+  `--splash-ink-light: ${chrome}`,
+  `--splash-muted-light: ${gray['600']}`,
+  `--splash-ink-dark: ${gray['50']}`,
+  `--splash-muted-dark: ${gray['400']}`,
+  `--splash-display: ${displayFont}`,
+  `--splash-body: ${bodyFont}`,
+].join('; ');
+---
+
+<!doctype html>
+<html lang="en" style={splashVars}>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- The Studio draws around display cutouts (the iPhone notch), so it needs viewport-fit=cover. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{name}</title>
+    <meta name="theme-color" content={chrome} />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <script is:inline>
+      // Paint in the scheme the Studio is about to use: the editor's last pick
+      // in the Appearance menu, else light (sanity.config seeds light for a
+      // first visit), else the computer's setting for "System".
+      try {
+        var pick = localStorage.getItem('sanityStudio:ui:colorScheme');
+        var seeded = localStorage.getItem('ncs:studio:lightDefault');
+        var scheme =
+          pick === 'dark' || pick === 'light'
+            ? pick
+            : !pick && !seeded
+              ? 'light'
+              : matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+        document.documentElement.setAttribute('data-studio-scheme', scheme);
+      } catch (_e) {
+        /* Storage blocked: the CSS media query decides. */
+      }
+    </script>
+    <script
+      is:inline
+      id="ncs-studio-boot"
+      type="application/json"
+      set:html={JSON.stringify(boot)}
+    />
+    <style is:global>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--splash-paper);
+        color: var(--splash-ink-light);
+      }
+      @media (prefers-color-scheme: dark) {
+        html:not([data-studio-scheme='light']),
+        html:not([data-studio-scheme='light']) body {
+          background: var(--splash-dark);
+          color: var(--splash-ink-dark);
+        }
+      }
+      html[data-studio-scheme='dark'],
+      html[data-studio-scheme='dark'] body {
+        background: var(--splash-dark);
+        color: var(--splash-ink-dark);
+      }
+      .ncs-splash {
+        box-sizing: border-box;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px 16px;
+        font-family: var(--splash-body);
+        -webkit-font-smoothing: antialiased;
+      }
+      .ncs-splash__inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        text-align: center;
+        max-width: 28rem;
+      }
+      .ncs-splash__mark {
+        width: 64px;
+        height: 64px;
+        display: block;
+      }
+      .ncs-splash__name {
+        margin: 0;
+        font-family: var(--splash-display);
+        font-size: clamp(1.375rem, 4.5vw, 1.75rem);
+        line-height: 1.2;
+        font-weight: 400;
+        text-wrap: balance;
+      }
+      .ncs-splash__note {
+        margin: 0;
+        font-size: 0.875rem;
+        line-height: 1.4;
+        color: var(--splash-muted-light);
+      }
+      html[data-studio-scheme='dark'] .ncs-splash__note {
+        color: var(--splash-muted-dark);
+      }
+      @media (prefers-color-scheme: dark) {
+        html:not([data-studio-scheme='light']) .ncs-splash__note {
+          color: var(--splash-muted-dark);
+        }
+      }
+      .ncs-splash__motif:empty {
+        display: none;
+      }
+      .ncs-splash__motif {
+        margin-top: 10px;
+        width: min(280px, 70vw);
+      }
+      .ncs-splash__motif svg,
+      .ncs-splash__motif img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <StudioComponentHash client:only="react">
+      <div slot="fallback" class="ncs-splash" data-studio-splash role="status">
+        <div class="ncs-splash__inner">
+          <img class="ncs-splash__mark" src="/favicon.svg" alt="" width="64" height="64" />
+          <p class="ncs-splash__name">{name}</p>
+          <p class="ncs-splash__note">Opening the editor</p>
+          <div class="ncs-splash__motif" aria-hidden="true">
+            <StudioSplashMotif />
+          </div>
+        </div>
+      </div>
+    </StudioComponentHash>
+  </body>
+</html>

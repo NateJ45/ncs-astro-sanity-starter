@@ -1,5 +1,18 @@
 # Change history
 
+_2026-10-18: the Studio's edges: its own /studio page, the site's words, a wordmark (PORTS card 120)._
+
+**Decision.** The site now owns `/studio` (`src/pages/studio/index.astro`) instead of @sanity/astro's page from
+node_modules: the site's title and icons from the first byte, the Studio's own paper or dark ground (no white flash),
+and a plain HTML splash with the mark and the name in the brand font that React replaces when the Studio mounts.
+astro.config drops `studioBasePath` and serves the `sanity:studio` config module itself (`studioConfigModule()`); React
+is still @sanity/astro's hash-routed component, so deep links are unchanged. `applySiteFavicon` is no longer called.
+The sign-in card gets the site's subtitle, and Sanity's signed-out notice and user-menu labels the site's words
+(`i18n.bundles`), with a test that each reworded key still exists in the installed sanity. The site's wordmark sits
+beside the square icon in the navy bar (root-level navbar middleware, hidden under 600px). A branded heading through a
+custom `auth` store was weighed and left out: Sanity uses a custom store as-is and drops its own expired-session and
+CORS handling.
+
 _2026-10-18: Studio icons by meaning, and a picture on every list row (PORTS card 119)._
 
 **Decision.** Every icon in the Studio is now named by what it means (service times, giving, scripture, pages...),
