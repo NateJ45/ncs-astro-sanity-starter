@@ -8648,3 +8648,8 @@ workflow changes, `"studioWeek"` in the webhook filter, then `npx wrangler secre
 
 **Status, 2026-10-18.** Starter `yes` (unit-tested; the kit's signed-out `/studio` checked in a dev server; signed-in
 views unverified, PENDING item 17). first-baptist-auburn took it the same day. Every other site `no`.
+
+**Follow-up, 2026-10-18 (signed-in walkthrough on first-baptist-auburn).** Quick update's submit button uses
+`tone="primary"` (the positive tone drew a neon green that was off-brand on a reskinned theme; the green "saved"
+card stays). `_seoFields.ts` titles read "Google title" and "Google description" instead of "SEO ..." (titles only,
+field names unchanged). Both files are PORTABLE: copy them into a site that has card 111.
