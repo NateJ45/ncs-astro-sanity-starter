@@ -462,7 +462,7 @@ export const siteSettings = defineType({
           { title: 'Travel Agency', value: 'TravelAgency' },
           { title: 'Educational Organization', value: 'EducationalOrganization' },
           { title: 'NGO', value: 'NGO' },
-          // Churches (PORTS.md card 112): a schema.org Church is a PlaceOfWorship. Neither gets
+          // Churches (PORTS.md card 113): a schema.org Church is a PlaceOfWorship. Neither gets
           // a priceRange (src/lib/schemas.ts).
           { title: 'Church', value: 'Church' },
           { title: 'Place of Worship (other faiths)', value: 'PlaceOfWorship' },

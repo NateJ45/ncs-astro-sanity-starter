@@ -229,7 +229,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 109 | Authoring kit: page templates, picture picker, patterns, synced sections       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 110 | Studio looks like the site: name, mark, colours, status line, help panel       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 112 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -239,7 +239,7 @@ are `n/a` as in row 106. first-baptist-auburn has no column.
 Row 111 (2026-10-18): needs cards 106 and 110 first, so the same cells as row 110. first-baptist-auburn has no column; it
 took the card on branch `feat/studio-remembers` the same day.
 
-Row 112 (2026-10-18): the hotspot half suits every site with `SanityImage.astro`; the JSON-LD half only matters to a
+Row 113 (2026-10-18): the hotspot half suits every site with `SanityImage.astro`; the JSON-LD half only matters to a
 site whose Site settings `businessType` feeds `localBusinessSchema()`. first-baptist-auburn and fbcm have no column;
 see the card.
 
@@ -8659,7 +8659,7 @@ views unverified, PENDING item 17). first-baptist-auburn took it the same day. E
 card stays). `_seoFields.ts` titles read "Google title" and "Google description" instead of "SEO ..." (titles only,
 field names unchanged). Both files are PORTABLE: copy them into a site that has card 111.
 
-## Card 112: SanityImage aims CSS crops at the hotspot; Church business type without a price range (2026-10-18)
+## Card 113: SanityImage aims CSS crops at the hotspot; Church business type without a price range (2026-10-18)
 
 **Origin:** first-baptist-auburn's Home audit (2026-10-17). Two small faults that every site in the family has.
 

@@ -109,7 +109,7 @@ export function localBusinessSchema(settings: SiteSettings | null | undefined): 
     schema.areaServed = areas.map((city) => ({ '@type': 'City', name: city }));
   }
 
-  // A price range only means something for a business that sells (PORTS.md card 112):
+  // A price range only means something for a business that sells (PORTS.md card 113):
   // never for a church, a charity or a school.
   if (!NON_SELLING_TYPES.includes(schema['@type'])) {
     schema.priceRange = '$';
