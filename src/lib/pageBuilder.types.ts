@@ -349,6 +349,8 @@ export interface ProjectedEmbedSection {
   subhead?: string;
   embedUrl?: string;
   embedCode?: string;
+  /** Card 121: run embedCode directly on the page instead of in its own box. */
+  runsOnPage?: boolean;
   heightHint?: 'short' | 'medium' | 'tall';
 }
 

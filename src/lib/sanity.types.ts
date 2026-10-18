@@ -451,6 +451,8 @@ export type SiteSettings = {
     showBudgetCalculator?: boolean;
   };
   satisfactionGuarantee?: string;
+  headCode?: string;
+  bodyEndCode?: string;
 };
 
 export type HomePageReference = {
@@ -887,6 +889,7 @@ export type EmbedSection = {
   subhead?: string;
   embedUrl?: string;
   embedCode?: string;
+  runsOnPage?: boolean;
   heightHint?: 'short' | 'medium' | 'tall';
 };
 

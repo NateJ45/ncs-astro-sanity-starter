@@ -50,6 +50,64 @@ const cta = (label: string) => ({
   externalUrl: '#',
 });
 
+// A small countdown, the kind of thing an editor asks an AI for (card 121).
+// Static numbers so the thumbnail does not change from day to day; it uses the
+// variables the frame's base stylesheet provides (src/lib/custom-code.ts).
+const COUNTDOWN = `<div class="count">
+  <p class="label">Vacation Bible School starts in</p>
+  <div class="row">
+    <div><b>12</b><span>days</span></div>
+    <div><b>06</b><span>hours</span></div>
+    <div><b>30</b><span>minutes</span></div>
+  </div>
+</div>
+<style>
+  .count { text-align: center; padding: 1.5rem 1rem; }
+  .label { margin: 0 0 1rem; color: var(--muted-foreground); }
+  .row { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  .row div { min-width: 5.5rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+  .row b { display: block; font-family: var(--font-display); font-size: 2.5rem; line-height: 1; color: var(--primary); }
+  .row span { font-size: 0.875rem; color: var(--muted-foreground); }
+</style>`;
+
+// Isolation probes for tests/custom-code.spec.ts (card 121). NOT on the wall
+// (no data-section-type), so they are never shot as thumbnails. The boxed probe
+// tries to read the page, the site's storage and cookies, and to mark the
+// page's <body>; the on-page probe shows what the switch gives up.
+const BOXED_PROBE = `<p id="probe">waiting</p>
+<script>
+  var out = [];
+  try { out.push('parent-dom:' + (parent.document.body ? 'READ' : 'none')); } catch (e) { out.push('parent-dom:blocked'); }
+  try { parent.document.body.setAttribute('data-custom-code-escaped', 'yes'); } catch (e) {}
+  try { out.push('storage:' + (localStorage.getItem('custom-code-secret') === null ? 'empty' : 'READ')); } catch (e) { out.push('storage:blocked'); }
+  try { out.push('cookie:' + (document.cookie ? 'READ' : 'empty')); } catch (e) { out.push('cookie:blocked'); }
+  document.getElementById('probe').textContent = 'ran ' + out.join(' ');
+</script>`;
+
+const ON_PAGE_PROBE = `<p data-on-page-probe>waiting</p>
+<script>
+  document.querySelector('[data-on-page-probe]').textContent =
+    'on page: ' + (localStorage.getItem('custom-code-secret') || 'nothing stored');
+</script>`;
+
+const CODE_CHECKS: Record<string, unknown>[] = [
+  {
+    _type: 'embedSection',
+    _key: 'code-boxed',
+    headline: 'Boxed code probe',
+    heightHint: 'short',
+    embedCode: BOXED_PROBE,
+  },
+  {
+    _type: 'embedSection',
+    _key: 'code-on-page',
+    headline: 'On-page code probe',
+    heightHint: 'short',
+    embedCode: ON_PAGE_PROBE,
+    runsOnPage: true,
+  },
+];
+
 const SECTIONS: Record<string, unknown>[] = [
   {
     _type: 'heroSection',
@@ -142,13 +200,15 @@ const SECTIONS: Record<string, unknown>[] = [
     ].map((img, i) => ({ ...img, _key: `l${i}` })),
   },
   {
+    // Card 121: the wall shows pasted code (the thumbnail an editor picks from),
+    // in its own box, drawn in the site's fonts and colours.
     _type: 'embedSection',
     _key: 'embed',
-    eyebrow: 'Embed',
-    headline: 'A map, form or calendar from another site',
-    subhead: 'Paste a link or a snippet and it shows here.',
+    eyebrow: 'Custom code',
+    headline: 'A widget from another site, or one an AI wrote',
+    subhead: 'Paste the code and it shows here, in its own box.',
     heightHint: 'short',
-    embedUrl: 'https://embed.example.com/map',
+    embedCode: COUNTDOWN,
   },
   // scaffold: about
   {
@@ -296,4 +356,7 @@ const SECTIONS: Record<string, unknown>[] = [
       <SectionRenderer sections={[section]} idPrefix={`fx-${String(section._key)}`} />
     </div>
   ))}
+  <div data-custom-code-checks>
+    <SectionRenderer sections={CODE_CHECKS} idPrefix="fx-code" />
+  </div>
 </BaseLayout>

@@ -84,7 +84,12 @@ function serveDist(dir) {
     if (path.endsWith('/')) file = join(file, 'index.html');
     try {
       const body = await readFile(file);
-      res.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' });
+      // Access-Control-Allow-Origin: the Custom code block's sandboxed frame loads
+      // the site fonts from an opaque origin, as public/_headers allows (card 121).
+      res.writeHead(200, {
+        'content-type': types[extname(file)] ?? 'application/octet-stream',
+        'access-control-allow-origin': '*',
+      });
       res.end(body);
     } catch {
       res.writeHead(404).end();

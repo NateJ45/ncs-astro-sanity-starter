@@ -373,6 +373,14 @@ on the built page, and seen signed out under `astro dev` and `wrangler dev`: the
 navbar wordmark beside the square icon (and gone under 600px), the user-menu labels, the signed-out notice after a real
 session expires, and Presentation opening a page through the new route.
 
+### 24. Card 121 (custom code): the signed-in Studio checks (opened 2026-10-18)
+
+Unit-tested (`custom-code.test.ts`, the two Checkup rules in `studio-checkup.test.ts`), proved in Playwright
+(`tests/custom-code.spec.ts`: the boxed probe cannot read `parent.document`, the page's localStorage or cookies; the
+on-page probe can), and seen under `wrangler dev` with the site fonts loading in the box, light and dark, 375 and 1280. Not yet seen signed in: the monospace code box and its count, the warning under it, the switch appearing only
+once there is code, Site settings' "Code on every page" tab, both Checkup findings opening the right field, and the
+boxed frame in Presentation.
+
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 
 PORTS.md card 109 (page templates, picture picker, patterns, synced sections, guardrails) was built, type-checked,

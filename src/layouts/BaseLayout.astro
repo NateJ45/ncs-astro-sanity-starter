@@ -17,7 +17,8 @@ import { layout } from '@/data/layout';
 import { layoutAttrs } from '@/lib/site-layout';
 import { urlFor } from '@/lib/sanity';
 import { localBusinessSchema } from '@/lib/schemas';
-import { getActiveAnnouncement } from '@/lib/queries';
+import { getActiveAnnouncement, getSiteCode } from '@/lib/queries';
+import { isSiteCodeRoute } from '@/lib/custom-code';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import BackToTop from '@/components/BackToTop';
@@ -114,6 +115,12 @@ const allSchemas = siteSettings ? [localBusinessSchema(siteSettings), ...schemas
 // query. Returns null when no active announcement exists (graceful absence).
 // Evaluated at BUILD TIME — banner changes require a rebuild.
 const announcement = await getActiveAnnouncement().catch(() => null);
+// Site settings' "Code on every page" (PORTS.md card 121). Public routes only:
+// the Studio and the preview never get it (they do not use this layout today;
+// this guard keeps it that way if one ever does).
+const siteCode = isSiteCodeRoute(Astro.url.pathname)
+  ? await getSiteCode().catch(() => null)
+  : null;
 const showAnnouncement = !!(announcement?.message);
 
 // Map announcement style -> semantic Tailwind token classes.
@@ -268,6 +275,10 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       consent decision. See src/components/Analytics.astro.
     */}
     <Analytics />
+
+    {/* Site settings' "Code for the page head" (PORTS.md card 121). Public
+        pages only: never /studio or /preview. Runs directly on the page. */}
+    {siteCode?.headCode && <Fragment set:html={siteCode.headCode} />}
 
     <ClientRouter />
   </head>
@@ -491,5 +502,8 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       initPolish();
       document.addEventListener('astro:page-load', initPolish);
     </script>
+
+    {/* Site settings' "Code for the end of every page" (PORTS.md card 121). */}
+    {siteCode?.bodyEndCode && <Fragment set:html={siteCode.bodyEndCode} />}
   </body>
 </html>
