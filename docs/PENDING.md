@@ -295,6 +295,23 @@ card, the Ask form, deploy status, link check, monthly report), the live publish
 tutorial videos. The spike findings for auth and cron are in `docs/agent/studio-kit.md`. Until then `features.visitors`
 stays false and Ask is a mailto (`PUBLIC_STUDIO_HELP_EMAIL`). No other site but first-baptist-auburn has the kit yet.
 
+### 15. Studio card 110: the signed-in checks (opened 2026-10-18)
+
+Card 110 was verified on the `/studio` login screen only (dev server, both schemes, 375 and 1280: the site's name,
+`favicon.svg` mark, tab icon and backgrounds), plus the colour gate in `test:unit`. Nobody has signed in to it yet. On the
+first site that takes it (or the starter against a real project), signed in, check and screenshot in light and dark:
+
+- The navbar: the workspace icon at its small size, and the status line under the top bar (needs a deployed
+  `/build-info.json`; on a dev server it says "Website up to date" or nothing). Publish something and watch it count
+  down, then settle.
+- Home: the greeting card's tint and display font, the four quick actions (each intent opens the right form), and "Pick
+  up where you left off" with a real draft: Publish, Discard (the confirm dialog) and a draft with a changed slug (no
+  Publish button, the reason shown).
+- "Help for this page" on a page, on `siteSettings` and on a journal post: where the button sits (header icon or the
+  three-dot menu; card 110 sets `showAsAction`), the page check updating as you type, the guide rendering at panel width.
+- Presentation on `siteSettings`: the amber "Shown on every page".
+- Branded accents: primary buttons, links, the focus ring and the selected desk row in the brand hue; Publish still green.
+
 ### 6. `docs/agent/` deep-dives still carry client-specific nouns
 
 Flagged in the topic index (now docs/claude/topic-index.md, formerly in CLAUDE.md) since the fork. The 2026-08-28 pass corrected every

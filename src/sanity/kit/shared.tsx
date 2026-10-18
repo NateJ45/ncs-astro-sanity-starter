@@ -248,3 +248,64 @@ export function useCheckup(config: KitConfig) {
 
 /** Fired to replay the first-run tour (Home's "Take the tour again"). */
 export const TOUR_OPEN_EVENT = 'ncs-studio-kit-tour-open';
+
+// -----------------------------------------------------------------------------
+// "Is it live?" data, shared by Home's card and the navbar line (card 110)
+// -----------------------------------------------------------------------------
+
+/** Fired once a Publish has landed (publishNote, Home's Publish), so the live line re-checks. */
+export const PUBLISHED_EVENT = 'ncs-studio-kit-published';
+
+const NOT_SYSTEM_DOCS = `!(_type match "sanity.*") && !(_type match "system.*") && !(_type match "media.*") && !(_id in path("versions.**")) && !(_id match "_.**")`;
+
+export interface LiveData {
+  builtAt: string | null;
+  lastPublish: string | null;
+  /** When the two were read, for the countdown. */
+  now: number;
+}
+
+/**
+ * The build time (/build-info.json) and the newest published change, read on
+ * mount, every minute, when the tab regains focus, and a few seconds after a
+ * Publish lands. Null until the first read.
+ */
+export function useLiveData(): LiveData | null {
+  const client = useClient({ apiVersion: API_VERSION });
+  const [data, setData] = useState<LiveData | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const builtAt = await fetch('/build-info.json', { cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j: { builtAt?: string } | null) => j?.builtAt ?? null)
+        .catch(() => null);
+      const lastPublish = await client
+        .fetch<string | null>(
+          `*[${NOT_SYSTEM_DOCS} && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]._updatedAt`,
+        )
+        .catch(() => null);
+      if (!cancelled) setData({ builtAt, lastPublish, now: Date.now() });
+    };
+    let soon: number | undefined;
+    const afterPublish = () => {
+      window.clearTimeout(soon);
+      soon = window.setTimeout(() => void load(), 4000);
+    };
+    const onFocus = () => void load();
+    void load();
+    const timer = window.setInterval(() => void load(), 60_000);
+    window.addEventListener('focus', onFocus);
+    window.addEventListener(PUBLISHED_EVENT, afterPublish);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      window.clearTimeout(soon);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener(PUBLISHED_EVENT, afterPublish);
+    };
+  }, [client]);
+
+  return data;
+}

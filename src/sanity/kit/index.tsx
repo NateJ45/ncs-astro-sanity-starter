@@ -17,6 +17,8 @@
 //     either way from Home ("Show the full Studio" / "See the staff view").
 //   - Trash instead of Delete on everyday lists, with a Trash type.
 //   - A note after Publish, and the first-run tour (via the layout).
+//   - The calm status line under the top bar and the "Help for this page"
+//     document panel (PORTS.md card 110).
 // =============================================================================
 
 import { definePlugin, type LayoutProps } from 'sanity';
@@ -26,7 +28,9 @@ import { HomeIcon } from '@sanity/icons/Home';
 import { TRASH_TYPE } from '../../lib/studio-trash';
 import { makeCheckupTool } from './CheckupTool';
 import { makeGuideTool } from './GuideTool';
+import { makeHelpPanel } from './HelpPanel';
 import { makeHomeTool } from './HomeTool';
+import { makeNavbarStatus } from './NavbarStatus';
 import { withPublishNote } from './publishNote';
 import { staffViewFor, useStaffView } from './shared';
 import { StudioTour } from './StudioTour';
@@ -67,6 +71,9 @@ export function ncsStudioKit(config: KitConfig) {
   const CheckupTool = makeCheckupTool(config);
   const MoveToTrash = makeMoveToTrashAction(config.trashTypes, config.helper.name);
   const trashTypes = new Set(Object.keys(config.trashTypes));
+  // Card 110 features: on unless kit.config.ts turns them off.
+  const KitNavbar = config.features.navbarStatus === false ? undefined : makeNavbarStatus(config);
+  const helpPanel = config.features.helpPanel === false ? null : makeHelpPanel(config);
 
   function KitLayout(props: LayoutProps) {
     const { staffView } = useStaffView(config);
@@ -87,7 +94,7 @@ export function ncsStudioKit(config: KitConfig) {
     },
 
     studio: {
-      components: { layout: KitLayout },
+      components: { layout: KitLayout, ...(KitNavbar ? { navbar: KitNavbar } : {}) },
     },
 
     tools: (prev, { currentUser }) => {
@@ -124,6 +131,10 @@ export function ncsStudioKit(config: KitConfig) {
 
     document: {
       newDocumentOptions: (prev) => prev.filter((o) => o.templateId !== TRASH_TYPE),
+
+      // "Help for this page" beside every document but the Trash (card 110).
+      inspectors: (prev, { documentType }) =>
+        helpPanel && documentType !== TRASH_TYPE ? [...prev, helpPanel] : prev,
 
       actions: (prev, { schemaType, currentUser }) => {
         const staff = staffViewFor(currentUser, config);

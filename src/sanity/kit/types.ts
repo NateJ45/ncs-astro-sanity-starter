@@ -9,6 +9,8 @@
 // =============================================================================
 
 import type { ComponentType } from 'react';
+import type { SanityClient } from 'sanity';
+import type { CheckGroup } from '../../lib/page-checks';
 import type { CheckupRule } from '../../lib/studio-checkup';
 import type { StudioTarget } from '../../lib/studio-kit';
 
@@ -27,6 +29,18 @@ export interface ThisWeekTask {
   /** Where the "Do it" button goes. */
   target: StudioTarget;
   targetLabel?: string;
+}
+
+/** One large button on Home for a job this site does often (PORTS.md card 110). */
+export interface QuickAction {
+  /** "Post an announcement", in the editor's words. */
+  title: string;
+  /** Optional one line under the title. */
+  detail?: string;
+  /** Where it goes: an intent link (edit a document, create one, open a tool). */
+  target: StudioTarget;
+  /** An @sanity/icons icon. No emoji. */
+  icon?: ComponentType;
 }
 
 /** One stop of the first-run tour. */
@@ -94,7 +108,26 @@ export interface KitConfig {
     categories: readonly string[];
     /** Renders one guide by slug (the site's GuideView). */
     view: (slug: string) => ComponentType;
+    /**
+     * Guide slugs per document type, for the "Help for this page" panel
+     * (card 110). The key '*' is the fallback for any type not listed.
+     */
+    forType?: Record<string, string[]>;
   };
+
+  /** Home's quick actions, in order. Empty or missing shows the two plain buttons. */
+  quickActions?: QuickAction[];
+
+  /** The "Help for this page" panel's page check (card 110). Missing: Checkup findings only. */
+  pageCheck?: {
+    /** Document types the check reads (the page-builder types). */
+    types: string[];
+    /** Runs the check over one document (draft first). */
+    run: (doc: unknown, client: SanityClient) => Promise<CheckGroup[]>;
+  };
+
+  /** How long a rebuild usually takes, for the navbar countdown. Default 3. */
+  typicalUpdateMinutes?: number;
 
   tourSteps: TourStep[];
 
@@ -111,5 +144,9 @@ export interface KitConfig {
     publishNote: boolean;
     /** Visitors card. False shows a calm "not set up yet" until the route exists. */
     visitors: boolean;
+    /** The status line under the top bar (card 110). Missing counts as on. */
+    navbarStatus?: boolean;
+    /** The "Help for this page" document panel (card 110). Missing counts as on. */
+    helpPanel?: boolean;
   };
 }
