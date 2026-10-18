@@ -1,5 +1,16 @@
 # Change history
 
+_2026-10-18: the Studio reads as the site's own admin (PORTS card 116)._
+
+**Decision.** The Studio opens light by default on a warm paper (`studio.paper`, else the site's light background
+warmed toward cream), with greys re-hued to match at Sanity's own luminances, a navbar in the brand's deep colour
+(`studio.chrome`, else `--color-primary-dark`) drawn by its own dark theme, the brand's radius, and the brand's fonts
+actually loaded (`src/sanity/studioFonts.css`, written by apply-brand; a one-weight display face is never faked bold).
+Portable Text body, headings and quotes are edited in the site's fonts at a reading size through each style's
+`component` (`withEditorTypography`). Solid status buttons (Publish, Delete) sit one step deeper in light mode so
+their labels read at AA. Everything stays `@sanity/ui`'s `buildTheme`: no new package, `@sanity/themer` not needed.
+The colour gate now checks text, muted text and solid buttons in every tone, both schemes, Studio and navbar.
+
 _2026-10-18: the Studio remembers (PORTS card 111)._
 
 **Decision.** For an editor alone on Sanity's free plan: a failed deploy now says "The last update didn't go through"

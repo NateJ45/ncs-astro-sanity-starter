@@ -157,6 +157,14 @@ plus every Checkup finding whose target is this document. "How to": the Site Gui
 `GuideView`. Read-only; uses only `documentId`, `documentType` and `onClose`, because inspector props have changed
 between Sanity majors. `features.helpPanel: false` removes it.
 
+## The look (card 116)
+
+Not part of the kit plugin, but it is what an editor sees around it. `src/sanity/studioTheme.ts` (theme, light by
+default, see PORTS.md card 116) and `src/sanity/components/StudioLook.tsx`: `studioLook(fonts)` draws the top bar in
+the brand's deep colour (a navbar middleware that always calls `renderDefault`, so the status line still shows), and
+`withEditorTypography(types, fonts)` gives every Portable Text style a `component` in the site's fonts. A new rich
+text field picks it up with no extra work, as long as it lists its `styles`.
+
 ## Checkup rules
 
 Generic (`genericRules()`): pictures with no description (skipping `altExemptFields` such as the logo), pages with no

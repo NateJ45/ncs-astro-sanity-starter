@@ -321,6 +321,14 @@ the status line and on Home, and Try again starting a run (needs `GITHUB_DEPLOY_
 375px, signed in, creating a published document; an empty list's pane and its button; the i18n empty words; and
 `restore-doc.mjs` against a real backup artifact. first-baptist-auburn is that site; its PENDING lists the same.
 
+### 19. Card 116 (the Studio look): the signed-in checks (opened 2026-10-18)
+
+The theme, the fonts and light-by-default are verified signed out (login and "project not found" screens, light and
+dark, 1280 and 390) and by the colour gate. Only a signed-in Studio shows the rest: the navbar in the chrome colour in
+both appearances (tool tabs, search, the user menu and its Appearance switch, the kit's status line under it), a
+release perspective tinting the navbar, and a Portable Text field (journal body, rich text section) showing body,
+H2, H3 and a quote in the site's fonts, with the style menu readable and list bullets lined up.
+
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 
 PORTS.md card 109 (page templates, picture picker, patterns, synced sections, guardrails) was built, type-checked,

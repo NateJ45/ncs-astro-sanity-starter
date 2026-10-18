@@ -23,7 +23,6 @@
 import { defineConfig } from 'sanity';
 import { structureTool } from 'sanity/structure';
 import { presentationTool } from 'sanity/presentation';
-import { buildTheme, type RootTheme, type ThemeFont } from '@sanity/ui/theme';
 import { visionTool } from '@sanity/vision';
 import { media } from 'sanity-plugin-media';
 import { unsplashImageAsset } from 'sanity-plugin-asset-source-unsplash';
@@ -34,7 +33,10 @@ import { resolve } from './src/sanity/resolve';
 import { PreviewNavigator } from './src/sanity/components/PreviewNavigator';
 import { envVal } from './src/sanity/urls';
 import { StudioIcon, applySiteFavicon } from './src/sanity/components/StudioIdentity';
-import { studioThemeColors } from './src/sanity/studioTheme';
+import { buildStudioTheme, seedLightScheme } from './src/sanity/studioTheme';
+import { studioLook, withEditorTypography } from './src/sanity/components/StudioLook';
+// The site's own font files for the Studio (rewritten by apply-brand; card 116).
+import './src/sanity/studioFonts.css';
 import brand from './brand/brand.config.json';
 import { CharacterCountInput } from './src/sanity/components/CharacterCountInput';
 import { documentBadges } from './src/sanity/components/documentBadges';
@@ -55,42 +57,25 @@ import { kitConfig } from './src/sanity/kit.config';
 // =============================================================================
 // Studio theme
 // =============================================================================
-// @sanity/ui's buildTheme() ships BOTH a light and a dark color scheme, so the
-// Studio's Appearance toggle (System / Light / Dark) works properly. Only the
-// FONT families are overridden here.
-//
-// This replaced buildLegacyTheme(), which was light-ONLY: it hard-codes white
-// component backgrounds and dark text, so flipping the Studio to Dark left
-// every panel white. The brand now lives in the logo and the guide-card
-// accents rather than in tinted Studio chrome.
+// The theme is built in src/sanity/studioTheme.ts from brand.config.json
+// (PORTS.md cards 110 and 116): a warm paper, the brand accent, re-hued greys,
+// the brand's fonts and radius, in BOTH schemes so the Appearance menu works.
+// Light is the default for new editors (seedLightScheme). The navbar's navy
+// chrome and the Portable Text typography are StudioLook.tsx.
 //
 // The families have to go INTO buildTheme({ font }): it bakes the CSS at build
-// time, and a post-hoc `theme.fonts.family` patch is ignored. Point these at
-// whatever `npm run apply-brand` writes into globals.css; the stacks below end
-// in system fallbacks so a fresh clone with no font files still reads well.
+// time, and a post-hoc `theme.fonts.family` patch is ignored. The font files
+// themselves load from src/sanity/studioFonts.css, imported above.
 // =============================================================================
 // These two lines are REWRITTEN by `npm run apply-brand` from
 // brand/brand.config.json (studio.fonts.display / studio.fonts.body). Keep them
 // as single-quoted one-line string literals or the rewrite will not match.
 const DISPLAY_STACK = '"Libre Baskerville", Georgia, "Times New Roman", serif';
 const BODY_STACK = '"Inter Variable", system-ui, -apple-system, sans-serif';
+const STUDIO_FONTS = { display: DISPLAY_STACK, body: BODY_STACK };
 
-function withFamily(font: ThemeFont, family: string): ThemeFont {
-  return { ...font, family };
-}
-
-const themeDefaults = buildTheme();
-const studioTheme: RootTheme = buildTheme({
-  font: {
-    ...themeDefaults.fonts,
-    text: withFamily(themeDefaults.fonts.text, BODY_STACK),
-    label: withFamily(themeDefaults.fonts.label, BODY_STACK),
-    heading: withFamily(themeDefaults.fonts.heading, DISPLAY_STACK),
-  },
-  // Brand accent and backgrounds from brand.config.json, contrast-guarded
-  // (src/sanity/studioTheme.ts, PORTS.md card 110). Status colours stay Sanity's.
-  ...studioThemeColors,
-});
+const studioTheme = buildStudioTheme(STUDIO_FONTS);
+seedLightScheme();
 
 // The Studio tab shows the site's own mark, not Sanity's (StudioIdentity.tsx).
 applySiteFavicon(brand.name);
@@ -181,11 +166,14 @@ export default defineConfig({
     // Trash instead of Delete, the note after Publish and the first-run tour.
     // KEEP IT LAST: its tools reducer has to see every other plugin's tools.
     // See docs/agent/studio-kit.md and PORTS.md card 106.
+    // Navy chrome for the top bar (StudioLook.tsx, PORTS.md card 116).
+    studioLook(STUDIO_FONTS),
     ncsStudioKit(kitConfig),
   ],
 
   schema: {
-    types: schemaTypes,
+    // Portable Text styles drawn in the site's fonts (StudioLook.tsx, card 116).
+    types: withEditorTypography(schemaTypes, STUDIO_FONTS),
     // Page templates (the authoring kit, PORTS.md card 109): the starting
     // points offered when someone makes a Custom page. The list is the site's
     // own, in src/sanity/pageTemplates.ts. `value` is a function so every new
