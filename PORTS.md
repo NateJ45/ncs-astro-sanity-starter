@@ -231,7 +231,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 112 | React 19.3.1, one copy in the tree                                             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)              | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)              | n/a     | yes         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
 | 115 | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -8764,8 +8764,8 @@ needs `@sanity/client` installed for its dummy-host probe; every site has it.
 (presacademy, first-baptist-auburn) goes red on its next run until it takes the copy, so per the Projects
 `CLAUDE.md` order: this card's PR merges first, then each site's.
 
-**Status, 2026-10-18.** Starter `yes`. stonesteps-50k `yes` (origin; it now takes the starter's header). fbcm,
-presacademy and first-baptist-auburn adopt it in PRs opened the same day. Sites with no `publish-due.mjs`
+**Status, 2026-10-18.** Starter `yes`. stonesteps-50k `yes` (origin; it now takes the starter's header). fbcm (fbcm#73),
+presacademy (presacademy#106) and first-baptist-auburn (fbc-auburn#58) took it the same day, each merged green. Sites with no `publish-due.mjs`
 (reid-design-site, mas-monograms, nixoncreativestudio) `n/a`.
 
 ## Card 115: the Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, guide videos (2026-10-18)
