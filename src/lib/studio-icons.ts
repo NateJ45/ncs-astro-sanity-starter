@@ -238,7 +238,11 @@ export function iconTileColors(
     tile?.dark && HEX6.test(tile.dark) ? tile.dark : mix(colors.black, colors.accent['400'], 0.3);
   return {
     light: { bg: lightBg, fg: readableStep(colors.accent, lightBg, ['600', '700', '800', '900']) },
-    dark: { bg: darkBg, fg: readableStep(colors.accent, darkBg, ['300', '200', '100', '50']) },
+    dark: {
+      bg: darkBg,
+      // A light tile set in brand.config.json takes a deep step instead.
+      fg: readableStep(colors.accent, darkBg, ['300', '200', '100', '50', '700', '800', '900']),
+    },
   };
 }
 

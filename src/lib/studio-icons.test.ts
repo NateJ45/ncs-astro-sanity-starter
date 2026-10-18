@@ -270,9 +270,11 @@ describe('coverage', () => {
 describe('brandIconArt.tsx', () => {
   it('only names meanings that exist', () => {
     const source = read('src/sanity/brandIconArt.tsx');
-    const body = source.slice(source.indexOf('BRAND_ICON_ART'));
-    for (const m of body.matchAll(/^\s+([a-zA-Z]+):\s*artIcon\(/gm)) {
-      assert.ok(BRAND_ICON_KEYS.includes(m[1] as BrandIconKey), `${m[1]} is not a meaning`);
+    const start = source.indexOf('= {', source.indexOf('BRAND_ICON_ART:'));
+    const body = source.slice(start, source.indexOf('};', start));
+    const keys = [...body.matchAll(/^\s+([a-zA-Z]+):/gm)].map((m) => m[1]);
+    for (const key of keys) {
+      assert.ok(BRAND_ICON_KEYS.includes(key as BrandIconKey), `${key} is not a meaning`);
     }
   });
 });

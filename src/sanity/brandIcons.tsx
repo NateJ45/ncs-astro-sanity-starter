@@ -188,10 +188,10 @@ export function IconTile({ icon: key }: { icon: BrandIconKey }) {
     containerType: 'size',
   };
   // Sanity's media box sizes a [data-sanity-icon] svg by its own font-size
-  // rule; an inline size wins, and 72cqmin keeps it in proportion to the box.
+  // rule; an inline size wins, and 80cqmin keeps it in proportion to the box.
   const glyph: CSSProperties = {
     flex: 'none',
-    fontSize: '72cqmin',
+    fontSize: '80cqmin',
     width: '1em',
     height: '1em',
     color: c.fg,
