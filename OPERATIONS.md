@@ -247,6 +247,32 @@ Until the Worker has three settings, the card says "Not set up yet". Once per si
 Numbers are Cloudflare's sampled estimates, by UTC day; visits to `/studio`, `/preview` and `/api` are left out of the
 most-read list. To rotate the token, create a new one, `secret put` it, then delete the old one in the dashboard.
 
+Since card 122 the sources include **AI assistants** (ChatGPT, Perplexity, Copilot, Gemini, Claude and similar) with a
+this-week and week-before count. Nothing to set up: it comes with the same token.
+
+### Writing help (the Studio's "Suggest" buttons, PORTS.md card 122)
+
+The "Suggest" buttons under the Google description, photo description and summary fields, and "Improve this
+paragraph" in rich text, call `/api/studio/ai/`, which asks the Claude API. Until the Worker has the key the buttons do
+not appear at all. Once per site:
+
+1. **Make an API key** at console.anthropic.com (Settings, API Keys, Create Key), named for the site
+   (`<site> Studio writing help`), in a workspace used for nothing else so its spend is easy to read.
+2. **Set a spend limit** on that workspace (Settings, Limits): a monthly cap of a few dollars is plenty. Rough cost:
+   a Google description or summary is about a tenth of a cent (Claude Haiku 5.5), a photo description under a cent
+   (Claude Sonnet 5.5, the picture sent at 800px). Every request has a hard token cap, and each person gets at most 30
+   suggestions an hour (per Worker instance), so even a busy week of editing stays well under a dollar.
+3. **Give it to the Worker as a secret** (never in the repo or in chat). From the site repo:
+   `npx wrangler secret put ANTHROPIC_API_KEY` and paste it at the prompt. Keep a copy in 1Password.
+4. Optional: a different hourly limit per person as a plain var in `wrangler.jsonc` `vars`: `"AI_HOURLY_LIMIT": "20"`.
+5. Deploy, open `/studio`, open a page, and check "Suggest a Google description" appears under its description. Press
+   it once to see a suggestion arrive. `npx wrangler tail` shows `studio-ai: seo: suggested` (only the task and the
+   outcome are ever logged, never the words). "Writing help did not answer" with `Claude API answered 401` in the tail
+   means the key is wrong; `429` means the spend limit or the account's rate limit.
+
+To switch it off, `npx wrangler secret delete ANTHROPIC_API_KEY`; the buttons disappear on the next Studio load. To
+rotate the key, make a new one, `secret put` it, then delete the old one in the console.
+
 ### Studio deploy
 
 There isn't one. The Studio is **embedded at `/studio`** and built by `astro build`, so

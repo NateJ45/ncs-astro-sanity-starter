@@ -70,6 +70,18 @@ export interface CheckupContext {
   nameOf: (doc: Doc) => string;
   /** A readable name for a type ("Announcement"). */
   typeTitle: (type: string) => string;
+  /**
+   * Files the live site serves that a rule may read (card 122: /llms.txt and
+   * /llms-full.txt). Optional: undefined means "not fetched", and a rule that
+   * needs it says nothing.
+   */
+  site?: SiteFiles;
+}
+
+/** What the Studio fetched from the site for the Checkup (card 122). Null: the site answered 404. */
+export interface SiteFiles {
+  llmsTxt?: string | null;
+  llmsFull?: string | null;
 }
 
 export interface CheckupRule {
@@ -446,7 +458,7 @@ const RANK: Record<Severity, number> = {
 export function runCheckup(
   docs: Doc[],
   rules: CheckupRule[],
-  opts: Pick<CheckupContext, 'nameOf' | 'typeTitle'> & { now?: number },
+  opts: Pick<CheckupContext, 'nameOf' | 'typeTitle' | 'site'> & { now?: number },
 ): CheckResult[] {
   const ctx: CheckupContext = {
     docs,
@@ -455,6 +467,7 @@ export function runCheckup(
     now: opts.now ?? Date.now(),
     nameOf: opts.nameOf,
     typeTitle: opts.typeTitle,
+    site: opts.site,
   };
   const out: CheckResult[] = [];
   for (const rule of rules) {

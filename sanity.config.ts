@@ -59,6 +59,8 @@ import { CheckPageAction } from './src/sanity/actions/checkPage';
 import { UndoAction, RedoAction, undoRedoShortcuts } from './src/sanity/components/UndoRedo';
 import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 import { ncsStudioKit } from './src/sanity/kit';
+// Writing suggestions under chosen fields (PORTS.md card 122).
+import { ncsWritingHelp } from './src/sanity/ai';
 import { kitConfig } from './src/sanity/kit.config';
 import { ncsWorkflowTools } from './src/sanity/workflow';
 import { brandIcons, typeIcon, withBrandPreviews } from './src/sanity/brandIcons';
@@ -195,6 +197,11 @@ export default defineConfig({
         'page',
       ],
     }),
+    // "Suggest" buttons under the Google description, photo descriptions and
+    // summaries, and "Improve this paragraph" in rich text (card 122). They
+    // appear only once the Worker has ANTHROPIC_API_KEY; nothing is written
+    // until the editor presses "Use this".
+    ncsWritingHelp(),
     // The Studio kit (src/sanity/kit/, settings in src/sanity/kit.config.ts):
     // Home, Site Guide and Checkup tools, plain tool names, the staff view,
     // Trash instead of Delete, the note after Publish and the first-run tour.

@@ -8,7 +8,8 @@
 // read-only API token and hands the Studio a small summary: visits in the last
 // seven days against the seven before, a four-week daily series, the most-read
 // pages and where visitors came from (search, typed it in, other sites,
-// social). This file is the pure half (the GraphQL request, the mapping, the
+// social, and since card 122 AI assistants such as ChatGPT, with their own
+// week-on-week count). This file is the pure half (the GraphQL request, the mapping, the
 // referrer groups), free of Worker and React imports so
 // src/lib/studio-analytics.test.ts can check it in bare Node.
 //
@@ -53,16 +54,19 @@ export function analyticsWindow(now: Date) {
     start: new Date(today - (SERIES_DAYS - 1) * DAY).toISOString(),
     /** Seven days ago, to the minute: "the last 7 days". */
     weekStart: new Date(end - 7 * DAY).toISOString(),
+    /** Fourteen days ago: the week before, for the AI assistants trend (card 122). */
+    prevWeekStart: new Date(end - 14 * DAY).toISOString(),
     end: new Date(end).toISOString(),
     days,
   };
 }
 
 /**
- * One request, three answers: visits per day for four weeks, the most-read
- * pages and the referring sites over the last seven days.
+ * One request, four answers: visits per day for four weeks, the most-read
+ * pages and the referring sites over the last seven days, and the referring
+ * sites over the seven days before (only the AI assistants are read from it).
  */
-export const ANALYTICS_QUERY = `query HomeVisitors($accountTag: string!, $siteTag: string!, $start: Time!, $weekStart: Time!, $end: Time!) {
+export const ANALYTICS_QUERY = `query HomeVisitors($accountTag: string!, $siteTag: string!, $start: Time!, $prevWeekStart: Time!, $weekStart: Time!, $end: Time!) {
   viewer {
     accounts(filter: { accountTag: $accountTag }) {
       daily: rumPageloadEventsAdaptiveGroups(limit: 100, filter: { AND: [{ datetime_geq: $start, datetime_leq: $end }, { siteTag: $siteTag }] }, orderBy: [date_ASC]) {
@@ -75,6 +79,11 @@ export const ANALYTICS_QUERY = `query HomeVisitors($accountTag: string!, $siteTa
         dimensions { requestPath }
       }
       referers: rumPageloadEventsAdaptiveGroups(limit: 50, filter: { AND: [{ datetime_geq: $weekStart, datetime_leq: $end }, { siteTag: $siteTag }] }, orderBy: [count_DESC]) {
+        count
+        sum { visits }
+        dimensions { refererHost }
+      }
+      referersBefore: rumPageloadEventsAdaptiveGroups(limit: 50, filter: { AND: [{ datetime_geq: $prevWeekStart, datetime_lt: $weekStart }, { siteTag: $siteTag }] }, orderBy: [count_DESC]) {
         count
         sum { visits }
         dimensions { refererHost }
@@ -92,6 +101,7 @@ export function analyticsRequest(settings: AnalyticsSettings, now: Date) {
       accountTag: settings.accountTag,
       siteTag: settings.siteTag,
       start: w.start,
+      prevWeekStart: w.prevWeekStart,
       weekStart: w.weekStart,
       end: w.end,
     },
@@ -107,11 +117,12 @@ export function analyticsHeaders(token: string): Record<string, string> {
 // Where visitors came from
 // -----------------------------------------------------------------------------
 
-export type SourceGroup = 'search' | 'direct' | 'other' | 'social';
+export type SourceGroup = 'search' | 'ai' | 'direct' | 'other' | 'social';
 
 /** The plain words for each group, in the order the card lists them. */
 export const SOURCE_LABELS: Record<SourceGroup, string> = {
   search: 'Searched for it',
+  ai: 'AI assistants',
   direct: 'Typed it in or used a bookmark',
   social: 'Social media',
   other: 'A link on another website',
@@ -129,8 +140,29 @@ const SEARCH = [
   /(^|\.)yandex\./,
   /(^|\.)startpage\.com$/,
   /(^|\.)qwant\.com$/,
-  /(^|\.)perplexity\.ai$/,
+];
+/**
+ * AI assistants that send visitors on with a link (card 122). Checked BEFORE
+ * search, because gemini.google.com would otherwise read as Google search.
+ * Many assistant visits arrive with no referrer at all and count as "Typed it
+ * in", so this number is a floor, not the whole story.
+ */
+export const AI_HOSTS = [
   /(^|\.)chatgpt\.com$/,
+  /^chat\.openai\.com$/,
+  /(^|\.)perplexity\.ai$/,
+  /^copilot\.microsoft\.com$/,
+  /^copilot\.cloud\.microsoft$/,
+  /^gemini\.google\.com$/,
+  /^bard\.google\.com$/,
+  /(^|\.)claude\.ai$/,
+  /(^|\.)you\.com$/,
+  /(^|\.)phind\.com$/,
+  /(^|\.)poe\.com$/,
+  /(^|\.)meta\.ai$/,
+  /^chat\.mistral\.ai$/,
+  /^chat\.deepseek\.com$/,
+  /(^|\.)grok\.com$/,
 ];
 const SOCIAL = [
   /(^|\.)facebook\.com$/,
@@ -163,6 +195,7 @@ export function sourceGroup(host: string | null | undefined, ownHost?: string): 
   if (!h) return 'direct';
   const own = (ownHost ?? '').toLowerCase().replace(/^www\./, '');
   if (own && h === own) return null;
+  if (AI_HOSTS.some((re) => re.test(h))) return 'ai';
   if (SEARCH.some((re) => re.test(h))) return 'search';
   if (SOCIAL.some((re) => re.test(h))) return 'social';
   return 'other';
@@ -182,7 +215,12 @@ interface Group {
 export interface AnalyticsAnswer {
   data?: {
     viewer?: {
-      accounts?: Array<{ daily?: Group[]; pages?: Group[]; referers?: Group[] }>;
+      accounts?: Array<{
+        daily?: Group[];
+        pages?: Group[];
+        referers?: Group[];
+        referersBefore?: Group[];
+      }>;
     };
   } | null;
   errors?: Array<{ message?: string }> | null;
@@ -200,6 +238,11 @@ export interface VisitorsReport {
   pages: Array<{ path: string; views: number }>;
   /** Where visits came from over the last seven days, biggest first, empty groups left out. */
   sources: Array<{ group: SourceGroup; label: string; visits: number }>;
+  /**
+   * Visits sent by AI assistants (card 122): the last 7 days and the 7 before.
+   * Also in `sources`; kept apart so the card can show the trend.
+   */
+  ai: { thisWeek: number; lastWeek: number };
   /** When this was read (ISO). */
   at: string;
 }
@@ -261,7 +304,11 @@ export function visitorsReport(
     if (!group) continue;
     bySource.set(group, (bySource.get(group) ?? 0) + n(g.sum?.visits));
   }
-  const order: SourceGroup[] = ['search', 'direct', 'social', 'other'];
+  let aiBefore = 0;
+  for (const g of account.referersBefore ?? []) {
+    if (sourceGroup(g.dimensions?.refererHost, ownHost) === 'ai') aiBefore += n(g.sum?.visits);
+  }
+  const order: SourceGroup[] = ['search', 'ai', 'direct', 'social', 'other'];
   const sources = order
     .map((group) => ({ group, label: SOURCE_LABELS[group], visits: bySource.get(group) ?? 0 }))
     .filter((s) => s.visits > 0)
@@ -274,8 +321,16 @@ export function visitorsReport(
     days: series,
     pages,
     sources,
+    ai: { thisWeek: bySource.get('ai') ?? 0, lastWeek: aiBefore },
     at: now.toISOString(),
   };
+}
+
+/** The AI assistants line under the sources (card 122), or null when there is nothing to say. */
+export function aiCompare(ai: { thisWeek: number; lastWeek: number } | undefined): string | null {
+  if (!ai || (ai.thisWeek === 0 && ai.lastWeek === 0)) return null;
+  const word = (k: number) => (k === 1 ? 'visit' : 'visits');
+  return `AI assistants such as ChatGPT sent ${ai.thisWeek} ${word(ai.thisWeek)} this week, and ${ai.lastWeek} the week before.`;
 }
 
 /** "12 more than the week before", "about the same as the week before", in plain words. */
