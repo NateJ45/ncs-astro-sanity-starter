@@ -326,6 +326,24 @@ function isGroupActive(items: { href: string }[]) {
           data-logo-dark-srcset={logoDarkSrcset}
         />
       )}
+      {/* No-JS fallback (card 108). The swap img above has no src until the
+          inline script runs, so with JS off it would show only its alt text.
+          The noscript copy carries the light variant (no-JS never gets
+          html.dark) and the scoped rule below hides the src-less swap img.
+          A noscript img is not fetched when JS is on, so the single-fetch
+          behaviour is unchanged. */}
+      {!logo && (
+        <noscript>
+          <img
+            src={logoLightImg.src}
+            alt={brandName}
+            width={280}
+            height={60}
+            class="h-12 w-auto"
+            decoding="async"
+          />
+        </noscript>
+      )}
     </a>
     {/* Synchronous inline setup — runs immediately after the img element
         is parsed, so the src is set before the browser begins any image
@@ -445,6 +463,12 @@ function isGroupActive(items: { href: string }[]) {
 </header>
 
 <style>
+  /* The theme-aware logo only lacks a src when the inline swap script never
+     ran (JS off); the <noscript> copy shows instead (card 108). */
+  img[data-theme-logo]:not([src]) {
+    display: none;
+  }
+
   /* Desktop dropdown groups (native <details>). The links are server-rendered
      and fully usable with no JS; these styles + the script below add the
      dropdown affordances. */
