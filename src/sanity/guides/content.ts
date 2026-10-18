@@ -678,6 +678,71 @@ guides.push(
   },
 );
 
+// ── Custom code (PORTS.md card 121) ──────────────────────────────────────────
+// Appended like the blocks above, so a site rewriting its guides keeps it.
+guides.push({
+  slug: 'add-a-widget',
+  category: 'Pages and words',
+  title: 'Add a widget from an AI or a website',
+  icon: '</>',
+  lead: 'A countdown, a sign-up box, a map or a calculator, pasted in as code.',
+  diy: 'mixed',
+  body: [
+    {
+      kind: 'p',
+      text: 'Sometimes you want something on a page that the Studio does not have a block for: a countdown to Vacation Bible School, a small sign-up gadget, a map, a calculator. You can ask an AI chat (ChatGPT, Claude, Gemini) to write it, or copy the code a website gives you, and paste it into a **Custom code or embed** section.',
+    },
+    { kind: 'h', text: 'What to ask the AI for' },
+    {
+      kind: 'p',
+      text: 'Describe the widget, then add this sentence: _"Give me a single self-contained HTML snippet with inline CSS and JS, no external build step."_ That gets you one block of code you can paste in one go, instead of several files.',
+    },
+    { kind: 'h', text: 'Put it on the page' },
+    {
+      kind: 'steps',
+      items: [
+        'Open the page and click `+ Add item` where you want the widget.',
+        'Pick `Custom code or embed`.',
+        'Give it a headline if you like, then paste the whole snippet into `Custom code`. The count under the box tells you it all went in.',
+        'Open `Presentation` and look at the page. The widget runs in the preview exactly as it will on the website.',
+        'If it looks right, click `Publish`.',
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'positive',
+      title: 'It runs in its own box.',
+      text: 'The code cannot change the rest of the website, and it cannot see anything private, such as your Studio login. The box grows to fit what is inside it. Links in it open in a new tab.',
+    },
+    {
+      kind: 'callout',
+      tone: 'primary',
+      title: 'It cannot restyle the rest of the site.',
+      text:
+        'Colours and fonts inside the box start out matching the website, but the code only ever styles itself. To change how the whole website looks, ask ' +
+        SITE.contactName +
+        ': design changes go through the theme.',
+    },
+    { kind: 'h', text: 'If it does not work' },
+    {
+      kind: 'bullets',
+      items: [
+        'Ask the AI to fix it, and tell it the code runs **inside a sandboxed iframe with no access to cookies, localStorage or the parent page**. Most widgets do not need any of those.',
+        'A yellow warning under the box means the code tries to reach outside it. In the box that is blocked, so that part will not work.',
+        'A widget cannot remember things between visits (it has no storage). For sign-ups, ask for a version that sends to a form service, or use one of the site forms.',
+      ],
+    },
+    { kind: 'h', text: 'The "Runs directly on the page" switch' },
+    {
+      kind: 'callout',
+      tone: 'caution',
+      title: 'Leave it off unless a provider you trust needs it.',
+      text: 'Some giving or booking services give you code that only works on the page itself. The switch lets it. With it on, the code can do anything the website can, including reading what a signed-in editor is doing, so never turn it on for code you are not sure about. The Checkup lists every page where it is on.',
+    },
+    { kind: 'seealso', items: ['Change the words on a page'] },
+  ],
+});
+
 /**
  * Which guides "Help for this page" shows for each document type (kit.config.ts
  * guide.forType, PORTS.md card 110). '*' is the fallback for anything unlisted.
@@ -685,9 +750,9 @@ guides.push(
  */
 export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   '*': ['edit-a-page', 'help-panel'],
-  page: ['edit-a-page', 'share-a-preview', 'rename-a-page', 'seo-fields'],
+  page: ['edit-a-page', 'share-a-preview', 'rename-a-page', 'seo-fields', 'add-a-widget'],
   homePage: ['edit-a-page', 'images-and-alt', 'seo-fields'],
-  siteSettings: ['menus-and-footer', 'website-status'],
+  siteSettings: ['menus-and-footer', 'website-status', 'add-a-widget'],
   businessInfo: ['menus-and-footer'],
   redirect: ['rename-a-page'],
 };

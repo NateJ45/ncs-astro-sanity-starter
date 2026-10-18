@@ -238,6 +238,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering            | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 119 | Studio icons by meaning, a picture on every list row                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 121 | Custom code in its own box; opt-in on-page and site-wide code                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 122 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -9113,6 +9114,65 @@ optionally `StudioSplashMotif.astro`), remove `studioBasePath` from the `sanity(
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-edges`, PR after this merges. Other
 sites `no`.
+
+## Card 121: custom code, safe by default: pasted widgets in their own box, opt-in on-page and site-wide code (2026-10-18)
+
+**Origin:** first-baptist-auburn, 2026-10-18. The pastor may ask an AI for a widget (a VBS countdown, a sign-up
+gadget, a map, a calculator) and paste it in, Squarespace-style. The `embedSection` rendered pasted code with
+`set:html` straight into the page, and the Studio is embedded at `/studio` on the SAME origin, so any pasted script
+could read a signed-in editor's Sanity session token from localStorage. Built in the starter, then first-baptist-auburn.
+
+**Canonical:** PORTABLE: `src/lib/custom-code.ts`, `src/lib/custom-code.test.ts`, `src/components/CustomCodeFrame.astro`,
+`src/sanity/components/CodeTextInput.tsx`, `tests/custom-code.spec.ts`, and the two rules in `src/lib/studio-checkup.ts`
+(with their tests in `studio-checkup.test.ts`). Per site (NOT portable, hand-merged): the `embedSection` schema
+(`src/sanity/schemaTypes/sections.ts`), `EmbedSection.astro`, the `runsOnPage` prop in `SectionRenderer.astro` and
+`pageBuilder.types.ts`, `siteSettings.ts` (the "Code on every page" group), `getSiteCode()` in `queries.ts`, the
+BaseLayout lines, `embedCode`/`runsOnPage` in `NON_STEGA_FIELDS` (`cms-preview.ts`), the `/_astro/*` rule in
+`public/_headers`, the styleguide wall fixture and probes, the Site Guide recipe (`add-a-widget`), the thumbnail.
+
+**What it adds.**
+
+- **The box (default).** Pasted code renders in `CustomCodeFrame`: an iframe from `srcdoc` with
+  `allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals` and NO `allow-same-origin`
+  (opaque origin: no cookies, no localStorage, no `parent.document`). `buildFrameDocument()` wraps the code in a
+  document with `<base target="_blank">`, a base stylesheet in the site's fonts and light colours (from
+  brand.config.json and `studioFonts.css?inline`), reduced motion honoured, and a resize script that posts
+  `{ type: 'ncs-custom-code-height', height }`. The parent accepts it only from one of its frames' `contentWindow`,
+  origin `"null"`, exact shape, then clamps to 40..5000 px. Dark mode: a light panel around the frame.
+- **The switch.** `runsOnPage` (boolean, default off, shown once there is code, in NON_STEGA_FIELDS) keeps the old
+  `set:html` path for trusted provider snippets. Caution in its description.
+- **Code on every page.** Site settings group "Code on every page": `headCode` and `bodyEndCode`, rendered by
+  BaseLayout on public routes only (`isSiteCodeRoute`: never `/studio`, `/preview`, `/api`), fetched by their own
+  query so the preview shell never sees them.
+- **Checkup.** Two generic rules, "For information": `code-runs-on-page` (every page with the switch on, deep-linked to
+  it) and `code-on-every-page`.
+- **Studio UX.** Block renamed "Custom code or embed" (name unchanged, rule 1); `CodeTextInput` (monospace, no
+  spellcheck, a character and line count); a warning (not an error) when code uses `document.cookie`, `localStorage`,
+  `top.location` or `parent.`; the "not both URL and code" check now reads `context.parent` (it read the document
+  before, so it never fired). Insert-menu thumbnail reshot from a countdown fixture.
+- **Fonts across the sandbox.** Root-relative font URLs resolve against the embedding page; the opaque origin makes each
+  a CORS fetch, so `public/_headers` adds `/_astro/*` with `Access-Control-Allow-Origin: *` and the immutable cache
+  line (trap 2). The thumbnail script's server sends the header too.
+
+**Weighed and left out.** Pinning font URLs to `Astro.site`: breaks every other host (workers.dev before cutover, local,
+preview). A full CSP: it would not stop same-origin script from reading localStorage, which is the real risk, and the
+box already removes it. A parent-to-frame theme message for dark mode: the frame would have to accept messages, and
+pasted widgets assume light backgrounds anyway.
+
+**Verified.** Unit tests (srcdoc builder escaping, base stylesheet, resize script, message shape, clamp, warnings, route
+guard, Checkup rules). Playwright `tests/custom-code.spec.ts` on `/styleguide/sections/`: the boxed probe reports
+`parent-dom:blocked storage:blocked cookie:blocked` and the page's `<body>` is unmarked while a secret sits in the
+page's localStorage; the frame sizes itself; the on-page probe reads the secret. Under `wrangler dev`: `/_astro/*`
+sends the CORS header and the frame's fonts load; light and dark at 375 and 1280, no horizontal overflow. Signed-in
+Studio checks: `docs/PENDING.md` item 24.
+
+**Adopting it in a site.** Copy the PORTABLE files; merge the per-site lines above into the site's own schema, renderer,
+types, queries, BaseLayout, NON_STEGA_FIELDS and `_headers`; add the wall fixture and the two probes to
+`/styleguide/sections/` (the spec needs them); add the guide; `npm run typegen`, `npm run build`, `npm run thumbnails`
+(commit only `embedSection.jpg`), `npm run test:unit`, `npm test`. Needs `brand/brand.config.json` and
+`src/sanity/studioFonts.css` (cards 110 and 116). Marked-file order: the starter merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/custom-code`, PR after this merges. Other
 
 ## Card 122: section looks instead of colours, and a photo viewer for galleries (2026-10-18)
 

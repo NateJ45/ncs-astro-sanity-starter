@@ -144,6 +144,13 @@ const NON_STEGA_FIELDS = new Set([
   // and this template adds no surface or accent COLOUR enum at all (see
   // src/lib/surfaces.ts for why).
   'headingAccent',
+  // Custom code, 2026-10-18 (PORTS.md card 121). embedCode is code, not prose:
+  // invisible markers appended to it would land inside the pasted widget (in
+  // its box, or on the page with the switch on), and there is no text in it to
+  // click into. runsOnPage is a boolean that picks the render branch; stega
+  // leaves booleans alone today, listed so the rule 8b audit finds it.
+  'embedCode',
+  'runsOnPage',
 ]);
 
 export function getPreviewClient(draftMode: boolean): SanityClient {

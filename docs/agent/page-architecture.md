@@ -50,7 +50,7 @@ The four core pages (home, about, services, process) and every custom `page` doc
 | `videoSection`     | CONTENT        | YouTube or Vimeo embed with optional heading and caption                         |
 | `spacerSection`    | SELF_CONTAINED | Explicit vertical gap -- ornament, line, or invisible space                      |
 | `logoStripSection` | SELF_CONTAINED | Row or grid of client/partner logos with optional eyebrow and headline           |
-| `embedSection`     | SELF_CONTAINED | Sandboxed iframe embed: Calendly, Cal.com, Tally, or raw trusted embed code      |
+| `embedSection`     | SELF_CONTAINED | Embed URL, or pasted code in its own sandboxed box (card 121, custom-code.md)    |
 
 Blocks deliberately carry no `backgroundColor` field. Background assignment is `SectionRenderer`'s responsibility.
 
