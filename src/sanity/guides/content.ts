@@ -73,6 +73,14 @@ export interface Guide {
   lead: string;
   diy: DiyLevel;
   body: GuideBlock[];
+  /**
+   * Optional short clip of the job being done (PORTS.md card 115). Shows under
+   * "Watch how it is done" on Home and in the Site Guide; with no clips anywhere
+   * the row hides itself. Either a file in public/ (record the screen, save as
+   * MP4, put it at public/guides/<slug>.mp4 and write "/guides/<slug>.mp4"), or
+   * a YouTube (unlisted is fine) or Vimeo link. Keep clips under two minutes.
+   */
+  video?: string;
 }
 
 export const guides: Guide[] = [
@@ -459,6 +467,40 @@ export const guides: Guide[] = [
 // Appended rather than written into the list above, so a site rewriting its
 // guides keeps these two by default. Both describe kit features, not the site.
 guides.push(
+  {
+    slug: 'home-page',
+    category: 'Start here',
+    title: 'What the Home page shows you',
+    icon: '⌂',
+    lead: 'Home opens first every time. Here is what each card is for, top to bottom.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Home is a dashboard: it changes nothing by itself. Every card points somewhere, and the buttons take you straight there.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '**Coming up**: pages set to publish by themselves, soonest first, with the time in plain words. To schedule one, open it, fill in **Publish automatically at** under Publishing, and leave it as a draft. `Open` takes you to it.',
+          '**Fix-it list**: the things the Checkup found, by name, like a picture with no description or a page with no Google description. `Edit` opens the page at the right spot. `See the whole list` opens the Checkup.',
+          '**Visitors**: how many people visited in the last 7 days against the week before, a small chart of the last four weeks, the most-read pages and how people found the website. Hover a bar to see that day.',
+          '**Your pages**: every page you can change, in groups, one click each. Pages you build yourself are added to it automatically.',
+          '**Watch how it is done**: short videos of common jobs, when there are any. `Watch` plays one without leaving the Studio.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Visitors says "not set up yet"?',
+        text:
+          'The numbers come from Cloudflare, which counts visits without cookies. ' +
+          SITE.contactName +
+          ' switches it on once, and after that it fills in by itself.',
+      },
+      { kind: 'seealso', items: ['The line under the top bar', 'Start here: how this all works'] },
+    ],
+  },
   {
     slug: 'website-status',
     category: 'Start here',

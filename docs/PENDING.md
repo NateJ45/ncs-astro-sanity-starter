@@ -290,10 +290,12 @@ Until then, open the panel in the scan or read the list and ignore warnings unde
 ### 14. Studio kit: the Worker half and the rest of the plan (opened 2026-10-17)
 
 PORTS.md card 106 brought the Studio kit's Studio half from first-baptist-auburn. Still to build, starter first: the
-Worker routes under `src/pages/api/studio/*` (visitors from GA4 for Home's Visitors card, the Ask form, link check,
-monthly report), the live publish checklist inspector, and recorded tutorial videos. Studio auth by the session token
-and deploy status landed with card 111 (`src/lib/studio-auth.ts`, `/api/studio/deploy-status/`). The spike findings for auth and cron are in `docs/agent/studio-kit.md`. Until then `features.visitors`
-stays false and Ask is a mailto (`PUBLIC_STUDIO_HELP_EMAIL`). No other site but first-baptist-auburn has the kit yet.
+Worker routes under `src/pages/api/studio/*` (the Ask form, link check, monthly report), the live publish checklist
+inspector, and the recorded tutorial videos themselves. Studio auth by the session token and deploy status landed with
+card 111 (`src/lib/studio-auth.ts`, `/api/studio/deploy-status/`); Home's visitors (Cloudflare Web Analytics, not GA4,
+`/api/studio/visitors/`) and the guide-video slot with card 115. The spike findings for auth and cron are in
+`docs/agent/studio-kit.md`. Ask is still a mailto (`PUBLIC_STUDIO_HELP_EMAIL`). No other site but first-baptist-auburn
+has the kit yet.
 
 ### 15. Studio card 110: the signed-in checks (opened 2026-10-18)
 
@@ -320,6 +322,18 @@ the status line and on Home, and Try again starting a run (needs `GITHUB_DEPLOY_
 `deploy-failed` issue opening and closing; a hand tick saving and a new week starting fresh; the Quick update forms at
 375px, signed in, creating a published document; an empty list's pane and its button; the i18n empty words; and
 `restore-doc.mjs` against a real backup artifact. first-baptist-auburn is that site; its PENDING lists the same.
+
+### 18. Card 115 (Home dashboard): the signed-in checks and the analytics token (opened 2026-10-18)
+
+Built and unit-tested (`studio-home.test.ts`, `studio-analytics.test.ts`), `astro check` and the build clean, and
+`/api/studio/visitors/` checked under `wrangler dev`: 403 without the site's Origin, 401 without a Sanity session. Not
+yet seen, signed in, in light and dark at 375 and 1280: the dated greeting and the "Need help?" line; Coming up with a
+real scheduled draft (and its empty sentence); the Fix-it list's rows and that each Edit opens the right field; Your
+pages (every link opens, a new custom page appears); the Visitors card with real numbers once a site has the three
+Worker settings (OPERATIONS.md, "Visitor numbers"; compare the week's total with the Cloudflare dashboard, since the
+GraphQL field names were taken from the dashboard's own query and have not been run against a real token yet); and a
+guide with a `video` playing from Home and the Site Guide. first-baptist-auburn is that site; Nathan creates the
+token there (Account Analytics: Read).
 
 ### 19. Card 116 (the Studio look): the signed-in checks (opened 2026-10-18)
 

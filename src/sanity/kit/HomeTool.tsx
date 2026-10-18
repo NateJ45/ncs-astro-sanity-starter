@@ -23,15 +23,22 @@
 //   3. Is it live? The build time from /build-info.json against the newest
 //      published change (liveStatus in src/lib/studio-kit.ts). Card 111: a
 //      FAILED deploy (the deploy route) says so, with "Try again".
-//   4. Site health: the Checkup's counts, with a link to the Checkup.
+//   4. Fix-it list (card 115, was Site health): the Checkup's findings by
+//      name, each with Edit, and "See the whole list".
+//   4b. Coming up (card 115): what will publish by itself, soonest first.
 //   5. Recent edits: the last few things changed, unpublished ones flagged.
-//   6. Visitors: a calm "not set up yet" until the analytics route exists.
-//   7. Ask for help, the tour again, and the staff view switch.
+//   6. Visitors (card 115): Cloudflare Web Analytics through the Worker route
+//      /api/studio/visitors/, or a calm "not set up yet".
+//   6b. Your pages (card 115, kitConfig.pages) and "Watch how it is done"
+//      (guide videos; hidden when no guide has one).
+//   7. Ask for help, "Need help?" line, the tour again, the staff view switch.
+// Card 115's cards live in HomeCards.tsx and GuideVideos.tsx; the dated
+// greeting line ("Sunday, October 18") is todayLine() in src/lib/studio-home.ts.
 //
 // Every card fails soft: a failed fetch shows a quiet sentence, never a blank.
 // =============================================================================
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   useClient,
   useCurrentUser,
@@ -67,12 +74,8 @@ import {
   WEEK_TYPE,
   type LiveState,
 } from '../../lib/studio-kit';
-import {
-  countBySeverity,
-  isAllClear,
-  publishedIdOf,
-  type CheckResult,
-} from '../../lib/studio-checkup';
+import { publishedIdOf, type CheckResult } from '../../lib/studio-checkup';
+import { todayLine } from '../../lib/studio-home';
 import {
   API_VERSION,
   PUBLISHED_EVENT,
@@ -84,37 +87,19 @@ import {
   useTryAgain,
   useTypeTitle,
 } from './shared';
-import { SEVERITY_TONE } from './CheckupTool';
+import {
+  ComingUp,
+  FixItList,
+  PagesMap,
+  Panel,
+  Quiet,
+  useScheduledTypes,
+  Visitors,
+} from './HomeCards';
+import { GuideVideos } from './GuideVideos';
 import type { KitConfig, QuickAction, ThisWeekTask } from './types';
 
 const NOT_SYSTEM = `!(_type match "sanity.*") && !(_type match "system.*") && !(_type match "media.*") && !(_id in path("versions.**")) && !(_id match "_.**")`;
-
-function CardTitle({ children }: { children: string }) {
-  return (
-    <Heading as="h2" size={1}>
-      {children}
-    </Heading>
-  );
-}
-
-function Panel({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <Card padding={4} radius={3} border>
-      <Stack gap={4}>
-        <CardTitle>{title}</CardTitle>
-        {children}
-      </Stack>
-    </Card>
-  );
-}
-
-function Quiet({ children }: { children: ReactNode }) {
-  return (
-    <Text size={2} muted style={{ lineHeight: 1.6 }}>
-      {children}
-    </Text>
-  );
-}
 
 // -----------------------------------------------------------------------------
 
@@ -315,50 +300,6 @@ function IsItLive({ slowAfter, helperName }: { slowAfter: number; helperName: st
 
 // -----------------------------------------------------------------------------
 
-function SiteHealth({ results, failed }: { results: CheckResult[] | null; failed: boolean }) {
-  const linkTo = useStudioLink();
-  const link = linkTo({ tool: 'checkup' });
-  const counts = results ? countBySeverity(results) : null;
-  return (
-    <Panel title="Site health">
-      {failed ? (
-        <Quiet>The check could not run just now. Try the Checkup in a minute.</Quiet>
-      ) : !results || !counts ? (
-        <Spinner muted />
-      ) : (
-        <Stack gap={4}>
-          {isAllClear(results) ? (
-            <Text size={2}>All clear. Nothing needs fixing right now.</Text>
-          ) : (
-            <Flex gap={2} wrap="wrap">
-              {(['Needs doing', 'Worth a look'] as const).map((s) =>
-                counts[s] ? (
-                  <Badge key={s} tone={SEVERITY_TONE[s]} fontSize={1} padding={2}>
-                    {s}: {counts[s]}
-                  </Badge>
-                ) : null,
-              )}
-            </Flex>
-          )}
-          <Flex>
-            <Button
-              as="a"
-              href={link.href}
-              onClick={link.onClick}
-              text="Open the Checkup"
-              mode="ghost"
-              fontSize={1}
-              padding={2}
-            />
-          </Flex>
-        </Stack>
-      )}
-    </Panel>
-  );
-}
-
-// -----------------------------------------------------------------------------
-
 interface Row {
   _id: string;
   _type: string;
@@ -460,9 +401,14 @@ function Welcome({ config }: { config: KitConfig }) {
     // so the header carries the brand without a literal colour or a gradient.
     <Card tone="primary" padding={[4, 5, 6]} radius={4}>
       <Stack gap={4}>
-        <Text size={2} muted>
-          {`${greeting(new Date())}, ${firstName(user?.name)}`}
-        </Text>
+        <Stack gap={3}>
+          <Text size={1} muted weight="semibold">
+            {todayLine(new Date())}
+          </Text>
+          <Text size={2} muted>
+            {`${greeting(new Date())}, ${firstName(user?.name)}`}
+          </Text>
+        </Stack>
         {/* Heading uses the theme's heading font: the site's display face. */}
         <Heading as="h1" size={[3, 4, 5]} style={{ lineHeight: 1.15 }}>
           {title}
@@ -715,8 +661,11 @@ export function makeHomeTool(config: KitConfig) {
     const guide = linkTo({ tool: 'site-guide' });
     const content = linkTo({ tool: 'structure' });
     const quickUpdate = linkTo({ tool: 'quick-update' });
-    // One Checkup run, shared by Site health and a "Checkup clear" job (card 111).
+    // One Checkup run, shared by the Fix-it list and a "Checkup clear" job (card 111).
     const checkup = useCheckup(config);
+    // Coming up shows only where some type has "Publish automatically at" (card 115).
+    const scheduledTypes = useScheduledTypes();
+    const pages = config.pages ?? [];
 
     const ask = config.helper.email
       ? `mailto:${config.helper.email}?subject=${encodeURIComponent(`Help with ${config.siteName}`)}&body=${encodeURIComponent(
@@ -785,19 +734,12 @@ export function makeHomeTool(config: KitConfig) {
             )}
             <IsItLive slowAfter={config.liveSlowAfterMinutes} helperName={config.helper.name} />
             {config.features.checkup && (
-              <SiteHealth results={checkup.results} failed={checkup.failed} />
+              <FixItList results={checkup.results} failed={checkup.failed} />
+            )}
+            {config.features.comingUp !== false && scheduledTypes.length > 0 && (
+              <ComingUp types={scheduledTypes} />
             )}
             <RecentEdits ignoreTypes={ignore} />
-            <Panel title="Visitors">
-              {config.features.visitors ? (
-                <Quiet>Loading visitor numbers...</Quiet>
-              ) : (
-                <Quiet>
-                  Not set up yet. Once it is, this shows how many people visited the website this
-                  week and which pages they read most.
-                </Quiet>
-              )}
-            </Panel>
             <Panel title={`Ask ${config.helper.name}`}>
               <Quiet>
                 Stuck, or something looks wrong? Say what you were trying to do and what happened.
@@ -817,6 +759,70 @@ export function makeHomeTool(config: KitConfig) {
               )}
             </Panel>
           </Grid>
+
+          <Visitors enabled={config.features.visitors} helperName={config.helper.name} />
+
+          {pages.length > 0 && <PagesMap groups={pages} />}
+
+          {config.features.guide && config.guide.guides.some((g) => g.video) && (
+            <Panel title="Watch how it is done">
+              <GuideVideos
+                guides={config.guide.guides}
+                max={3}
+                footer={(hidden) =>
+                  hidden > 0 ? (
+                    <Flex>
+                      <Button
+                        as="a"
+                        href={guide.href}
+                        onClick={guide.onClick}
+                        text={`${hidden} more in the Site Guide`}
+                        mode="bleed"
+                        fontSize={1}
+                        padding={2}
+                      />
+                    </Flex>
+                  ) : null
+                }
+              />
+            </Panel>
+          )}
+
+          <Flex gap={2} align="center" wrap="wrap">
+            <Text size={2} muted>
+              Need help?
+            </Text>
+            {config.features.guide && (
+              <Button
+                as="a"
+                href={guide.href}
+                onClick={guide.onClick}
+                text="Site Guide"
+                mode="bleed"
+                tone="primary"
+                fontSize={2}
+                padding={2}
+              />
+            )}
+            {config.features.guide && (
+              <Text size={2} muted>
+                or
+              </Text>
+            )}
+            {ask ? (
+              <Button
+                as="a"
+                href={ask}
+                text={`Ask ${config.helper.name}`}
+                mode="bleed"
+                tone="primary"
+                fontSize={2}
+                padding={2}
+              />
+            ) : (
+              <Text size={2} muted>{`Ask ${config.helper.name}`}</Text>
+            )}
+          </Flex>
 
           <Flex gap={2} wrap="wrap">
             {config.features.tour && (

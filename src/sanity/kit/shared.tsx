@@ -353,7 +353,7 @@ export function useLiveData(): LiveData | null {
 // it too when it is set. A cookie-only login has no token, so the route says
 // "sign in again" and the editor can still ask for help.
 
-function studioToken(client: { config: () => { token?: string; projectId?: string } }) {
+export function studioToken(client: { config: () => { token?: string; projectId?: string } }) {
   const cfg = client.config();
   if (cfg.token) return cfg.token;
   try {

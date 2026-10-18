@@ -96,6 +96,33 @@ export interface QuickAction {
   icon?: ComponentType;
 }
 
+/** One link on Home's "Your pages" card (PORTS.md card 115). */
+export interface PageMapLink {
+  /** The page's name as the editor knows it ("Plan your visit"). */
+  title: string;
+  /** Where it goes: usually { doc, type }; a field path (`field`) opens that part. */
+  target: StudioTarget;
+  /** Optional one line under the name. */
+  detail?: string;
+  /** An @sanity/icons icon. No emoji. */
+  icon?: ComponentType;
+}
+
+/** One group on Home's "Your pages" card (PORTS.md card 115). */
+export interface PageMapGroup {
+  /** "Main pages", "Collections", "Site-wide settings". */
+  title: string;
+  /** Optional one line under the group's title. */
+  detail?: string;
+  links?: PageMapLink[];
+  /**
+   * Also list every document of this type by name, after `links` ('page' for
+   * custom pages), so a page built tomorrow shows up without a config change.
+   * Pages already linked anywhere on the card are skipped.
+   */
+  listType?: string;
+}
+
 /** One stop of the first-run tour. */
 export interface TourStep {
   title: string;
@@ -109,6 +136,13 @@ export interface KitGuide {
   title: string;
   lead: string;
   body: unknown[];
+  /**
+   * A short clip showing the job (PORTS.md card 115): a file in public/
+   * ("/guides/post-a-notice.mp4"), a YouTube or Vimeo link, or any https
+   * address (opens in a new tab). Guides with one show in "Watch how it is
+   * done" on Home and in the Site Guide; with none, the row hides itself.
+   */
+  video?: string;
 }
 
 export interface KitConfig {
@@ -177,6 +211,12 @@ export interface KitConfig {
     forType?: Record<string, string[]>;
   };
 
+  /**
+   * Home's "Your pages" card (card 115): every page the editor can change, in
+   * groups, each a one-click link. Missing or empty hides the card.
+   */
+  pages?: PageMapGroup[];
+
   /** Home's quick actions, in order. Empty or missing shows the two plain buttons. */
   quickActions?: QuickAction[];
 
@@ -204,8 +244,17 @@ export interface KitConfig {
     tour: boolean;
     trash: boolean;
     publishNote: boolean;
-    /** Visitors card. False shows a calm "not set up yet" until the route exists. */
+    /**
+     * Visitors card. True asks /api/studio/visitors/ (card 115), which says
+     * "not set up yet" itself until the Worker has its Cloudflare settings.
+     * False shows that sentence without asking.
+     */
     visitors: boolean;
+    /**
+     * Home's "Coming up" card (card 115): drafts with a "Publish automatically
+     * at" time. Missing counts as on; it shows only when some type has publishAt.
+     */
+    comingUp?: boolean;
     /** The status line under the top bar (card 110). Missing counts as on. */
     navbarStatus?: boolean;
     /** The "Help for this page" document panel (card 110). Missing counts as on. */

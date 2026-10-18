@@ -27,6 +27,12 @@ import type { StudioTarget } from './studio-kit.ts';
 
 export type Severity = 'Needs doing' | 'Worth a look' | 'For information';
 
+/** One page or thing a finding is about, for Home's Fix-it list (PORTS.md card 115). */
+export interface FindingItem {
+  name: string;
+  target: StudioTarget;
+}
+
 export interface Finding {
   severity: Severity;
   label: string;
@@ -34,6 +40,14 @@ export interface Finding {
   target?: StudioTarget;
   /** Words on the "Take me there" button. */
   targetLabel?: string;
+  /**
+   * Card 115: each page or thing the finding is about, with its own link, so
+   * Home's Fix-it list can name them one by one. Optional: a finding without
+   * items shows on Home as one row from its label.
+   */
+  items?: FindingItem[];
+  /** What is wrong with each item, short ("A picture needs a description"). */
+  itemLabel?: string;
 }
 
 export interface CheckResult extends Finding {
@@ -80,6 +94,27 @@ export function listNames(names: string[], max = 4): string {
 
 export const isDraftId = (id: string) => id.startsWith('drafts.');
 export const publishedIdOf = (id: string) => (isDraftId(id) ? id.slice('drafts.'.length) : id);
+
+/** One Fix-it item per document (card 115), each opening that document (at `field`). */
+export function itemsOf(
+  docs: Doc[],
+  nameOf: (doc: Doc) => string,
+  field?: (doc: Doc) => string | undefined,
+): FindingItem[] {
+  const seen = new Set<string>();
+  const out: FindingItem[] = [];
+  for (const doc of docs) {
+    const id = publishedIdOf(doc._id);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const f = field?.(doc);
+    out.push({
+      name: nameOf(doc),
+      target: { doc: id, type: doc._type, ...(f ? { field: f } : {}) },
+    });
+  }
+  return out;
+}
 
 /** Open the one document, or say "Open the first one" when there are several. */
 export function openFirst(docs: Doc[], field?: string): Pick<Finding, 'target' | 'targetLabel'> {
@@ -189,6 +224,8 @@ export function genericRules(opts: GenericRuleOptions = {}): CheckupRule[] {
           label: `${plural(hits.length, 'picture')} with no description`,
           detail: `On ${listNames(docs.map(nameOf))}. Each picture needs a few words saying what it shows. They are read aloud to people who cannot see it, and Google reads them too.`,
           ...openFirst([hits[0].doc], hits[0].field),
+          items: itemsOf(docs, nameOf, (d) => hits.find((h) => h.doc._id === d._id)?.field),
+          itemLabel: 'A picture needs a description',
         };
       },
     },
@@ -208,6 +245,8 @@ export function genericRules(opts: GenericRuleOptions = {}): CheckupRule[] {
           label: `${plural(missing.length, 'page')} with no Google description`,
           detail: `${listNames(missing.map(nameOf))}. The description is the line Google shows under the page's name. Without one, Google picks some words itself.`,
           ...openFirst(missing, 'seoDescription'),
+          items: itemsOf(missing, nameOf, () => 'seoDescription'),
+          itemLabel: 'No Google description',
         };
       },
     },
@@ -235,6 +274,8 @@ export function genericRules(opts: GenericRuleOptions = {}): CheckupRule[] {
           label: `${plural(broken.length, 'page')} linking to something that is not on the website`,
           detail: `${listNames(broken.map(nameOf))}. A link or a choice on it points at something that was removed or has not been published. Publish that, or change the link.`,
           ...openFirst(broken),
+          items: itemsOf(broken, nameOf),
+          itemLabel: 'Links to something not on the website',
         };
       },
     },
@@ -252,6 +293,8 @@ export function genericRules(opts: GenericRuleOptions = {}): CheckupRule[] {
           label: `${plural(old.length, 'change')} waiting more than ${staleDays} days`,
           detail: `${listNames(old.map(nameOf))}. You started a change and have not pressed Publish. Publish it, or open it and use "Discard changes" if you no longer want it.`,
           ...openFirst(old),
+          items: itemsOf(old, nameOf),
+          itemLabel: `Not published for over ${staleDays} days`,
         };
       },
     },
@@ -339,6 +382,8 @@ export function unconfirmedRule(
         label: `${plural(hits.length, 'page')} with facts still to confirm`,
         detail: `${listNames(hits.map(nameOf))}. Some words on these are marked "to be confirmed" or not yet ticked as confirmed. Check them, correct them if needed, and remove the marker.`,
         ...openFirst(hits),
+        items: itemsOf(hits, nameOf),
+        itemLabel: 'Facts to confirm',
       };
     },
   };
