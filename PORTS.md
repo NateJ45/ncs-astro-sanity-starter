@@ -231,8 +231,9 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 112 | React 19.3.1, one copy in the tree                                             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)              | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)              | n/a     | yes         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
 | 115 | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 116 | Studio as the site's admin: paper, navy chrome, fonts, text in site type       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 117 | Studio workflow: change note, expiring preview links, Messages, table panes    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -242,6 +243,9 @@ are `n/a` as in row 106. first-baptist-auburn has no column.
 
 Row 111 (2026-10-18): needs cards 106 and 110 first, so the same cells as row 110. first-baptist-auburn has no column; it
 took the card on branch `feat/studio-remembers` the same day.
+
+Row 116 (2026-10-18): needs card 110 first, so the same cells as row 110; first-baptist-auburn has no column (branch
+`feat/studio-branded-look`, PR opened after the starter merges).
 
 Row 113 (2026-10-18): the hotspot half suits every site with `SanityImage.astro`; the JSON-LD half only matters to a
 site whose Site settings `businessType` feeds `localBusinessSchema()`. first-baptist-auburn and fbcm have no column;
@@ -8768,8 +8772,8 @@ needs `@sanity/client` installed for its dummy-host probe; every site has it.
 (presacademy, first-baptist-auburn) goes red on its next run until it takes the copy, so per the Projects
 `CLAUDE.md` order: this card's PR merges first, then each site's.
 
-**Status, 2026-10-18.** Starter `yes`. stonesteps-50k `yes` (origin; it now takes the starter's header). fbcm,
-presacademy and first-baptist-auburn adopt it in PRs opened the same day. Sites with no `publish-due.mjs`
+**Status, 2026-10-18.** Starter `yes`. stonesteps-50k `yes` (origin; it now takes the starter's header). fbcm (fbcm#73),
+presacademy (presacademy#106) and first-baptist-auburn (fbc-auburn#58) took it the same day, each merged green. Sites with no `publish-due.mjs`
 (reid-design-site, mas-monograms, nixoncreativestudio) `n/a`.
 
 ## Card 115: the Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, guide videos (2026-10-18)
@@ -8813,6 +8817,71 @@ OPERATIONS.md "Visitor numbers" for the token and the two vars. Marked-file orde
 **Status, 2026-10-18.** Starter `yes` (unit-tested; the route's 403/401 checked under `wrangler dev`; signed-in views and
 real numbers unverified, PENDING item 18). first-baptist-auburn: branch pushed, PR after this card merges. Every other
 site `no`.
+
+## Card 116: the Studio reads as the site's own admin: paper, navy chrome, fonts, text in the site's type (2026-10-18)
+
+**Origin:** the Theology Matters WordPress admin, which looks like the site it runs (cream ground, navy chrome, a brand
+accent, serif headings). The family's Studio, after card 110, still opened in Sanity's dark default on a laptop set to
+dark, named the brand fonts without loading them (so it drew in system fonts), and edited rich text in Sanity's small UI
+type. Built in the starter, then first-baptist-auburn.
+
+**Canonical:** PORTABLE: `src/lib/studio-theme.ts` (+ `studio-theme.test.ts`), `src/sanity/studioTheme.ts`,
+`src/sanity/components/StudioLook.tsx`, the `docs/agent/studio-kit.md` "The look" section. Per site (NOT portable):
+`src/sanity/studioFonts.css` (generated by `apply-brand` from `fonts.display.imports` and `fonts.body.imports`), the
+`sanity.config.ts` lines, and `apply-brand.mjs`'s `rewriteStudioFonts` step. Optional `brand.config.json` keys:
+`studio.paper`, `studio.chrome` (hex).
+
+**What it adds.** All of it is `@sanity/ui`'s own `buildTheme` and Sanity's documented extension points; no package
+changes and no CSS aimed at Sanity's class names. `@sanity/themer` was weighed (installable since card 112) and not
+used: sites do not carry it, and nothing here needs it.
+
+- **Light by default.** `seedLightScheme()` writes "light" into Sanity's appearance key once per browser, before the
+  Studio reads it, when nothing (or "system") is stored. A marker key makes it once only, so a later pick of System or
+  Dark sticks. An editor who had "system" stored gets light once.
+- **A warm paper.** Palette white is `studio.paper`, else the site's light background mixed 60% toward `#F4EEE1`.
+  The greys keep Sanity's luminance per step (so every contrast Sanity tuned holds) but take the paper's hue on 50 to
+  400 and the dark background's on 500 to 950, chroma capped so a grey stays a grey.
+- **Navy chrome.** `studioLook(fonts)` is a navbar middleware wrapping `renderDefault` in a `ThemeProvider` with a
+  second theme (`buildChromeTheme`), always `scheme="dark"`. Its background is `studio.chrome`, else
+  `--color-primary-dark`, else `--primary`, darkened until white text reaches 8:1. Every hue in that theme is
+  re-laddered (`relativeTo`): each step gets the contrast against the navbar that Sanity's step has against its own
+  dark page, so hovers, muted text, focus rings and the release-perspective tones still work on a mid-dark colour.
+- **Deeper status buttons.** In light mode the solid positive, caution and critical buttons use steps 600/700/800
+  instead of 500/600/700, so Publish's white label reads at AA (Sanity's own green Publish is 2.6:1). Dark unchanged.
+- **Fonts, radius, weight.** `studioFonts.css` loads the site's @fontsource files (sanity.config.ts imports it; the
+  Sanity CLI and `load-schema.mjs` both take a CSS import). Heading weights are capped at the heaviest weight the
+  display face ships (`displayWeight`: Young Serif 400 only, so never a faked bold). Sanity's radius scale is scaled by
+  `brand.radius` against 8px (0.5x to 2x).
+- **Text in the site's type.** `withEditorTypography(schemaTypes, fonts)` walks the schema and gives each Portable Text
+  style without a `component` one from `EDITOR_STYLES`: body 17px/1.6 in the body font, H1 to H4 in the display font
+  (32, 26, 21, 18px), a quote with a 3px rule in the link colour. Spacing between blocks stays Sanity's. A block with
+  no `styles` list is left on Sanity's defaults. The style menu shows the same faces, capped at 20px.
+- **The gate.** `studio-theme.test.ts` builds the real themes for the site's brand and three awkward ones and asserts,
+  in both schemes and on the navbar: text at 4.5:1, muted text at 4.5:1 or within 10% of Sanity's own where Sanity is
+  under it (the paper is not white), the solid button of every tone (default, primary, positive, caution, critical) at
+  4.5:1, links, focus rings, hover visible on the navbar, white on the navbar at 8:1, status hues Sanity's. It also
+  fails when `studioFonts.css` misses a font file the brand names.
+
+**Measured (first-baptist-auburn, #235E93 accent, #1B4A75 chrome):** paper #F8F5ED; light text 13.4:1, muted 6.4:1,
+Publish 5.0:1; dark text 14.0:1; navbar white 9.2:1, muted 6.5:1, primary button 6.5:1, focus ring 3.7:1.
+
+**Signed out only, so far.** Verified in a dev server on the login and "project not found" screens, light and dark, 1280
+and 390, and in first-baptist-auburn on its real login screen. The navbar and the editor typography were also rendered in a
+throwaway page using the same themes and components. In a real signed-in Studio they are still unchecked
+(`docs/PENDING.md` item 19).
+
+**Known, Sanity's own:** the small "Sanity" wordmark under the login box follows the computer's light or dark setting,
+not the Studio's, so a light Studio on a dark-mode computer shows it white on the paper. Leave it; fixing it means
+styling Sanity's internals.
+
+**Adopting it in a site.** Needs card 110. Copy the three PORTABLE source files and the test, take the
+`sanity.config.ts` lines (`import './src/sanity/studioFonts.css'`, `STUDIO_FONTS`, `buildStudioTheme`,
+`seedLightScheme()`, `studioLook(STUDIO_FONTS)` before the kit, `withEditorTypography(schemaTypes, STUDIO_FONTS)`),
+take apply-brand's `rewriteStudioFonts` step, run `npm run apply-brand` (or write `studioFonts.css` by hand from the
+brand's imports), then `npm run test:unit`. Marked-file order: the starter merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-branded-look`, PR after this
+merges. Other sites `no`.
 
 ## Card 117: the Studio's safety net: morning change note, expiring preview links, Messages, table panes (2026-10-18)
 

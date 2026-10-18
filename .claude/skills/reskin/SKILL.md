@@ -189,7 +189,7 @@ This rewrites:
 - `src/styles/globals.css` -- `@theme` palette tokens, font tokens, `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string
 - `src/data/site.ts` -- `name`, `domain`, `brandColors` (derived fields `storageKeyPrefix`, `themeStorageKey`, `studio` are computed automatically -- never stale)
 - `src/data/layout.ts` -- the `layout` block (header, hero, density, cards); defaults reproduce the original layout
-- `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json; the Studio's colours come from @sanity/ui's built-in light/dark theme and are not brand-driven)
+- `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json), and `src/sanity/studioFonts.css` (the font files the Studio loads). The Studio's colours are read from brand.config.json at build time (PORTS.md cards 110 and 116; optional `studio.accent`, `studio.paper`, `studio.chrome`); `npm run test:unit` is their contrast gate
 - `scripts/generate-og-default.mjs` -- `wordmark`, `tagline`
 - `scripts/og-theme.mjs` -- `OG_THEME` share-image colors and font stack (never `scripts/lib/render-og.mjs`, which is PORTABLE; card 104)
 - `scripts/generate-og-pages.mjs` -- `WORDMARK` fallback string

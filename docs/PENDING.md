@@ -335,7 +335,16 @@ GraphQL field names were taken from the dashboard's own query and have not been 
 guide with a `video` playing from Home and the Site Guide. first-baptist-auburn is that site; Nathan creates the
 token there (Account Analytics: Read).
 
-### 19. Card 117 (workflow tools): the signed-in and deployed checks (opened 2026-10-18)
+### 19. Card 116 (the Studio look): the signed-in checks (opened 2026-10-18)
+
+The theme, the fonts and light-by-default are verified signed out (login and "project not found" screens, light and
+dark, 1280 and 390) and by the colour gate. Only a signed-in Studio shows the rest: the navbar in the chrome colour in
+both appearances (tool tabs, search, the user menu and its Appearance switch, the kit's status line under it), a
+release perspective tinting the navbar, and a Portable Text field (journal body, rich text section) showing body,
+H2, H3 and a quote in the site's fonts, with the style menu readable and list bullets lined up. Known and left alone: the login screen's small "Sanity"
+wordmark follows the computer's light or dark setting, not the Studio's.
+
+### 20. Card 117 (workflow tools): the signed-in and deployed checks (opened 2026-10-18)
 
 Unit-tested (`change-summary.test.mjs`, `preview-share.test.ts`, `studio-messages.test.ts`, `studio-table.test.ts`),
 `astro check` and the build clean, the two endpoints answered as designed under `wrangler dev` signed out. Not yet
