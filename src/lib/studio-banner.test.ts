@@ -17,7 +17,7 @@ const NAVY = '#1B4A75';
 
 describe('readableOn', () => {
   it('keeps a colour that reads at the bar and drops one that does not', () => {
-    assert.equal(readableOn('#E8A93A', NAVY), null); // gold on navy, about 4.1:1: not body text
+    assert.equal(readableOn('#E8A93A', NAVY), null); // gold on navy, about 4.4:1: not body text
     assert.equal(readableOn('#E8A93A', NAVY, 3), '#E8A93A'); // but fine as large text
     assert.equal(readableOn('#2C5B3A', NAVY), null); // green on navy vanishes
     assert.equal(readableOn('#FFFFFF', NAVY), '#FFFFFF');
