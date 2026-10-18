@@ -33,18 +33,22 @@ interface PagefindSearch {
   totalFilters?: Record<string, Record<string, number>>;
   filters?: Record<string, Record<string, number>>;
 }
+type PagefindFilters = Record<string, string | { any: string[] }>;
 interface PagefindApi {
   options: (o: Record<string, unknown>) => Promise<void>;
   init: () => Promise<void> | void;
+  filters: () => Promise<Record<string, Record<string, number>>>;
   debouncedSearch: (
     term: string,
-    opts?: { filters?: Record<string, string> },
+    opts?: { filters?: PagefindFilters },
     ms?: number,
   ) => Promise<PagefindSearch | null>;
-  search: (term: string, opts?: { filters?: Record<string, string> }) => Promise<PagefindSearch>;
+  search: (term: string, opts?: { filters?: PagefindFilters }) => Promise<PagefindSearch>;
 }
 
 let pagefindPromise: Promise<PagefindApi> | null = null;
+/** Every page type in the index, read once after Pagefind starts. */
+let allTypes: string[] = [];
 
 /** Loads Pagefind once per visit, on first use. */
 export function loadPagefind(): Promise<PagefindApi> {
@@ -55,6 +59,14 @@ export function loadPagefind(): Promise<PagefindApi> {
     pagefindPromise = (import(/* @vite-ignore */ url) as Promise<PagefindApi>).then(async (pf) => {
       await pf.options({ excerptLength: 22 });
       await pf.init();
+      // Pagefind 1.5 only counts results per type when a search carries a
+      // filter, so "All" searches with every type ({ any: [...] }); that is
+      // what fills totalFilters for the filter buttons.
+      try {
+        allTypes = Object.keys((await pf.filters()).type ?? {});
+      } catch {
+        allTypes = [];
+      }
       return pf;
     });
     pagefindPromise.catch(() => {
@@ -220,7 +232,11 @@ export function mountSearchPanel(
       return;
     }
 
-    const filterOpt = activeType ? { filters: { type: activeType } } : {};
+    const filterOpt: { filters?: PagefindFilters } = activeType
+      ? { filters: { type: activeType } }
+      : allTypes.length
+        ? { filters: { type: { any: allTypes } } }
+        : {};
     const res = immediate
       ? await pf.search(term, filterOpt)
       : await pf.debouncedSearch(term, filterOpt, 220);

@@ -12,7 +12,8 @@
 // whatever else the visitor has.
 //
 // Buttons are the site's secondary button (the outline style CtaLink uses), so
-// they stay in the page's one button family (rule 17). A site whose buttons are
+// they stay in the page's one button family (rule 17). data-pagefind-ignore
+// keeps "Share this, Facebook, X" out of every search excerpt (card 123). A site whose buttons are
 // its own classes passes them as `buttonClass` (keep a gap for the icon).
 //
 //   <ShareButtons title={sermon.title} path={`/sermons/${slug}/`} />
@@ -55,6 +56,7 @@ const button =
   role="group"
   aria-labelledby={headingId}
   data-share
+  data-pagefind-ignore="all"
   data-share-url={url}
   data-share-title={title}
 >

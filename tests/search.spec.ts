@@ -76,6 +76,25 @@ test.describe('site search', () => {
     await expect(dialog).toBeHidden();
   });
 
+  test('type filters narrow the results when a word matches two kinds of page', async ({
+    page,
+  }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await settle(page);
+    await page.locator('[data-site-search-open]:visible').first().click();
+    const dialog = page.locator('[data-site-search-dialog]');
+    // A word every site uses on its FAQ page and elsewhere.
+    await dialog.locator('[data-search-input]').fill('the');
+    await expect(dialog.locator('a[data-search-result]').first()).toBeVisible({ timeout: 10_000 });
+    const chips = dialog.locator('.site-search__chip');
+    test.skip((await chips.count()) < 3, 'this site has only one kind of page for that word');
+    await expect(chips.first()).toHaveAttribute('aria-pressed', 'true');
+    await chips.nth(1).click();
+    await expect(chips.nth(1)).toHaveAttribute('aria-pressed', 'true');
+    await expect(chips.nth(1)).toBeFocused();
+    await expect(dialog.locator('[data-search-status]')).toContainText(' in ');
+  });
+
   test('no results shows the friendly suggestions', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await settle(page);
@@ -117,7 +136,7 @@ test.describe('site search', () => {
     await page.setViewportSize({ width: 375, height: 800 });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await settle(page);
-    await page.getByRole('button', { name: /open menu/i }).click();
+    await page.getByRole('button', { name: /open (the )?menu/i }).click();
     await page
       .getByRole('link', { name: /search the site/i })
       .last()
