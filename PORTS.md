@@ -225,7 +225,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 105 | A text hero (no photo, or editorial) still renders its buttons                 | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 | 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 107 | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page  | n/a     | yes         | yes      | yes              | partial       | n/a            | n/a                | partial             | yes            |
-| 108 | The header logo renders with JS off (`<noscript>` light variant)               | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | no             |
+| 108 | The header logo renders with JS off (`<noscript>` light variant)               | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8471,6 +8471,6 @@ always had a `src`.
 `javaScriptEnabled: false`: the visible header logo has `naturalWidth > 0` and the src-less img computes to
 `display: none`. Then with JS on, in light and dark: one logo request per load and the right variant shown.
 
-**Status, 2026-10-17.** Starter `yes`. stonesteps-50k has the same src-less header logo and stays `no`. The other
-matrix sites have no theme-aware header logo (`n/a`). first-baptist-auburn (no column) takes it in the PR that follows
-this card.
+**Status, 2026-10-17.** Starter `yes`. stonesteps-50k had the same src-less header logo and took it the same day
+(stonesteps-50k#126), hence `yes`. The other matrix sites have no theme-aware header logo (`n/a`). first-baptist-auburn
+(no column) took it in fbc-auburn#31.
