@@ -8974,7 +8974,7 @@ banner) and `src/sanity/kit/types.ts` (`HomeBannerConfig`, `KitConfig.homeBanner
 **Auburn's dressing (for reference).** The full-colour mark on the disc (the white mark loses the story colours),
 the stone path from the water to the red cross along the foot (two new presets in its `scripts/lib/stone-mosaic.mjs`,
 `banner` and `bannerPhone`, with the share card's stricter filters so every stone is rounded; `npm run gen:stones`
-writes `public/studio/home-banner-path{,-phone}.svg`), the name in gold, and "Auburn" in Auburn Stone in the footer
+writes `public/studio-banner/stone-path{,-phone}.svg`), the name in gold, and "Auburn" in Auburn Stone in the footer
 signature's on-navy colours (white, water, gold).
 
 **Verified.** Unit tests for the pure half. The banner rendered in a throwaway page with the real Studio theme, light
@@ -8982,8 +8982,9 @@ and dark appearance, 1280 and 375 (no horizontal scroll), for the starter and fo
 in a signed-in Studio (the same gap as card 116, `docs/PENDING.md`).
 
 **Adopting it in a site.** Needs cards 110, 115 and 116. Copy the four PORTABLE kit and lib files and the test
-byte-identically, add `homeBanner` to `kit.config.ts` (at least `mark`), put any files it names in `public/`,
-then `npm run test:unit` and `npm run sync-check`. Marked-file order: starter PR first, then the site PR.
+byte-identically, add `homeBanner` to `kit.config.ts` (at least `mark`), put any files it names in `public/` (not
+under `public/studio/`, the Studio's own address), then `npm run test:unit` and `npm run sync-check`. Marked-file
+order: starter PR first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-home-banner`, PR after this
 merges. Other sites `no`.

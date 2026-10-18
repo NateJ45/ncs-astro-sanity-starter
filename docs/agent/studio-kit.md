@@ -238,7 +238,8 @@ Everything site-specific is optional, in `kitConfig.homeBanner`:
 The lettering's font file must be the site's own (a path starting `/`, same origin), loaded by a small `@font-face`
 the banner writes; colours under 3:1 on the banner are dropped, and the heading font shows until the file loads. The
 mark and motif are decorative (`alt=""`); the heading carries the name, with an `aria-label` when it is lettered.
-The starter sets only `mark: '/favicon.svg'`.
+The starter sets only `mark: '/favicon.svg'`. Keep a site's banner files out of `public/studio/`, which is the Studio's
+own address; a folder such as `public/studio-banner/` is clear of it.
 
 ## The look (card 116)
 
