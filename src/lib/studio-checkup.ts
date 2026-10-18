@@ -69,7 +69,17 @@ export interface CheckupContext {
   nameOf: (doc: Doc) => string;
   /** A readable name for a type ("Announcement"). */
   typeTitle: (type: string) => string;
+  /**
+   * Reports written by scheduled jobs (REPORT_TYPES, e.g. the weekly link
+   * check, card 122). Kept OUT of docs/published/drafts, so a weekly write
+   * never reads as "the last change was published today" and no content rule
+   * walks a report as if it were a page.
+   */
+  reports: Doc[];
 }
+
+/** Document types that are reports about the site, not content (card 122). */
+export const REPORT_TYPES = new Set(['linkReport']);
 
 export interface CheckupRule {
   id: string;
@@ -401,10 +411,13 @@ export function runCheckup(
   rules: CheckupRule[],
   opts: Pick<CheckupContext, 'nameOf' | 'typeTitle'> & { now?: number },
 ): CheckResult[] {
+  const reports = docs.filter((d) => REPORT_TYPES.has(d._type));
+  const content = docs.filter((d) => !REPORT_TYPES.has(d._type));
   const ctx: CheckupContext = {
-    docs,
-    published: docs.filter((d) => !isDraftId(d._id)),
-    drafts: docs.filter((d) => isDraftId(d._id)),
+    docs: content,
+    published: content.filter((d) => !isDraftId(d._id)),
+    drafts: content.filter((d) => isDraftId(d._id)),
+    reports,
     now: opts.now ?? Date.now(),
     nameOf: opts.nameOf,
     typeTitle: opts.typeTitle,

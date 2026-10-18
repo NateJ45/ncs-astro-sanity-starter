@@ -734,10 +734,12 @@ export async function getAllPageSlugs(): Promise<string[]> {
 // and Footer.astro can inject these alongside the built-in links.
 //
 // Archived pages drop out: the page is not built, so a menu link to it would be
-// a 404 in the middle of the navigation.
+// a 404 in the middle of the navigation. Hidden pages drop out too (card 122):
+// "Hide this page from Google and the menus" means the menus as well, even if
+// "Show in the top menu" was left on.
 export async function getNavPages() {
   return sanityFetch(
-    `*[_type == "page" && defined(slug.current) && archived != true && (addToMainNav == true || addToFooter == true)]{
+    `*[_type == "page" && defined(slug.current) && archived != true && hideFromSearch != true && (addToMainNav == true || addToFooter == true)]{
     title,
     "slug": slug.current,
     navLabel,

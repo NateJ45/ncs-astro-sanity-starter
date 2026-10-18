@@ -90,7 +90,8 @@ unchanged; the helper adds two things:
   draws a live Google result and a live share card as the editor types. It is an INPUT and
   must never be re-registered as a document VIEW: a view mounted inside the Presentation
   tool has no `FormValueProvider`, so `useFormValue` throws and freezes the panel.
-- `hideFromSearch` -- "Keep this page out of Google". **Two halves, and both are required**,
+- `hideFromSearch` -- "Hide this page from Google and the menus" (card 122 widened it to the menus,
+  the menu picker and site search too; `docs/agent/private-pages.md`). **Two halves, and both are required**,
   or the switch silently does nothing: `src/pages/[slug].astro` passes `noindex` to
   BaseLayout (which emits `<meta name="robots" content="noindex, follow">`), and the
   `sitemap()` filter in `astro.config.mjs` drops the same path using a build-time query.

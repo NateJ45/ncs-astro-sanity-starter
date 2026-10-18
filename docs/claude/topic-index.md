@@ -27,6 +27,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Performance budgets + Lighthouse                                                                         | `docs/agent/performance.md`                                          |
 | Content data + Sanity integration                                                                        | `docs/agent/sanity.md`                                               |
 | Studio kit (Home, Site Guide, Checkup, staff view, Trash; `kit.config.ts`)                               | `docs/agent/studio-kit.md`                                           |
+| Hidden pages, password pages (security note), Checkup link and heading checks                            | `docs/agent/private-pages.md`                                        |
 | Deployment + env vars + rebuild model                                                                    | `docs/agent/deployment.md`                                           |
 | Editor-driven vs hardcoded                                                                               | `docs/agent/editor-vs-hardcoded.md`                                  |
 | Cross-repo shared improvements (port cards + applied-to matrix + drift check)                            | `PORTS.md`                                                           |

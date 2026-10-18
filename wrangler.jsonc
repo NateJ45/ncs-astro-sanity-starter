@@ -112,6 +112,12 @@
   // Without it the dialog says links are not set up and the /preview route
   // ignores ?share=. The Messages tool reads CONTACT_DB above (no new binding).
 
+  // ── Password pages (src/pages/private/[slug].astro) ──────────────────────
+  // PORTS.md card 122. One secret, 32+ random characters, signs the access
+  // cookie: npx wrangler secret put PRIVATE_PAGE_SECRET
+  // Pages are read with SANITY_TOKEN (above). Without both, /private/* shows
+  // "not ready yet" and never a page. docs/agent/private-pages.md.
+
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     // @astrojs/cloudflare v14 splits the build into dist/client (static assets)

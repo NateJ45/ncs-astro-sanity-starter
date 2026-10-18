@@ -16,6 +16,7 @@ import { journalEntry } from './journalEntry'; // scaffold: journal
 import { journalPage } from './journalPage'; // scaffold: journal
 import { navLink } from './navLink';
 import { page } from './page';
+import { privatePage } from './privatePage';
 import { pageSectionSchemas, syncedSection } from './sections';
 import { richSectionSchemas } from './richSections';
 import { notFoundPage } from './notFoundPage';
@@ -73,6 +74,9 @@ export const schemaTypes = [
   journalEntry, // scaffold: journal
   // Custom pages built from the section library (multi-instance, not a singleton)
   page,
+  // Pages only people with the password can see (card 122). Stored under the
+  // privatePage. id path, which the public API never serves.
+  privatePage,
   // One saved section, kept for reuse on other pages. Not content: nothing
   // about a preset reaches the live site until it is added to a page.
   sectionPreset,

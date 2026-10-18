@@ -43,6 +43,67 @@ export type Redirect = {
   note?: string;
 };
 
+export type PrivatePage = {
+  _id: string;
+  _type: 'privatePage';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  password?: {
+    alg?: string;
+    iterations?: number;
+    salt?: string;
+    hash?: string;
+    setAt?: string;
+  };
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & LogoStripSection)
+    | ({
+        _key: string;
+      } & EmbedSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
+  >;
+};
+
+export type Slug = {
+  _type: 'slug';
+  current?: string;
+  source?: string;
+};
+
 export type JournalCategory = {
   _id: string;
   _type: 'journalCategory';
@@ -52,12 +113,6 @@ export type JournalCategory = {
   title?: string;
   slug?: Slug;
   description?: string;
-};
-
-export type Slug = {
-  _type: 'slug';
-  current?: string;
-  source?: string;
 };
 
 export type ProcessStep = {
@@ -2235,8 +2290,9 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | Photo
   | Redirect
-  | JournalCategory
+  | PrivatePage
   | Slug
+  | JournalCategory
   | ProcessStep
   | Service
   | SanityImageCrop
