@@ -229,6 +229,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 109 | Authoring kit: page templates, picture picker, patterns, synced sections       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 110 | Studio looks like the site: name, mark, colours, status line, help panel       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 112 | React 19.3.1, one copy in the tree                                             | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | staged              | staged         |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -962,13 +963,13 @@ unexplainable, read the lines **above** the `MiniflareCoreError`.
 `react-dom` and `react-is` all `19.2.7`, no caret. `react-is` was added at the same time
 (the Sanity stack needs it, and it drifts the same way).
 
-**Note, 2026-10-18 (experiment, not a card yet):** branch `exp/react-19.3` moves all three
+**Note, 2026-10-18 (now card 112):** branch `exp/react-19.3` moves all three
 to `19.3.1` exact. The bump removes five nested 19.3.1 copies the Sanity 6.19 tree had
 already pulled in (`sanity`, `@sanity/ui`, `@sanity/visual-editing`, `@sanity/cli-build`)
 and clears the `npm ci` ERESOLVE warning (`@portabletext/editor@8.2.4` peers
 `react@^19.2.8`); scheduler goes 0.27.0 to 0.28.0. Gates, Playwright, build, `wrangler dev`
 and the dev Studio were unchanged. It also makes `@sanity/themer` installable (peers
-`react ^19.3.0`). If it merges it needs its own card (site rollout: react, react-dom,
+`react ^19.3.0`). Merged as PR #140; card 112 has the site rollout (react, react-dom,
 react-is to 19.3.1 exact, `npm install` on the committed lockfile, `npm ls react` single).
 
 **Adjacent, learned in that session:** a stale `package-lock.json` can hide the fix. An
@@ -8653,3 +8654,34 @@ views unverified, PENDING item 17). first-baptist-auburn took it the same day. E
 `tone="primary"` (the positive tone drew a neon green that was off-brand on a reskinned theme; the green "saved"
 card stays). `_seoFields.ts` titles read "Google title" and "Google description" instead of "SEO ..." (titles only,
 field names unchanged). Both files are PORTABLE: copy them into a site that has card 111.
+
+## Card 112: React 19.3.1, one copy in the tree (2026-10-18)
+
+**Origin:** the starter, PR #140 (`exp/react-19.3`, merged 2026-10-18 as `b5138b7`). Sanity 6.19 had already pulled
+nested React 19.3.1 copies in under the family's exact 19.2.7 pin (`sanity`, `@sanity/ui`, `@sanity/visual-editing`,
+`@sanity/cli-build`), so every site shipped two Reacts in its install tree, and `npm ci` printed an ERESOLVE warning
+because `@portabletext/editor` 8.2.4 peers `react ^19.2.8`. Moving the pin to 19.3.1 collapses the tree to one copy.
+
+**Canonical:** `package.json` and `package-lock.json` (NOT PORTABLE; each site moves its own pins). `react`,
+`react-dom` and `react-is` exact at `19.3.1`, no caret. `@types/react` and `@types/react-dom` stay on their carets
+(`^19.2.x` resolves the current types; nothing to move). The rule text is `.claude/rules/dependencies.md` rule 8 and
+card 13 (the exact-pin card this updates).
+
+**What changed, measured in the starter:** gates, Playwright (120/120), `npm run build`, `wrangler dev` and the dev
+Studio unchanged, same warnings. `scheduler` goes 0.27.0 to 0.28.0. The nested copies and the ERESOLVE warning are
+gone. It also makes `@sanity/themer` installable (peers `react ^19.3.0`); the starter has it as a proof test only
+(`src/lib/sanity-themer.test.ts`), not wired into the Studio, so sites do NOT take `@sanity/themer` with this card.
+
+**Adopting it in a site.**
+
+1. Worktree off `origin/main`. `npm install react@19.3.1 react-dom@19.3.1 react-is@19.3.1 --save-exact` on the
+   committed lockfile (never delete or regenerate `package-lock.json`), then `npm ci`.
+2. `npm ls react react-dom react-is` shows one version, every other line `deduped`.
+3. Gates as separate commands: `npm run check`, `npm run build:full`, `npm run test:unit`, `npm run sync-check`,
+   `npm test`. One PR; merge when `build` and `test` are green; check the deployed site.
+
+**Known, not caused by this card:** `astro dev` SSR logs `Invalid hook call` about seven times on first render, on
+19.2.7 and 19.3.1 alike. It does not appear in `astro build` or the deployed site. Not investigated; leave it unless it
+starts breaking a page.
+
+**Status, 2026-10-18.** Starter `yes`. Site rollout in progress the same day (see the matrix row).
