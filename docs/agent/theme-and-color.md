@@ -98,6 +98,8 @@ The URLs come from `getImage()` calls at build time (Astro's image pipeline pre-
 
 Net effect: **only one logo file is ever fetched per page load**, regardless of theme. Lighthouse's "Properly size images" and "Improve image delivery" audits no longer see an inactive variant in the DOM. Toggling the theme via `ThemeToggle` swaps the src in place; navigating via View Transitions re-applies via `astro:after-swap`.
 
+**No-JS fallback (PORTS.md card 108).** Because the header img has no `src` until the inline script runs, the header also renders a `<noscript>` copy with the light variant's `src`, and a scoped rule (`img[data-theme-logo]:not([src]) { display: none; }`) hides the src-less swap img. With JS on, `<noscript>` content is never parsed into markup, so the single fetch above still holds. Keep both pieces if you touch the header logo.
+
 **Don't revert to two img tags with CSS hide/show.** Modern browsers usually skip `display:none + loading="lazy"` fetches, but Lighthouse still analyses the DOM and counts the inactive variant against the score.
 
 The site is designed and tested first in light mode. Don't optimize dark mode at the expense of light.

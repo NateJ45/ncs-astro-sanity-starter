@@ -225,6 +225,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 105 | A text hero (no photo, or editorial) still renders its buttons                 | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
 | 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 107 | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page  | n/a     | no          | yes      | no               | partial       | n/a            | n/a                | partial             | no             |
+| 108 | The header logo renders with JS off (`<noscript>` light variant)               | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8440,3 +8441,28 @@ still plays. Visual baselines should not move, since the Playwright settle helpe
 class). presacademy, reid-design-site and stonesteps-50k `no`. first-baptist-auburn (no column) already sets
 `html.motion` for its own `motion.css` and scopes its `globals.css` copies in the PR that follows this card. fbcm (no column)
 has the unconditional rules and stays `no`.
+
+## Card 108: the header logo renders with JavaScript off (2026-10-17)
+
+**Origin:** found on first-baptist-auburn while verifying card 107 with JavaScript off. Every section showed, but the
+header logo was only its alt text. The theme-aware header `<img data-theme-logo>` ships with no `src` or `srcset` on
+purpose, so the browser fetches nothing until the inline script after it picks the light or dark variant from
+`html.dark`. That keeps one logo fetch per page load, and it also means no JS, no logo.
+**Canonical:** `src/components/Header.astro` (foundation, not PORTABLE).
+
+**The fix.** Right after the swap img, and only when no Site Settings logo is uploaded, the header renders a
+`<noscript>` copy of the logo with the light variant's `src` (a no-JS visitor never gets `html.dark`, so light is the
+right one). A scoped rule in the header's `<style>`, `img[data-theme-logo]:not([src]) { display: none; }`, hides the
+src-less swap img, which only stays src-less when the inline script never ran. With JS on, `<noscript>` content is not
+parsed as markup, so nothing extra is fetched and the single-fetch behaviour is unchanged. The footer logo already
+carries the light `src` (it is lazy, so the swap lands before it loads) and needs nothing. The uploaded-logo branch
+always had a `src`.
+
+**Adopting it in a site.** Where `Header.astro` has an `img` with `data-theme-logo` and no `src` attribute: copy the
+`<noscript>` block (match the swap img's width, height and class) and the scoped CSS rule. Verify with Playwright
+`javaScriptEnabled: false`: the visible header logo has `naturalWidth > 0` and the src-less img computes to
+`display: none`. Then with JS on, in light and dark: one logo request per load and the right variant shown.
+
+**Status, 2026-10-17.** Starter `yes`. stonesteps-50k has the same src-less header logo and stays `no`. The other
+matrix sites have no theme-aware header logo (`n/a`). first-baptist-auburn (no column) takes it in the PR that follows
+this card.
