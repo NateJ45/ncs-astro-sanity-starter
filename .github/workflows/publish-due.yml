@@ -20,8 +20,9 @@ name: Publish scheduled drafts
 # inherits working scheduled publishing on day one.
 #
 # To enable in a fork, per site:
-#   1. Set the SANITY_AUTH_TOKEN repo secret. It must be a WRITE token here
-#      (unlike the backup workflow, where a read token is enough).
+#   1. Set the SANITY_API_WRITE_TOKEN repo secret: a Sanity token with the
+#      Editor role. Not SANITY_AUTH_TOKEN, which the backup workflow uses and
+#      which is usually a READ token (it cannot publish). Card 111.
 #   2. Set the SANITY_PROJECT_ID repo variable to that site's Sanity project id.
 #      Not a secret (it ships in the client bundle), a variable because this
 #      file is a template and every fork has a different one.
@@ -31,6 +32,12 @@ name: Publish scheduled drafts
 # or the variable missing, the workflow logs a warning and skips rather than
 # failing. That is what makes it safe to commit before either exists.
 # workflow_dispatch stays on, so a manual run always works.
+#
+# AFTER A PUBLISH IT REBUILDS THE SITE (card 111). The site is statically built,
+# so a scheduled publish nobody deploys is invisible. When a run published
+# anything it starts deploy.yml itself (workflow_dispatch with the job's own
+# GITHUB_TOKEN, which GitHub allows). With the Sanity publish webhook set up as
+# well, deploy.yml's concurrency group queues the second build.
 #
 # ── HONEST TIMING ────────────────────────────────────────────────────────────
 # */30 means "within about half an hour of the time the editor picked", and the
@@ -49,20 +56,23 @@ jobs:
     steps:
       - id: check
         env:
-          TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
           PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
         run: |
           if [ -n "$TOKEN" ] && [ -n "$PROJECT_ID" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::SANITY_AUTH_TOKEN secret and/or SANITY_PROJECT_ID variable not set; skipping scheduled publishing. Expected in the unforked template."
+            echo "::warning::SANITY_API_WRITE_TOKEN secret and/or SANITY_PROJECT_ID variable not set; skipping scheduled publishing. Expected in the unforked template."
           fi
 
   publish:
     needs: gate
     if: needs.gate.outputs.ready == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write # to start deploy.yml after a publish
     steps:
       - uses: actions/checkout@v7
 
@@ -72,11 +82,30 @@ jobs:
 
       # No install step on purpose. See the header.
       - name: Publish anything whose time has come
+        id: publish
+        shell: bash
         env:
-          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
           SANITY_PROJECT_ID: ${{ vars.SANITY_PROJECT_ID }}
           SANITY_DATASET: production
         # --apply is what turns the script from a dry run into a publish. The
         # script defaults to dry-run precisely so that a human running it by
-        # hand cannot publish by accident.
-        run: node scripts/publish-due.mjs --apply
+        # hand cannot publish by accident. The log is kept so the next step
+        # knows whether anything went out; the script's own exit code is kept
+        # too, so a failed publish still turns the run red.
+        run: |
+          set +e
+          node scripts/publish-due.mjs --apply | tee publish.log
+          code=${PIPESTATUS[0]}
+          if grep -qE '^publish-due: published [1-9]' publish.log; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
+          exit $code
+
+      # Something went out, so build the website (card 111). always() so a run
+      # where one document failed still deploys the ones that succeeded.
+      - name: Rebuild the website
+        if: always() && steps.publish.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main -R "${{ github.repository }}"

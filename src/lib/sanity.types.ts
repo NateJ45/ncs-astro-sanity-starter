@@ -2065,6 +2065,16 @@ export type Testimonial = {
   reviewUrl?: string;
 };
 
+export type StudioWeek = {
+  _id: string;
+  _type: 'studioWeek';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  weekOf?: string;
+  ticked?: Array<string>;
+};
+
 export type TrashedItem = {
   _id: string;
   _type: 'trashedItem';
@@ -2275,6 +2285,7 @@ export type AllSanitySchemaTypes =
   | AboutPage
   | HomePage
   | Testimonial
+  | StudioWeek
   | TrashedItem
   | MediaFolderReference
   | MediaFolder

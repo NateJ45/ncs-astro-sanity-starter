@@ -85,6 +85,9 @@ jobs:
     needs: gate
     if: needs.gate.outputs.ready == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write # the two "tell someone" steps at the end
     steps:
       - uses: actions/checkout@v7
 
@@ -202,3 +205,39 @@ jobs:
             FAIL=1
           }
           exit $FAIL
+
+      # ── TELL SOMEONE (PORTS.md card 111) ──────────────────────────────────
+      # The Studio's status line reads this workflow's latest run through the
+      # Worker route /api/studio/deploy-status/ and, on a failure, tells the
+      # editor "The last update didn't go through. <helper> has been told."
+      # This is the telling: ONE open issue labelled deploy-failed (a comment
+      # on it for each further failure, never a pile of issues), which GitHub
+      # emails to whoever watches the repo, the owner by default. The next green
+      # deploy closes it. The words are public on a public repo, so they carry
+      # the event name and the run link and nothing else.
+      - name: Tell someone the deploy failed
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create deploy-failed --color B60205 --description "The production deploy failed" 2>/dev/null || true
+          OPEN=$(gh issue list --label deploy-failed --state open --json number --jq '.[0].number')
+          BODY="The production deploy failed (event: $GITHUB_EVENT_NAME). Run: $RUN_URL. The next green deploy closes this issue."
+          if [ -n "$OPEN" ]; then
+            gh issue comment "$OPEN" --body "$BODY"
+          else
+            gh issue create --title "The website did not update" --label deploy-failed --body "$BODY"
+          fi
+
+      - name: Close the failure issue once it is green again
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          for n in $(gh issue list --label deploy-failed --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "Deployed fine again: $RUN_URL"
+          done

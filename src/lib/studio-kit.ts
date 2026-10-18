@@ -251,3 +251,161 @@ export function greeting(now: Date): string {
   if (h < 18) return 'Good afternoon';
   return 'Good evening';
 }
+
+// -----------------------------------------------------------------------------
+// "The last update didn't go through" (PORTS.md card 111)
+// -----------------------------------------------------------------------------
+// /api/studio/deploy-status/ says whether the newest production deploy failed
+// (src/lib/deploy-status.ts). A failure outranks every build-time comparison:
+// "taking longer than usual" would be a comforting lie, since nothing is coming.
+// -----------------------------------------------------------------------------
+
+/** The slice of the route's answer the Studio reads. */
+export interface DeployAnswer {
+  configured: boolean;
+  state: 'ok' | 'failed' | 'running' | 'unknown';
+}
+
+export interface DeployProblem {
+  tone: 'critical';
+  /** The status line. */
+  text: string;
+  /** Home's card, a little longer. */
+  message: string;
+}
+
+/** Null unless the newest deploy failed. Missing or unconfigured: null (old behaviour). */
+export function deployProblem(
+  deploy: DeployAnswer | null | undefined,
+  helperName: string,
+): DeployProblem | null {
+  if (!deploy?.configured || deploy.state !== 'failed') return null;
+  return {
+    tone: 'critical',
+    text: `The last update didn't go through. ${helperName} has been told.`,
+    message: `The last update didn't go through, so the website is showing an older version. ${helperName} has been told. Your published changes are safe, and "Try again" starts the update once more.`,
+  };
+}
+
+// -----------------------------------------------------------------------------
+// The weekly checklist (PORTS.md card 111)
+// -----------------------------------------------------------------------------
+// "This week" jobs are ticked three ways: a GROQ check over the content (a
+// sermon dated last Sunday exists), the Checkup being clear, or by hand. Hand
+// ticks live on one small document per week (WEEK_TYPE, id from weekDocId), so
+// a new week starts with a fresh document and nothing has to be reset.
+// -----------------------------------------------------------------------------
+
+/** The kit's own document type for hand ticks. Excluded from Home's lists and the live check. */
+export const WEEK_TYPE = 'studioWeek';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+const localDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+/** The local date ("2026-10-12") the week containing `now` starts on. */
+export function weekKey(now: Date, firstDay = 1): string {
+  return localDate(new Date(weekStart(now, firstDay)));
+}
+
+/** The id of the week's tick document. */
+export function weekDocId(key: string): string {
+  return `${WEEK_TYPE}-${key}`;
+}
+
+/** The local date of the most recent Sunday (today, on a Sunday). */
+export function lastSunday(now: Date): string {
+  const d = new Date(now);
+  d.setDate(d.getDate() - d.getDay());
+  return localDate(d);
+}
+
+/** The local date of the next Sunday (today, on a Sunday). */
+export function comingSunday(now: Date): string {
+  const d = new Date(now);
+  d.setDate(d.getDate() + ((7 - d.getDay()) % 7));
+  return localDate(d);
+}
+
+export type TickedBy = 'content' | 'checkup' | 'hand';
+
+export interface ChecklistTask {
+  id: string;
+  query?: string;
+  check?: 'checkup';
+  manual?: boolean;
+}
+
+export interface ChecklistRow {
+  id: string;
+  done: boolean;
+  /** How "done" is known; null while not done. */
+  by: TickedBy | null;
+  /** Can the editor tick or untick it? Only hand jobs. */
+  tickable: boolean;
+}
+
+/**
+ * Each job's state. `answers` holds the GROQ answers by id, `ticked` the hand
+ * ticks for this week, `checkupClear` whether the Checkup has nothing in
+ * "Needs doing" (null while it runs).
+ */
+export function checklist(
+  tasks: ChecklistTask[],
+  answers: Record<string, unknown>,
+  ticked: string[],
+  checkupClear: boolean | null,
+): ChecklistRow[] {
+  const hand = new Set(ticked);
+  return tasks.map((t) => {
+    if (t.manual || (!t.query && !t.check)) {
+      const done = hand.has(t.id);
+      return { id: t.id, done, by: done ? 'hand' : null, tickable: true };
+    }
+    if (t.check === 'checkup') {
+      const done = checkupClear === true;
+      return { id: t.id, done, by: done ? 'checkup' : null, tickable: false };
+    }
+    const done = isDone(answers[t.id]);
+    return { id: t.id, done, by: done ? 'content' : null, tickable: false };
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Quick update forms (PORTS.md card 111)
+// -----------------------------------------------------------------------------
+
+export type QuickFieldKind = 'string' | 'text' | 'date' | 'datetime' | 'url';
+
+export interface QuickFieldRule {
+  name: string;
+  title: string;
+  kind: QuickFieldKind;
+  required?: boolean;
+  /** For 'string' and 'text': the most characters allowed. */
+  max?: number;
+}
+
+/** Plain-words problems with a quick form's answers, by field name. Empty means good to go. */
+export function quickFormErrors(
+  fields: QuickFieldRule[],
+  values: Record<string, string>,
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  for (const f of fields) {
+    const v = (values[f.name] ?? '').trim();
+    if (!v) {
+      if (f.required) errors[f.name] = `${f.title} is needed.`;
+      continue;
+    }
+    if (f.max && v.length > f.max) {
+      errors[f.name] = `Keep it under ${f.max} characters (it is ${v.length}).`;
+    } else if (f.kind === 'url' && !/^https?:\/\/\S+\.\S+/.test(v)) {
+      errors[f.name] = 'Paste the whole link, starting with https://';
+    } else if (f.kind === 'date' && !/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+      errors[f.name] = 'Pick a date.';
+    } else if (f.kind === 'datetime' && Number.isNaN(Date.parse(v))) {
+      errors[f.name] = 'Pick a date and time.';
+    }
+  }
+  return errors;
+}

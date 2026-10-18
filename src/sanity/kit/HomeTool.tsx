@@ -16,9 +16,13 @@
 //      unchanged; anything else opens the document, where the full Publish
 //      (with the safe-rename redirect) runs.
 //   2. This week: the site's recurring jobs (kit.config.ts), each ticked off by
-//      a GROQ check, so a done job shows done without anyone ticking it.
+//      a GROQ check, so a done job shows done without anyone ticking it. Card
+//      111 added jobs ticked by the Checkup being clear, and jobs ticked by
+//      hand, kept on one small document per week (WEEK_TYPE), so the list
+//      starts fresh each week without anything being reset.
 //   3. Is it live? The build time from /build-info.json against the newest
-//      published change (liveStatus in src/lib/studio-kit.ts).
+//      published change (liveStatus in src/lib/studio-kit.ts). Card 111: a
+//      FAILED deploy (the deploy route) says so, with "Try again".
 //   4. Site health: the Checkup's counts, with a link to the Checkup.
 //   5. Recent edits: the last few things changed, unpublished ones flagged.
 //   6. Visitors: a calm "not set up yet" until the analytics route exists.
@@ -27,7 +31,7 @@
 // Every card fails soft: a failed fetch shows a quiet sentence, never a blank.
 // =============================================================================
 
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   useClient,
   useCurrentUser,
@@ -40,6 +44,7 @@ import {
   Box,
   Button,
   Card,
+  Checkbox,
   Dialog,
   Flex,
   Grid,
@@ -50,15 +55,24 @@ import {
 } from '@sanity/ui';
 import { useToast } from '@sanity/ui/toast';
 import {
+  checklist,
+  deployProblem,
   firstName,
   greeting,
-  isDone,
   liveStatus,
   timeAgo,
+  weekDocId,
+  weekKey,
   weekStart,
+  WEEK_TYPE,
   type LiveState,
 } from '../../lib/studio-kit';
-import { countBySeverity, isAllClear, publishedIdOf } from '../../lib/studio-checkup';
+import {
+  countBySeverity,
+  isAllClear,
+  publishedIdOf,
+  type CheckResult,
+} from '../../lib/studio-checkup';
 import {
   API_VERSION,
   PUBLISHED_EVENT,
@@ -67,6 +81,7 @@ import {
   useLiveData,
   useStaffView,
   useStudioLink,
+  useTryAgain,
   useTypeTitle,
 } from './shared';
 import { SEVERITY_TONE } from './CheckupTool';
@@ -103,54 +118,113 @@ function Quiet({ children }: { children: ReactNode }) {
 
 // -----------------------------------------------------------------------------
 
-function ThisWeek({ tasks, firstDay }: { tasks: ThisWeekTask[]; firstDay: 0 | 1 }) {
+function ThisWeek({
+  tasks,
+  firstDay,
+  title,
+  checkupResults,
+}: {
+  tasks: ThisWeekTask[];
+  firstDay: 0 | 1;
+  title: string;
+  /** The Checkup's findings, shared with Site health; null while it runs. */
+  checkupResults: CheckResult[] | null;
+}) {
   const client = useClient({ apiVersion: API_VERSION });
   const linkTo = useStudioLink();
-  const [done, setDone] = useState<Record<string, boolean> | null>(null);
+  const toast = useToast();
+  const [answers, setAnswers] = useState<Record<string, unknown> | null>(null);
+  const [ticked, setTicked] = useState<string[]>([]);
+  const [saving, setSaving] = useState<string | null>(null);
+  const key = weekKey(new Date(), firstDay);
+  const docId = weekDocId(key);
 
   useEffect(() => {
     let cancelled = false;
     const params = { weekStart: weekStart(new Date(), firstDay), now: new Date().toISOString() };
-    Promise.all(
-      tasks.map((t) =>
-        client
-          .fetch(t.query, params)
-          .then((answer) => [t.id, isDone(answer)] as const)
-          .catch(() => [t.id, false] as const),
+    Promise.all([
+      Promise.all(
+        tasks
+          .filter((t) => t.query)
+          .map((t) =>
+            client
+              .fetch(t.query as string, params)
+              .then((answer) => [t.id, answer] as const)
+              .catch(() => [t.id, false] as const),
+          ),
       ),
-    ).then((pairs) => {
-      if (!cancelled) setDone(Object.fromEntries(pairs));
+      client.fetch<string[] | null>(`*[_id == $id][0].ticked`, { id: docId }).catch(() => null),
+    ]).then(([pairs, hand]) => {
+      if (cancelled) return;
+      setAnswers(Object.fromEntries(pairs));
+      setTicked(hand ?? []);
     });
     return () => {
       cancelled = true;
     };
-  }, [client, tasks, firstDay]);
+  }, [client, tasks, firstDay, docId]);
+
+  // Hand ticks go on this week's own small document. Created on the first tick;
+  // a new week has a new id, so last week's ticks simply stop counting.
+  const toggle = async (id: string, on: boolean) => {
+    setSaving(id);
+    const before = ticked;
+    setTicked(on ? [...ticked.filter((t) => t !== id), id] : ticked.filter((t) => t !== id));
+    try {
+      await client.createIfNotExists({ _id: docId, _type: WEEK_TYPE, weekOf: key, ticked: [] });
+      const patch = client
+        .patch(docId)
+        .setIfMissing({ ticked: [] })
+        .unset([`ticked[@ == "${id}"]`]);
+      await (on ? patch.append('ticked', [id]) : patch).commit({ autoGenerateArrayKeys: false });
+    } catch {
+      setTicked(before);
+      toast.push({ status: 'error', title: 'That tick did not save. Try again in a moment.' });
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const clear = checkupResults ? !checkupResults.some((r) => r.severity === 'Needs doing') : null;
+  const rows = answers ? checklist(tasks, answers, ticked, clear) : null;
+  const firstDayName = firstDay === 0 ? 'Sunday' : 'Monday';
 
   return (
-    <Panel title="This week">
-      {done === null ? (
+    <Panel title={title}>
+      {rows === null ? (
         <Spinner muted />
       ) : (
         <Stack gap={4}>
-          {tasks.map((t) => {
-            const ok = done[t.id];
-            const link = linkTo(t.target);
+          {tasks.map((t, i) => {
+            const row = rows[i];
+            const link = t.target ? linkTo(t.target) : null;
             return (
               <Flex key={t.id} gap={3} align="flex-start">
                 <Box style={{ flexShrink: 0, paddingTop: 2 }}>
-                  <Badge tone={ok ? 'positive' : 'default'} fontSize={1} padding={2}>
-                    {ok ? 'Done' : 'To do'}
-                  </Badge>
+                  {row.tickable ? (
+                    <Checkbox
+                      id={`week-${t.id}`}
+                      checked={row.done}
+                      disabled={saving === t.id}
+                      onChange={(e) => void toggle(t.id, e.currentTarget.checked)}
+                      style={{ width: 24, height: 24 }}
+                    />
+                  ) : (
+                    <Badge tone={row.done ? 'positive' : 'default'} fontSize={1} padding={2}>
+                      {row.done ? 'Done' : 'To do'}
+                    </Badge>
+                  )}
                 </Box>
                 <Stack gap={2} flex={1}>
                   <Text size={2} weight="semibold">
-                    {t.title}
+                    {row.tickable ? <label htmlFor={`week-${t.id}`}>{t.title}</label> : t.title}
                   </Text>
                   <Text size={1} muted style={{ lineHeight: 1.5 }}>
                     {t.detail}
+                    {row.by === 'content' || row.by === 'checkup' ? ' Ticked for you.' : ''}
                   </Text>
                 </Stack>
-                {!ok && (
+                {!row.done && link && (
                   <Button
                     as="a"
                     href={link.href}
@@ -165,6 +239,7 @@ function ThisWeek({ tasks, firstDay }: { tasks: ThisWeekTask[]; firstDay: 0 | 1 
               </Flex>
             );
           })}
+          <Quiet>{`The list starts fresh every ${firstDayName}.`}</Quiet>
         </Stack>
       )}
     </Panel>
@@ -186,16 +261,41 @@ const LIVE_BADGE: Record<LiveState, string> = {
   unknown: 'Not sure',
 };
 
-function IsItLive({ slowAfter }: { slowAfter: number }) {
+function IsItLive({ slowAfter, helperName }: { slowAfter: number; helperName: string }) {
   // Shared with the navbar line (NavbarStatus.tsx), so the two never disagree.
   const state = useLiveData();
+  const retry = useTryAgain();
   const now = state?.now ?? Date.now();
 
   const status = state ? liveStatus(state.builtAt, state.lastPublish, now, slowAfter) : null;
+  const problem = state ? deployProblem(state.deploy, helperName) : null;
   return (
     <Panel title="Is it live?">
       {!status || !state ? (
         <Spinner muted />
+      ) : problem ? (
+        // Card 111: the newest deploy failed. Nothing is on its way, so say so.
+        <Stack gap={3}>
+          <Flex>
+            <Badge tone="critical" fontSize={1} padding={2}>
+              Did not go through
+            </Badge>
+          </Flex>
+          <Text size={2} style={{ lineHeight: 1.6 }}>
+            {problem.message}
+          </Text>
+          <Flex>
+            <Button
+              text="Try again"
+              tone="critical"
+              fontSize={1}
+              padding={2}
+              disabled={retry.busy}
+              onClick={() => void retry.tryAgain()}
+            />
+          </Flex>
+          {retry.note && <Quiet>{retry.note}</Quiet>}
+        </Stack>
       ) : (
         <Stack gap={3}>
           <Flex>
@@ -215,8 +315,7 @@ function IsItLive({ slowAfter }: { slowAfter: number }) {
 
 // -----------------------------------------------------------------------------
 
-function SiteHealth({ config }: { config: KitConfig }) {
-  const { results, failed } = useCheckup(config);
+function SiteHealth({ results, failed }: { results: CheckResult[] | null; failed: boolean }) {
   const linkTo = useStudioLink();
   const link = linkTo({ tool: 'checkup' });
   const counts = results ? countBySeverity(results) : null;
@@ -610,10 +709,14 @@ export function makeHomeTool(config: KitConfig) {
   return function HomeTool() {
     const { staffView, switchTo, reset, overridden } = useStaffView(config);
     const quick = config.quickActions ?? [];
-    const ignore = config.checkup.ignoreTypes;
+    // The kit's weekly tick documents (card 111) are bookkeeping, never an edit.
+    const ignore = useMemo(() => [...config.checkup.ignoreTypes, WEEK_TYPE], []); // config is fixed for the Studio's life
     const linkTo = useStudioLink();
     const guide = linkTo({ tool: 'site-guide' });
     const content = linkTo({ tool: 'structure' });
+    const quickUpdate = linkTo({ tool: 'quick-update' });
+    // One Checkup run, shared by Site health and a "Checkup clear" job (card 111).
+    const checkup = useCheckup(config);
 
     const ask = config.helper.email
       ? `mailto:${config.helper.email}?subject=${encodeURIComponent(`Help with ${config.siteName}`)}&body=${encodeURIComponent(
@@ -644,6 +747,18 @@ export function makeHomeTool(config: KitConfig) {
               fontSize={2}
               padding={3}
             />
+            {(config.quickUpdate?.length ?? 0) > 0 && (
+              <Button
+                as="a"
+                href={quickUpdate.href}
+                onClick={quickUpdate.onClick}
+                text="Quick update"
+                mode="ghost"
+                tone="primary"
+                fontSize={2}
+                padding={3}
+              />
+            )}
             {config.features.guide && (
               <Button
                 as="a"
@@ -661,10 +776,17 @@ export function makeHomeTool(config: KitConfig) {
 
           <Grid gridTemplateColumns={[1, 1, 2]} gap={4} style={{ alignItems: 'start' }}>
             {config.thisWeek.length > 0 && (
-              <ThisWeek tasks={config.thisWeek} firstDay={config.weekStartsOn} />
+              <ThisWeek
+                tasks={config.thisWeek}
+                firstDay={config.weekStartsOn}
+                title={config.thisWeekTitle ?? 'This week'}
+                checkupResults={config.features.checkup ? checkup.results : null}
+              />
             )}
-            <IsItLive slowAfter={config.liveSlowAfterMinutes} />
-            {config.features.checkup && <SiteHealth config={config} />}
+            <IsItLive slowAfter={config.liveSlowAfterMinutes} helperName={config.helper.name} />
+            {config.features.checkup && (
+              <SiteHealth results={checkup.results} failed={checkup.failed} />
+            )}
             <RecentEdits ignoreTypes={ignore} />
             <Panel title="Visitors">
               {config.features.visitors ? (

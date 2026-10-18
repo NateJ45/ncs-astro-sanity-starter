@@ -228,11 +228,15 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 108 | The header logo renders with JS off (`<noscript>` light variant)               | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
 | 109 | Authoring kit: page templates, picture picker, patterns, synced sections       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 110 | Studio looks like the site: name, mark, colours, status line, help panel       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
 Row 110 (2026-10-18): needs card 106 (the kit) and card 103 (`@sanity/ui` 4) first; the sites without a Studio for staff
 are `n/a` as in row 106. first-baptist-auburn has no column.
+
+Row 111 (2026-10-18): needs cards 106 and 110 first, so the same cells as row 110. first-baptist-auburn has no column; it
+took the card on branch `feat/studio-remembers` the same day.
 
 Row 107 (2026-10-17): mas-monograms (`html.reveal-ready`) and nixoncreativestudio (`.js`) already gate
 their reveal on a head-script class, a divergent form of the same idea, hence `partial`; neither was changed. presacademy
@@ -8590,3 +8594,56 @@ item 15). Follow the marked-file order: starter first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes` (login screen verified in a dev server; the signed-in views are unverified, see
 PENDING item 15). Every other site `no`.
+
+## Card 111: the Studio remembers: failed deploys, weekly ticks, Quick update, empty lists, restore-doc (2026-10-18)
+
+**Origin:** first-baptist-auburn, where the pastor edits alone on Sanity's free plan (three days of history,
+administrators only). Five gaps, each a support call waiting to happen. The status line compared only the build time with
+the last publish, so a FAILED build said "taking longer than usual" for ever. "This week" could only tick what GROQ could
+prove, so the jobs done outside the Studio (the church calendar, the bulletin printout) had nowhere to go. A phone edit
+meant the full document form with the page builder in it. An empty desk list said "No documents of this type" and
+nothing else. And "put the page back the way it was on Tuesday" had no answer at all once the history window closed.
+
+**Canonical (PORTABLE):** `src/lib/deploy-status.ts` + `deploy-status.test.ts` (which also tests `studio-auth.ts`),
+`src/lib/studio-auth.ts`, `src/pages/api/studio/deploy-status.ts`, `src/sanity/kit/weekType.ts`,
+`src/sanity/kit/QuickUpdateTool.tsx`, `src/sanity/kit/emptyList.tsx`, `scripts/restore-doc.mjs`,
+`scripts/lib/restore-doc.mjs` + `restore-doc.test.mjs`, and the card-111 changes to `kit/HomeTool.tsx`,
+`kit/NavbarStatus.tsx`, `kit/shared.tsx`, `kit/index.tsx`, `kit/types.ts`, `src/lib/studio-kit.ts` (+ test) and
+`docs/agent/studio-kit.md`. Per site (NOT portable): `kit.config.ts` (`thisWeek` hand and Checkup jobs,
+`thisWeekTitle`, `quickUpdate` forms, `'quick-update'` in `staffTools`), `structure.ts` (`emptyAwareList` on the
+editor's lists), `wrangler.jsonc` (`vars.GITHUB_REPO`), `deploy.yml` and `publish-due.yml` (template changes below,
+copied by hand), `package.json` (`restore:doc`), and the publish webhook's filter.
+
+**What it adds.**
+
+- **"The last update didn't go through."** `GET /api/studio/deploy-status/` reads the deploy workflow's newest runs
+  from GitHub with a Worker secret (`GITHUB_DEPLOY_TOKEN`, Actions read and write on one repo), cached 60 seconds, and
+  hands the Studio one word (`deployStatusFromRuns()`). A failure outranks the build-time comparison in the status line
+  and Home's card, with "<helper> has been told" and **Try again**, a `POST` that needs the site's own origin and a
+  Sanity session token checked against `/users/me` (`studio-auth.ts`), refuses while a deploy runs and within five
+  minutes of the last, then dispatches the workflow. No token: `configured: false`, old behaviour.
+- **"Has been told" is true:** the template `deploy.yml` now opens one `deploy-failed` issue on a failed run (or
+  comments on the open one) and closes it on the next green run, so the owner gets GitHub's email.
+- **Scheduled publishing rebuilds the site:** the template `publish-due.yml` reads `SANITY_API_WRITE_TOKEN` (not
+  `SANITY_AUTH_TOKEN`, which the backup uses as a READ token) and, when a run published anything, starts `deploy.yml`
+  with its own `GITHUB_TOKEN`. Its schedule stays commented out in the starter.
+- **Weekly checklist.** `thisWeek` jobs can be `check: 'checkup'` (done when the Checkup has no "Needs doing") or
+  `manual` (ticked by hand). Hand ticks are stored on one `studioWeek` document per week (`studioWeek-<first day>`),
+  written straight to the dataset, skipped by Home's lists, the Checkup and the live check. Pure logic: `checklist()`,
+  `weekKey()`, `weekDocId()`, tested. **The publish webhook's deny-list must add `"studioWeek"`**, or a tick rebuilds
+  the site.
+- **Quick update**, a tool for phones: `kitConfig.quickUpdate` forms (a few plain fields and a `build()` returning the
+  whole document), opened one at a time with nothing else on screen, checked by `quickFormErrors()`, then created
+  PUBLISHED. `build` must return a valid document because the Studio's validation is skipped.
+- **Empty lists** say what goes there: `emptyAwareList()` for `structure.ts` (counts first; empty shows an explaining
+  pane with "Create the first one"), and `EMPTY_LIST_BUNDLE` replacing Sanity's default empty words everywhere.
+- **restore-doc.mjs**: one document from the newest (or a dated) nightly backup, via `gh`, decrypted in memory, a
+  field-by-field summary, and with `--apply` (plus `NCS_PRODUCTION_WRITE=yes` on production) written back as a DRAFT.
+
+**Adopting it in a site.** Needs cards 106 and 110. Copy the PORTABLE files, run `npm run typegen` (`studioWeek` is
+new), add the `kit.config.ts` keys and the `structure.ts` wrappers, `vars.GITHUB_REPO` in `wrangler.jsonc`, the two
+workflow changes, `"studioWeek"` in the webhook filter, then `npx wrangler secret put GITHUB_DEPLOY_TOKEN` and the
+`SANITY_API_WRITE_TOKEN` repo secret. Follow the marked-file order: starter first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes` (unit-tested; the kit's signed-out `/studio` checked in a dev server; signed-in
+views unverified, PENDING item 17). first-baptist-auburn took it the same day. Every other site `no`.

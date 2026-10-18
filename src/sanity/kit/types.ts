@@ -12,9 +12,14 @@ import type { ComponentType } from 'react';
 import type { SanityClient } from 'sanity';
 import type { CheckGroup } from '../../lib/page-checks';
 import type { CheckupRule } from '../../lib/studio-checkup';
-import type { StudioTarget } from '../../lib/studio-kit';
+import type { QuickFieldKind, StudioTarget } from '../../lib/studio-kit';
 
-/** One recurring job on Home's "This week" card, ticked by a GROQ check. */
+/**
+ * One recurring job on Home's "This week" card. It is ticked one of three ways
+ * (card 111): by a GROQ check (`query`), by the Checkup being clear
+ * (`check: 'checkup'`), or by hand (`manual: true`, or no check at all). Hand
+ * ticks are kept on one small document per week, so a new week starts fresh.
+ */
 export interface ThisWeekTask {
   id: string;
   /** "Post this week's news", in the editor's words. */
@@ -25,10 +30,48 @@ export interface ThisWeekTask {
    * GROQ answering "is it done?": true or a positive number counts as done.
    * Receives $weekStart (ISO, start of this week) and $now (ISO).
    */
-  query: string;
-  /** Where the "Do it" button goes. */
-  target: StudioTarget;
+  query?: string;
+  /** 'checkup': done when the Checkup has nothing in "Needs doing" (card 111). */
+  check?: 'checkup';
+  /** Ticked by hand on Home (card 111). Implied when there is no query or check. */
+  manual?: boolean;
+  /** Where the "Do it" button goes. Optional for hand jobs done outside the Studio. */
+  target?: StudioTarget;
   targetLabel?: string;
+}
+
+/** One field of a Quick update form (card 111). Plain inputs only; no page builder. */
+export interface QuickField {
+  /** The key in the values handed to `build`. */
+  name: string;
+  title: string;
+  kind: QuickFieldKind;
+  description?: string;
+  required?: boolean;
+  /** For 'string' and 'text': the most characters allowed. */
+  max?: number;
+  /** A starting value ("2026-10-18"), worked out when the form opens. */
+  initial?: (now: Date) => string;
+}
+
+/**
+ * One big button on the Quick update tool, and the short form behind it
+ * (card 111). `build` turns the answers into a whole document; the kit adds the
+ * id and publishes it straight away, so build must return a document that is
+ * complete and valid for its type (slugs, required fields, defaults).
+ */
+export interface QuickForm {
+  id: string;
+  /** "Put up a notice", in the editor's words. */
+  title: string;
+  detail?: string;
+  icon?: ComponentType;
+  fields: QuickField[];
+  /** The button at the bottom of the form ("Put it on the website"). */
+  submitLabel?: string;
+  build: (values: Record<string, string>, now: Date) => { _type: string } & Record<string, unknown>;
+  /** One sentence after it is saved ("The notice shows until the day you picked."). */
+  doneMessage?: string;
 }
 
 /** One large button on Home for a job this site does often (PORTS.md card 110). */
@@ -94,6 +137,15 @@ export interface KitConfig {
   /** The "This week" jobs on Home. Empty hides the card. */
   thisWeek: ThisWeekTask[];
 
+  /** The card's heading. Default "This week" (card 111). */
+  thisWeekTitle?: string;
+
+  /**
+   * The Quick update tool's forms (card 111), for the jobs an editor does from a
+   * phone. Missing or empty: no tool.
+   */
+  quickUpdate?: QuickForm[];
+
   /** First day of the week for "This week": 0 Sunday, 1 Monday. */
   weekStartsOn: 0 | 1;
 
@@ -148,5 +200,10 @@ export interface KitConfig {
     navbarStatus?: boolean;
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
     helpPanel?: boolean;
+    /**
+     * Plain words in an empty desk list, and emptyAwareList() (card 111).
+     * Missing counts as on.
+     */
+    emptyStates?: boolean;
   };
 }

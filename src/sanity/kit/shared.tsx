@@ -20,6 +20,8 @@ import {
   readOverride,
   studioTargetPath,
   VIEW_KEY,
+  WEEK_TYPE,
+  type DeployAnswer,
   type StudioTarget,
   type ViewOverride,
 } from '../../lib/studio-kit';
@@ -221,7 +223,8 @@ export function useCheckup(config: KitConfig) {
     setBusy(true);
     setFailed(false);
     try {
-      const ignore = new Set(config.checkup.ignoreTypes);
+      // The kit's weekly tick documents (card 111) are bookkeeping, never content.
+      const ignore = new Set([...config.checkup.ignoreTypes, WEEK_TYPE]);
       const docs = ((await client.fetch<Doc[]>(CHECKUP_QUERY)) ?? []).filter(
         (d) => !ignore.has(d._type),
       );
@@ -256,13 +259,38 @@ export const TOUR_OPEN_EVENT = 'ncs-studio-kit-tour-open';
 /** Fired once a Publish has landed (publishNote, Home's Publish), so the live line re-checks. */
 export const PUBLISHED_EVENT = 'ncs-studio-kit-published';
 
-const NOT_SYSTEM_DOCS = `!(_type match "sanity.*") && !(_type match "system.*") && !(_type match "media.*") && !(_id in path("versions.**")) && !(_id match "_.**")`;
+// The kit's weekly tick documents (card 111) are written straight to the
+// dataset; they are bookkeeping, not a change to the website, so they never
+// count as "the newest publish".
+const NOT_SYSTEM_DOCS = `!(_type match "sanity.*") && !(_type match "system.*") && !(_type match "media.*") && !(_id in path("versions.**")) && !(_id match "_.**") && _type != "${WEEK_TYPE}"`;
+
+/** Where the kit asks whether the last deploy went through (card 111). */
+export const DEPLOY_STATUS_PATH = '/api/studio/deploy-status/';
+
+/** Fired to make every useLiveData re-read now (after "Try again"). */
+export const LIVE_REFRESH_EVENT = 'ncs-studio-kit-live-refresh';
 
 export interface LiveData {
   builtAt: string | null;
   lastPublish: string | null;
+  /** The deploy route's answer (card 111); null where the site has no route. */
+  deploy: DeployAnswer | null;
   /** When the two were read, for the countdown. */
   now: number;
+}
+
+/** GET the deploy route; anything but a well-formed answer is null (old behaviour). */
+async function readDeploy(): Promise<DeployAnswer | null> {
+  try {
+    const r = await fetch(DEPLOY_STATUS_PATH, { cache: 'no-store' });
+    if (!r.ok) return null;
+    const j = (await r.json()) as Partial<DeployAnswer>;
+    return typeof j.configured === 'boolean' && typeof j.state === 'string'
+      ? { configured: j.configured, state: j.state }
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -281,12 +309,15 @@ export function useLiveData(): LiveData | null {
         .then((r) => (r.ok ? r.json() : null))
         .then((j: { builtAt?: string } | null) => j?.builtAt ?? null)
         .catch(() => null);
-      const lastPublish = await client
-        .fetch<string | null>(
-          `*[${NOT_SYSTEM_DOCS} && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]._updatedAt`,
-        )
-        .catch(() => null);
-      if (!cancelled) setData({ builtAt, lastPublish, now: Date.now() });
+      const [lastPublish, deploy] = await Promise.all([
+        client
+          .fetch<string | null>(
+            `*[${NOT_SYSTEM_DOCS} && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]._updatedAt`,
+          )
+          .catch(() => null),
+        readDeploy(),
+      ]);
+      if (!cancelled) setData({ builtAt, lastPublish, deploy, now: Date.now() });
     };
     let soon: number | undefined;
     const afterPublish = () => {
@@ -298,14 +329,69 @@ export function useLiveData(): LiveData | null {
     const timer = window.setInterval(() => void load(), 60_000);
     window.addEventListener('focus', onFocus);
     window.addEventListener(PUBLISHED_EVENT, afterPublish);
+    window.addEventListener(LIVE_REFRESH_EVENT, onFocus);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
       window.clearTimeout(soon);
       window.removeEventListener('focus', onFocus);
       window.removeEventListener(PUBLISHED_EVENT, afterPublish);
+      window.removeEventListener(LIVE_REFRESH_EVENT, onFocus);
     };
   }, [client]);
 
   return data;
+}
+
+// -----------------------------------------------------------------------------
+// "Try again" (card 111)
+// -----------------------------------------------------------------------------
+// POSTs to the deploy route with the Studio's own session token, which the
+// route checks with Sanity (src/lib/studio-auth.ts). The signed-in embedded
+// Studio keeps that token in localStorage under __studio_auth_token_<projectId>
+// (the step 0 spike in docs/agent/studio-kit.md); the client's config carries
+// it too when it is set. A cookie-only login has no token, so the route says
+// "sign in again" and the editor can still ask for help.
+
+function studioToken(client: { config: () => { token?: string; projectId?: string } }) {
+  const cfg = client.config();
+  if (cfg.token) return cfg.token;
+  try {
+    const raw = window.localStorage.getItem(`__studio_auth_token_${cfg.projectId}`);
+    const parsed = raw ? (JSON.parse(raw) as { token?: string }) : null;
+    return parsed?.token ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function useTryAgain() {
+  const client = useClient({ apiVersion: API_VERSION });
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  const tryAgain = useCallback(async () => {
+    setBusy(true);
+    setNote(null);
+    try {
+      const token = studioToken(client);
+      const r = await fetch(DEPLOY_STATUS_PATH, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const j = (await r.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      setNote(
+        r.ok && j.ok
+          ? 'Trying again now. The website usually updates within a few minutes.'
+          : (j.error ?? 'That did not work just now. Ask for help if it keeps happening.'),
+      );
+    } catch {
+      setNote('That did not work just now. Ask for help if it keeps happening.');
+    } finally {
+      setBusy(false);
+      window.dispatchEvent(new Event(LIVE_REFRESH_EVENT));
+    }
+  }, [client]);
+
+  return { tryAgain, busy, note };
 }

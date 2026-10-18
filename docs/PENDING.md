@@ -290,9 +290,9 @@ Until then, open the panel in the scan or read the list and ignore warnings unde
 ### 14. Studio kit: the Worker half and the rest of the plan (opened 2026-10-17)
 
 PORTS.md card 106 brought the Studio kit's Studio half from first-baptist-auburn. Still to build, starter first: the
-Worker routes under `src/pages/api/studio/*` (Studio auth by the session token, visitors from GA4 for Home's Visitors
-card, the Ask form, deploy status, link check, monthly report), the live publish checklist inspector, and recorded
-tutorial videos. The spike findings for auth and cron are in `docs/agent/studio-kit.md`. Until then `features.visitors`
+Worker routes under `src/pages/api/studio/*` (visitors from GA4 for Home's Visitors card, the Ask form, link check,
+monthly report), the live publish checklist inspector, and recorded tutorial videos. Studio auth by the session token
+and deploy status landed with card 111 (`src/lib/studio-auth.ts`, `/api/studio/deploy-status/`). The spike findings for auth and cron are in `docs/agent/studio-kit.md`. Until then `features.visitors`
 stays false and Ask is a mailto (`PUBLIC_STUDIO_HELP_EMAIL`). No other site but first-baptist-auburn has the kit yet.
 
 ### 15. Studio card 110: the signed-in checks (opened 2026-10-18)
@@ -311,6 +311,15 @@ first site that takes it (or the starter against a real project), signed in, che
   three-dot menu; card 110 sets `showAsAction`), the page check updating as you type, the guide rendering at panel width.
 - Presentation on `siteSettings`: the amber "Shown on every page".
 - Branded accents: primary buttons, links, the focus ring and the selected desk row in the brand hue; Publish still green.
+
+### 17. Card 111 (the Studio remembers): the signed-in and deployed checks (opened 2026-10-18)
+
+Built and unit-tested (`deploy-status.test.ts`, `studio-kit.test.ts`, `restore-doc.test.mjs`), `astro check` and the
+build clean, and `/studio` loaded signed out. Not yet seen, on the first site with a real project: a failed deploy in
+the status line and on Home, and Try again starting a run (needs `GITHUB_DEPLOY_TOKEN` on the Worker); the
+`deploy-failed` issue opening and closing; a hand tick saving and a new week starting fresh; the Quick update forms at
+375px, signed in, creating a published document; an empty list's pane and its button; the i18n empty words; and
+`restore-doc.mjs` against a real backup artifact. first-baptist-auburn is that site; its PENDING lists the same.
 
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 
