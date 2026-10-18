@@ -39,6 +39,7 @@ are commented in that site's `src/sanity/kit.config.ts`.
 | Deploy status (111)     | `src/pages/api/studio/deploy-status.ts`, `src/lib/deploy-status.ts`, `src/lib/studio-auth.ts` | GET the newest deploy run's outcome; POST "Try again" (same origin + Sanity session); tests in `deploy-status.test.ts`                                  |
 | Home cards (115)        | `src/sanity/kit/HomeCards.tsx`, `src/lib/studio-home.ts`                                      | Coming up, Fix-it list, Visitors, Your pages, and the Panel frame; pure parts tested in `studio-home.test.ts`                                           |
 | Home banner (118)       | `src/sanity/kit/HomeBanner.tsx`, `src/lib/studio-banner.ts`                                   | The navy welcome at the top of Home; `kitConfig.homeBanner`; pure parts tested in `studio-banner.test.ts`                                               |
+| Icons (119)             | `src/sanity/brandIcons.tsx`, `src/sanity/artIcon.tsx`, `src/lib/studio-icons.ts`              | Not the kit plugin: icons by meaning and list-row pictures; the site's art in `brandIconArt.tsx`; tests in `studio-icons.test.ts`                       |
 | Guide videos (115)      | `src/sanity/kit/GuideVideos.tsx`                                                              | "Watch how it is done" on Home and in the Site Guide; `videoSource()` in `studio-home.ts`                                                               |
 | Visitors route (115)    | `src/pages/api/studio/visitors.ts`, `src/lib/studio-analytics.ts`                             | Cloudflare Web Analytics GraphQL through the Worker (same origin + Sanity session); tests in `studio-analytics.test.ts`                                 |
 | Weekly ticks (111)      | `src/sanity/kit/weekType.ts`                                                                  | `studioWeek` document per week for hand-ticked jobs; `checklist()` and `weekKey()` in `studio-kit.ts`                                                   |
@@ -240,6 +241,42 @@ the banner writes; colours under 3:1 on the banner are dropped, and the heading 
 mark and motif are decorative (`alt=""`); the heading carries the name, with an `aria-label` when it is lettered.
 The starter sets only `mark: '/favicon.svg'`. Keep a site's banner files out of `public/studio/`, which is the Studio's
 own address; a folder such as `public/studio-banner/` is clear of it.
+
+## Icons and list-row pictures (card 119)
+
+Not part of the kit plugin either, but it is on every screen. Every icon the Studio draws is named by what it MEANS
+(`times`, `give`, `scripture`, `sections`...; the list is `BRAND_ICON_KEYS` in `src/lib/studio-icons.ts`), and
+`src/sanity/brandIcons.tsx` draws each meaning: with `@sanity/icons` by default, or with the site's own art when
+`src/sanity/brandIconArt.tsx` (per site, not PORTABLE) lists it. `artIcon(url, title)` (`src/sanity/artIcon.tsx`)
+turns a brand-kit SVG (a Vite `?url` import) into a Sanity icon: the file is drawn as it is, colours included, inside a
+1em `<svg data-sanity-icon>`, so Sanity sizes it like its own icons everywhere.
+
+Which document type, field group and tool means what is data: the starter's defaults in `studio-icons.ts`, plus
+`brand/brand.config.json` `studio.icons.types` / `.groups` / `.tools` for the site (a church: `"sermon": "scripture"`).
+An unknown meaning there is dropped and the default stays (the unit test lists it).
+
+Where the icons land:
+
+- `withBrandPreviews(types)` in `sanity.config.ts` decorates the schema: each document type's `icon` (so lists,
+  search, references and the create menu agree), an icon on each field group whose name is mapped, and a preview that
+  always returns `media`. A type's own `prepare` still runs; only a missing `media` is filled, with `IconTile`: the
+  type's icon on a square of the brand's tint, read from the theme's scheme, so it is right in light and dark. A
+  type's own image still wins, so a `prepare` should return `media: image?.asset ? image : undefined`, never an icon.
+- `brandIcons()`, registered right after the kit: the same for types that plugins register (Trash, the weekly tick,
+  share links), and an icon on every tool (the top bar draws none, the phone's sidebar does).
+- `structure.ts` asks `typeIcon('<type>')` or `brandIcon('<meaning>')` instead of importing icons;
+  `singletonWithPreview` defaults to the type's icon, and names its one view "Edit".
+- Page templates take `typeIcon('page')`.
+
+The tile is a wash of the accent on the paper, and a deeper one on the dark ground; `studio.icons.tile.light` /
+`.dark` (hex) set either square, and a one-colour icon on it is kept at 3:1 (`iconTileColors`). Multi-colour art with
+dark parts (navy, deep green) can sink into the dark tile: give the dark tile a light, warm colour
+instead (a stone or paper tone), so the art sits on it like a photo would. List-row subtitles use `previewDate` and `previewSubtitle` from `studio-icons.ts`: a short
+date, then status or detail, joined with " · ", in plain words ("Shows until Sun, Nov 9, 2026").
+
+`src/lib/studio-icons.test.ts` is the gate: every document type in `src/sanity/schemaTypes/` and the kit's and
+workflow's types needs a meaning and a `preview`, `sanity.config.ts` must run `withBrandPreviews` and register
+`brandIcons()` after the kit, and `brandIconArt.tsx` may name only real meanings.
 
 ## The look (card 116)
 

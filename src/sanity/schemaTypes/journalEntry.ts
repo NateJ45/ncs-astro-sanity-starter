@@ -11,6 +11,7 @@
 // actual post copy; everything else is metadata.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
+import { previewDate, previewSubtitle } from '../../lib/studio-icons';
 
 export const journalEntry = defineType({
   name: 'journalEntry',
@@ -611,7 +612,10 @@ export const journalEntry = defineType({
     },
     prepare: ({ title, publishedAt, featured, media }) => ({
       title: title ?? 'Untitled post',
-      subtitle: `${featured ? '★ ' : ''}${publishedAt ? new Date(publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}`,
+      subtitle: previewSubtitle(
+        featured ? 'Featured' : '',
+        previewDate(publishedAt) || 'No date yet',
+      ),
       media,
     }),
   },
