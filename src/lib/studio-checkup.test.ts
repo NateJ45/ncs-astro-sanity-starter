@@ -187,3 +187,73 @@ describe('robustness and wording', () => {
     }
   });
 });
+
+describe('custom code rules (PORTS.md card 121)', () => {
+  it('lists every page with code that runs directly on the page, deep-linked to the switch', () => {
+    const docs: Doc[] = [
+      {
+        _id: 'p1',
+        _type: 'page',
+        title: 'Give',
+        seoDescription: 'x',
+        sections: [{ _key: 'e1', _type: 'embedSection', embedCode: '<p>x</p>', runsOnPage: true }],
+      },
+      {
+        _id: 'p2',
+        _type: 'page',
+        title: 'Visit',
+        seoDescription: 'x',
+        sections: [{ _key: 'e2', _type: 'embedSection', embedCode: '<p>x</p>', runsOnPage: false }],
+      },
+      {
+        _id: 'drafts.p3',
+        _type: 'page',
+        title: 'Draft only',
+        sections: [{ _key: 'e3', _type: 'embedSection', embedCode: '<p>x</p>', runsOnPage: true }],
+      },
+    ];
+    const hit = run(docs).find((r) => r.id === 'code-runs-on-page');
+    assert.ok(hit);
+    assert.equal(hit.severity, 'For information');
+    assert.match(hit.label, /^Code that runs directly on the page: 1 page$/);
+    assert.match(hit.detail, /Give/);
+    assert.doesNotMatch(hit.detail, /Visit|Draft only/);
+    assert.deepEqual(hit.target, {
+      doc: 'p1',
+      type: 'page',
+      field: 'sections[_key=="e1"].runsOnPage',
+    });
+    assert.equal(hit.items?.length, 1);
+  });
+
+  it('stays quiet when all code is in its box', () => {
+    const docs: Doc[] = [
+      {
+        _id: 'p1',
+        _type: 'page',
+        title: 'Give',
+        seoDescription: 'x',
+        sections: [{ _key: 'e1', _type: 'embedSection', embedCode: '<p>x</p>' }],
+      },
+      { _id: 'siteSettings', _type: 'siteSettings', headCode: '', bodyEndCode: '   ' },
+    ];
+    const found = ids(docs);
+    assert.ok(!found.includes('code-runs-on-page'));
+    assert.ok(!found.includes('code-on-every-page'));
+  });
+
+  it('flags code on every page from Site settings, opening the field that holds it', () => {
+    const docs: Doc[] = [
+      { _id: 'siteSettings', _type: 'siteSettings', bodyEndCode: '<script>x()</script>' },
+    ];
+    const hit = run(docs).find((r) => r.id === 'code-on-every-page');
+    assert.ok(hit);
+    assert.equal(hit.label, 'Code on every page');
+    assert.match(hit.detail, /the end of every page/);
+    assert.deepEqual(hit.target, {
+      doc: 'siteSettings',
+      type: 'siteSettings',
+      field: 'bodyEndCode',
+    });
+  });
+});

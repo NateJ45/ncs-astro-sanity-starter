@@ -35,7 +35,7 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 
 **Page builder schemas:**
 
-- `sections.ts` -- the 11 general block types (`heroSection`, `richTextSection`, `imageTextSection`, `gallerySection`, `quoteSection`, `statSection`, `ctaBandSection`, `videoSection`, `spacerSection`, `logoStripSection`, `embedSection`), plus `SECTION_TYPES` (the `of` array for any `pageBuilder` field) and `additionalSectionsField` (the append zone).
+- `sections.ts` -- the 11 general block types (`heroSection`, `richTextSection`, `imageTextSection`, `gallerySection`, `quoteSection`, `statSection`, `ctaBandSection`, `videoSection`, `spacerSection`, `logoStripSection`, `embedSection`: "Custom code or embed", see `docs/agent/custom-code.md`), plus `SECTION_TYPES` (the `of` array for any `pageBuilder` field) and `additionalSectionsField` (the append zone).
 - `richSections.ts` -- 10 rich section types (`founderSection`, `servicesGridSection`, `testimonialsSection`, `storySection`, `valuesSection`, `processSection`, `serviceAreaSection`, `guaranteeSection`, `faqSection`, `teamSection`), plus per-page curated lists (`HOME_SECTION_TYPES`, `ABOUT_SECTION_TYPES`, `SERVICES_SECTION_TYPES`, `PROCESS_SECTION_TYPES`).
 - `page.ts` -- the custom page document type. Multi-instance, non-singleton. Has `title`, `slug` (with reserved-slug validation), `pageBuilder` (using `SECTION_TYPES`), nav placement fields (`addToMainNav`, `navGroup`, `navLabel`, `addToFooter`), and SEO fields. Routed by `src/pages/[slug].astro`.
 
