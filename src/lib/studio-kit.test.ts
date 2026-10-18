@@ -5,18 +5,26 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  checklist,
+  comingSunday,
+  deployProblem,
   firstName,
   greeting,
   isDone,
   isStaffUser,
   isStaffView,
+  lastSunday,
   liveStatus,
   navbarStatus,
+  quickFormErrors,
   readOverride,
   studioTargetPath,
   timeAgo,
   VIEW_KEY,
+  weekDocId,
+  weekKey,
   weekStart,
+  WEEK_TYPE,
 } from './studio-kit.ts';
 
 const admin = { email: 'Admin@Example.org', roles: [{ name: 'administrator' }] };
@@ -201,5 +209,111 @@ describe('greeting', () => {
     assert.equal(greeting(at(17)), 'Good afternoon');
     assert.equal(greeting(at(18)), 'Good evening');
     assert.equal(greeting(at(0)), 'Good morning');
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Card 111: deploy failures, the weekly checklist, quick update forms
+// -----------------------------------------------------------------------------
+
+describe('deployProblem', () => {
+  it('a failed deploy says so, naming the helper', () => {
+    const p = deployProblem({ configured: true, state: 'failed' }, 'Sam');
+    assert.equal(p?.tone, 'critical');
+    assert.equal(p?.text, "The last update didn't go through. Sam has been told.");
+    assert.match(p?.message ?? '', /Try again/);
+  });
+  it('anything else, or no route, keeps the old behaviour', () => {
+    assert.equal(deployProblem({ configured: true, state: 'ok' }, 'Sam'), null);
+    assert.equal(deployProblem({ configured: true, state: 'running' }, 'Sam'), null);
+    assert.equal(deployProblem({ configured: false, state: 'failed' }, 'Sam'), null);
+    assert.equal(deployProblem(null, 'Sam'), null);
+  });
+  it('the words carry no em-dash', () => {
+    const p = deployProblem({ configured: true, state: 'failed' }, 'Sam');
+    assert.ok(!`${p?.text}${p?.message}`.includes('\u2014'));
+  });
+});
+
+describe('the week', () => {
+  it('a Monday week: Wednesday and the Sunday after share a key; Monday starts a new one', () => {
+    const wed = new Date(2026, 9, 14, 12); // Wed 14 Oct 2026
+    const sun = new Date(2026, 9, 18, 20); // Sun 18 Oct
+    const mon = new Date(2026, 9, 19, 0, 5); // Mon 19 Oct, just after midnight
+    assert.equal(weekKey(wed, 1), '2026-10-12');
+    assert.equal(weekKey(sun, 1), '2026-10-12');
+    assert.equal(weekKey(mon, 1), '2026-10-19');
+  });
+  it('a Sunday week starts on the Sunday', () => {
+    assert.equal(weekKey(new Date(2026, 9, 14, 12), 0), '2026-10-11');
+  });
+  it('the doc id is the type plus the key', () => {
+    assert.equal(weekDocId('2026-10-12'), `${WEEK_TYPE}-2026-10-12`);
+  });
+  it('last and coming Sunday, with Sunday itself counting as both', () => {
+    assert.equal(lastSunday(new Date(2026, 9, 14, 12)), '2026-10-11');
+    assert.equal(comingSunday(new Date(2026, 9, 14, 12)), '2026-10-18');
+    assert.equal(lastSunday(new Date(2026, 9, 18, 9)), '2026-10-18');
+    assert.equal(comingSunday(new Date(2026, 9, 18, 9)), '2026-10-18');
+  });
+});
+
+describe('checklist', () => {
+  const tasks = [
+    { id: 'sermon', query: 'count(*)' },
+    { id: 'events', manual: true },
+    { id: 'clean', check: 'checkup' as const },
+    { id: 'plain' },
+  ];
+  it('content checks tick themselves and cannot be ticked by hand', () => {
+    const [sermon] = checklist(tasks, { sermon: 1 }, [], null);
+    assert.deepEqual(sermon, { id: 'sermon', done: true, by: 'content', tickable: false });
+    assert.equal(checklist(tasks, { sermon: 0 }, ['sermon'], null)[0].done, false);
+  });
+  it("hand jobs follow this week's ticks; a job with no check is a hand job", () => {
+    const rows = checklist(tasks, {}, ['events'], null);
+    assert.deepEqual(rows[1], { id: 'events', done: true, by: 'hand', tickable: true });
+    assert.deepEqual(rows[3], { id: 'plain', done: false, by: null, tickable: true });
+  });
+  it('the Checkup job is done only when the Checkup is known clear', () => {
+    assert.equal(checklist(tasks, {}, [], null)[2].done, false);
+    assert.equal(checklist(tasks, {}, [], false)[2].done, false);
+    assert.deepEqual(checklist(tasks, {}, [], true)[2], {
+      id: 'clean',
+      done: true,
+      by: 'checkup',
+      tickable: false,
+    });
+  });
+});
+
+describe('quickFormErrors', () => {
+  const fields = [
+    { name: 'message', title: 'The notice', kind: 'text' as const, required: true, max: 20 },
+    { name: 'link', title: 'Link', kind: 'url' as const },
+    { name: 'ends', title: 'Last day', kind: 'date' as const, required: true },
+  ];
+  it('names the missing fields in plain words', () => {
+    assert.deepEqual(quickFormErrors(fields, {}), {
+      message: 'The notice is needed.',
+      ends: 'Last day is needed.',
+    });
+  });
+  it('checks length, links and dates', () => {
+    const e = quickFormErrors(fields, {
+      message: 'x'.repeat(25),
+      link: 'church.org',
+      ends: '18/10/2026',
+    });
+    assert.match(e.message, /under 20/);
+    assert.match(e.link, /https/);
+    assert.equal(e.ends, 'Pick a date.');
+  });
+  it('good answers give no errors; an empty optional field is fine', () => {
+    assert.deepEqual(quickFormErrors(fields, { message: 'Snow', ends: '2026-10-18' }), {});
+    assert.deepEqual(
+      quickFormErrors(fields, { message: 'Snow', ends: '2026-10-18', link: 'https://a.org/x' }),
+      {},
+    );
   });
 });

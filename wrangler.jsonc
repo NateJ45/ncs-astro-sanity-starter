@@ -85,6 +85,15 @@
   // Optional, both as secrets: TURNSTILE_SECRET (plus PUBLIC_TURNSTILE_SITE_KEY
   // in .env) and WEB3FORMS_KEY, the fallback for a site with no email binding.
 
+  // ── The Studio's deploy status (src/pages/api/studio/deploy-status.ts) ─────
+  // PORTS.md card 111. A fork that wants "The last update didn't go through"
+  // and "Try again" in the Studio sets its repo here and the token as a secret:
+  //   npx wrangler secret put GITHUB_DEPLOY_TOKEN
+  // (a fine-grained GitHub token on that one repo, "Actions: Read and write"
+  // only). Without them the route says configured: false and the Studio keeps
+  // its old behaviour, so the template ships it commented out.
+  // "vars": { "GITHUB_REPO": "<owner>/<repo>" },
+
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     // @astrojs/cloudflare v14 splits the build into dist/client (static assets)

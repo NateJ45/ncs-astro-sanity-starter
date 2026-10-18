@@ -19,19 +19,26 @@
 //   - A note after Publish, and the first-run tour (via the layout).
 //   - The calm status line under the top bar and the "Help for this page"
 //     document panel (PORTS.md card 110).
+//   - Card 111: the weekly tick document (Home's hand-ticked jobs), the Quick
+//     update tool (kitConfig.quickUpdate) and plain words in empty lists
+//     (EMPTY_LIST_BUNDLE; emptyAwareList() is for structure.ts).
 // =============================================================================
 
 import { definePlugin, type LayoutProps } from 'sanity';
 import { ActivityIcon } from '@sanity/icons/Activity';
+import { BoltIcon } from '@sanity/icons/Bolt';
 import { BookIcon } from '@sanity/icons/Book';
 import { HomeIcon } from '@sanity/icons/Home';
+import { WEEK_TYPE } from '../../lib/studio-kit';
 import { TRASH_TYPE } from '../../lib/studio-trash';
 import { makeCheckupTool } from './CheckupTool';
+import { EMPTY_LIST_BUNDLE } from './emptyList';
 import { makeGuideTool } from './GuideTool';
 import { makeHelpPanel } from './HelpPanel';
 import { makeHomeTool } from './HomeTool';
 import { makeNavbarStatus } from './NavbarStatus';
 import { withPublishNote } from './publishNote';
+import { makeQuickUpdateTool } from './QuickUpdateTool';
 import { staffViewFor, useStaffView } from './shared';
 import { StudioTour } from './StudioTour';
 import {
@@ -41,9 +48,11 @@ import {
   trashedItemType,
 } from './trash';
 import type { KitConfig } from './types';
+import { studioWeekType } from './weekType';
 
 export type { KitConfig } from './types';
 export { staffViewFor } from './shared';
+export { emptyAwareList } from './emptyList';
 
 /**
  * Two things the tools list cannot remove, hidden by CSS in the staff view:
@@ -69,6 +78,7 @@ export function ncsStudioKit(config: KitConfig) {
   const HomeTool = makeHomeTool(config);
   const GuideTool = makeGuideTool(config);
   const CheckupTool = makeCheckupTool(config);
+  const QuickUpdateTool = config.quickUpdate?.length ? makeQuickUpdateTool(config) : null;
   const MoveToTrash = makeMoveToTrashAction(config.trashTypes, config.helper.name);
   const trashTypes = new Set(Object.keys(config.trashTypes));
   // Card 110 features: on unless kit.config.ts turns them off.
@@ -90,8 +100,13 @@ export function ncsStudioKit(config: KitConfig) {
     name: 'ncs-studio-kit',
 
     schema: {
-      types: config.features.trash ? [trashedItemType] : [],
+      // The weekly tick document is always registered (card 111): Home reads it
+      // whenever a "This week" job is ticked by hand.
+      types: config.features.trash ? [trashedItemType, studioWeekType] : [studioWeekType],
     },
+
+    // Plain words in an empty desk list (card 111).
+    ...(config.features.emptyStates === false ? {} : { i18n: { bundles: [EMPTY_LIST_BUNDLE] } }),
 
     studio: {
       components: { layout: KitLayout, ...(KitNavbar ? { navbar: KitNavbar } : {}) },
@@ -117,7 +132,13 @@ export function ncsStudioKit(config: KitConfig) {
           icon: ActivityIcon,
           component: CheckupTool,
         },
-      ].filter((t): t is Exclude<typeof t, false> => Boolean(t));
+        QuickUpdateTool && {
+          name: 'quick-update',
+          title: 'Quick update',
+          icon: BoltIcon,
+          component: QuickUpdateTool,
+        },
+      ].filter((t): t is Exclude<typeof t, false | null> => Boolean(t));
 
       const all = [...kitTools, ...prev.filter((t) => !kitTools.some((k) => k.name === t.name))]
         .map((t) => (config.toolTitles[t.name] ? { ...t, title: config.toolTitles[t.name] } : t))
@@ -130,11 +151,14 @@ export function ncsStudioKit(config: KitConfig) {
     },
 
     document: {
-      newDocumentOptions: (prev) => prev.filter((o) => o.templateId !== TRASH_TYPE),
+      newDocumentOptions: (prev) =>
+        prev.filter((o) => o.templateId !== TRASH_TYPE && o.templateId !== WEEK_TYPE),
 
       // "Help for this page" beside every document but the Trash (card 110).
       inspectors: (prev, { documentType }) =>
-        helpPanel && documentType !== TRASH_TYPE ? [...prev, helpPanel] : prev,
+        helpPanel && documentType !== TRASH_TYPE && documentType !== WEEK_TYPE
+          ? [...prev, helpPanel]
+          : prev,
 
       actions: (prev, { schemaType, currentUser }) => {
         const staff = staffViewFor(currentUser, config);

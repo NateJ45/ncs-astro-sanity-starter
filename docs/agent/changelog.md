@@ -1,5 +1,14 @@
 # Change history
 
+_2026-10-18: the Studio remembers (PORTS card 111)._
+
+**Decision.** For an editor alone on Sanity's free plan: a failed deploy now says "The last update didn't go through"
+with Try again (`/api/studio/deploy-status/`, GitHub token on the Worker, Sanity session check), and `deploy.yml`
+opens a `deploy-failed` issue so someone really is told; "This week" jobs can be ticked by hand (one `studioWeek`
+document per week) or by the Checkup being clear; a Quick update tool for phones; empty desk lists that explain
+themselves; and `scripts/restore-doc.mjs` to put one document back from a nightly backup as a draft. `publish-due.yml`
+reads `SANITY_API_WRITE_TOKEN` and starts a deploy after it publishes. Built first for first-baptist-auburn.
+
 _2026-10-17: a text hero keeps its buttons; default copy is clean (PORTS cards 105 and 104)._
 
 **Decision.** The text hero (no photo, or the editorial variant) dropped its CTAs, so an unseeded home had no buttons; it now

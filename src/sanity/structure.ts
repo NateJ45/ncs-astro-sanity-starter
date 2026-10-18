@@ -52,6 +52,7 @@ import { TrashIcon } from '@sanity/icons/Trash';
 import { staffDesk } from './kit/shared';
 import { kitConfig } from './kit.config';
 import { TRASH_TYPE } from '../lib/studio-trash';
+import { WEEK_TYPE } from '../lib/studio-kit';
 
 const SINGLETON_TYPES = [
   'siteSettings',
@@ -92,6 +93,8 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
   'media.tag',
+  // The Studio kit's weekly tick document (card 111): Home's bookkeeping, never edited here.
+  WEEK_TYPE,
   // processStep is placed explicitly under Content → Process Steps
   'processStep', // scaffold: process
 ]);

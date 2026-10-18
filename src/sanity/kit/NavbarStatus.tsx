@@ -8,6 +8,11 @@
 // (caution, past liveSlowAfterMinutes). The same data as Home's "Is it live?"
 // card (useLiveData in shared.tsx), so the two can never disagree.
 //
+// Card 111: when the deploy route (/api/studio/deploy-status/) says the newest
+// deploy FAILED, that outranks everything: "The last update didn't go through.
+// <helper> has been told." in the critical tone, with "Try again". A site
+// without the route, or without its GitHub token, never sees this.
+//
 // A `studio.components.navbar` middleware: it ALWAYS renders
 // props.renderDefault(props) first, so every plugin's navbar after this one
 // still runs. With no build time to compare against (a fresh clone, a dev
@@ -15,23 +20,27 @@
 // =============================================================================
 
 import type { NavbarProps } from 'sanity';
-import { Box, Card, Flex, Stack, Text } from '@sanity/ui';
-import { navbarStatus } from '../../lib/studio-kit';
-import { useLiveData, useStudioLink } from './shared';
+import { Box, Button, Card, Flex, Stack, Text } from '@sanity/ui';
+import { deployProblem, navbarStatus } from '../../lib/studio-kit';
+import { useLiveData, useStudioLink, useTryAgain } from './shared';
 import type { KitConfig } from './types';
 
 export function makeNavbarStatus(config: KitConfig) {
   function StatusLine() {
     const data = useLiveData();
     const linkTo = useStudioLink();
+    const retry = useTryAgain();
     if (!data) return null;
-    const status = navbarStatus(
-      data.builtAt,
-      data.lastPublish,
-      data.now,
-      config.liveSlowAfterMinutes,
-      config.typicalUpdateMinutes,
-    );
+    const problem = deployProblem(data.deploy, config.helper.name);
+    const status =
+      problem ??
+      navbarStatus(
+        data.builtAt,
+        data.lastPublish,
+        data.now,
+        config.liveSlowAfterMinutes,
+        config.typicalUpdateMinutes,
+      );
     if (!status) return null;
     const home = config.features.home ? linkTo({ tool: 'home' }) : null;
     return (
@@ -43,7 +52,7 @@ export function makeNavbarStatus(config: KitConfig) {
         role="status"
         aria-live="polite"
       >
-        <Flex align="center" justify="flex-end" gap={2}>
+        <Flex align="center" justify="flex-end" gap={2} wrap="wrap">
           <Box
             aria-hidden
             style={{
@@ -58,7 +67,7 @@ export function makeNavbarStatus(config: KitConfig) {
             }}
           />
           <Text size={1} muted={status.tone === 'default'}>
-            {status.text}
+            {problem ? (retry.note ?? problem.text) : status.text}
             {home && status.tone !== 'default' && (
               <>
                 {' '}
@@ -68,6 +77,17 @@ export function makeNavbarStatus(config: KitConfig) {
               </>
             )}
           </Text>
+          {problem && (
+            <Button
+              text="Try again"
+              mode="ghost"
+              tone="critical"
+              fontSize={1}
+              padding={2}
+              disabled={retry.busy}
+              onClick={() => void retry.tryAgain()}
+            />
+          )}
         </Flex>
       </Card>
     );
