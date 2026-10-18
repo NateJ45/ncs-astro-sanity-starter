@@ -60,7 +60,8 @@ updates:
       # wrangler-bump-needs-real-deploy-test). Minors and patches still flow.
       - dependency-name: '*'
         update-types: ['version-update:semver-major']
-      # The Sanity stack and React are an exact-pinned, matched set.
+      # The Sanity stack and React (19.3.1 since 2026-10-18) are an exact-pinned,
+      # matched set.
       # Moved by hand as one set, starter first (phase 2 on 2026-10-17: sanity
       # 6.19.0, @sanity/ui 4.4.9, @sanity/icons 5.2.3; PORTS.md card 103). A lone
       # @sanity/* bump from here would split the set again.
