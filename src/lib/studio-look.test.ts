@@ -18,6 +18,7 @@ import {
   inlineParts,
   lookBase,
   lookInput,
+  neutralLookWarnings,
   pebblePath,
   resolveLook,
   shotMarks,
@@ -253,5 +254,31 @@ describe('calm stones (card 132)', () => {
     );
     assert.deepEqual(look.light.calm, [0]);
     assert.ok(look.dark.calm.length >= 1);
+  });
+});
+
+describe('studio look: neutral warnings (card 138)', () => {
+  it('flags every neutral device in an empty look', () => {
+    assert.equal(neutralLookWarnings(undefined).length, 4);
+  });
+  it('is quiet once the marker, stone, colours and connector are settled', () => {
+    assert.deepEqual(
+      neutralLookWarnings({
+        marker: 'steps',
+        stone: 'pebble',
+        markColors: ['#2C5B3A', '#235E93'],
+        connector: { kind: 'dashes' },
+      }),
+      [],
+    );
+  });
+  it('flags the dot and round stone even when named outright', () => {
+    const w = neutralLookWarnings({
+      marker: 'dot',
+      stone: 'round',
+      markColors: ['#111111', '#222222'],
+      connector: { kind: 'dots' },
+    });
+    assert.equal(w.length, 2);
   });
 });

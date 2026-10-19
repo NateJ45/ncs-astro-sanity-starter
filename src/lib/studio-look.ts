@@ -771,3 +771,31 @@ export function lookInput(brand: unknown): StudioLookInput | undefined {
   const look = (brand as { studio?: { look?: unknown } })?.studio?.look;
   return look && typeof look === 'object' ? (look as StudioLookInput) : undefined;
 }
+
+/**
+ * Card 138: a site that ships the starter's neutral marker and stone unchanged
+ * has not given its Studio a character of its own. Returns one plain sentence
+ * per device still on the default (marker, stone, connector, motion, mark
+ * colours), or nothing when the site has settled its own. A warning, never an
+ * error: the starter itself is neutral on purpose.
+ */
+export function neutralLookWarnings(input: StudioLookInput | undefined): string[] {
+  const look = input ?? {};
+  const out: string[] = [];
+  const marker = look.marker;
+  if (marker === undefined || marker === 'dot')
+    out.push(
+      "studio.look.marker is the neutral dot: pick steps, rule, diamond or the site's own art.",
+    );
+  if (look.stone === undefined || look.stone === 'round')
+    out.push(
+      'studio.look.stone is the neutral round stone: pick pebble, square, lozenge or a shape of its own.',
+    );
+  if (!look.markColors || look.markColors.length < 2)
+    out.push('studio.look.markColors names fewer than two colours, so every stone is the accent.');
+  if (!look.connector?.kind || look.connector.kind === 'line')
+    out.push(
+      "studio.look.connector is the plain line: dashes, dots or none make the path the site's own.",
+    );
+  return out;
+}
