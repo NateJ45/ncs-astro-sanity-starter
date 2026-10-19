@@ -1,0 +1,254 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// SiteSearch - the search dialog every page carries when search is on
+// =============================================================================
+// PORTS.md card 126. Rendered once by Header.astro (render it only when
+// site.search.enabled, so a site without search ships none of this). Any
+// element with `data-site-search-open` opens it: <SearchButton> in the header,
+// the "Search" row in the mobile menu, or a link an editor adds. Those
+// triggers are real links to /search/, so with JavaScript off, or with a
+// Ctrl/Cmd-click, they still go somewhere useful.
+//
+// Also opens on "/" (when the visitor is not typing in a field) and on
+// Ctrl+K / Cmd+K, the shortcuts people already know from other sites.
+//
+// A native <dialog> opened with showModal(): the browser traps focus inside,
+// makes the page behind inert, closes on Escape and hands focus back to the
+// button that opened it. Pagefind and the panel code load on first open.
+// =============================================================================
+import { X } from 'lucide-react';
+import SearchPanel from './SearchPanel.astro';
+---
+
+<dialog
+  class="site-search-dialog"
+  aria-labelledby="site-search-dialog-title"
+  data-site-search-dialog
+>
+  <div class="site-search-dialog__inner">
+    <div class="site-search-dialog__head">
+      <h2 id="site-search-dialog-title" class="site-search-dialog__title">
+        Search
+      </h2>
+      <button
+        type="button"
+        class="site-search-dialog__close"
+        aria-label="Close search"
+        data-search-close
+      >
+        <X size={20} aria-hidden="true" />
+      </button>
+    </div>
+    <SearchPanel id="dialog" suggestHeading="h3" />
+  </div>
+</dialog>
+
+<style is:global>
+  .site-search-dialog {
+    width: min(42rem, calc(100vw - 2rem));
+    max-width: none;
+    max-height: min(44rem, calc(100dvh - 4rem));
+    margin: 8vh auto auto;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 0.5rem);
+    background: var(--background);
+    color: var(--foreground);
+    box-shadow: 0 24px 48px -12px rgb(0 0 0 / 0.25);
+    overflow: hidden;
+  }
+  .site-search-dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .site-search-dialog::backdrop {
+    background: rgb(15 18 22 / 0.55);
+  }
+  .site-search-dialog__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem 1.25rem 1.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .site-search-dialog__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .site-search-dialog__title {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .site-search-dialog__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -0.5rem -0.5rem -0.5rem 0;
+    border: 0;
+    border-radius: var(--radius-md, 0.375rem);
+    background: transparent;
+    color: var(--foreground);
+    cursor: pointer;
+  }
+  .site-search-dialog__close:hover {
+    background: var(--muted);
+  }
+  .site-search-dialog__close:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Page behind stays still while the dialog is open. */
+  html:has(.site-search-dialog[open]) {
+    overflow: hidden;
+  }
+
+  /* Phones: the dialog takes the whole screen, so the keyboard and the
+     results never fight over a small floating box. */
+  @media (max-width: 639px) {
+    .site-search-dialog {
+      width: 100%;
+      height: 100dvh;
+      max-height: none;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+    }
+  }
+
+  /* A short fade and rise in. Nothing moves for reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .site-search-dialog[open] {
+      animation: site-search-in 160ms ease-out;
+    }
+    .site-search-dialog[open]::backdrop {
+      animation: site-search-fade 160ms ease-out;
+    }
+  }
+  @keyframes site-search-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+  }
+  @keyframes site-search-fade {
+    from {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  // Bound once per visit (the flag survives View Transitions navigations);
+  // every handler looks the dialog up fresh because the header is swapped on
+  // each navigation.
+  type W = typeof window & { __siteSearchBound?: boolean };
+  const w = window as W;
+
+  function dialogEl() {
+    return document.querySelector<HTMLDialogElement>('[data-site-search-dialog]');
+  }
+
+  async function openSearch() {
+    const dialog = dialogEl();
+    if (!dialog) return false;
+    if (!dialog.open) dialog.showModal();
+    const panel = dialog.querySelector<HTMLElement>('[data-site-search-panel]');
+    const input = dialog.querySelector<HTMLInputElement>('[data-search-input]');
+    input?.focus();
+    input?.select();
+    // The panel code is a separate chunk, fetched on first open only; then
+    // Pagefind starts loading while the visitor types their first word.
+    const { mountSearchPanel, loadPagefind } = await import('@/lib/site-search-client');
+    loadPagefind().catch(() => {});
+    if (panel) mountSearchPanel(panel);
+    return true;
+  }
+
+  function isTyping(el: Element | null) {
+    if (!el) return false;
+    const tag = el.tagName;
+    return (
+      tag === 'INPUT' ||
+      tag === 'TEXTAREA' ||
+      tag === 'SELECT' ||
+      (el as HTMLElement).isContentEditable
+    );
+  }
+
+  if (!w.__siteSearchBound) {
+    w.__siteSearchBound = true;
+
+    document.addEventListener(
+      'click',
+      (e) => {
+        const target = e.target as Element;
+
+        const trigger = target.closest('[data-site-search-open]');
+        if (trigger) {
+          // A modified click opens /search/ in a new tab, as a link should.
+          if (e instanceof MouseEvent && (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0))
+            return;
+          if (!dialogEl()) return;
+          e.preventDefault();
+          void openSearch();
+          return;
+        }
+
+        const dialog = dialogEl();
+        if (!dialog?.open) return;
+        // The close button, a click on the dim backdrop (the dialog element
+        // itself, outside the inner box), or following a result closes it.
+        if (
+          target.closest('[data-search-close]') ||
+          target === dialog ||
+          target.closest('a[href]')
+        ) {
+          dialog.close();
+        }
+        // Capture phase: Astro's ClientRouter also listens for link clicks on
+        // document and would start a page navigation to /search/ first.
+      },
+      true,
+    );
+
+    // The mobile menu asks for search this way after its drawer has closed.
+    window.addEventListener('site-search:open', () => void openSearch());
+
+    document.addEventListener('keydown', (e) => {
+      // Escape always closes. Without this, Chrome spends the first Escape
+      // clearing the search box (type=search) and leaves the dialog open.
+      if (e.key === 'Escape' && dialogEl()?.open) {
+        e.preventDefault();
+        dialogEl()?.close();
+        return;
+      }
+      const k = e.key.toLowerCase();
+      const shortcut =
+        (k === 'k' && (e.ctrlKey || e.metaKey)) ||
+        (e.key === '/' &&
+          !e.ctrlKey &&
+          !e.metaKey &&
+          !e.altKey &&
+          !isTyping(document.activeElement));
+      if (!shortcut || dialogEl()?.open) return;
+      if (!dialogEl()) return;
+      e.preventDefault();
+      void openSearch();
+    });
+
+    // Never carry an open dialog into the next page.
+    document.addEventListener('astro:before-swap', () => dialogEl()?.close());
+  }
+</script>

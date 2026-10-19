@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/with-workerd.mjs astro build",
+    "build": "node scripts/with-workerd.mjs astro build && node scripts/build-search-index.mjs",
     "build:full": "npm run typegen && npm run build",
     "preview": "wrangler dev -c dist/server/wrangler.json",
     "astro": "astro",
@@ -50,7 +50,8 @@
     "favicon": "node scripts/generate-favicons.mjs",
     "scaffold": "node scripts/scaffold.mjs",
     "audit:studio": "node scripts/audit-studio.mjs",
-    "audit:data": "node scripts/audit-data-vs-schema.mjs"
+    "audit:data": "node scripts/audit-data-vs-schema.mjs",
+    "search:index": "node scripts/build-search-index.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.4.0",
@@ -118,6 +119,7 @@
     "http-server": "^14.1.1",
     "linkinator": "^8.1.0",
     "opentype.js": "^2.0.0",
+    "pagefind": "1.5.2",
     "prettier": "^3.8.4",
     "prettier-plugin-astro": "^1.1.1",
     "prettier-plugin-tailwindcss": "^0.8.1",
