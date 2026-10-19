@@ -242,6 +242,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 122 | Hidden and password pages; Checkup link, heading and orphan checks             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 123 | Studio writing help (Claude API), Before you publish panel, AI visitors        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 126 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 128 | Studio design language (studio.look), shared UI pieces, Site Guide redesign    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -9361,3 +9362,67 @@ merges first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes` (switch off). first-baptist-auburn on branch `feat/site-search`, on, PR after
 this merges. Other sites `no`.
+
+## Card 128: the Studio's design language, shared UI pieces, and a Site Guide worth reading (2026-10-18)
+
+**Origin:** first-baptist-auburn, 2026-10-18. The Site Guide was the part of the Studio an editor reads most and it
+looked like documentation pasted into a form: emoji icons, one flat list, tinted boxes. The Studio had a look (cards
+116, 118, 119) but no vocabulary a surface could draw in, so each new screen rebuilt its own. This card gives the
+Studio a small design language driven by the site's brand, then redraws the guide in it. Pick (design note and three
+mockups in the Auburn repo, `docs/design-directions/2026-10-18-studio-guide/`): A, the board page: a banner, a rule
+and marker opening each section, stones for steps, callouts in three tones. Built in the starter, then
+first-baptist-auburn.
+
+**Canonical (PORTABLE, new):** `src/lib/studio-look.ts` and `studio-look.test.ts`; `src/sanity/kit/ui/` (`look.ts`,
+`css.ts`, `primitives.tsx`, `GuideShot.tsx`, `index.ts`); `src/sanity/kit/guide/GuidePage.tsx` and `GuideIndex.tsx`;
+`src/sanity/kit/harness/Harness.tsx` and `src/pages/kit-harness/[name].astro` (dev-only bench, see below).
+**PORTABLE, existing, changed:** `src/sanity/kit/GuideTool.tsx` (rewritten on the new pieces),
+`src/sanity/kit/HelpPanel.tsx` (passes `variant="panel"` and `onOpen`), `src/sanity/kit/NavbarStatus.tsx` (text wraps and
+never clips), `src/sanity/kit/types.ts` (`KitGuide` gains optional `icon` and `diy`; `GuideViewProps`),
+`docs/agent/studio-kit.md` ("The design language"). Not marked but kept identical: `brand/brand.config.schema.json`
+(`studio.look`). Per site: `brand.config.json` `studio.look`, `src/sanity/guides/content.ts`,
+`src/sanity/components/GuideView.tsx` (a thin wrapper), `src/sanity/structure.ts` (desk icons via `guideMeaning`),
+`public/guide-shots/`, and any marker art.
+
+**What it adds.**
+
+- **A look, resolved from the brand.** `resolveLook()` reads `brand.config.json` `studio.look` (marker kind or art,
+  stone shape, connector, motion verb, motif, texture, edge colours, lettering, three callout hues, heading colour) plus
+  the Studio's colours, and returns light and dark tokens. Every text pair is AA and every mark 3:1, moved toward black
+  or white until it passes; `contrastPairs()` is the gate, run over the real brand and six awkward ones. An unknown
+  value is ignored with a note, not an error. The decorative connector colour is the site's own and is deliberately not
+  guarded.
+- **Callout markers keep the brand gold.** A tone has `fill` (the hue exactly as the brand names it) and `mark` (an
+  outline darkened to 3:1 on the callout ground). The first build darkened the fill itself and the tip callout went a
+  dull brown. `studio-look.test.ts` pins both: the fill equals the brand hue in light and dark, the outline is at 3:1.
+- **Shared pieces.** `kit/ui`: `KitScope`, `Marker`, `SectionRule`, `KitPanel`, `Stone`, `SeverityStone`, `StepPath`
+  (down or across, laid or drawn, still under reduced motion), `KitNotice`, `UiChip` (the real Studio buttons drawn
+  true), `InlineText`, `StoneTag`, `StatusBadge`, `ArtTile`, `KitCard`, `PullQuote`, `ColourEdge`, `Sill`, `Lettering`,
+  `PageBanner`, `KitLoading`, `GuideShot`. Later cards build the other Studio surfaces from these.
+- **The guide.** `GuideIndex` (banner, search, a featured "Start here" on the texture with a colour edge, groups as
+  cards) and `GuidePage` (banner, a rule and marker per section, stones for steps, three callout tones note, tip and
+  careful, optional quote and annotated screenshot blocks). Old block kinds and tones still render. Guide icons are
+  meanings (`guideMeaning()` maps the old icon names, and an emoji, to a registry meaning), so the desk's guide rows
+  and the guide agree.
+- **GuideShot.** An image with numbered, clamped marks and a caption list; `public/guide-shots/example-editor.svg` is a
+  wireframe placeholder until real captures replace it.
+- **The bench.** `/kit-harness/<name>/` renders the real Studio on a mock auth store (`/kit-harness/studio/`) or the guide
+  views (`/kit-harness/guide/?view=index|page|panel|ui&g=<slug>&scheme=light|dark`). `getStaticPaths` returns nothing
+  in a build, so check `dist` has no `kit-harness` page; start dev with `PUBLIC_SANITY_PROJECT_ID` set.
+
+**Weighed and left out.** A fixed set of themes (the look is derived, so a new brand needs a few lines of config, not a
+skin). Redrawing every Studio surface in this card (about twenty are queued for the next card). The navbar status line
+clipping a user saw: not reproduced in the mock-auth Studio at 320 to 1440 wide, so only the defensive wrap shipped.
+
+**Verified.** `studio-look.test.ts` (tokens, contrast gate, awkward brands, stones and paths, guide helpers),
+`astro check`, build (no `kit-harness` page in `dist`), `test:unit`, `npm test`; screenshots at 1280 and 375, light
+and dark, in both repos (Auburn `docs/design-directions/2026-10-18-studio-guide/shots/build/`). Signed-in checks and
+real captures: `docs/PENDING.md`.
+
+**Adopting it in a site.** Needs cards 116, 118 and 119. Copy the PORTABLE files, take the `studio.look` schema, write a
+`studio.look` block (or leave it out for neutral defaults), make `GuideView.tsx` the thin wrapper, convert guide icons
+to names, run `npm run typegen`, `npm run test:unit` and open `/studio`. Marked-file order: the starter merges first, then
+the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-guide-design`, PR after this merges.
+Other sites `no`.
