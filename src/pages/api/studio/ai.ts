@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /api/studio/ai/ - one writing suggestion for the Studio (PORTS.md card 122)
+// /api/studio/ai/ - one writing suggestion for the Studio (PORTS.md card 123)
 // =============================================================================
 // GET  -> { configured }   Public: says only whether the buttons can work, so
 //                          the Studio can say "Not set up yet" instead of failing.
@@ -104,7 +104,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const res = await fetch(ANTHROPIC_URL, {
       method: 'POST',
-      headers: anthropicHeaders(key, task),
+      headers: anthropicHeaders(key),
       body: JSON.stringify(built.body),
       signal: AbortSignal.timeout(25_000),
     });

@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// Writing help in the Studio: the buttons (PORTS.md card 122)
+// Writing help in the Studio: the buttons (PORTS.md card 123)
 // =============================================================================
 // Three pieces, all registered by ncsWritingHelp() in ./index.ts:
 //

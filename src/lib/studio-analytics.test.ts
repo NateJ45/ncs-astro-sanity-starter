@@ -58,7 +58,7 @@ describe('referrer groups', () => {
     assert.equal(sourceGroup('hamiltonohio.gov'), 'other');
   });
 
-  it('gives AI assistants their own group, before search (card 122)', () => {
+  it('gives AI assistants their own group, before search (card 123)', () => {
     for (const host of [
       'chatgpt.com',
       'chat.openai.com',

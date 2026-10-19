@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// ncsWritingHelp(): writing suggestions in the Studio (PORTS.md card 122)
+// ncsWritingHelp(): writing suggestions in the Studio (PORTS.md card 123)
 // =============================================================================
 // Adds a "Suggest" button under the Google description, photo description and
 // summary fields, and "Improve this paragraph" in rich text. The words come

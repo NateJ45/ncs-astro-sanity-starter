@@ -31,6 +31,11 @@ export const IGNORED_TYPES = new Set([
   'studioWeek',
   'previewShare',
   'sectionPreset',
+  // The weekly link check's report (card 122): bookkeeping, not a change.
+  'linkReport',
+  // Private pages (card 122): this note becomes a GitHub issue, and the repo
+  // may be public. A private page's name is not for a public issue.
+  'privatePage',
 ]);
 const IGNORED_PREFIXES = ['sanity.', 'system.', 'assist.', 'media.'];
 

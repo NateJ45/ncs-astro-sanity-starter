@@ -297,7 +297,7 @@ export interface KitConfig {
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
     helpPanel?: boolean;
     /**
-     * The "Before you publish" document panel (card 122): the Checkup's
+     * The "Before you publish" document panel (card 123): the Checkup's
      * findings for the open document. Missing counts as on.
      */
     publishPanel?: boolean;

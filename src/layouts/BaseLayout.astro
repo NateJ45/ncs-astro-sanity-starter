@@ -310,7 +310,10 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
 
     <Header siteSettings={siteSettings} />
 
-    <main id="main" class="flex-1">
+    {/* A noindex page (hidden, 404, styleguide, private) is kept out of site
+        search too (card 122): Pagefind skips everything under
+        data-pagefind-ignore="all". */}
+    <main id="main" class="flex-1" data-pagefind-ignore={noindex ? 'all' : undefined}>
       <slot />
     </main>
 

@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// Writing help in the Studio, PORTS.md card 122: the prompt builder, the hourly
+// Writing help in the Studio, PORTS.md card 123: the prompt builder, the hourly
 // limit and the sign-in check the route relies on. Never calls the real API:
 // every fetch here is a stub.
 
@@ -87,33 +87,34 @@ describe('the photo address', () => {
 });
 
 describe('the request body', () => {
-  it('sends short text to Haiku with a hard cap and thinking off', () => {
+  it('sends short text to Haiku with a hard cap, and only the four plain fields', () => {
     const p = parseAiInput({ task: 'seo', title: 'Visit us', context: 'Sunday worship at 10.' });
     assert.ok(p.ok);
     const r = buildMessagesRequest(p.input, SITE);
     assert.ok(r.ok);
     assert.equal(r.body.model, AI_MODELS.text);
     assert.equal(r.body.max_tokens, AI_LIMITS.seo.maxTokens);
-    assert.deepEqual(r.body.thinking, { type: 'disabled' });
-    assert.equal(r.body.fallbacks, undefined);
+    assert.deepEqual(Object.keys(r.body).sort(), ['max_tokens', 'messages', 'model', 'system']);
     const text = JSON.stringify(r.body.messages);
     assert.match(text, /<title>Visit us<\/title>/);
     assert.match(text, /<page>Sunday worship at 10.<\/page>/);
   });
 
-  it('sends the picture to Sonnet by URL, with the fallback header', () => {
+  it('sends the picture to Sonnet by URL, with no beta header', () => {
     const p = parseAiInput({ task: 'alt', assetRef: REF, title: 'Home' });
     assert.ok(p.ok);
     const r = buildMessagesRequest(p.input, SITE);
     assert.ok(r.ok);
     assert.equal(r.body.model, AI_MODELS.vision);
-    assert.deepEqual(r.body.thinking, { type: 'between_tools' });
+    assert.deepEqual(Object.keys(r.body).sort(), ['max_tokens', 'messages', 'model', 'system']);
     const image = r.body.messages[0].content[0] as { type: string; source: { url: string } };
     assert.equal(image.type, 'image');
     assert.match(image.source.url, /^https:\/\/cdn\.sanity\.io\/images\/abc123\/production\//);
-    assert.equal(anthropicHeaders('k', 'alt')['anthropic-beta'], 'server-side-fallback-2026-07-01');
-    assert.equal(anthropicHeaders('k', 'seo')['anthropic-beta'], undefined);
-    assert.equal(anthropicHeaders('k', 'seo')['x-api-key'], 'k');
+    assert.deepEqual(anthropicHeaders('k'), {
+      'x-api-key': 'k',
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    });
   });
 
   it('never carries the key in the body', () => {

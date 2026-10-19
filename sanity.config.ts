@@ -59,7 +59,7 @@ import { CheckPageAction } from './src/sanity/actions/checkPage';
 import { UndoAction, RedoAction, undoRedoShortcuts } from './src/sanity/components/UndoRedo';
 import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 import { ncsStudioKit } from './src/sanity/kit';
-// Writing suggestions under chosen fields (PORTS.md card 122).
+// Writing suggestions under chosen fields (PORTS.md card 123).
 import { ncsWritingHelp } from './src/sanity/ai';
 import { kitConfig } from './src/sanity/kit.config';
 import { ncsWorkflowTools } from './src/sanity/workflow';
@@ -198,7 +198,7 @@ export default defineConfig({
       ],
     }),
     // "Suggest" buttons under the Google description, photo descriptions and
-    // summaries, and "Improve this paragraph" in rich text (card 122). They
+    // summaries, and "Improve this paragraph" in rich text (card 123). They
     // appear only once the Worker has ANTHROPIC_API_KEY; nothing is written
     // until the editor presses "Use this".
     ncsWritingHelp(),
@@ -251,7 +251,13 @@ export default defineConfig({
         ? prev.filter((option) => option.templateId !== 'page')
         : prev;
       if (creationContext.type === 'global') {
-        return options.filter((option) => !SINGLETON_TYPES.has(option.templateId));
+        // Private pages (card 122) are made from Pages -> Private pages only,
+        // where structure.ts gives them their privatePage. id. Made anywhere
+        // else they would get an ordinary (public) id.
+        return options.filter(
+          (option) =>
+            !SINGLETON_TYPES.has(option.templateId) && option.templateId !== 'privatePage',
+        );
       }
       return options;
     },
@@ -265,6 +271,10 @@ export default defineConfig({
       // copy is a second document claiming an address that is already taken.
       // See src/sanity/components/pageActions.tsx.
       if (PAGE_OPS_TYPES.has(schemaType)) {
+        base = base.filter(({ action }) => action !== 'duplicate');
+      }
+      // A duplicate of a private page would get an ordinary, PUBLIC id (card 122).
+      if (schemaType === 'privatePage') {
         base = base.filter(({ action }) => action !== 'duplicate');
       }
 

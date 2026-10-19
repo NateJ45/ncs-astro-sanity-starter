@@ -161,7 +161,7 @@ If a content change isn't appearing on the live site after a few minutes:
 The webhook lives at manage.sanity.io → API → Webhooks. The recommended GROQ filter is a deny-list:
 
 ```
-!(_id in path("drafts.**")) && !(_type in ["media.tag", "sanity.imageAsset", "sanity.fileAsset", "sanity.assetSourceData"])
+!(_id in path("drafts.**")) && !(_type in ["media.tag", "sanity.imageAsset", "sanity.fileAsset", "sanity.assetSourceData", "previewShare", "privatePage", "linkReport"])
 ```
 
 This filter skips rebuilds triggered by draft saves and internal Sanity asset-management events (tagging an uploaded photo, rotating an image, etc.), which don't affect live HTML. New content types are covered automatically because the filter excludes only the named system types and lets everything else through. The old hand-maintained allow-list approach (explicitly listing every `_type` that should trigger a rebuild) silently dropped new types until a developer remembered to add them. The deny-list is safer: add a new schema type and it triggers rebuilds out of the box.
@@ -247,10 +247,10 @@ Until the Worker has three settings, the card says "Not set up yet". Once per si
 Numbers are Cloudflare's sampled estimates, by UTC day; visits to `/studio`, `/preview` and `/api` are left out of the
 most-read list. To rotate the token, create a new one, `secret put` it, then delete the old one in the dashboard.
 
-Since card 122 the sources include **AI assistants** (ChatGPT, Perplexity, Copilot, Gemini, Claude and similar) with a
+Since card 123 the sources include **AI assistants** (ChatGPT, Perplexity, Copilot, Gemini, Claude and similar) with a
 this-week and week-before count. Nothing to set up: it comes with the same token.
 
-### Writing help (the Studio's "Suggest" buttons, PORTS.md card 122)
+### Writing help (the Studio's "Suggest" buttons, PORTS.md card 123)
 
 The "Suggest" buttons under the Google description, photo description and summary fields, and "Improve this
 paragraph" in rich text, call `/api/studio/ai/`, which asks the Claude API. Until the Worker has the key the buttons do
@@ -328,6 +328,19 @@ dist/server/wrangler.json`, then `npm run preview`.
   `SITE_URL`, then uncomment the schedule in `.github/workflows/change-note.yml`. The person who should get it
   watches the repo. Try it by hand: `node --experimental-strip-types scripts/change-note.mjs --dry --hours 72`.
 - **Table panes.** Nothing to switch on; edit `src/sanity/tables.config.ts`.
+
+## Private pages and the link report (PORTS.md card 122)
+
+- **Password pages.** `npx wrangler secret put PRIVATE_PAGE_SECRET` (32+ random characters, as above) plus the
+  preview stack's `SANITY_TOKEN`. Without either, `/private/<slug>/` says "not ready yet" and never shows a page.
+  Optional: a Cloudflare rate limiting rule on `POST /private/*` for a hard global limit. Locally: `.dev.vars` with
+  `PRIVATE_PAGE_SECRET` and `PRIVATE_PAGE_TEST_FIXTURE=1`, copied to `dist/server/`, then `npm run preview` and
+  `PRIVATE_PAGES_BASE_URL=http://localhost:8787 npx playwright test private-pages`. Never set the fixture flag on a
+  deployed Worker.
+- **Link report in the Checkup.** Repo secret `SANITY_API_WRITE_TOKEN` (the one publish-due uses); link-health.yml
+  then saves `linkReport.latest` every Monday. Try it by hand: `node scripts/check-live-links.mjs --write-report`
+  with the token in the environment.
+- Both types are in the webhook deny-list above; add them to an existing webhook's filter.
 
 ## Seed placeholder content
 

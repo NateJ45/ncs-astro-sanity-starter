@@ -160,7 +160,7 @@ vars `CF_ACCOUNT_ID` and `CF_WEB_ANALYTICS_SITE_TAG` (32 hex each; the site tag 
 step is in OPERATIONS.md, "Visitor numbers". The query's field names were taken from the Web Analytics dashboard's own
 query; check the card against the dashboard the first time a site switches it on.
 
-**AI assistants (card 122).** Referrers from AI assistants (`AI_HOSTS`: chatgpt.com, chat.openai.com, perplexity.ai,
+**AI assistants (card 123).** Referrers from AI assistants (`AI_HOSTS`: chatgpt.com, chat.openai.com, perplexity.ai,
 copilot.microsoft.com, gemini.google.com, claude.ai, you.com, phind.com, poe.com, meta.ai, chat.mistral.ai,
 chat.deepseek.com, grok.com) are their own source group, "AI assistants", checked before search so Gemini does not read
 as Google. A fourth alias, `referersBefore`, reads the seven days before the last seven, so the report carries
@@ -221,7 +221,7 @@ plus every Checkup finding whose target is this document. "How to": the Site Gui
 `GuideView`. Read-only; uses only `documentId`, `documentType` and `onClose`, because inspector props have changed
 between Sanity majors. `features.helpPanel: false` removes it.
 
-## Before you publish (card 122)
+## Before you publish (card 123)
 
 A second document inspector (`PublishPanel.tsx`), beside "Help for this page" on every type but the Trash and the
 weekly tick. It lists what the Checkup would say about THIS document once its changes are published: `forDocument()` in
@@ -235,7 +235,7 @@ own rule covers pictures with a field link. Re-run 600 ms after typing stops. Bl
 `features.publishPanel: false` removes it. Any rule a site adds (heading order, link words, private pages) shows up
 here with no change to the panel, as long as it returns `items` with `target.doc` and `target.field`.
 
-## Writing help (card 122)
+## Writing help (card 123)
 
 `ncsWritingHelp()` (`src/sanity/ai/`, its own plugin in `sanity.config.ts`, not part of the kit config) wraps
 `form.components.input` and `form.components.block`:
@@ -258,10 +258,10 @@ whether the Worker has `ANTHROPIC_API_KEY`; until it does, nothing is drawn, so 
 default 30, `AI_HOURLY_LIMIT` var; held per Worker instance, a brake not a vault), a well-formed body (400). Then one
 plain `fetch` to the Messages API (no SDK). The pure half is `src/lib/studio-ai.ts`:
 
-- Models: short text to `claude-haiku-5-5` with thinking `disabled`; photo descriptions to `claude-sonnet-5-5` with
-  thinking `between_tools` (Sonnet 5.5 refuses `disabled`) and the server-side fallback (`fallbacks: "default"`, beta
-  header `server-side-fallback-2026-07-01`), effort `low` on both. `max_tokens` per task 160 to 700; input cut to a few
-  thousand characters (`AI_LIMITS`).
+- Models: short text to `claude-haiku-5-5`, photo descriptions to `claude-sonnet-5-5`. The body is only `model`,
+  `max_tokens`, `system` and `messages`, with no thinking, effort, fallback or beta settings, so nothing model-specific
+  can be refused. Both models think a little by default and that counts against `max_tokens`, so the caps (`AI_LIMITS`)
+  are 1024 (2048 for a paragraph); the input is cut to a few thousand characters.
 - The photo goes by URL, built on the Worker from the asset id and THIS project's id and dataset
   (`imageUrlFromRef`, 800px JPEG), never from a URL the browser sent.
 - The system prompt is the site copy voice from `docs/claude/communication-style.md` (warm, plain, US English, no
@@ -378,7 +378,11 @@ Generic (`genericRules()`): pictures with no description (skipping `altExemptFie
 Google description (`seoTypes`, unless hidden from search), links to anything unpublished or gone, changes waiting more
 than 14 days, recent unpublished changes, the Trash, and the last publish. Opt-in: `unconfirmedRule()` (text containing
 "to be confirmed" or `[confirm]`, or any `confirmed` or `...Confirmed` box left unticked at any depth; PORTS.md card
-66). Card 122 (`src/lib/studio-prepublish.ts`): `exampleTextRule()` (words still starting "Example:" from a page
+66). Links, headings and pages (`qualityRules()`, card 122): dead external links from the weekly link report,
+typed internal links to missing pages, skipped heading levels, vague link words and bare web addresses, long Google
+titles and descriptions, pages nothing links to, and two private-page guards (`docs/agent/private-pages.md`).
+Report documents (`REPORT_TYPES`, e.g. `linkReport`) reach rules as `ctx.reports`, never as content. A site adds its own rules in `kit.config.ts`. A rule is `{ id, run(ctx) }` returning one finding or null; a rule
+66). Card 123 (`src/lib/studio-prepublish.ts`): `exampleTextRule()` (words still starting "Example:" from a page
 template, Needs doing, with the field) and `llmsRules({ pageTypes })`: `/llms.txt` or `/llms-full.txt` still carrying
 the starter's words, a listed custom page missing from `/llms.txt`, and `/llms-full.txt` older than `maxAgeDays` (60)
 with something published since its `Last updated:` line (written by `npm run llms:full`). The llms rules read
@@ -432,8 +436,8 @@ and staff view place `messages`. PORTS.md card 117 has the full file list.
 
 Tracked in the starter's `docs/PENDING.md` item 14: the rest of the Worker routes (Ask form, link check, monthly report)
 and the recorded tutorial videos themselves (the slot exists, card 115). The publish checklist inspector landed as
-"Before you publish" with card 122. Studio
-auth and deploy status landed with card 111; visitors (from Cloudflare Web Analytics, not GA4) with card 115.
+"Before you publish" with card 123. Studio auth and deploy status landed with card 111; visitors (from Cloudflare
+Web Analytics, not GA4) with card 115.
 
 Findings from the step 0 spike (2026-10-17), for the Worker half:
 

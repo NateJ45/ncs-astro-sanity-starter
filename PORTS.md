@@ -239,7 +239,8 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 119 | Studio icons by meaning, a picture on every list row                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 121 | Custom code in its own box; opt-in on-page and site-wide code                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 122 | Studio writing help (Claude API), Before you publish panel, AI visitors        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 122 | Hidden and password pages; Checkup link, heading and orphan checks             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 123 | Studio writing help (Claude API), Before you publish panel, AI visitors        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -464,7 +465,7 @@ and the checksum is deliberately a change detector, not a security primitive: it
 written out inline so the file stays dependency-free.
 
 **Proof, 2026-09-18, in the starter.** Temporarily set `inlineStylesheets: 'always'`
-(121KB of CSS per page), capture, change `--color-tertiary` by one hex digit, rebuild,
+(122KB of CSS per page), capture, change `--color-tertiary` by one hex digit, rebuild,
 compare: ten of eleven pages report DIFF with a single changed line each,
 `- <style>/* CSS 121864B abec36b4 */</style>` against
 `+ <style>/* CSS 121864B ccd4b458 */</style>`. Config reverted, rebuilt, recaptured,
@@ -9175,7 +9176,63 @@ types, queries, BaseLayout, NON_STEGA_FIELDS and `_headers`; add the wall fixtur
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/custom-code`, PR after this merges. Other
 sites `no`.
 
-## Card 122: Studio writing help (Claude API), a "Before you publish" panel, AI assistants on the Visitors card (2026-10-18)
+## Card 122: hidden pages, password pages, and the Checkup's link and accessibility checks (2026-10-18)
+
+**Origin:** first-baptist-auburn (2026-10-18): a church needs pages for some people only (a members page, a trip
+sign-up), and an editor needs to hear about broken links and muddled headings before a visitor does. Built in the
+starter, then first-baptist-auburn. Full design and the security note: `docs/agent/private-pages.md`.
+
+**Canonical:** PORTABLE: `src/lib/private-pages.ts` (+ test), `src/lib/private-pages-server.ts`,
+`src/lib/studio-checkup-quality.ts` (+ test), `src/lib/sitemap-filter.ts` (+ test),
+`src/sanity/components/PrivatePasswordInput.tsx`, `tests/private-pages.spec.ts`, `scripts/lib/link-report.test.mjs`,
+and the marked files it edits: `_seoFields.ts` (the switch's wording), `studio-checkup.ts` (`REPORT_TYPES`,
+`ctx.reports`), `HomeCards.tsx` ("(hidden)" in Your pages), `check-live-links.mjs` (`--write-report`),
+`change-summary.mjs` (ignores `linkReport` and `privatePage`), the guides. Per site: `src/pages/private/[slug].astro`,
+`src/sanity/schemaTypes/privatePage.ts`, the `structure.ts`, `sanity.config.ts`, `kit.config.ts`, `queries.ts`
+(`getNavPages`), `navLink.ts`, `page.ts`, `BaseLayout.astro` (`data-pagefind-ignore` on `<main>` when noindex),
+`astro.config.mjs` (`isSitemapPage`), `robots.txt.ts`, `link-health.yml` and `'private'` in both reserved-slug copies
+and their test.
+
+**What it adds.**
+
+- **Hidden** ("Hide this page from Google and the menus", the existing `hideFromSearch` field reworded): noindex, out
+  of the sitemap (as before), and now out of the automatic menus, the menu link picker, site search and the "nobody
+  can click through" check; "(hidden)" on Home's Your pages and in the list subtitle.
+- **Private** (`privatePage`, Pages, Private pages): built from the section library, served at `/private/<slug>/` by a
+  server-rendered route behind a password. Stored under the `privatePage.` id path, which the public API never serves
+  (the dataset is public, so a password on an ordinary page would leave its words one query away); never built; a
+  PBKDF2 hash made in the editor's browser, never the password; an HMAC-signed, page-scoped, 14-day cookie that a new
+  password revokes; a per-isolate rate limit; noindex and no-store on every answer; fails closed.
+- **Checkup**: dead external links (the weekly link check now saves `linkReport.latest` when the repo has
+  `SANITY_API_WRITE_TOKEN`), typed internal links to missing pages, skipped heading levels, vague link words and bare
+  web addresses, Google titles and descriptions that get cut off, pages nothing links to, and two private-page guards.
+  Each names the page with an Edit button. Report documents stay out of the content rules.
+- **Site Guide**: "Make a page private", "Keep links working".
+- **Sitemap filter** now matches whole path segments (a page called `studio-tour` used to be dropped by the `/studio`
+  rule's `includes()`), and drops `/private/`.
+
+**Weighed and left out.** A password switch on an ordinary custom page (unsafe on a public dataset, above). A second,
+private dataset (a plan question, and a second Studio workspace for editors). A hard global rate limit (needs KV or a
+Durable Object; a Cloudflare rate limiting rule does it without code). Presentation preview for private pages.
+Pictures on private pages are not private (public CDN); the Studio and the guide say so.
+
+**Verified.** `npm run check`, `npm run build` (no `dist/client/private`), `npm run test:unit`, `npm test`, and
+`tests/private-pages.spec.ts` part 2 against `wrangler dev` with the fixture page (form, wrong 401, right 303 + cookie
+
+- page, forged cookie, cross-site 403, 429), the gate in light and dark at 375 and 1280 with no overflow, and a real
+  browser opening the page after the right password. Not yet seen in a signed-in Studio: making a private page from the
+  list (the id path), the password input, the new Checkup rules on real data (`docs/PENDING.md` item 25).
+
+**Adopting it in a site.** Copy the PORTABLE files and the per-site pieces above, `npm run typegen`, add
+`qualityRules({...})` to `kit.config.ts` with the site's fixed routes and slugged types, and the "Private pages" group
+to `pages`. Set `PRIVATE_PAGE_SECRET` (`wrangler secret put`), check `SANITY_TOKEN` is set, add
+`SANITY_API_WRITE_TOKEN` to the repo secrets for the link report, and add `"privatePage"` and `"linkReport"` to the
+publish webhook's deny-list. Marked-file order: the starter merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/private-pages`, PR after this merges.
+Other sites `no`.
+
+## Card 123: Studio writing help (Claude API), a "Before you publish" panel, AI assistants on the Visitors card (2026-10-18)
 
 **Origin:** hosted site builders now ship AI writing help in the editor, a pre-publish check and an AI visibility
 report (2026-10-18). Our editors are non-writers, photo descriptions are already required (card 111's Checkup), and the Checkup and Fix-it list already
@@ -9202,8 +9259,8 @@ and `.dev.vars.example` comments, OPERATIONS.md "Writing help".
   has `ANTHROPIC_API_KEY`.
 - **The route.** `POST /api/studio/ai/`: same origin, a Sanity project member (`studio-auth.ts`), the key, an hourly
   limit per person (30, `AI_HOURLY_LIMIT`; per Worker instance), a checked body, then one `fetch` to the Messages API.
-  Haiku 5.5 for text (thinking `disabled`), Sonnet 5.5 for photos (thinking `between_tools`, `fallbacks: "default"`),
-  effort `low`, `max_tokens` 160 to 700, input capped. The photo URL is built on the Worker from the asset id and this
+  Haiku 5.5 for text, Sonnet 5.5 for photos; the body is only model, `max_tokens` (1024, 2048 for a paragraph, room
+  for the default thinking), system and messages, and the input is capped. The photo URL is built on the Worker from the asset id and this
   project only. The system prompt compiles `docs/claude/communication-style.md` (a test keeps the banned words in
   step) plus the brand name; dashes in the answer become commas. Logs the task and outcome only.
 - **Before you publish.** A second document inspector. `forDocument()` runs the site's own Checkup rules with the
@@ -9227,7 +9284,7 @@ cases with a stubbed fetch; the panel's draft swap; the llms and example rules; 
 `astro check`, build, `npm test`. On first-baptist-auburn under `astro dev`: `GET /api/studio/ai/` answers
 `configured`, a cross-site POST is 403 and a POST without a Sanity session is 401; the Studio loads with the plugin
 and no console errors (signed out). Not yet seen: the buttons and the panel signed in, and a real suggestion from the
-API (needs the key; `docs/PENDING.md` item 24).
+API (needs the key; `docs/PENDING.md` item 26).
 
 **Adopting it in a site.** Needs cards 106, 111, 115 and 117 (`studioApi`). Copy the PORTABLE files, add
 `ncsWritingHelp()` to `sanity.config.ts` plugins before the kit, add the two rules and `publishPanel: true` in

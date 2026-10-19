@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// "Before you publish", and two more Checkup rules (PORTS.md card 122)
+// "Before you publish", and two more Checkup rules (PORTS.md card 123)
 // =============================================================================
 // THE PANEL. The kit's "Before you publish" panel (src/sanity/kit/
 // PublishPanel.tsx) shows the Checkup's findings for ONE document, the one

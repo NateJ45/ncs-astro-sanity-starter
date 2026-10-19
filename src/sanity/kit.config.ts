@@ -17,6 +17,7 @@
 
 import type { KitConfig } from './kit/types';
 import { genericRules, unconfirmedRule } from '../lib/studio-checkup';
+import { qualityRules } from '../lib/studio-checkup-quality';
 import { exampleTextRule, llmsRules } from '../lib/studio-prepublish';
 import { guides, GUIDE_CATEGORIES, GUIDES_FOR_TYPE } from './guides/content';
 import { makeGuideView } from './components/GuideView';
@@ -95,7 +96,28 @@ export const kitConfig: KitConfig = {
       // Flags text marked "to be confirmed" or "[confirm]" and unticked
       // `confirmed` boxes. Harmless when nothing carries them.
       unconfirmedRule(),
-      // Card 122: words still starting "Example:" from a page template, and the
+      // Links, headings, long Google text, pages nobody can reach, private
+      // pages (PORTS.md card 122). fixedPaths are this site's built routes;
+      // routes maps each slugged type to its address.
+      ...qualityRules({
+        seoTypes: SEO_TYPES,
+        fixedPaths: [
+          '/',
+          '/about/', // scaffold: about
+          '/services/', // scaffold: services
+          '/process/', // scaffold: process
+          '/faq/', // scaffold: faq
+          '/journal/', // scaffold: journal
+          '/contact/',
+          '/privacy/',
+        ],
+        routes: {
+          page: (slug) => `/${slug}/`,
+          privatePage: (slug) => `/private/${slug}/`,
+          journalEntry: (slug) => `/journal/${slug}/`, // scaffold: journal
+        },
+      }),
+      // Card 123: words still starting "Example:" from a page template, and the
       // files for AI assistants (/llms.txt, /llms-full.txt) being stale.
       exampleTextRule(),
       ...llmsRules({ pageTypes: ['page'] }),
@@ -131,6 +153,8 @@ export const kitConfig: KitConfig = {
       ],
     },
     { title: 'Pages you built', listType: 'page' },
+    // Password pages (card 122), listed by name like the pages above.
+    { title: 'Private pages', listType: 'privatePage' },
     {
       title: 'Lists',
       links: [
@@ -233,7 +257,7 @@ export const kitConfig: KitConfig = {
     // Card 110: the status line under the top bar, and the help panel.
     navbarStatus: true,
     helpPanel: true,
-    // Card 122: "Before you publish", the Checkup for the open document.
+    // Card 123: "Before you publish", the Checkup for the open document.
     publishPanel: true,
   },
 };

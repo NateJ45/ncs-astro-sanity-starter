@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words in the prompts are safe to edit)
 // =============================================================================
-// Writing help in the Studio, the pure half (PORTS.md card 122)
+// Writing help in the Studio, the pure half (PORTS.md card 123)
 // =============================================================================
 // The Studio's "Suggest" buttons (Google description, photo description,
 // summary) and the rich-text "Improve this paragraph" action POST to
@@ -25,7 +25,10 @@
 // description needs to see the photo, so it goes to Claude Sonnet 5.5 with the
 // picture at 800px wide. Every task has a hard max_tokens cap and the input is
 // cut to a few thousand characters, so one suggestion costs a fraction of a
-// cent. Thinking is switched off: these are one-line jobs.
+// cent. The request is the plain minimum (model, max_tokens, system,
+// messages): no thinking, effort or fallback settings, so nothing in it can be
+// refused for a model-specific reason. Both models think a little by default,
+// and that counts against max_tokens, so the caps leave room for it.
 // =============================================================================
 
 /** What the editor asked for. */
@@ -46,14 +49,16 @@ export const AI_MODELS = {
 } as const;
 
 /**
- * Per task: the most the model may write (max_tokens) and the most text we
- * send it. The caps are the cost control; the prompt asks for far less.
+ * Per task: the most the model may write (max_tokens, thinking included) and
+ * the most text we send it. The caps are the cost control; the prompt asks for
+ * far less. Worst case at today's prices: about a tenth of a cent on Haiku,
+ * about a cent on Sonnet.
  */
 export const AI_LIMITS: Record<AiTask, { maxTokens: number; inputChars: number }> = {
-  seo: { maxTokens: 160, inputChars: 6000 },
-  summary: { maxTokens: 200, inputChars: 6000 },
-  alt: { maxTokens: 160, inputChars: 600 },
-  paragraph: { maxTokens: 700, inputChars: 2500 },
+  seo: { maxTokens: 1024, inputChars: 6000 },
+  summary: { maxTokens: 1024, inputChars: 6000 },
+  alt: { maxTokens: 1024, inputChars: 600 },
+  paragraph: { maxTokens: 2048, inputChars: 2500 },
 };
 
 /** Suggestions per signed-in person per hour (AI_HOURLY_LIMIT var overrides). */
@@ -186,10 +191,6 @@ export interface MessagesRequest {
   max_tokens: number;
   system: string;
   messages: Array<{ role: 'user'; content: Array<Record<string, unknown>> }>;
-  thinking: { type: 'disabled' | 'between_tools' };
-  output_config: { effort: 'low' };
-  /** Sonnet only: retry a refused request on a fallback model (Claude API feature). */
-  fallbacks?: 'default';
 }
 
 /** The Messages API body for one suggestion, or an error for the editor. */
@@ -212,22 +213,16 @@ export function buildMessagesRequest(
       max_tokens: AI_LIMITS[input.task].maxTokens,
       system: systemPrompt(site.brand),
       messages: [{ role: 'user', content }],
-      // Thinking off: one-line jobs. Haiku 5.5 takes `disabled`; Sonnet 5.5
-      // refuses `disabled` and takes `between_tools` (no tools here, so none).
-      thinking: { type: vision ? 'between_tools' : 'disabled' },
-      output_config: { effort: 'low' },
-      ...(vision ? { fallbacks: 'default' as const } : {}),
     },
   };
 }
 
 /** Headers for the call. The key never leaves the Worker. */
-export function anthropicHeaders(apiKey: string, task: AiTask): Record<string, string> {
+export function anthropicHeaders(apiKey: string): Record<string, string> {
   return {
     'x-api-key': apiKey,
     'anthropic-version': ANTHROPIC_VERSION,
     'content-type': 'application/json',
-    ...(task === 'alt' ? { 'anthropic-beta': 'server-side-fallback-2026-07-01' } : {}),
   };
 }
 

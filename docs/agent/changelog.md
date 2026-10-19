@@ -1,6 +1,6 @@
 # Change history
 
-_2026-10-18: writing help, "Before you publish" and AI visitors in the Studio (PORTS card 122)._
+_2026-10-18: writing help, "Before you publish" and AI visitors in the Studio (PORTS card 123)._
 
 **Decision.** Three editor features that hosted site builders now ship. "Suggest" buttons under the Google
 description, photo description and summary fields, and "Improve this paragraph" in rich text, ask a new Worker route
@@ -12,6 +12,14 @@ draft swapped in, with a "Show me" per field; it blocks nothing. Two new Checkup
 template, and stale or template `llms.txt` files. The Visitors card gives AI assistants (ChatGPT, Perplexity, Copilot,
 Gemini, Claude and others) their own source group with a week-on-week count. No new dependency.
 
+_2026-10-18: hidden pages, password pages, and link and heading checks in the Checkup (PORTS card 122)._
+
+**Decision.** "Hide this page from Google and the menus" now also keeps a page out of the menus, the menu picker and
+site search. Password pages are a separate type, `privatePage`, stored under a private id path because the dataset is
+public (a password on an ordinary page would leave its words readable over the API), served by a server-rendered
+route with a hashed password, a signed cookie and a rate limit, and never built. The Checkup gained dead external
+links (from the weekly link check), internal links to missing pages, skipped headings, vague link words, long Google
+text, pages nobody can reach, and private-page guards. Detail and the security note: `docs/agent/private-pages.md`.
 _2026-10-18: custom code, safe by default (PORTS card 121)._
 
 **Decision.** Editors can paste a widget (a countdown, a sign-up gadget, a map, something an AI wrote) into the block

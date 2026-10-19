@@ -22,7 +22,7 @@
 #   npx sanity cors add https://<your-worker>.workers.dev --credentials
 SANITY_TOKEN=
 
-# ── Writing help in the Studio (/api/studio/ai/, PORTS.md card 122) ─────────
+# ── Writing help in the Studio (/api/studio/ai/, PORTS.md card 123) ─────────
 # A Claude API key from console.anthropic.com. Optional: without it the Studio's
 # "Suggest" buttons do not appear. In production:
 #   npx wrangler secret put ANTHROPIC_API_KEY

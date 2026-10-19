@@ -114,7 +114,7 @@ const siteName = identity.siteName;
 p(`# ${siteName} — Full Site Content`);
 p('');
 // The Studio's Checkup reads this line to tell an editor when the file was
-// last made (PORTS.md card 122). Keep the wording: the rule matches it.
+// last made (PORTS.md card 123). Keep the wording: the rule matches it.
 p(`Last updated: ${new Date().toISOString().slice(0, 10)}`);
 p('');
 p(

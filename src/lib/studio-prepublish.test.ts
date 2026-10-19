@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// "Before you publish" and the example-text and llms rules (PORTS.md card 122).
+// "Before you publish" and the example-text and llms rules (PORTS.md card 123).
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,6 +12,7 @@ import {
   llmsUpdatedAt,
 } from './studio-prepublish.ts';
 import { runCheckup } from './studio-checkup.ts';
+import { qualityRules } from './studio-checkup-quality.ts';
 
 const NOW = Date.parse('2026-10-18T12:00:00Z');
 const opts = {
@@ -91,6 +92,31 @@ describe('before you publish', () => {
       found.map((f) => f.ruleId),
       ['link-to-missing'],
     );
+  });
+
+  it('picks up the link and heading rules (card 122) with no change to the panel', () => {
+    const draft: Doc = {
+      _id: 'drafts.p5',
+      _type: 'page',
+      title: 'Groups',
+      seoDescription: 'Small groups.',
+      slug: { current: 'groups' },
+      cta: { href: '/nowhere/' },
+      body: [
+        { _key: 'a', _type: 'block', style: 'h2', children: [{ _type: 'span', text: 'One' }] },
+        { _key: 'b', _type: 'block', style: 'h4', children: [{ _type: 'span', text: 'Two' }] },
+      ],
+    };
+    const found = forDocument(
+      [draft],
+      [...rules, ...qualityRules({ fixedPaths: ['/'] })],
+      draft,
+      opts,
+    );
+    const ids = found.map((f) => f.ruleId);
+    assert.ok(ids.includes('heading-skips'), ids.join());
+    assert.ok(ids.includes('internal-link-missing'), ids.join());
+    assert.equal(found.find((f) => f.ruleId === 'heading-skips')?.field, 'body');
   });
 
   it('is empty with no document', () => {

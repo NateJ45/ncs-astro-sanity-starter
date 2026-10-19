@@ -227,7 +227,7 @@ async function readSiteFile(path: string): Promise<string | null | undefined> {
 }
 
 /**
- * The files the Checkup's llms rules read (card 122), from the site serving
+ * The files the Checkup's llms rules read (card 123), from the site serving
  * this Studio. Undefined values mean "could not tell", and the rules stay quiet.
  */
 export async function readSiteFiles(): Promise<SiteFiles> {

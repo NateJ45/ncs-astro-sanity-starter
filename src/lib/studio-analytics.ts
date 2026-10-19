@@ -8,7 +8,7 @@
 // read-only API token and hands the Studio a small summary: visits in the last
 // seven days against the seven before, a four-week daily series, the most-read
 // pages and where visitors came from (search, typed it in, other sites,
-// social, and since card 122 AI assistants such as ChatGPT, with their own
+// social, and since card 123 AI assistants such as ChatGPT, with their own
 // week-on-week count). This file is the pure half (the GraphQL request, the mapping, the
 // referrer groups), free of Worker and React imports so
 // src/lib/studio-analytics.test.ts can check it in bare Node.
@@ -54,7 +54,7 @@ export function analyticsWindow(now: Date) {
     start: new Date(today - (SERIES_DAYS - 1) * DAY).toISOString(),
     /** Seven days ago, to the minute: "the last 7 days". */
     weekStart: new Date(end - 7 * DAY).toISOString(),
-    /** Fourteen days ago: the week before, for the AI assistants trend (card 122). */
+    /** Fourteen days ago: the week before, for the AI assistants trend (card 123). */
     prevWeekStart: new Date(end - 14 * DAY).toISOString(),
     end: new Date(end).toISOString(),
     days,
@@ -142,7 +142,7 @@ const SEARCH = [
   /(^|\.)qwant\.com$/,
 ];
 /**
- * AI assistants that send visitors on with a link (card 122). Checked BEFORE
+ * AI assistants that send visitors on with a link (card 123). Checked BEFORE
  * search, because gemini.google.com would otherwise read as Google search.
  * Many assistant visits arrive with no referrer at all and count as "Typed it
  * in", so this number is a floor, not the whole story.
@@ -239,7 +239,7 @@ export interface VisitorsReport {
   /** Where visits came from over the last seven days, biggest first, empty groups left out. */
   sources: Array<{ group: SourceGroup; label: string; visits: number }>;
   /**
-   * Visits sent by AI assistants (card 122): the last 7 days and the 7 before.
+   * Visits sent by AI assistants (card 123): the last 7 days and the 7 before.
    * Also in `sources`; kept apart so the card can show the trend.
    */
   ai: { thisWeek: number; lastWeek: number };
@@ -326,7 +326,7 @@ export function visitorsReport(
   };
 }
 
-/** The AI assistants line under the sources (card 122), or null when there is nothing to say. */
+/** The AI assistants line under the sources (card 123), or null when there is nothing to say. */
 export function aiCompare(ai: { thisWeek: number; lastWeek: number } | undefined): string | null {
   if (!ai || (ai.thisWeek === 0 && ai.lastWeek === 0)) return null;
   const word = (k: number) => (k === 1 ? 'visit' : 'visits');

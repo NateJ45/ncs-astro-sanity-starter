@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// "Before you publish": a document inspector (Studio kit, PORTS.md card 122)
+// "Before you publish": a document inspector (Studio kit, PORTS.md card 123)
 // =============================================================================
 // Opens from the document's footer, beside "Help for this page", and lists
 // what the Checkup would say about THIS document once the editor's changes are

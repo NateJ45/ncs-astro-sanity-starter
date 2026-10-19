@@ -291,7 +291,7 @@ Until then, open the panel in the scan or read the list and ignore warnings unde
 
 PORTS.md card 106 brought the Studio kit's Studio half from first-baptist-auburn. Still to build, starter first: the
 Worker routes under `src/pages/api/studio/*` (the Ask form, link check, monthly report) and the recorded tutorial
-videos themselves. The live publish checklist inspector landed as "Before you publish" (card 122). Studio auth by the session token and deploy status landed with
+videos themselves. The live publish checklist inspector landed as "Before you publish" (card 123). Studio auth by the session token and deploy status landed with
 card 111 (`src/lib/studio-auth.ts`, `/api/studio/deploy-status/`); Home's visitors (Cloudflare Web Analytics, not GA4,
 `/api/studio/visitors/`) and the guide-video slot with card 115. The spike findings for auth and cron are in
 `docs/agent/studio-kit.md`. Ask is still a mailto (`PUBLIC_STUDIO_HELP_EMAIL`). No other site but first-baptist-auburn
@@ -381,17 +381,25 @@ on-page probe can), and seen under `wrangler dev` with the site fonts loading in
 once there is code, Site settings' "Code on every page" tab, both Checkup findings opening the right field, and the
 boxed frame in Presentation.
 
-### 24. Card 122 (writing help, Before you publish, AI visitors): signed-in checks and the key (opened 2026-10-18)
+### 25. Card 122 (hidden and password pages, link checks): the signed-in and deployed checks (opened 2026-10-18)
+
+Unit-tested (`private-pages`, `studio-checkup-quality`, `sitemap-filter`, `link-report`), the static half of
+`tests/private-pages.spec.ts` in the suite, and the Worker half against `wrangler dev` with the fixture page. Not yet
+seen signed in: making a page from Pages, Private pages and confirming its id starts `privatePage.` (draft and
+published), the password input saving a hash, a published private page opening on a deployed Worker with
+`PRIVATE_PAGE_SECRET` set, the new Checkup findings on real data, and the first Monday link-health run saving
+`linkReport.latest` (needs the `SANITY_API_WRITE_TOKEN` repo secret).
+
+### 26. Card 123 (writing help, Before you publish, AI visitors): signed-in checks and the key (opened 2026-10-18)
 
 Unit-tested (`studio-ai.test.ts` with a mocked fetch, `studio-prepublish.test.ts`, `studio-analytics.test.ts`),
 `astro check`, the build and `npm test` clean. The route was checked on first-baptist-auburn under `astro dev`
 (configured, 403 cross-site, 401 without a session) and its Studio loads with the plugin, signed out. Still open:
 signed in, in light and dark at 375 and 1280, the Suggest buttons under a Google description, a photo description
 and a summary, "Improve this paragraph" and its dialog (and that Use this lands in the right block), and the Before
-you publish panel with its Show me links; the first real suggestion against the Claude API (needs
-`ANTHROPIC_API_KEY` on a deployed site; OPERATIONS.md, "Writing help", with the spend limit), checking that
-`thinking: between_tools` plus `fallbacks: "default"` is accepted on Sonnet 5.5 for the photo description (the route
-logs the status; drop `fallbacks` if it 400s), and the AI assistants line on a Visitors card with real referrals.
+you publish panel with its Show me links; the first real suggestion against the Claude API for each task (needs
+`ANTHROPIC_API_KEY` on a deployed site; OPERATIONS.md, "Writing help", with the spend limit; the route logs only the
+status), and the AI assistants line on a Visitors card with real referrals.
 
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 

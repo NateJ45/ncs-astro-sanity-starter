@@ -71,18 +71,28 @@ export interface CheckupContext {
   /** A readable name for a type ("Announcement"). */
   typeTitle: (type: string) => string;
   /**
-   * Files the live site serves that a rule may read (card 122: /llms.txt and
+   * Reports written by scheduled jobs (REPORT_TYPES, e.g. the weekly link
+   * check, card 122). Kept OUT of docs/published/drafts, so a weekly write
+   * never reads as "the last change was published today" and no content rule
+   * walks a report as if it were a page.
+   */
+  reports: Doc[];
+  /**
+   * Files the live site serves that a rule may read (card 123: /llms.txt and
    * /llms-full.txt). Optional: undefined means "not fetched", and a rule that
    * needs it says nothing.
    */
   site?: SiteFiles;
 }
 
-/** What the Studio fetched from the site for the Checkup (card 122). Null: the site answered 404. */
+/** What the Studio fetched from the site for the Checkup (card 123). Null: the site answered 404. */
 export interface SiteFiles {
   llmsTxt?: string | null;
   llmsFull?: string | null;
 }
+
+/** Document types that are reports about the site, not content (card 122). */
+export const REPORT_TYPES = new Set(['linkReport']);
 
 export interface CheckupRule {
   id: string;
@@ -460,10 +470,13 @@ export function runCheckup(
   rules: CheckupRule[],
   opts: Pick<CheckupContext, 'nameOf' | 'typeTitle' | 'site'> & { now?: number },
 ): CheckResult[] {
+  const reports = docs.filter((d) => REPORT_TYPES.has(d._type));
+  const content = docs.filter((d) => !REPORT_TYPES.has(d._type));
   const ctx: CheckupContext = {
-    docs,
-    published: docs.filter((d) => !isDraftId(d._id)),
-    drafts: docs.filter((d) => isDraftId(d._id)),
+    docs: content,
+    published: content.filter((d) => !isDraftId(d._id)),
+    drafts: content.filter((d) => isDraftId(d._id)),
+    reports,
     now: opts.now ?? Date.now(),
     nameOf: opts.nameOf,
     typeTitle: opts.typeTitle,
