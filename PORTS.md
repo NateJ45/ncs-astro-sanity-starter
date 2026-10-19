@@ -223,34 +223,38 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 103 | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)              | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
 | 104 | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file        | n/a     | no          | yes      | n/a              | no            | no             | n/a                | n/a                 | no             |
 | 105 | A text hero (no photo, or editorial) still renders its buttons                 | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
-| 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                       | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
 | 107 | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page  | n/a     | yes         | yes      | yes              | partial       | n/a            | n/a                | partial             | yes            |
 | 108 | The header logo renders with JS off (`<noscript>` light variant)               | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
-| 109 | Authoring kit: page templates, picture picker, patterns, synced sections       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 110 | Studio looks like the site: name, mark, colours, status line, help panel       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 109 | Authoring kit: page templates, picture picker, patterns, synced sections       | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
+| 110 | Studio looks like the site: name, mark, colours, status line, help panel       | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
+| 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc  | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
 | 112 | React 19.3.1, one copy in the tree                                             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
-| 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it   | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | no                  | no             |
 | 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)              | n/a     | yes         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
-| 115 | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 116 | Studio as the site's admin: paper, navy chrome, fonts, text in site type       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 117 | Studio workflow: change note, expiring preview links, Messages, table panes    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering            | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 119 | Studio icons by meaning, a picture on every list row                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 121 | Custom code in its own box; opt-in on-page and site-wide code                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 122 | Hidden and password pages; Checkup link, heading and orphan checks             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 123 | Studio writing help (Claude API), Before you publish panel, AI visitors        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 124 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 125 | Studio on a phone (PWA), Post a photo, Earlier versions from backups           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 126 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 127 | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 128 | Studio design language (studio.look), shared UI pieces, Site Guide redesign    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 129 | Studio signs in by token (kit routes need it); recentIgnoreTypes               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 130 | Real screenshots in the Site Guide: per-site shot registry                     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 131 | Every Studio surface in the design language (first pass)                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 134 | Field "How to" chip to the Site Guide; icons on every field group              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 135 | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 115 | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos     | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 116 | Studio as the site's admin: paper, navy chrome, fonts, text in site type       | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 117 | Studio workflow: change note, expiring preview links, Messages, table panes    | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering            | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | yes            |
+| 119 | Studio icons by meaning, a picture on every list row                           | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | yes            |
+| 121 | Custom code in its own box; opt-in on-page and site-wide code                  | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | no                  | no             |
+| 122 | Hidden and password pages; Checkup link, heading and orphan checks             | n/a     | no          | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 123 | Studio writing help (Claude API), Before you publish panel, AI visitors        | n/a     | no          | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 124 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | yes            |
+| 125 | Studio on a phone (PWA), Post a photo, Earlier versions from backups           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | yes            |
+| 126 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | yes            |
+| 127 | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | yes            |
+| 128 | Studio design language (studio.look), shared UI pieces, Site Guide redesign    | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 129 | Studio signs in by token (kit routes need it); recentIgnoreTypes               | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 130 | Real screenshots in the Site Guide: per-site shot registry                     | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 131 | Every Studio surface in the design language (first pass)                       | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 132 | Studio design pass two: Home, Post a photo, tour, splash, offline page         | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 133 | Studio polish from a signed-in review: Home's ways-in tiles                    | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 134 | Field "How to" chip to the Site Guide; icons on every field group              | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 135 | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+
+Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -8461,6 +8465,8 @@ carry none (card 99).
 marked ones in the PR that follows this card. Every other site `no`; the Worker half (visitors, Ask form, deploy status,
 monthly report) is `docs/PENDING.md` item 14.
 
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
+
 ## Card 107: hidden reveal states wait for `html.motion`, so no-JS shows the finished page (2026-10-17)
 
 **Origin:** found on first-baptist-auburn while checking reported "blank sections" on the home page. The blanks were only
@@ -8502,6 +8508,8 @@ with `html.motion` too (fbcm did its whole arch/mark/draw/ink/sign block, presac
 clipped `.reveal-rise` headline) take it as well, start AND end, or the prefixed start outranks the old end. In an Astro
 scoped `<style>`, write `:global(html.motion) .x[data-reveal] ...`.
 
+**Rolled out, 2026-10-19.** The rollout report does not name this card per site. All five sites are synced to starter a837dc3 (synced, not individually verified).
+
 ## Card 108: the header logo renders with JavaScript off (2026-10-17)
 
 **Origin:** found on first-baptist-auburn while verifying card 107 with JavaScript off. Every section showed, but the
@@ -8526,6 +8534,8 @@ always had a `src`.
 **Status, 2026-10-17.** Starter `yes`. stonesteps-50k had the same src-less header logo and took it the same day
 (stonesteps-50k#126), hence `yes`. The other matrix sites have no theme-aware header logo (`n/a`). first-baptist-auburn
 (no column) took it in fbc-auburn#31.
+
+**Rolled out, 2026-10-19.** The rollout report does not name this card per site. All five sites are synced to starter a837dc3 (synced, not individually verified).
 
 ## Card 109: the authoring kit: page templates, a picture picker, patterns, synced sections, guardrails (2026-10-18)
 
@@ -8572,6 +8582,8 @@ each template, open "+ Add item" in grid view, insert a pattern as a copy and as
 **Status, 2026-10-18.** Starter `yes` (draft PR). Every site `no`; 2ndpreschicago and ncs-church-starter `n/a`
 (archived), wcp `n/a` (retired). Not yet verified logged in to a Studio: the picker grid, the insert dialog and the
 template menu were type-checked and built, not clicked.
+
+**Rolled out, 2026-10-19.** Applied on presacademy, reid-design-site, mas-monograms, stonesteps-50k. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
 
 ## Card 110: the Studio looks like the site: name, mark, colours, status line, help panel, Home round two (2026-10-18)
 
@@ -8628,6 +8640,8 @@ item 15). Follow the marked-file order: starter first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes` (login screen verified in a dev server; the signed-in views are unverified, see
 PENDING item 15). Every other site `no`.
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
 
 ## Card 111: the Studio remembers: failed deploys, weekly ticks, Quick update, empty lists, restore-doc (2026-10-18)
 
@@ -8688,6 +8702,8 @@ views unverified, PENDING item 17). first-baptist-auburn took it the same day. E
 card stays). `_seoFields.ts` titles read "Google title" and "Google description" instead of "SEO ..." (titles only,
 field names unchanged). Both files are PORTABLE: copy them into a site that has card 111.
 
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
+
 ## Card 112: React 19.3.1, one copy in the tree (2026-10-18)
 
 **Origin:** the starter, PR #140 (`exp/react-19.3`, merged 2026-10-18 as `b5138b7`). Sanity 6.19 had already pulled
@@ -8728,6 +8744,8 @@ their CI runs sync-check against the live starter and it had drifted that mornin
 workerd inspector port the prerender server opens). Run builds, and any Playwright config whose `webServer` builds,
 one at a time.
 
+**Rolled out, 2026-10-19.** The rollout report does not name this card per site. All five sites are synced to starter a837dc3 (synced, not individually verified).
+
 ## Card 113: SanityImage aims CSS crops at the hotspot; Church business type without a price range (2026-10-18)
 
 **Origin:** first-baptist-auburn's Home audit (2026-10-17). Two small faults that every site in the family has.
@@ -8758,6 +8776,8 @@ only the SanityImage half.
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn has both (branch `claude/home-before-jacob`, PR #35).
 fbcm: SanityImage half to adopt; JSON-LD half n/a. Crestview has no site repo, so n/a. Every other site `no`
 (SanityImage half worth taking; the JSON-LD half changes nothing for a business).
+
+**Rolled out, 2026-10-19.** Applied on presacademy, mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
 
 ## Card 114: publish-due.mjs takes the production write gate (2026-10-18)
 
@@ -8791,6 +8811,8 @@ needs `@sanity/client` installed for its dummy-host probe; every site has it.
 **Status, 2026-10-18.** Starter `yes`. stonesteps-50k `yes` (origin; it now takes the starter's header). fbcm (fbcm#73),
 presacademy (presacademy#106) and first-baptist-auburn (fbc-auburn#58) took it the same day, each merged green. Sites with no `publish-due.mjs`
 (reid-design-site, mas-monograms, nixoncreativestudio) `n/a`.
+
+**Rolled out, 2026-10-19.** The rollout report does not name this card per site. All five sites are synced to starter a837dc3 (synced, not individually verified).
 
 ## Card 115: the Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, guide videos (2026-10-18)
 
@@ -8833,6 +8855,8 @@ OPERATIONS.md "Visitor numbers" for the token and the two vars. Marked-file orde
 **Status, 2026-10-18.** Starter `yes` (unit-tested; the route's 403/401 checked under `wrangler dev`; signed-in views and
 real numbers unverified, PENDING item 18). first-baptist-auburn: branch pushed, PR after this card merges. Every other
 site `no`.
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
 
 ## Card 116: the Studio reads as the site's own admin: paper, navy chrome, fonts, text in the site's type (2026-10-18)
 
@@ -8899,6 +8923,8 @@ brand's imports), then `npm run test:unit`. Marked-file order: the starter merge
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-branded-look`, PR after this
 merges. Other sites `no`.
 
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
+
 ## Card 117: the Studio's safety net: morning change note, expiring preview links, Messages, table panes (2026-10-18)
 
 **Origin:** first-baptist-auburn, modelled on what the Theology Matters WordPress admin already gives its editors: a
@@ -8954,6 +8980,8 @@ new link does not rebuild the site, and follow the marked-file order (starter PR
 **Status, 2026-10-18.** Starter `yes` (unit-tested; built; endpoints checked under `wrangler dev` signed out; the
 signed-in Studio views are unverified). first-baptist-auburn took it the same day. Every other site `no`.
 
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
+
 ## Card 118: the Studio Home banner: navy welcome, the site's mark, motif and lettering (2026-10-18)
 
 **Origin:** the Theology Matters WordPress dashboard, whose welcome is a deep navy banner holding the date, a warm
@@ -9003,6 +9031,8 @@ order: starter PR first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-home-banner`, PR after this
 merges. Other sites `no`.
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, mas-monograms, stonesteps-50k. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
 
 ## Card 119: Studio icons by meaning, and a picture on every list row (2026-10-18)
 
@@ -9062,6 +9092,8 @@ make each `prepare` return `media: image?.asset ? image : undefined` rather than
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-brand-icons`, PR after this merges.
 Other sites `no`.
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
 
 ## Card 120: the Studio's edges: its own /studio page and splash, the site's words, a wordmark (2026-10-18)
 
@@ -9126,6 +9158,8 @@ optionally `StudioSplashMotif.astro`), remove `studioBasePath` from the `sanity(
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-edges`, PR after this merges. Other
 sites `no`.
 
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, mas-monograms, stonesteps-50k. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
+
 ## Card 121: custom code, safe by default: pasted widgets in their own box, opt-in on-page and site-wide code (2026-10-18)
 
 **Origin:** first-baptist-auburn, 2026-10-18. The pastor may ask an AI for a widget (a VBS countdown, a sign-up
@@ -9185,6 +9219,8 @@ types, queries, BaseLayout, NON_STEGA_FIELDS and `_headers`; add the wall fixtur
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/custom-code`, PR after this merges. Other
 
+**Rolled out, 2026-10-19.** Applied on presacademy, mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
+
 ## Card 122: hidden pages, password pages, and the Checkup's link and accessibility checks (2026-10-18)
 
 **Origin:** first-baptist-auburn (2026-10-18): a church needs pages for some people only (a members page, a trip
@@ -9239,6 +9275,8 @@ to `pages`. Set `PRIVATE_PAGE_SECRET` (`wrangler secret put`), check `SANITY_TOK
 publish webhook's deny-list. Marked-file order: the starter merges first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/private-pages`, PR after this merges.
+
+**Rolled out, 2026-10-19.** Applied on mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
 
 ## Card 123: Studio writing help (Claude API), a "Before you publish" panel, AI assistants on the Visitors card (2026-10-18)
 
@@ -9301,6 +9339,8 @@ help" for the key and spend limit. Marked-file order: the starter merges first, 
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-ai`, PR after this merges. Other
 
+**Rolled out, 2026-10-19.** Applied on mas-monograms. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
+
 ## Card 124: section looks instead of colours, and a photo viewer for galleries (2026-10-18)
 
 **Origin:** the Squarespace-parity pass on first-baptist-auburn (2026-10-18). Editors wanted what Squarespace gives
@@ -9362,6 +9402,8 @@ Marked-file order: the starter merges first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/section-looks`, PR after this merges. Other
 sites `no`.
+
+**Rolled out, 2026-10-19.** Applied on stonesteps-50k. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
 
 ## Card 125: the Studio on a phone, "Post a photo", and earlier versions from the nightly backups (2026-10-18)
 
@@ -9435,6 +9477,8 @@ Earlier versions: the backup running, `SANITY_API_WRITE_TOKEN` and `SANITY_PROJE
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-pwa`, PR after this merges. Other
 sites `no`. Signed-in and on-device checks: `docs/PENDING.md` item 27.
 
+**Rolled out, 2026-10-19.** Applied on stonesteps-50k. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
+
 ## Card 126: visitor site search (Pagefind) and share buttons with no third-party code (2026-10-18)
 
 **Origin:** first-baptist-auburn wanted visitors to find a sermon, a news post or "where do I park" without knowing
@@ -9501,6 +9545,8 @@ merges first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes` (switch off). first-baptist-auburn on branch `feat/site-search`, on, PR after
 this merges. Other sites `no`.
+
+**Rolled out, 2026-10-19.** Applied on stonesteps-50k. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
 
 ## Card 127: the email backbone: one sender (Cloudflare or Resend), a newsletter with double opt-in, RSVPs (2026-10-18)
 
@@ -9585,6 +9631,8 @@ in the tool order; reserve `email` and `newsletter`; `npm run typegen`, `build`,
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/email-backbone`, PR after this merges.
 Other sites `no`.
 
+**Rolled out, 2026-10-19.** Applied on stonesteps-50k. On the other sites it is synced to starter a837dc3 only (synced, not individually verified).
+
 ## Card 128: the Studio's design language, shared UI pieces, and a Site Guide worth reading (2026-10-18)
 
 **Origin:** first-baptist-auburn, 2026-10-18. The Site Guide was the part of the Studio an editor reads most and it
@@ -9650,6 +9698,8 @@ the site PR.
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-guide-design`, PR after this merges.
 Other sites `no`.
 
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms, stonesteps-50k.
+
 ## Card 129: the Studio signs in by token, says so plainly when it cannot, and Home can skip imported documents (2026-10-19)
 
 **Origin:** the 2026-10-19 signed-in checks on mas-monograms and stonesteps-50k. Live routes were fine (a valid Sanity
@@ -9683,6 +9733,8 @@ once after the site deploys. stonesteps-50k#135 and mas-monograms#121 carry the 
 
 **Status, 2026-10-19.** Starter `yes` (on merge). first-baptist-auburn on branch `fix/studio-token-login`. Others `no`
 except the config line on stonesteps-50k and mas-monograms.
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms, stonesteps-50k.
 
 ## Card 130: real Studio screenshots in the Site Guide, with a per-site shot registry (2026-10-19)
 
@@ -9722,6 +9774,8 @@ own guide showing the wireframe.
 
 **Status, 2026-10-19.** Starter `yes`. first-baptist-auburn on branch `feat/guide-shots`, PR after this merges.
 Other sites `no`.
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms, stonesteps-50k.
 
 ## Card 131: every Studio surface in the design language, first pass (2026-10-19)
 
@@ -9768,6 +9822,8 @@ tiles, Visitors in mark colours, the splash and offline page, Section Look thumb
 sign-in heading.
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms, stonesteps-50k.
 
 ## Card 132: the Studio design pass, part two: Home, Post a photo, the tour, the splash and offline page (2026-10-19)
 
@@ -9824,6 +9880,8 @@ sign-in heading; PreviewNavigator's spinner (preview stack, left on purpose).
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).
 
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms, stonesteps-50k.
+
 ## Card 133: Studio polish from a signed-in review: Home's ways-in tiles (2026-10-19)
 
 **Origin:** first-baptist-auburn, 2026-10-19, a live signed-in review of the Studio. At 1280 the Home grid put four
@@ -9847,6 +9905,8 @@ imports against its `BaseLayout.astro`.
 **Gates.** Kit harness at 375 and 1280 (`?view=surfaces&part=home`): no horizontal overflow, no title over two lines.
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms, stonesteps-50k.
 
 ## Card 134: a "How to" beside fields, and icons on every field group (2026-10-19)
 
@@ -9879,6 +9939,8 @@ inherited keys, cached). Kit harness `/kit-harness/studio/`: a page's Google tit
 section, Escape closes it, at 1280 and 375.
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms, stonesteps-50k.
 
 ## Card 135: Home's banner look is a style slot, and the hooks a site may select are documented and tested (2026-10-19)
 
@@ -9922,3 +9984,5 @@ at 1280 and 375: no horizontal scroll, each look draws.
 splash). docs/PENDING.md item 31.
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19; Auburn sets no style).
+
+**Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms, stonesteps-50k.
