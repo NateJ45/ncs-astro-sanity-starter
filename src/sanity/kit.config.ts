@@ -18,6 +18,7 @@
 import type { KitConfig } from './kit/types';
 import { genericRules, unconfirmedRule } from '../lib/studio-checkup';
 import { qualityRules } from '../lib/studio-checkup-quality';
+import { exampleTextRule, llmsRules } from '../lib/studio-prepublish';
 import { guides, GUIDE_CATEGORIES, GUIDES_FOR_TYPE } from './guides/content';
 import { makeGuideView } from './components/GuideView';
 import { envVal } from './urls';
@@ -116,6 +117,10 @@ export const kitConfig: KitConfig = {
           journalEntry: (slug) => `/journal/${slug}/`, // scaffold: journal
         },
       }),
+      // Card 123: words still starting "Example:" from a page template, and the
+      // files for AI assistants (/llms.txt, /llms-full.txt) being stale.
+      exampleTextRule(),
+      ...llmsRules({ pageTypes: ['page'] }),
     ],
     ignoreTypes: ['sectionPreset', 'studioGuide', 'studioNotes', 'redirect'],
   },
@@ -252,6 +257,8 @@ export const kitConfig: KitConfig = {
     // Card 110: the status line under the top bar, and the help panel.
     navbarStatus: true,
     helpPanel: true,
+    // Card 123: "Before you publish", the Checkup for the open document.
+    publishPanel: true,
   },
 };
 

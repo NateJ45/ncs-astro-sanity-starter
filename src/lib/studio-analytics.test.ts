@@ -4,6 +4,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  aiCompare,
   analyticsRequest,
   analyticsWindow,
   isTag,
@@ -57,6 +58,23 @@ describe('referrer groups', () => {
     assert.equal(sourceGroup('hamiltonohio.gov'), 'other');
   });
 
+  it('gives AI assistants their own group, before search (card 123)', () => {
+    for (const host of [
+      'chatgpt.com',
+      'chat.openai.com',
+      'www.perplexity.ai',
+      'copilot.microsoft.com',
+      'gemini.google.com',
+      'claude.ai',
+    ]) {
+      assert.equal(sourceGroup(host), 'ai', host);
+    }
+    // Google search and Bing stay search; an unrelated openai page is "other".
+    assert.equal(sourceGroup('www.google.com'), 'search');
+    assert.equal(sourceGroup('www.bing.com'), 'search');
+    assert.equal(sourceGroup('openai.com'), 'other');
+  });
+
   it('leaves out the site itself (moving between its own pages)', () => {
     assert.equal(sourceGroup('www.example.org', 'example.org'), null);
     assert.equal(sourceGroup('example.org', 'www.example.org'), null);
@@ -89,6 +107,12 @@ describe('visitorsReport', () => {
               { sum: { visits: 2 }, dimensions: { refererHost: 'facebook.com' } },
               { sum: { visits: 1 }, dimensions: { refererHost: 'example.org' } },
               { sum: { visits: 50 }, dimensions: { refererHost: 'fbc.example' } }, // own host
+              { sum: { visits: 4 }, dimensions: { refererHost: 'chatgpt.com' } },
+              { sum: { visits: 1 }, dimensions: { refererHost: 'www.perplexity.ai' } },
+            ],
+            referersBefore: [
+              { sum: { visits: 2 }, dimensions: { refererHost: 'chatgpt.com' } },
+              { sum: { visits: 9 }, dimensions: { refererHost: 'www.google.com' } }, // not AI
             ],
           },
         ],
@@ -121,11 +145,29 @@ describe('visitorsReport', () => {
       r.sources.map((s) => [s.group, s.visits]),
       [
         ['search', 8],
+        ['ai', 5],
         ['direct', 3],
         ['social', 2],
         ['other', 1],
       ],
     );
+  });
+
+  it('counts AI assistant visits this week and the week before', () => {
+    assert.deepEqual(r.ai, { thisWeek: 5, lastWeek: 2 });
+    assert.equal(
+      aiCompare(r.ai),
+      'AI assistants such as ChatGPT sent 5 visits this week, and 2 the week before.',
+    );
+    assert.equal(aiCompare({ thisWeek: 0, lastWeek: 0 }), null);
+    assert.equal(aiCompare(undefined), null);
+  });
+
+  it('asks for the week before as its own window', () => {
+    const body = analyticsRequest({ token: 't', accountTag: TAG, siteTag: TAG }, NOW);
+    assert.equal(body.variables.prevWeekStart, '2026-10-04T15:00:00.000Z');
+    assert.match(body.query, /referersBefore: rumPageloadEventsAdaptiveGroups/);
+    assert.match(body.query, /datetime_lt: \$weekStart/);
   });
 
   it('throws on GraphQL errors or a missing account, so the card never shows false zeros', () => {

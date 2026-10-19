@@ -19,6 +19,7 @@
 //   - A note after Publish, and the first-run tour (via the layout).
 //   - The calm status line under the top bar and the "Help for this page"
 //     document panel (PORTS.md card 110).
+//   - Card 123: the "Before you publish" document panel.
 //   - Card 111: the weekly tick document (Home's hand-ticked jobs), the Quick
 //     update tool (kitConfig.quickUpdate) and plain words in empty lists
 //     (EMPTY_LIST_BUNDLE; emptyAwareList() is for structure.ts).
@@ -37,6 +38,7 @@ import { makeGuideTool } from './GuideTool';
 import { makeHelpPanel } from './HelpPanel';
 import { makeHomeTool } from './HomeTool';
 import { makeNavbarStatus } from './NavbarStatus';
+import { makePublishPanel } from './PublishPanel';
 import { withPublishNote } from './publishNote';
 import { makeQuickUpdateTool } from './QuickUpdateTool';
 import { staffViewFor, useStaffView } from './shared';
@@ -84,6 +86,8 @@ export function ncsStudioKit(config: KitConfig) {
   // Card 110 features: on unless kit.config.ts turns them off.
   const KitNavbar = config.features.navbarStatus === false ? undefined : makeNavbarStatus(config);
   const helpPanel = config.features.helpPanel === false ? null : makeHelpPanel(config);
+  // Card 123: "Before you publish", the Checkup for the open document.
+  const publishPanel = config.features.publishPanel === false ? null : makePublishPanel(config);
 
   function KitLayout(props: LayoutProps) {
     const { staffView } = useStaffView(config);
@@ -154,11 +158,12 @@ export function ncsStudioKit(config: KitConfig) {
       newDocumentOptions: (prev) =>
         prev.filter((o) => o.templateId !== TRASH_TYPE && o.templateId !== WEEK_TYPE),
 
-      // "Help for this page" beside every document but the Trash (card 110).
+      // "Help for this page" (card 110) and "Before you publish" (card 123)
+      // beside every document but the Trash and the weekly tick.
       inspectors: (prev, { documentType }) =>
-        helpPanel && documentType !== TRASH_TYPE && documentType !== WEEK_TYPE
-          ? [...prev, helpPanel]
-          : prev,
+        documentType === TRASH_TYPE || documentType === WEEK_TYPE
+          ? prev
+          : [...prev, ...(publishPanel ? [publishPanel] : []), ...(helpPanel ? [helpPanel] : [])],
 
       actions: (prev, { schemaType, currentUser }) => {
         const staff = staffViewFor(currentUser, config);
