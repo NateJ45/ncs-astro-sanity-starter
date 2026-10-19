@@ -129,6 +129,13 @@
   // Pages are read with SANITY_TOKEN (above). Without both, /private/* shows
   // "not ready yet" and never a page. docs/agent/private-pages.md.
 
+  // ── Writing help in the Studio (src/pages/api/studio/ai.ts) ────────────────
+  // PORTS.md card 123. The "Suggest" buttons call the Claude API with one
+  // secret: npx wrangler secret put ANTHROPIC_API_KEY
+  // Set a monthly spend limit on that Anthropic workspace. Optional plain var
+  // "AI_HOURLY_LIMIT" (suggestions per person per hour, default 30). Without
+  // the key the buttons do not appear. Steps: OPERATIONS.md, "Writing help".
+
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     // @astrojs/cloudflare v14 splits the build into dist/client (static assets)

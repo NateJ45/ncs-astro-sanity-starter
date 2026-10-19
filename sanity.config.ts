@@ -59,6 +59,8 @@ import { CheckPageAction } from './src/sanity/actions/checkPage';
 import { UndoAction, RedoAction, undoRedoShortcuts } from './src/sanity/components/UndoRedo';
 import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 import { ncsStudioKit } from './src/sanity/kit';
+// Writing suggestions under chosen fields (PORTS.md card 123).
+import { ncsWritingHelp } from './src/sanity/ai';
 import { kitConfig } from './src/sanity/kit.config';
 import { ncsWorkflowTools } from './src/sanity/workflow';
 import { ncsMailTools } from './src/sanity/mail';
@@ -196,6 +198,11 @@ export default defineConfig({
         'page',
       ],
     }),
+    // "Suggest" buttons under the Google description, photo descriptions and
+    // summaries, and "Improve this paragraph" in rich text (card 123). They
+    // appear only once the Worker has ANTHROPIC_API_KEY; nothing is written
+    // until the editor presses "Use this".
+    ncsWritingHelp(),
     // Newsletter send buttons and the RSVPs tool (the email backbone, card 127).
     // Before the kit, so the kit's tool order and staff view place "rsvps".
     ncsMailTools(),

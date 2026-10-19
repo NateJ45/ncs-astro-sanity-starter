@@ -31,6 +31,7 @@ import {
   runCheckup,
   type CheckResult,
   type Doc,
+  type SiteFiles,
 } from '../../lib/studio-checkup';
 import type { KitConfig } from './types';
 
@@ -211,6 +212,32 @@ export function useTypeTitle() {
   );
 }
 
+/** One site file as text; null on a 404 (or an HTML page), undefined when unreachable. */
+async function readSiteFile(path: string): Promise<string | null | undefined> {
+  try {
+    const r = await fetch(path, { cache: 'no-store' });
+    if (r.status === 404) return null;
+    if (!r.ok) return undefined;
+    const type = r.headers.get('Content-Type') ?? '';
+    // A site without the file can answer with its HTML 404 page and a 200.
+    return type.includes('text/html') ? null : await r.text();
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The files the Checkup's llms rules read (card 123), from the site serving
+ * this Studio. Undefined values mean "could not tell", and the rules stay quiet.
+ */
+export async function readSiteFiles(): Promise<SiteFiles> {
+  const [llmsTxt, llmsFull] = await Promise.all([
+    readSiteFile('/llms.txt'),
+    readSiteFile('/llms-full.txt'),
+  ]);
+  return { llmsTxt, llmsFull };
+}
+
 export function useCheckup(config: KitConfig) {
   const client = useClient({ apiVersion: API_VERSION });
   const typeTitle = useTypeTitle();
@@ -225,10 +252,9 @@ export function useCheckup(config: KitConfig) {
     try {
       // The kit's weekly tick documents (card 111) are bookkeeping, never content.
       const ignore = new Set([...config.checkup.ignoreTypes, WEEK_TYPE]);
-      const docs = ((await client.fetch<Doc[]>(CHECKUP_QUERY)) ?? []).filter(
-        (d) => !ignore.has(d._type),
-      );
-      setResults(runCheckup(docs, config.checkup.rules, { nameOf, typeTitle }));
+      const [all, site] = await Promise.all([client.fetch<Doc[]>(CHECKUP_QUERY), readSiteFiles()]);
+      const docs = (all ?? []).filter((d) => !ignore.has(d._type));
+      setResults(runCheckup(docs, config.checkup.rules, { nameOf, typeTitle, site }));
     } catch {
       setFailed(true);
     } finally {
