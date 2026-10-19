@@ -1,0 +1,210 @@
+---
+// Foundation, edit with care
+// =============================================================================
+// /private/<slug>/ - a page only people with the password can see (card 122)
+// =============================================================================
+// SERVER-RENDERED, never built: there is no HTML for a private page in the
+// public assets, so nobody can fetch it around this check. The page's words
+// live in a `privatePage.` id-path document, which Sanity serves only to
+// signed-in requests, and this route reads it with the Worker's SANITY_TOKEN.
+// The rules (hash, cookie, rate limit) are in src/lib/private-pages.ts; the
+// full safety argument is in docs/agent/private-pages.md.
+//
+// GET  with a good cookie (or from a signed-in Studio session): the page.
+// GET  without one: the password form. Same form whether or not a page exists
+//      at this address, so the form says nothing about what is behind it.
+// POST the form: right password -> signed cookie + 303 back here; wrong ->
+//      the form again (401); too many wrong -> "wait a while" (429).
+//
+// Every answer: noindex, nofollow and no-store. Not in the sitemap (only
+// prerendered routes are) and robots.txt disallows /private/.
+// =============================================================================
+export const prerender = false;
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import { getSiteSettings } from '@/lib/queries';
+import { perspectiveCookieName } from '@sanity/preview-url-secret/constants';
+import { isStudioPreview } from '@/lib/preview-auth';
+import {
+  cookieName,
+  isPrivateSlug,
+  privatePath,
+  signAccessCookie,
+  verifyAccessCookie,
+  verifyPassword,
+  MAX_PASSWORD_LENGTH,
+} from '@/lib/private-pages';
+import {
+  limiter,
+  privatePagesConfigured,
+  privateSecret,
+  readPrivatePage,
+  visitorKey,
+  type PrivatePageDoc,
+} from '@/lib/private-pages-server';
+import { site } from '@/data/site';
+
+const headers = Astro.response.headers;
+headers.set('Cache-Control', 'private, no-store');
+headers.set('X-Robots-Tag', 'noindex, nofollow');
+headers.set('Referrer-Policy', 'same-origin');
+
+const slug = String(Astro.params.slug ?? '');
+const path = isPrivateSlug(slug) ? privatePath(slug) : '/private/';
+const now = Date.now();
+
+type State = 'ask' | 'wrong' | 'slow' | 'not-ready' | 'show';
+let state: State = 'ask';
+let retryMinutes = 0;
+let page: PrivatePageDoc | null = null;
+
+const ready = isPrivateSlug(slug) && privatePagesConfigured();
+if (!ready) {
+  state = 'not-ready';
+} else {
+  try {
+    page = await readPrivatePage(slug);
+  } catch (err) {
+    // Fails closed: a read that throws is "no page", never the page.
+    console.error(`private-pages: read failed (${err instanceof Error ? err.message : 'error'})`);
+    page = null;
+  }
+  const record = page?.password ?? null;
+  const secret = privateSecret() as string;
+
+  if (Astro.request.method === 'POST') {
+    // A form posted from another site is refused outright.
+    const origin = Astro.request.headers.get('origin');
+    if (origin && origin !== Astro.url.origin) {
+      return new Response('Forbidden', { status: 403, headers });
+    }
+    const key = visitorKey(Astro.request, slug);
+    if (!limiter.allowed(key, now)) {
+      // Read the body anyway: an unread POST body drops the connection.
+      await Astro.request.arrayBuffer().catch(() => null);
+      state = 'slow';
+      retryMinutes = Math.ceil(limiter.retryAfter(key, now) / 60);
+      headers.set('Retry-After', String(limiter.retryAfter(key, now)));
+      Astro.response.status = 429;
+    } else {
+      let guess = '';
+      try {
+        const form = await Astro.request.formData();
+        guess = String(form.get('password') ?? '').slice(0, MAX_PASSWORD_LENGTH + 1);
+      } catch {
+        guess = '';
+      }
+      // verifyPassword always runs the hash when there is a record, and a
+      // missing page or password is simply "wrong": same answer either way.
+      const ok = record ? await verifyPassword(guess, record) : false;
+      if (ok && record && page) {
+        limiter.clear(key);
+        const cookie = await signAccessCookie(slug, record, secret, now);
+        Astro.cookies.set(cookieName(slug), cookie.value, {
+          path,
+          httpOnly: true,
+          // Always https in production; plain http only on a local preview.
+          secure: Astro.url.protocol === 'https:',
+          sameSite: 'lax',
+          maxAge: cookie.maxAge,
+        });
+        return Astro.redirect(path, 303);
+      }
+      limiter.fail(key, now);
+      state = 'wrong';
+      Astro.response.status = 401;
+    }
+  } else if (page && record) {
+    const cookieOk = await verifyAccessCookie(
+      Astro.cookies.get(cookieName(slug))?.value,
+      slug,
+      record,
+      secret,
+      now,
+    );
+    if (cookieOk) state = 'show';
+  }
+
+  // An editor signed in to the Studio can always look at it.
+  if (state !== 'show' && Astro.request.method === 'GET' && page) {
+    if (await isStudioPreview(Astro.cookies.get(perspectiveCookieName)?.value)) state = 'show';
+  }
+}
+
+const siteSettings = await getSiteSettings();
+const title =
+  state === 'show'
+    ? `${page?.title ?? 'Private page'} | ${site.name}`
+    : `Private page | ${site.name}`;
+const message: Record<Exclude<State, 'show'>, string> = {
+  ask: 'This page is private. Type the password you were given to see it.',
+  wrong: 'That password is not right. Check it and try again.',
+  slow: `Too many tries. Please wait ${retryMinutes || 15} minutes and try again.`,
+  'not-ready': 'This page is not ready yet. Please check back later.',
+};
+---
+
+<BaseLayout {title} description="" {siteSettings} noindex>
+  {state === 'show' ? (
+    <SectionRenderer sections={page?.pageBuilder as any} idPrefix="private" />
+  ) : (
+    <section
+      class="mx-auto max-w-content px-m py-section-lg"
+      aria-labelledby="private-heading"
+      data-private-gate
+    >
+      <div class="max-w-xl">
+        <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">Private page</p>
+        <h1
+          id="private-heading"
+          class="font-display text-h1 leading-headline-tight text-foreground"
+        >
+          Password needed
+        </h1>
+        <p
+          class="mt-m text-lg leading-relaxed text-foreground/80"
+          id="private-message"
+          role={state === 'ask' ? undefined : 'alert'}
+        >
+          {message[state]}
+        </p>
+        {state !== 'not-ready' && state !== 'slow' && (
+          <form
+            method="post"
+            action={path}
+            data-astro-reload
+            class="mt-l flex flex-col gap-s sm:flex-row"
+          >
+            <label for="private-password" class="sr-only">
+              Password
+            </label>
+            <input
+              id="private-password"
+              name="password"
+              type="password"
+              required
+              autocomplete="current-password"
+              maxlength={MAX_PASSWORD_LENGTH}
+              aria-describedby="private-message"
+              aria-invalid={state === 'wrong' ? 'true' : undefined}
+              class="min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none sm:max-w-[20rem]"
+              placeholder="Password"
+            />
+            <button
+              type="submit"
+              class="press-tactile inline-flex min-h-[44px] items-center justify-center rounded-sm bg-primary-dark px-l py-s text-xs font-semibold tracking-eyebrow text-white uppercase hover:bg-accent-dark"
+            >
+              Open the page
+            </button>
+          </form>
+        )}
+        <p class="mt-l text-sm text-foreground/70">
+          <a href="/" class="underline underline-offset-4 hover:text-foreground">
+            Back to the home page
+          </a>
+        </p>
+      </div>
+    </section>
+  )}
+</BaseLayout>

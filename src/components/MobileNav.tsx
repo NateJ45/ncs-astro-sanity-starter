@@ -84,7 +84,7 @@ interface Props {
    */
   cta?: { show: boolean; label: string; href: string };
   /**
-   * Visitor search is on (src/data/site.ts search.enabled, PORTS.md card 123):
+   * Visitor search is on (src/data/site.ts search.enabled, PORTS.md card 126):
    * show a "Search the site" row that closes the drawer and opens the header's
    * search dialog. Header.astro passes it only when search is on.
    */
@@ -160,7 +160,7 @@ export default function MobileNav({
             </div>
           )}
 
-          {/* Visitor search (card 123). A real link to /search/, so it works
+          {/* Visitor search (card 126). A real link to /search/, so it works
               before React or the dialog script is ready. */}
           {search && (
             <div className="px-l pb-l">

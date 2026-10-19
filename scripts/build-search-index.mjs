@@ -1,6 +1,6 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// build-search-index.mjs - write the Pagefind search index (PORTS.md card 123)
+// build-search-index.mjs - write the Pagefind search index (PORTS.md card 126)
 // =============================================================================
 // Runs straight after `astro build` (package.json "build"), so CI, Lighthouse
 // and deploy all ship the same index. It reads the static HTML in dist/client

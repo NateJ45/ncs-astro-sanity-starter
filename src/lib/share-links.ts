@@ -1,6 +1,6 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// share-links.ts - plain share URLs for <ShareButtons> (PORTS.md card 123)
+// share-links.ts - plain share URLs for <ShareButtons> (PORTS.md card 126)
 // =============================================================================
 // No third-party scripts, SDKs or tracking pixels: each network gets an
 // ordinary link to its own share page, and email is a mailto:. Nothing loads

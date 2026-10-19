@@ -17,7 +17,8 @@ import { layout } from '@/data/layout';
 import { layoutAttrs } from '@/lib/site-layout';
 import { urlFor } from '@/lib/sanity';
 import { localBusinessSchema } from '@/lib/schemas';
-import { getActiveAnnouncement } from '@/lib/queries';
+import { getActiveAnnouncement, getSiteCode } from '@/lib/queries';
+import { isSiteCodeRoute } from '@/lib/custom-code';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import BackToTop from '@/components/BackToTop';
@@ -46,7 +47,7 @@ interface Props {
   ogType?: 'website' | 'article';
   /** Article metadata. Only used when ogType is 'article'. */
   ogArticle?: { publishedAt?: string; author?: string };
-  /** What kind of page this is in visitor search results (PORTS.md card 123): 'page' (the default), 'sermon', 'series', 'news', 'question' and so on. Only used when src/data/site.ts search.enabled is on. */
+  /** What kind of page this is in visitor search results (PORTS.md card 126): 'page' (the default), 'sermon', 'series', 'news', 'question' and so on. Only used when src/data/site.ts search.enabled is on. */
   searchType?: string;
 }
 
@@ -63,7 +64,7 @@ const {
   searchType = 'page',
 } = Astro.props as Props;
 
-// Visitor search (PORTS.md card 123). With search on, <main> carries
+// Visitor search (PORTS.md card 126). With search on, <main> carries
 // data-pagefind-body so scripts/build-search-index.mjs indexes main content
 // only, never the header, footer or nav. noindex pages (404, /search/, the
 // styleguide walls, any page an editor keeps out of Google) stay out of the
@@ -124,6 +125,12 @@ const allSchemas = siteSettings ? [localBusinessSchema(siteSettings), ...schemas
 // query. Returns null when no active announcement exists (graceful absence).
 // Evaluated at BUILD TIME — banner changes require a rebuild.
 const announcement = await getActiveAnnouncement().catch(() => null);
+// Site settings' "Code on every page" (PORTS.md card 121). Public routes only:
+// the Studio and the preview never get it (they do not use this layout today;
+// this guard keeps it that way if one ever does).
+const siteCode = isSiteCodeRoute(Astro.url.pathname)
+  ? await getSiteCode().catch(() => null)
+  : null;
 const showAnnouncement = !!(announcement?.message);
 
 // Map announcement style -> semantic Tailwind token classes.
@@ -279,6 +286,10 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     */}
     <Analytics />
 
+    {/* Site settings' "Code for the page head" (PORTS.md card 121). Public
+        pages only: never /studio or /preview. Runs directly on the page. */}
+    {siteCode?.headCode && <Fragment set:html={siteCode.headCode} />}
+
     <ClientRouter />
   </head>
   <body class="min-h-screen flex flex-col">
@@ -309,11 +320,17 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
 
     <Header siteSettings={siteSettings} />
 
+    {/* Site search (cards 122 and 126). With search on, an indexable page's
+        <main> carries data-pagefind-body (main content only) and its type as a
+        filter. A noindex page (hidden, 404, styleguide, private) gets neither,
+        and data-pagefind-ignore="all" keeps it out even if something else on
+        the page is marked. */}
     <main
       id="main"
       class="flex-1"
       data-pagefind-body={searchable ? '' : undefined}
       data-pagefind-filter={searchable ? `type:${searchType}` : undefined}
+      data-pagefind-ignore={noindex ? 'all' : undefined}
     >
       <slot />
     </main>
@@ -506,5 +523,8 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       initPolish();
       document.addEventListener('astro:page-load', initPolish);
     </script>
+
+    {/* Site settings' "Code for the end of every page" (PORTS.md card 121). */}
+    {siteCode?.bodyEndCode && <Fragment set:html={siteCode.bodyEndCode} />}
   </body>
 </html>

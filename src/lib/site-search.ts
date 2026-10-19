@@ -1,6 +1,6 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// site-search.ts - the pure half of visitor site search (PORTS.md card 123)
+// site-search.ts - the pure half of visitor site search (PORTS.md card 126)
 // =============================================================================
 // Pagefind (https://pagefind.app) indexes the built HTML after `astro build`
 // (scripts/build-search-index.mjs) and ships a small JS API under /pagefind/.

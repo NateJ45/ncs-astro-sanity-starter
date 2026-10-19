@@ -5,7 +5,7 @@ import { settle } from './helpers';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
-// Visitor site search and share buttons (PORTS.md card 123).
+// Visitor site search and share buttons (PORTS.md card 126).
 //
 // Search is opt-in (src/data/site.ts search.enabled). A site with it off has
 // no /pagefind/ index, and every search test skips itself; the starter ships

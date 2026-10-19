@@ -14,6 +14,7 @@ import { buildRedirectMap } from './src/lib/redirects.ts';
 import { dropRedirectsOverLivePages } from './src/lib/redirect-guard.ts';
 import { fixSanityDedupeAlias } from './src/lib/sanity-dedupe-alias.ts';
 import { studioConfigModule } from './src/lib/studio-route.ts';
+import { isSitemapPage } from './src/lib/sitemap-filter.ts';
 
 // The Sanity project id is PUBLIC by design: it ships in every client bundle.
 // A fresh clone with no .env still builds; the Studio then shows a project-not-
@@ -184,29 +185,14 @@ export default defineConfig({
       // only walks prerendered routes so they are mostly excluded already, but
       // the filter makes it explicit and future-proof.
       //
-      // A custom page whose editor ticked "Keep this page out of Google" (or
-      // that is archived) drops out here too. `page` is a full URL, so compare
-      // on the pathname with the trailing slash Astro's directory format adds.
-      filter: (page) => {
-        // /styleguide is a real built route so Playwright can load it out of
-        // dist/client, but it is the design-system wall, not a page for
-        // visitors, and it is noindex. Keep it out of the sitemap too.
-        if (
-          page.includes('/404') ||
-          page.includes('/studio') ||
-          page.includes('/preview') ||
-          page.includes('/styleguide') ||
-          // Visitor search (card 123): noindex, nothing of its own for Google.
-          new URL(page).pathname === '/search/'
-        )
-          return false;
-        try {
-          const path = new URL(page).pathname.replace(/\/+$/, '');
-          return !hiddenPagePaths.has(path);
-        } catch {
-          return true;
-        }
-      },
+      // A custom page whose editor turned on "Hide this page from Google and
+      // the menus" (or that is archived) drops out here too. /styleguide is a
+      // real built route (Playwright loads it out of dist/client) but it is
+      // the noindex design-system wall. The rules, with their test, live in
+      // src/lib/sitemap-filter.ts (card 122). They match whole path segments,
+      // so a custom page called "studio-tour" is no longer dropped by the
+      // "/studio" rule, which the old `page.includes()` test did.
+      filter: (page) => isSitemapPage(page, hiddenPagePaths),
     }),
     react(),
   ],

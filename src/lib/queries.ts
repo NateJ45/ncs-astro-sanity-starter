@@ -286,6 +286,22 @@ export const SITE_SETTINGS_PROJECTION = `{
     }
   }`;
 
+// Site settings' "Code on every page" (PORTS.md card 121). Its own memoized
+// query, deliberately NOT in SITE_SETTINGS_PROJECTION: that projection also
+// feeds the preview shell, and this code must never reach the preview or the
+// Studio. BaseLayout calls it only on public routes (isSiteCodeRoute).
+let _siteCodePromise: Promise<{ headCode?: string; bodyEndCode?: string } | null> | null = null;
+
+export async function getSiteCode() {
+  if (_siteCodePromise) return _siteCodePromise;
+  _siteCodePromise = sanityFetch<{ headCode?: string; bodyEndCode?: string } | null>(
+    `*[_type == "siteSettings"][0]{ headCode, bodyEndCode }`,
+    {},
+    null,
+  );
+  return _siteCodePromise;
+}
+
 export async function getSiteSettings() {
   if (_siteSettingsPromise) return _siteSettingsPromise;
   _siteSettingsPromise = sanityFetch(
@@ -734,10 +750,12 @@ export async function getAllPageSlugs(): Promise<string[]> {
 // and Footer.astro can inject these alongside the built-in links.
 //
 // Archived pages drop out: the page is not built, so a menu link to it would be
-// a 404 in the middle of the navigation.
+// a 404 in the middle of the navigation. Hidden pages drop out too (card 122):
+// "Hide this page from Google and the menus" means the menus as well, even if
+// "Show in the top menu" was left on.
 export async function getNavPages() {
   return sanityFetch(
-    `*[_type == "page" && defined(slug.current) && archived != true && (addToMainNav == true || addToFooter == true)]{
+    `*[_type == "page" && defined(slug.current) && archived != true && hideFromSearch != true && (addToMainNav == true || addToFooter == true)]{
     title,
     "slug": slug.current,
     navLabel,

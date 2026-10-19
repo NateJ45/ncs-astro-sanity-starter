@@ -238,7 +238,9 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering            | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 119 | Studio icons by meaning, a picture on every list row                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 123 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 121 | Custom code in its own box; opt-in on-page and site-wide code                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 122 | Hidden and password pages; Checkup link, heading and orphan checks             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 126 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -463,7 +465,7 @@ and the checksum is deliberately a change detector, not a security primitive: it
 written out inline so the file stays dependency-free.
 
 **Proof, 2026-09-18, in the starter.** Temporarily set `inlineStylesheets: 'always'`
-(121KB of CSS per page), capture, change `--color-tertiary` by one hex digit, rebuild,
+(122KB of CSS per page), capture, change `--color-tertiary` by one hex digit, rebuild,
 compare: ten of eleven pages report DIFF with a single changed line each,
 `- <style>/* CSS 121864B abec36b4 */</style>` against
 `+ <style>/* CSS 121864B ccd4b458 */</style>`. Config reverted, rebuilt, recaptured,
@@ -9114,7 +9116,123 @@ optionally `StudioSplashMotif.astro`), remove `studioBasePath` from the `sanity(
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-edges`, PR after this merges. Other
 sites `no`.
 
-## Card 123: visitor site search (Pagefind) and share buttons with no third-party code (2026-10-18)
+## Card 121: custom code, safe by default: pasted widgets in their own box, opt-in on-page and site-wide code (2026-10-18)
+
+**Origin:** first-baptist-auburn, 2026-10-18. The pastor may ask an AI for a widget (a VBS countdown, a sign-up
+gadget, a map, a calculator) and paste it in, Squarespace-style. The `embedSection` rendered pasted code with
+`set:html` straight into the page, and the Studio is embedded at `/studio` on the SAME origin, so any pasted script
+could read a signed-in editor's Sanity session token from localStorage. Built in the starter, then first-baptist-auburn.
+
+**Canonical:** PORTABLE: `src/lib/custom-code.ts`, `src/lib/custom-code.test.ts`, `src/components/CustomCodeFrame.astro`,
+`src/sanity/components/CodeTextInput.tsx`, `tests/custom-code.spec.ts`, and the two rules in `src/lib/studio-checkup.ts`
+(with their tests in `studio-checkup.test.ts`). Per site (NOT portable, hand-merged): the `embedSection` schema
+(`src/sanity/schemaTypes/sections.ts`), `EmbedSection.astro`, the `runsOnPage` prop in `SectionRenderer.astro` and
+`pageBuilder.types.ts`, `siteSettings.ts` (the "Code on every page" group), `getSiteCode()` in `queries.ts`, the
+BaseLayout lines, `embedCode`/`runsOnPage` in `NON_STEGA_FIELDS` (`cms-preview.ts`), the `/_astro/*` rule in
+`public/_headers`, the styleguide wall fixture and probes, the Site Guide recipe (`add-a-widget`), the thumbnail.
+
+**What it adds.**
+
+- **The box (default).** Pasted code renders in `CustomCodeFrame`: an iframe from `srcdoc` with
+  `allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals` and NO `allow-same-origin`
+  (opaque origin: no cookies, no localStorage, no `parent.document`). `buildFrameDocument()` wraps the code in a
+  document with `<base target="_blank">`, a base stylesheet in the site's fonts and light colours (from
+  brand.config.json and `studioFonts.css?inline`), reduced motion honoured, and a resize script that posts
+  `{ type: 'ncs-custom-code-height', height }`. The parent accepts it only from one of its frames' `contentWindow`,
+  origin `"null"`, exact shape, then clamps to 40..5000 px. Dark mode: a light panel around the frame.
+- **The switch.** `runsOnPage` (boolean, default off, shown once there is code, in NON_STEGA_FIELDS) keeps the old
+  `set:html` path for trusted provider snippets. Caution in its description.
+- **Code on every page.** Site settings group "Code on every page": `headCode` and `bodyEndCode`, rendered by
+  BaseLayout on public routes only (`isSiteCodeRoute`: never `/studio`, `/preview`, `/api`), fetched by their own
+  query so the preview shell never sees them.
+- **Checkup.** Two generic rules, "For information": `code-runs-on-page` (every page with the switch on, deep-linked to
+  it) and `code-on-every-page`.
+- **Studio UX.** Block renamed "Custom code or embed" (name unchanged, rule 1); `CodeTextInput` (monospace, no
+  spellcheck, a character and line count); a warning (not an error) when code uses `document.cookie`, `localStorage`,
+  `top.location` or `parent.`; the "not both URL and code" check now reads `context.parent` (it read the document
+  before, so it never fired). Insert-menu thumbnail reshot from a countdown fixture.
+- **Fonts across the sandbox.** Root-relative font URLs resolve against the embedding page; the opaque origin makes each
+  a CORS fetch, so `public/_headers` adds `/_astro/*` with `Access-Control-Allow-Origin: *` and the immutable cache
+  line (trap 2). The thumbnail script's server sends the header too.
+
+**Weighed and left out.** Pinning font URLs to `Astro.site`: breaks every other host (workers.dev before cutover, local,
+preview). A full CSP: it would not stop same-origin script from reading localStorage, which is the real risk, and the
+box already removes it. A parent-to-frame theme message for dark mode: the frame would have to accept messages, and
+pasted widgets assume light backgrounds anyway.
+
+**Verified.** Unit tests (srcdoc builder escaping, base stylesheet, resize script, message shape, clamp, warnings, route
+guard, Checkup rules). Playwright `tests/custom-code.spec.ts` on `/styleguide/sections/`: the boxed probe reports
+`parent-dom:blocked storage:blocked cookie:blocked` and the page's `<body>` is unmarked while a secret sits in the
+page's localStorage; the frame sizes itself; the on-page probe reads the secret. Under `wrangler dev`: `/_astro/*`
+sends the CORS header and the frame's fonts load; light and dark at 375 and 1280, no horizontal overflow. Signed-in
+Studio checks: `docs/PENDING.md` item 24.
+
+**Adopting it in a site.** Copy the PORTABLE files; merge the per-site lines above into the site's own schema, renderer,
+types, queries, BaseLayout, NON_STEGA_FIELDS and `_headers`; add the wall fixture and the two probes to
+`/styleguide/sections/` (the spec needs them); add the guide; `npm run typegen`, `npm run build`, `npm run thumbnails`
+(commit only `embedSection.jpg`), `npm run test:unit`, `npm test`. Needs `brand/brand.config.json` and
+`src/sanity/studioFonts.css` (cards 110 and 116). Marked-file order: the starter merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/custom-code`, PR after this merges. Other
+sites `no`.
+
+## Card 122: hidden pages, password pages, and the Checkup's link and accessibility checks (2026-10-18)
+
+**Origin:** first-baptist-auburn (2026-10-18): a church needs pages for some people only (a members page, a trip
+sign-up), and an editor needs to hear about broken links and muddled headings before a visitor does. Built in the
+starter, then first-baptist-auburn. Full design and the security note: `docs/agent/private-pages.md`.
+
+**Canonical:** PORTABLE: `src/lib/private-pages.ts` (+ test), `src/lib/private-pages-server.ts`,
+`src/lib/studio-checkup-quality.ts` (+ test), `src/lib/sitemap-filter.ts` (+ test),
+`src/sanity/components/PrivatePasswordInput.tsx`, `tests/private-pages.spec.ts`, `scripts/lib/link-report.test.mjs`,
+and the marked files it edits: `_seoFields.ts` (the switch's wording), `studio-checkup.ts` (`REPORT_TYPES`,
+`ctx.reports`), `HomeCards.tsx` ("(hidden)" in Your pages), `check-live-links.mjs` (`--write-report`),
+`change-summary.mjs` (ignores `linkReport` and `privatePage`), the guides. Per site: `src/pages/private/[slug].astro`,
+`src/sanity/schemaTypes/privatePage.ts`, the `structure.ts`, `sanity.config.ts`, `kit.config.ts`, `queries.ts`
+(`getNavPages`), `navLink.ts`, `page.ts`, `BaseLayout.astro` (`data-pagefind-ignore` on `<main>` when noindex),
+`astro.config.mjs` (`isSitemapPage`), `robots.txt.ts`, `link-health.yml` and `'private'` in both reserved-slug copies
+and their test.
+
+**What it adds.**
+
+- **Hidden** ("Hide this page from Google and the menus", the existing `hideFromSearch` field reworded): noindex, out
+  of the sitemap (as before), and now out of the automatic menus, the menu link picker, site search and the "nobody
+  can click through" check; "(hidden)" on Home's Your pages and in the list subtitle.
+- **Private** (`privatePage`, Pages, Private pages): built from the section library, served at `/private/<slug>/` by a
+  server-rendered route behind a password. Stored under the `privatePage.` id path, which the public API never serves
+  (the dataset is public, so a password on an ordinary page would leave its words one query away); never built; a
+  PBKDF2 hash made in the editor's browser, never the password; an HMAC-signed, page-scoped, 14-day cookie that a new
+  password revokes; a per-isolate rate limit; noindex and no-store on every answer; fails closed.
+- **Checkup**: dead external links (the weekly link check now saves `linkReport.latest` when the repo has
+  `SANITY_API_WRITE_TOKEN`), typed internal links to missing pages, skipped heading levels, vague link words and bare
+  web addresses, Google titles and descriptions that get cut off, pages nothing links to, and two private-page guards.
+  Each names the page with an Edit button. Report documents stay out of the content rules.
+- **Site Guide**: "Make a page private", "Keep links working".
+- **Sitemap filter** now matches whole path segments (a page called `studio-tour` used to be dropped by the `/studio`
+  rule's `includes()`), and drops `/private/`.
+
+**Weighed and left out.** A password switch on an ordinary custom page (unsafe on a public dataset, above). A second,
+private dataset (a plan question, and a second Studio workspace for editors). A hard global rate limit (needs KV or a
+Durable Object; a Cloudflare rate limiting rule does it without code). Presentation preview for private pages.
+Pictures on private pages are not private (public CDN); the Studio and the guide say so.
+
+**Verified.** `npm run check`, `npm run build` (no `dist/client/private`), `npm run test:unit`, `npm test`, and
+`tests/private-pages.spec.ts` part 2 against `wrangler dev` with the fixture page (form, wrong 401, right 303 + cookie
+
+- page, forged cookie, cross-site 403, 429), the gate in light and dark at 375 and 1280 with no overflow, and a real
+  browser opening the page after the right password. Not yet seen in a signed-in Studio: making a private page from the
+  list (the id path), the password input, the new Checkup rules on real data (`docs/PENDING.md` item 25).
+
+**Adopting it in a site.** Copy the PORTABLE files and the per-site pieces above, `npm run typegen`, add
+`qualityRules({...})` to `kit.config.ts` with the site's fixed routes and slugged types, and the "Private pages" group
+to `pages`. Set `PRIVATE_PAGE_SECRET` (`wrangler secret put`), check `SANITY_TOKEN` is set, add
+`SANITY_API_WRITE_TOKEN` to the repo secrets for the link report, and add `"privatePage"` and `"linkReport"` to the
+publish webhook's deny-list. Marked-file order: the starter merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/private-pages`, PR after this merges.
+Other sites `no`.
+
+## Card 126: visitor site search (Pagefind) and share buttons with no third-party code (2026-10-18)
 
 **Origin:** first-baptist-auburn wanted visitors to find a sermon, a news post or "where do I park" without knowing
 which page it is on, and to pass a sermon on to a friend. Built in the starter, opt-in, then switched on in

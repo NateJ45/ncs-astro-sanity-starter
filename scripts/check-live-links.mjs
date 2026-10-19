@@ -15,6 +15,16 @@
 //
 //   node scripts/check-live-links.mjs
 //   node scripts/check-live-links.mjs --verbose
+//   node scripts/check-live-links.mjs --write-report   (needs SANITY_API_WRITE_TOKEN)
+//
+// THE CHECKUP READS THE RESULT (PORTS.md card 122). With --write-report and a
+// write token, the run also saves what it found as ONE document,
+// `linkReport.latest` (type linkReport). Its id is under a path, so the public
+// API never serves it; the Studio's Checkup reads it with the editor's own
+// login and lists each dead link with an Edit button on the page that has it
+// (src/lib/studio-checkup-quality.ts). Add "linkReport" to the publish
+// webhook's deny-list so the weekly write does not rebuild the site. No token
+// means no report, and the run is otherwise unchanged.
 //
 // ---------------------------------------------------------------------------
 // WHY THIS EXISTS
@@ -50,6 +60,8 @@ const PROJECT_ID = process.env.PUBLIC_SANITY_PROJECT_ID;
 const DATASET = process.env.PUBLIC_SANITY_DATASET ?? 'production';
 const API_VERSION = process.env.PUBLIC_SANITY_API_VERSION ?? '2026-05-01';
 const VERBOSE = process.argv.includes('--verbose');
+const WRITE_REPORT = process.argv.includes('--write-report');
+const WRITE_TOKEN = process.env.SANITY_API_WRITE_TOKEN;
 const TIMEOUT_MS = 15000;
 
 /**
@@ -104,6 +116,7 @@ const QUERY = `*[
   !(_type match "system.*") &&
   _type != "trashedItem" &&
   _type != "media.tag" &&
+  _type != "linkReport" &&
   archived != true
 ]`;
 
@@ -156,7 +169,12 @@ function* urlsIn(node, path = '') {
     return;
   }
   if (Array.isArray(node)) {
-    for (let i = 0; i < node.length; i++) yield* urlsIn(node[i], `${path}[${i}]`);
+    // Keyed items get a [_key=="..."] step, the shape a Studio deep link
+    // (and the Checkup's Edit button) understands; the rest an index.
+    for (let i = 0; i < node.length; i++) {
+      const key = node[i] && typeof node[i]._key === 'string' ? node[i]._key : null;
+      yield* urlsIn(node[i], key ? `${path}[_key=="${key}"]` : `${path}[${i}]`);
+    }
     return;
   }
   if (node && typeof node === 'object') {
@@ -167,16 +185,50 @@ function* urlsIn(node, path = '') {
   }
 }
 
-function collect(docs) {
+export function collect(docs) {
   const found = new Map(); // url -> Set of labels, so one URL is checked once
   for (const doc of docs) {
     const label = docLabel(doc);
     for (const [path, url] of urlsIn(doc)) {
       if (!found.has(url)) found.set(url, new Set());
       found.get(url).add(`${label} (${path})`);
+      // Where, for the Checkup report: the document and the field.
+      if (!usedIn.has(url)) usedIn.set(url, []);
+      usedIn.get(url).push({ id: doc._id, type: doc._type, path });
     }
   }
   return found;
+}
+
+/** url -> [{ id, type, path }], filled by collect(). */
+export const usedIn = new Map();
+
+/** The `linkReport.latest` document the Checkup reads (card 122). Pure. */
+export function buildLinkReport(checked, failures, unverified, uses, now = new Date()) {
+  const entry = (f, i) => ({
+    _key: `l${i}`,
+    url: f.url,
+    detail: f.detail,
+    docs: (uses.get(f.url) ?? []).map((u, j) => ({ _key: `d${j}`, ...u })),
+  });
+  return {
+    _id: 'linkReport.latest',
+    _type: 'linkReport',
+    checkedAt: now.toISOString(),
+    checked,
+    dead: failures.map(entry),
+    unverified: unverified.map(entry),
+  };
+}
+
+async function writeReport(report) {
+  const url = `https://${PROJECT_ID}.api.sanity.io/v${API_VERSION}/data/mutate/${DATASET}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${WRITE_TOKEN}` },
+    body: JSON.stringify({ mutations: [{ createOrReplace: report }] }),
+  });
+  if (!res.ok) throw new Error(`Saving the link report failed: ${res.status}`);
 }
 
 /**
@@ -316,6 +368,19 @@ async function main() {
     );
   }
   writeSummary(targets.size, failures, unverified);
+  if (WRITE_REPORT) {
+    if (!WRITE_TOKEN) {
+      console.log('No SANITY_API_WRITE_TOKEN: the Checkup report was not saved.');
+    } else {
+      try {
+        await writeReport(buildLinkReport(targets.size, failures, unverified, usedIn));
+        console.log('Saved the result for the Studio Checkup (linkReport.latest).');
+      } catch (err) {
+        // The report is a courtesy; the run's own result still stands.
+        console.log(String(err.message || err));
+      }
+    }
+  }
   if (failures.length === 0) {
     console.log(`No broken links. ${targets.size} checked.`);
     return;
@@ -325,7 +390,10 @@ async function main() {
   process.exitCode = 1;
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Run only as a script, so scripts/lib tests can import buildLinkReport.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
