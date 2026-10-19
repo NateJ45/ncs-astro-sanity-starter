@@ -158,7 +158,7 @@ export interface QuickTile {
 const TILE_GRID: CSSProperties = {
   display: 'grid',
   gap: 14,
-  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
 };
 
 /** The tiles under the banner, in a grid that fits as many across as the width allows. */

@@ -143,6 +143,21 @@ const TYPE_TITLES: Record<string, string> = {
 const typeTitle = (t: string) => TYPE_TITLES[t] ?? t;
 
 const TILES: QuickTile[] = [
+  // The longest real titles (card 133): they must wrap to two lines, never three.
+  {
+    key: 'sermon',
+    title: "Add Sunday's sermon",
+    lead: 'The title, the passage and the video link.',
+    meaning: 'scripture',
+    link: noLink(),
+  },
+  {
+    key: 'times',
+    title: 'Change the service times',
+    lead: 'Church facts. Every page that shows a time reads it from here.',
+    meaning: 'times',
+    link: noLink(),
+  },
   {
     key: 'home',
     title: 'Edit the homepage',
