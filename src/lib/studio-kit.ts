@@ -409,3 +409,66 @@ export function quickFormErrors(
   }
   return errors;
 }
+
+// -----------------------------------------------------------------------------
+// "How to" beside a field (card 134)
+// -----------------------------------------------------------------------------
+// A small map in the site's guides config says which Site Guide section
+// explains a field: by the field's NAME (`seoTitle`, `alt`) or by its schema
+// TYPE (`seo`, `image`), the name winning. The Studio draws a quiet "How to"
+// chip after the field's description that opens that section. A field the map
+// does not name is left exactly as Sanity draws it.
+
+/** Where a field's "How to" opens: a guide, and optionally one of its headings. */
+export interface FieldGuideLink {
+  /** The guide's slug. */
+  guide: string;
+  /** The text of one of the guide's headings (a `{ kind: 'h' }` block). */
+  section?: string;
+}
+
+/** The map, in the site's guides config (`GUIDE_FOR_FIELD`). */
+export interface FieldGuideMap {
+  /** Field name -> guide section. Use names that mean one thing (`seoTitle`, not `title`). */
+  fields?: Record<string, FieldGuideLink>;
+  /** Schema type name -> guide section, for a type used in many places. */
+  types?: Record<string, FieldGuideLink>;
+}
+
+/**
+ * A lookup for the field wrapper: `(name, typeNames) => link | null`. Built
+ * once per Studio; answers are cached by name and type chain, because the
+ * wrapper runs for every field on every render and must cost next to nothing.
+ * An empty map gives a lookup that always answers null.
+ */
+export function fieldGuideLookup(
+  map: FieldGuideMap | undefined | null,
+): (name: string, typeNames: readonly string[]) => FieldGuideLink | null {
+  const fields = map?.fields ?? {};
+  const types = map?.types ?? {};
+  const own = (o: Record<string, FieldGuideLink>, k: string) =>
+    Object.prototype.hasOwnProperty.call(o, k) ? o[k] : undefined;
+  if (!Object.keys(fields).length && !Object.keys(types).length) return () => null;
+  const cache = new Map<string, FieldGuideLink | null>();
+  return (name, typeNames) => {
+    const key = `${name}|${typeNames.join('>')}`;
+    const hit = cache.get(key);
+    if (hit !== undefined) return hit;
+    let found: FieldGuideLink | null = own(fields, name) ?? null;
+    for (const t of typeNames) {
+      if (found) break;
+      found = own(types, t) ?? null;
+    }
+    cache.set(key, found);
+    return found;
+  };
+}
+
+/** The anchor id of a guide section ("What alt text is" -> "what-alt-text-is"). */
+export function guideSectionId(slug: string, heading: string): string {
+  const s = heading
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return `guide-${slug}--${s || 'section'}`;
+}

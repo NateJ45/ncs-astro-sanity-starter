@@ -10,7 +10,7 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { guides, GUIDE_CATEGORIES } from '../sanity/guides/content.ts';
+import { guides, GUIDE_CATEGORIES, GUIDE_FOR_FIELD } from '../sanity/guides/content.ts';
 
 describe('Studio guides', () => {
   it('every guide has a unique slug', () => {
@@ -89,3 +89,25 @@ function blockText(b: (typeof guides)[number]['body'][number]): string[] {
       return [];
   }
 }
+
+describe('Field "How to" map (card 134)', () => {
+  const links = [
+    ...Object.entries(GUIDE_FOR_FIELD.fields ?? {}),
+    ...Object.entries(GUIDE_FOR_FIELD.types ?? {}),
+  ];
+  it('names real guides and real headings', () => {
+    for (const [key, link] of links) {
+      const g = guides.find((x) => x.slug === link.guide);
+      assert.ok(g, `${key}: no guide "${link.guide}"`);
+      if (!link.section) continue;
+      const headings = g.body.flatMap((b) => (b.kind === 'h' ? [b.text.trim()] : []));
+      assert.ok(
+        headings.includes(link.section.trim()),
+        `${key}: "${link.section}" is not a heading in ${link.guide} (${headings.join(' / ')})`,
+      );
+    }
+  });
+  it('stays small: a chip on every field would be noise', () => {
+    assert.ok(links.length <= 16, `${links.length} mapped fields; keep it to the obvious ones`);
+  });
+});

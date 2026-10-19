@@ -8,7 +8,9 @@ import {
   checklist,
   comingSunday,
   deployProblem,
+  fieldGuideLookup,
   firstName,
+  guideSectionId,
   greeting,
   isDone,
   isStaffUser,
@@ -315,5 +317,35 @@ describe('quickFormErrors', () => {
       quickFormErrors(fields, { message: 'Snow', ends: '2026-10-18', link: 'https://a.org/x' }),
       {},
     );
+  });
+});
+
+describe('fieldGuideLookup (card 134)', () => {
+  const map = {
+    fields: { seoTitle: { guide: 'seo-fields' }, alt: { guide: 'images-and-alt', section: 'Alt' } },
+    types: { seo: { guide: 'seo-fields', section: 'Types' } },
+  };
+  it('finds a field by name first, then by its type chain', () => {
+    const look = fieldGuideLookup(map);
+    assert.deepEqual(look('seoTitle', ['string']), { guide: 'seo-fields' });
+    assert.deepEqual(look('meta', ['seo', 'object']), { guide: 'seo-fields', section: 'Types' });
+    assert.equal(look('alt', ['seo'])?.guide, 'images-and-alt');
+  });
+  it('leaves an unmapped field alone, and never reads inherited keys', () => {
+    const look = fieldGuideLookup(map);
+    assert.equal(look('title', ['string']), null);
+    assert.equal(look('constructor', ['toString']), null);
+    assert.equal(look('title', ['string']), null);
+  });
+  it('an empty or missing map always answers null', () => {
+    assert.equal(fieldGuideLookup(undefined)('seoTitle', []), null);
+    assert.equal(fieldGuideLookup({})('seoTitle', ['seo']), null);
+  });
+  it('makes a stable section anchor', () => {
+    assert.equal(
+      guideSectionId('images-and-alt', 'What alt text is'),
+      'guide-images-and-alt--what-alt-text-is',
+    );
+    assert.equal(guideSectionId('x', '  '), 'guide-x--section');
   });
 });

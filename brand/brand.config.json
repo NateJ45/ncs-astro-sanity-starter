@@ -135,6 +135,37 @@
     "fonts": {
       "display": "\"Libre Baskerville\", Georgia, \"Times New Roman\", serif",
       "body": "\"Inter Variable\", system-ui, -apple-system, sans-serif"
+    },
+    "icons": {
+      "groups": {
+        "access": "privacy",
+        "area": "place",
+        "code": "code",
+        "ctas": "link",
+        "extra": "sections",
+        "featuredJournal": "journal",
+        "featuredWork": "image",
+        "final": "link",
+        "form": "form",
+        "identity": "brandKit",
+        "list": "content",
+        "meetFounder": "person",
+        "menu": "pages",
+        "navigation": "pages",
+        "newsletter": "message",
+        "pageBuilder": "sections",
+        "personal": "person",
+        "philosophy": "value",
+        "process": "step",
+        "reviews": "testimonial",
+        "scheduling": "event",
+        "services": "service",
+        "social": "link",
+        "stats": "overview",
+        "story": "post",
+        "testimonials": "testimonial",
+        "visibility": "preview"
+      }
     }
   }
 }

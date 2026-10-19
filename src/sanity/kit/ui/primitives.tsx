@@ -137,10 +137,13 @@ export function KitScope({
   children,
   className,
   style,
+  inline,
 }: {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
+  /** A span instead of a div, for a scope inside a line of text (card 134). */
+  inline?: boolean;
 }) {
   const root = useRootTheme();
   const font = root.theme.v2?.font;
@@ -151,13 +154,14 @@ export function KitScope({
   const t = root.scheme === 'dark' ? LOOK.dark : LOOK.light;
   const face = LOOK.lettering ? fontFaceCss(LOOK.lettering.family, LOOK.lettering.src) : '';
   useKitStyles(UI_CSS + (face ?? ''));
+  const Tag = inline ? 'span' : 'div';
   return (
-    <div
+    <Tag
       className={['ncs-ui', className].filter(Boolean).join(' ')}
       style={{ ...vars(t, fonts), ...style }}
     >
       {children}
-    </div>
+    </Tag>
   );
 }
 

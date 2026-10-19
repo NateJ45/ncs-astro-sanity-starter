@@ -19,7 +19,7 @@ import type { KitConfig } from './kit/types';
 import { genericRules, unconfirmedRule } from '../lib/studio-checkup';
 import { qualityRules } from '../lib/studio-checkup-quality';
 import { exampleTextRule, llmsRules } from '../lib/studio-prepublish';
-import { guides, GUIDE_CATEGORIES, GUIDES_FOR_TYPE } from './guides/content';
+import { guides, GUIDE_CATEGORIES, GUIDE_FOR_FIELD, GUIDES_FOR_TYPE } from './guides/content';
 import { makeGuideView } from './components/GuideView';
 import { envVal } from './urls';
 import type { PageRules } from '../lib/page-guardrails';
@@ -141,6 +141,9 @@ export const kitConfig: KitConfig = {
     view: makeGuideView,
     // "Help for this page" (card 110): which guides each document type shows.
     forType: GUIDES_FOR_TYPE,
+    // The quiet "How to" chip after a field's description (card 134): which
+    // guide section explains which field, by name or schema type.
+    forField: GUIDE_FOR_FIELD,
   },
 
   // Home's "Your pages" card (card 115): every page the editor can change, in

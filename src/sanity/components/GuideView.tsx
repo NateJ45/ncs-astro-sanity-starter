@@ -22,7 +22,7 @@ import { useStudioLink } from '../kit/shared';
 import type { GuideViewProps } from '../kit/types';
 
 export function makeGuideView(slug: string): ComponentType<GuideViewProps> {
-  return function GuideView({ variant = 'page', onOpen }: GuideViewProps) {
+  return function GuideView({ variant = 'page', onOpen, section }: GuideViewProps) {
     const linkTo = useStudioLink();
     const { title } = useWorkspace();
     const guide = guides.find((g) => g.slug === slug);
@@ -42,6 +42,7 @@ export function makeGuideView(slug: string): ComponentType<GuideViewProps> {
             helper={SITE.contactName}
             siteName={title}
             variant={variant}
+            section={section}
             linkTo={linkTo}
             // See also opens that guide in the desk's Help & Guide list.
             onOpen={
