@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-19: Studio polish, Home's ways-in tiles (PORTS card 133)._
+
+**Decision.** Home's job tiles use a 260px minimum so the dashboard column holds three across at most, and a tile's art sits top left beside its title instead of floating at the middle. A title wraps to two lines, not three.
+
 _2026-10-19: real Studio screenshots in the Site Guide, with a per-site shot registry (PORTS card 130)._
 
 **Decision.** A guide asks for a picture by key (`{ kind: 'shot', key: 'publish-button' }`) and each site's own registry,

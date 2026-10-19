@@ -118,6 +118,7 @@ The Section Look radio now draws each look as a small section in the site's devi
 chip (a `form.components.field` wrapper linking the Site Guide section), and the AuthStore sign-in heading (beta API;
 pin it with a signed-out screenshot test). PreviewNavigator keeps its Spinner (preview stack; change it only with the
 preview rules in hand). Also: check the new surfaces signed in on the live Studio (the bench uses made-up data).
+Card 133 fixed Home's ways-in tile grid after a signed-in review on Auburn. Other sites' `PreviewLayout.astro` import only `globals.css` (BaseLayout also loads `starwind.css` and a site brand layer): compare the two before trusting a brand-token colour in the preview.
 Detail: `docs/agent/studio-kit.md` "Every surface in the language".
 
 ### 2. `npm run parity compare` is not a CI step

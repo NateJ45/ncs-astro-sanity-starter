@@ -9821,3 +9821,27 @@ Playwright tests cover the offline page's words and button.
 sign-in heading; PreviewNavigator's spinner (preview stack, left on purpose).
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).
+
+## Card 133: Studio polish from a signed-in review: Home's ways-in tiles (2026-10-19)
+
+**Origin:** first-baptist-auburn, 2026-10-19, a live signed-in review of the Studio. At 1280 the Home grid put four
+tiles in a roughly 740px-wide dashboard column, so each title had about 130px and wrapped onto three lines ("Add /
+Sunday's / sermon") while the art floated at the vertical middle.
+
+**PORTABLE, changed:** `src/sanity/kit/HomeCards.tsx` (the tile grid's minimum width, 220px to 260px, so a row holds
+three tiles at most in the 1040px column and a title wraps to two lines), `src/sanity/kit/ui/css.ts` (a tile's art sits
+top left beside its title, `align-items: start`, art 52px), `src/sanity/kit/ui/surfaces.tsx` (`TileCard` art 60 to 52),
+`docs/agent/studio-kit.md`.
+
+**What it changes.** Home's job tiles fit three across in the dashboard column and one on a phone; the art is
+top-aligned with the title; the colour edge is untouched. Quick update's tiles share the same card.
+
+**Per site, not portable:** a site whose `PreviewLayout.astro` imports only `globals.css` draws the preview without the
+site's brand layer: any component that reads a brand token defined there gets an invalid colour. Auburn's This Sunday
+pill read `var(--auburn-red-dark)` (defined in `auburn.css`), so the pill was white on white in Live preview. The fix
+there is to import the same stylesheets BaseLayout does, in the same order. Check each site's `PreviewLayout.astro`
+imports against its `BaseLayout.astro`.
+
+**Gates.** Kit harness at 375 and 1280 (`?view=surfaces&part=home`): no horizontal overflow, no title over two lines.
+
+**Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).

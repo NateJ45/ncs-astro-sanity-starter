@@ -522,7 +522,7 @@ export function TileCard({
         <ArtTile
           meaning={meaning}
           icon={meaning ? undefined : icon}
-          size={60}
+          size={52}
           ground={t.tones.note.bg}
           seed={String(title).length + 5}
         />

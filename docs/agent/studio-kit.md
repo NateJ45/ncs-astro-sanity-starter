@@ -568,7 +568,7 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 | `Figure`    | a headline number in the display font with its words                                      | Visitors, newsletter subscribers, CollectionIntro |
 | `MarkBars`  | bars in the calm mark colours, each with its number in words                              | Visitors                                          |
 | `StepTrail` | named steps across: laid, ringed, waiting (`LiveSteps` with one column per word)          | Post a photo, the tour                            |
-| `TileCard`  | now takes `href` (a real link) as well as `onClick`                                       | Home's ways in, Quick update                      |
+| `TileCard`  | now takes `href` (a real link) as well as `onClick`; art top left, 52px (card 133)        | Home's ways in, Quick update                      |
 
 - **Done means calm.** `look.<scheme>.calm` lists the stones that may say "done": every mark colour except one within
   28 degrees of the careful hue (`calmStones()`, tested). `StateStone calm`, `LiveSteps`, `AllClear` and `MarkBars`
