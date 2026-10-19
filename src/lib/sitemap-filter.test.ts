@@ -21,6 +21,10 @@ describe('isSitemapPage', () => {
     for (const u of ['/404/', '/studio/', '/preview/about/', '/styleguide/', '/private/members/'])
       assert.equal(keep(u), false, u);
   });
+  it('drops the visitor search page (card 126) but keeps a page that only starts with search', () => {
+    assert.equal(keep('/search/'), false);
+    assert.equal(keep('/search-and-rescue/'), true);
+  });
   it('keeps a URL it cannot parse rather than guess', () => {
     assert.equal(isSitemapPage('not a url', hidden), true);
   });

@@ -34,6 +34,8 @@ import CaseStudyTOC from '@/components/CaseStudyTOC';
 import FinalCta from '@/components/FinalCta.astro';
 import Lightbox from '@/components/Lightbox.astro';
 import { formatDate } from '@/lib/format-date';
+import ShareButtons from '@/components/ShareButtons.astro';
+import SearchMeta from '@/components/search/SearchMeta.astro';
 
 // Enumerate slugs + carry prev/next refs (newest-first iteration).
 // Returns [] when journal is off — no detail pages build and they 404.
@@ -121,7 +123,9 @@ const schemas = [
   {siteSettings}
   ogType="article"
   ogArticle={{ publishedAt: entry.publishedAt, author: entry.author }}
+  searchType="journal"
 >
+  <SearchMeta date={dateLabel} />
   {/* Thin bronze progress bar tracking scroll through the article. */}
   <ReadingProgress />
 
@@ -205,6 +209,13 @@ const schemas = [
         <JournalPortableText client:visible value={entry.body} />
         {/* The post's photos open full screen (inline images and galleries). */}
         <Lightbox />
+
+        {/* Share this post (card 126): plain links, no third-party scripts. */}
+        <ShareButtons
+          title={entry.title ?? title}
+          path={`/journal/${slug}/`}
+          class="mt-section-md border-t border-border-soft pt-l"
+        />
 
         {/* Related project link (if this post walks through a specific portfolio piece).
             Centered on mobile so the cross-link reads as a deliberate "go see

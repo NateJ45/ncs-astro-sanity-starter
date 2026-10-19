@@ -47,6 +47,8 @@ interface Props {
   ogType?: 'website' | 'article';
   /** Article metadata. Only used when ogType is 'article'. */
   ogArticle?: { publishedAt?: string; author?: string };
+  /** What kind of page this is in visitor search results (PORTS.md card 126): 'page' (the default), 'sermon', 'series', 'news', 'question' and so on. Only used when src/data/site.ts search.enabled is on. */
+  searchType?: string;
 }
 
 const {
@@ -59,7 +61,15 @@ const {
   noindex = false,
   ogType = 'website',
   ogArticle,
+  searchType = 'page',
 } = Astro.props as Props;
+
+// Visitor search (PORTS.md card 126). With search on, <main> carries
+// data-pagefind-body so scripts/build-search-index.mjs indexes main content
+// only, never the header, footer or nav. noindex pages (404, /search/, the
+// styleguide walls, any page an editor keeps out of Google) stay out of the
+// search index too: a page hidden from Google should not turn up here either.
+const searchable = site.search.enabled && !noindex;
 
 const canonical = new URL(Astro.url.pathname, site.url).toString();
 
@@ -310,10 +320,18 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
 
     <Header siteSettings={siteSettings} />
 
-    {/* A noindex page (hidden, 404, styleguide, private) is kept out of site
-        search too (card 122): Pagefind skips everything under
-        data-pagefind-ignore="all". */}
-    <main id="main" class="flex-1" data-pagefind-ignore={noindex ? 'all' : undefined}>
+    {/* Site search (cards 122 and 126). With search on, an indexable page's
+        <main> carries data-pagefind-body (main content only) and its type as a
+        filter. A noindex page (hidden, 404, styleguide, private) gets neither,
+        and data-pagefind-ignore="all" keeps it out even if something else on
+        the page is marked. */}
+    <main
+      id="main"
+      class="flex-1"
+      data-pagefind-body={searchable ? '' : undefined}
+      data-pagefind-filter={searchable ? `type:${searchType}` : undefined}
+      data-pagefind-ignore={noindex ? 'all' : undefined}
+    >
       <slot />
     </main>
 

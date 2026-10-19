@@ -2,7 +2,7 @@
 
 Moved out of CLAUDE.md. Read when you need the detail behind a build, test or tooling command. The seed and scaffold bullets live in .claude/rules/scaffold.md.
 
-`npm run build` runs `node scripts/with-workerd.mjs astro build` (the Windows workerd shim, a no-op elsewhere). It does NOT chain typegen.
+`npm run build` runs `node scripts/with-workerd.mjs astro build` (the Windows workerd shim, a no-op elsewhere), then `node scripts/build-search-index.mjs`, which writes the visitor search index to `dist/client/pagefind/` when `src/data/site.ts` `search.enabled` is on and does nothing otherwise (PORTS.md card 126; `npm run search:index` runs it alone on an existing build; detail in `docs/agent/site-search.md`). It does NOT chain typegen.
 
 After any schema change, run `npm run typegen` first, then `npm run build`. Or use `npm run build:full` which chains both in one command: `npm run typegen && astro build`.
 

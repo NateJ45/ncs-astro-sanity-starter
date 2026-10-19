@@ -1,0 +1,191 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Safe to edit by hand
+// =============================================================================
+// ShareButtons - share this page, with no third-party code (PORTS.md card 126)
+// =============================================================================
+// Facebook, X and email are plain links to each network's own share page
+// (src/lib/share-links.ts), so nothing loads from Facebook or X and nobody is
+// tracked until a visitor chooses to click. "Copy link" uses the clipboard.
+// On phones and tablets (a coarse pointer that supports the Web Share API) a
+// "Share" button opens the device's own share sheet: Messages, WhatsApp and
+// whatever else the visitor has.
+//
+// Buttons are the site's secondary button (the outline style CtaLink uses), so
+// they stay in the page's one button family (rule 17). data-pagefind-ignore
+// keeps "Share this, Facebook, X" out of every search excerpt (card 126). A site whose buttons are
+// its own classes passes them as `buttonClass` (keep a gap for the icon).
+//
+//   <ShareButtons title={sermon.title} path={`/sermons/${slug}/`} />
+// =============================================================================
+import { Link2, Mail, Share2 } from 'lucide-react';
+import { IconBrandFacebook, IconBrandX } from '@tabler/icons-react';
+import { site } from '@/data/site';
+import { shareLinks, absoluteUrl } from '@/lib/share-links';
+
+interface Props {
+  /** The page title, used as the post text and the email subject. */
+  title: string;
+  /** The page's path ("/sermons/grace/"); defaults to the current page. */
+  path?: string;
+  /** Visible label over the buttons. */
+  heading?: string;
+  class?: string;
+  /** Replaces the built-in outline button classes with the site's own. */
+  buttonClass?: string;
+}
+
+const {
+  title,
+  path = Astro.url.pathname,
+  heading = 'Share this',
+  class: extra = '',
+  buttonClass,
+} = Astro.props as Props;
+const url = absoluteUrl(site.url, path);
+const links = shareLinks({ url, title });
+const headingId = `share-${path.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home'}`;
+
+const button =
+  buttonClass ??
+  'share-buttons__btn press-tactile inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sm border border-primary px-m py-s text-xs font-semibold tracking-[0.12em] text-link uppercase transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none';
+---
+
+<div
+  class:list={['share-buttons', extra]}
+  role="group"
+  aria-labelledby={headingId}
+  data-share
+  data-pagefind-ignore="all"
+  data-share-url={url}
+  data-share-title={title}
+>
+  <p id={headingId} class="mb-s text-xs tracking-[0.14em] text-foreground/80 uppercase">
+    {heading}
+  </p>
+  <ul class="flex list-none flex-wrap gap-xs p-0">
+    <li data-share-native-item hidden>
+      <button type="button" class={button} data-share-native>
+        <Share2 size={16} aria-hidden="true" />
+        Share
+      </button>
+    </li>
+    <li>
+      <a
+        class={button}
+        href={links.facebook}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Share on Facebook (opens in a new tab)"
+      >
+        <IconBrandFacebook size={16} stroke={1.75} aria-hidden="true" />
+        Facebook
+      </a>
+    </li>
+    <li>
+      <a
+        class={button}
+        href={links.x}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Share on X (opens in a new tab)"
+      >
+        <IconBrandX size={16} stroke={1.75} aria-hidden="true" />X
+      </a>
+    </li>
+    <li>
+      <a class={button} href={links.email} aria-label="Share by email">
+        <Mail size={16} aria-hidden="true" />
+        Email
+      </a>
+    </li>
+    <li>
+      <button type="button" class={button} data-share-copy>
+        <Link2 size={16} aria-hidden="true" />
+        <span data-share-copy-label>Copy link</span>
+      </button>
+    </li>
+  </ul>
+  <p class="sr-only" role="status" aria-live="polite" data-share-status></p>
+</div>
+
+<script>
+  // Bound once; works for every share block on the page and across View
+  // Transitions navigations because it reads the clicked block's own data.
+  type W = typeof window & { __shareBound?: boolean };
+  const w = window as W;
+
+  function revealNative() {
+    // Phones and tablets only: desktop browsers that support navigator.share
+    // open a small system sheet that does less than the buttons beside it.
+    const can =
+      typeof navigator.share === 'function' && window.matchMedia('(pointer: coarse)').matches;
+    if (!can) return;
+    document
+      .querySelectorAll<HTMLElement>('[data-share-native-item]')
+      .forEach((li) => (li.hidden = false));
+  }
+
+  async function copy(text: string): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Older browsers, or a page not allowed the clipboard: select-and-copy.
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.append(ta);
+      ta.select();
+      let ok = false;
+      try {
+        ok = document.execCommand('copy');
+      } catch {
+        ok = false;
+      }
+      ta.remove();
+      return ok;
+    }
+  }
+
+  if (!w.__shareBound) {
+    w.__shareBound = true;
+
+    document.addEventListener('click', async (e) => {
+      const target = e.target as Element;
+      const block = target.closest<HTMLElement>('[data-share]');
+      if (!block) return;
+      const url = block.dataset.shareUrl ?? window.location.href;
+      const title = block.dataset.shareTitle ?? document.title;
+      const status = block.querySelector<HTMLElement>('[data-share-status]');
+
+      if (target.closest('[data-share-copy]')) {
+        const ok = await copy(url);
+        const label = block.querySelector<HTMLElement>('[data-share-copy-label]');
+        const message = ok ? 'Link copied' : 'Could not copy. Press and hold the address bar.';
+        if (status) status.textContent = message;
+        if (label) {
+          label.textContent = ok ? 'Copied' : 'Copy link';
+          window.setTimeout(() => {
+            label.textContent = 'Copy link';
+            if (status) status.textContent = '';
+          }, 2500);
+        }
+        return;
+      }
+
+      if (target.closest('[data-share-native]')) {
+        try {
+          await navigator.share({ title, url });
+        } catch {
+          // The visitor closed the sheet; nothing to say.
+        }
+      }
+    });
+
+    document.addEventListener('astro:page-load', revealNative);
+  }
+  revealNative();
+</script>

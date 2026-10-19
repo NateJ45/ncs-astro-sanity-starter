@@ -12,6 +12,16 @@ caption and position, arrows and swipe, Escape, a focus trap and focus return, r
 JavaScript off each photo is a link to the full-size picture. A Squarespace-style free background picker was weighed
 and left out: it is how a site drifts.
 
+_2026-10-18: visitor site search and share buttons (PORTS card 126)._
+
+**Decision.** Sites can switch on search (`site.search.enabled`, off in the starter). Pagefind 1.5.2, pinned as a
+devDependency, indexes the built HTML straight after `astro build`, main content only, skipping noindex pages; the
+index ships as static files under `/pagefind/`. A search button in the header and a row in the mobile menu open a
+native dialog styled from the theme tokens, with type filters, dates and sermon passages, keyboard movement, a live
+result count and friendly suggestions when nothing matches. Nothing loads until search is opened. Share buttons
+(Facebook, X, email, copy link, and the phone's share sheet) are plain links with no third-party code. Pagefind's own
+UI was left out: heavier, its own look.
+
 _2026-10-18: writing help, "Before you publish" and AI visitors in the Studio (PORTS card 123)._
 
 **Decision.** Three editor features that hosted site builders now ship. "Suggest" buttons under the Google
