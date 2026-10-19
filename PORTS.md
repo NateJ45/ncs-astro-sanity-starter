@@ -9199,7 +9199,7 @@ the one `guides.push(...phoneGuides(...))` line in `guides/content.ts`, and `pub
 
 - **The Studio installs.** `/studio/manifest.webmanifest` (prerendered): `id` and `scope` `/studio/`,
   standalone, the brand name and an optional short name, the navy chrome as `theme_color` and the paper as
-  `background_color`, the 192 and 512 icons and a maskable 512 (the mark at 60% on its own plate colour). Only the boot
+  `background_color`, the 192 and 512 icons and a maskable 512 (the mark at 60% on its own plate colour, or white; a site's own drawn one is kept). Only the boot
   page links it, with the iOS app-title metas; the public site's `/site.webmanifest` stays `display: browser`.
 - **A service worker that stays out of the way.** `/studio/sw.js`, scope `/studio/`, registered by the boot page in
   production builds only. The boot page is fetched fresh (network first) and falls back to `/studio/offline/` ("You're
@@ -9239,7 +9239,7 @@ Studio needs Sanity to edit, so the offline page says so rather than pretending.
 Lighthouse 12; `tests/studio-app.spec.ts` asks Chrome itself (`Page.getInstallabilityErrors`) instead.
 
 **Adopting it in a site.** Needs cards 106, 111 and 120. Copy the PORTABLE files, run
-`npm run favicon -- --maskable-only` and look at `public/icon-maskable-512.png`, set `studioEdges.app` and
+`npm run favicon -- --maskable-only` (it keeps an existing file; `--force-maskable` redraws it) and look at `public/icon-maskable-512.png`, set `studioEdges.app` and
 `kitConfig.postPhoto`, add the `phoneGuides` line to the guides, build, `npm run test:unit`, `npm test`. For
 Earlier versions: the backup running, `SANITY_API_WRITE_TOKEN` and `SANITY_PROJECT_ID` in the repo, and the Worker's
 `GITHUB_DEPLOY_TOKEN` with Actions: Read and write (OPERATIONS.md). Marked-file order: the starter merges first.

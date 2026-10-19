@@ -241,7 +241,7 @@ and in Sanity's "Review changes".
 - **Manifest**: `/studio/manifest.webmanifest` from `studioManifest()` (`src/lib/studio-app.ts`): `id` and
   `scope` `/studio/`, `display: standalone`, the brand name, `theme_color` the navy chrome, `background_color`
   the paper, icons `/icon-192.png`, `/icon-512.png` and `/icon-maskable-512.png` (`npm run favicon`, or
-  `npm run favicon -- --maskable-only` for just that one). `studioEdges.app` sets `shortName` and `start`
+  `npm run favicon -- --maskable-only` for just that one; an existing file, perhaps drawn by hand, is kept unless `--force-maskable`). `studioEdges.app` sets `shortName` and `start`
   (`'home'` or `'quick-update'`). Only the boot page links it; the public site keeps `/site.webmanifest`
   (display browser).
 - **Service worker**: `public/studio/sw.js`, registered by the boot page in a production build only, scope
