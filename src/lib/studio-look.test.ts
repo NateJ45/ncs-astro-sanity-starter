@@ -75,6 +75,19 @@ describe('studio look: this site', () => {
     assertReadable(look, 'brand'));
 });
 
+describe('studio look: the tip callout keeps the brand gold', () => {
+  const gold = '#c8962e';
+  const look = resolveLook({ tones: { tip: gold } }, lookBase(studioColors({}, stock), {}));
+  it('fills the marker with the gold itself, light and dark, not a darkened brown', () => {
+    assert.equal(look.light.tones.tip.fill, gold);
+    assert.equal(look.dark.tones.tip.fill, gold);
+  });
+  it('outlines it at 3:1 (AA for graphics) on the callout ground', () => {
+    for (const t of [look.light, look.dark])
+      assert.ok(contrastRatio(t.tones.tip.mark, t.tones.tip.bg) >= 3, 'tip outline');
+  });
+});
+
 describe('studio look: awkward brands still read', () => {
   const awkward = ['#E8C547', '#C9D8C5', '#000000', '#808080', '#D62828', '#1D4ED8'];
   for (const accent of awkward) {

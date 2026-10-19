@@ -94,7 +94,9 @@ export interface LookBase {
 export interface ToneTokens {
   /** The callout's ground. */
   bg: string;
-  /** Its stone marker (3:1 on bg). */
+  /** Its stone marker's fill: the hue as the brand names it, not darkened. */
+  fill: string;
+  /** The marker's outline (3:1 on bg), so the fill can stay the true hue. */
   mark: string;
   /** Its title (AA on bg). */
   title: string;
@@ -173,6 +175,7 @@ function tone(hue: string, bg0: string, ink: string, dark: boolean): ToneTokens 
   const bg = dark ? mix(hue, bg0, 0.8) : mix(hue, '#ffffff', 0.87);
   return {
     bg,
+    fill: hue,
     mark: ensure(hue, bg, AA_NON_TEXT, dark ? '#ffffff' : '#000000'),
     title: ensure(hue, bg, AA_BODY_TEXT, dark ? '#ffffff' : ink),
   };
@@ -219,7 +222,12 @@ function scheme(
     note: tone(hues.note, paper, ink, dark),
     tip: tone(hues.tip, paper, ink, dark),
     careful: tone(hues.careful, paper, ink, dark),
-    plain: { bg: surface, mark: ensure(muted, surface, AA_NON_TEXT), title: ink },
+    plain: {
+      bg: surface,
+      fill: ensure(muted, surface, AA_NON_TEXT),
+      mark: ensure(muted, surface, AA_NON_TEXT),
+      title: ink,
+    },
   };
   const chrome = base.chrome;
   return {
@@ -347,7 +355,7 @@ export function contrastPairs(
   for (const [k, v] of Object.entries(t.tones)) {
     pairs.push({ name: `${k} title`, fg: v.title, bg: v.bg, min: AA_BODY_TEXT });
     pairs.push({ name: `${k} text`, fg: t.ink, bg: v.bg, min: AA_BODY_TEXT });
-    pairs.push({ name: `${k} marker`, fg: v.mark, bg: v.bg, min: AA_NON_TEXT });
+    pairs.push({ name: `${k} marker outline`, fg: v.mark, bg: v.bg, min: AA_NON_TEXT });
   }
   return pairs;
 }

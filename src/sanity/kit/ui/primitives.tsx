@@ -302,6 +302,7 @@ export function Stone({
   n,
   size = 48,
   fill,
+  edge,
   color,
   seed,
   label,
@@ -310,6 +311,8 @@ export function Stone({
   n?: ReactNode;
   size?: number;
   fill?: string;
+  /** An outline, so a true brand hue can sit on a pale ground and still hold 3:1. */
+  edge?: string;
   color?: string;
   seed?: number;
   label?: string;
@@ -328,7 +331,13 @@ export function Stone({
       aria-hidden={label ? undefined : true}
     >
       <svg viewBox={`0 0 ${w} ${h}`} aria-hidden>
-        <path d={d} fill={fill ?? s.fill} />
+        <path
+          d={d}
+          fill={fill ?? s.fill}
+          stroke={edge}
+          strokeWidth={edge ? 1.5 : undefined}
+          strokeLinejoin="round"
+        />
       </svg>
       {n !== undefined && <b style={{ fontSize: Math.round(size * 0.42) }}>{n}</b>}
     </span>
@@ -353,7 +362,12 @@ export function SeverityStone({
   const s = SEVERITY[level];
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 600 }}>
-      <Stone size={16} fill={t.tones[s.tone].mark} seed={level.length * 11} />
+      <Stone
+        size={16}
+        fill={t.tones[s.tone].fill}
+        edge={t.tones[s.tone].mark}
+        seed={level.length * 11}
+      />
       <span>{children ?? s.words}</span>
     </span>
   );
@@ -439,7 +453,7 @@ export function KitNotice({
   const seed = { note: 21, tip: 22, careful: 23, plain: 24 }[tone];
   return (
     <aside className="ui-notice" style={toneVars(t, tone)}>
-      <Stone size={30} fill={t.tones[tone].mark} seed={seed} />
+      <Stone size={30} fill={t.tones[tone].fill} edge={t.tones[tone].mark} seed={seed} />
       <div className="ui-notice__body">
         {title && <p className="ui-notice__title">{title}</p>}
         <div>{children}</div>
@@ -464,7 +478,12 @@ export function StoneTag({
       className={['ui-tag', onDark ? 'ui-tag--on-dark' : ''].join(' ').trim()}
       style={toneVars(t, tone)}
     >
-      <Stone size={13} fill={onDark ? LOOK.banner.accent : t.tones[tone].mark} seed={tone.length} />
+      <Stone
+        size={13}
+        fill={onDark ? LOOK.banner.accent : t.tones[tone].fill}
+        edge={onDark ? undefined : t.tones[tone].mark}
+        seed={tone.length}
+      />
       {children}
     </span>
   );
