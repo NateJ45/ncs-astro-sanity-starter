@@ -63,6 +63,9 @@ test('every reserved slug is a route this repo serves, a scaffolded one, or a bu
     'styleguide',
     // The embedded Studio (src/pages/studio/index.astro, card 120).
     'studio',
+    // Visitor search (card 126): src/pages/search/[...search].astro, built
+    // when site.search.enabled is on.
+    'search',
     // Password pages (src/pages/private/[slug].astro, card 122).
     'private',
   ]);
