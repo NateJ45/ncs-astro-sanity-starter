@@ -416,6 +416,8 @@ quickUpdate: [
 ],
 ```
 
+`postPhoto.tileLead` and `postPhoto.draftNote` reword Post a photo's "saved as a draft" lines (a shop: "Saved for you to check before it goes in the shop.").
+
 Field kinds: `string`, `text`, `date`, `datetime`, `url`, `number`, `boolean` (a checkbox; its `description` is the
 words beside it), `select` (`options: [{ title, value }]`), `file`, `image` (`accept`). Every field takes `path`
 (dot-separated, default its `name`), `as: 'blocks' | 'slug'`, `required`, `max`, `description`, `initial(now)`.

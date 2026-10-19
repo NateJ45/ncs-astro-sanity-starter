@@ -338,8 +338,8 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
             </h2>
           </div>
           <p className="ui-toolhead__lead" style={{ margin: 0 }}>
-            Take a photo or pick one from your phone, say what is in it, and choose where it goes.
-            It is saved as a draft for you to check and publish.
+            Take a photo or pick one from your phone, say what is in it, and choose where it goes.{' '}
+            {config.draftNote ?? 'It is saved as a draft for you to check and publish.'}
           </p>
           {config.note && <KitNotice tone="tip">{config.note}</KitNotice>}
         </header>

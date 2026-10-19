@@ -591,7 +591,10 @@ export function makeQuickUpdateTool(config: KitConfig) {
                       meaning="image"
                       icon={ImageIcon}
                       title="Post a photo"
-                      lead="From your camera or your photos, into a gallery or a new post. Saved as a draft for you to publish."
+                      lead={
+                        photo.tileLead ??
+                        'From your camera or your photos, into a gallery or a new post. Saved as a draft for you to publish.'
+                      }
                       onClick={() => setOpen('photo')}
                     />
                   )}

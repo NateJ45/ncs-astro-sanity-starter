@@ -140,6 +140,13 @@ export interface PostPhotoConfig {
       now: Date;
     }) => QuickDoc;
   };
+  /**
+   * Card 137: the words for "it is a draft", on the Quick update tile and at the top of the
+   * form. Default: "Saved as a draft for you to publish." / "It is saved as a draft for you to
+   * check and publish."
+   */
+  tileLead?: string;
+  draftNote?: string;
   /** One line above the picker, for a site rule ("Only post children with a parent's permission."). */
   note?: string;
 }
