@@ -29,9 +29,14 @@
 //   - _underscores_ for a light aside.
 //   - No em-dashes. Commas, or "and".
 //   - Define any jargon in plain words the first time it appears.
+//   - `icon` is a NAME, never an emoji: one of GUIDE_ICON_MEANINGS in
+//     src/lib/studio-look.ts ('clock'), or a meaning from the icon registry
+//     ('times'), so the guide wears the site's own art for it (card 128).
+//   - A picture of the Studio: a { kind: 'shot' } block (GuideShot, card 128).
 //   - src/lib/studio-guides.test.ts enforces the structural half of this.
 // =============================================================================
 
+import type { KitGuideBlock } from '../kit/guide/GuidePage';
 import { phoneGuides } from './phoneGuides.ts';
 
 export type DiyLevel = 'self' | 'ask' | 'mixed';
@@ -39,19 +44,13 @@ export type DiyLevel = 'self' | 'ask' | 'mixed';
 /** Where a "Where in the Studio" breadcrumb can link to. */
 export type PathLink = { doc: string; type?: string } | { pane: string } | { tool: string };
 
-export type GuideBlock =
-  | { kind: 'h'; text: string }
-  | { kind: 'p'; text: string }
-  | { kind: 'steps'; items: string[] }
-  | { kind: 'bullets'; items: string[] }
-  | { kind: 'path'; items: string[]; link?: PathLink }
-  | {
-      kind: 'callout';
-      tone?: 'primary' | 'positive' | 'caution' | 'critical' | 'default';
-      title?: string;
-      text: string;
-    }
-  | { kind: 'seealso'; items: string[] };
+/**
+ * Every block a guide can hold: the kit's list (kit/guide/GuidePage.tsx, card
+ * 128). The card 41 kinds and tones still work; new and optional are
+ * { kind: 'shot' } (a GuideShot), { kind: 'quote' }, steps { across: true } and
+ * the tones 'note' | 'tip' | 'careful'.
+ */
+export type GuideBlock = KitGuideBlock;
 
 /** Names the prose refers to. Replace these, do not hardcode them in guides. */
 export const SITE = {
@@ -90,7 +89,7 @@ export const guides: Guide[] = [
     slug: 'start-here',
     category: 'Start here',
     title: 'Start here: how this all works',
-    icon: '👋',
+    icon: 'info',
     lead: 'Two minutes that make everything else make sense.',
     diy: 'self',
     body: [
@@ -130,7 +129,7 @@ export const guides: Guide[] = [
     slug: 'edit-a-page',
     category: 'Pages and words',
     title: 'Change the words on a page',
-    icon: '📄',
+    icon: 'document',
     lead: 'Every page is a stack of blocks. You edit the blocks.',
     diy: 'self',
     body: [
@@ -163,7 +162,7 @@ export const guides: Guide[] = [
     slug: 'add-a-page',
     category: 'Pages and words',
     title: 'Add a new page',
-    icon: '➕',
+    icon: 'add',
     lead: 'And the one thing to get right before you publish it.',
     diy: 'self',
     body: [
@@ -198,7 +197,7 @@ export const guides: Guide[] = [
     slug: 'page-templates',
     category: 'Pages and words',
     title: 'Start a page from a template',
-    icon: '🧩',
+    icon: 'blocks',
     lead: 'A new page can start with its sections already in place.',
     diy: 'self',
     body: [
@@ -237,7 +236,7 @@ export const guides: Guide[] = [
     slug: 'reuse-sections',
     category: 'Pages and words',
     title: 'Reuse a section on other pages',
-    icon: '♻️',
+    icon: 'copy',
     lead: 'Build a section once, then drop it onto any page as a copy.',
     diy: 'self',
     body: [
@@ -282,7 +281,7 @@ export const guides: Guide[] = [
     slug: 'synced-sections',
     category: 'Pages and words',
     title: 'Keep a section the same on every page',
-    icon: '🔗',
+    icon: 'sync',
     lead: 'Edit it once and every page that uses it changes.',
     diy: 'self',
     body: [
@@ -365,7 +364,7 @@ export const guides: Guide[] = [
     slug: 'rename-a-page',
     category: 'Pages and words',
     title: 'Rename a page without breaking links',
-    icon: '↪️',
+    icon: 'arrow',
     lead: 'Anyone who saved the old address should still arrive.',
     diy: 'self',
     body: [
@@ -395,7 +394,7 @@ export const guides: Guide[] = [
     slug: 'images-and-alt',
     category: 'Pictures',
     title: 'Add or change a picture',
-    icon: '📷',
+    icon: 'image',
     lead: 'And write the one line that describes it.',
     diy: 'self',
     body: [
@@ -426,7 +425,7 @@ export const guides: Guide[] = [
     slug: 'menus-and-footer',
     category: 'Housekeeping',
     title: 'Change the menu or the footer',
-    icon: '🧭',
+    icon: 'menu',
     lead: 'The links across the top and along the bottom.',
     diy: 'self',
     body: [
@@ -452,7 +451,7 @@ export const guides: Guide[] = [
     slug: 'seo-fields',
     category: 'Housekeeping',
     title: 'What the SEO boxes do',
-    icon: '🔍',
+    icon: 'search',
     lead: 'The title and description Google shows.',
     diy: 'self',
     body: [
@@ -533,7 +532,7 @@ export const guides: Guide[] = [
     slug: 'housekeeping',
     category: 'Housekeeping',
     title: 'The occasional tidy-up',
-    icon: '🧹',
+    icon: 'check',
     lead: 'Worth ten minutes once or twice a year.',
     diy: 'self',
     body: [
@@ -631,7 +630,7 @@ guides.push(
     slug: 'home-page',
     category: 'Start here',
     title: 'What the Home page shows you',
-    icon: '⌂',
+    icon: 'home',
     lead: 'Home opens first every time. Here is what each card is for, top to bottom.',
     diy: 'self',
     body: [
@@ -665,7 +664,7 @@ guides.push(
     slug: 'website-status',
     category: 'Start here',
     title: 'The line under the top bar',
-    icon: '🕒',
+    icon: 'clock',
     lead: 'A quiet answer to "is my change on the website yet?", wherever you are in the Studio.',
     diy: 'self',
     body: [
@@ -699,7 +698,7 @@ guides.push(
     slug: 'help-panel',
     category: 'Start here',
     title: 'Help for this page',
-    icon: '💡',
+    icon: 'bulb',
     lead: 'Help beside whatever you are editing, without leaving it.',
     diy: 'self',
     body: [
@@ -730,7 +729,7 @@ guides.push(
     slug: 'share-a-preview',
     category: 'Pages and words',
     title: 'Show someone a page before it goes live',
-    icon: '↗',
+    icon: 'play',
     lead: 'A private link to your draft that works for a few days, no login needed.',
     diy: 'self',
     body: [
@@ -765,7 +764,7 @@ guides.push(
     slug: 'messages',
     category: 'Housekeeping',
     title: 'Read messages from the website',
-    icon: '@',
+    icon: 'mail',
     lead: 'Everything people send through the forms, in one list.',
     diy: 'self',
     body: [
@@ -802,7 +801,7 @@ guides.push({
   slug: 'add-a-widget',
   category: 'Pages and words',
   title: 'Add a widget from an AI or a website',
-  icon: '</>',
+  icon: 'code',
   lead: 'A countdown, a sign-up box, a map or a calculator, pasted in as code.',
   diy: 'mixed',
   body: [
@@ -868,7 +867,7 @@ guides.push(
     slug: 'make-a-page-private',
     category: 'Pages and words',
     title: 'Make a page private',
-    icon: '#',
+    icon: 'privacy',
     lead: 'Hide a page from Google and the menus, or put it behind a password.',
     diy: 'self',
     body: [
@@ -930,7 +929,7 @@ guides.push(
     slug: 'keep-links-working',
     category: 'Housekeeping',
     title: 'Keep links working',
-    icon: '~',
+    icon: 'redirect',
     lead: 'What the Checkup says about links and headings, and how to fix each one.',
     diy: 'self',
     body: [
@@ -969,7 +968,7 @@ guides.push(
     slug: 'writing-help',
     category: 'Pages and words',
     title: 'Get help with the words',
-    icon: '✎',
+    icon: 'post',
     lead: 'A suggested Google description, photo description, summary or a tidier paragraph, for you to use, change or ignore.',
     diy: 'self',
     body: [
@@ -1009,7 +1008,7 @@ guides.push(
     slug: 'before-you-publish',
     category: 'Start here',
     title: 'Before you publish',
-    icon: '✓',
+    icon: 'activity',
     lead: 'One last look at the page you are working on, with a link to each thing worth fixing.',
     diy: 'self',
     body: [

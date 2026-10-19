@@ -24,7 +24,7 @@ export function phoneGuides(contactName: string): Guide[] {
       slug: 'studio-on-your-phone',
       category: 'Start here',
       title: "Put the Studio on your phone's home screen",
-      icon: '▢',
+      icon: 'home',
       lead: 'An icon on your phone that opens the Studio like an app, ready for a quick update.',
       diy: 'self',
       body: [
@@ -73,7 +73,7 @@ export function phoneGuides(contactName: string): Guide[] {
       slug: 'post-a-photo',
       category: 'Pictures',
       title: 'Post a photo from your phone',
-      icon: '◉',
+      icon: 'image',
       lead: 'Take a photo, describe it, and put it in a gallery or a new post, all from your phone.',
       diy: 'self',
       body: [
@@ -114,7 +114,7 @@ export function phoneGuides(contactName: string): Guide[] {
       slug: 'earlier-versions',
       category: 'Housekeeping',
       title: 'Go back to an earlier version',
-      icon: '↺',
+      icon: 'restore',
       lead: 'Put a page back the way it was on any night in the last two weeks.',
       diy: 'mixed',
       body: [

@@ -15,7 +15,8 @@
 //
 // A `studio.components.navbar` middleware: it ALWAYS renders
 // props.renderDefault(props) first, so every plugin's navbar after this one
-// still runs. With no build time to compare against (a fresh clone, a dev
+// still runs. Card 128: the line never clips (wraps instead) at any width.
+// With no build time to compare against (a fresh clone, a dev
 // server without /build-info.json) it draws nothing at all.
 // =============================================================================
 
@@ -52,7 +53,7 @@ export function makeNavbarStatus(config: KitConfig) {
         role="status"
         aria-live="polite"
       >
-        <Flex align="center" justify="flex-end" gap={2} wrap="wrap">
+        <Flex align="center" justify="flex-end" gap={2} wrap="wrap" style={{ minWidth: 0 }}>
           <Box
             aria-hidden
             style={{
@@ -66,7 +67,22 @@ export function makeNavbarStatus(config: KitConfig) {
               opacity: status.tone === 'default' ? 0.6 : 1,
             }}
           />
-          <Text size={1} muted={status.tone === 'default'}>
+          {/* Card 128: the words may wrap but never clip. Nathan saw "Website up
+              to d..." at the top right; a flex child's min-width and an inherited
+              nowrap can cut a line short, so the line shrinks, wraps and stays whole. */}
+          <Text
+            size={1}
+            muted={status.tone === 'default'}
+            style={{
+              minWidth: 0,
+              flex: '0 1 auto',
+              whiteSpace: 'normal',
+              overflow: 'visible',
+              textOverflow: 'clip',
+              overflowWrap: 'anywhere',
+              textAlign: 'right',
+            }}
+          >
             {problem ? (retry.note ?? problem.text) : status.text}
             {home && status.tone !== 'default' && (
               <>

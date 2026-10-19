@@ -246,6 +246,71 @@
           "$ref": "#/definitions/hex",
           "description": "Optional. The Studio's accent (primary buttons, links, focus rings) when the site's palette.light --primary is wrong for UI chrome. Only its hue and saturation are used; src/lib/studio-theme.ts solves the lightness and guards contrast (PORTS.md card 110)."
         },
+        "look": {
+          "type": "object",
+          "description": "Optional. The site's own devices inside the Studio (PORTS.md card 128, src/lib/studio-look.ts): every family site should differ in form, not only colour. Unset keys take neutral defaults (a dot marker, round stones, a plain line, no texture, no lettering). Colours are guarded for contrast; an unusable value is ignored with a note.",
+          "properties": {
+            "marker": {
+              "description": "The section marker: \"dot\", \"steps\", \"rule\" or \"diamond\", or the site's own art { src (a path in public/), width, height }.",
+              "oneOf": [
+                { "type": "string", "enum": ["dot", "steps", "rule", "diamond"] },
+                {
+                  "type": "object",
+                  "required": ["src", "width", "height"],
+                  "properties": {
+                    "src": { "type": "string" },
+                    "width": { "type": "number" },
+                    "height": { "type": "number" }
+                  }
+                }
+              ]
+            },
+            "markerColor": { "$ref": "#/definitions/hex" },
+            "headingColor": { "$ref": "#/definitions/hex" },
+            "markColors": {
+              "type": "array",
+              "description": "The numbered stones' colours, in order.",
+              "items": { "$ref": "#/definitions/hex" }
+            },
+            "stone": { "type": "string", "enum": ["pebble", "round", "square", "lozenge"] },
+            "connector": {
+              "type": "object",
+              "properties": {
+                "kind": { "type": "string", "enum": ["dashes", "dots", "line", "none"] },
+                "color": { "$ref": "#/definitions/hex" }
+              }
+            },
+            "tones": {
+              "type": "object",
+              "description": "The callout hues: note, tip, careful.",
+              "properties": {
+                "note": { "$ref": "#/definitions/hex" },
+                "tip": { "$ref": "#/definitions/hex" },
+                "careful": { "$ref": "#/definitions/hex" }
+              }
+            },
+            "motif": {
+              "type": "string",
+              "description": "A wide, short SVG in public/ for a banner's foot."
+            },
+            "motifNarrow": { "type": "string" },
+            "texture": {
+              "type": "string",
+              "description": "A repeating tile SVG in public/ for featured panels."
+            },
+            "edgeColors": { "type": "array", "items": { "$ref": "#/definitions/hex" } },
+            "lettering": {
+              "type": "object",
+              "required": ["family", "src"],
+              "properties": {
+                "family": { "type": "string" },
+                "src": { "type": "string" },
+                "colors": { "type": "array", "items": { "$ref": "#/definitions/hex" } }
+              }
+            },
+            "motion": { "type": "string", "enum": ["lay", "draw", "none"] }
+          }
+        },
         "icons": {
           "type": "object",
           "description": "Optional. The Studio's icons by meaning (PORTS.md card 119, src/lib/studio-icons.ts lists the meanings). The art for a meaning is src/sanity/brandIconArt.tsx; these maps say which document type, field group or tool means what, on top of the starter's defaults.",

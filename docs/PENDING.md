@@ -16,7 +16,7 @@ sequence).
 
 ## Waiting on a human
 
-### 24. Card 127 (the email backbone): a real send, and the Studio buttons signed in (opened 2026-10-18)
+### 28. Card 127 (the email backbone): a real send, and the Studio buttons signed in (opened 2026-10-18)
 
 **Blocker: a sending domain and a signed-in Studio.** Unit-tested on real SQLite and exercised under `wrangler dev` with
 a local D1 and the local `send_email` binding (OPERATIONS.md "Email"). Not yet seen: an email arriving through Resend
@@ -408,6 +408,16 @@ and a summary, "Improve this paragraph" and its dialog (and that Use this lands 
 you publish panel with its Show me links; the first real suggestion against the Claude API for each task (needs
 `ANTHROPIC_API_KEY` on a deployed site; OPERATIONS.md, "Writing help", with the spend limit; the route logs only the
 status), and the AI assistants line on a Visitors card with real referrals.
+
+### 29. Card 128 (Studio design language, Site Guide): captures, art, the signed-in checks (opened 2026-10-18)
+
+Unit-tested (`studio-look.test.ts`), checked, built and Playwright-clean, and seen in the dev bench at 375 and 1280 in
+light and dark (`/kit-harness/guide/`, `/kit-harness/studio/`). Still open: (a) real Studio screenshots for `GuideShot`
+in place of the wireframe `public/guide-shots/example-editor.svg`; (b) hand-drawn art for the guide meanings that have
+only a placeholder glyph on a stone (a Gemini brief is drafted for first-baptist-auburn); (c) the navbar status line: a
+signed-in check on the live Studio, since the clipping seen once was not reproduced under mock auth (the text now wraps,
+so ask for a screenshot with the exact width if it persists); (d) the next card: redraw the remaining roughly twenty
+Studio surfaces from `kit/ui`.
 
 ### 27. Card 125 (Studio app, Post a photo, Earlier versions): the signed-in and on-device checks (opened 2026-10-18)
 

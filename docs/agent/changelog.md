@@ -1,5 +1,21 @@
 # Change history
 
+_2026-10-18: the Studio's design language and a redesigned Site Guide (PORTS card 128)._
+
+**Decision.** The Studio now has a small design language the site's brand drives: a marker, a stone shape, a connector,
+three callout hues, a motif and optional lettering, set in `brand.config.json` `studio.look` and resolved to light and
+dark tokens that hold AA text and 3:1 marks. The shared pieces live in `src/sanity/kit/ui/` for later surfaces. The Site
+Guide is redrawn in it: a banner and a featured "Start here" on the index, a rule and marker per section, stones for
+steps, and note, tip and careful callouts, with annotated screenshots available. Callout markers keep the brand's true
+hue and take a darker outline for contrast (a first pass darkened the fill and the gold went brown). Guide icons are
+meanings now, not emoji.
+
+**Why.** The guide is what editors read most, and it read as documentation pasted into a form. A vocabulary also stops
+each new surface rebuilding its own look.
+
+**Left open.** Real screenshots for GuideShot, art for guide meanings with none, a signed-in look at the navbar status
+line, and the next card's roughly twenty surfaces (`docs/PENDING.md`).
+
 _2026-10-18: the email backbone: one sender, a newsletter with double opt-in, RSVPs (PORTS card 127)._
 
 **Decision.** Everything the site emails now goes through one module (`src/lib/mail-send.ts`) with two providers
