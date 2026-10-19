@@ -114,9 +114,10 @@ domain and their mail.
 
 Cards 131 and 132 redrew tool headings, Home (every card), the findings, the weekly checklist, "Is it live?", Quick
 update, Post a photo, the tour, the Section Look radio, Messages, the empty lists, the splash and the offline page in the design language.
-The Section Look radio now draws each look as a small section in the site's devices. Still to do: the field "How to"
-chip (a `form.components.field` wrapper linking the Site Guide section), and the AuthStore sign-in heading (beta API;
-pin it with a signed-out screenshot test). PreviewNavigator keeps its Spinner (preview stack; change it only with the
+The Section Look radio now draws each look as a small section in the site's devices. Card 134 added the field "How to"
+chip and icons on every document field group. The sign-in heading is blocked in sanity 6.19: `AuthConfig` has no
+login component slot, and a custom `AuthStore` drops the Studio's request handler (studio-kit.md "The edges"). Revisit
+on each Sanity upgrade. PreviewNavigator keeps its Spinner (preview stack; change it only with the
 preview rules in hand). Also: check the new surfaces signed in on the live Studio (the bench uses made-up data).
 Card 133 fixed Home's ways-in tile grid after a signed-in review on Auburn. Other sites' `PreviewLayout.astro` import only `globals.css` (BaseLayout also loads `starwind.css` and a site brand layer): compare the two before trusting a brand-token colour in the preview.
 Detail: `docs/agent/studio-kit.md` "Every surface in the language".

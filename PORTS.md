@@ -249,6 +249,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 129 | Studio signs in by token (kit routes need it); recentIgnoreTypes               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 130 | Real screenshots in the Site Guide: per-site shot registry                     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 131 | Every Studio surface in the design language (first pass)                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 134 | Field "How to" chip to the Site Guide; icons on every field group              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -9843,5 +9844,37 @@ there is to import the same stylesheets BaseLayout does, in the same order. Chec
 imports against its `BaseLayout.astro`.
 
 **Gates.** Kit harness at 375 and 1280 (`?view=surfaces&part=home`): no horizontal overflow, no title over two lines.
+
+**Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).
+
+## Card 134: a "How to" beside fields, and icons on every field group (2026-10-19)
+
+**Origin:** the Studio-wide design pass (the last two items of the audit's top 15), built in the starter first.
+
+**PORTABLE, new:** `src/sanity/kit/FieldGuide.tsx` (the global `form.components.field` wrapper and its dialog).
+
+**PORTABLE, changed:** `src/sanity/kit/index.tsx` (registers the wrapper), `src/sanity/kit/types.ts`
+(`guide.forField`, `features.fieldHelp`, `GuideViewProps.section`), `src/sanity/kit/guide/GuidePage.tsx` (opens at a
+section: stable heading ids, scroll and focus, marker edge), `src/sanity/kit/ui/primitives.tsx` (`KitScope inline`),
+`src/sanity/kit/ui/css.ts` (`.ui-howto`, `.ui-section--focus`), `src/lib/studio-kit.ts` (`fieldGuideLookup`,
+`guideSectionId`), `src/lib/studio-kit.test.ts`, `src/lib/studio-guides.test.ts` (the map gate),
+`docs/agent/studio-kit.md`.
+
+**Per site, not portable:** `src/sanity/guides/content.ts` gains `GUIDE_FOR_FIELD` (6 to 10 obvious fields, in the
+site's guides and headings), `src/sanity/kit.config.ts` passes it as `guide.forField`, `src/sanity/components/GuideView.tsx`
+passes `section` through to `GuidePage`, and `brand/brand.config.json` `studio.icons.groups` names a meaning for each
+document field group the defaults miss (pick meanings the site has art for).
+
+**What it changes.** A mapped field shows "How to" (the look's marker, the stone's shape, the heading colour) after its
+description; pressing it opens the guide in a dialog at that heading. Unmapped fields are untouched: the wrapper calls
+`renderDefault` after one cached lookup, with no hooks. Every document field-group tab carries an icon.
+
+**Not done, and why:** the branded heading inside the sign-in card. In sanity 6.19 `AuthConfig` has no `LoginComponent`;
+a custom `AuthStore` carries one but is used as-is, skipping the Studio's request handler (dead-session sign-out,
+the CORS and project-not-found screens). See studio-kit.md "The edges".
+
+**Gates.** Unit: the map names real guides and headings, at most 16 entries; the lookup (name first, type chain, no
+inherited keys, cached). Kit harness `/kit-harness/studio/`: a page's Google title shows the chip, the dialog opens at the
+section, Escape closes it, at 1280 and 375.
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).

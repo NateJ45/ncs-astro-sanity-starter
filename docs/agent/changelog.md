@@ -1,5 +1,13 @@
 # Change history
 
+_2026-10-19: a "How to" beside fields, and icons on every field group (PORTS card 134)._
+
+**Decision.** A field the guides config names (by field name, or by schema type) gets a quiet "How to" chip after its
+description that opens that Site Guide section in a dialog; every other field is left exactly as Sanity draws it, and
+the lookup is cached so the form does not slow. Field-group tabs take their icons from `brand.config.json` alone. The
+branded heading inside the sign-in card stays undone: sanity 6.19 offers it only through a custom auth store, which
+loses Sanity's own expired-session and CORS screens.
+
 _2026-10-19: Studio polish, Home's ways-in tiles (PORTS card 133)._
 
 **Decision.** Home's job tiles use a 260px minimum so the dashboard column holds three across at most, and a tile's art sits top left beside its title instead of floating at the middle. A title wraps to two lines, not three.

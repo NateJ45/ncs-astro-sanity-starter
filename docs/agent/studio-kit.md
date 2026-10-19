@@ -434,9 +434,13 @@ Also outside the kit plugin; site choices in `src/sanity/studioEdges.config.ts`.
   `logoPaths` entry; `view` crops an SVG lockup to its words) beside the square icon, hidden under 600px. It is
   registered at the ROOT of sanity.config (`studio.components.navbar`), the innermost middleware, so it wraps only
   Sanity's bar and not the kit's status line. The page hands it the built URL in `#ncs-studio-boot`.
-- **Not done, on purpose:** a branded heading inside the sign-in card through a custom `auth` store. Sanity uses a
-  custom store as-is, which drops its own request handler (expired-session handling, the CORS and project-not-found
-  screens). Not worth that for a heading.
+- **Not done, on purpose:** a branded heading inside the sign-in card. Checked again against sanity 6.19 for card
+  134: `AuthConfig` (the `auth` object in sanity.config) has no `LoginComponent` key; only a full custom
+  `AuthStore` can bring one, and `getAuthStore()` uses such a store as-is, skipping the Studio's request handler
+  (signed-out handling for a dead session, the CORS and project-not-found screens, the request-failure diagnostics).
+  Wrapping the default store would mean rebuilding it with the deprecated, internal `createAuthStore` and losing
+  those screens. The supported levers stay the workspace `icon`, `title` and `subtitle` (all drawn on the card)
+  and the i18n words above. Revisit when `AuthConfig` gains a login component slot.
 
 ## The design language (card 128)
 
@@ -557,7 +561,8 @@ family site gets its own devices and the starter's neutral defaults stay tidy.
 piece with made-up data in light or dark (`&scheme=dark`), since the real screens need a signed-in Studio
 (`src/sanity/kit/harness/Surfaces.tsx`, dev only).
 
-**Still to do** (`docs/PENDING.md`): the field "How to" chip and the sign-in heading.
+**Still to do** (`docs/PENDING.md`): the sign-in heading (blocked in sanity 6.19; see "The edges" above). The field
+"How to" chip landed with card 134 (below).
 
 ### Part two (card 132)
 
@@ -587,6 +592,43 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
   maps it in `brandIconArt.tsx`.
 - **Tour steps** may name a `short` word for the trail and a `meaning` for their art (`types.ts` `TourStep`).
 - **The bench** has `part=home` (every Home card with made-up data), `part=photo` and `part=tour`.
+
+## "How to" beside a field, and icons on every field group (card 134)
+
+**The chip.** `kit/FieldGuide.tsx` is a global `form.components.field` wrapper, registered by the kit plugin. A field
+named in `guide.forField` (kit.config.ts; the map is `GUIDE_FOR_FIELD` beside `GUIDES_FOR_TYPE` in
+`guides/content.ts`) gets a quiet "How to" chip after its description: the look's marker in small, the words, in the
+stone's shape (`--ui-tag-radius`) and the heading colour. It opens a dialog with that guide in its compact panel
+drawing, scrolled to the named heading, focus on it, the marker colour down its left. "See also" inside opens the next
+guide in the same dialog.
+
+```ts
+export const GUIDE_FOR_FIELD: FieldGuideMap = {
+  fields: {
+    seoTitle: { guide: 'seo-fields' },
+    alt: { guide: 'images-and-alt', section: 'What alt text is' },
+  },
+  types: {}, // schema type name -> section, for a type used in many places
+};
+```
+
+- A field's NAME wins over its TYPE chain (`schemaType`, then each `.type`). Name fields that mean one thing
+  everywhere: `seoTitle`, not `title`. Keep the list to the obvious ones (the gate stops at 16).
+- Every field passes through the wrapper, so it has no hooks and one cached lookup (`fieldGuideLookup` in
+  `src/lib/studio-kit.ts`; type chains are cached per schema type). An unmapped field gets `renderDefault(props)`
+  untouched. `features.fieldHelp: false` turns the wrapper off entirely.
+- The chip goes into the description slot, typed `string` in sanity 6.19 but drawn as a child of a Text. An upgrade
+  that stops drawing a node there loses the chip and nothing else.
+- `GuideViewProps.section` and `GuidePage`'s `section` carry the heading; each section heading now has a stable id,
+  `guideSectionId(slug, heading)`. A site's `GuideView` must pass `section` through.
+- Gates: `studio-guides.test.ts` (every mapped guide and heading exists; at most 16 entries), `studio-kit.test.ts`
+  (the lookup). Keyboard: a real button, the look's focus ring, Escape closes the dialog. No motion beyond a colour
+  change, off under reduced motion.
+
+**Field-group icons.** Config only: `brand/brand.config.json` `studio.icons.groups` names a meaning for every document
+field group the defaults in `studio-icons.ts` do not cover (`navigation`, `social`, `final`...). Object types'
+groups (a section's tabs) are not decorated. A site with art for a meaning (`brandIconArt.tsx`) gets its stone there;
+choose meanings the site has art for where one fits.
 
 ## Checkup rules
 

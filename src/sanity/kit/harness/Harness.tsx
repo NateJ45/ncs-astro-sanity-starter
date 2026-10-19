@@ -99,6 +99,8 @@ function GuideBench() {
       siteName={kitConfig.siteName}
       onOpen={setSlug}
       variant={view === 'panel' ? 'panel' : 'page'}
+      // Card 134: &s=<heading> opens at that section, as a field's "How to" does.
+      section={q.get('s') ?? undefined}
       linkTo={() => ({ href: '#', onClick: (e) => e.preventDefault() })}
     />
   );

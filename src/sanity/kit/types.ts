@@ -12,7 +12,7 @@ import type { ComponentType } from 'react';
 import type { SanityClient } from 'sanity';
 import type { CheckGroup } from '../../lib/page-checks';
 import type { CheckupRule } from '../../lib/studio-checkup';
-import type { QuickFieldKind, StudioTarget } from '../../lib/studio-kit';
+import type { FieldGuideMap, QuickFieldKind, StudioTarget } from '../../lib/studio-kit';
 import type { BrandIconKey } from '../../lib/studio-icons';
 import type { GallerySpec } from '../../lib/photo-post';
 
@@ -175,6 +175,11 @@ export interface GuideViewProps {
   variant?: 'page' | 'panel';
   /** Opens another guide in place (See also). Without it the view decides. */
   onOpen?: (slug: string) => void;
+  /**
+   * A heading of this guide to open at (card 134, the field "How to" chip):
+   * the view scrolls to it and moves focus there. Unknown text is ignored.
+   */
+  section?: string;
 }
 
 /** The help guides, as the site's Help & Guide data already holds them. */
@@ -305,6 +310,12 @@ export interface KitConfig {
      * (card 110). The key '*' is the fallback for any type not listed.
      */
     forType?: Record<string, string[]>;
+    /**
+     * Which guide section explains a field, by field name or schema type
+     * (card 134). A mapped field gets a quiet "How to" chip after its
+     * description; every other field is drawn exactly as Sanity draws it.
+     */
+    forField?: FieldGuideMap;
   };
 
   /**
@@ -370,6 +381,8 @@ export interface KitConfig {
     navbarStatus?: boolean;
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
     helpPanel?: boolean;
+    /** The "How to" chip on fields named in guide.forField (card 134). Missing counts as on. */
+    fieldHelp?: boolean;
     /**
      * The "Before you publish" document panel (card 123): the Checkup's
      * findings for the open document. Missing counts as on.

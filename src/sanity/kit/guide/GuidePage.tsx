@@ -24,7 +24,7 @@
 // link maker, so the page renders on a bare test page too.
 // =============================================================================
 
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import {
   findGuide,
   guideMeaning,
@@ -32,7 +32,7 @@ import {
   type GuideShotBlock,
 } from '../../../lib/studio-look';
 import { GUIDE_SHOTS } from '../../guides/shots';
-import type { StudioTarget } from '../../../lib/studio-kit';
+import { guideSectionId, type StudioTarget } from '../../../lib/studio-kit';
 import type { KitGuide } from '../types';
 import {
   GuideShot,
@@ -98,6 +98,11 @@ export interface GuidePageProps {
   linkTo?: LinkMaker;
   /** 'panel' for the narrow "Help for this page" inspector: a compact banner. */
   variant?: 'page' | 'panel';
+  /**
+   * One of the guide's headings to open at (card 134, a field's "How to"):
+   * scrolled to and given focus, with the marker beside it. Unknown text is ignored.
+   */
+  section?: string;
 }
 
 function WhereCard({
@@ -248,7 +253,7 @@ function sections(body: KitGuideBlock[]) {
 }
 
 export function GuidePage(props: GuidePageProps) {
-  const { guide, helper, siteName, variant = 'page' } = props;
+  const { guide, helper, siteName, variant = 'page', section } = props;
   const body = (Array.isArray(guide.body) ? guide.body : []) as KitGuideBlock[];
   const panel = variant === 'panel';
   const headingId = `guide-${guide.slug}`;
@@ -279,7 +284,13 @@ export function GuidePage(props: GuidePageProps) {
           foot={<StatusBadge level={guide.diy} helper={helper} onDark />}
         />
         {sections(body).map((s, i) => (
-          <Section key={i} heading={s.h} panel={panel}>
+          <Section
+            key={i}
+            heading={s.h}
+            panel={panel}
+            id={s.h ? guideSectionId(guide.slug, s.h) : undefined}
+            focus={Boolean(section && s.h && s.h.trim() === section.trim())}
+          >
             {s.blocks.map((b, j) => (
               <Block key={j} block={b} props={props} />
             ))}
@@ -293,18 +304,44 @@ export function GuidePage(props: GuidePageProps) {
 function Section({
   heading,
   panel,
+  id,
+  focus,
   children,
 }: {
   heading?: string;
   panel: boolean;
+  id?: string;
+  focus?: boolean;
   children: ReactNode;
 }) {
+  // Card 134: a field's "How to" opens the guide at this section. Scroll it to
+  // the top at once (no glide, so reduced motion needs nothing more) and move
+  // focus to its heading, so a screen reader starts reading here.
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (!focus) return;
+    const h = headingRef.current;
+    if (!h) return;
+    h.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior });
+    // After the dialog's own first focus (it runs after ours), so ours wins.
+    const timer = window.setTimeout(() => h.focus({ preventScroll: true }), 80);
+    return () => window.clearTimeout(timer);
+  }, [focus]);
   return (
-    <section style={{ display: 'grid', gap: panel ? 16 : 22 }}>
+    <section
+      style={{ display: 'grid', gap: panel ? 16 : 22 }}
+      className={focus ? 'ui-section--focus' : undefined}
+    >
       {heading && (
         <div style={{ display: 'grid', gap: 14 }}>
           <SectionRule />
-          <h2 className="ui-h2" style={panel ? { fontSize: 22 } : undefined}>
+          <h2
+            ref={headingRef}
+            id={id}
+            tabIndex={focus ? -1 : undefined}
+            className="ui-h2"
+            style={panel ? { fontSize: 22 } : undefined}
+          >
             {heading}
           </h2>
         </div>

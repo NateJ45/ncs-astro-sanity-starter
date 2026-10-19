@@ -23,6 +23,8 @@
 //   - Card 111: the weekly tick document (Home's hand-ticked jobs), the Quick
 //     update tool (kitConfig.quickUpdate) and plain words in empty lists
 //     (EMPTY_LIST_BUNDLE; emptyAwareList() is for structure.ts).
+//   - Card 134: a quiet "How to" chip after the description of each field
+//     that guide.forField maps to a Site Guide section (FieldGuide.tsx).
 // =============================================================================
 
 import { definePlugin, type LayoutProps } from 'sanity';
@@ -34,6 +36,7 @@ import { WEEK_TYPE } from '../../lib/studio-kit';
 import { TRASH_TYPE } from '../../lib/studio-trash';
 import { makeCheckupTool } from './CheckupTool';
 import { EMPTY_LIST_BUNDLE } from './emptyList';
+import { makeFieldGuide } from './FieldGuide';
 import { makeGuideTool } from './GuideTool';
 import { makeHelpPanel } from './HelpPanel';
 import { makeHomeTool } from './HomeTool';
@@ -95,6 +98,10 @@ export function ncsStudioKit(config: KitConfig) {
   const earlierVersions =
     config.features.earlierVersions === false ? null : makeEarlierVersions(config);
 
+  // Card 134: a quiet "How to" after the description of each field the
+  // guides config maps to a Site Guide section. Null when nothing is mapped.
+  const FieldGuideField = makeFieldGuide(config);
+
   function KitLayout(props: LayoutProps) {
     const { staffView } = useStaffView(config);
     return (
@@ -121,6 +128,8 @@ export function ncsStudioKit(config: KitConfig) {
     studio: {
       components: { layout: KitLayout, ...(KitNavbar ? { navbar: KitNavbar } : {}) },
     },
+
+    ...(FieldGuideField ? { form: { components: { field: FieldGuideField } } } : {}),
 
     tools: (prev, { currentUser }) => {
       const kitTools = [
