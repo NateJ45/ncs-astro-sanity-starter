@@ -2,7 +2,9 @@
 // Foundation, edit with care
 // Renders a page-builder section array. Maps each block _type to its component
 // and OWNS the alternating background cadence for content blocks, so reordering
-// can never break the page rhythm (that is why blocks have no color field).
+// can never break the page rhythm (that is why blocks have no color field). A
+// content block's `look` (src/lib/section-looks.ts, rule 9 as amended) is a
+// request the cadence resolves into a measured surface, never a colour.
 // Self-contained blocks (hero, CTA band, stats, spacer) manage their own surface.
 //
 // Cadence logic lives in src/lib/sectionCadence.ts and is unit-tested separately.
@@ -61,6 +63,11 @@ const { sections = [], idPrefix = 'section', editDoc } = Astro.props as Props;
 // Synced sections (the authoring kit, PORTS.md card 109) are swapped for the
 // sections their saved copy holds BEFORE the cadence runs, so a synced band
 // takes its place in the alternating rhythm like any typed-in band (rule 9).
+// The business blocks (story, service area, guarantee) take no look, so the
+// cadence only ever hands them a light surface; this narrows the type for them.
+const lightSurface = (s: string | null): 'background' | 'muted' =>
+  s === 'muted' ? 'muted' : 'background';
+
 const rows = classifySections<PageBuilderBlock>(
   expandSyncedSections(sections as PageBuilderBlock[]),
   idPrefix,
@@ -221,7 +228,7 @@ const editKeyOf = (block: unknown) => {
           attribution={s.attribution}
           credentialLine={s.credentialLine}
           serviceAreaLine={s.serviceAreaLine}
-          surface={surface ?? 'background'}
+          surface={lightSurface(surface)}
           headingId={headingId}
         />
       ) : // scaffold-branch: philosophy
@@ -251,14 +258,14 @@ const editKeyOf = (block: unknown) => {
           description={s.description}
           travelFees={s.travelFees ?? []}
           showTravelFees={s.showTravelFees ?? true}
-          surface={surface ?? 'background'}
+          surface={lightSurface(surface)}
           headingId={headingId}
         />
       ) : s._type === 'guaranteeSection' ? (
         <GuaranteeSection
           text={s.text}
           siteSettingsText={s.siteSettingsText}
-          surface={surface ?? 'background'}
+          surface={lightSurface(surface)}
         />
       ) : // scaffold-branch: faq
       s._type === 'faqSection' ? (

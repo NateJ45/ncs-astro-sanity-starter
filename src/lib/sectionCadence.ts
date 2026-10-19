@@ -18,6 +18,22 @@
 //   cadence at index 1 (muted) so the first content block contrasts rather
 //   than blending into the hero. An image hero is dark, so the default
 //   starting index 0 (background = light) already contrasts.
+//
+// LOOKS (2026-10-18, src/lib/section-looks.ts, rule 9 as amended):
+//   An eligible content block can carry a `look`. Unset or Standard is the
+//   cadence above, untouched, so every existing page renders as before.
+//   Quiet: always the plain page surface ('background'). The cadence restarts
+//     from it, so the next Standard block is 'muted' and the page keeps
+//     alternating after it.
+//   Feature: the deep brand band ('feature'). It sits OUTSIDE the alternation,
+//     like a self-contained block: it neither advances the counter nor takes a
+//     divider on either side (a dark band is its own edge). Two dark bands may
+//     never touch, so a Feature directly after a dark row (another Feature, an
+//     image hero, a CTA band) or directly before a CTA band or image hero falls
+//     back to Standard. The Studio says so in the field's description.
+
+import { resolveLook, type SectionLook } from './section-looks.ts';
+import type { CadenceSurface } from './surfaces.ts';
 
 /** _type strings for blocks that manage their own surface. */
 export const SELF_CONTAINED_TYPES = new Set([
@@ -55,6 +71,17 @@ export const CONTENT_TYPES = new Set([
   'rsvpSection',
 ]);
 
+/**
+ * Self-contained rows that paint a DARK band, so a Feature look must not touch
+ * them. The CTA band is always the Ink slab; a hero is dark only when it has a
+ * background photo (see the leading-muted offset above).
+ */
+function isDarkSelfContained(block: SectionBlock | undefined): boolean {
+  if (!block) return false;
+  if (block._type === 'ctaBandSection') return true;
+  return block._type === 'heroSection' && !!block.backgroundImage;
+}
+
 export interface SectionBlock {
   _type: string;
   [key: string]: unknown;
@@ -63,7 +90,13 @@ export interface SectionBlock {
 export interface ClassifiedRow<T extends SectionBlock = SectionBlock> {
   block: T;
   /** Assigned surface for content blocks; null for self-contained blocks. */
-  surface: 'background' | 'muted' | null;
+  surface: CadenceSurface | null;
+  /**
+   * The look this row RENDERS with, after the cadence's overrule (a Feature
+   * that would touch another dark band renders as Standard). Always
+   * 'standard' for self-contained blocks.
+   */
+  look: SectionLook;
   /** Whether a SectionDivider should be inserted BEFORE this row. */
   insertDividerBefore: boolean;
   /** Generated heading id for accessible aria-labelledby. */
@@ -97,15 +130,35 @@ export function classifySections<T extends { _type: string }>(
     first?._type === 'heroSection' && !(first as Record<string, unknown>)?.backgroundImage;
 
   let contentIdx = opensWithTextHero ? 1 : 0;
-  let prevContentSurface: 'background' | 'muted' | null = null;
+  let prevContentSurface: CadenceSurface | null = null;
+  // Whether the row just rendered paints a dark band (a Feature row or a dark
+  // self-contained block), for the "two dark bands never touch" rule.
+  let prevDark = false;
 
   return list.map((block, i): ClassifiedRow<T & SectionBlock> => {
-    let surface: 'background' | 'muted' | null = null;
+    let surface: CadenceSurface | null = null;
+    let look: SectionLook = 'standard';
 
     if (CONTENT_TYPES.has(block._type)) {
-      surface = contentIdx % 2 === 0 ? 'background' : 'muted';
-      contentIdx += 1;
+      look = resolveLook(block._type, block.look);
+      if (look === 'feature' && (prevDark || isDarkSelfContained(list[i + 1]))) {
+        look = 'standard';
+      }
+
+      if (look === 'feature') {
+        surface = 'feature';
+        // Out of the alternation: no counter step, and no divider either side.
+        prevContentSurface = null;
+      } else if (look === 'quiet') {
+        surface = 'background';
+        // Restart the rhythm from the plain surface: the next Standard is muted.
+        contentIdx = 1;
+      } else {
+        surface = contentIdx % 2 === 0 ? 'background' : 'muted';
+        contentIdx += 1;
+      }
     }
+    const dark = surface === 'feature' || isDarkSelfContained(block);
 
     // Insert a divider before this row when:
     //   - Both this and the previous content block are content blocks.
@@ -115,13 +168,15 @@ export function classifySections<T extends { _type: string }>(
     const insertDividerBefore =
       surface !== null && prevContentSurface !== null && surface !== prevContentSurface;
 
-    if (surface !== null) {
+    if (surface !== null && surface !== 'feature') {
       prevContentSurface = surface;
     }
+    prevDark = dark;
 
     return {
       block,
       surface,
+      look,
       insertDividerBefore,
       headingId: `${idPrefix}-${i}`,
     };

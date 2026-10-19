@@ -32,6 +32,7 @@ import ReadingProgress from '@/components/ReadingProgress.astro';
 import StickyCTAChip from '@/components/StickyCTAChip';
 import CaseStudyTOC from '@/components/CaseStudyTOC';
 import FinalCta from '@/components/FinalCta.astro';
+import Lightbox from '@/components/Lightbox.astro';
 import { formatDate } from '@/lib/format-date';
 import ShareButtons from '@/components/ShareButtons.astro';
 import SearchMeta from '@/components/search/SearchMeta.astro';
@@ -206,6 +207,8 @@ const schemas = [
             the visitor scrolls the body into view. The article HTML is still
             server-rendered above the fold, so reading starts immediately. */}
         <JournalPortableText client:visible value={entry.body} />
+        {/* The post's photos open full screen (inline images and galleries). */}
+        <Lightbox />
 
         {/* Share this post (card 126): plain links, no third-party scripts. */}
         <ShareButtons

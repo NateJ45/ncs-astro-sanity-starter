@@ -6,14 +6,14 @@
 // "<page id>:<block key>"; `pageId` comes from the projection (^._id).
 import SectionHeading from '@/components/SectionHeading.astro';
 import RsvpForm from '@/components/RsvpForm';
-import { surfaceClass } from '@/lib/surfaces';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
 import { eventKey, normalizeRsvpBlock, whenWords } from '@/lib/mail-rsvp';
 import { TIME_ZONE } from '@/lib/newsletter-content';
 import type { ProjectedRsvpSection } from '@/lib/pageBuilder.types';
 
 interface Props {
   block: ProjectedRsvpSection;
-  surface?: 'background' | 'muted' | null;
+  surface?: CadenceSurface | null;
   headingId: string;
 }
 
@@ -23,7 +23,7 @@ const ev = normalizeRsvpBlock(block, pageId);
 const key = eventKey(pageId, block._key ?? '');
 const when = whenWords(ev?.startsAt ?? null, TIME_ZONE);
 const closed = ev?.closesAt ? Date.parse(ev.closesAt) <= Date.now() : false;
-const bg = surfaceClass(surface);
+const bg = surfaceClass(surface ?? 'background');
 ---
 
 {ev && key && (

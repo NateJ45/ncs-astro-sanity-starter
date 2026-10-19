@@ -320,6 +320,48 @@ export const guides: Guide[] = [
   },
 
   {
+    slug: 'section-looks',
+    category: 'Pages and words',
+    title: 'Change how a section looks',
+    icon: '◐',
+    lead: 'Make one section stand out, or keep one plain, without picking colours.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Text, picture and text, gallery, quote and video sections each have a **Look**. The website already takes turns between a plain band and a soft band down the page, so most sections never need changing. The look is for the few that do.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '**Standard** follows that rhythm. Every section starts here.',
+          '**Quiet** always sits on the plain page colour, with no band. Good after a busy section, or to let two short sections read as one.',
+          '**Feature** puts the section on the deep brand colour with light text. Use it once or twice a page, for the part that matters most.',
+        ],
+      },
+      { kind: 'h', text: 'Change one' },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page and click the section.',
+          'Scroll to `Look` near the bottom and pick one. The little picture beside each shows the band.',
+          'Check it in the preview, then `Publish`.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Two Feature sections never sit side by side.',
+        text: 'If a Feature section would touch another dark band (another Feature, a banner with a photo, or the closing call to action), the website shows it as Standard instead, so the page never turns into one long dark block. Move it, or pick a different section to feature.',
+      },
+      {
+        kind: 'p',
+        text: '_There is no colour picker on purpose. The looks are the colours the design was made with, and they are checked for easy reading._',
+      },
+    ],
+  },
+
+  {
     slug: 'rename-a-page',
     category: 'Pages and words',
     title: 'Rename a page without breaking links',

@@ -1,10 +1,14 @@
 ---
 // Page-builder block: a responsive photo grid (2, 3, or 4 columns) with
 // optional captions. Surface comes from SectionRenderer. Safe to edit by hand.
+// Every photo opens the full-screen viewer (LightboxLink + Lightbox, 2026-10-18),
+// and with JavaScript off it is a plain link to the full-size picture.
 import SanityImage from '@/components/SanityImage.astro';
+import Lightbox from '@/components/Lightbox.astro';
+import LightboxLink from '@/components/LightboxLink.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 import { columnsClass } from '@/lib/layout-variants';
-import { surfaceClass } from '@/lib/surfaces';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
 
 import type { SanityImageObject } from '@/lib/pageBuilder.types';
 
@@ -14,7 +18,8 @@ interface Props {
   heading?: string;
   images?: GalleryImage[];
   columns?: number;
-  surface?: 'background' | 'muted';
+  /** From SectionRenderer's cadence, including the band an editor's look asks for. */
+  surface?: CadenceSurface;
   headingId: string;
 }
 
@@ -48,16 +53,19 @@ const colClass = columnsClass('gallerySection', columns);
       <div
         class:list={['grid grid-cols-1 gap-m', colClass, heading && 'mt-section-md']}
         data-stagger-grid
+        data-lightbox-group
       >
         {pics.map((img) => (
           <figure class="overflow-hidden rounded-md">
-            <SanityImage
-              source={img}
-              width={800}
-              sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
-              quality={75}
-              class="h-auto w-full"
-            />
+            <LightboxLink source={img} caption={img.caption}>
+              <SanityImage
+                source={img}
+                width={800}
+                sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
+                quality={75}
+                class="h-auto w-full"
+              />
+            </LightboxLink>
             {img.caption && (
               <figcaption class="mt-xs text-sm text-muted-foreground italic">
                 {img.caption}
@@ -67,5 +75,6 @@ const colClass = columnsClass('gallerySection', columns);
         ))}
       </div>
     </div>
+    <Lightbox />
   </section>
 )}

@@ -1,0 +1,47 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// LightboxLink - makes one Sanity photo open in the photo viewer
+// =============================================================================
+// Wrap a photo in this and it becomes a real link to the full-size picture on
+// Sanity's CDN. That is the whole feature with JavaScript off: a tap opens the
+// photo. With JavaScript on, src/components/Lightbox.astro catches the tap and
+// opens the viewer instead, stepping through every other LightboxLink inside the
+// same `data-lightbox-group` element (a gallery, a post body).
+//
+// The full-size picture keeps the editor's crop and is never cut into (fit=max),
+// so whatever the hotspot marks stays in frame. Pair it with <Lightbox /> once
+// in the same component, which is what loads the viewer's script and styles.
+// =============================================================================
+import { parseSanityAssetDimensions, urlFor } from '@/lib/sanity';
+import { viewerSources } from '@/lib/lightbox';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+interface Props {
+  source: SanityImageObject;
+  /** Shown under the photo in the viewer. Plain text. */
+  caption?: string | null;
+  class?: string;
+}
+
+const { source, caption, class: className } = Astro.props;
+const dims = parseSanityAssetDimensions(source);
+const { href, srcset } = viewerSources(
+  (w) => urlFor(source).width(w).fit('max').quality(80).auto('format').url(),
+  dims?.width,
+);
+const alt = (source as { alt?: string }).alt ?? '';
+---
+
+<a
+  href={href}
+  class:list={['lightbox-link', className]}
+  data-lightbox
+  data-lightbox-srcset={srcset}
+  data-lightbox-alt={alt}
+  data-lightbox-caption={caption || undefined}
+  aria-label={alt ? `View larger: ${alt}` : 'View photo larger'}
+>
+  <slot />
+</a>

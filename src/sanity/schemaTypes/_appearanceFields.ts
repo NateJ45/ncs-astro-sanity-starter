@@ -17,11 +17,18 @@
 //   richTwin            the bold/italic twin of a plain support-text string.
 //   hideWhenRich        hides the plain field once its twin holds text.
 //   columnsField        how many cards across, from the shared registry.
+//   lookField           (2026-10-18) a short enum of DESIGNED looks (Standard,
+//                       Quiet, Feature) from src/lib/section-looks.ts. The
+//                       editor picks a look; SectionRenderer's cadence turns it
+//                       into a measured surface with the neighbours in view, so
+//                       this is still not a colour field (rule 9 as amended).
 // =============================================================================
 
 import { defineField, defineArrayMember } from 'sanity';
 import { hasInlineRich } from '../../lib/inline-rich';
 import { columnFallback, columnOptions } from '../../lib/layout-variants';
+import { lookOptionsFor } from '../../lib/section-looks';
+import { SectionLookInput } from '../components/SectionLookInput';
 
 // -----------------------------------------------------------------------------
 // Inline emphasis on curated plain-string support text
@@ -110,5 +117,29 @@ export function columnsField(type: string) {
     description: 'On a phone this section always stacks, whichever you pick.',
     options: { list: columnOptions(type), layout: 'radio' },
     initialValue: columnFallback(type),
+  });
+}
+
+/**
+ * The "Look" control for one content block (rule 9 as amended, 2026-10-18).
+ *
+ * A string enum, never a colour: the list comes from src/lib/section-looks.ts,
+ * which also says which blocks offer which looks. No initialValue on purpose:
+ * unset means Standard, so new blocks and every block that existed before this
+ * field store the same nothing, and no page moves until an editor picks a look.
+ * `look` is in NON_STEGA_FIELDS (src/lib/cms-preview.ts, rule 8b).
+ */
+export function lookField(type: string) {
+  return defineField({
+    name: 'look',
+    title: 'Look',
+    type: 'string',
+    description:
+      'How this section sits on the page. Standard follows the page rhythm. Two Feature sections never sit side by side, and a Feature next to the closing call to action shows as Standard.',
+    options: {
+      list: lookOptionsFor(type).map((l) => ({ title: l.title, value: l.value })),
+      layout: 'radio',
+    },
+    components: { input: SectionLookInput },
   });
 }
