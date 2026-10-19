@@ -111,7 +111,9 @@ export function paramsFromSearch(search) {
 export function createSnapshotServer(docs) {
   return createServer(async (req, res) => {
     const send = (code, body) => {
-      res.writeHead(code, { 'content-type': 'application/json' });
+      // Connection: close, so no keep-alive socket outlives the client (a child that
+      // calls process.exit() with one open trips a libuv assertion on Windows).
+      res.writeHead(code, { 'content-type': 'application/json', connection: 'close' });
       res.end(JSON.stringify(body));
     };
     try {
@@ -230,8 +232,10 @@ async function main(argv) {
       child.on('exit', (c, s) => ok(c ?? (s ? 1 : 0)));
       child.on('error', () => ok(1));
     });
+    server.closeAllConnections();
     server.close();
-    process.exit(code);
+    process.exitCode = code;
+    return;
   }
   throw new Error('usage: snapshot.mjs export | serve [--port N] [--file F] | run -- <command...>');
 }
