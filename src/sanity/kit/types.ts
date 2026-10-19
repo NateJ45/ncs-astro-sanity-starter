@@ -333,6 +333,11 @@ export interface KitConfig {
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
     helpPanel?: boolean;
     /**
+     * The "Before you publish" document panel (card 123): the Checkup's
+     * findings for the open document. Missing counts as on.
+     */
+    publishPanel?: boolean;
+    /**
      * The "Earlier versions" document panel (card 125): the nightly backups,
      * through /api/studio/earlier-versions/. Without the Worker's GitHub
      * settings it offers "Ask <helper> to restore this". Missing counts as on.

@@ -77,6 +77,18 @@ export interface CheckupContext {
    * walks a report as if it were a page.
    */
   reports: Doc[];
+  /**
+   * Files the live site serves that a rule may read (card 123: /llms.txt and
+   * /llms-full.txt). Optional: undefined means "not fetched", and a rule that
+   * needs it says nothing.
+   */
+  site?: SiteFiles;
+}
+
+/** What the Studio fetched from the site for the Checkup (card 123). Null: the site answered 404. */
+export interface SiteFiles {
+  llmsTxt?: string | null;
+  llmsFull?: string | null;
 }
 
 /** Document types that are reports about the site, not content (card 122). */
@@ -456,7 +468,7 @@ const RANK: Record<Severity, number> = {
 export function runCheckup(
   docs: Doc[],
   rules: CheckupRule[],
-  opts: Pick<CheckupContext, 'nameOf' | 'typeTitle'> & { now?: number },
+  opts: Pick<CheckupContext, 'nameOf' | 'typeTitle' | 'site'> & { now?: number },
 ): CheckResult[] {
   const reports = docs.filter((d) => REPORT_TYPES.has(d._type));
   const content = docs.filter((d) => !REPORT_TYPES.has(d._type));
@@ -468,6 +480,7 @@ export function runCheckup(
     now: opts.now ?? Date.now(),
     nameOf: opts.nameOf,
     typeTitle: opts.typeTitle,
+    site: opts.site,
   };
   const out: CheckResult[] = [];
   for (const rule of rules) {
