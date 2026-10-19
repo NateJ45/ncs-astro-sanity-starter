@@ -34,6 +34,7 @@ import {
   type SiteFiles,
 } from '../../lib/studio-checkup';
 import type { KitConfig } from './types';
+import { signInNote } from '../../lib/studio-signin';
 
 export const API_VERSION = '2025-02-19';
 
@@ -376,8 +377,9 @@ export function useLiveData(): LiveData | null {
 // route checks with Sanity (src/lib/studio-auth.ts). The signed-in embedded
 // Studio keeps that token in localStorage under __studio_auth_token_<projectId>
 // (the step 0 spike in docs/agent/studio-kit.md); the client's config carries
-// it too when it is set. A cookie-only login has no token, so the route says
-// "sign in again" and the editor can still ask for help.
+// it too when it is set. A cookie-only login has no token, so the route answers
+// 401 and the editor is told, in plain words, to sign out and in once (card 129;
+// sanity.config.ts sets auth.loginMethod 'token' so that switch is one time).
 
 export function studioToken(client: { config: () => { token?: string; projectId?: string } }) {
   const cfg = client.config();
@@ -409,7 +411,12 @@ export function useTryAgain() {
       setNote(
         r.ok && j.ok
           ? 'Trying again now. The website usually updates within a few minutes.'
-          : (j.error ?? 'That did not work just now. Ask for help if it keeps happening.'),
+          : signInNote(
+              Boolean(token),
+              r.status,
+              j.error,
+              'That did not work just now. Ask for help if it keeps happening.',
+            ),
       );
     } catch {
       setNote('That did not work just now. Ask for help if it keeps happening.');

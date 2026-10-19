@@ -110,6 +110,11 @@ export default defineConfig({
   // deprecated and was never drawn; the login screen showed "My Studio".)
   title: brand.name,
   icon: StudioIcon,
+  // Sign in with a session TOKEN, not Sanity's default (a cookie where the
+  // browser allows one). The kit's Worker routes (/api/studio/*) check a Bearer
+  // token; a cookie session sends none and every route answers 401 (card 129).
+  // Each editor signs in once more after a site takes this line.
+  auth: { loginMethod: 'token' },
   // The line under the name on the sign-in card (card 120).
   subtitle: wording.subtitle,
   // The site's words on Sanity's screens: signed-out notice, user menu.

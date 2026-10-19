@@ -246,6 +246,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 126 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 127 | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 128 | Studio design language (studio.look), shared UI pieces, Site Guide redesign    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 129 | Studio signs in by token (kit routes need it); recentIgnoreTypes               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -9644,3 +9645,37 @@ the site PR.
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-guide-design`, PR after this merges.
 Other sites `no`.
+
+## Card 129: the Studio signs in by token, says so plainly when it cannot, and Home can skip imported documents (2026-10-19)
+
+**Origin:** the 2026-10-19 signed-in checks on mas-monograms and stonesteps-50k. Live routes were fine (a valid Sanity
+token with the site's Origin got 200 from `/api/studio/messages/` and `/visitors/`), but the same Chrome that worked on
+Auburn and presacademy got 401 on those two. `studioToken()` reads only localStorage `__studio_auth_token_<projectId>`; a
+Studio signed in by cookie (Sanity's default `dual` login) has none, sends no Bearer header, and every kit route answers 401. Whether a browser held a token or a cookie depended on when and how it signed in.
+
+**Canonical (PORTABLE):** `src/lib/studio-signin.ts` and `studio-signin.test.ts` (new); `src/sanity/kit/shared.tsx`
+(`useTryAgain` uses `signInNote`), `src/sanity/workflow/studioApi.ts` (a 401 with no token says the one-time switch),
+`src/sanity/kit/HomeTool.tsx` and `src/sanity/kit/types.ts` (`recentIgnoreTypes`), `docs/agent/studio-kit.md`. Per site:
+the `auth` line in `sanity.config.ts` (not marked), and `recentIgnoreTypes` in `src/sanity/kit.config.ts` if wanted.
+
+**What it does.**
+
+- `sanity.config.ts` sets `auth: { loginMethod: 'token' }`, so every Studio session holds the token the kit's routes
+  verify.
+- When a kit call gets 401 and this browser sent no token, the editor reads: sign out from the menu, sign in again, once.
+  A 401 that did carry a token keeps the route's own words.
+- Optional `recentIgnoreTypes` hides types from Home's Recent edits and Pick up without taking them out of the Checkup
+  (Stone Steps' nightly-imported `result` documents showed as eight identical rows).
+
+**Weighed and left out.** Making the routes accept a cookie: the Worker cannot read Sanity's cookie for another origin.
+Result previews without a title is a per-site schema fix.
+
+**Verified.** `studio-signin.test.ts`, `astro check`, build, `test:unit`, `npm test`. Signed-in check: a browser signed in
+by cookie sees the new sentence on a failed "Try again", and after one sign-out and in the Home cards load.
+
+**Adopting it in a site.** Add the one `auth` line to `sanity.config.ts`; copy the PORTABLE files (marked-file order:
+the starter merges first, then the site PR); run `npm run typegen` and `npm run test:unit`. Every editor signs out and in
+once after the site deploys. stonesteps-50k#135 and mas-monograms#121 carry the config line already.
+
+**Status, 2026-10-19.** Starter `yes` (on merge). first-baptist-auburn on branch `fix/studio-token-login`. Others `no`
+except the config line on stonesteps-50k and mas-monograms.
