@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words for a site come from kit.config.ts postPhoto)
 // =============================================================================
-// "Post a photo" on the Quick update tool (Studio kit, PORTS.md card 124)
+// "Post a photo" on the Quick update tool (Studio kit, PORTS.md card 125)
 // =============================================================================
 // The phone job the Studio was missing: take a photo (or pick one from the
 // phone's gallery), describe it, and put it in a gallery on a page or in a new

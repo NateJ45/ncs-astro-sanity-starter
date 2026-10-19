@@ -46,9 +46,9 @@ are commented in that site's `src/sanity/kit.config.ts`.
 | Quick update (111)      | `src/sanity/kit/QuickUpdateTool.tsx`                                                                                                                 | Tool `quick-update`, forms from `kitConfig.quickUpdate`; `quickFormErrors()` in `studio-kit.ts`                                                         |
 | Empty lists (111)       | `src/sanity/kit/emptyList.tsx`                                                                                                                       | `emptyAwareList()` for `structure.ts`, plus `EMPTY_LIST_BUNDLE` (the default empty words)                                                               |
 | Restore one document    | `scripts/restore-doc.mjs`, `scripts/lib/restore-doc.mjs`                                                                                             | One document from a nightly backup, written back as a draft; dry by default; tests in `restore-doc.test.mjs`                                            |
-| Post a photo (124)      | `src/sanity/kit/PostPhoto.tsx`, `src/lib/photo-post.ts`                                                                                              | Quick update's photo action, `kitConfig.postPhoto`; draft only; tests in `photo-post.test.ts`                                                           |
-| Earlier versions (124)  | `src/sanity/kit/EarlierVersions.tsx`, `src/pages/api/studio/earlier-versions.ts`, `src/lib/earlier-versions.ts`, `.github/workflows/restore-doc.yml` | Document inspector; nightly backups via CI; tests in `earlier-versions.test.ts`                                                                         |
-| Studio app (124)        | `src/lib/studio-app.ts`, `src/pages/studio/manifest.webmanifest.ts`, `src/pages/studio/offline.astro`, `public/studio/sw.js`                         | Manifest, offline page and service worker scoped to /studio/; tests in `studio-app.test.ts`, `tests/studio-app.spec.ts`                                 |
+| Post a photo (125)      | `src/sanity/kit/PostPhoto.tsx`, `src/lib/photo-post.ts`                                                                                              | Quick update's photo action, `kitConfig.postPhoto`; draft only; tests in `photo-post.test.ts`                                                           |
+| Earlier versions (125)  | `src/sanity/kit/EarlierVersions.tsx`, `src/pages/api/studio/earlier-versions.ts`, `src/lib/earlier-versions.ts`, `.github/workflows/restore-doc.yml` | Document inspector; nightly backups via CI; tests in `earlier-versions.test.ts`                                                                         |
+| Studio app (125)        | `src/lib/studio-app.ts`, `src/pages/studio/manifest.webmanifest.ts`, `src/pages/studio/offline.astro`, `public/studio/sw.js`                         | Manifest, offline page and service worker scoped to /studio/; tests in `studio-app.test.ts`, `tests/studio-app.spec.ts`                                 |
 
 Every file above except `kit.config.ts` and `structure.ts` carries the PORTABLE marker. Nothing in them names a site, a
 person or a document type; everything site-specific comes in through `kitConfig`.
@@ -185,7 +185,7 @@ that returns the whole document. The tool shows the forms as big buttons, opens 
 screen (no page builder, no tabs), checks the answers with `quickFormErrors()`, then **creates the document published**
 and fires `PUBLISHED_EVENT`. Because it skips the Studio's validation, `build` must return a document that is complete
 and valid for its type (slugs, required fields). Afterwards it offers "Open it in the full editor". Built for 375px
-first: one column, 72px buttons, 16px-plus inputs. With `kitConfig.postPhoto` set, "Post a photo" (card 124) is the
+first: one column, 72px buttons, 16px-plus inputs. With `kitConfig.postPhoto` set, "Post a photo" (card 125) is the
 first button, and it alone is enough to give the tool; unlike the forms it saves a DRAFT. Add `'quick-update'` to `staffTools` for the staff view.
 `lastSunday()` and `comingSunday()` in `studio-kit.ts` are there for `initial` values.
 
@@ -208,7 +208,7 @@ week" goes to the developer: `node scripts/restore-doc.mjs <docId> [--from <date
 (plus `NCS_PRODUCTION_WRITE=yes` on production) writes it back **as a draft**, so the editor reviews it and publishes,
 or presses Discard changes to undo the restore. Artifacts last 14 days; pass an R2 copy's file for anything older.
 
-## Earlier versions (card 124)
+## Earlier versions (card 125)
 
 A document inspector ("Earlier versions" in the document's menu) that reaches the nightly backups, so an editor can go
 back further than the free plan's three days without asking anyone. It never decrypts anything itself:
@@ -236,7 +236,7 @@ and in Sanity's "Review changes".
 **Without the settings** (or for a viewer) the panel says why and offers "Ask <helper> to restore this" (email when
 `PUBLIC_STUDIO_HELP_EMAIL` is set, and "Copy the details"). `features.earlierVersions: false` hides it.
 
-## The Studio on a phone (card 124)
+## The Studio on a phone (card 125)
 
 - **Manifest**: `/studio/manifest.webmanifest` from `studioManifest()` (`src/lib/studio-app.ts`): `id` and
   `scope` `/studio/`, `display: standalone`, the brand name, `theme_color` the navy chrome, `background_color`

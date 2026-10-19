@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// The Studio app's service worker (PORTS.md card 124), scope /studio/
+// The Studio app's service worker (PORTS.md card 125), scope /studio/
 // =============================================================================
 // Registered by the boot page (src/pages/studio/index.astro) and by nothing
 // else, so it only ever sees requests made by the Studio. It does two jobs:

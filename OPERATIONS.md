@@ -303,7 +303,7 @@ dist/server/wrangler.json`, then `npm run preview`.
   watches the repo. Try it by hand: `node --experimental-strip-types scripts/change-note.mjs --dry --hours 72`.
 - **Table panes.** Nothing to switch on; edit `src/sanity/tables.config.ts`.
 
-## The Studio app and Earlier versions (PORTS.md card 124)
+## The Studio app and Earlier versions (PORTS.md card 125)
 
 - **The Studio on a phone.** Nothing to switch on: `/studio/manifest.webmanifest` and `/studio/sw.js` ship with
   every build. Check after a deploy: open `/studio/` in Chrome, DevTools, Application, Manifest (no errors, the

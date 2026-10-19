@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// "Earlier versions" (PORTS.md card 124): the endpoint's checks and limits, the
+// "Earlier versions" (PORTS.md card 125): the endpoint's checks and limits, the
 // backups list, finding a request's run, reading the run log back, and that the
 // route and the workflow keep their safety rails.
 import { readFileSync } from 'node:fs';

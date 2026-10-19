@@ -42,7 +42,7 @@
 // asset itself. Any old "Publish automatically at" is dropped. Sanity's own
 // system documents (assets, roles, ids starting "_") are never restored.
 //
-// THE STUDIO'S "EARLIER VERSIONS" (PORTS.md card 124). The Studio cannot hold
+// THE STUDIO'S "EARLIER VERSIONS" (PORTS.md card 125). The Studio cannot hold
 // BACKUP_PASSPHRASE, so its panel asks GitHub Actions to run this script
 // (.github/workflows/restore-doc.yml): --scan lists the last 14 backups that
 // hold the document and which fields differ from now; --run <id> picks one

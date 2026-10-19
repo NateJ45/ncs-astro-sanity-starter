@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// "Post a photo" on Quick update (PORTS.md card 124): the checks, the shrink,
+// "Post a photo" on Quick update (PORTS.md card 125): the checks, the shrink,
 // the gallery query and choices, the photo value and the patch path.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';

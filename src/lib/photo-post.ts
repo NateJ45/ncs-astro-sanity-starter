@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// "Post a photo": the pure half (Studio kit, PORTS.md card 124)
+// "Post a photo": the pure half (Studio kit, PORTS.md card 125)
 // =============================================================================
 // The Quick update tool's photo action (src/sanity/kit/PostPhoto.tsx) takes a
 // photo from the phone's camera or gallery, uploads it to Sanity with a

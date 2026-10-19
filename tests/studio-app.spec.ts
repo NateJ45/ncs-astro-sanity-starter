@@ -2,7 +2,7 @@
 import { test, expect } from './fixtures';
 
 // =============================================================================
-// The Studio as a phone app (PORTS.md card 124)
+// The Studio as a phone app (PORTS.md card 125)
 // =============================================================================
 // Against the real build: the Studio's own manifest is served and valid, its
 // icons load, the service worker registers on /studio/ (and nowhere else), and

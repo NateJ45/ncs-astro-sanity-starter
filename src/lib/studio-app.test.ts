@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// The Studio as a phone app (PORTS.md card 124):
+// The Studio as a phone app (PORTS.md card 125):
 //   1. The manifest has what a phone needs to install it, scoped to /studio/.
 //   2. Its icons exist in public/ at the sizes it says.
 //   3. The service worker NEVER keeps a Sanity answer, a login or an /api/ reply.

@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// The Studio as a phone app: its manifest and its paths (PORTS.md card 124)
+// The Studio as a phone app: its manifest and its paths (PORTS.md card 125)
 // =============================================================================
 // /studio installs to a phone's home screen like an app: its own icon, no
 // browser bars, opening straight on Home or Quick update. Three pieces:

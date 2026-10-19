@@ -154,7 +154,7 @@ describe('the write', () => {
   });
 });
 
-// Card 124: the Studio's "Earlier versions" runs this script in CI, where the
+// Card 125: the Studio's "Earlier versions" runs this script in CI, where the
 // log is public, so it must be able to say what differs without the words.
 import {
   changeSummary as valueFree,
@@ -163,7 +163,7 @@ import {
   sameContent,
 } from './restore-doc.mjs';
 
-describe('earlier versions (card 124)', () => {
+describe('earlier versions (card 125)', () => {
   it('the value-free summary names fields and list lengths only', () => {
     const rows = valueFree(
       { _id: 'a', _type: 'page', title: 'Now words', sections: [1, 2, 3] },

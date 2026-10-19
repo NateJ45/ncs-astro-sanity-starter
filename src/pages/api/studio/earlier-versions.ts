@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /api/studio/earlier-versions/ - "Go back to an earlier version" (card 124)
+// /api/studio/earlier-versions/ - "Go back to an earlier version" (card 125)
 // =============================================================================
 // The Studio's "Earlier versions" panel (src/sanity/kit/EarlierVersions.tsx)
 // talks to this route, and this route talks to GitHub. It never sees a backup:

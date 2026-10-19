@@ -381,7 +381,7 @@ on-page probe can), and seen under `wrangler dev` with the site fonts loading in
 once there is code, Site settings' "Code on every page" tab, both Checkup findings opening the right field, and the
 boxed frame in Presentation.
 
-### 25. Card 124 (Studio app, Post a photo, Earlier versions): the signed-in and on-device checks (opened 2026-10-18)
+### 25. Card 125 (Studio app, Post a photo, Earlier versions): the signed-in and on-device checks (opened 2026-10-18)
 
 Unit-tested (`studio-app.test.ts`, `photo-post.test.ts`, `earlier-versions.test.ts`, `restore-doc.test.mjs`) and
 `tests/studio-app.spec.ts` on the build (manifest valid, worker on /studio/ only, offline page, Chrome's installability

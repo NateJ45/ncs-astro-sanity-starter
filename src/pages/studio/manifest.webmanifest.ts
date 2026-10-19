@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /studio/manifest.webmanifest: the Studio as a phone app (PORTS.md card 124)
+// /studio/manifest.webmanifest: the Studio as a phone app (PORTS.md card 125)
 // =============================================================================
 // Built once at build time from the brand and the Studio's own colours, so a
 // rebrand carries it. The shape and the reasons are in src/lib/studio-app.ts;

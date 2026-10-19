@@ -1,6 +1,6 @@
 # Change history
 
-_2026-10-18: the Studio on a phone, "Post a photo", and earlier versions from the nightly backups (PORTS card 124)._
+_2026-10-18: the Studio on a phone, "Post a photo", and earlier versions from the nightly backups (PORTS card 125)._
 
 **Decision.** `/studio` installs to a phone's home screen: its own manifest (`/studio/manifest.webmanifest`, scope
 `/studio/`, standalone, the site's name and icons plus a padded maskable one, the Studio's navy and paper) and a small

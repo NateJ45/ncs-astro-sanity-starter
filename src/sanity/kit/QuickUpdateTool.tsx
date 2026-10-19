@@ -14,7 +14,7 @@
 // Nothing site-specific here: the forms, their words and their documents all
 // come from kit.config.ts.
 //
-// "Post a photo" (card 124, kit.config.ts postPhoto) is the first button when
+// "Post a photo" (card 125, kit.config.ts postPhoto) is the first button when
 // it is set up. It is different on purpose: it saves a DRAFT and the editor
 // presses Publish (src/sanity/kit/PostPhoto.tsx).
 // =============================================================================

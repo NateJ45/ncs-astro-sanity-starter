@@ -79,7 +79,7 @@ export function ncsStudioKit(config: KitConfig) {
   const HomeTool = makeHomeTool(config);
   const GuideTool = makeGuideTool(config);
   const CheckupTool = makeCheckupTool(config);
-  // Card 124: "Post a photo" alone is enough to give the tool.
+  // Card 125: "Post a photo" alone is enough to give the tool.
   const QuickUpdateTool =
     config.quickUpdate?.length || config.postPhoto ? makeQuickUpdateTool(config) : null;
   const MoveToTrash = makeMoveToTrashAction(config.trashTypes, config.helper.name);
@@ -87,7 +87,7 @@ export function ncsStudioKit(config: KitConfig) {
   // Card 110 features: on unless kit.config.ts turns them off.
   const KitNavbar = config.features.navbarStatus === false ? undefined : makeNavbarStatus(config);
   const helpPanel = config.features.helpPanel === false ? null : makeHelpPanel(config);
-  // Card 124: "Earlier versions" beside every document but the Trash.
+  // Card 125: "Earlier versions" beside every document but the Trash.
   const earlierVersions =
     config.features.earlierVersions === false ? null : makeEarlierVersions(config);
 
@@ -161,7 +161,7 @@ export function ncsStudioKit(config: KitConfig) {
         prev.filter((o) => o.templateId !== TRASH_TYPE && o.templateId !== WEEK_TYPE),
 
       // "Help for this page" beside every document but the Trash (card 110).
-      // "Earlier versions" beside them too (card 124).
+      // "Earlier versions" beside them too (card 125).
       inspectors: (prev, { documentType }) =>
         documentType === TRASH_TYPE || documentType === WEEK_TYPE
           ? prev

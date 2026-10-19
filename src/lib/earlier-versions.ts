@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// "Earlier versions": the pure half (Studio kit, PORTS.md card 124)
+// "Earlier versions": the pure half (Studio kit, PORTS.md card 125)
 // =============================================================================
 // Sanity's free plan keeps three days of history. The nightly backups keep
 // fourteen, encrypted with BACKUP_PASSPHRASE, which only GitHub Actions holds.

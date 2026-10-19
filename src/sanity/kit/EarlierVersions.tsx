@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// "Earlier versions": a document inspector (Studio kit, PORTS.md card 124)
+// "Earlier versions": a document inspector (Studio kit, PORTS.md card 125)
 // =============================================================================
 // Sanity's free plan keeps three days of history. This panel reaches back two
 // weeks, to the nightly backups: it lists the nights GitHub still keeps, looks

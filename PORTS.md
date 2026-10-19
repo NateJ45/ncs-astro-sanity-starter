@@ -239,7 +239,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 119 | Studio icons by meaning, a picture on every list row                           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 121 | Custom code in its own box; opt-in on-page and site-wide code                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 124 | Studio on a phone (PWA), Post a photo, Earlier versions from backups           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 125 | Studio on a phone (PWA), Post a photo, Earlier versions from backups           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -9175,7 +9175,7 @@ types, queries, BaseLayout, NON_STEGA_FIELDS and `_headers`; add the wall fixtur
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/custom-code`, PR after this merges. Other
 sites `no`.
 
-## Card 124: the Studio on a phone, "Post a photo", and earlier versions from the nightly backups (2026-10-18)
+## Card 125: the Studio on a phone, "Post a photo", and earlier versions from the nightly backups (2026-10-18)
 
 **Origin:** two editor needs: quick edits from a phone, photos included, and going back further than Sanity's three
 days of history. Quick update (card 111) already covered text on a phone, and `restore-doc.mjs` (card 111) already put

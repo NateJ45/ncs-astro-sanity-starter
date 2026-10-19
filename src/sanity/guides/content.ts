@@ -703,7 +703,7 @@ guides.push({
   ],
 });
 
-// ── The Studio app and earlier versions (PORTS.md card 124) ──────────────────
+// ── The Studio app and earlier versions (PORTS.md card 125) ──────────────────
 // Shared by every site (src/sanity/guides/phoneGuides.ts, PORTABLE): keep this
 // line when rewriting the guides above.
 guides.push(...phoneGuides(SITE.contactName));

@@ -37,7 +37,7 @@ export function bearerToken(request: Request): string | null {
 export interface StudioUser {
   id: string;
   name?: string;
-  /** The member's role names on this project ("administrator", "editor", "viewer"...). Card 124. */
+  /** The member's role names on this project ("administrator", "editor", "viewer"...). Card 125. */
   roles: string[];
 }
 

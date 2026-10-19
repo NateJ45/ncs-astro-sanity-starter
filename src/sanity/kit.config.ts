@@ -204,7 +204,7 @@ export const kitConfig: KitConfig = {
     },
   ],
 
-  // "Post a photo" on Quick update (card 124): a photo from the phone into a
+  // "Post a photo" on Quick update (card 125): a photo from the phone into a
   // gallery on any page, or into a new journal post. Always a DRAFT; the editor
   // presses Publish. A fork names its own post type and words (a church: "A
   // new news post"), and can add a `note` for a site rule about photos.

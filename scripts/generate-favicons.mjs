@@ -15,7 +15,7 @@
 //   apple-touch-icon.png 180x180, iOS home screen
 //   icon-192.png         Android home screen and the manifest
 //   icon-512.png         install prompts and splash screens
-//   icon-maskable-512.png the Studio app's Android icon (card 124): the mark in
+//   icon-maskable-512.png the Studio app's Android icon (card 125): the mark in
 //                        the middle 60% on its own plate colour, so a circle or
 //                        squircle crop never cuts it. Written only when MISSING
 //                        (a hand-drawn one is kept); --force-maskable redraws it
@@ -99,7 +99,7 @@ function buildIco(entries) {
 }
 
 /**
- * The maskable icon (card 124). Android masks an app icon to a circle or a
+ * The maskable icon (card 125). Android masks an app icon to a circle or a
  * squircle, keeping only the middle 80% for sure, so the mark is drawn at 60%
  * in the middle of a square filled with the mark's own plate colour (the pixel
  * just inside its top-left corner, so a full-bleed square plate carries on to
@@ -172,7 +172,7 @@ await writeMaskable();
 // the middle 80%, and the starter's favicon fills its square, so declaring one
 // would crop the mark on Android. Add it only alongside artwork drawn for it.
 // (The Studio app's manifest does list icon-maskable-512.png, drawn above with
-// the padding a maskable icon needs; that is a different manifest, card 124.)
+// the padding a maskable icon needs; that is a different manifest, card 125.)
 const manifest = {
   name: brand.name,
   short_name: brand.name,

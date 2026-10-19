@@ -86,7 +86,7 @@ export interface QuickForm {
 }
 
 /**
- * "Post a photo" on the Quick update tool (card 124): a photo from the phone's
+ * "Post a photo" on the Quick update tool (card 125): a photo from the phone's
  * camera or gallery, with a required description, added to a gallery on a page
  * or to a new post. Always a DRAFT: the editor presses Publish.
  */
@@ -257,7 +257,7 @@ export interface KitConfig {
    */
   quickUpdate?: QuickForm[];
 
-  /** "Post a photo" on the Quick update tool (card 124). Missing: no photo action. */
+  /** "Post a photo" on the Quick update tool (card 125). Missing: no photo action. */
   postPhoto?: PostPhotoConfig;
 
   /** First day of the week for "This week": 0 Sunday, 1 Monday. */
@@ -333,7 +333,7 @@ export interface KitConfig {
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
     helpPanel?: boolean;
     /**
-     * The "Earlier versions" document panel (card 124): the nightly backups,
+     * The "Earlier versions" document panel (card 125): the nightly backups,
      * through /api/studio/earlier-versions/. Without the Worker's GitHub
      * settings it offers "Ask <helper> to restore this". Missing counts as on.
      */

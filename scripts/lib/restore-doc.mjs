@@ -157,7 +157,7 @@ export function backupDate(fileName) {
 }
 
 // -----------------------------------------------------------------------------
-// Earlier versions in the Studio (PORTS.md card 124)
+// Earlier versions in the Studio (PORTS.md card 125)
 // -----------------------------------------------------------------------------
 // The Studio's "Earlier versions" panel asks GitHub Actions to run this script
 // (.github/workflows/restore-doc.yml), because only CI holds BACKUP_PASSPHRASE.

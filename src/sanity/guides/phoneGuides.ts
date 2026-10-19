@@ -1,6 +1,6 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// Site Guide entries for the Studio app and earlier versions (PORTS.md card 124)
+// Site Guide entries for the Studio app and earlier versions (PORTS.md card 125)
 // =============================================================================
 // Three guides every site with the Studio kit shares: putting the Studio on a
 // phone's home screen, posting a photo from the phone, and going back to an
