@@ -802,15 +802,89 @@ guides.push(
   },
 );
 
+// ── Writing help and "Before you publish" (PORTS.md card 123) ────────────────
+// Appended like the kit helpers above, so a site rewriting its guides keeps them.
+guides.push(
+  {
+    slug: 'writing-help',
+    category: 'Pages and words',
+    title: 'Get help with the words',
+    icon: '✎',
+    lead: 'A suggested Google description, photo description, summary or a tidier paragraph, for you to use, change or ignore.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Under some boxes there is a **Suggest** button: the Google description, the description of a photo, and the short summary of a post. In the main text, click into a paragraph and **Improve this paragraph** appears under it.',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Write the page first. The suggestion is made from the words already on it.',
+          'Click `Suggest a Google description` (or the button under the box you are filling in).',
+          'Read the suggestion. Change anything you like in the box it appears in.',
+          'Click `Use this` to put it in, `Try again` for another one, or `No thanks`.',
+          'Publish as usual when you are happy.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'Check the facts.',
+        text: 'Suggestions are written by an AI from your own words. It is told not to invent anything, but read every one before you use it, especially times, dates and names.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          'Nothing changes until you click `Use this`, and nothing is published until you press Publish.',
+          'For a paragraph with bold words or a link in it, the suggestion cannot go straight in (the bold and the link would be lost). Click `Copy the words` and paste them yourself.',
+          'There is a limit of about 30 suggestions an hour for each person.',
+          'If you do not see the buttons, writing help is not switched on for this website. Ask for help if you would like it.',
+        ],
+      },
+      { kind: 'seealso', items: ['Add or change a picture', 'What the SEO boxes do'] },
+    ],
+  },
+  {
+    slug: 'before-you-publish',
+    category: 'Start here',
+    title: 'Before you publish',
+    icon: '✓',
+    lead: 'One last look at the page you are working on, with a link to each thing worth fixing.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'When a page is open, click `Before you publish` at the top of it (it can also sit in the menu with three dots). A panel opens beside the boxes and lists what the Checkup would say about this page once your changes go live.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          'Photos with no description, and a missing Google description.',
+          'Links to things that are not on the website, or have not been published yet.',
+          'Facts still marked "to be confirmed", and words still starting "Example:" from the template the page came from.',
+        ],
+      },
+      {
+        kind: 'p',
+        text: 'Click `Show me` to jump to the box that needs a look. The list updates as you type. None of it stops you publishing: it is there to catch what is easy to miss.',
+      },
+      { kind: 'seealso', items: ['Help for this page', 'Get help with the words'] },
+    ],
+  },
+);
+
 /**
  * Which guides "Help for this page" shows for each document type (kit.config.ts
  * guide.forType, PORTS.md card 110). '*' is the fallback for anything unlisted.
  * A site that rewrites its guides rewrites this map with them.
  */
 export const GUIDES_FOR_TYPE: Record<string, string[]> = {
-  '*': ['edit-a-page', 'help-panel'],
+  '*': ['edit-a-page', 'help-panel', 'before-you-publish'],
   page: [
     'edit-a-page',
+    'before-you-publish',
+    'writing-help',
     'share-a-preview',
     'rename-a-page',
     'seo-fields',

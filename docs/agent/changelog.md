@@ -1,5 +1,17 @@
 # Change history
 
+_2026-10-18: writing help, "Before you publish" and AI visitors in the Studio (PORTS card 123)._
+
+**Decision.** Three editor features that hosted site builders now ship. "Suggest" buttons under the Google
+description, photo description and summary fields, and "Improve this paragraph" in rich text, ask a new Worker route
+(`/api/studio/ai/`, guarded like deploy-status, an hourly limit per person) that calls the Claude API with a plain fetch
+in the site's own voice; the editor accepts, edits or ignores every suggestion, and nothing is written or published by
+it. Without the `ANTHROPIC_API_KEY` secret the buttons do not appear. A "Before you publish" document panel shows the
+Checkup's findings for the open document as it will be once published, by running the Checkup's own rules with the
+draft swapped in, with a "Show me" per field; it blocks nothing. Two new Checkup rules: example text left from a page
+template, and stale or template `llms.txt` files. The Visitors card gives AI assistants (ChatGPT, Perplexity, Copilot,
+Gemini, Claude and others) their own source group with a week-on-week count. No new dependency.
+
 _2026-10-18: hidden pages, password pages, and link and heading checks in the Checkup (PORTS card 122)._
 
 **Decision.** "Hide this page from Google and the menus" now also keeps a page out of the menus, the menu picker and
