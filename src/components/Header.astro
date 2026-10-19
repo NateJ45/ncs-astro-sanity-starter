@@ -26,6 +26,8 @@ import logoDarkAsset from '@/assets/logo-dark.svg';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
 import { urlFor } from '@/lib/sanity';
+import SearchButton from './search/SearchButton.astro';
+import SiteSearch from './search/SiteSearch.astro';
 
 // SVG logos are passed through Astro's image pipeline for cache-busted URLs.
 // SVGs are resolution-independent so no 1x/2x variants are needed — one URL
@@ -429,6 +431,8 @@ function isGroupActive(items: { href: string }[]) {
           ),
         )}
       </nav>
+      {/* Visitor search (card 126). Renders nothing when search is off. */}
+      <SearchButton class="inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent hover:text-link focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none" />
       <span class="h-6 w-px bg-border-soft" aria-hidden="true"></span>
       {headerCta.show && (
         <a
@@ -451,8 +455,12 @@ function isGroupActive(items: { href: string }[]) {
         and React arrives behind requestIdleCallback rather than on the
         critical path. An Astro comment, not an HTML one, so it does not ship
         on every page. See docs/agent/components.md. */}
+    {/* Mobile search button, just left of the hamburger (card 126). */}
+    <SearchButton class="absolute top-1/2 right-[calc(var(--spacing-m)+2.75rem)] inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent lg:hidden" />
+
     <MobileNav
       client:idle
+      search={site.search.enabled || undefined}
       links={NAV_LINKS}
       siteSettings={mobileNavSettings}
       logoLightUrl={logoLightWebpMobile.src}
@@ -460,6 +468,7 @@ function isGroupActive(items: { href: string }[]) {
       {...mobileCtaProps}
     />
   </div>
+  {site.search.enabled && <SiteSearch />}
 </header>
 
 <style>

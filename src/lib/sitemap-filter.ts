@@ -11,7 +11,15 @@
 // =============================================================================
 
 /** Path prefixes that never belong in a sitemap. */
-export const SITEMAP_EXCLUDED_PREFIXES = ['/404', '/studio', '/preview', '/styleguide', '/private'];
+// '/search' is the visitor search page (card 126): noindex, nothing of its own for Google.
+export const SITEMAP_EXCLUDED_PREFIXES = [
+  '/404',
+  '/studio',
+  '/preview',
+  '/styleguide',
+  '/private',
+  '/search',
+];
 
 /**
  * True when `page` (a full URL, as @astrojs/sitemap hands it over) belongs in
