@@ -4,28 +4,35 @@
 // =============================================================================
 // /studio/offline/: what the Studio app shows with no connection (card 125)
 // =============================================================================
-// The Studio's service worker (public/studio/sw.js) keeps a copy of this page
-// and shows it when the editor opens the app with no signal, instead of the
-// phone's own "no internet" screen. Plain HTML and CSS, no script but the
-// "Try again" button and the colour-scheme pick, the Studio's own colours. The
-// words are the brief's: a change made before the signal went is still waiting
-// in the open Studio and goes through when the connection is back; nothing
-// here can lose it.
+// The Studio's service worker (public/studio/sw.js) keeps a copy of this page,
+// and every file it points at (the brand's font files, the lettering, the
+// motif strips, the mark), and shows it when the editor opens the app with no
+// signal, instead of the phone's own "no internet" screen.
+//
+// Card 132: it wears the same splash as /studio (the shared partial
+// src/components/studio/StudioSplash.astro): the mark, the name in the site's
+// lettering, its stone path with the last stone not yet laid, the motif strip,
+// and a pill "Try again". All from brand.config.json `studio.look`; a site
+// changes nothing here. Plain HTML and CSS, no script but the button and the
+// colour-scheme pick. The words are the brief's: a change made before the
+// signal went is still waiting in the open Studio and goes through when the
+// connection is back; nothing here can lose it.
 // =============================================================================
 import brand from '../../../brand/brand.config.json';
 import { STUDIO_COLORS } from '../../sanity/studioTheme';
+import StudioSplash from '../../components/studio/StudioSplash.astro';
+// The brand's font files, the same ones the Studio loads (card 116); the
+// worker keeps them at install so the page is whole with no connection.
+import '../../sanity/studioFonts.css';
 
 export const prerender = true;
 
 const name = brand.name;
-const vars = [
-  `--paper: ${STUDIO_COLORS.white}`,
-  `--dark: ${STUDIO_COLORS.black}`,
-  `--chrome: ${STUDIO_COLORS.chrome.bg}`,
-  `--muted-light: ${STUDIO_COLORS.gray['600']}`,
-  `--ink-dark: ${STUDIO_COLORS.gray['50']}`,
-  `--muted-dark: ${STUDIO_COLORS.gray['400']}`,
-].join('; ');
+const vars = [`--paper: ${STUDIO_COLORS.white}`, `--dark: ${STUDIO_COLORS.black}`].join('; ');
+// Served at /studio/ when the boot page cannot load, so "Try again" reloads
+// that; opened at its own address, it goes to the Studio.
+const retry =
+  "location.pathname.indexOf('/studio/offline') === 0 ? location.assign('/studio/') : location.reload()";
 ---
 
 <!doctype html>
@@ -53,27 +60,17 @@ const vars = [
       body {
         margin: 0;
         background: var(--paper);
-        color: var(--chrome);
-        font-family: system-ui, sans-serif;
         -webkit-font-smoothing: antialiased;
       }
       @media (prefers-color-scheme: dark) {
         html:not([data-studio-scheme='light']),
         html:not([data-studio-scheme='light']) body {
           background: var(--dark);
-          color: var(--ink-dark);
-        }
-        html:not([data-studio-scheme='light']) .note {
-          color: var(--muted-dark);
         }
       }
       html[data-studio-scheme='dark'],
       html[data-studio-scheme='dark'] body {
         background: var(--dark);
-        color: var(--ink-dark);
-      }
-      html[data-studio-scheme='dark'] .note {
-        color: var(--muted-dark);
       }
       main {
         box-sizing: border-box;
@@ -83,64 +80,15 @@ const vars = [
         place-items: center;
         padding: 24px 16px;
       }
-      .inner {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 14px;
-        max-width: 26rem;
-        text-align: center;
-      }
-      img {
-        width: 56px;
-        height: 56px;
-      }
-      h1 {
-        margin: 0;
-        font-size: 1.375rem;
-        line-height: 1.25;
-        font-weight: 600;
-      }
-      .note {
-        margin: 0;
-        font-size: 1rem;
-        line-height: 1.5;
-        color: var(--muted-light);
-      }
-      button {
-        margin-top: 8px;
-        min-height: 48px;
-        padding: 0 24px;
-        border: 0;
-        border-radius: 6px;
-        background: var(--chrome);
-        color: #fff;
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      button:focus-visible {
-        outline: 3px solid currentColor;
-        outline-offset: 3px;
-      }
-      html[data-studio-scheme='dark'] button {
-        outline-color: var(--ink-dark);
-      }
     </style>
   </head>
   <body>
-    <main>
-      <div class="inner" data-studio-offline>
-        <img src="/favicon.svg" alt="" width="56" height="56" />
-        <h1>You're offline</h1>
-        <p class="note">
-          Your changes are saved when you're back online. Check your Wi-Fi or signal, then try
-          again.
-        </p>
-        <button type="button" onclick="location.href='/studio/'">
+    <main data-studio-offline>
+      <StudioSplash mode="offline">
+        <button type="button" class="ncs-sp__button" onclick={retry}>
           Try again
         </button>
-      </div>
+      </StudioSplash>
     </main>
   </body>
 </html>

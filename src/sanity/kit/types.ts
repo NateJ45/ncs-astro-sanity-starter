@@ -163,6 +163,10 @@ export interface PageMapGroup {
 export interface TourStep {
   title: string;
   body: string;
+  /** A word or two for the stone trail across the top ("Publish"). Default: the title. */
+  short?: string;
+  /** The art on the step's stone (card 132). Default: the guide's. */
+  meaning?: BrandIconKey;
 }
 
 /** What the kit hands a site's GuideView (card 128). */

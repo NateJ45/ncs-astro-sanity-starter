@@ -22,6 +22,9 @@
 // The buttons ask /api/studio/ai/ once per Studio visit whether the site has
 // writing help set up (the ANTHROPIC_API_KEY secret). Until it has, they do
 // not appear, so a site without the key looks exactly as it did before.
+//
+// Card 132: waiting is the kit's laid-stones loader and a failed request is a
+// careful callout (src/sanity/kit/ui), not a spinner and a grey line.
 // =============================================================================
 
 import { useCallback, useEffect, useState } from 'react';
@@ -36,7 +39,8 @@ import {
   type InputProps,
   type Path,
 } from 'sanity';
-import { Box, Button, Card, Dialog, Flex, Spinner, Stack, Text, TextArea } from '@sanity/ui';
+import { Box, Button, Card, Dialog, Flex, Stack, Text, TextArea } from '@sanity/ui';
+import { KitLoading, KitNotice, KitScope } from '../kit/ui';
 import { AI_PATH, documentText, type AiInput, type AiTask } from '../../lib/studio-ai';
 import { studioApi, WORKFLOW_API_VERSION } from '../workflow/studioApi';
 
@@ -208,16 +212,23 @@ function AskButton({ task, busy, onClick }: { task: AiTask; busy: boolean; onCli
         disabled={busy}
         onClick={onClick}
       />
-      {busy && <Spinner muted />}
+      {busy && (
+        // The button already says "Thinking of something...": the stones alone.
+        <KitScope>
+          <KitLoading label="" />
+        </KitScope>
+      )}
     </Flex>
   );
 }
 
 function ErrorLine({ message }: { message: string }) {
   return (
-    <Text size={1} muted role="status">
-      {message}
-    </Text>
+    <KitScope>
+      <div role="status">
+        <KitNotice tone="careful">{message}</KitNotice>
+      </div>
+    </KitScope>
   );
 }
 
@@ -385,12 +396,9 @@ function ParagraphHelp({
                 </Text>
               </Stack>
               {state.kind === 'busy' && (
-                <Flex align="center" gap={2}>
-                  <Spinner muted />
-                  <Text size={1} muted>
-                    Thinking of something...
-                  </Text>
-                </Flex>
+                <KitScope>
+                  <KitLoading label="Thinking of something..." />
+                </KitScope>
               )}
               {state.kind === 'error' && <ErrorLine message={state.message} />}
               {state.kind === 'ready' && (

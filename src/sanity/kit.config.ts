@@ -222,22 +222,32 @@ export const kitConfig: KitConfig = {
   tourSteps: [
     {
       title: 'This is Home',
+      short: 'Home',
+      meaning: 'home',
       body: 'Home opens first every time. It shows what to do this week, whether your last change is on the website yet, and anything that needs fixing.',
     },
     {
       title: 'Content is where you edit',
+      short: 'Content',
+      meaning: 'content',
       body: 'Click Content in the top bar to change the words and pictures on any page or add something new.',
     },
     {
       title: 'Live preview shows the real page',
+      short: 'Preview',
+      meaning: 'preview',
       body: 'Live preview shows the website as visitors will see it, with your unpublished changes in place. Click any words on it to edit them right there.',
     },
     {
       title: 'Nothing is public until you press Publish',
+      short: 'Publish',
+      meaning: 'publishing',
       body: 'Your changes are private until you press the green Publish button. After that the website updates itself in a few minutes. Changed your mind? Use Undo, or move a thing to the Trash and bring it back later.',
     },
     {
       title: 'Help is always one click away',
+      short: 'Help',
+      meaning: 'help',
       body: 'Site Guide in the top bar has step-by-step help for every job, and you can print any of it. Stuck? Home has a card for asking for help.',
     },
   ],

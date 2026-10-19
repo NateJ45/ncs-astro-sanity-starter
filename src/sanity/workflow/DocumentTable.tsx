@@ -12,10 +12,13 @@
 // It sits BESIDE the normal desk list, never instead of it (structure.ts adds
 // it as an extra item), so if a Sanity upgrade ever breaks a custom pane the
 // editor still has the list they always had.
+//
+// Card 132: waiting is the kit's laid-stones loader and a failed load is a
+// careful callout (src/sanity/kit/ui), not a spinner and a red card.
 // =============================================================================
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useClient } from 'sanity';
-import { Badge, Box, Button, Card, Flex, Spinner, Stack, Text } from '@sanity/ui';
+import { Badge, Box, Button, Card, Flex, Stack, Text } from '@sanity/ui';
 import { RefreshIcon } from '@sanity/icons/Refresh';
 import {
   cellText,
@@ -28,6 +31,7 @@ import {
   type TableRow,
 } from '../../lib/studio-table';
 import { useStudioLink } from '../kit/shared';
+import { KitLoading, KitNotice, KitScope } from '../kit/ui';
 import { WORKFLOW_API_VERSION } from './studioApi';
 
 const TONE: Record<RowStatus, 'positive' | 'caution' | 'default'> = {
@@ -116,11 +120,17 @@ export function makeDocumentTable(config: TableConfig) {
             <Button icon={RefreshIcon} mode="ghost" text="Refresh" onClick={() => void load()} />
           </Flex>
           {error && (
-            <Card padding={3} tone="critical" radius={2} border>
-              <Text size={1}>The list could not load just now. Use the normal list instead.</Text>
-            </Card>
+            <KitScope>
+              <KitNotice tone="careful">
+                The list could not load just now. Use the normal list instead.
+              </KitNotice>
+            </KitScope>
           )}
-          {!rows && !error && <Spinner muted />}
+          {!rows && !error && (
+            <KitScope>
+              <KitLoading label="Loading the list..." />
+            </KitScope>
+          )}
           {rows && (
             <Card radius={2} border overflow="auto">
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>

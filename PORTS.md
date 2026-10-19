@@ -9726,3 +9726,58 @@ tiles, Visitors in mark colours, the splash and offline page, Section Look thumb
 sign-in heading.
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).
+
+## Card 132: the Studio design pass, part two: Home, Post a photo, the tour, the splash and offline page (2026-10-19)
+
+**Origin:** first-baptist-auburn, 2026-10-19. Card 131 drew tool headings, findings, the checklist and "Is it live?"
+in the design language. A signed-in review on Auburn found two faults: a finished "On the website" stone was laid in
+the warning brick, and the checklist's waiting stones were plain circles. This card fixes both and carries the
+language onto the rest of Home, Post a photo, the tour, the splash and the offline page. Built in the starter, then
+first-baptist-auburn.
+
+**Canonical (PORTABLE, new):** `src/components/studio/StudioSplash.astro` (one partial for the splash and the
+offline page), `src/lib/studio-splash.ts` and its test (the stone path and the lettered name).
+**PORTABLE, existing, changed:** `src/lib/studio-look.ts` and its test (`calm` stones per scheme, `calmStones()`,
+`restore` for the guide icon, a slightly rougher pebble), `src/lib/studio-icons.ts` (the `restore` meaning),
+`src/sanity/brandIcons.tsx`, `src/sanity/kit/ui/surfaces.tsx` (DateBlock, ArtRow, ArtRows, Figure, MarkBars,
+StepTrail; `TileCard` takes an `href`; `StateStone` takes `calm`), `primitives.tsx`, `css.ts`, `HomeCards.tsx`,
+`HomeTool.tsx`, `PostPhoto.tsx`, `StudioTour.tsx`, `EarlierVersions.tsx`, `types.ts` (a tour step's `short` and
+`meaning`), `harness/Surfaces.tsx` (parts `home`, `photo`, `tour`), `src/sanity/mail/MailHome.tsx`,
+`src/sanity/workflow/DocumentTable.tsx`, `SharePreviewAction.tsx`, `src/sanity/ai/WritingHelp.tsx`,
+`src/pages/studio/index.astro`, `src/pages/studio/offline.astro`, `public/studio/sw.js` (cache v2),
+`src/lib/studio-app.test.ts`, `tests/studio-app.spec.ts`, `docs/agent/studio-kit.md`. Per site: `kit.config.ts` tour
+steps' `short` and `meaning`; `brandIconArt.tsx` may map `restore`.
+
+**What it changes.**
+
+- **Done means calm.** A finished stone (Is it live, the navbar line, all clear, the bars) is laid only in the mark
+  colours that do not read as the careful tone (`look.calm`: any mark within 28 degrees of the careful hue is left
+  out). The careful colour is kept for a failed step.
+- **Waiting stones are stones.** A step not yet done is the same hand-laid outline, drawn in the colour it will be laid
+  in, with its number; no more plain circles.
+- **Home:** the ways in are tiles with the colour edge and the site's art (real links); Coming up rows carry a date on
+  a stone; Recent edits and Pick up rows carry the type's art and a "Not published" tag; Visitors is a display-font
+  figure with bars in the calm mark colours; the newsletter and RSVP cards match.
+- **Post a photo** is a three-stone path (Pick a photo, Say what it shows, Post it) that follows the form.
+- **The tour** has a stone trail across its top, a lettered banner and each step's art.
+- **The splash** lays the path stone by stone while the Studio loads; the **offline page** shares its partial, with the
+  last stone not yet laid, a warm line and a "Try again" pill. The service worker keeps the fonts and motif.
+- **Restore** is a meaning of its own: Earlier versions and the "Undo a change" guide use it, so a site's restore art
+  shows there.
+- The last kit spinners are the laid-stones loader; their error boxes are callouts.
+
+**Gates.** `studio-look.test.ts` pins `calmStones()` (Auburn's brick is left out; all-warm sets keep every stone);
+`studio-splash.test.ts` pins the path, the lettering fallback and the unlaid offline stone; `studio-app` unit and
+Playwright tests cover the offline page's words and button.
+
+**Adopting.** Copy the PORTABLE files. Give tour steps a `short` word and a `meaning` if you want art on them; map
+`restore` in `brandIconArt.tsx` if the site has art for it. Everything else comes from `studio.look`.
+
+- **The Section Look radio** draws each look as a small section: band colours, a heading line, the marker and the
+  texture on Feature; the chosen look has a step of the marker colour down its left side
+  (`src/sanity/components/SectionLookInput.tsx`, shared but unmarked; copy it by hand).
+
+**Not done yet** (in `docs/PENDING.md`): the field "How to" chip, the AuthStore
+sign-in heading; PreviewNavigator's spinner (preview stack, left on purpose).
+
+**Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).

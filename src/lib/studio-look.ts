@@ -117,6 +117,12 @@ export interface SchemeTokens {
   connector: string;
   /** Numbered stones, each with the number's colour on it. */
   stones: { fill: string; text: string }[];
+  /**
+   * Card 132: the stones that read as "good" (indexes into `stones`): every
+   * mark colour except one near the careful tone's hue. A finished state (Is it
+   * live, all clear) is laid in these, so brick never says "done".
+   */
+  calm: number[];
   tones: Record<'note' | 'tip' | 'careful' | 'plain', ToneTokens>;
   /** Studio button copies. */
   chip: { bg: string; fg: string; border: string };
@@ -226,6 +232,10 @@ function scheme(
     tip: hex(input.tones?.tip) ?? DEFAULT_TONES.tip,
     careful: hex(input.tones?.careful) ?? DEFAULT_TONES.careful,
   };
+  const calm = calmStones(
+    stones.map((x) => x.fill),
+    hues.careful,
+  );
   const edgeOn = (hue: string) => ensure(hue, surface, AA_NON_TEXT, dark ? '#ffffff' : '#000000');
   const tones = {
     note: { ...tone(hues.note, paper, ink, dark), edge: edgeOn(hues.note) },
@@ -250,6 +260,7 @@ function scheme(
     marker,
     connector,
     stones,
+    calm,
     tones,
     chip: dark
       ? { bg: mix('#ffffff', paper, 0.88), fg: ink, border: mix('#ffffff', paper, 0.72) }
@@ -440,13 +451,50 @@ function lcg(seed: number) {
   return () => (s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32;
 }
 
+/** A colour's hue (0-360) and saturation (0-1). */
+function hueSat(c: string): { h: number; s: number } {
+  const n = parseInt(c.replace('#', '').slice(0, 6), 16);
+  const r = ((n >> 16) & 255) / 255;
+  const g = ((n >> 8) & 255) / 255;
+  const b = (n & 255) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  const l = (max + min) / 2;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  let h = 0;
+  if (d) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+  }
+  return { h: (h * 60 + 360) % 360, s };
+}
+
+/**
+ * Card 132: which stones may stand for "done". A stone within 28 degrees of the
+ * careful (warning) hue, and saturated enough to read as it, is left out; if
+ * that leaves none, every stone is kept.
+ */
+export function calmStones(fills: readonly string[], careful: string): number[] {
+  const c = hueSat(careful);
+  const keep = fills
+    .map((f, i) => ({ i, ...hueSat(f) }))
+    .filter((x) => {
+      const dh = Math.min(Math.abs(x.h - c.h), 360 - Math.abs(x.h - c.h));
+      return !(dh < 28 && x.s > 0.3 && c.s > 0.3);
+    })
+    .map((x) => x.i);
+  return keep.length ? keep : fills.map((_, i) => i);
+}
+
 /** A hand-laid stone: a seeded irregular outline, smoothed (Chaikin), as an SVG path in a w x h box. */
-export function pebblePath(seed: number, w: number, h: number, sides = 7): string {
+export function pebblePath(seed: number, w: number, h: number, sides = 6): string {
   const r = lcg(seed * 7919 + 13);
   let pts: [number, number][] = [];
   for (let i = 0; i < sides; i++) {
     const a = (i / sides) * Math.PI * 2 + (r() - 0.5) * 0.5;
-    const k = 0.86 + r() * 0.14;
+    const k = 0.8 + r() * 0.2;
     pts.push([w / 2 + Math.cos(a) * (w / 2) * k, h / 2 + Math.sin(a) * (h / 2) * k]);
   }
   for (let pass = 0; pass < 3; pass++) {
@@ -503,7 +551,7 @@ export const GUIDE_ICON_MEANINGS: Record<string, BrandIconKey> = {
   activity: 'checkup',
   bulb: 'help',
   bolt: 'quickUpdate',
-  restore: 'trash',
+  restore: 'restore',
   mail: 'message',
   code: 'code',
 };

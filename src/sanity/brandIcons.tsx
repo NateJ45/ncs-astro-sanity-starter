@@ -69,6 +69,7 @@ import { TextIcon } from '@sanity/icons/Text';
 import { ThListIcon } from '@sanity/icons/ThList';
 import { ThumbsUpIcon } from '@sanity/icons/ThumbsUp';
 import { TrashIcon } from '@sanity/icons/Trash';
+import { RestoreIcon } from '@sanity/icons/Restore';
 import { UnknownIcon } from '@sanity/icons/Unknown';
 import { UserIcon } from '@sanity/icons/User';
 import { UsersIcon } from '@sanity/icons/Users';
@@ -137,6 +138,7 @@ const DEFAULT_ICONS: Record<BrandIconKey, BrandIcon> = {
   guide: InfoOutlineIcon,
   help: HelpCircleIcon,
   trash: TrashIcon,
+  restore: RestoreIcon,
   message: EnvelopeIcon,
   preview: EyeOpenIcon,
   checkup: ActivityIcon,

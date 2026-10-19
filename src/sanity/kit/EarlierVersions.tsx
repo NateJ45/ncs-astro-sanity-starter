@@ -19,6 +19,11 @@
 // and list length only, never the old words: those travel through a log that
 // is public on a public repository. The editor sees the words themselves in
 // the draft, and in "Review changes", once it is back.
+//
+// Card 132: drawn in the kit's language. The restore art (the site's own where
+// it has some, brandIcon('restore')) is the inspector's icon, the button's and
+// the stone by the heading; waiting is the laid-stones loader (KitLoading), and
+// the outcome is a callout (KitNotice: note, tip, careful).
 // =============================================================================
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -31,8 +36,9 @@ import {
 } from 'sanity';
 import { CloseIcon } from '@sanity/icons/Close';
 import { CopyIcon } from '@sanity/icons/Copy';
-import { RestoreIcon } from '@sanity/icons/Restore';
-import { Box, Button, Card, Flex, Spinner, Stack, Text } from '@sanity/ui';
+import { Box, Button, Card, Flex, Stack, Text } from '@sanity/ui';
+import { brandIcon } from '../brandIcons';
+import { ArtTile, KitLoading, KitNotice, KitScope, type Tone } from './ui';
 import {
   changesLine,
   nightLabel,
@@ -45,6 +51,16 @@ import {
 } from '../../lib/earlier-versions';
 import { API_VERSION, studioToken, tabStorage } from './shared';
 import type { KitConfig } from './types';
+
+/** The restore art: the site's own where it has some (card 132). */
+const RestoreArt = brandIcon('restore');
+
+/** The outcome note's tone, as the kit's callouts draw it. */
+const NOTE_TONE: Record<'positive' | 'critical' | 'caution', Tone> = {
+  positive: 'note',
+  caution: 'tip',
+  critical: 'careful',
+};
 
 export const EARLIER_VERSIONS_NAME = 'ncs-earlier-versions';
 const PATH = '/api/studio/earlier-versions/';
@@ -313,9 +329,12 @@ export function makeEarlierVersions(config: KitConfig) {
         <Card borderBottom paddingX={4} paddingY={3} style={{ flexShrink: 0 }}>
           <Flex align="center" gap={2}>
             <Box flex={1}>
-              <Text size={1} weight="semibold">
-                Earlier versions
-              </Text>
+              <KitScope style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <ArtTile meaning="restore" size={30} seed={17} />
+                <Text size={1} weight="semibold">
+                  Earlier versions
+                </Text>
+              </KitScope>
             </Box>
             <Button
               icon={CloseIcon}
@@ -336,12 +355,9 @@ export function makeEarlierVersions(config: KitConfig) {
             </Text>
 
             {setup.kind === 'loading' && (
-              <Flex gap={2} align="center">
-                <Spinner muted />
-                <Text size={1} muted>
-                  Looking for backups...
-                </Text>
-              </Flex>
+              <KitScope>
+                <KitLoading label="Looking for backups..." />
+              </KitScope>
             )}
 
             {setup.kind === 'unavailable' && (
@@ -365,19 +381,20 @@ export function makeEarlierVersions(config: KitConfig) {
 
                 {pending ? (
                   <Card padding={3} radius={2} border>
-                    <Flex gap={3} align="center">
-                      <Spinner muted />
-                      <Text size={1} style={{ lineHeight: 1.6 }}>
-                        {pending.mode === 'scan'
-                          ? 'Looking for this page in the backups. This takes two or three minutes; you can keep working and come back.'
-                          : `Putting back the version from ${nightLabel(pending.date ?? '')}. This takes a minute or two.`}
-                        {state === 'starting' ? ' Starting...' : ''}
-                      </Text>
-                    </Flex>
+                    <KitScope>
+                      <KitLoading
+                        label={
+                          (pending.mode === 'scan'
+                            ? 'Looking for this page in the backups. This takes two or three minutes; you can keep working and come back.'
+                            : `Putting back the version from ${nightLabel(pending.date ?? '')}. This takes a minute or two.`) +
+                          (state === 'starting' ? ' Starting...' : '')
+                        }
+                      />
+                    </KitScope>
                   </Card>
                 ) : (
                   <Button
-                    icon={RestoreIcon}
+                    icon={RestoreArt}
                     text={scan ? 'Look again' : 'Look for this page in the backups'}
                     mode={scan ? 'ghost' : 'default'}
                     tone="primary"
@@ -387,11 +404,9 @@ export function makeEarlierVersions(config: KitConfig) {
                 )}
 
                 {note && (
-                  <Card padding={3} radius={2} border tone={note.tone}>
-                    <Text size={1} style={{ lineHeight: 1.6 }}>
-                      {note.text}
-                    </Text>
-                  </Card>
+                  <KitScope>
+                    <KitNotice tone={NOTE_TONE[note.tone]}>{note.text}</KitNotice>
+                  </KitScope>
                 )}
 
                 {scan && !pending && found.length === 0 && (
@@ -466,7 +481,7 @@ export function makeEarlierVersions(config: KitConfig) {
   return defineDocumentInspector({
     name: EARLIER_VERSIONS_NAME,
     useMenuItem: () => ({
-      icon: RestoreIcon,
+      icon: RestoreArt,
       title: 'Earlier versions',
       showAsAction: false,
     }),

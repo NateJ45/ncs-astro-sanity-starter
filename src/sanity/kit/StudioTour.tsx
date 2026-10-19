@@ -9,16 +9,69 @@
 // again"). Keyed by Sanity user id, so a second editor on the same computer
 // still gets it. Nothing here writes to the dataset.
 //
+// Card 132: the dialog's body is drawn in the kit's language (TourCard, also
+// drawn on the kit harness): a stone trail across the top with each step's
+// short word (laid, ringed, waiting), then a compact banner in the site's deep
+// colour with the step's art on a stone and its title in the site's
+// lettering, then the words. The dialog, its buttons and Escape are
+// @sanity/ui's own.
+//
 // BUMP SEEN_PREFIX's version when the steps change enough to show them again.
 // =============================================================================
 
 import { useCallback, useEffect, useState } from 'react';
 import { useCurrentUser } from 'sanity';
-import { Box, Button, Card, Dialog, Flex, Heading, Stack, Text } from '@sanity/ui';
+import { Box, Button, Dialog, Flex, Text } from '@sanity/ui';
 import { TOUR_OPEN_EVENT } from './shared';
+import { ArtTile, KitNotice, KitScope, LOOK, Lettering, StepTrail } from './ui';
 import type { TourStep } from './types';
 
 const SEEN_PREFIX = 'ncs-studio-kit-tour-v1:';
+
+/** One step of the tour, presentational: the trail, the banner, the words. */
+export function TourCard({ steps, step }: { steps: TourStep[]; step: number }) {
+  const at = Math.min(Math.max(step, 0), steps.length - 1);
+  const current = steps[at];
+  return (
+    <KitScope>
+      <div style={{ display: 'grid', gap: 22 }}>
+        <div className="ui-trail ui-tour-trail">
+          <StepTrail words={steps.map((s) => s.short ?? s.title)} current={at} />
+        </div>
+        <section
+          className="ui-banner ui-banner--compact"
+          aria-labelledby="ncs-studio-kit-tour-title"
+        >
+          <div className="ui-banner__in">
+            <div style={{ minWidth: 0 }}>
+              <p className="ui-banner__eyebrow ui-eyebrow" style={{ margin: 0 }}>
+                A quick tour
+              </p>
+              <h2 id="ncs-studio-kit-tour-title" className="ui-banner__title">
+                <Lettering text={current.title} />
+              </h2>
+            </div>
+            <span className="ui-banner__disc">
+              <ArtTile
+                meaning={current.meaning ?? 'guide'}
+                size={64}
+                ground={LOOK.light.paper}
+                seed={at * 7 + 5}
+              />
+            </span>
+          </div>
+        </section>
+        <p style={{ margin: 0, fontSize: 18, lineHeight: 1.6, color: 'var(--ui-ink)' }}>
+          {current.body}
+        </p>
+        <KitNotice tone="plain">
+          You can close this at any time. To see it again, use &quot;Take the tour again&quot; at
+          the bottom of Home.
+        </KitNotice>
+      </div>
+    </KitScope>
+  );
+}
 
 export function StudioTour({ steps }: { steps: TourStep[] }) {
   const user = useCurrentUser();
@@ -54,7 +107,6 @@ export function StudioTour({ steps }: { steps: TourStep[] }) {
   }, [key]);
 
   if (!open || steps.length === 0) return null;
-  const current = steps[Math.min(step, steps.length - 1)];
   const last = step >= steps.length - 1;
 
   return (
@@ -89,21 +141,8 @@ export function StudioTour({ steps }: { steps: TourStep[] }) {
         </Box>
       }
     >
-      <Box padding={5}>
-        <Stack gap={5}>
-          <Heading as="h2" size={3}>
-            {current.title}
-          </Heading>
-          <Text size={3} style={{ lineHeight: 1.6 }}>
-            {current.body}
-          </Text>
-          <Card padding={3} radius={2} tone="transparent">
-            <Text size={1} muted>
-              You can close this at any time. To see it again, use &quot;Take the tour again&quot;
-              at the bottom of Home.
-            </Text>
-          </Card>
-        </Stack>
+      <Box padding={[4, 5]}>
+        <TourCard steps={steps} step={step} />
       </Box>
     </Dialog>
   );

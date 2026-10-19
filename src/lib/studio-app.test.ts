@@ -134,6 +134,45 @@ describe('the service worker', () => {
     assert.match(source, /var OFFLINE_URL = '\/studio\/offline\/'/);
     assert.match(source, /PRECACHE = \[OFFLINE_URL/);
   });
+
+  // Card 132: the offline page is whole with no signal.
+  it('falls back to a kept copy of the offline page files, and never stores new ones', () => {
+    assert.equal(get(`${own}/studio-banner/stone-path.svg`), 'fallback');
+    assert.equal(get(`${own}/fonts/auburn-stone.woff2`), 'fallback');
+    assert.equal(get(`${own}/api/studio/x.svg`), 'none');
+    assert.equal(get(`${own}/fonts/auburn-stone.woff2`, true), 'none');
+    assert.match(source, /if \(rule === 'fallback'\)[\s\S]*?fetch\(req\)\.catch/);
+    assert.match(source, /var VERSION = 'v2'/);
+  });
+
+  it("reads the offline page's own files from its HTML and stylesheet", () => {
+    const offlineRefs = sandbox.offlineRefs as (html: string) => string[];
+    const fontRefs = sandbox.fontRefs as (css: string, base: string) => string[];
+    const html = [
+      '<link rel="stylesheet" href="/_astro/offline.Ab12.css">',
+      '<link rel="icon" href="/favicon.svg">',
+      "<style>@font-face{font-family:'Stone';src:url('/fonts/stone.woff2') format('woff2')}</style>",
+      '<source srcset="/banner/path-phone.svg"><img src="/banner/path.svg" alt="">',
+      '<img src="https://cdn.example/x.png"><a href="/studio/">Studio</a><img src="//evil.example/x.svg">',
+    ].join('');
+    assert.deepEqual(Array.from(offlineRefs(html)), [
+      '/_astro/offline.Ab12.css',
+      '/favicon.svg',
+      '/fonts/stone.woff2',
+      '/banner/path-phone.svg',
+      '/banner/path.svg',
+    ]);
+    const css =
+      "@font-face{src:url(/_astro/serif-latin-400-normal.A1.woff2) format('woff2'),url(/_astro/serif-latin-400-normal.A1.woff)}" +
+      '@font-face{src:url(/_astro/serif-latin-ext-400-normal.B2.woff2)}' +
+      '@font-face{src:url(./sans-cyrillic-wght-normal.C3.woff2)}' +
+      '@font-face{src:url(./sans-latin-wght-normal.D4.woff2)}';
+    assert.deepEqual(Array.from(fontRefs(css, `${own}/_astro/offline.Ab12.css`)), [
+      '/_astro/serif-latin-400-normal.A1.woff2',
+      '/_astro/sans-latin-wght-normal.D4.woff2',
+    ]);
+    assert.deepEqual(Array.from(fontRefs('src:url(/f/a.woff2)', own)), ['/f/a.woff2']);
+  });
 });
 
 /** Every .astro, .ts and .tsx file under src/, as [path, text]. */
