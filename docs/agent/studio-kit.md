@@ -26,7 +26,7 @@ are commented in that site's `src/sanity/kit.config.ts`.
 | Site settings           | `src/sanity/kit.config.ts`                                                                    | The ONE site-specific file (NOT portable): staff list, This week jobs, checkup rules, trash types, tour words, feature switches                         |
 | Settings shape          | `src/sanity/kit/types.ts`                                                                     | `KitConfig`                                                                                                                                             |
 | Home                    | `src/sanity/kit/HomeTool.tsx`                                                                 | First tool, so the Studio opens on it                                                                                                                   |
-| Site Guide              | `src/sanity/kit/GuideTool.tsx`                                                                | Reads the existing guides (`src/sanity/guides/content.ts`) and renders each with `GuideView`; search reads every word; Print prints only the open guide |
+| Site Guide              | `src/sanity/kit/GuideTool.tsx`, `src/sanity/kit/guide/`                                       | Reads the existing guides (`src/sanity/guides/content.ts`) and renders each with `GuideView`; search reads every word; Print prints only the open guide |
 | Checkup                 | `src/sanity/kit/CheckupTool.tsx`, `src/lib/studio-checkup.ts`                                 | Pure rules over one fetch of every content document; tests in `studio-checkup.test.ts`                                                                  |
 | Trash                   | `src/sanity/kit/trash.tsx`, `src/lib/studio-trash.ts`                                         | Snapshot-to-Trash in one transaction; `trashedItem` type; tests in `studio-trash.test.ts`                                                               |
 | Staff view, links, live | `src/sanity/kit/shared.tsx`, `src/lib/studio-kit.ts`                                          | Pure parts tested in `studio-kit.test.ts`                                                                                                               |
@@ -40,6 +40,7 @@ are commented in that site's `src/sanity/kit.config.ts`.
 | Home cards (115)        | `src/sanity/kit/HomeCards.tsx`, `src/lib/studio-home.ts`                                      | Coming up, Fix-it list, Visitors, Your pages, and the Panel frame; pure parts tested in `studio-home.test.ts`                                           |
 | Home banner (118)       | `src/sanity/kit/HomeBanner.tsx`, `src/lib/studio-banner.ts`                                   | The navy welcome at the top of Home; `kitConfig.homeBanner`; pure parts tested in `studio-banner.test.ts`                                               |
 | Icons (119)             | `src/sanity/brandIcons.tsx`, `src/sanity/artIcon.tsx`, `src/lib/studio-icons.ts`              | Not the kit plugin: icons by meaning and list-row pictures; the site's art in `brandIconArt.tsx`; tests in `studio-icons.test.ts`                       |
+| Design language (128)   | `src/sanity/kit/ui/`, `src/lib/studio-look.ts`                                                | Shared primitives in the site's own devices (`brand.config.json` `studio.look`); tests in `studio-look.test.ts`                                         |
 | Guide videos (115)      | `src/sanity/kit/GuideVideos.tsx`                                                              | "Watch how it is done" on Home and in the Site Guide; `videoSource()` in `studio-home.ts`                                                               |
 | Visitors route (115)    | `src/pages/api/studio/visitors.ts`, `src/lib/studio-analytics.ts`                             | Cloudflare Web Analytics GraphQL through the Worker (same origin + Sanity session); tests in `studio-analytics.test.ts`                                 |
 | Weekly ticks (111)      | `src/sanity/kit/weekType.ts`                                                                  | `studioWeek` document per week for hand-ticked jobs; `checklist()` and `weekKey()` in `studio-kit.ts`                                                   |
@@ -371,6 +372,62 @@ Also outside the kit plugin; site choices in `src/sanity/studioEdges.config.ts`.
 - **Not done, on purpose:** a branded heading inside the sign-in card through a custom `auth` store. Sanity uses a
   custom store as-is, which drops its own request handler (expired-session handling, the CORS and project-not-found
   screens). Not worth that for a heading.
+
+## The design language (card 128)
+
+The kit's own look, so the Studio's middle reads like the site and not like a generic app. Shared, PORTABLE primitives
+in `src/sanity/kit/ui/` (import from `kit/ui`), the pure half in `src/lib/studio-look.ts` (tested in
+`studio-look.test.ts`, including a contrast gate over every token in both schemes). The Site Guide and its index are
+the first surfaces drawn in it; the next card moves the other kit surfaces over.
+
+**The site's devices** are named in `brand/brand.config.json` `studio.look` (schema in `brand.config.schema.json`).
+Every family site should differ in FORM, not only colour. Unset keys take the starter's neutral defaults.
+
+| Key                    | What it is                                                                               | Starter default        |
+| ---------------------- | ---------------------------------------------------------------------------------------- | ---------------------- |
+| `marker`               | The section marker: `dot`, `steps`, `rule`, `diamond`, or art `{ src, width, height }`   | `dot`                  |
+| `markerColor`          | Colour for a built-in marker                                                             | the accent             |
+| `markColors`           | The numbered stones' colours, in order                                                   | the accent             |
+| `stone`                | Stone shape: `pebble` (seeded, hand-laid), `round`, `square`, `lozenge`                  | `round`                |
+| `connector`            | What joins numbered steps: `{ kind: dashes / dots / line / none, color }`                | a plain line           |
+| `tones`                | Callout hues `{ note, tip, careful }`; grounds and title colours are worked out          | accent, amber, rust    |
+| `motif`, `motifNarrow` | The strip along a banner's foot (and its phone version), SVGs in `public/`               | none: the colour edge  |
+| `texture`              | A repeating tile for featured panels                                                     | none                   |
+| `edgeColors`           | The ColourEdge's colours, left to right                                                  | `markColors`           |
+| `lettering`            | Banner titles in the site's display lettering `{ family, src, colors }`                  | none: the heading font |
+| `motion`               | How things arrive: `lay` (stones set down in turn), `draw` (the connector draws), `none` | `draw`                 |
+
+Every colour is guarded: text at AA (4.5:1), markers, stones and focus rings at 3:1, banner lettering at 3:1 on the
+chrome. A failing colour is nudged until it passes; an unusable value is ignored with a note (`resolveLook().notes`).
+
+**The primitives** (`kit/ui/primitives.tsx`): `KitScope` (the wrapper that sets the look's CSS variables for the
+current scheme and loads the one stylesheet, `kit/ui/css.ts`; every primitive sits inside one), `Marker`,
+`SectionRule`, `KitPanel`, `Stone`, `SeverityStone`, `StepPath` (down, or `across`), `KitNotice` (note, tip,
+careful, plain), `UiChip` (a small copy of a real Studio button: green Publish, navy tool tabs, red Discard),
+`InlineText` (the guide marks), `StoneTag` and `StatusBadge`, `ArtTile` (a meaning's icon, the site's art where it
+has some, on a stone), `KitCard`, `PullQuote`, `ColourEdge`, `Sill`, `Lettering`, `PageBanner` and `KitLoading`.
+`GuideShot` is in `kit/ui/GuideShot.tsx`. None uses a Studio hook, so all of them render on a bare page.
+
+**The Site Guide** (`kit/guide/GuidePage.tsx`, `kit/guide/GuideIndex.tsx`, wired by `GuideTool.tsx`; the site's
+`components/GuideView.tsx` is now a thin wrapper that hands in the router). The guide format is unchanged and old
+entries render as they were; new and optional: `{ kind: 'shot' }` (below), `{ kind: 'quote', text, cite? }`,
+`steps` with `across: true`, callout tones `note` / `tip` / `careful` (the old `primary` is a note, `positive` a tip,
+`caution` and `critical` are careful), and a guide `icon` that names a meaning in the icon registry (the old names
+map through `GUIDE_ICON_MEANINGS`; an emoji or a typo draws the guide icon). Print gives the open guide with a
+letterhead and no banner or buttons. "Help for this page" shows the same page in its compact `panel` variant.
+
+**GuideShot** draws a picture of the Studio with the look's own marks on it: numbered stones, highlight rings and
+arrows, positioned in PERCENT of the picture so a recapture at another size keeps them. Data:
+`{ kind: 'shot', src, alt, width, height, marks?: [{ kind: 'stone', x, y, label? } | { kind: 'ring', x, y, w, h,
+label? } | { kind: 'arrow', x, y, toX, toY, label? }], caption? }`. `src` is a file in `public/guide-shots/` or an
+https address; anything else is not drawn. Capture at 1280 wide in the light appearance, under 300 KB. Labelled
+marks become a numbered key under the picture, which is what a screen reader hears beside the `alt`.
+`public/guide-shots/example-editor.svg` is a placeholder until real captures land.
+
+**The test bench** (`/kit-harness/studio/` and `/kit-harness/guide/`, dev server only; `getStaticPaths` returns
+nothing in a build). `studio` is the real Studio signed in as a pretend administrator through Sanity's
+`createMockAuthStore`: reads of a public dataset work, anything that needs a real session fails quietly. `guide`
+draws the guide pieces in the Studio theme: `?view=index|page|panel|ui&g=<slug>&scheme=light|dark`.
 
 ## Checkup rules
 

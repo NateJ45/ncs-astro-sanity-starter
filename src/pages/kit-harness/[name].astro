@@ -1,0 +1,53 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// The Studio kit's test bench (PORTS.md card 128). DEV SERVER ONLY: in a build
+// getStaticPaths returns no paths, so these pages never ship. See
+// src/sanity/kit/harness/Harness.tsx for what each bench shows.
+import Harness from '../../sanity/kit/harness/Harness';
+import '../../sanity/studioFonts.css';
+import brand from '../../../brand/brand.config.json';
+import { studioEdges } from '../../sanity/studioEdges.config';
+import { pickWordmark, type StudioBootData } from '../../lib/studio-route';
+
+export function getStaticPaths() {
+  return import.meta.env.DEV ? [{ params: { name: 'studio' } }, { params: { name: 'guide' } }] : [];
+}
+const { name } = Astro.params;
+// The same boot data /studio hands the navbar wordmark, so the bench's bar matches the real one.
+const logoAssets = import.meta.glob('/src/assets/**/*.{svg,png,webp}', {
+  eager: true,
+  import: 'default',
+});
+const logoPaths = (brand as { logoPaths?: Record<string, string> }).logoPaths ?? {};
+const wordmarkLogo = studioEdges.wordmark.logo;
+const boot: StudioBootData = {
+  wordmark: wordmarkLogo
+    ? pickWordmark(logoAssets, logoPaths[wordmarkLogo], studioEdges.wordmark.view)
+    : null,
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Kit harness: {name}</title>
+    <style is:global>
+      html,
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script
+      is:inline
+      id="ncs-studio-boot"
+      type="application/json"
+      set:html={JSON.stringify(boot)}
+    />
+    <Harness client:only="react" name={name!} />
+  </body>
+</html>

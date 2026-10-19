@@ -26,6 +26,7 @@ import BusinessOverview from './components/BusinessOverview';
 import BrandKit from './components/BrandKit';
 import { staffDesk } from './kit/shared';
 import { brandIcon, typeIcon, type BrandIcon } from './brandIcons';
+import { guideMeaning } from '../lib/studio-look';
 import { kitConfig } from './kit.config';
 import { TRASH_TYPE } from '../lib/studio-trash';
 import { privateDocId } from '../lib/private-pages';
@@ -155,7 +156,7 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
                         S.listItem()
                           .id(`guide-${g.slug}`)
                           .title(g.title)
-                          .icon(() => g.icon)
+                          .icon(brandIcon(guideMeaning(g.icon)))
                           .child(
                             S.component(makeGuideView(g.slug) as never)
                               .id(`guide-view-${g.slug}`)

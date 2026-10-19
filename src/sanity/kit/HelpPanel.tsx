@@ -191,7 +191,7 @@ function Guides({ config, documentType }: { config: KitConfig; documentType: str
       )}
       {View && (
         <Card radius={2} border>
-          <View />
+          <View variant="panel" onOpen={setOpen} />
         </Card>
       )}
       {config.features.guide && (

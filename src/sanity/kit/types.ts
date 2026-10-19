@@ -129,6 +129,14 @@ export interface TourStep {
   body: string;
 }
 
+/** What the kit hands a site's GuideView (card 128). */
+export interface GuideViewProps {
+  /** 'panel' in the narrow "Help for this page" inspector. */
+  variant?: 'page' | 'panel';
+  /** Opens another guide in place (See also). Without it the view decides. */
+  onOpen?: (slug: string) => void;
+}
+
 /** The help guides, as the site's Help & Guide data already holds them. */
 export interface KitGuide {
   slug: string;
@@ -136,6 +144,14 @@ export interface KitGuide {
   title: string;
   lead: string;
   body: unknown[];
+  /**
+   * The guide's art (card 128): a name from GUIDE_ICON_MEANINGS in
+   * src/lib/studio-look.ts ('clock') or a meaning in the icon registry
+   * ('times'). Anything else (an old emoji) draws the guide icon.
+   */
+  icon?: string;
+  /** Who does this job (card 41): drawn as a stone tag under the title. */
+  diy?: 'self' | 'ask' | 'mixed';
   /**
    * A short clip showing the job (PORTS.md card 115): a file in public/
    * ("/guides/post-a-notice.mp4"), a YouTube or Vimeo link, or any https
@@ -236,8 +252,11 @@ export interface KitConfig {
   guide: {
     guides: KitGuide[];
     categories: readonly string[];
-    /** Renders one guide by slug (the site's GuideView). */
-    view: (slug: string) => ComponentType;
+    /**
+     * Renders one guide by slug (the site's GuideView), for the desk and the
+     * "Help for this page" panel, which passes variant 'panel' (card 128).
+     */
+    view: (slug: string) => ComponentType<GuideViewProps>;
     /**
      * Guide slugs per document type, for the "Help for this page" panel
      * (card 110). The key '*' is the fallback for any type not listed.
