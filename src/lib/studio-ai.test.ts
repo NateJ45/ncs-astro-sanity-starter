@@ -232,7 +232,7 @@ describe('the sign-in check (studio-auth)', () => {
       asked = url;
       return new Response(JSON.stringify({ id: 'p1', roles: [{ name: 'editor' }] }));
     });
-    assert.deepEqual(member, { id: 'p1', name: undefined });
+    assert.deepEqual(member, { id: 'p1', name: undefined, roles: ['editor'] });
     assert.match(asked, /^https:\/\/abc123\.api\.sanity\.io\/.+\/users\/me$/);
   });
 });

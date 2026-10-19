@@ -29,6 +29,7 @@ import { EditIcon } from '@sanity/icons/Edit';
 import { PinIcon } from '@sanity/icons/Pin';
 import { runPageCheck } from './actions/checkPage';
 import { PAGE_BUILDER_TYPES } from './pageBuilderConfig';
+import { slugify } from '../lib/slugify'; // scaffold: journal
 
 /**
  * Page types with a Google description (seoDescription). Not journalEntry: a
@@ -240,6 +241,39 @@ export const kitConfig: KitConfig = {
       body: 'Site Guide in the top bar has step-by-step help for every job, and you can print any of it. Stuck? Home has a card for asking for help.',
     },
   ],
+
+  // "Post a photo" on Quick update (card 125): a photo from the phone into a
+  // gallery on any page, or into a new journal post. Always a DRAFT; the editor
+  // presses Publish. A fork names its own post type and words (a church: "A
+  // new news post"), and can add a `note` for a site rule about photos.
+  postPhoto: {
+    galleryTypes: [...PAGE_BUILDER_TYPES],
+    // scaffold: journal
+    post: {
+      label: 'A new journal post',
+      type: 'journalEntry',
+      build: ({ title, alt, caption, image, now }) => ({
+        _type: 'journalEntry',
+        title,
+        slug: { _type: 'slug', current: slugify(title) },
+        excerpt: (caption || alt).slice(0, 220),
+        coverImage: image,
+        publishedAt: now.toISOString(),
+        body: [
+          {
+            _type: 'block',
+            _key: 'photo-intro',
+            style: 'normal',
+            markDefs: [],
+            children: [
+              { _type: 'span', _key: 'photo-intro-text', text: caption || alt, marks: [] },
+            ],
+          },
+        ],
+      }),
+    },
+    // scaffold:end
+  },
 
   liveSlowAfterMinutes: 15,
 
