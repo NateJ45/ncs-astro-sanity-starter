@@ -247,6 +247,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 127 | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 128 | Studio design language (studio.look), shared UI pieces, Site Guide redesign    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 129 | Studio signs in by token (kit routes need it); recentIgnoreTypes               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 131 | Every Studio surface in the design language (first pass)                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -9679,3 +9680,49 @@ once after the site deploys. stonesteps-50k#135 and mas-monograms#121 carry the 
 
 **Status, 2026-10-19.** Starter `yes` (on merge). first-baptist-auburn on branch `fix/studio-token-login`. Others `no`
 except the config line on stonesteps-50k and mas-monograms.
+
+## Card 131: every Studio surface in the design language, first pass (2026-10-19)
+
+**Origin:** first-baptist-auburn, 2026-10-19. Card 128 gave the Studio a design language and redrew the Site Guide in
+it, but every card, panel, badge and checklist below Home's banner was still plain @sanity/ui. Nathan wanted the whole
+Studio to feel like part of the site. This card carries the language onto the surfaces in the order of the Studio
+audit's ranking. Built in the starter, then first-baptist-auburn.
+
+**Canonical (PORTABLE, new):** `src/sanity/kit/ui/surfaces.tsx` (ToolHead, KitBox, KitAction, ResultCard,
+SeverityGroup, AllClear, CheckPath, LiveSteps, StateStone, TileCard, DoneCard), `src/sanity/kit/harness/Surfaces.tsx`
+(the dev-only surfaces bench).
+**PORTABLE, existing, changed:** `src/lib/studio-look.ts` and its test (a guarded `edge` per tone, stone fills held at
+3:1 on the white card too, `liveSteps`, `stepsLabel`, `pathProgress`), `src/sanity/kit/ui/css.ts`, `primitives.tsx`
+(the stylesheet goes into `<head>` once), `index.ts`, `src/sanity/kit/shared.tsx` (`ToolHeading` takes a `meaning` and
+a `label`), `CheckupTool.tsx` (a presentational `CheckupView`), `HomeCards.tsx`, `HomeTool.tsx`, `PublishPanel.tsx`,
+`HelpPanel.tsx`, `NavbarStatus.tsx`, `QuickUpdateTool.tsx`, `PostPhoto.tsx`, `types.ts` (`QuickForm.meaning`),
+`harness/Harness.tsx`, `src/sanity/workflow/MessagesTool.tsx`, `docs/agent/studio-kit.md`. Per site: `kit.config.ts`
+quick-update `meaning`s.
+
+**What it changes.**
+
+- **Tool headings** carry the rule, the meaning's art on its stone and a display-font title.
+- **Home cards** are white cards with the marker or the card's art beside a display-font title; This week has the
+  colour edge along its top. Actions are pills in the heading colour.
+- **Findings** (Checkup, Fix-it list, Before you publish, the Help panel) are white cards with the severity along the
+  left edge, grouped "Needs doing / Worth a look / Good to know", and an all-clear that lays three stones over the
+  motif. Severity is always said in words too.
+- **The weekly checklist** is a path: each stone is the checkbox (a real input, keyboard and focus intact), fills with
+  the site's colour and a tick when done, and the connector is laid between finished stones.
+- **Is it live?** is three stones, Saved, Building, On the website; the navbar line shows the same three, small.
+- **Quick update** tiles carry the colour edge and the site's art; both done screens show the path laid so far.
+- **Messages:** statuses are stone tags; a prayer request is a gentle sky callout, not a caution.
+- Every kit spinner on these surfaces is the laid-stones loader; errors are callouts.
+
+**Gates.** `studio-look.test.ts` guards the new pairs (card edge on surface, muted and heading on surface, each stone
+on surface) for the real brand and the six awkward ones, and pins the step states and their sentence.
+
+**Adopting.** Copy the PORTABLE files; give quick-update forms a `meaning` if the site has art for them. Nothing else
+to set: the look block from card 128 drives it all.
+
+**Not done yet** (in `docs/PENDING.md`): Post a photo's form as a three-stone path, branded empty lists and
+CollectionIntro, the tour's stone progress, Home's quick actions, Coming up date blocks, Recent edits and Pick up art
+tiles, Visitors in mark colours, the splash and offline page, Section Look thumbnails, the field "How to" chip, the
+sign-in heading.
+
+**Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).

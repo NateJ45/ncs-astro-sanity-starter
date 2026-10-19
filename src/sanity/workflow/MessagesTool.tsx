@@ -14,18 +14,7 @@
 // =============================================================================
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useClient } from 'sanity';
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Container,
-  Flex,
-  Heading,
-  Spinner,
-  Stack,
-  Text,
-} from '@sanity/ui';
+import { Box, Button, Card, Container, Flex, Heading, Stack, Text } from '@sanity/ui';
 import { ArrowLeftIcon } from '@sanity/icons/ArrowLeft';
 import { RefreshIcon } from '@sanity/icons/Refresh';
 import {
@@ -36,6 +25,7 @@ import {
   type MessageStatus,
 } from '../../lib/studio-messages';
 import { studioApi, WORKFLOW_API_VERSION } from './studioApi';
+import { KitLoading, KitNotice, KitScope, StoneTag, type Tone } from '../kit/ui';
 import { RsvpInboxNote } from '../mail/MailHome';
 
 const API = '/api/studio/messages/';
@@ -47,6 +37,13 @@ const TONE: Record<MessageStatus, 'primary' | 'caution' | 'positive' | 'default'
   spam: 'default',
 };
 
+const STONE_TONE: Record<MessageStatus, Tone> = {
+  new: 'note',
+  'needs-person': 'tip',
+  replied: 'plain',
+  spam: 'plain',
+};
+
 const when = (iso: string) =>
   new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(
     new Date(iso),
@@ -54,9 +51,10 @@ const when = (iso: string) =>
 
 export function StatusPill({ status }: { status: MessageStatus }) {
   return (
-    <Badge tone={TONE[status]} fontSize={1} padding={2} radius={4}>
-      {STATUS_LABELS[status]}
-    </Badge>
+    // Card 131: a stone tag in the site's tones instead of a Sanity badge.
+    <KitScope style={{ display: 'inline-block' }}>
+      <StoneTag tone={STONE_TONE[status]}>{STATUS_LABELS[status]}</StoneTag>
+    </KitScope>
   );
 }
 
@@ -106,7 +104,11 @@ function Detail({
       <Flex>
         <Button icon={ArrowLeftIcon} mode="bleed" text="All messages" onClick={onBack} />
       </Flex>
-      {!message && !error && <Spinner muted />}
+      {!message && !error && (
+        <KitScope>
+          <KitLoading />
+        </KitScope>
+      )}
       {error && (
         <Card padding={3} tone="critical" radius={2} border>
           <Text size={1}>{error}</Text>
@@ -145,9 +147,16 @@ function Detail({
               )}
             </Stack>
             {message.note && (
-              <Card padding={3} radius={2} tone={message.prayer ? 'transparent' : 'caution'} border>
-                <Text size={1}>{message.note}</Text>
-              </Card>
+              // Card 131: a prayer request is a gentle sky callout, never a caution.
+              <KitScope>
+                {message.prayer ? (
+                  <KitNotice tone="note" title="Prayer request">
+                    {message.note}
+                  </KitNotice>
+                ) : (
+                  <KitNotice tone="tip">{message.note}</KitNotice>
+                )}
+              </KitScope>
             )}
             {message.answers.length > 0 && (
               <Stack gap={3}>
@@ -251,7 +260,9 @@ export function MessagesTool() {
           )}
           {!answer && !error && (
             <Flex justify="center" padding={5}>
-              <Spinner muted />
+              <KitScope>
+                <KitLoading />
+              </KitScope>
             </Flex>
           )}
 

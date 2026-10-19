@@ -20,13 +20,25 @@
 
 import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from 'react';
 import { useClient, useSchema } from 'sanity';
-import { Badge, Box, Button, Card, Flex, Grid, Heading, Spinner, Stack, Text } from '@sanity/ui';
+import { Box, Card, Flex, Grid, Stack, Text } from '@sanity/ui';
 import { countBySeverity, publishedIdOf, type CheckResult } from '../../lib/studio-checkup';
 import { comingUp, fixItList, resolvePageMap, type ComingRow } from '../../lib/studio-home';
 import { aiCompare, weekCompare, type VisitorsReport } from '../../lib/studio-analytics';
 import type { StudioTarget } from '../../lib/studio-kit';
 import { API_VERSION, studioToken, useStudioLink, useTypeTitle } from './shared';
-import { SEVERITY_TONE } from './CheckupTool';
+import {
+  AllClear,
+  KitAction,
+  KitBox,
+  KitLoading,
+  KitScope,
+  levelOf,
+  ResultCard,
+  SeverityStone,
+  StoneTag,
+  type Tone,
+} from './ui';
+import type { BrandIconKey } from '../../lib/studio-icons';
 import type { PageMapGroup } from './types';
 
 // -----------------------------------------------------------------------------
@@ -37,24 +49,28 @@ export function Panel({
   title,
   children,
   action,
+  meaning,
+  edge,
+  tone,
 }: {
   title: string;
   children: ReactNode;
   /** A small link beside the title ("See the whole list"). */
   action?: ReactNode;
+  /** Card 131: the site's art beside the title instead of the marker. */
+  meaning?: BrandIconKey;
+  /** Card 131: the site's colour edge along the top. */
+  edge?: boolean;
+  /** Card 131: a gentle callout ground (note) instead of the white card. */
+  tone?: Tone;
 }) {
+  // Card 131: the kit's own card (ui/surfaces.tsx KitBox) in the site's devices.
   return (
-    <Card padding={4} radius={3} border>
-      <Stack gap={4}>
-        <Flex align="center" gap={3} wrap="wrap" justify="space-between">
-          <Heading as="h2" size={1}>
-            {title}
-          </Heading>
-          {action}
-        </Flex>
+    <KitScope>
+      <KitBox title={title} action={action} meaning={meaning} edge={edge} tone={tone}>
         {children}
-      </Stack>
-    </Card>
+      </KitBox>
+    </KitScope>
   );
 }
 
@@ -66,11 +82,10 @@ export function Quiet({ children }: { children: ReactNode }) {
   );
 }
 
-/** A small router link button, for "Open", "Edit" and "See the whole list". */
+/** A small router link, for "Open", "Edit" and "See the whole list" (card 131: the kit's pill). */
 function LinkButton({
   target,
   text,
-  tone,
   mode = 'ghost',
 }: {
   target: StudioTarget;
@@ -81,16 +96,9 @@ function LinkButton({
   const linkTo = useStudioLink();
   const link = linkTo(target);
   return (
-    <Button
-      as="a"
-      href={link.href}
-      onClick={link.onClick}
-      text={text}
-      mode={mode}
-      tone={tone}
-      fontSize={1}
-      padding={2}
-    />
+    <KitAction href={link.href} onClick={link.onClick} quiet={mode === 'bleed'}>
+      {text}
+    </KitAction>
   );
 }
 
@@ -135,11 +143,11 @@ export function ComingUp({ types, children }: { types: string[]; children?: Reac
   }, [client, types]);
 
   return (
-    <Panel title="Coming up">
+    <Panel title="Coming up" meaning="event">
       {failed ? (
         <Quiet>The list could not load just now.</Quiet>
       ) : rows === null ? (
-        <Spinner muted />
+        <KitLoading />
       ) : rows.length === 0 ? (
         <Quiet>
           Nothing is set to publish by itself. To schedule a page, open it, fill in "Publish
@@ -179,48 +187,42 @@ export function FixItList({ results, failed }: { results: CheckResult[] | null; 
   const whole = <LinkButton target={{ tool: 'checkup' }} text="See the whole list" mode="bleed" />;
 
   return (
-    <Panel title="Fix-it list" action={list && list.total > 0 ? whole : undefined}>
+    <Panel
+      title="Fix-it list"
+      meaning="checkup"
+      action={list && list.total > 0 ? whole : undefined}
+    >
       {failed ? (
         <Quiet>The check could not run just now. Try the Checkup in a minute.</Quiet>
       ) : !list ? (
-        <Spinner muted />
+        <KitLoading />
       ) : list.total === 0 ? (
-        <Stack gap={3}>
-          <Flex>
-            <Badge tone="positive" fontSize={1} padding={2}>
-              All clear
-            </Badge>
-          </Flex>
-          <Quiet>Nothing needs fixing right now.</Quiet>
-        </Stack>
+        <AllClear compact title="All clear" lead="Nothing needs fixing right now." />
       ) : (
         <Stack gap={3}>
-          <Flex gap={2} wrap="wrap">
+          <Flex gap={4} wrap="wrap">
             {(['Needs doing', 'Worth a look'] as const).map((s) =>
               counts?.[s] ? (
-                <Badge key={s} tone={SEVERITY_TONE[s]} fontSize={1} padding={2}>
-                  {s}: {counts[s]}
-                </Badge>
+                <SeverityStone key={s} level={levelOf(s)}>
+                  {`${s}: ${counts[s]}`}
+                </SeverityStone>
               ) : null,
             )}
           </Flex>
           {list.rows.map((r) => (
-            <Flex key={r.key} align="center" gap={3}>
-              <Stack gap={2} flex={1}>
-                <Text size={2} weight="semibold" textOverflow="ellipsis">
-                  {r.name}
-                </Text>
-                <Flex gap={2} align="center" wrap="wrap">
-                  <Badge tone={SEVERITY_TONE[r.severity]} fontSize={0} padding={1}>
-                    {r.severity}
-                  </Badge>
-                  <Text size={1} muted style={{ lineHeight: 1.5 }}>
-                    {r.reason}
-                  </Text>
-                </Flex>
-              </Stack>
-              {r.target && <LinkButton target={r.target} text={r.targetLabel} tone="primary" />}
-            </Flex>
+            <ResultCard
+              key={r.key}
+              dense
+              showLevel
+              level={levelOf(r.severity)}
+              title={r.name}
+              detail={r.reason}
+              action={
+                r.target ? (
+                  <LinkButton target={r.target} text={r.targetLabel} tone="primary" />
+                ) : undefined
+              }
+            />
           ))}
           {list.more > 0 && <Quiet>{`${list.more} more in the Checkup.`}</Quiet>}
         </Stack>
@@ -338,9 +340,9 @@ function VisitsChart({ days }: { days: VisitorsReport['days'] }) {
 export function Visitors({ enabled, helperName }: { enabled: boolean; helperName: string }) {
   const state = useVisitors(enabled);
   return (
-    <Panel title="Visitors">
+    <Panel title="Visitors" meaning="people">
       {state.kind === 'loading' ? (
-        <Spinner muted />
+        <KitLoading />
       ) : state.kind === 'not-set-up' ? (
         <Quiet>
           {`Not set up yet. Once ${helperName} switches it on, this shows how many people visited the website this week, which pages they read most and how they found it.`}
@@ -480,9 +482,9 @@ export function PagesMap({ groups }: { groups: PageMapGroup[] }) {
 
   const resolved = docs ? resolvePageMap(groups, docs) : null;
   return (
-    <Panel title="Your pages">
+    <Panel title="Your pages" meaning="content">
       {!resolved ? (
-        <Spinner muted />
+        <KitLoading />
       ) : (
         <Grid gridTemplateColumns={[1, 2, Math.min(resolved.length, 3)]} gap={4}>
           {resolved.map((g) => (
@@ -527,11 +529,7 @@ export function PagesMap({ groups }: { groups: PageMapGroup[] }) {
                             </Text>
                           )}
                         </Stack>
-                        {draftOnly && (
-                          <Badge tone="caution" fontSize={0} padding={2}>
-                            Not published
-                          </Badge>
-                        )}
+                        {draftOnly && <StoneTag tone="tip">Not published</StoneTag>}
                       </Flex>
                     </Card>
                   );

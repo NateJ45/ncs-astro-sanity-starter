@@ -25,10 +25,10 @@ import {
 } from 'sanity';
 import { CloseIcon } from '@sanity/icons/Close';
 import { HelpCircleIcon } from '@sanity/icons/HelpCircle';
-import { Badge, Box, Button, Card, Flex, Spinner, Stack, Text } from '@sanity/ui';
+import { Box, Button, Card, Flex, Stack, Text } from '@sanity/ui';
 import type { CheckGroup } from '../../lib/page-checks';
 import { publishedIdOf } from '../../lib/studio-checkup';
-import { SEVERITY_TONE } from './CheckupTool';
+import { KitLoading, KitScope, levelOf, ResultCard, SectionRule } from './ui';
 import { API_VERSION, useCheckup, useStudioLink } from './shared';
 import type { KitConfig } from './types';
 
@@ -36,10 +36,11 @@ export const HELP_PANEL_NAME = 'ncs-help';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
+    // Card 131: the site's section rule (marker, small caps, hairline) over each part.
     <Stack gap={3}>
-      <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase' }}>
-        {title}
-      </Text>
+      <KitScope>
+        <SectionRule label={title} />
+      </KitScope>
       {children}
     </Stack>
   );
@@ -73,29 +74,43 @@ function PageCheck({
   }, [check, doc, client]);
 
   if (!check || !check.types.includes(documentType)) return null;
-  if (!groups) return <Spinner muted />;
+  if (!groups)
+    return (
+      <KitScope>
+        <KitLoading />
+      </KitScope>
+    );
   return (
-    <Stack gap={2}>
-      {groups.map((g) => {
-        const clear = g.findings.length === 0;
-        return (
-          <Card key={g.id} padding={3} radius={2} tone={clear ? 'positive' : 'caution'} border>
-            <Stack gap={3}>
-              <Text size={1} weight="semibold">
-                {clear
+    <KitScope>
+      <div style={{ display: 'grid', gap: 8 }}>
+        {groups.map((g) => {
+          const clear = g.findings.length === 0;
+          return (
+            <ResultCard
+              key={g.id}
+              dense
+              level={clear ? 'good' : 'worth'}
+              title={
+                clear
                   ? `${g.title}: nothing to flag`
-                  : `${g.title}: ${g.findings.length} to look at`}
-              </Text>
-              {g.findings.map((f, i) => (
-                <Text key={`${f.where}-${i}`} size={1} muted>
-                  <strong>{f.where}</strong>: {f.detail}
-                </Text>
-              ))}
-            </Stack>
-          </Card>
-        );
-      })}
-    </Stack>
+                  : `${g.title}: ${g.findings.length} to look at`
+              }
+              detail={
+                g.findings.length ? (
+                  <>
+                    {g.findings.map((f, i) => (
+                      <span key={`${f.where}-${i}`} style={{ display: 'block', marginTop: 4 }}>
+                        <strong>{f.where}</strong>: {f.detail}
+                      </span>
+                    ))}
+                  </>
+                ) : undefined
+              }
+            />
+          );
+        })}
+      </div>
+    </KitScope>
   );
 }
 
@@ -110,7 +125,12 @@ function CheckupFindings({ config, documentId }: { config: KitConfig; documentId
         The Checkup could not run just now.
       </Text>
     );
-  if (!results) return <Spinner muted />;
+  if (!results)
+    return (
+      <KitScope>
+        <KitLoading />
+      </KitScope>
+    );
   if (mine.length === 0) {
     return (
       <Text size={1} muted style={{ lineHeight: 1.6 }}>
@@ -122,21 +142,15 @@ function CheckupFindings({ config, documentId }: { config: KitConfig; documentId
   return (
     <Stack gap={2}>
       {mine.map((r) => (
-        <Card key={r.id} padding={3} radius={2} border>
-          <Stack gap={3}>
-            <Flex>
-              <Badge tone={SEVERITY_TONE[r.severity]} fontSize={0} padding={2}>
-                {r.severity}
-              </Badge>
-            </Flex>
-            <Text size={1} weight="semibold">
-              {r.label}
-            </Text>
-            <Text size={1} muted style={{ lineHeight: 1.5 }}>
-              {r.detail}
-            </Text>
-          </Stack>
-        </Card>
+        <KitScope key={r.id}>
+          <ResultCard
+            dense
+            showLevel
+            level={levelOf(r.severity)}
+            title={r.label}
+            detail={r.detail}
+          />
+        </KitScope>
       ))}
       {config.features.checkup && (
         <Flex>

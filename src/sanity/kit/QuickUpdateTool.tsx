@@ -21,13 +21,15 @@
 
 import { useMemo, useState } from 'react';
 import { useClient } from 'sanity';
-import { Box, Button, Card, Flex, Stack, Text, TextArea, TextInput } from '@sanity/ui';
+import { Box, Button, Flex, Stack, Text, TextArea, TextInput } from '@sanity/ui';
 import { ArrowLeftIcon } from '@sanity/icons/ArrowLeft';
 import { BoltIcon } from '@sanity/icons/Bolt';
 import { ImageIcon } from '@sanity/icons/Image';
 import { PostPhoto } from './PostPhoto';
 import { quickFormErrors } from '../../lib/studio-kit';
 import { API_VERSION, PUBLISHED_EVENT, ToolHeading, useStudioLink } from './shared';
+import { DoneCard, KitAction, KitNotice, KitScope, TileCard } from './ui';
+import { liveSteps } from '../../lib/studio-look';
 import type { KitConfig, QuickField, QuickForm } from './types';
 
 const INPUT_TYPE: Record<QuickField['kind'], string> = {
@@ -135,31 +137,24 @@ function QuickFormView({ form, onBack }: { form: QuickForm; onBack: () => void }
   if (saved) {
     const open = linkTo({ doc: saved.id, type: saved.type });
     return (
-      <Stack gap={5}>
-        <Card tone="positive" padding={4} radius={3} border>
-          <Stack gap={3}>
-            <Text size={3} weight="semibold">
-              Done. It is published.
-            </Text>
-            <Text size={2} style={{ lineHeight: 1.6 }}>
-              {form.doneMessage ??
-                'The website updates itself in a few minutes. Home shows when it is live.'}
-            </Text>
-          </Stack>
-        </Card>
-        <Stack gap={3}>
-          <Button
-            as="a"
-            href={open.href}
-            onClick={open.onClick}
-            text="Open it in the full editor"
-            mode="ghost"
-            fontSize={2}
-            padding={4}
-          />
-          <Button text="Back to quick updates" fontSize={2} padding={4} onClick={onBack} />
-        </Stack>
-      </Stack>
+      // Card 131: the path laid so far, Saved and now Building, instead of a green box.
+      <KitScope>
+        <DoneCard
+          states={liveSteps('on-its-way')}
+          title="Done. It is published."
+          lead={
+            form.doneMessage ??
+            'The website updates itself in a few minutes. Home shows when it is live.'
+          }
+        >
+          <KitAction strong onClick={onBack}>
+            Back to quick updates
+          </KitAction>
+          <KitAction href={open.href} onClick={open.onClick}>
+            Open it in the full editor
+          </KitAction>
+        </DoneCard>
+      </KitScope>
     );
   }
 
@@ -195,9 +190,11 @@ function QuickFormView({ form, onBack }: { form: QuickForm; onBack: () => void }
         />
       ))}
       {failed && (
-        <Card tone="critical" padding={3} radius={2} border>
-          <Text size={2}>That did not save. Check your connection and press the button again.</Text>
-        </Card>
+        <KitScope>
+          <KitNotice tone="careful" title="That did not save">
+            Check your connection and press the button again.
+          </KitNotice>
+        </KitScope>
       )}
       <Button
         text={busy ? 'Saving...' : (form.submitLabel ?? 'Put it on the website')}
@@ -227,72 +224,36 @@ export function makeQuickUpdateTool(config: KitConfig) {
             <>
               <ToolHeading
                 icon={BoltIcon}
+                meaning="post"
+                label="Quick update"
                 lead="The quick jobs, made for a phone. Pick one, fill in a few boxes, and it goes on the website."
               >
                 Quick update
               </ToolHeading>
-              <Stack gap={3}>
-                {photo && (
-                  <Card
-                    as="button"
-                    type="button"
-                    padding={4}
-                    radius={3}
-                    border
-                    data-quick="post-photo"
-                    onClick={() => setOpen('photo')}
-                    style={{ textAlign: 'left', width: '100%', cursor: 'pointer', minHeight: 72 }}
-                  >
-                    <Flex gap={3} align="center">
-                      <Text size={4} muted>
-                        <ImageIcon />
-                      </Text>
-                      <Stack gap={2} flex={1}>
-                        <Text size={3} weight="semibold">
-                          Post a photo
-                        </Text>
-                        <Text size={1} muted style={{ lineHeight: 1.5 }}>
-                          From your camera or your photos, into a gallery or a new post. Saved as a
-                          draft for you to publish.
-                        </Text>
-                      </Stack>
-                    </Flex>
-                  </Card>
-                )}
-                {forms.map((f) => {
-                  const Icon = f.icon;
-                  return (
-                    <Card
+              <KitScope>
+                <div style={{ display: 'grid', gap: 14 }}>
+                  {photo && (
+                    <TileCard
+                      dataQuick="post-photo"
+                      meaning="image"
+                      icon={ImageIcon}
+                      title="Post a photo"
+                      lead="From your camera or your photos, into a gallery or a new post. Saved as a draft for you to publish."
+                      onClick={() => setOpen('photo')}
+                    />
+                  )}
+                  {forms.map((f) => (
+                    <TileCard
                       key={f.id}
-                      as="button"
-                      type="button"
-                      padding={4}
-                      radius={3}
-                      border
+                      meaning={f.meaning}
+                      icon={f.icon}
+                      title={f.title}
+                      lead={f.detail}
                       onClick={() => setOpen(f)}
-                      style={{ textAlign: 'left', width: '100%', cursor: 'pointer', minHeight: 72 }}
-                    >
-                      <Flex gap={3} align="center">
-                        {Icon && (
-                          <Text size={4} muted>
-                            <Icon />
-                          </Text>
-                        )}
-                        <Stack gap={2} flex={1}>
-                          <Text size={3} weight="semibold">
-                            {f.title}
-                          </Text>
-                          {f.detail && (
-                            <Text size={1} muted style={{ lineHeight: 1.5 }}>
-                              {f.detail}
-                            </Text>
-                          )}
-                        </Stack>
-                      </Flex>
-                    </Card>
-                  );
-                })}
-              </Stack>
+                    />
+                  ))}
+                </div>
+              </KitScope>
             </>
           )}
         </Stack>

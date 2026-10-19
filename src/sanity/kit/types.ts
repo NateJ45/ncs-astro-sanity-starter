@@ -13,6 +13,7 @@ import type { SanityClient } from 'sanity';
 import type { CheckGroup } from '../../lib/page-checks';
 import type { CheckupRule } from '../../lib/studio-checkup';
 import type { QuickFieldKind, StudioTarget } from '../../lib/studio-kit';
+import type { BrandIconKey } from '../../lib/studio-icons';
 import type { GallerySpec } from '../../lib/photo-post';
 
 /**
@@ -70,6 +71,8 @@ export interface QuickForm {
   title: string;
   detail?: string;
   icon?: ComponentType;
+  /** Card 131: the site's art for the tile (its stone icon); the icon is the fallback. */
+  meaning?: BrandIconKey;
   fields: QuickField[];
   /** The button at the bottom of the form ("Put it on the website"). */
   submitLabel?: string;

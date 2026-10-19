@@ -1,5 +1,17 @@
 # Change history
 
+_2026-10-19: every Studio surface in the design language, first pass (PORTS card 131)._
+
+**Decision.** The Studio's middle now draws in card 128's language instead of plain @sanity/ui. Tool headings carry the
+site's rule, art and display type; Home's cards are white cards with a marker and a display-font title; findings are
+white cards with their severity along the left edge, grouped "Needs doing / Worth a look / Good to know", with an
+all-clear that lays three stones over the motif; the weekly checklist is a path whose stones are the checkboxes; "Is
+it live?" and the navbar line are three stones (Saved, Building, On the website); Quick update has art tiles and a
+done screen that shows the path laid so far; a prayer request in Messages is a gentle sky callout. The pieces are
+presentational (`kit/ui/surfaces.tsx`) so a dev-only bench can draw them with made-up data. The kit stylesheet now
+goes into the page once instead of once per card. Severity is always words as well as colour; every new colour pair
+is in the contrast gate.
+
 _2026-10-18: the Studio's design language and a redesigned Site Guide (PORTS card 128)._
 
 **Decision.** The Studio now has a small design language the site's brand drives: a marker, a stone shape, a connector,

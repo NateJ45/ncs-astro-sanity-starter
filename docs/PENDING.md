@@ -110,6 +110,20 @@ domain and their mail.
 
 ## Known gaps, deliberately open
 
+### 30. Card 131: the Studio surfaces still in plain @sanity/ui (opened 2026-10-19)
+
+Card 131's first pass redrew tool headings, Home's cards, the findings (Checkup, Fix-it list, Before you publish,
+Help), the weekly checklist as a path, "Is it live?" and the navbar line, Quick update's tiles and done screens, and
+Messages' statuses in the design language. Still to do, in the audit's order: Post a photo's form as a three-stone
+path (a camera stone exists for Auburn); CollectionIntro (empty lists are done); the tour with a
+stone progress row; KitLoading for the spinners left in EarlierVersions, MailHome, RsvpTool, NewsletterActions,
+DocumentTable, SharePreviewAction and WritingHelp; Home's quick actions as tiles with the colour edge; Coming up rows
+with date blocks; Recent edits and Pick up rows with art tiles; Visitors in mark colours with a display-font number;
+the splash that lays the path and an offline page sharing its partial; then the Section Look radio thumbnails, the
+field "How to" chip and the AuthStore sign-in heading (beta API; pin with a screenshot test). Also: check the new
+surfaces signed in on the live Studio (the bench uses made-up data). Detail: `docs/agent/studio-kit.md` "Every
+surface in the language".
+
 ### 2. `npm run parity compare` is not a CI step
 
 The baselines in `scripts/.parity/` are captured on a developer machine, and nobody in

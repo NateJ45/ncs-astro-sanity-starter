@@ -209,3 +209,26 @@ describe('guide helpers', () => {
     assert.equal(shotSrc('//x/a.png'), null);
   });
 });
+
+// Card 131: the surfaces' step states.
+import { liveSteps, pathProgress, stepsLabel, LIVE_STEP_WORDS } from './studio-look.ts';
+
+describe('step states (card 131)', () => {
+  it('maps every live state to three stones', () => {
+    assert.deepEqual(liveSteps('live'), ['done', 'done', 'done']);
+    assert.deepEqual(liveSteps('on-its-way'), ['done', 'now', 'todo']);
+    assert.deepEqual(liveSteps('slow'), ['done', 'slow', 'todo']);
+    assert.deepEqual(liveSteps('failed'), ['done', 'failed', 'todo']);
+    assert.deepEqual(liveSteps('unknown'), ['todo', 'todo', 'todo']);
+  });
+  it('says the steps in words, with no dashes', () => {
+    const s = stepsLabel(LIVE_STEP_WORDS, liveSteps('on-its-way'));
+    assert.equal(s, 'Saved, done. Building, in progress. On the website, not yet.');
+    assert.doesNotMatch(s, /\u2014/);
+  });
+  it('counts a checklist', () => {
+    assert.equal(pathProgress([true, false, true]).text, '2 of 3 done');
+    assert.equal(pathProgress([true, true]).text, 'All done');
+    assert.equal(pathProgress([]).text, '');
+  });
+});

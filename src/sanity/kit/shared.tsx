@@ -14,7 +14,6 @@ import {
 } from 'react';
 import { useClient, useCurrentUser, useSchema, useWorkspace } from 'sanity';
 import { useRouter } from 'sanity/router';
-import { Box, Flex, Heading, Text } from '@sanity/ui';
 import {
   isStaffView,
   readOverride,
@@ -34,6 +33,8 @@ import {
   type SiteFiles,
 } from '../../lib/studio-checkup';
 import type { KitConfig } from './types';
+import { KitScope, ToolHead } from './ui';
+import type { BrandIconKey } from '../../lib/studio-icons';
 import { signInNote } from '../../lib/studio-signin';
 
 export const API_VERSION = '2025-02-19';
@@ -156,45 +157,30 @@ export function staffDesk<T>(
 // -----------------------------------------------------------------------------
 
 export function ToolHeading({
-  icon: Icon,
+  icon,
+  meaning,
+  label,
   children,
   lead,
 }: {
-  icon: ComponentType;
+  icon?: ComponentType;
+  /** Card 131: the site's own art for the tool, drawn on its stone (the icon is the fallback). */
+  meaning?: BrandIconKey;
+  /** A small-caps word beside the marker, e.g. "Checkup". */
+  label?: ReactNode;
   children: ReactNode;
   lead?: ReactNode;
 }) {
   return (
-    <Box>
-      <Flex align="center" gap={3}>
-        <Flex
-          aria-hidden
-          align="center"
-          justify="center"
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            flexShrink: 0,
-            fontSize: 26,
-            background: 'var(--card-badge-default-bg-color, rgba(127,127,127,0.12))',
-            color: 'var(--card-fg-color)',
-          }}
-        >
-          <Icon />
-        </Flex>
-        <Heading as="h1" size={4}>
-          {children}
-        </Heading>
-      </Flex>
-      {lead && (
-        <Box marginTop={4}>
-          <Text size={3} muted style={{ lineHeight: 1.6 }}>
-            {lead}
-          </Text>
-        </Box>
-      )}
-    </Box>
+    <KitScope>
+      <ToolHead
+        title={children}
+        lead={lead}
+        label={label}
+        meaning={meaning}
+        icon={meaning ? undefined : icon}
+      />
+    </KitScope>
   );
 }
 

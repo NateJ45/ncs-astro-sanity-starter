@@ -23,18 +23,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useClient, type SanityClient } from 'sanity';
-import {
-  Box,
-  Button,
-  Card,
-  Flex,
-  Radio,
-  Spinner,
-  Stack,
-  Text,
-  TextArea,
-  TextInput,
-} from '@sanity/ui';
+import { Box, Button, Card, Flex, Radio, Stack, Text, TextArea, TextInput } from '@sanity/ui';
 import { ArrowLeftIcon } from '@sanity/icons/ArrowLeft';
 import { ImageIcon } from '@sanity/icons/Image';
 import { UploadIcon } from '@sanity/icons/Upload';
@@ -50,6 +39,7 @@ import {
   type GalleryChoice,
 } from '../../lib/photo-post';
 import { API_VERSION, useStudioLink, useTypeTitle } from './shared';
+import { DoneCard, KitAction, KitLoading, KitNotice, KitScope } from './ui';
 import type { PostPhotoConfig } from './types';
 
 const key = () => crypto.randomUUID().replace(/-/g, '').slice(0, 12);
@@ -224,40 +214,27 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
   if (saved) {
     const open = linkTo({ doc: saved.id, type: saved.type });
     return (
-      <Stack gap={5}>
-        <Card tone="positive" padding={4} radius={3} border>
-          <Stack gap={3}>
-            <Text size={3} weight="semibold">
-              Saved as a draft.
-            </Text>
-            <Text size={2} style={{ lineHeight: 1.6 }}>
-              Nothing changes on the website until you open it and press Publish.
-              {saved.hadDraft
-                ? ' This page already had changes waiting, so they go live together when you publish.'
-                : ''}
-            </Text>
-          </Stack>
-        </Card>
-        <Stack gap={3}>
-          <Button
-            as="a"
-            href={open.href}
-            onClick={open.onClick}
-            text="Open it to check and publish"
-            tone="primary"
-            fontSize={2}
-            padding={4}
-          />
-          <Button text="Post another photo" mode="ghost" fontSize={2} padding={4} onClick={reset} />
-          <Button
-            text="Back to quick updates"
-            mode="bleed"
-            fontSize={2}
-            padding={4}
-            onClick={onBack}
-          />
-        </Stack>
-      </Stack>
+      // Card 131: one stone laid (Saved); Publish lays the rest.
+      <KitScope>
+        <DoneCard
+          states={['done', 'todo', 'todo']}
+          title="Saved as a draft."
+          lead={
+            'Nothing changes on the website until you open it and press Publish.' +
+            (saved.hadDraft
+              ? ' This page already had changes waiting, so they go live together when you publish.'
+              : '')
+          }
+        >
+          <KitAction strong href={open.href} onClick={open.onClick}>
+            Open it to check and publish
+          </KitAction>
+          <KitAction onClick={reset}>Post another photo</KitAction>
+          <KitAction quiet onClick={onBack}>
+            Back to quick updates
+          </KitAction>
+        </DoneCard>
+      </KitScope>
     );
   }
 
@@ -293,11 +270,9 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
           is saved as a draft for you to check and publish.
         </Text>
         {config.note && (
-          <Card tone="caution" padding={3} radius={2} border>
-            <Text size={1} style={{ lineHeight: 1.5 }}>
-              {config.note}
-            </Text>
-          </Card>
+          <KitScope>
+            <KitNotice tone="tip">{config.note}</KitNotice>
+          </KitScope>
         )}
       </Stack>
 
@@ -400,12 +375,9 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
           Where should it go?
         </Text>
         {choices === null ? (
-          <Flex gap={2} align="center">
-            <Spinner muted />
-            <Text size={1} muted>
-              Finding the galleries...
-            </Text>
-          </Flex>
+          <KitScope>
+            <KitLoading label="Finding the galleries..." />
+          </KitScope>
         ) : (
           <Stack gap={2}>
             {config.post && (
@@ -473,9 +445,9 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
       )}
 
       {failed && (
-        <Card tone="critical" padding={3} radius={2} border>
-          <Text size={2}>{failed}</Text>
-        </Card>
+        <KitScope>
+          <KitNotice tone="careful">{failed}</KitNotice>
+        </KitScope>
       )}
       <Button
         text={step ?? 'Save as a draft'}

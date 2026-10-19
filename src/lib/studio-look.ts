@@ -100,6 +100,8 @@ export interface ToneTokens {
   mark: string;
   /** Its title (AA on bg). */
   title: string;
+  /** Card 131: the hue as a card's left edge on the raised surface (3:1 on surface). */
+  edge: string;
 }
 
 export interface SchemeTokens {
@@ -170,7 +172,7 @@ const DARK_INK = '#eef0f4';
 /** Neutral starter hues for the three callouts when the brand names none. */
 export const DEFAULT_TONES = { tip: '#b7791f', careful: '#c2410c' };
 
-function tone(hue: string, bg0: string, ink: string, dark: boolean): ToneTokens {
+function tone(hue: string, bg0: string, ink: string, dark: boolean): Omit<ToneTokens, 'edge'> {
   // Light: a clear wash of the hue on white (a wash on a warm paper goes grey).
   const bg = dark ? mix(hue, bg0, 0.8) : mix(hue, '#ffffff', 0.87);
   return {
@@ -207,7 +209,13 @@ function scheme(
   // colour is kept as it is, as the site draws it: Auburn's gold on white.
   const connector = hex(input.connector?.color) ?? (input.connector?.kind ? marker : rule);
   const stones = marks.map((m) => {
-    const fill = ensure(m, paper, AA_NON_TEXT);
+    // Card 131: on the paper AND the raised surface (white cards), so either ground holds 3:1.
+    const fill = ensure(
+      ensure(m, paper, AA_NON_TEXT),
+      surface,
+      AA_NON_TEXT,
+      dark ? '#ffffff' : '#000000',
+    );
     // The number on the stone: white or ink, whichever reads; AA either way.
     const text =
       contrastRatio('#ffffff', fill) >= contrastRatio(LIGHT_INK, fill) ? '#ffffff' : LIGHT_INK;
@@ -218,15 +226,17 @@ function scheme(
     tip: hex(input.tones?.tip) ?? DEFAULT_TONES.tip,
     careful: hex(input.tones?.careful) ?? DEFAULT_TONES.careful,
   };
+  const edgeOn = (hue: string) => ensure(hue, surface, AA_NON_TEXT, dark ? '#ffffff' : '#000000');
   const tones = {
-    note: tone(hues.note, paper, ink, dark),
-    tip: tone(hues.tip, paper, ink, dark),
-    careful: tone(hues.careful, paper, ink, dark),
+    note: { ...tone(hues.note, paper, ink, dark), edge: edgeOn(hues.note) },
+    tip: { ...tone(hues.tip, paper, ink, dark), edge: edgeOn(hues.tip) },
+    careful: { ...tone(hues.careful, paper, ink, dark), edge: edgeOn(hues.careful) },
     plain: {
       bg: surface,
       fill: ensure(muted, surface, AA_NON_TEXT),
       mark: ensure(muted, surface, AA_NON_TEXT),
       title: ink,
+      edge: ensure(muted, surface, AA_NON_TEXT),
     },
   };
   const chrome = base.chrome;
@@ -356,8 +366,69 @@ export function contrastPairs(
     pairs.push({ name: `${k} title`, fg: v.title, bg: v.bg, min: AA_BODY_TEXT });
     pairs.push({ name: `${k} text`, fg: t.ink, bg: v.bg, min: AA_BODY_TEXT });
     pairs.push({ name: `${k} marker outline`, fg: v.mark, bg: v.bg, min: AA_NON_TEXT });
+    pairs.push({ name: `${k} card edge on surface`, fg: v.edge, bg: t.surface, min: AA_NON_TEXT });
   }
+  // Card 131: the surfaces' white cards and the empty stone of a step not yet done.
+  pairs.push({ name: 'muted on surface', fg: t.muted, bg: t.surface, min: AA_BODY_TEXT });
+  pairs.push({ name: 'heading on surface', fg: t.heading, bg: t.surface, min: AA_BODY_TEXT });
+  t.stones.forEach((s, i) => {
+    pairs.push({ name: `stone ${i} on surface`, fg: s.fill, bg: t.surface, min: AA_NON_TEXT });
+  });
   return pairs;
+}
+
+// -----------------------------------------------------------------------------
+// Card 131: step states (the Sunday checklist, "Is it live?", the navbar line)
+// -----------------------------------------------------------------------------
+
+/** A stone on a path: laid (done), being laid (now), waiting (todo), or one that did not go down. */
+export type StepState = 'done' | 'now' | 'todo' | 'failed' | 'slow';
+
+/** The three steps of an update, Saved, Building, On the website, from the live state. */
+export function liveSteps(
+  state: 'live' | 'on-its-way' | 'slow' | 'unknown' | 'failed',
+): [StepState, StepState, StepState] {
+  switch (state) {
+    case 'live':
+      return ['done', 'done', 'done'];
+    case 'on-its-way':
+      return ['done', 'now', 'todo'];
+    case 'slow':
+      return ['done', 'slow', 'todo'];
+    case 'failed':
+      return ['done', 'failed', 'todo'];
+    default:
+      return ['todo', 'todo', 'todo'];
+  }
+}
+
+export const LIVE_STEP_WORDS = ['Saved', 'Building', 'On the website'] as const;
+
+/** A sentence for a screen reader: "Saved, done. Building, in progress. On the website, not yet." */
+export function stepsLabel(words: readonly string[], states: readonly StepState[]): string {
+  const say: Record<StepState, string> = {
+    done: 'done',
+    now: 'in progress',
+    todo: 'not yet',
+    failed: 'did not go through',
+    slow: 'taking longer than usual',
+  };
+  return words.map((w, i) => `${w}, ${say[states[i] ?? 'todo']}.`).join(' ');
+}
+
+/** How far along a checklist is, for the path's heading: "2 of 5 done". */
+export function pathProgress(done: readonly boolean[]): {
+  done: number;
+  total: number;
+  text: string;
+} {
+  const n = done.filter(Boolean).length;
+  const total = done.length;
+  return {
+    done: n,
+    total,
+    text: total === 0 ? '' : n === total ? 'All done' : `${n} of ${total} done`,
+  };
 }
 
 // -----------------------------------------------------------------------------
