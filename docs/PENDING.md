@@ -16,6 +16,14 @@ sequence).
 
 ## Waiting on a human
 
+### 28. Card 127 (the email backbone): a real send, and the Studio buttons signed in (opened 2026-10-18)
+
+**Blocker: a sending domain and a signed-in Studio.** Unit-tested on real SQLite and exercised under `wrangler dev` with
+a local D1 and the local `send_email` binding (OPERATIONS.md "Email"). Not yet seen: an email arriving through Resend
+or Cloudflare (and how Gmail and Outlook show the template in dark mode), "Send a test to me" and "Send to everyone"
+pressed signed in, the RSVPs tool and its CSV opened in Excel, Home's Newsletter card with real numbers, and the
+List-Unsubscribe one-click button in Gmail.
+
 ### 1. Verify the live preview against a real Sanity project
 
 **Blocker: this template has no Sanity project, by design.**
@@ -401,7 +409,7 @@ you publish panel with its Show me links; the first real suggestion against the 
 `ANTHROPIC_API_KEY` on a deployed site; OPERATIONS.md, "Writing help", with the spend limit; the route logs only the
 status), and the AI assistants line on a Visitors card with real referrals.
 
-### 27. Card 128 (Studio design language, Site Guide): captures, art, the signed-in checks (opened 2026-10-18)
+### 29. Card 128 (Studio design language, Site Guide): captures, art, the signed-in checks (opened 2026-10-18)
 
 Unit-tested (`studio-look.test.ts`), checked, built and Playwright-clean, and seen in the dev bench at 375 and 1280 in
 light and dark (`/kit-harness/guide/`, `/kit-harness/studio/`). Still open: (a) real Studio screenshots for `GuideShot`

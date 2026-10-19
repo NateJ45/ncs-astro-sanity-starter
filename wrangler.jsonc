@@ -84,6 +84,17 @@
   //
   // Optional, both as secrets: TURNSTILE_SECRET (plus PUBLIC_TURNSTILE_SITE_KEY
   // in .env) and WEB3FORMS_KEY, the fallback for a site with no email binding.
+  //
+  // ── The email backbone (PORTS.md card 127, src/lib/mail-env.ts) ──────────
+  // The newsletter, RSVPs and every form email go through ONE sender: the EMAIL
+  // binding above (Cloudflare Email Sending) or Resend (secret RESEND_API_KEY,
+  // any domain verified in Resend, so it works before the client's domain is on
+  // Cloudflare). MAIL_PROVIDER ("cloudflare" | "resend") picks when both exist.
+  // Subscribers, the send log and RSVPs live in CONTACT_DB (migrations/*_mail.sql).
+  // Secrets: MAIL_SECRET (32+ chars, signs confirm/unsubscribe links), and
+  // MAIL_FROM (or reuse CONTACT_FROM). Optional vars: MAIL_FROM_NAME, MAIL_REPLY_TO.
+  // Without them the sign-up box, RSVP form and Studio buttons say "not set up".
+  // Exact steps: OPERATIONS.md "Email".
 
   // ── The Studio's deploy status (src/pages/api/studio/deploy-status.ts) ─────
   // PORTS.md card 111. A fork that wants "The last update didn't go through"

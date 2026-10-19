@@ -1,0 +1,123 @@
+---
+// Safe to edit by hand
+// =============================================================================
+// /newsletter/ and /newsletter/<issue>/ - past issues on the website (PORTS.md card 127)
+// =============================================================================
+// Every published Newsletter with "Show on the website too?" on and a date that
+// has come, newest first, and a page for each. One file with a rest parameter
+// so that a site with NO issues builds no pages at all: no empty archive page
+// sits in the sitemap of a site that never sends a newsletter.
+//
+// The words come from the same mapping as the email (src/lib/newsletter-content.ts),
+// drawn with the site's own type rather than the email template.
+// =============================================================================
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getSiteSettings } from '@/lib/queries';
+import { archiveIssues, issueFromRaw, issuePath } from '@/lib/newsletter-content';
+import { safeUrl } from '@/lib/mail-template';
+import { site } from '@/data/site';
+
+export async function getStaticPaths() {
+  const issues = await archiveIssues();
+  if (!issues.length) return [];
+  return [
+    { params: { issue: undefined }, props: { issues, current: null } },
+    ...issues.map((raw) => ({ params: { issue: raw.slug }, props: { issues, current: raw } })),
+  ];
+}
+
+type Raw = Awaited<ReturnType<typeof archiveIssues>>[number];
+const { issues, current } = Astro.props as { issues: Raw[]; current: Raw | null };
+const siteSettings = await getSiteSettings();
+const issue = current ? issueFromRaw(current) : null;
+const dateWords = (d?: string) =>
+  d
+    ? new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(
+        new Date(`${d}T12:00:00Z`),
+      )
+    : '';
+const paras = (t?: string) =>
+  (t ?? '')
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+---
+
+{issue && current ? (
+  <BaseLayout
+    title={issue.subject}
+    description={issue.preheader ?? `The ${site.name} newsletter.`}
+    siteSettings={siteSettings}
+  >
+    <article class="mx-auto max-w-prose px-m py-section-lg" aria-labelledby="issue-heading">
+      <p class="text-sm text-foreground/70">
+        <a href="/newsletter/" class="underline underline-offset-2 hover:text-link">
+          Newsletter
+        </a>
+        , {dateWords(current.date)}
+      </p>
+      <h1 id="issue-heading" class="mt-s font-display text-h1 text-foreground">
+        {issue.title ?? issue.subject}
+      </h1>
+      {paras(issue.intro).map((p) => (
+        <p class="mt-m text-lg leading-relaxed text-foreground/85">{p}</p>
+      ))}
+      {issue.sections.map((s) => (
+        <section class="mt-l">
+          <h2 class="font-display text-h3 text-foreground">{s.heading}</h2>
+          <ul class="mt-s divide-y divide-border">
+            {s.items.map((it) => (
+              <li class="py-s">
+                {it.meta && <p class="text-sm text-foreground/70">{it.meta}</p>}
+                <p class="font-semibold text-foreground">
+                  {safeUrl(it.url) ? (
+                    <a href={safeUrl(it.url)} class="underline underline-offset-2 hover:text-link">
+                      {it.title}
+                    </a>
+                  ) : (
+                    it.title
+                  )}
+                </p>
+                {it.text && <p class="mt-xs text-foreground/85">{it.text}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      {issue.note && (
+        <aside class="mt-l border-l-4 border-primary pl-m">
+          {issue.note.heading && <p class="font-semibold text-foreground">{issue.note.heading}</p>}
+          {paras(issue.note.text).map((p) => (
+            <p class="mt-xs text-foreground/85">{p}</p>
+          ))}
+        </aside>
+      )}
+    </article>
+  </BaseLayout>
+) : (
+  <BaseLayout
+    title="Newsletter"
+    description={`Past issues of the ${site.name} newsletter.`}
+    siteSettings={siteSettings}
+  >
+    <section class="mx-auto max-w-prose px-m py-section-lg" aria-labelledby="archive-heading">
+      <h1 id="archive-heading" class="font-display text-h1 text-foreground">
+        Newsletter
+      </h1>
+      <p class="mt-m text-lg text-foreground/85">Past issues, newest first.</p>
+      <ul class="mt-l divide-y divide-border">
+        {issues.map((raw) => (
+          <li class="py-s">
+            <a
+              href={issuePath(raw.slug)}
+              class="font-semibold text-foreground underline underline-offset-2 hover:text-link"
+            >
+              {raw.subject}
+            </a>
+            <p class="text-sm text-foreground/70">{dateWords(raw.date)}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </BaseLayout>
+)}

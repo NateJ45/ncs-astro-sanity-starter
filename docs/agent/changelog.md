@@ -16,6 +16,17 @@ each new surface rebuilding its own look.
 **Left open.** Real screenshots for GuideShot, art for guide meanings with none, a signed-in look at the navbar status
 line, and the next card's roughly twenty surfaces (`docs/PENDING.md`).
 
+_2026-10-18: the email backbone: one sender, a newsletter with double opt-in, RSVPs (PORTS card 127)._
+
+**Decision.** Everything the site emails now goes through one module (`src/lib/mail-send.ts`) with two providers
+behind it, Cloudflare Email Sending and Resend, picked by a Worker setting; with neither, every piece says "not set up
+yet". The contact form sends the same message through it. One D1 database (`CONTACT_DB`) now also holds newsletter
+subscribers (address, status, timestamps only), the send log with a per-person claim that makes a second send to anyone
+impossible, and RSVPs. A Newsletter document is sent from the Studio ("Send a test to me", "Send to everyone", in
+batches); an RSVP section on any page takes replies with capacity and a waiting list decided in one SQL statement, and
+the Studio's RSVPs tool lists them with a CSV download. A provider-hosted list was weighed and left out: one more
+account and a second home for people's addresses.
+
 _2026-10-18: section looks and a photo viewer (PORTS card 124)._
 
 **Decision.** Editors can pick a section's look instead of a colour. The five content blocks (text, image + text,

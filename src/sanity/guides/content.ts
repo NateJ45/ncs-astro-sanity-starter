@@ -556,6 +556,70 @@ export const guides: Guide[] = [
       },
     ],
   },
+  {
+    slug: 'send-the-newsletter',
+    category: 'Housekeeping',
+    title: 'Send the weekly newsletter',
+    icon: '✉',
+    lead: 'Write it, publish it, send yourself a test, then send it to everyone.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'steps',
+        items: [
+          "Open `Newsletter` in the list on the left and press `+` for a new issue, or duplicate last week's.",
+          'Write the subject line and a few opening words, then pick what goes in. Leave out anything you do not need this week.',
+          'Press `Publish`. Only the published issue is ever sent, so publish again after any change.',
+          'Press `Send a test to me` (under the arrow beside Publish). Read it in your own inbox, on your phone too.',
+          'Happy? Press `Send to everyone` and then `Yes, send it to everyone`. Keep the window open while the count goes up.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'An issue goes once.',
+        text: 'After an issue has gone out, `Send to everyone` only tells you when it went. To send a correction, make a new issue. If the window closes halfway, press the button again: it carries on, and nobody gets it twice.',
+      },
+      {
+        kind: 'p',
+        text: 'People join from the newsletter sign-up box on the website and confirm by pressing a link in an email. **Home** shows how many people get it. Everyone can leave with the link at the bottom of every issue; you never need to remove anyone by hand.',
+      },
+      {
+        kind: 'p',
+        text: 'If the buttons say **Email is not set up on this website yet**, ask for help to switch it on.',
+      },
+    ],
+  },
+  {
+    slug: 'rsvps',
+    category: 'Housekeeping',
+    title: 'Let people RSVP',
+    icon: '✓',
+    lead: 'Add an RSVP section to an event page and see who is coming.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'steps',
+        items: [
+          "Open the event's page, add a section and pick `RSVP (who is coming)` under Sign-ups.",
+          'Fill in the event name and when it starts. Add how many places there are if there is a limit, and whether to keep a waiting list.',
+          'Add any questions you need, like allergies or an age group. Ask only for what you will use.',
+          'Publish the page. People who reply get a confirmation email with the details.',
+          'Click `RSVPs` in the top bar to see who is coming. `Download for a spreadsheet` gives the organiser a list that opens in Excel or Google Sheets.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Replies stop by themselves.',
+        text: 'The form closes when the event starts, or at the time you set in "Stop taking replies at". When the places are full it offers the waiting list, or says the event is full.',
+      },
+      {
+        kind: 'p',
+        text: 'This form does not take payments. For a paid event, say where to pay in the line under the heading.',
+      },
+    ],
+  },
 ];
 
 // ── Studio kit helpers (PORTS.md card 110) ───────────────────────────────────
@@ -993,6 +1057,7 @@ export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   ],
   privatePage: ['make-a-page-private', 'edit-a-page'],
   homePage: ['edit-a-page', 'images-and-alt', 'seo-fields'],
+  newsletter: ['send-the-newsletter'],
   siteSettings: ['menus-and-footer', 'website-status', 'add-a-widget'],
   businessInfo: ['menus-and-footer'],
   redirect: ['rename-a-page'],

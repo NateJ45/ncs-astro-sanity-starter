@@ -61,8 +61,17 @@ export const kitConfig: KitConfig = {
   // entry, anyone who is not a Sanity administrator gets the staff view.
   staff: [],
 
-  staffTools: ['home', 'structure', 'presentation', 'messages', 'site-guide', 'checkup'],
-  toolOrder: ['home', 'structure', 'presentation', 'messages', 'site-guide', 'checkup', 'media'],
+  staffTools: ['home', 'structure', 'presentation', 'messages', 'rsvps', 'site-guide', 'checkup'],
+  toolOrder: [
+    'home',
+    'structure',
+    'presentation',
+    'messages',
+    'rsvps',
+    'site-guide',
+    'checkup',
+    'media',
+  ],
   toolTitles: { structure: 'Content', presentation: 'Live preview' },
 
   // Desk item ids only a developer needs (ids from src/sanity/structure.ts,
@@ -288,6 +297,9 @@ export const kitConfig: KitConfig = {
     // set up yet" until the Worker has CF_ANALYTICS_TOKEN, CF_ACCOUNT_ID and
     // CF_WEB_ANALYTICS_SITE_TAG (OPERATIONS.md, "Visitor numbers").
     visitors: true,
+    // The email backbone (card 127): the Newsletter card and RSVP counts. Each
+    // says "not set up yet" until the Worker has the settings (OPERATIONS.md, "Email").
+    mail: true,
     // Card 110: the status line under the top bar, and the help panel.
     navbarStatus: true,
     helpPanel: true,

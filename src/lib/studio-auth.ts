@@ -39,6 +39,8 @@ export interface StudioUser {
   name?: string;
   /** The member's role names on this project ("administrator", "editor", "viewer"...). Card 125. */
   roles: string[];
+  /** The login's email, when Sanity gives one. Used only as the "Send a test to me" address (card 127). */
+  email?: string;
 }
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -62,6 +64,7 @@ export async function verifyStudioUser(
     const me = (await res.json()) as {
       id?: string;
       name?: string;
+      email?: string;
       role?: string;
       roles?: Array<{ name?: string }>;
     };
@@ -70,7 +73,10 @@ export async function verifyStudioUser(
       ...(me.role ? [me.role] : []),
     ];
     const hasRole = (Array.isArray(me.roles) && me.roles.length > 0) || Boolean(me.role);
-    return me.id && hasRole ? { id: me.id, name: me.name, roles } : null;
+    if (!me.id || !hasRole) return null;
+    return typeof me.email === 'string' && me.email.includes('@')
+      ? { id: me.id, name: me.name, roles, email: me.email }
+      : { id: me.id, name: me.name, roles };
   } catch {
     return null;
   }

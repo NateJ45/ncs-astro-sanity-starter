@@ -5,7 +5,8 @@
 //
 // Signature notes:
 //   - `formActionUrl`: the ESP's form-action endpoint (e.g. a ConvertKit, MailerLite, or
-//     Kit form URL). When absent, falls back to Web3Forms (PUBLIC_WEB3FORMS_KEY).
+//     Kit form URL). When absent, the site's own list (/api/subscribe/, double opt-in,
+//     PORTS.md card 127) when it is switched on, then Web3Forms (PUBLIC_WEB3FORMS_KEY).
 //   - `audienceId`: optional audience / list / group ID for ESPs that accept it as a
 //     query param or body field. Passed through in the Web3Forms fallback as metadata.
 //   - `tag`: optional ESP tag slug (e.g. "quiz-result", "guide-download"). Added as
@@ -44,6 +45,51 @@ export interface SubscribeResult {
 // Read the Web3Forms access key at module scope. This file is imported by React
 // islands (client bundles), so import.meta.env is available in both SSR + browser.
 const WEB3FORMS_KEY = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
+
+/** Has the site's own list been switched on? False on a static host or before setup. */
+export async function ownListReady(): Promise<boolean> {
+  try {
+    const res = await fetch('/api/subscribe/', { headers: { Accept: 'application/json' } });
+    if (!res.ok) return false;
+    const body = (await res.json().catch(() => null)) as { ready?: unknown } | null;
+    return body?.ready === true;
+  } catch {
+    return false;
+  }
+}
+
+/** POST to the own list. Null means "not here, try the next path". */
+async function postToOwnList(email: string, name?: string): Promise<SubscribeResult | null> {
+  let res: Response;
+  try {
+    res = await fetch('/api/subscribe/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ email, name: name || undefined }),
+    });
+  } catch {
+    return null;
+  }
+  if (res.status === 404 || res.status === 405) return null;
+  const body = (await res.json().catch(() => null)) as {
+    ok?: boolean;
+    unavailable?: boolean;
+    error?: string;
+    errors?: Record<string, string>;
+  } | null;
+  if (!body || body.unavailable) return null;
+  if (res.ok && body.ok) {
+    return {
+      ok: true,
+      message: 'Nearly there: check your inbox and press the button in our email to confirm.',
+    };
+  }
+  return {
+    ok: false,
+    message:
+      body.errors?.email ?? body.error ?? "Couldn't sign you up right now. Try again in a minute.",
+  };
+}
 
 export async function subscribeEmail(opts: SubscribeOptions): Promise<SubscribeResult> {
   const { email, name, tag, source, formActionUrl, audienceId } = opts;
@@ -103,6 +149,14 @@ export async function subscribeEmail(opts: SubscribeOptions): Promise<SubscribeR
       };
     }
   }
+
+  // --- Path A2: the site's own list (/api/subscribe/, PORTS.md card 127) ------
+  // Double opt-in, stored in the site's D1, sent through the email backbone.
+  // Tried when no ESP form is set. A static host (404/405) or a Worker that is
+  // not set up yet (503 unavailable) falls through to Web3Forms, so nothing
+  // changes for a site that has not switched the list on.
+  const own = await postToOwnList(email, name);
+  if (own) return own;
 
   // --- Path B: Web3Forms fallback -------------------------------------------
   // Used when newsletter.formActionUrl isn't configured in Sanity, or when

@@ -244,6 +244,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 124 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 125 | Studio on a phone (PWA), Post a photo, Earlier versions from backups           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 126 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 127 | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 128 | Studio design language (studio.look), shared UI pieces, Site Guide redesign    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -9233,7 +9234,6 @@ to `pages`. Set `PRIVATE_PAGE_SECRET` (`wrangler secret put`), check `SANITY_TOK
 publish webhook's deny-list. Marked-file order: the starter merges first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/private-pages`, PR after this merges.
-Other sites `no`.
 
 ## Card 123: Studio writing help (Claude API), a "Before you publish" panel, AI assistants on the Visitors card (2026-10-18)
 
@@ -9496,6 +9496,89 @@ merges first, then the site PR.
 
 **Status, 2026-10-18.** Starter `yes` (switch off). first-baptist-auburn on branch `feat/site-search`, on, PR after
 this merges. Other sites `no`.
+
+## Card 127: the email backbone: one sender (Cloudflare or Resend), a newsletter with double opt-in, RSVPs (2026-10-18)
+
+**Origin:** the Squarespace and Wix comparison (studio vault, 2026-10 report, section 2 items 2 and 3): both builders
+send a newsletter and take RSVPs from the same dashboard; we sent nobody anything. Items 2 and 3 share one backbone (D1
+plus an email sender), so it was built once. Built in the starter, then first-baptist-auburn.
+
+**Canonical:** PORTABLE: `src/lib/mail-send.ts` (providers behind one interface, `pickMailer`), `mail-token.ts` (HMAC
+links), `mail-template.ts` (table-based HTML + plain text, `brandFromConfig`), `mail-db.ts` (`MAIL_DDL`),
+`mail-subscribe.ts`, `mail-newsletter.ts`, `mail-rsvp.ts`, `mail-studio.ts`, `mail-env.ts`, `mail-fixtures.ts`,
+`mail-sqlite.ts` (tests only) and the three `mail-*.test.ts`; routes `src/pages/api/subscribe/index.ts`,
+`subscribe/confirm.ts`, `unsubscribe.ts`, `rsvp.ts`, `studio/newsletter.ts`, `studio/rsvps.ts`;
+`src/components/RsvpForm.tsx`; `src/sanity/schemaTypes/rsvpSection.ts`; `src/sanity/mail/*` (`ncsMailTools`: the
+newsletter's two buttons, the RSVPs tool, Home's Newsletter card, the RSVP rows in Coming up and Messages). Changed
+PORTABLE files: `contact.ts` (sends through the backbone, same message), `subscribe.ts` (the own list between an ESP form
+and Web3Forms), `studio-auth.ts` (`email` on the user, for "Send a test to me"), `studio-icons.ts`, `HomeTool.tsx`,
+`HomeCards.tsx` (`ComingUp` takes children), `kit/types.ts` (`features.mail`), `MessagesTool.tsx`. Per site (NOT
+portable): `src/lib/newsletter-content.ts` (what an issue holds, the brand, the footer address, the time zone),
+`src/sanity/schemaTypes/newsletter.ts`, the section component (`RsvpSection.astro` here),
+`src/pages/email/[state].astro`, `src/pages/newsletter/[...issue].astro`, `NewsletterSignup.tsx`, the section wiring
+(sections.ts, sectionCadence, pageBuilder.types, the queries arm `"pageId": ^._id`, SectionRenderer, the styleguide
+wall), `'email'` and `'newsletter'` reserved (both copies and the test), the migration file (numbered after the site's
+own), kit.config (`features.mail`, `rsvps` in the tool order), sanity.config (`ncsMailTools()` before the kit), the
+sitemap filter for `/email/`.
+
+**What it adds.**
+
+- **One sender.** `pickMailer(env)` returns Cloudflare Email Sending (the `EMAIL` binding; Workers Paid and the domain on
+  Cloudflare DNS) or Resend (`RESEND_API_KEY`; any domain verified in Resend, so it works before a client's domain is on
+  Cloudflare), chosen by `MAIL_PROVIDER` or, unset, whichever is configured. Nothing configured is a state, not an error:
+  every route says "not set up yet". The Cloudflare message keeps the contact form's exact shape and its retry without
+  headers, so `/api/contact/` sends what it always sent (and gains Resend for free).
+- **The list.** Double opt-in: `/api/subscribe/` stores the address as pending and emails a signed confirm link (HMAC
+  with `MAIL_SECRET`, purpose and expiry signed in, 7 days); only confirmed addresses get issues. D1 keeps the address,
+  a status and timestamps, nothing else (the optional first name says hello once and is dropped). The answer is the same
+  whatever the list holds, an already-subscribed address gets no mail, the link is resent at most every 10 minutes, and
+  unconfirmed addresses are forgotten after 30 days. Unsubscribe never expires: the footer link opens
+  `/email/unsubscribe/` (a button, so mail scanners cannot unsubscribe anyone) and List-Unsubscribe plus
+  List-Unsubscribe-Post give Gmail's one-click button (RFC 8058).
+- **The newsletter.** A `newsletter` document (subject, date, preview line, opening words, picks, notices, a closing
+  note, "show on the website"). "Send a test to me" emails the signed-in editor (their Sanity login's email). "Send to
+  everyone" sends the PUBLISHED issue in batches (40 per call; Resend's batch API takes up to 100) while the dialog shows
+  the count. Never twice: one `newsletter_sends` row per issue (a finished issue is refused with its date), and each
+  person is claimed in `newsletter_deliveries` (primary key issue + subscriber) BEFORE their email goes, so racing
+  batches cannot both send; a refused message is counted, never retried. Every issue carries its reader's own
+  unsubscribe link and the postal address (CAN-SPAM). `/newsletter/` archives issues marked for the website; with none,
+  no page is built.
+- **RSVPs.** An `rsvpSection` for any page: event name, start, where, places, waiting list, most per reply, closing time
+  (defaults to the start, rule 15), the editor's own `formQuestion`s, a note for the confirmation. The block is the event
+  (key `<doc id>:<block key>`, `^._id` in the projection), so sites that keep a calendar elsewhere need no events type.
+  `/api/rsvp/` re-reads the published block, refuses after closing, and decides going / waiting list / full in the SAME
+  SQL statement as the insert, so replies arriving together cannot overbook. A confirmation email follows; a reply whose
+  email failed is still kept. No payments, by design. A party too big for the last places goes on the waiting list even
+  if a smaller one later fits.
+- **The Studio.** The RSVPs tool (counts per event, the replies as a table, "Download for a spreadsheet" CSV with
+  formula-safe cells), RSVP counts in Home's Coming up and on top of Messages, Home's Newsletter card (people on the
+  list, the last send). The two Studio routes fail closed: same origin (403), then a signed-in project member (401), then
+  the settings (503), before D1 is read.
+- **The template.** Nested tables, a 600px column, inline styles, bgcolor attributes, system font stacks taken from the
+  brand config's fallbacks, hex colours only (`brandFromConfig`), and a `prefers-color-scheme` / `[data-ogsc]` dark
+  scheme for Apple Mail and Outlook; every coloured cell sets text and background together so Gmail's own inversion
+  stays legible.
+
+**Weighed and left out.** A provider-hosted list (Buttondown, Resend Audiences): one more account and a second place
+people's addresses live; D1 is already the forms' database. A GET that unsubscribes: link scanners follow every link.
+An events collection: the family's churches keep their calendar elsewhere. Retrying failed newsletter sends: the
+provider may have sent them.
+
+**Verified.** 48 unit tests on real SQLite (`node:sqlite`, the real `MAIL_DDL`): signing, both wire formats, double
+opt-in, unsubscribe, batching, never twice (restart and race), capacity, waiting list, concurrent replies, CSV, and the
+auth order. `wrangler dev` on the build with a local D1 and the local `send_email` binding (`MAIL_TEST_FIXTURES=1`):
+subscribe, the confirm link to `/email/confirmed/` and the row `subscribed`, three RSVPs filling six places then the
+waiting list, confirmation emails written by the binding, the contact form `notified = 1`, the Studio routes 403 and 401. The three emails rendered and screenshotted light and dark at 375 and 700 (no overflow). Not yet: a real send
+through Resend or Cloudflare, and the Studio buttons signed in (`docs/PENDING.md` item 24).
+
+**Adopting it in a site.** Copy the PORTABLE files; write `newsletter-content.ts` and the `newsletter` type for the
+site's picks; add the section to its block library and the projection's `"pageId": ^._id`; add the migration
+(`MAIL_DDL`, numbered after the site's last); register `ncsMailTools()` before the kit, `features.mail: true`, `rsvps`
+in the tool order; reserve `email` and `newsletter`; `npm run typegen`, `build`, `test:unit`. Then OPERATIONS.md
+"Email". Marked-file order: the starter merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/email-backbone`, PR after this merges.
+Other sites `no`.
 
 ## Card 128: the Studio's design language, shared UI pieces, and a Site Guide worth reading (2026-10-18)
 

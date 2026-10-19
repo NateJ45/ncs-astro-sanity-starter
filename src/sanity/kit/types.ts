@@ -347,6 +347,11 @@ export interface KitConfig {
      * at" time. Missing counts as on; it shows only when some type has publishAt.
      */
     comingUp?: boolean;
+    /**
+     * The email backbone (card 127): Home's Newsletter card and the RSVP rows in
+     * "Coming up". Needs ncsMailTools registered. Missing counts as off.
+     */
+    mail?: boolean;
     /** The status line under the top bar (card 110). Missing counts as on. */
     navbarStatus?: boolean;
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
