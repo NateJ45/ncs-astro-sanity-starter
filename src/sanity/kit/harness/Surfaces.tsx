@@ -9,6 +9,12 @@
 // Studio: the tool heading, the Checkup (findings and all clear), Home's
 // cards (Fix-it list, the Sunday checklist as a path, "Is it live?" in every
 // state), so each can be screenshotted at 1280 and 375 in both schemes.
+// Card 132 added Home's redesigned cards to part=home: the quick tiles,
+// Coming up (dates on stones, with RSVPs), Recent edits, Pick up where you left
+// off, Visitors (the figure and the mark bars) and the newsletter, all drawn by
+// the real presentational pieces in HomeCards.tsx and mail/MailHome.tsx.
+// Card 132 also added part=photo (Post a photo's trail and its three led steps,
+// with buttons to move the trail) and part=tour (TourCard on two steps).
 // =============================================================================
 
 import { useState } from 'react';
@@ -16,8 +22,25 @@ import type { CheckResult } from '../../../lib/studio-checkup';
 import { LIVE_STEP_WORDS, liveSteps, pathProgress } from '../../../lib/studio-look';
 import { CheckupView } from '../CheckupTool';
 import { ToolHeading } from '../shared';
+import { comingUp } from '../../../lib/studio-home';
+import type { VisitorsReport } from '../../../lib/studio-analytics';
+import {
+  ComingUpRows,
+  DraftRowView,
+  QuickTiles,
+  RecentRows,
+  VisitorsBody,
+  type QuickTile,
+  type RecentRow,
+} from '../HomeCards';
+import { NewsletterBody, RsvpRows } from '../../mail/MailHome';
+import type { RsvpOverview } from '../../mail/rsvpData';
+// Card 132: Post a photo's three-stone path and the tour (parts photo, tour).
+import { PHOTO_STEPS, PhotoStep } from '../PostPhoto';
+import { TourCard } from '../StudioTour';
 import {
   AllClear,
+  ArtRows,
   DoneCard,
   EmptyState,
   TileCard,
@@ -28,7 +51,7 @@ import {
   LiveSteps,
   ResultCard,
   SeverityStone,
-  StoneTag,
+  StepTrail,
   type CheckItem,
 } from '../ui';
 
@@ -99,6 +122,217 @@ const WEEK: CheckItem[] = [
     action: <KitAction href="#">Open the Checkup</KitAction>,
   },
 ];
+
+// -----------------------------------------------------------------------------
+// Card 132: Home's redesigned cards, with made-up data
+// -----------------------------------------------------------------------------
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const at = (days: number, hour = 9) => {
+  const d = new Date(Date.now() + days * DAY_MS);
+  d.setHours(hour, 0, 0, 0);
+  return d.toISOString();
+};
+const TYPE_TITLES: Record<string, string> = {
+  page: 'Page',
+  event: 'Event',
+  announcement: 'Announcement',
+  post: 'News post',
+  homePage: 'Home page',
+};
+const typeTitle = (t: string) => TYPE_TITLES[t] ?? t;
+
+const TILES: QuickTile[] = [
+  {
+    key: 'home',
+    title: 'Edit the homepage',
+    lead: 'Words, photos and sections.',
+    meaning: 'home',
+    link: noLink(),
+  },
+  {
+    key: 'notice',
+    title: 'Post an announcement',
+    lead: 'The banner across the top of every page.',
+    meaning: 'notice',
+    link: noLink(),
+  },
+  {
+    key: 'website',
+    title: 'Edit the website',
+    lead: 'Every page, section and setting, in one place.',
+    meaning: 'pages',
+    link: noLink(),
+  },
+  {
+    key: 'quick',
+    title: 'Quick update',
+    lead: 'The everyday jobs, a few taps each.',
+    meaning: 'quickUpdate',
+    link: noLink(),
+  },
+  {
+    key: 'guide',
+    title: 'How do I...?',
+    lead: 'Step-by-step help for every job on the website.',
+    meaning: 'guide',
+    link: noLink(),
+  },
+];
+
+const COMING = comingUp(
+  [
+    { _id: 'drafts.harvest', _type: 'event', publishAt: at(1, 9), name: 'Harvest supper' },
+    { _id: 'drafts.advent', _type: 'post', publishAt: at(5, 18), name: 'Advent services' },
+    {
+      _id: 'drafts.hours',
+      _type: 'announcement',
+      publishAt: at(23, 7),
+      name: 'Christmas Eve service times',
+    },
+  ],
+  new Date(),
+);
+
+const RSVPS: RsvpOverview[] = [
+  {
+    key: 'vbs',
+    name: 'Vacation Bible School',
+    startsAt: at(9, 9),
+    capacity: 60,
+    waitlist: true,
+    docId: null,
+    docType: null,
+    docTitle: null,
+    going: 34,
+    waiting: 0,
+    replies: 34,
+  },
+  {
+    key: 'supper',
+    name: 'Harvest supper',
+    startsAt: at(12, 18),
+    capacity: null,
+    waitlist: false,
+    docId: null,
+    docType: null,
+    docTitle: null,
+    going: 51,
+    waiting: 3,
+    replies: 54,
+  },
+];
+
+const RECENT: RecentRow[] = [
+  { _id: 'drafts.about', _type: 'page', _updatedAt: at(0, 8), name: 'About us' },
+  { _id: 'harvest', _type: 'event', _updatedAt: at(-1, 15), name: 'Harvest supper' },
+  { _id: 'notice-1', _type: 'announcement', _updatedAt: at(-3, 11), name: 'Parking on Sunday' },
+  { _id: 'homePage', _type: 'homePage', _updatedAt: at(-6, 10) },
+];
+
+const VISITORS: VisitorsReport = {
+  configured: true,
+  thisWeek: 412,
+  lastWeek: 356,
+  days: Array.from({ length: 28 }, (_, i) => {
+    const d = new Date(Date.now() - (27 - i) * DAY_MS);
+    return { date: d.toISOString().slice(0, 10), visits: [38, 52, 61, 49, 44, 71, 97][i % 7] };
+  }),
+  pages: [
+    { path: '/', views: 288 },
+    { path: '/plan-your-visit/', views: 131 },
+    { path: '/sermons/', views: 96 },
+    { path: '/events/harvest-supper/', views: 54 },
+  ],
+  sources: [
+    { group: 'search', label: 'Search engines', visits: 201 },
+    { group: 'direct', label: 'Typed in or bookmarked', visits: 133 },
+    { group: 'social', label: 'Social media', visits: 64 },
+    { group: 'ai', label: 'AI assistants', visits: 14 },
+  ],
+  ai: { thisWeek: 14, lastWeek: 6 },
+  at: new Date().toISOString(),
+} as VisitorsReport;
+
+function HomeCards132() {
+  return (
+    <div style={{ display: 'grid', gap: 20 }}>
+      <QuickTiles tiles={TILES} />
+      <div
+        style={{
+          display: 'grid',
+          gap: 20,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
+          alignItems: 'start',
+        }}
+      >
+        <KitBox title="Pick up where you left off" meaning="step">
+          <p className="ui-muted" style={{ margin: 0 }}>
+            These have changes that are saved but not on the website yet. Publish them, or open them
+            to carry on.
+          </p>
+          <ArtRows label="Unpublished changes">
+            <DraftRowView
+              type="page"
+              name="About us"
+              meta="Page, changed 2 hours ago"
+              link={noLink()}
+              seed={8}
+              canPublish
+              canDiscard
+              busy={false}
+              onPublish={() => {}}
+              onDiscard={() => {}}
+            />
+            <DraftRowView
+              type="event"
+              name="Harvest supper"
+              meta="Event, changed yesterday, never published"
+              why="Something needs filling in first. Open it to see what."
+              link={noLink()}
+              seed={14}
+              canPublish={false}
+              canDiscard={false}
+              busy={false}
+              onPublish={() => {}}
+              onDiscard={() => {}}
+            />
+          </ArtRows>
+        </KitBox>
+        <KitBox title="Coming up" meaning="event">
+          <p className="ui-muted" style={{ margin: 0 }}>
+            These publish by themselves, within half an hour of the time shown.
+          </p>
+          <ComingUpRows rows={COMING} typeTitle={typeTitle} linkTo={noLink} />
+          <RsvpRows events={RSVPS} link={noLink()} />
+        </KitBox>
+        <KitBox title="Recent edits" meaning="document">
+          <RecentRows rows={RECENT} typeTitle={typeTitle} linkTo={noLink} now={Date.now()} />
+        </KitBox>
+        <KitBox title="Newsletter" meaning="message">
+          <NewsletterBody
+            data={{
+              subscribers: 186,
+              pending: 4,
+              recent: [
+                {
+                  subject: 'This week at church',
+                  status: 'done',
+                  sent: 182,
+                  started_at: at(-4, 8),
+                  finished_at: at(-4, 8),
+                },
+              ],
+            }}
+          />
+        </KitBox>
+      </div>
+      <KitBox title="Visitors" meaning="people">
+        <VisitorsBody report={VISITORS} />
+      </KitBox>
+    </div>
+  );
+}
 
 function Week() {
   const [items, setItems] = useState(WEEK);
@@ -243,14 +477,97 @@ export function SurfacesBench({ part }: { part: string }) {
             <KitBox title="Fix-it list (clear)">
               <AllClear compact title="All clear" lead="Nothing needs fixing right now." />
             </KitBox>
-            <KitBox title="Recent edits" meaning="document">
-              <p>
-                Harvest supper <StoneTag tone="tip">Not published</StoneTag>
-              </p>
-            </KitBox>
+          </div>
+          <div style={{ marginTop: 40 }}>
+            <HomeCards132 />
           </div>
         </KitScope>
       )}
+      {show('photo') && <PhotoBench />}
+      {show('tour') && <TourBench />}
+    </div>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Card 132: Post a photo as a three-stone path, and the tour's stone trail
+// -----------------------------------------------------------------------------
+
+/** Post a photo's frame with stand-in fields: press a stone word to move the trail. */
+function PhotoBench() {
+  const [current, setCurrent] = useState(1);
+  const stand = (words: string) => (
+    <div
+      style={{
+        padding: '14px 16px',
+        border: '1px dashed var(--ui-rule)',
+        borderRadius: 8,
+        color: 'var(--ui-muted)',
+      }}
+    >
+      {words}
+    </div>
+  );
+  return (
+    <KitScope style={{ maxWidth: 560 }}>
+      <div style={{ display: 'grid', gap: 28 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {[0, 1, 2, 3].map((i) => (
+            <KitAction key={i} strong={i === current} onClick={() => setCurrent(i)}>
+              {`current ${i}`}
+            </KitAction>
+          ))}
+        </div>
+        <StepTrail words={PHOTO_STEPS} current={current} />
+        <PhotoStep index={0} current={current}>
+          {stand('Take a photo / Choose from your photos')}
+        </PhotoStep>
+        <PhotoStep index={1} current={current}>
+          {stand('Describe the photo, Caption (if you like)')}
+        </PhotoStep>
+        <PhotoStep index={2} current={current}>
+          {stand('Where should it go? Save as a draft')}
+        </PhotoStep>
+      </div>
+    </KitScope>
+  );
+}
+
+const TOUR = [
+  { title: 'This is Home', short: 'Home', meaning: 'home', body: 'Home opens first every time.' },
+  {
+    title: 'Content is where you edit',
+    short: 'Content',
+    meaning: 'content',
+    body: 'Click Content in the top bar to change the words and pictures on any page.',
+  },
+  {
+    title: 'Live preview shows the real page',
+    short: 'Preview',
+    meaning: 'preview',
+    body: 'Live preview shows the website as visitors will see it, with your changes in place.',
+  },
+  {
+    title: 'Nothing is public until you press Publish',
+    short: 'Publish',
+    meaning: 'publishing',
+    body: 'Your changes are private until you press the green Publish button.',
+  },
+  {
+    title: 'Help is always one click away',
+    short: 'Help',
+    meaning: 'help',
+    body: 'Site Guide in the top bar has step-by-step help for every job.',
+  },
+] as const;
+
+/** The tour's body on step 1 and step 4, as the dialog draws it. */
+function TourBench() {
+  const steps = TOUR.map((s) => ({ ...s }));
+  return (
+    <div style={{ display: 'grid', gap: 40, maxWidth: 560 }}>
+      <TourCard steps={steps} step={0} />
+      <TourCard steps={steps} step={3} />
     </div>
   );
 }

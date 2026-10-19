@@ -1,5 +1,16 @@
 # Change history
 
+_2026-10-19: the Studio design pass, part two: Home, Post a photo, the tour, the splash and offline page (PORTS card 132)._
+
+**Decision.** A finished step is laid only in the calm mark colours (`look.calm`), so "On the website" is never the
+warning colour, and a step not yet done is the same hand-laid stone outlined in its colour rather than a circle. Home's
+ways in are tiles with the colour edge and the site's art; Coming up rows carry a date on a stone; Recent edits and
+Pick up rows carry the type's art; Visitors is a display-font figure over bars in the calm colours; the newsletter and
+RSVP cards match. Post a photo is a three-stone path, the tour has a stone trail and a lettered banner, the splash lays
+the path while the Studio loads and the offline page shares it (with the last stone not yet laid). `restore` is a
+meaning of its own. The Section Look radio draws each look as a small section in the site's devices. The last kit spinners are the
+laid-stones loader.
+
 _2026-10-19: every Studio surface in the design language, first pass (PORTS card 131)._
 
 **Decision.** The Studio's middle now draws in card 128's language instead of plain @sanity/ui. Tool headings carry the

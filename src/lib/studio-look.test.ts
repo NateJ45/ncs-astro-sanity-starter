@@ -10,6 +10,7 @@ import assert from 'node:assert/strict';
 import { studioColorInput, studioColors, TINTS, type Scale } from './studio-theme.ts';
 import { contrastRatio } from './contrast.ts';
 import {
+  calmStones,
   chipKind,
   contrastPairs,
   findGuide,
@@ -230,5 +231,27 @@ describe('step states (card 131)', () => {
     assert.equal(pathProgress([true, false, true]).text, '2 of 3 done');
     assert.equal(pathProgress([true, true]).text, 'All done');
     assert.equal(pathProgress([]).text, '');
+  });
+});
+
+describe('calm stones (card 132)', () => {
+  it('leaves the warning hue out of the colours that say done', () => {
+    // Auburn: green, blue, brick, sky; careful is the same brick.
+    assert.deepEqual(
+      calmStones(['#2c5b3a', '#235e93', '#c4401f', '#3b83aa'], '#c4401f'),
+      [0, 1, 3],
+    );
+  });
+  it('keeps every stone when none is near the warning hue, or all are', () => {
+    assert.deepEqual(calmStones(['#235e93', '#2c5b3a'], '#c2410c'), [0, 1]);
+    assert.deepEqual(calmStones(['#c4401f'], '#c4401f'), [0]);
+  });
+  it('is on every resolved scheme', () => {
+    const look = resolveLook(
+      { markColors: ['#2C5B3A', '#C4401F'], tones: { careful: '#C4401F' } },
+      lookBase(studioColors({}, stock), {}),
+    );
+    assert.deepEqual(look.light.calm, [0]);
+    assert.ok(look.dark.calm.length >= 1);
   });
 });

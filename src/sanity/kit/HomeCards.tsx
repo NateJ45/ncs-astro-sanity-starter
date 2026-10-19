@@ -1,44 +1,72 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// Home's dashboard cards, round four (Studio kit, PORTS.md card 115)
+// Home's dashboard cards, round four (Studio kit, PORTS.md card 115; card 132's look)
 // =============================================================================
 // The cards that bring Home up to the WordPress staff dashboard on the family's
 // WordPress sites. HomeTool.tsx lays them out; each fails soft (a quiet
 // sentence, never a blank) like the rest of Home. What they decide is pure and
 // tested in src/lib/studio-home.ts and src/lib/studio-analytics.ts.
 //
+//   Quick tiles  Home's ways in (Edit the website, Quick update, How do I...?)
+//                and kitConfig.quickActions as job tiles: the colour edge, the
+//                art on a stone, a display-font title and one line.
 //   Coming up    drafts with a "Publish automatically at" time (card 111's
-//                scheduled publishing), soonest first, in plain words.
+//                scheduled publishing), soonest first: each a row with its
+//                date on a stone (DateBlock), the time in plain words.
+//   Recent edits / Pick up where you left off: rows with the document type's
+//                art (typeMeaning) and "Not published" as a stone tag. The
+//                fetching and the publish and discard operations stay in
+//                HomeTool.tsx; the rows are drawn here.
 //   Fix-it list  the Checkup's findings by name, each with Edit; the rules are
 //                the Checkup's own (useCheckup), never repeated here.
 //   Visitors     /api/studio/visitors/ (Cloudflare Web Analytics through the
-//                Worker): the week against the week before, a four-week chart
-//                in plain SVG, the most-read pages and where people came from.
+//                Worker): the week as a display-font figure against the week
+//                before, then the last seven days, the most-read pages and
+//                where people came from as bars in the mark colours, each with
+//                its number beside it.
 //   Your pages   kitConfig.pages: every page the editor can change, grouped.
+//
+// Card 132: the presentational pieces (QuickTiles, ComingUpRows, RecentRows,
+// DraftRowView, VisitorsBody) take their data and links by props, so the kit
+// harness (harness/Surfaces.tsx, part=home) draws them with made-up data.
 // =============================================================================
 
-import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ComponentType,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { useClient, useSchema } from 'sanity';
-import { Box, Card, Flex, Grid, Stack, Text } from '@sanity/ui';
+import { Card, Flex, Grid, Stack, Text } from '@sanity/ui';
 import { countBySeverity, publishedIdOf, type CheckResult } from '../../lib/studio-checkup';
 import { comingUp, fixItList, resolvePageMap, type ComingRow } from '../../lib/studio-home';
 import { aiCompare, weekCompare, type VisitorsReport } from '../../lib/studio-analytics';
-import type { StudioTarget } from '../../lib/studio-kit';
+import { timeAgo, type StudioTarget } from '../../lib/studio-kit';
+import { typeIconKey, type BrandIconKey } from '../../lib/studio-icons';
+import { ICON_MAPS } from '../brandIcons';
 import { API_VERSION, studioToken, useStudioLink, useTypeTitle } from './shared';
 import {
   AllClear,
+  ArtRow,
+  ArtRows,
+  DateBlock,
+  Figure,
   KitAction,
   KitBox,
   KitLoading,
   KitScope,
   levelOf,
+  MarkBars,
   ResultCard,
   SeverityStone,
   StoneTag,
+  TileCard,
   type Tone,
 } from './ui';
-import type { BrandIconKey } from '../../lib/studio-icons';
 import type { PageMapGroup } from './types';
 
 // -----------------------------------------------------------------------------
@@ -82,6 +110,13 @@ export function Quiet({ children }: { children: ReactNode }) {
   );
 }
 
+/** A link as useStudioLink() makes it; the harness passes a dead one. */
+export interface HomeLink {
+  href: string;
+  onClick?: (e: { preventDefault: () => void; metaKey?: boolean; ctrlKey?: boolean }) => void;
+}
+export type HomeLinkTo = (target: StudioTarget) => HomeLink;
+
 /** A small router link, for "Open", "Edit" and "See the whole list" (card 131: the kit's pill). */
 function LinkButton({
   target,
@@ -99,6 +134,53 @@ function LinkButton({
     <KitAction href={link.href} onClick={link.onClick} quiet={mode === 'bleed'}>
       {text}
     </KitAction>
+  );
+}
+
+/** The meaning a document type is drawn with: the site's own art for it. */
+export const typeMeaning = (type: string): BrandIconKey => typeIconKey(type, ICON_MAPS);
+
+// -----------------------------------------------------------------------------
+// Quick tiles (card 132): Home's ways in and quick actions as job tiles
+// -----------------------------------------------------------------------------
+
+export interface QuickTile {
+  key: string;
+  title: string;
+  lead?: string;
+  meaning?: BrandIconKey;
+  icon?: ComponentType;
+  link: HomeLink;
+  /** Kept for tests and hooks that find a tile by its job. */
+  dataQuick?: string;
+}
+
+const TILE_GRID: CSSProperties = {
+  display: 'grid',
+  gap: 14,
+  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
+};
+
+/** The tiles under the banner, in a grid that fits as many across as the width allows. */
+export function QuickTiles({ tiles, label }: { tiles: QuickTile[]; label?: string }) {
+  if (!tiles.length) return null;
+  return (
+    <KitScope>
+      <nav aria-label={label ?? 'Ways in'} style={TILE_GRID}>
+        {tiles.map((tile) => (
+          <TileCard
+            key={tile.key}
+            title={tile.title}
+            lead={tile.lead}
+            meaning={tile.meaning}
+            icon={tile.icon}
+            href={tile.link.href}
+            onClick={tile.link.onClick}
+            dataQuick={tile.dataQuick}
+          />
+        ))}
+      </nav>
+    </KitScope>
   );
 }
 
@@ -122,9 +204,59 @@ export function useScheduledTypes(): string[] {
   );
 }
 
+/** The whole date, for a screen reader when the words say "Tomorrow at 9:00 AM". */
+export const fullDate = (iso: string) => {
+  const d = new Date(iso.length <= 10 ? `${iso}T12:00:00` : iso);
+  return Number.isNaN(d.getTime())
+    ? ''
+    : d.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      });
+};
+
+/** Coming up's rows: the date on a stone, the name, then when (in words) and what. */
+export function ComingUpRows({
+  rows,
+  typeTitle,
+  linkTo,
+}: {
+  rows: ComingRow[];
+  typeTitle: (type: string) => string;
+  linkTo: HomeLinkTo;
+}) {
+  return (
+    <ArtRows label="Publishing by itself">
+      {rows.map((r, i) => {
+        const link = linkTo({ doc: r.id, type: r.type });
+        const whole = fullDate(r.publishAt);
+        return (
+          <ArtRow
+            key={r.id}
+            lead={<DateBlock date={r.publishAt} index={i} />}
+            title={r.name || typeTitle(r.type)}
+            meta={
+              <>
+                {r.when}
+                {whole && <span className="ui-sr">{` (${whole})`}</span>}
+                {`, ${typeTitle(r.type)}`}
+              </>
+            }
+            href={link.href}
+            onClick={link.onClick}
+          />
+        );
+      })}
+    </ArtRows>
+  );
+}
+
 export function ComingUp({ types, children }: { types: string[]; children?: ReactNode }) {
   const client = useClient({ apiVersion: API_VERSION });
   const typeTitle = useTypeTitle();
+  const linkTo = useStudioLink();
   const [rows, setRows] = useState<ComingRow[] | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -156,24 +288,119 @@ export function ComingUp({ types, children }: { types: string[]; children?: Reac
       ) : (
         <Stack gap={3}>
           <Quiet>These publish by themselves, within half an hour of the time shown.</Quiet>
-          {rows.map((r) => (
-            <Flex key={r.id} align="center" gap={3}>
-              <Stack gap={2} flex={1}>
-                <Text size={2} weight="semibold" textOverflow="ellipsis">
-                  {r.name || typeTitle(r.type)}
-                </Text>
-                <Text size={1} muted>
-                  {r.when}, {typeTitle(r.type)}
-                </Text>
-              </Stack>
-              <LinkButton target={{ doc: r.id, type: r.type }} text="Open" />
-            </Flex>
-          ))}
+          <ComingUpRows rows={rows} typeTitle={typeTitle} linkTo={linkTo} />
         </Stack>
       )}
       {/* Extra rows a site's tools add, like RSVP headcounts (card 127). */}
       {children}
     </Panel>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Recent edits and Pick up where you left off: the rows (card 132)
+// -----------------------------------------------------------------------------
+
+export interface RecentRow {
+  _id: string;
+  _type: string;
+  _updatedAt: string;
+  name?: string;
+}
+
+/** Recent edits' rows: the type's art, the name, what and when, "Not published" on a draft. */
+export function RecentRows({
+  rows,
+  typeTitle,
+  linkTo,
+  now,
+}: {
+  rows: RecentRow[];
+  typeTitle: (type: string) => string;
+  linkTo: HomeLinkTo;
+  now: number;
+}) {
+  return (
+    <ArtRows label="Recent edits">
+      {rows.map((r, i) => {
+        const link = linkTo({ doc: publishedIdOf(r._id), type: r._type });
+        return (
+          <ArtRow
+            key={r._id}
+            meaning={typeMeaning(r._type)}
+            seed={i + 3}
+            title={r.name || typeTitle(r._type)}
+            meta={`${typeTitle(r._type)}, ${timeAgo(r._updatedAt, now)}`}
+            tag={
+              r._id.startsWith('drafts.') ? (
+                <StoneTag tone="tip">Not published</StoneTag>
+              ) : undefined
+            }
+            href={link.href}
+            onClick={link.onClick}
+          />
+        );
+      })}
+    </ArtRows>
+  );
+}
+
+/**
+ * One unpublished draft on "Pick up where you left off": the row opens it;
+ * Publish and Discard changes sit beside it when they are safe to offer here.
+ */
+export function DraftRowView({
+  type,
+  name,
+  meta,
+  why,
+  link,
+  seed,
+  canPublish,
+  canDiscard,
+  busy,
+  onPublish,
+  onDiscard,
+}: {
+  type: string;
+  name: string;
+  meta: string;
+  /** Why Publish is not offered here, when it is not. */
+  why?: string | null;
+  link: HomeLink;
+  seed?: number;
+  canPublish: boolean;
+  canDiscard: boolean;
+  busy: boolean;
+  onPublish: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <ArtRow
+      meaning={typeMeaning(type)}
+      seed={seed}
+      title={name}
+      meta={why ? `${meta}. ${why}` : meta}
+      tag={<StoneTag tone="tip">Not published</StoneTag>}
+      href={link.href}
+      onClick={link.onClick}
+      action={
+        canPublish || canDiscard ? (
+          <span style={{ display: 'grid', gap: 6, justifyItems: 'end' }}>
+            {canPublish && (
+              <KitAction strong disabled={busy} onClick={onPublish}>
+                Publish
+              </KitAction>
+            )}
+            {canDiscard && (
+              <KitAction quiet disabled={busy} onClick={onDiscard}>
+                Discard changes
+              </KitAction>
+            )}
+          </span>
+        ) : undefined
+      }
+    />
   );
 }
 
@@ -278,64 +505,14 @@ function useVisitors(enabled: boolean): VisitorsState {
   return state;
 }
 
-const dayName = (date: string) =>
-  new Date(`${date}T12:00:00Z`).toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
+/** "Mon 12" for a UTC chart day. */
+const shortDay = (date: string) => {
+  const d = new Date(`${date}T12:00:00Z`);
+  return `${d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })} ${d.getUTCDate()}`;
+};
 
-/** Four weeks of daily visits as plain SVG bars; the last seven are full strength. */
-function VisitsChart({ days }: { days: VisitorsReport['days'] }) {
-  const max = Math.max(1, ...days.map((d) => d.visits));
-  const W = 8;
-  const GAP = 2;
-  const H = 64;
-  const width = days.length * (W + GAP) - GAP;
-  const total = days.reduce((a, d) => a + d.visits, 0);
-  return (
-    <Stack gap={2}>
-      <Box style={{ color: 'var(--card-fg-color)' }}>
-        <svg
-          viewBox={`0 0 ${width} ${H}`}
-          width="100%"
-          height={H}
-          preserveAspectRatio="none"
-          role="img"
-          aria-label={`Visits per day over the last four weeks: ${total} in all, the busiest day ${max}.`}
-        >
-          <line x1={0} x2={width} y1={H - 0.5} y2={H - 0.5} stroke="currentColor" opacity={0.2} />
-          {days.map((d, i) => {
-            const h = d.visits ? Math.max(2, Math.round((d.visits / max) * (H - 4))) : 0;
-            return (
-              <rect
-                key={d.date}
-                x={i * (W + GAP)}
-                y={H - h}
-                width={W}
-                height={h}
-                rx={1.5}
-                fill="currentColor"
-                opacity={i >= days.length - 7 ? 0.85 : 0.3}
-              >
-                <title>{`${dayName(d.date)}: ${d.visits} ${d.visits === 1 ? 'visit' : 'visits'}`}</title>
-              </rect>
-            );
-          })}
-        </svg>
-      </Box>
-      <Flex justify="space-between">
-        <Text size={0} muted>
-          4 weeks ago
-        </Text>
-        <Text size={0} muted>
-          Today
-        </Text>
-      </Flex>
-    </Stack>
-  );
-}
+const plural = (n: number, one: string, many: string) =>
+  `${n.toLocaleString('en-US')} ${n === 1 ? one : many}`;
 
 export function Visitors({ enabled, helperName }: { enabled: boolean; helperName: string }) {
   const state = useVisitors(enabled);
@@ -358,75 +535,77 @@ export function Visitors({ enabled, helperName }: { enabled: boolean; helperName
   );
 }
 
-function VisitorsBody({ report }: { report: VisitorsReport }) {
+/** A small heading over a column of bars. */
+function BarsHead({ children }: { children: ReactNode }) {
   return (
-    <Stack gap={4}>
-      <Stack gap={3}>
-        <Flex align="baseline" gap={2} wrap="wrap">
-          <Text size={4} weight="semibold">
-            {report.thisWeek}
-          </Text>
-          <Text size={2} muted>
-            {report.thisWeek === 1 ? 'visit' : 'visits'} in the last 7 days
-          </Text>
-        </Flex>
-        <Text size={1} muted>
-          {weekCompare(report.thisWeek, report.lastWeek)}
-        </Text>
-      </Stack>
-      <VisitsChart days={report.days} />
-      <Grid gridTemplateColumns={[1, 2]} gap={4}>
+    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 650, color: 'var(--ui-ink)' }}>{children}</h3>
+  );
+}
+
+/** The figure, the last seven days, the most-read pages and where people came from. */
+export function VisitorsBody({ report }: { report: VisitorsReport }) {
+  const week = report.days.slice(-7);
+  const ai = aiCompare(report.ai);
+  return (
+    <Stack gap={5}>
+      <Grid gridTemplateColumns={[1, 1, 2]} gap={5} style={{ alignItems: 'start' }}>
+        <Figure
+          value={report.thisWeek.toLocaleString('en-US')}
+          label={`${report.thisWeek === 1 ? 'visit' : 'visits'} in the last 7 days`}
+          sub={weekCompare(report.thisWeek, report.lastWeek)}
+        />
+        {week.length > 0 && (
+          <Stack gap={3}>
+            <BarsHead>Day by day</BarsHead>
+            <MarkBars
+              label="Visits each day, the last seven days"
+              rows={week.map((d) => ({
+                label: shortDay(d.date),
+                value: d.visits,
+                text: plural(d.visits, 'visit', 'visits'),
+              }))}
+            />
+          </Stack>
+        )}
+      </Grid>
+      <Grid gridTemplateColumns={[1, 1, 2]} gap={5} style={{ alignItems: 'start' }}>
         <Stack gap={3}>
-          <Text size={1} weight="semibold">
-            Most read this week
-          </Text>
+          <BarsHead>Most read this week</BarsHead>
           {report.pages.length === 0 ? (
-            <Text size={1} muted>
-              No page views yet.
-            </Text>
+            <Quiet>No page views yet.</Quiet>
           ) : (
-            report.pages.map((p) => (
-              <Flex key={p.path} gap={2} justify="space-between">
-                <Text size={1} textOverflow="ellipsis">
-                  {p.path === '/' ? 'Home page' : p.path}
-                </Text>
-                <Text size={1} muted>
-                  {p.views}
-                </Text>
-              </Flex>
-            ))
+            <MarkBars
+              label="Page views this week, by page"
+              rows={report.pages.map((p) => ({
+                label: p.path === '/' ? 'Home page' : p.path,
+                value: p.views,
+                text: plural(p.views, 'view', 'views'),
+              }))}
+            />
           )}
         </Stack>
         <Stack gap={3}>
-          <Text size={1} weight="semibold">
-            How people found the website
-          </Text>
+          <BarsHead>How people found the website</BarsHead>
           {report.sources.length === 0 ? (
-            <Text size={1} muted>
-              Nothing to show yet.
-            </Text>
+            <Quiet>Nothing to show yet.</Quiet>
           ) : (
-            report.sources.map((s) => (
-              <Flex key={s.group} gap={2} justify="space-between">
-                <Text size={1}>{s.label}</Text>
-                <Text size={1} muted>
-                  {s.visits}
-                </Text>
-              </Flex>
-            ))
+            <MarkBars
+              label="Visits this week, by where they came from"
+              rows={report.sources.map((s) => ({
+                label: s.label,
+                value: s.visits,
+                text: plural(s.visits, 'visit', 'visits'),
+              }))}
+            />
           )}
           {/* Card 123: the AI assistants trend, when there is one to tell. */}
-          {aiCompare(report.ai) && (
-            <Text size={1} muted style={{ lineHeight: 1.5 }}>
-              {aiCompare(report.ai)}
-            </Text>
-          )}
+          {ai && <Quiet>{ai}</Quiet>}
         </Stack>
       </Grid>
-      <Text size={0} muted>
+      <p className="ui-muted" style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>
         Counted by Cloudflare without cookies. Numbers are close estimates and update every few
         minutes.
-      </Text>
+      </p>
     </Stack>
   );
 }

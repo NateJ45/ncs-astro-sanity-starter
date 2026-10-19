@@ -78,6 +78,8 @@ export const BRAND_ICON_KEYS = [
   'guide',
   'help',
   'trash',
+  // Card 132: undo, earlier versions, restore from a backup
+  'restore',
   'message',
   'preview',
   'checkup',

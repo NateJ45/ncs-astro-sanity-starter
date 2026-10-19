@@ -1,0 +1,389 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// The Studio's splash, shared by /studio and /studio/offline/ (PORTS.md card 132)
+// =============================================================================
+// One partial, two moments:
+//   - mode="loading" (src/pages/studio/index.astro): shown while the Studio's
+//     code loads. The site's path is laid stone by stone, joined by its
+//     connector, and lifted again in the same order while loading goes on, so
+//     it reads as progress. The look's motion verb picks how: 'lay' sets each
+//     stone down, 'draw' draws each connector and the stone after it, 'none'
+//     shows the path laid and still.
+//   - mode="offline" (src/pages/studio/offline.astro): the path with its last
+//     stone not yet laid (an outline), the motif strip, a warm line and the
+//     page's slot (the "Try again" button).
+//
+// Everything comes from brand.config.json (`name`, `studio.fonts`,
+// `studio.look`) through resolveLook (contrast-guarded tokens for both
+// schemes) and src/lib/studio-splash.ts. A site changes nothing here.
+// Server-rendered HTML and CSS only (no React, no script): the loading copy is
+// the Studio island's fallback and is swapped out the moment React mounts.
+// `prefers-reduced-motion: reduce` shows the path fully laid and still.
+//
+// Dark mode follows the page: html[data-studio-scheme='dark'], or the system
+// setting when the page has not picked (the same rule both pages already use).
+// =============================================================================
+import brand from '../../../brand/brand.config.json';
+import { STUDIO_COLORS } from '../../sanity/studioTheme';
+import { lookBase, lookInput, resolveLook } from '../../lib/studio-look';
+import { connectorStroke, splashName, splashPath } from '../../lib/studio-splash';
+
+interface Props {
+  mode: 'loading' | 'offline';
+}
+const { mode } = Astro.props;
+
+const look = resolveLook(lookInput(brand), lookBase(STUDIO_COLORS, brand));
+const fonts = (brand as { studio?: { fonts?: { display?: string; body?: string } } }).studio?.fonts;
+const display = fonts?.display ?? 'Georgia, serif';
+const body = fonts?.body ?? 'system-ui, sans-serif';
+
+const path = splashPath(look, 5);
+const stroke = connectorStroke(path.connector);
+const name = splashName(brand.name, look, display);
+const motion = mode === 'offline' ? 'none' : look.motion;
+const lastIndex = path.stones.length - 1;
+
+// Tokens for both schemes, AA-guarded by resolveLook (ink 7:1, muted 4.5:1,
+// focus 3:1, stones 3:1 on the paper).
+const vars = [
+  `--sp-ink-l: ${look.light.ink}`,
+  `--sp-ink-d: ${look.dark.ink}`,
+  `--sp-muted-l: ${look.light.muted}`,
+  `--sp-muted-d: ${look.dark.muted}`,
+  `--sp-rule-l: ${look.light.rule}`,
+  `--sp-rule-d: ${look.dark.rule}`,
+  `--sp-link-l: ${path.connectorLight}`,
+  `--sp-link-d: ${path.connectorDark}`,
+  `--sp-focus-l: ${look.light.focus}`,
+  `--sp-focus-d: ${look.dark.focus}`,
+  `--sp-btn-bg: ${look.light.chipTool.bg}`,
+  `--sp-btn-fg: ${look.light.chipTool.fg}`,
+  `--sp-display: ${display}`,
+  `--sp-body: ${body}`,
+  `--sp-lettering: ${name.stack}`,
+].join('; ');
+---
+
+{name.face && <style is:inline set:html={name.face} />}
+<div class="ncs-sp" data-mode={mode} style={vars}>
+  <img class="ncs-sp__mark" src="/favicon.svg" alt="" width="56" height="56" />
+  <p class="ncs-sp__name">
+    <span class="ncs-sp__sr">{brand.name}</span>
+    <span aria-hidden="true">
+      {name.before}
+      {name.lettered.length > 0 && (
+        <span class="ncs-sp__lettering">
+          {name.lettered.map((x) =>
+            x.light ? (
+              <span style={`--l: ${x.light}; --d: ${x.dark ?? x.light}`}>{x.char}</span>
+            ) : (
+              x.char
+            ),
+          )}
+        </span>
+      )}
+      {name.after}
+    </span>
+  </p>
+  <svg
+    class="ncs-sp__path"
+    data-motion={motion}
+    viewBox={`0 0 ${path.width} ${path.height}`}
+    width={path.width}
+    height={path.height}
+    aria-hidden="true"
+    focusable="false"
+  >
+    {path.connector !== 'none' &&
+      path.links.map((d, i) => (
+        <path
+          class="ncs-sp__link"
+          d={d}
+          fill="none"
+          stroke-width={stroke.width}
+          stroke-linecap={stroke.cap}
+          stroke-dasharray={stroke.dash ?? undefined}
+          style={`--i: ${i}`}
+          data-unlaid={mode === 'offline' && i === lastIndex - 1 ? '' : undefined}
+        />
+      ))}
+    {path.stones.map((s, i) => (
+      <g transform={`translate(${s.x} ${s.y})`}>
+        <path
+          class="ncs-sp__stone"
+          d={s.d}
+          style={`--i: ${i}; --l: ${s.light}; --d: ${s.dark}`}
+          data-unlaid={mode === 'offline' && i === lastIndex ? '' : undefined}
+        />
+      </g>
+    ))}
+  </svg>
+  {mode === 'offline' ? (
+    <>
+      <h1 class="ncs-sp__title">You're offline</h1>
+      <p class="ncs-sp__note">
+        Your work is safe in the Studio. It will be here when the connection comes back.
+      </p>
+    </>
+  ) : (
+    <p class="ncs-sp__note">Opening the editor</p>
+  )}
+  <slot />
+  {mode === 'offline' && look.motif && (
+    <picture class="ncs-sp__motif" aria-hidden="true">
+      {look.motifNarrow && <source media="(max-width: 520px)" srcset={look.motifNarrow} />}
+      <img src={look.motif} alt="" />
+    </picture>
+  )}
+</div>
+
+<style is:global>
+  .ncs-sp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: 28rem;
+    text-align: center;
+    color: var(--sp-ink-l);
+    font-family: var(--sp-body);
+  }
+  .ncs-sp__mark {
+    display: block;
+    width: 56px;
+    height: 56px;
+  }
+  .ncs-sp__name {
+    margin: 0;
+    font-family: var(--sp-display);
+    /* Never under 24px: the lettering's colours are held to 3:1, the large-text bar. */
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    line-height: 1.2;
+    font-weight: 400;
+    text-wrap: balance;
+    color: var(--sp-ink-l);
+  }
+  .ncs-sp__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .ncs-sp__title {
+    margin: 4px 0 0;
+    font-family: var(--sp-display);
+    font-size: 1.25rem;
+    line-height: 1.3;
+    font-weight: 400;
+  }
+  .ncs-sp__lettering {
+    font-family: var(--sp-lettering);
+    letter-spacing: 0.01em;
+  }
+  .ncs-sp__lettering > span {
+    color: var(--l);
+  }
+  .ncs-sp__note {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--sp-muted-l);
+    max-width: 24rem;
+  }
+  .ncs-sp[data-mode='loading'] .ncs-sp__note {
+    font-size: 0.875rem;
+  }
+  .ncs-sp__path {
+    display: block;
+    width: min(300px, 78vw);
+    height: auto;
+    margin: 4px 0;
+    overflow: visible;
+  }
+  .ncs-sp__link {
+    stroke: var(--sp-link-l);
+  }
+  .ncs-sp__stone {
+    fill: var(--l);
+    transform-box: fill-box;
+    transform-origin: 50% 60%;
+  }
+  /* Offline: the last stone is not laid yet, only its place is marked. */
+  .ncs-sp__stone[data-unlaid] {
+    fill: none;
+    stroke: var(--sp-muted-l);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 4;
+  }
+  .ncs-sp__link[data-unlaid] {
+    opacity: 0.35;
+  }
+  .ncs-sp__motif {
+    display: block;
+    width: min(420px, 86vw);
+    margin-top: 6px;
+  }
+  .ncs-sp__motif img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* The pill button the offline page puts in the slot. */
+  .ncs-sp__button {
+    margin-top: 6px;
+    min-height: 48px;
+    padding: 0 28px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--sp-btn-bg);
+    color: var(--sp-btn-fg);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .ncs-sp__button:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .ncs-sp__button:focus-visible {
+    outline: 3px solid var(--sp-focus-l);
+    outline-offset: 3px;
+  }
+
+  /* --- Motion: the path is laid, then lifted in the same order, while loading. --- */
+  .ncs-sp__path[data-motion='lay'] .ncs-sp__stone,
+  .ncs-sp__path[data-motion='draw'] .ncs-sp__stone {
+    animation: ncs-sp-lay 3.2s cubic-bezier(0.2, 0.7, 0.2, 1) infinite both;
+    animation-delay: calc(var(--i) * 0.28s);
+  }
+  .ncs-sp__path[data-motion='lay'] .ncs-sp__link {
+    animation: ncs-sp-fade 3.2s ease-out infinite both;
+    animation-delay: calc(var(--i) * 0.28s + 0.16s);
+  }
+  .ncs-sp__path[data-motion='draw'] .ncs-sp__link {
+    animation: ncs-sp-draw 3.2s ease-out infinite both;
+    animation-delay: calc(var(--i) * 0.28s + 0.1s);
+  }
+  @keyframes ncs-sp-lay {
+    0% {
+      opacity: 0;
+      transform: translateY(-7px) scale(0.72);
+    }
+    12% {
+      opacity: 1;
+      transform: none;
+    }
+    74% {
+      opacity: 1;
+      transform: none;
+    }
+    88%,
+    100% {
+      opacity: 0;
+      transform: translateY(2px) scale(0.92);
+    }
+  }
+  @keyframes ncs-sp-fade {
+    0% {
+      opacity: 0;
+    }
+    12%,
+    74% {
+      opacity: 1;
+    }
+    88%,
+    100% {
+      opacity: 0;
+    }
+  }
+  @keyframes ncs-sp-draw {
+    0% {
+      clip-path: inset(0 100% 0 0);
+      opacity: 1;
+    }
+    14%,
+    74% {
+      clip-path: inset(0 0 0 0);
+      opacity: 1;
+    }
+    88%,
+    100% {
+      clip-path: inset(0 0 0 0);
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ncs-sp__path .ncs-sp__stone,
+    .ncs-sp__path .ncs-sp__link {
+      animation: none !important;
+      opacity: 1;
+      transform: none;
+      clip-path: none;
+    }
+    .ncs-sp__link[data-unlaid] {
+      opacity: 0.35;
+    }
+  }
+
+  /* --- Dark: the page's own pick, else the system setting. --- */
+  html[data-studio-scheme='dark'] .ncs-sp,
+  html[data-studio-scheme='dark'] .ncs-sp__name,
+  html[data-studio-scheme='dark'] .ncs-sp__title {
+    color: var(--sp-ink-d);
+  }
+  html[data-studio-scheme='dark'] .ncs-sp__note {
+    color: var(--sp-muted-d);
+  }
+  html[data-studio-scheme='dark'] .ncs-sp__lettering > span,
+  html[data-studio-scheme='dark'] .ncs-sp__stone {
+    fill: var(--d);
+    color: var(--d);
+  }
+  html[data-studio-scheme='dark'] .ncs-sp__stone[data-unlaid] {
+    fill: none;
+    stroke: var(--sp-muted-d);
+  }
+  html[data-studio-scheme='dark'] .ncs-sp__link {
+    stroke: var(--sp-link-d);
+  }
+  html[data-studio-scheme='dark'] .ncs-sp__button {
+    border-color: var(--sp-ink-d);
+  }
+  html[data-studio-scheme='dark'] .ncs-sp__button:focus-visible {
+    outline-color: var(--sp-focus-d);
+  }
+  @media (prefers-color-scheme: dark) {
+    html:not([data-studio-scheme='light']) .ncs-sp,
+    html:not([data-studio-scheme='light']) .ncs-sp__name,
+    html:not([data-studio-scheme='light']) .ncs-sp__title {
+      color: var(--sp-ink-d);
+    }
+    html:not([data-studio-scheme='light']) .ncs-sp__note {
+      color: var(--sp-muted-d);
+    }
+    html:not([data-studio-scheme='light']) .ncs-sp__lettering > span,
+    html:not([data-studio-scheme='light']) .ncs-sp__stone {
+      fill: var(--d);
+      color: var(--d);
+    }
+    html:not([data-studio-scheme='light']) .ncs-sp__stone[data-unlaid] {
+      fill: none;
+      stroke: var(--sp-muted-d);
+    }
+    html:not([data-studio-scheme='light']) .ncs-sp__link {
+      stroke: var(--sp-link-d);
+    }
+    html:not([data-studio-scheme='light']) .ncs-sp__button {
+      border-color: var(--sp-ink-d);
+    }
+    html:not([data-studio-scheme='light']) .ncs-sp__button:focus-visible {
+      outline-color: var(--sp-focus-d);
+    }
+  }
+</style>

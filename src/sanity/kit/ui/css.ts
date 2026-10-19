@@ -249,6 +249,7 @@ export const UI_CSS = `
 /* Quick update tiles and the done screen */
 .ncs-ui .ui-tile{position:relative;display:block;width:100%;padding:0;overflow:hidden;text-align:left;font:inherit;color:inherit;cursor:pointer;background:var(--ui-surface);border:1px solid var(--ui-rule);border-radius:var(--ui-radius);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 .ncs-ui .ui-tile>.ui-edge{display:block}
+.ncs-ui a.ui-tile:not([data-ui]){color:inherit;text-decoration:none}
 .ncs-ui .ui-tile__in{display:grid;grid-template-columns:60px minmax(0,1fr);gap:16px;align-items:center;padding:18px 20px 20px;min-height:96px}
 .ncs-ui .ui-tile__title{display:block;font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:22px;line-height:1.2;color:var(--ui-heading);text-wrap:balance}
 .ncs-ui .ui-tile__lead{display:block;margin-top:5px;font-size:15px;line-height:1.5;color:var(--ui-muted)}
@@ -259,4 +260,42 @@ export const UI_CSS = `
 .ncs-ui .ui-done__actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 .ncs-ui .ui-empty .ui-clear__in{padding:34px 30px 28px;gap:12px}
 .ncs-ui .ui-empty .ui-art{margin-bottom:6px}
+/* ===== Card 132: rows, dates, numbers, the trail ===== */
+.ncs-ui .ui-state--todo{display:inline-grid}
+.ncs-ui .ui-date{position:relative;display:grid;place-items:center;width:56px;height:50px;flex:none}
+.ncs-ui .ui-date>.ui-stone{position:absolute;inset:0}
+.ncs-ui .ui-date__words{position:relative;display:grid;justify-items:center;line-height:1}
+.ncs-ui .ui-date__month{font:700 10.5px/1 var(--ui-body);letter-spacing:.14em;text-transform:uppercase;color:var(--ui-muted)}
+.ncs-ui .ui-date__day{margin-top:3px;font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:22px;color:var(--ui-heading)}
+.ncs-ui .ui-rows{list-style:none;margin:0;padding:0;display:grid}
+.ncs-ui .ui-row{display:flex;align-items:center;gap:10px;min-width:0;border-top:1px solid var(--ui-rule)}
+.ncs-ui .ui-row:first-child{border-top:0}
+.ncs-ui .ui-row__hit{flex:1;display:flex;align-items:center;gap:14px;min-width:0;padding:10px 6px 10px 0;background:none;border:0;font:inherit;color:inherit;text-align:left;text-decoration:none;cursor:pointer;border-radius:10px}
+.ncs-ui a.ui-row__hit:not([data-ui]){color:inherit}
+.ncs-ui .ui-row__hit--still{cursor:default}
+.ncs-ui .ui-row__hit .ui-art,.ncs-ui .ui-row__hit .ui-date{transition:transform .2s ease}
+.ncs-ui .ui-row__hit:not(.ui-row__hit--still):hover .ui-art,.ncs-ui .ui-row__hit:not(.ui-row__hit--still):hover .ui-date{transform:translateY(-2px) rotate(-3deg)}
+.ncs-ui .ui-row__hit:not(.ui-row__hit--still):hover .ui-row__title{color:var(--ui-heading);text-decoration:underline;text-underline-offset:3px}
+.ncs-ui .ui-row__hit:focus-visible{outline:3px solid var(--ui-focus);outline-offset:2px}
+.ncs-ui .ui-row__words{flex:1;display:grid;gap:1px;min-width:0}
+.ncs-ui .ui-row__title{font-weight:650;font-size:15.5px;line-height:1.35;color:var(--ui-ink);overflow-wrap:anywhere}
+.ncs-ui .ui-row__meta{font-size:14px;line-height:1.4;color:var(--ui-muted)}
+.ncs-ui .ui-row__tag{flex:none}
+.ncs-ui .ui-row__tag .ui-tag{font-size:11px;padding:6px 11px 6px 9px}
+.ncs-ui .ui-row__action{flex:none}
+@media (max-width:480px){.ncs-ui .ui-row__hit{flex-wrap:wrap}.ncs-ui .ui-row__tag{flex-basis:100%;padding-left:58px}}
+@media (prefers-reduced-motion:reduce){.ncs-ui .ui-row__hit .ui-art,.ncs-ui .ui-row__hit .ui-date{transition:none;transform:none!important}}
+.ncs-ui .ui-figure{display:grid;gap:2px}
+.ncs-ui .ui-figure__value{font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:clamp(40px,3vw + 22px,56px);line-height:1;color:var(--ui-heading);letter-spacing:-.01em;font-variant-numeric:lining-nums}
+.ncs-ui .ui-figure__label{font-weight:650;font-size:15px;color:var(--ui-ink)}
+.ncs-ui .ui-figure__sub{font-size:14px;color:var(--ui-muted)}
+.ncs-ui .ui-bars{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.ncs-ui .ui-bars__row{display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr) auto;align-items:center;gap:12px;font-size:14.5px}
+.ncs-ui .ui-bars__label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ui-ink)}
+.ncs-ui .ui-bars__track{height:12px;min-width:0}
+.ncs-ui .ui-bars__bar{display:block;height:100%;border-radius:var(--ui-tag-radius)}
+.ncs-ui .ui-bars__value{font-weight:650;font-variant-numeric:tabular-nums;color:var(--ui-ink)}
+@media (max-width:480px){.ncs-ui .ui-bars__row{grid-template-columns:minmax(0,1fr) auto}.ncs-ui .ui-bars__track{grid-column:1 / -1;grid-row:2}}
+.ncs-ui .ui-trail .ui-live{max-width:520px}
+.ncs-ui .ui-tour-trail .ui-live{max-width:none}
 `;

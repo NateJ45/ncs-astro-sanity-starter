@@ -86,21 +86,29 @@ function Tick() {
   );
 }
 
-/** A stone in a step state: laid (its colour, a tick), waiting (an outline, its number). */
+/**
+ * A stone in a step state: laid (its mark colour, a tick), waiting (the same
+ * hand-laid outline drawn in that colour, its number), being laid, slow, failed.
+ * `calm` (card 132) lays a finished stone only in the colours that read as
+ * "good" (look.calm), so a done "On the website" is never the warning brick.
+ */
 export function StateStone({
   state,
   index = 0,
   n,
   size = 40,
+  calm = false,
 }: {
   state: StepState;
   index?: number;
   n?: ReactNode;
   size?: number;
+  calm?: boolean;
 }) {
   const t = useLookTokens();
   const seed = index * 5 + 3;
-  if (state === 'done') return <Stone index={index} n={<Tick />} size={size} seed={seed} />;
+  const colour = calm ? t.calm[index % t.calm.length] : index;
+  if (state === 'done') return <Stone index={colour} n={<Tick />} size={size} seed={seed} />;
   if (state === 'now' || state === 'slow' || state === 'failed') {
     const tone = state === 'now' ? 'note' : state === 'slow' ? 'tip' : 'careful';
     return (
@@ -116,7 +124,13 @@ export function StateStone({
       </span>
     );
   }
-  return <Stone size={size} seed={seed} fill={t.surface} edge={t.muted} color={t.muted} n={n} />;
+  // Waiting: the stone's own shape, outlined in the colour it will be laid in.
+  const s = t.stones[colour % t.stones.length];
+  return (
+    <span className="ui-state ui-state--todo">
+      <Stone size={size} seed={seed} fill={t.surface} edge={s.fill} color={t.muted} n={n} />
+    </span>
+  );
 }
 
 /** A pill link or button in the site's heading colour. `strong` fills it. */
@@ -303,7 +317,7 @@ export function AllClear({
       <div className="ui-clear__in">
         <span className="ui-clear__stones" aria-hidden>
           {[0, 1, 2].map((i) => (
-            <StateStone key={i} state="done" index={i} size={compact ? 22 : 30} />
+            <StateStone key={i} state="done" index={i} calm size={compact ? 22 : 30} />
           ))}
         </span>
         <p className="ui-clear__title">{title}</p>
@@ -437,6 +451,11 @@ export function LiveSteps({
       className={['ui-live', compact ? 'ui-live--compact' : ''].join(' ').trim()}
       aria-label={compact ? undefined : label}
       aria-hidden={compact ? true : undefined}
+      style={
+        compact
+          ? undefined
+          : ({ gridTemplateColumns: `repeat(${words.length}, minmax(0, 1fr))` } as CSSProperties)
+      }
     >
       {words.map((w, i) => {
         const s = states[i] ?? 'todo';
@@ -447,6 +466,7 @@ export function LiveSteps({
               <StateStone
                 state={s}
                 index={i}
+                calm
                 n={compact ? undefined : i + 1}
                 size={compact ? 12 : 34}
               />
@@ -476,19 +496,22 @@ export function TileCard({
   meaning,
   icon,
   onClick,
+  href,
   dataQuick,
 }: {
   title: ReactNode;
   lead?: ReactNode;
   meaning?: BrandIconKey;
   icon?: ComponentType;
-  onClick?: () => void;
+  onClick?: (e: MouseEvent<HTMLElement>) => void;
+  /** Card 132: a real link (Ctrl or Cmd opens a new tab), with onClick for the Studio's router. */
+  href?: string;
   /** Kept for tests and hooks that find a tile by its job ("post-photo"). */
   dataQuick?: string;
 }) {
   const t = useLookTokens();
-  return (
-    <button type="button" className="ui-tile" onClick={onClick} data-quick={dataQuick}>
+  const body = (
+    <>
       <ColourEdge />
       <span className="ui-tile__in">
         <ArtTile
@@ -503,6 +526,15 @@ export function TileCard({
           {lead && <span className="ui-tile__lead">{lead}</span>}
         </span>
       </span>
+    </>
+  );
+  return href ? (
+    <a className="ui-tile" href={href} onClick={onClick} data-quick={dataQuick}>
+      {body}
+    </a>
+  ) : (
+    <button type="button" className="ui-tile" onClick={onClick} data-quick={dataQuick}>
+      {body}
     </button>
   );
 }
@@ -573,5 +605,169 @@ export function EmptyState({
       </div>
       <Sill />
     </section>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Card 132: Home's rows, dates and numbers, and the trail across
+// -----------------------------------------------------------------------------
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * A date on a stone: the month in small caps over the day in the display font,
+ * inside a hand-laid outline in a mark colour (cycling by `index`), like a date
+ * chalked on a stepping stone. `date` is an ISO date or date-time. Decorative:
+ * the row's own words carry the full date for a screen reader.
+ */
+export function DateBlock({ date, index = 0 }: { date: string; index?: number }) {
+  const t = useLookTokens();
+  const d = new Date(date.length <= 10 ? `${date}T12:00:00` : date);
+  if (Number.isNaN(d.getTime())) return null;
+  const s = t.stones[index % t.stones.length];
+  return (
+    <span className="ui-date" aria-hidden>
+      <Stone size={56} seed={index * 7 + 2} fill={t.surface} edge={s.fill} />
+      <span className="ui-date__words">
+        <span className="ui-date__month">{MONTHS[d.getMonth()]}</span>
+        <span className="ui-date__day">{d.getDate()}</span>
+      </span>
+    </span>
+  );
+}
+
+/**
+ * A row in a Home list: the meaning's art on a small stone (or `lead`, a
+ * DateBlock on Coming up), a title, a muted line, a tag, an optional action.
+ * The words and art are one link when `href` or `onClick` is given.
+ */
+export function ArtRow({
+  meaning,
+  icon,
+  lead,
+  title,
+  meta,
+  tag,
+  href,
+  onClick,
+  action,
+  seed = 3,
+}: {
+  meaning?: BrandIconKey;
+  icon?: ComponentType;
+  lead?: ReactNode;
+  title: ReactNode;
+  meta?: ReactNode;
+  tag?: ReactNode;
+  href?: string;
+  onClick?: (e: MouseEvent<HTMLElement>) => void;
+  action?: ReactNode;
+  seed?: number;
+}) {
+  const t = useLookTokens();
+  const inner = (
+    <>
+      {lead ?? (
+        <ArtTile meaning={meaning} icon={icon} size={44} ground={t.tones.note.bg} seed={seed} />
+      )}
+      <span className="ui-row__words">
+        <span className="ui-row__title">{title}</span>
+        {meta && <span className="ui-row__meta">{meta}</span>}
+      </span>
+      {tag && <span className="ui-row__tag">{tag}</span>}
+    </>
+  );
+  return (
+    <li className="ui-row">
+      {href ? (
+        <a className="ui-row__hit" href={href} onClick={onClick}>
+          {inner}
+        </a>
+      ) : onClick ? (
+        <button type="button" className="ui-row__hit" onClick={onClick}>
+          {inner}
+        </button>
+      ) : (
+        <span className="ui-row__hit ui-row__hit--still">{inner}</span>
+      )}
+      {action && <span className="ui-row__action">{action}</span>}
+    </li>
+  );
+}
+
+/** The list ArtRows sit in. */
+export function ArtRows({ children, label }: { children: ReactNode; label?: string }) {
+  return (
+    <ul className="ui-rows" aria-label={label}>
+      {children}
+    </ul>
+  );
+}
+
+/** A headline number in the display font, its words beneath (Visitors, subscribers). */
+export function Figure({
+  value,
+  label,
+  sub,
+}: {
+  value: ReactNode;
+  label: ReactNode;
+  sub?: ReactNode;
+}) {
+  return (
+    <p className="ui-figure">
+      <span className="ui-figure__value">{value}</span>
+      <span className="ui-figure__label">{label}</span>
+      {sub && <span className="ui-figure__sub">{sub}</span>}
+    </p>
+  );
+}
+
+/**
+ * Bars in the calm mark colours in turn, each with its number in words beside
+ * it, so the colour never carries the meaning alone.
+ */
+export function MarkBars({
+  rows,
+  label,
+}: {
+  rows: { label: ReactNode; value: number; text?: ReactNode }[];
+  label?: string;
+}) {
+  const t = useLookTokens();
+  const max = Math.max(1, ...rows.map((r) => r.value));
+  return (
+    <ul className="ui-bars" aria-label={label}>
+      {rows.map((r, i) => {
+        const s = t.stones[t.calm[i % t.calm.length] % t.stones.length];
+        return (
+          <li key={i} className="ui-bars__row">
+            <span className="ui-bars__label">{r.label}</span>
+            <span className="ui-bars__track" aria-hidden>
+              <span
+                className="ui-bars__bar"
+                style={{ width: `${Math.max(4, (r.value / max) * 100)}%`, background: s.fill }}
+              />
+            </span>
+            <span className="ui-bars__value">{r.text ?? r.value}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
+ * Named steps across (Post a photo, the tour): the stones laid so far, the one
+ * you are on ringed, the rest waiting as outlines. It reads as words too.
+ */
+export function StepTrail({ words, current }: { words: readonly string[]; current: number }) {
+  const states: StepState[] = words.map((_, i) =>
+    i < current ? 'done' : i === current ? 'now' : 'todo',
+  );
+  return (
+    <div className="ui-trail">
+      <LiveSteps states={states} words={words} />
+    </div>
   );
 }

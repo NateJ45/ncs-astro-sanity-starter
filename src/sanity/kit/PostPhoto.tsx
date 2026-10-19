@@ -19,9 +19,15 @@
 // WHERE it was taken. If the browser cannot redraw it, the original goes up.
 //
 // The pure parts (checks, labels, GROQ, paths) are in src/lib/photo-post.ts.
+//
+// Layout (card 132): the form is a three-stone path in the kit's language. A
+// StepTrail across the top (Pick a photo, Say what it shows, Post it) lays a
+// stone as each part is filled in, and each part of the form is led by its own
+// numbered stone in the same state, with a display-font heading. The inputs
+// stay @sanity/ui controls (their focus, keyboard and labels are the Studio's).
 // =============================================================================
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useClient, type SanityClient } from 'sanity';
 import { Box, Button, Card, Flex, Radio, Stack, Text, TextArea, TextInput } from '@sanity/ui';
 import { ArrowLeftIcon } from '@sanity/icons/ArrowLeft';
@@ -39,8 +45,67 @@ import {
   type GalleryChoice,
 } from '../../lib/photo-post';
 import { API_VERSION, useStudioLink, useTypeTitle } from './shared';
-import { DoneCard, KitAction, KitLoading, KitNotice, KitScope } from './ui';
+import {
+  ArtTile,
+  DoneCard,
+  KitAction,
+  KitLoading,
+  KitNotice,
+  KitScope,
+  StateStone,
+  StepTrail,
+} from './ui';
+import type { StepState } from '../../lib/studio-look';
 import type { PostPhotoConfig } from './types';
+
+/** The three parts of the form, as the trail and the step headings name them. */
+export const PHOTO_STEPS = ['Pick a photo', 'Say what it shows', 'Post it'] as const;
+
+/** One part of the form, led by its numbered stone (laid, ringed or waiting) and a display-font heading. */
+export function PhotoStep({
+  index,
+  current,
+  children,
+}: {
+  index: number;
+  current: number;
+  children: ReactNode;
+}) {
+  const state: StepState = index < current ? 'done' : index === current ? 'now' : 'todo';
+  const id = `photo-step-${index}`;
+  return (
+    <section
+      aria-labelledby={id}
+      style={{
+        display: 'grid',
+        gap: 16,
+        paddingTop: 20,
+        borderTop: '1px solid var(--ui-rule)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+        <StateStone state={state} index={index} calm n={index + 1} size={40} />
+        <h3
+          id={id}
+          style={{
+            margin: 0,
+            fontFamily: 'var(--ui-display)',
+            fontWeight: 'var(--ui-display-weight)',
+            fontSize: 24,
+            lineHeight: 1.15,
+            color: 'var(--ui-heading)',
+            minWidth: 0,
+            overflowWrap: 'anywhere',
+          }}
+        >
+          {PHOTO_STEPS[index]}
+          {state === 'done' && <span className="ui-sr"> (done)</span>}
+        </h3>
+      </div>
+      {children}
+    </section>
+  );
+}
 
 const key = () => crypto.randomUUID().replace(/-/g, '').slice(0, 12);
 
@@ -249,214 +314,217 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
       </Text>
     ) : null;
 
+  // Where the trail stands: no photo yet, then the words, then where it goes.
+  const current = !file ? 0 : alt.trim() ? 2 : 1;
+
   return (
-    <Stack gap={5}>
-      <Flex>
-        <Button
-          icon={ArrowLeftIcon}
-          text="Back"
-          mode="bleed"
-          fontSize={2}
-          padding={3}
-          onClick={onBack}
-        />
-      </Flex>
-      <Stack gap={3}>
-        <Text as="h2" size={4} weight="semibold">
-          Post a photo
-        </Text>
-        <Text size={2} muted style={{ lineHeight: 1.6 }}>
-          Take a photo or pick one from your phone, say what is in it, and choose where it goes. It
-          is saved as a draft for you to check and publish.
-        </Text>
-        {config.note && (
-          <KitScope>
-            <KitNotice tone="tip">{config.note}</KitNotice>
-          </KitScope>
-        )}
-      </Stack>
-
-      {/* The photo. Two hidden inputs: the camera, and the phone's photos. */}
-      <Stack gap={3}>
-        <Text size={2} weight="semibold">
-          The photo
-        </Text>
-        <input
-          ref={cameraRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          hidden
-          data-photo-input="camera"
-          onChange={(e) => pick(e.currentTarget.files?.[0])}
-        />
-        <input
-          ref={galleryRef}
-          type="file"
-          accept="image/*"
-          hidden
-          data-photo-input="gallery"
-          onChange={(e) => pick(e.currentTarget.files?.[0])}
-        />
-        {previewUrl && (
-          <Card radius={3} border overflow="hidden">
-            <img
-              src={previewUrl}
-              alt="The photo you picked"
-              style={{ display: 'block', width: '100%', maxHeight: 320, objectFit: 'contain' }}
-            />
-          </Card>
-        )}
-        <Flex gap={2} wrap="wrap">
-          <Box flex={1} style={{ minWidth: 150 }}>
-            <Button
-              icon={ImageIcon}
-              text={file ? 'Take another' : 'Take a photo'}
-              mode="ghost"
-              fontSize={2}
-              padding={4}
-              style={{ width: '100%' }}
-              onClick={() => cameraRef.current?.click()}
-            />
-          </Box>
-          <Box flex={1} style={{ minWidth: 150 }}>
-            <Button
-              icon={UploadIcon}
-              text={file ? 'Choose a different one' : 'Choose from your photos'}
-              mode="ghost"
-              fontSize={2}
-              padding={4}
-              style={{ width: '100%' }}
-              onClick={() => galleryRef.current?.click()}
-            />
-          </Box>
+    <KitScope>
+      <Stack gap={5}>
+        <Flex>
+          <Button
+            icon={ArrowLeftIcon}
+            text="Back"
+            mode="bleed"
+            fontSize={2}
+            padding={3}
+            onClick={onBack}
+          />
         </Flex>
-        {fieldError('photo')}
-      </Stack>
+        <header className="ui-toolhead">
+          <div className="ui-toolhead__row">
+            <ArtTile meaning="image" size={64} seed={13} />
+            <h2 className="ui-toolhead__title" style={{ margin: 0 }}>
+              Post a photo
+            </h2>
+          </div>
+          <p className="ui-toolhead__lead" style={{ margin: 0 }}>
+            Take a photo or pick one from your phone, say what is in it, and choose where it goes.
+            It is saved as a draft for you to check and publish.
+          </p>
+          {config.note && <KitNotice tone="tip">{config.note}</KitNotice>}
+        </header>
 
-      <Stack gap={3}>
-        <Text as="label" htmlFor="photo-alt" size={2} weight="semibold">
-          Describe the photo
-        </Text>
-        <Text size={1} muted style={{ lineHeight: 1.5 }}>
-          What is in it, for someone who cannot see it. For example: "The children's choir singing
-          at the Christmas service".
-        </Text>
-        <TextArea
-          id="photo-alt"
-          rows={3}
-          fontSize={3}
-          padding={4}
-          value={alt}
-          aria-invalid={Boolean(errors.alt)}
-          aria-describedby={errors.alt ? 'photo-alt-error' : undefined}
-          onChange={(e) => setAlt(e.currentTarget.value)}
-        />
-        {fieldError('alt')}
-      </Stack>
+        <StepTrail words={PHOTO_STEPS} current={current} />
 
-      {spec.captionField && (
-        <Stack gap={3}>
-          <Text as="label" htmlFor="photo-caption" size={2} weight="semibold">
-            Caption (if you like)
-          </Text>
-          <TextInput
-            id="photo-caption"
-            fontSize={3}
-            padding={4}
-            value={caption}
-            onChange={(e) => setCaption(e.currentTarget.value)}
+        {/* 1. The photo. Two hidden inputs: the camera, and the phone's photos. */}
+        <PhotoStep index={0} current={current}>
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            hidden
+            data-photo-input="camera"
+            onChange={(e) => pick(e.currentTarget.files?.[0])}
           />
-        </Stack>
-      )}
+          <input
+            ref={galleryRef}
+            type="file"
+            accept="image/*"
+            hidden
+            data-photo-input="gallery"
+            onChange={(e) => pick(e.currentTarget.files?.[0])}
+          />
+          {previewUrl && (
+            <Card radius={3} border overflow="hidden">
+              <img
+                src={previewUrl}
+                alt="The photo you picked"
+                style={{ display: 'block', width: '100%', maxHeight: 320, objectFit: 'contain' }}
+              />
+            </Card>
+          )}
+          <Flex gap={2} wrap="wrap">
+            <Box flex={1} style={{ minWidth: 150 }}>
+              <Button
+                icon={ImageIcon}
+                text={file ? 'Take another' : 'Take a photo'}
+                mode="ghost"
+                fontSize={2}
+                padding={4}
+                style={{ width: '100%' }}
+                onClick={() => cameraRef.current?.click()}
+              />
+            </Box>
+            <Box flex={1} style={{ minWidth: 150 }}>
+              <Button
+                icon={UploadIcon}
+                text={file ? 'Choose a different one' : 'Choose from your photos'}
+                mode="ghost"
+                fontSize={2}
+                padding={4}
+                style={{ width: '100%' }}
+                onClick={() => galleryRef.current?.click()}
+              />
+            </Box>
+          </Flex>
+          {fieldError('photo')}
+        </PhotoStep>
 
-      <Stack gap={3} as="fieldset" style={{ border: 0, margin: 0, padding: 0 }}>
-        <Text as="legend" size={2} weight="semibold" style={{ marginBottom: 12 }}>
-          Where should it go?
-        </Text>
-        {choices === null ? (
-          <KitScope>
-            <KitLoading label="Finding the galleries..." />
-          </KitScope>
-        ) : (
-          <Stack gap={2}>
-            {config.post && (
-              <Card as="label" padding={3} radius={2} border style={{ cursor: 'pointer' }}>
-                <Flex gap={3} align="center">
-                  <Radio
-                    name="photo-target"
-                    value="post"
-                    checked={target === 'post'}
-                    onChange={() => setTarget('post')}
-                  />
-                  <Text size={2}>{config.post.label}</Text>
-                </Flex>
-              </Card>
-            )}
-            {choices.map((c) => {
-              const id = `${c.docId}:${c.sectionKey}`;
-              return (
-                <Card
-                  key={id}
-                  as="label"
-                  padding={3}
-                  radius={2}
-                  border
-                  style={{ cursor: 'pointer' }}
-                >
-                  <Flex gap={3} align="center">
-                    <Radio
-                      name="photo-target"
-                      value={id}
-                      checked={target === id}
-                      onChange={() => setTarget(id)}
-                    />
-                    <Text size={2}>{c.label}</Text>
-                  </Flex>
-                </Card>
-              );
-            })}
-            {!choices.length && !config.post && (
-              <Text size={1} muted style={{ lineHeight: 1.5 }}>
-                No page has a photo gallery yet. Add a "Photo gallery" section to a page in the full
-                editor first.
-              </Text>
-            )}
+        {/* 2. What it shows: the description (required) and a caption. */}
+        <PhotoStep index={1} current={current}>
+          <Stack gap={3}>
+            <Text as="label" htmlFor="photo-alt" size={2} weight="semibold">
+              Describe the photo
+            </Text>
+            <Text size={1} muted style={{ lineHeight: 1.5 }}>
+              What is in it, for someone who cannot see it. For example: "The children's choir
+              singing at the Christmas service".
+            </Text>
+            <TextArea
+              id="photo-alt"
+              rows={3}
+              fontSize={3}
+              padding={4}
+              value={alt}
+              aria-invalid={Boolean(errors.alt)}
+              aria-describedby={errors.alt ? 'photo-alt-error' : undefined}
+              onChange={(e) => setAlt(e.currentTarget.value)}
+            />
+            {fieldError('alt')}
           </Stack>
-        )}
-        {fieldError('target')}
-      </Stack>
 
-      {target === 'post' && config.post && (
-        <Stack gap={3}>
-          <Text as="label" htmlFor="photo-title" size={2} weight="semibold">
-            Title for the post
-          </Text>
-          <TextInput
-            id="photo-title"
-            fontSize={3}
+          {spec.captionField && (
+            <Stack gap={3}>
+              <Text as="label" htmlFor="photo-caption" size={2} weight="semibold">
+                Caption (if you like)
+              </Text>
+              <TextInput
+                id="photo-caption"
+                fontSize={3}
+                padding={4}
+                value={caption}
+                onChange={(e) => setCaption(e.currentTarget.value)}
+              />
+            </Stack>
+          )}
+        </PhotoStep>
+
+        {/* 3. Where it goes, then save. */}
+        <PhotoStep index={2} current={current}>
+          <Stack gap={3} as="fieldset" style={{ border: 0, margin: 0, padding: 0 }}>
+            <Text as="legend" size={2} weight="semibold" style={{ marginBottom: 12 }}>
+              Where should it go?
+            </Text>
+            {choices === null ? (
+              <KitLoading label="Finding the galleries..." />
+            ) : (
+              <Stack gap={2}>
+                {config.post && (
+                  <Card as="label" padding={3} radius={2} border style={{ cursor: 'pointer' }}>
+                    <Flex gap={3} align="center">
+                      <Radio
+                        name="photo-target"
+                        value="post"
+                        checked={target === 'post'}
+                        onChange={() => setTarget('post')}
+                      />
+                      <Text size={2}>{config.post.label}</Text>
+                    </Flex>
+                  </Card>
+                )}
+                {choices.map((c) => {
+                  const id = `${c.docId}:${c.sectionKey}`;
+                  return (
+                    <Card
+                      key={id}
+                      as="label"
+                      padding={3}
+                      radius={2}
+                      border
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <Flex gap={3} align="center">
+                        <Radio
+                          name="photo-target"
+                          value={id}
+                          checked={target === id}
+                          onChange={() => setTarget(id)}
+                        />
+                        <Text size={2}>{c.label}</Text>
+                      </Flex>
+                    </Card>
+                  );
+                })}
+                {!choices.length && !config.post && (
+                  <Text size={1} muted style={{ lineHeight: 1.5 }}>
+                    No page has a photo gallery yet. Add a "Photo gallery" section to a page in the
+                    full editor first.
+                  </Text>
+                )}
+              </Stack>
+            )}
+            {fieldError('target')}
+          </Stack>
+
+          {target === 'post' && config.post && (
+            <Stack gap={3}>
+              <Text as="label" htmlFor="photo-title" size={2} weight="semibold">
+                Title for the post
+              </Text>
+              <TextInput
+                id="photo-title"
+                fontSize={3}
+                padding={4}
+                value={title}
+                aria-invalid={Boolean(errors.title)}
+                onChange={(e) => setTitle(e.currentTarget.value)}
+              />
+              {fieldError('title')}
+            </Stack>
+          )}
+
+          {failed && <KitNotice tone="careful">{failed}</KitNotice>}
+          <Button
+            text={step ?? 'Save as a draft'}
+            tone="primary"
+            fontSize={2}
             padding={4}
-            value={title}
-            aria-invalid={Boolean(errors.title)}
-            onChange={(e) => setTitle(e.currentTarget.value)}
+            disabled={Boolean(step)}
+            onClick={() => void submit()}
           />
-          {fieldError('title')}
-        </Stack>
-      )}
-
-      {failed && (
-        <KitScope>
-          <KitNotice tone="careful">{failed}</KitNotice>
-        </KitScope>
-      )}
-      <Button
-        text={step ?? 'Save as a draft'}
-        tone="primary"
-        fontSize={2}
-        padding={4}
-        disabled={Boolean(step)}
-        onClick={() => void submit()}
-      />
-    </Stack>
+        </PhotoStep>
+      </Stack>
+    </KitScope>
   );
 }

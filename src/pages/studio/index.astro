@@ -13,10 +13,12 @@
 //     own paper (light) or dark background, following the Appearance the
 //     editor last picked (Sanity keeps it in localStorage) or, failing that,
 //     the computer's setting;
-//   - a plain HTML/CSS splash (the site's mark, its name in the brand font, an
-//     optional site motif from src/sanity/StudioSplashMotif.astro) that React
-//     replaces as soon as the Studio mounts. It is the island's `fallback`
-//     slot, so Astro swaps it out; no script of ours removes it.
+//   - a plain HTML/CSS splash that React replaces as soon as the Studio
+//     mounts: the site's mark, its name in its lettering, and its stone path
+//     laid one stone at a time (src/components/studio/StudioSplash.astro, card
+//     132, all from brand.config.json `studio.look`), plus an optional site
+//     motif from src/sanity/StudioSplashMotif.astro. It is the island's
+//     `fallback` slot, so Astro swaps it out; no script of ours removes it.
 //
 // The React side is still @sanity/astro's StudioComponentHash (hash history:
 // deep links are /studio/#/structure/...). Its config module `sanity:studio` is
@@ -40,6 +42,7 @@ import { STUDIO_COLORS } from '../../sanity/studioTheme';
 import { studioEdges } from '../../sanity/studioEdges.config';
 import { pickWordmark, type StudioBootData } from '../../lib/studio-route';
 import StudioSplashMotif from '../../sanity/StudioSplashMotif.astro';
+import StudioSplash from '../../components/studio/StudioSplash.astro';
 import { STUDIO_MANIFEST_PATH, STUDIO_SCOPE, STUDIO_SW_PATH } from '../../lib/studio-app';
 // The brand's font files, the same ones the Studio loads (card 116).
 import '../../sanity/studioFonts.css';
@@ -52,9 +55,6 @@ const appName = studioEdges.app?.shortName ?? name;
 // Vite's own files and outlive the dev server.
 const registerWorker = import.meta.env.PROD;
 const workerScript = `if ('serviceWorker' in navigator) { addEventListener('load', function () { navigator.serviceWorker.register(${JSON.stringify(STUDIO_SW_PATH)}, { scope: ${JSON.stringify(STUDIO_SCOPE)} }).catch(function () {}); }); }`;
-const fonts = (brand as { studio?: { fonts?: { display?: string; body?: string } } }).studio?.fonts;
-const displayFont = fonts?.display ?? 'Georgia, serif';
-const bodyFont = fonts?.body ?? 'system-ui, sans-serif';
 
 // Palette: exactly what the Studio paints, so the hand-over does not flash.
 const paper = STUDIO_COLORS.white;
@@ -80,11 +80,7 @@ const splashVars = [
   `--splash-dark: ${dark}`,
   `--splash-chrome: ${chrome}`,
   `--splash-ink-light: ${chrome}`,
-  `--splash-muted-light: ${gray['600']}`,
   `--splash-ink-dark: ${gray['50']}`,
-  `--splash-muted-dark: ${gray['400']}`,
-  `--splash-display: ${displayFont}`,
-  `--splash-body: ${bodyFont}`,
 ].join('; ');
 ---
 
@@ -160,49 +156,13 @@ const splashVars = [
         display: grid;
         place-items: center;
         padding: 24px 16px;
-        font-family: var(--splash-body);
         -webkit-font-smoothing: antialiased;
-      }
-      .ncs-splash__inner {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 14px;
-        text-align: center;
-        max-width: 28rem;
-      }
-      .ncs-splash__mark {
-        width: 64px;
-        height: 64px;
-        display: block;
-      }
-      .ncs-splash__name {
-        margin: 0;
-        font-family: var(--splash-display);
-        font-size: clamp(1.375rem, 4.5vw, 1.75rem);
-        line-height: 1.2;
-        font-weight: 400;
-        text-wrap: balance;
-      }
-      .ncs-splash__note {
-        margin: 0;
-        font-size: 0.875rem;
-        line-height: 1.4;
-        color: var(--splash-muted-light);
-      }
-      html[data-studio-scheme='dark'] .ncs-splash__note {
-        color: var(--splash-muted-dark);
-      }
-      @media (prefers-color-scheme: dark) {
-        html:not([data-studio-scheme='light']) .ncs-splash__note {
-          color: var(--splash-muted-dark);
-        }
       }
       .ncs-splash__motif:empty {
         display: none;
       }
       .ncs-splash__motif {
-        margin-top: 10px;
+        margin-top: 4px;
         width: min(280px, 70vw);
       }
       .ncs-splash__motif svg,
@@ -216,14 +176,11 @@ const splashVars = [
   <body>
     <StudioComponentHash client:only="react">
       <div slot="fallback" class="ncs-splash" data-studio-splash role="status">
-        <div class="ncs-splash__inner">
-          <img class="ncs-splash__mark" src="/favicon.svg" alt="" width="64" height="64" />
-          <p class="ncs-splash__name">{name}</p>
-          <p class="ncs-splash__note">Opening the editor</p>
+        <StudioSplash mode="loading">
           <div class="ncs-splash__motif" aria-hidden="true">
             <StudioSplashMotif />
           </div>
-        </div>
+        </StudioSplash>
       </div>
     </StudioComponentHash>
   </body>

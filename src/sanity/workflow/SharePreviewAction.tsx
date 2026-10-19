@@ -22,6 +22,9 @@
 // one-hour look; this is the one to use for "can the board read it this week".
 // Only types whose own page the /preview route renders get the action (the
 // `shareTypes` option of ncsWorkflowTools in sanity.config.ts).
+//
+// Card 132: waiting is the kit's laid-stones loader, and "not set up" and a
+// failure are kit callouts (src/sanity/kit/ui), not spinners and tinted cards.
 // =============================================================================
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -30,10 +33,11 @@ import {
   type DocumentActionComponent,
   type DocumentActionDescription,
 } from 'sanity';
-import { Box, Button, Card, Flex, Spinner, Stack, Text, TextInput } from '@sanity/ui';
+import { Box, Button, Card, Flex, Stack, Text, TextInput } from '@sanity/ui';
 import { ShareIcon } from '@sanity/icons/Share';
 import { CopyIcon } from '@sanity/icons/Copy';
 import { previewPathFor } from '../components/shareDraftLink';
+import { KitLoading, KitNotice, KitScope } from '../kit/ui';
 import {
   expiryFor,
   normaliseSharePath,
@@ -168,20 +172,24 @@ function SharePreviewDialog({
 
   if (configured === null) {
     return (
-      <Flex justify="center" padding={4}>
-        <Spinner muted />
-      </Flex>
+      <Box padding={4}>
+        <KitScope>
+          <KitLoading label="Checking preview links..." />
+        </KitScope>
+      </Box>
     );
   }
 
   if (!configured) {
     return (
-      <Card padding={4} tone="caution" radius={2}>
-        <Text size={2}>
-          Private preview links are not set up on this website yet. Ask for help to switch them on.
-          Until then, "Copy share link" makes a link that works for about an hour.
-        </Text>
-      </Card>
+      <Box padding={4}>
+        <KitScope>
+          <KitNotice tone="tip">
+            Private preview links are not set up on this website yet. Ask for help to switch them
+            on. Until then, "Copy share link" makes a link that works for about an hour.
+          </KitNotice>
+        </KitScope>
+      </Box>
     );
   }
 
@@ -250,9 +258,9 @@ function SharePreviewDialog({
       )}
 
       {note && (
-        <Card padding={3} radius={2} tone="critical" border>
-          <Text size={1}>{note}</Text>
-        </Card>
+        <KitScope>
+          <KitNotice tone="careful">{note}</KitNotice>
+        </KitScope>
       )}
 
       <Stack gap={2}>
@@ -260,7 +268,9 @@ function SharePreviewDialog({
           Links for this page that still work
         </Text>
         {active === null ? (
-          <Spinner muted />
+          <KitScope>
+            <KitLoading label="Loading the links..." />
+          </KitScope>
         ) : active.length === 0 ? (
           <Text size={1} muted>
             None.

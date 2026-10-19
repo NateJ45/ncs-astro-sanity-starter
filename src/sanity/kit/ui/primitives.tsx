@@ -354,7 +354,7 @@ export function Stone({
           d={d}
           fill={fill ?? s.fill}
           stroke={edge}
-          strokeWidth={edge ? 1.5 : undefined}
+          strokeWidth={edge ? Math.max(1.5, Math.min(2.25, size / 18)) : undefined}
           strokeLinejoin="round"
         />
       </svg>
@@ -732,7 +732,7 @@ export function KitCard({
 export function KitLoading({ label = 'Loading' }: { label?: string }) {
   const { ref, className } = useArrive<HTMLSpanElement>();
   return (
-    <span className="ui-loading" role="status">
+    <span className="ui-loading" role="status" aria-label={label ? undefined : 'Loading'}>
       <span ref={ref} className={['ui-loading__stones', className].join(' ').trim()}>
         {[0, 1, 2].map((i) => (
           <span key={i} style={{ '--i': i } as CSSProperties}>

@@ -11,7 +11,12 @@
 //      kept after the first visit and served from here, even when the phone has
 //      dropped them from its ordinary cache.
 //   2. A FRIENDLY OFFLINE PAGE. Opening the app with no connection shows
-//      /studio/offline/ ("You're offline") instead of the phone's error.
+//      /studio/offline/ ("You're offline") instead of the phone's error. At
+//      install the worker also keeps every file that page points at (its
+//      stylesheet, the brand's font files in it, the lettering, the motif
+//      strips, the mark; card 132), read from the page itself by
+//      offlineRefs() and fontRefs(), so the page is whole with no signal and
+//      no list here goes stale when the brand changes.
 //
 // WHAT IT NEVER STORES (the reason this file is short):
 //   - anything from another address: every Sanity API call, the realtime
@@ -25,10 +30,11 @@
 //     one copy it falls back to offline is /studio/offline/.
 //
 // cacheRule() below is the whole policy; src/lib/studio-app.test.ts runs this
-// file in a sandbox and checks it. Bump VERSION to throw every kept file away.
+// file in a sandbox and checks it. Bump VERSION to throw every kept file away
+// (v2, card 132: the offline page's own files are kept too).
 // =============================================================================
 
-var VERSION = 'v1';
+var VERSION = 'v2';
 var PREFIX = 'ncs-studio-';
 var SHELL_CACHE = PREFIX + 'shell-' + VERSION;
 var ASSET_CACHE = PREFIX + 'assets-' + VERSION;
@@ -42,7 +48,10 @@ var PRECACHE = [OFFLINE_URL, '/favicon.svg', '/icon-192.png'];
  * What to do with one request: 'shell' (the boot page: network first, offline
  * page if that fails), 'asset' (a code file named by its content: kept, served
  * from the cache first), 'static' (an icon or the manifest: served from the
- * cache, refreshed in the background) or 'none' (leave it to the browser).
+ * cache, refreshed in the background), 'fallback' (a picture or font file of
+ * the site's own: the network, and only with no connection the copy kept at
+ * install for the offline page; nothing new is stored) or 'none' (leave it to
+ * the browser).
  */
 function cacheRule(url, method, hasAuth, ownOrigin) {
   var u;
@@ -67,7 +76,78 @@ function cacheRule(url, method, hasAuth, ownOrigin) {
   ) {
     return 'static';
   }
+  if (/\.(svg|woff2?|png|webp)$/.test(p)) return 'fallback';
   return 'none';
+}
+
+/** The same-origin files the offline page points at: stylesheets, pictures, fonts. */
+function offlineRefs(html) {
+  var out = [];
+  var re = /(?:src|href|srcset)="(\/[^"\s]+)"|url\(['"]?(\/[^'")\s]+)['"]?\)/g;
+  var m;
+  while ((m = re.exec(html))) {
+    var p = (m[1] || m[2]).split('#')[0];
+    if (p.indexOf('//') === 0) continue;
+    if (!/\.(css|svg|png|ico|webp|woff2?)(\?.*)?$/.test(p)) continue;
+    if (out.indexOf(p) < 0) out.push(p);
+  }
+  return out;
+}
+
+/**
+ * The font files a stylesheet points at, woff2 only. Font packages ship one
+ * file per alphabet; the latin ones are the ones an English page uses, so when
+ * there are latin files only those are kept (not latin-ext, cyrillic, ...).
+ */
+function fontRefs(css, base) {
+  var all = [];
+  var re = /url\(['"]?([^'")\s]+\.woff2)['"]?\)/g;
+  var m;
+  while ((m = re.exec(css))) {
+    var u;
+    try {
+      u = new URL(m[1], base).pathname;
+    } catch (_e) {
+      continue;
+    }
+    if (all.indexOf(u) < 0) all.push(u);
+  }
+  var latin = all.filter(function (u) {
+    return /-latin-(?!ext)/.test(u);
+  });
+  return latin.length ? latin : all;
+}
+
+/** Keep the offline page's own files (best effort: one missing file never fails the install). */
+function keepOfflineFiles(cache, origin) {
+  return fetch(OFFLINE_URL)
+    .then(function (res) {
+      return res.ok ? res.text() : '';
+    })
+    .then(function (html) {
+      var refs = offlineRefs(html);
+      return Promise.all(
+        refs.map(function (p) {
+          return fetch(p)
+            .then(function (res) {
+              if (!res.ok) return null;
+              var kept = cache.put(p, res.clone());
+              if (!/\.css(\?.*)?$/.test(p)) return kept;
+              return res.text().then(function (css) {
+                return Promise.all(
+                  [kept].concat(
+                    fontRefs(css, origin + p).map(function (font) {
+                      return cache.add(font).catch(function () {});
+                    }),
+                  ),
+                );
+              });
+            })
+            .catch(function () {});
+        }),
+      );
+    })
+    .catch(function () {});
 }
 
 /** Keep the code-file cache from growing for ever: oldest out first. */
@@ -97,7 +177,7 @@ function offlinePage() {
     return (
       hit ||
       new Response(
-        "<!doctype html><meta name=viewport content='width=device-width'><title>You're offline</title><p style='font:1rem system-ui;padding:24px'>You're offline. Your changes are saved when you're back online.</p>",
+        "<!doctype html><meta name=viewport content='width=device-width'><title>You're offline</title><p style='font:1rem system-ui;padding:24px'>You're offline. Your work is safe in the Studio; it will be here when the connection comes back.</p>",
         { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
       )
     );
@@ -112,7 +192,9 @@ if (typeof self !== 'undefined' && typeof caches !== 'undefined') {
       caches
         .open(SHELL_CACHE)
         .then(function (cache) {
-          return cache.addAll(PRECACHE);
+          return cache.addAll(PRECACHE).then(function () {
+            return keepOfflineFiles(cache, self.location.origin);
+          });
         })
         .then(function () {
           return self.skipWaiting();
@@ -163,6 +245,17 @@ if (typeof self !== 'undefined' && typeof caches !== 'undefined') {
           return fetch(req).then(function (res) {
             keep(ASSET_CACHE, req, res);
             return res;
+          });
+        }),
+      );
+      return;
+    }
+
+    if (rule === 'fallback') {
+      event.respondWith(
+        fetch(req).catch(function () {
+          return caches.match(req).then(function (hit) {
+            return hit || Response.error();
           });
         }),
       );
