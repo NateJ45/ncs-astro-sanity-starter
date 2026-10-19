@@ -240,7 +240,8 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 120 | Studio edges: own /studio page and splash, site words, navbar wordmark         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 121 | Custom code in its own box; opt-in on-page and site-wide code                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 122 | Hidden and password pages; Checkup link, heading and orphan checks             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 124 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 123 | Studio writing help (Claude API), Before you publish panel, AI visitors        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 124 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer | n/a | no | yes | no | no | n/a | n/a | n/a | no |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -9230,6 +9231,67 @@ publish webhook's deny-list. Marked-file order: the starter merges first, then t
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/private-pages`, PR after this merges.
 Other sites `no`.
+
+## Card 123: Studio writing help (Claude API), a "Before you publish" panel, AI assistants on the Visitors card (2026-10-18)
+
+**Origin:** hosted site builders now ship AI writing help in the editor, a pre-publish check and an AI visibility
+report (2026-10-18). Our editors are non-writers, photo descriptions are already required (card 111's Checkup), and the Checkup and Fix-it list already
+exist, so all three are small. Built in the starter, then first-baptist-auburn.
+
+**Canonical:** PORTABLE: `src/lib/studio-ai.ts` (+ test), `src/pages/api/studio/ai.ts`, `src/sanity/ai/index.ts`,
+`src/sanity/ai/WritingHelp.tsx`, `src/lib/studio-prepublish.ts` (+ test), `src/sanity/kit/PublishPanel.tsx`, and
+changes to `src/lib/studio-checkup.ts` (`SiteFiles`, `CheckupContext.site`), `src/sanity/kit/shared.tsx`
+(`readSiteFiles`, `useCheckup` passes `site`), `src/sanity/kit/index.tsx` and `types.ts` (`features.publishPanel`),
+`src/sanity/kit/HomeCards.tsx` (the AI line), `src/lib/studio-analytics.ts` (+ test), `scripts/generate-llms-full.mjs`
+(the `Last updated:` line), the `docs/agent/studio-kit.md` sections. Per site: the `sanity.config.ts` lines
+(`ncsWritingHelp()` before the kit), `kit.config.ts` (`exampleTextRule()`, `llmsRules({ pageTypes })`,
+`features.publishPanel`), the two guides in `guides/content.ts` and their `GUIDES_FOR_TYPE` entries, `wrangler.jsonc`
+and `.dev.vars.example` comments, OPERATIONS.md "Writing help".
+
+**What it adds.**
+
+- **Writing help.** `ncsWritingHelp()` wraps `form.components.input` and `.block`: "Suggest a Google description"
+  (`seoDescription`, `metaDescription`), "Suggest a summary" (`excerpt`, `summary`), "Suggest a description of the
+  photo" (`alt` under an image with an asset), and "Improve this paragraph" for a plain paragraph with the caret in it
+  (the suggestion opens in a Dialog). Each suggestion sits in an editable box with Use this, Try again, No thanks; a
+  paragraph with marks or links offers Copy instead of replacing. Nothing is written until Use this (then the draft,
+  like typing) and nothing is published. The buttons ask `GET /api/studio/ai/` once and stay hidden until the Worker
+  has `ANTHROPIC_API_KEY`.
+- **The route.** `POST /api/studio/ai/`: same origin, a Sanity project member (`studio-auth.ts`), the key, an hourly
+  limit per person (30, `AI_HOURLY_LIMIT`; per Worker instance), a checked body, then one `fetch` to the Messages API.
+  Haiku 5.5 for text, Sonnet 5.5 for photos; the body is only model, `max_tokens` (1024, 2048 for a paragraph, room
+  for the default thinking), system and messages, and the input is capped. The photo URL is built on the Worker from the asset id and this
+  project only. The system prompt compiles `docs/claude/communication-style.md` (a test keeps the banned words in
+  step) plus the brand name; dashes in the answer become commas. Logs the task and outcome only.
+- **Before you publish.** A second document inspector. `forDocument()` runs the site's own Checkup rules with the
+  draft swapped in as the published copy and keeps the Fix-it items for this document, each with "Show me" to its
+  field, plus the page check's empty-section and address groups. Blocks nothing. Rules other agents add (link words,
+  heading order, private pages) appear here with no change, as long as they return per-document `items`.
+- **Two rules.** `exampleTextRule()` (words starting "Example:" from a page template, Needs doing) and `llmsRules()`
+  (`/llms.txt` or `/llms-full.txt` still the starter's, a listed page missing from `/llms.txt`, `/llms-full.txt` past
+  60 days with a publish since). The Studio fetches the two files from the site for `CheckupContext.site`.
+- **AI assistants on the Visitors card.** `AI_HOSTS` (chatgpt.com, chat.openai.com, perplexity.ai, copilot,
+  gemini.google.com, claude.ai and others) is its own group, checked before search; a fourth GraphQL alias reads the
+  week before so the card shows "AI assistants such as ChatGPT sent N visits this week, and M the week before."
+
+**Weighed and left out.** Sanity AI Assist (paid add-on per project, and its prompts live in the dataset, outside the
+house voice). The `@anthropic-ai/sdk` package (one fetch does it; no new dependency). Streaming (answers are one
+line). A durable rate limit in D1 or KV (a per-instance brake plus token caps plus the Anthropic spend limit is enough
+for a handful of editors). Writing the suggestion straight into the field (the editor must choose).
+
+**Verified.** `test:unit` (prompt builder, image URL, answer reading, the hourly limit and `studio-auth` fail-closed
+cases with a stubbed fetch; the panel's draft swap; the llms and example rules; the AI referrer group and trend),
+`astro check`, build, `npm test`. On first-baptist-auburn under `astro dev`: `GET /api/studio/ai/` answers
+`configured`, a cross-site POST is 403 and a POST without a Sanity session is 401; the Studio loads with the plugin
+and no console errors (signed out). Not yet seen: the buttons and the panel signed in, and a real suggestion from the
+API (needs the key; `docs/PENDING.md` item 26).
+
+**Adopting it in a site.** Needs cards 106, 111, 115 and 117 (`studioApi`). Copy the PORTABLE files, add
+`ncsWritingHelp()` to `sanity.config.ts` plugins before the kit, add the two rules and `publishPanel: true` in
+`kit.config.ts`, add the two guides, run `npm run test:unit` and open `/studio`. Then follow OPERATIONS.md "Writing
+help" for the key and spend limit. Marked-file order: the starter merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-ai`, PR after this merges. Other
 
 ## Card 124: section looks instead of colours, and a photo viewer for galleries (2026-10-18)
 

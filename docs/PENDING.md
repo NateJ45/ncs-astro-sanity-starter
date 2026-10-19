@@ -290,8 +290,8 @@ Until then, open the panel in the scan or read the list and ignore warnings unde
 ### 14. Studio kit: the Worker half and the rest of the plan (opened 2026-10-17)
 
 PORTS.md card 106 brought the Studio kit's Studio half from first-baptist-auburn. Still to build, starter first: the
-Worker routes under `src/pages/api/studio/*` (the Ask form, link check, monthly report), the live publish checklist
-inspector, and the recorded tutorial videos themselves. Studio auth by the session token and deploy status landed with
+Worker routes under `src/pages/api/studio/*` (the Ask form, link check, monthly report) and the recorded tutorial
+videos themselves. The live publish checklist inspector landed as "Before you publish" (card 123). Studio auth by the session token and deploy status landed with
 card 111 (`src/lib/studio-auth.ts`, `/api/studio/deploy-status/`); Home's visitors (Cloudflare Web Analytics, not GA4,
 `/api/studio/visitors/`) and the guide-video slot with card 115. The spike findings for auth and cron are in
 `docs/agent/studio-kit.md`. Ask is still a mailto (`PUBLIC_STUDIO_HELP_EMAIL`). No other site but first-baptist-auburn
@@ -389,6 +389,17 @@ seen signed in: making a page from Pages, Private pages and confirming its id st
 published), the password input saving a hash, a published private page opening on a deployed Worker with
 `PRIVATE_PAGE_SECRET` set, the new Checkup findings on real data, and the first Monday link-health run saving
 `linkReport.latest` (needs the `SANITY_API_WRITE_TOKEN` repo secret).
+
+### 26. Card 123 (writing help, Before you publish, AI visitors): signed-in checks and the key (opened 2026-10-18)
+
+Unit-tested (`studio-ai.test.ts` with a mocked fetch, `studio-prepublish.test.ts`, `studio-analytics.test.ts`),
+`astro check`, the build and `npm test` clean. The route was checked on first-baptist-auburn under `astro dev`
+(configured, 403 cross-site, 401 without a session) and its Studio loads with the plugin, signed out. Still open:
+signed in, in light and dark at 375 and 1280, the Suggest buttons under a Google description, a photo description
+and a summary, "Improve this paragraph" and its dialog (and that Use this lands in the right block), and the Before
+you publish panel with its Show me links; the first real suggestion against the Claude API for each task (needs
+`ANTHROPIC_API_KEY` on a deployed site; OPERATIONS.md, "Writing help", with the spend limit; the route logs only the
+status), and the AI assistants line on a Visitors card with real referrals.
 
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 
