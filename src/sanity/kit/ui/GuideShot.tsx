@@ -18,17 +18,21 @@
 // Positions are PERCENT of the picture, so a recapture at another size keeps its
 // marks. Capture at 1280 wide, light appearance, and keep the file under 300 KB
 // (PNG or WebP) in public/guide-shots/. Stones are the look's numbered stones;
-// rings and arrows draw in the marker colour with a paper halo so they read on
-// any screenshot. Each mark's label goes into a key under the picture, which is
-// also what a screen reader hears (the picture itself has its alt).
+// they shrink with the picture on a phone (css.ts). Rings and arrows draw in the
+// marker colour with a paper halo so they read on any screenshot. Guides ask for a
+// picture by KEY (src/sanity/guides/shots.ts, card 130) rather than writing it
+// out. Each mark's label goes into a key under the picture, which is also what a
+// screen reader hears (the picture itself has its alt).
 // =============================================================================
 
-import type { CSSProperties } from 'react';
+import { useId, type CSSProperties } from 'react';
 import { shotMarks, shotSrc, type GuideShotData } from '../../../lib/studio-look';
 import { Stone, useLookTokens } from './primitives';
 
 export function GuideShot({ shot }: { shot: GuideShotData }) {
   const t = useLookTokens();
+  // One arrowhead per picture: ids must be unique when a guide holds several shots.
+  const head = `ncs-shot-head-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const src = shotSrc(shot.src);
   if (!src || !shot.alt) return null;
   const W = Number(shot.width) > 0 ? Number(shot.width) : 1280;
@@ -36,8 +40,8 @@ export function GuideShot({ shot }: { shot: GuideShotData }) {
   const marks = shotMarks(shot.marks);
   const px = (v: number) => (v / 100) * W;
   const py = (v: number) => (v / 100) * H;
-  // Strokes scale with the picture; 0.35% of its width reads at 1280 and at a phone's 340.
-  const sw = Math.max(3, W * 0.0035);
+  // Strokes scale with the picture; 0.45% of its width reads at 1280 and at a phone's 340.
+  const sw = Math.max(3, W * 0.0045);
   const keyed = marks.filter((m) => m.label);
   return (
     <figure className="ui-shot">
@@ -46,7 +50,7 @@ export function GuideShot({ shot }: { shot: GuideShotData }) {
         <svg className="ui-shot__marks" viewBox={`0 0 ${W} ${H}`} aria-hidden>
           <defs>
             <marker
-              id="ncs-shot-head"
+              id={head}
               viewBox="0 0 10 10"
               refX="7"
               refY="5"
@@ -67,7 +71,7 @@ export function GuideShot({ shot }: { shot: GuideShotData }) {
                     {...box}
                     fill="none"
                     stroke={t.paper}
-                    strokeWidth={sw * 2.4}
+                    strokeWidth={sw * 1.9}
                     opacity={0.85}
                   />
                   <rect {...box} fill="none" stroke={t.marker} strokeWidth={sw} />
@@ -78,13 +82,8 @@ export function GuideShot({ shot }: { shot: GuideShotData }) {
               const line = { x1: px(m.x), y1: py(m.y), x2: px(m.toX), y2: py(m.toY) };
               return (
                 <g key={i} strokeLinecap="round">
-                  <line {...line} stroke={t.paper} strokeWidth={sw * 2.4} opacity={0.85} />
-                  <line
-                    {...line}
-                    stroke={t.marker}
-                    strokeWidth={sw}
-                    markerEnd="url(#ncs-shot-head)"
-                  />
+                  <line {...line} stroke={t.paper} strokeWidth={sw * 1.9} opacity={0.85} />
+                  <line {...line} stroke={t.marker} strokeWidth={sw} markerEnd={`url(#${head})`} />
                 </g>
               );
             }

@@ -11,7 +11,9 @@
 //
 // The guide FORMAT is unchanged and old entries render as they are: the block
 // kinds and callout tones from card 41 all still work. New, optional:
-//   - blocks { kind: 'shot', ...GuideShotData } and { kind: 'quote', text, cite? };
+//   - blocks { kind: 'shot', key } (a capture from the site's registry,
+//     src/sanity/guides/shots.ts, card 130) or { kind: 'shot', ...GuideShotData },
+//     and { kind: 'quote', text, cite? };
 //   - steps { across: true } for a short walk drawn across the page;
 //   - callout tones 'note' | 'tip' | 'careful' (the old 'primary' is a note,
 //     'positive' a tip, 'caution' and 'critical' are careful);
@@ -23,7 +25,13 @@
 // =============================================================================
 
 import type { ReactNode } from 'react';
-import { findGuide, guideMeaning, type GuideShotData } from '../../../lib/studio-look';
+import {
+  findGuide,
+  guideMeaning,
+  resolveShot,
+  type GuideShotBlock,
+} from '../../../lib/studio-look';
+import { GUIDE_SHOTS } from '../../guides/shots';
 import type { StudioTarget } from '../../../lib/studio-kit';
 import type { KitGuide } from '../types';
 import {
@@ -57,7 +65,7 @@ export type KitGuideBlock =
       text: string;
     }
   | { kind: 'seealso'; items: string[] }
-  | ({ kind: 'shot' } & GuideShotData)
+  | ({ kind: 'shot' } & GuideShotBlock)
   | { kind: 'quote'; text: string; cite?: string };
 
 const TONES: Record<string, Tone> = {
@@ -217,8 +225,10 @@ function Block({ block, props }: { block: KitGuideBlock; props: GuidePageProps }
         </div>
       );
     }
-    case 'shot':
-      return <GuideShot shot={block} />;
+    case 'shot': {
+      const shot = resolveShot(block, GUIDE_SHOTS);
+      return shot ? <GuideShot shot={shot} /> : null;
+    }
     case 'quote':
       return <PullQuote cite={block.cite}>{block.text}</PullQuote>;
     default:

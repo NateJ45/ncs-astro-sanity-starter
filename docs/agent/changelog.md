@@ -1,5 +1,14 @@
 # Change history
 
+_2026-10-19: real Studio screenshots in the Site Guide, with a per-site shot registry (PORTS card 130)._
+
+**Decision.** A guide asks for a picture by key (`{ kind: 'shot', key: 'publish-button' }`) and each site's own registry,
+`src/sanity/guides/shots.ts`, says what that key shows there: a real capture of its Studio, cropped, with the avatar and
+any personal name covered, and the numbered stones, rings and arrows laid on the real controls in percent of the picture.
+The guide text stays portable and site-neutral; the images and coordinates are per site. A key with no entry falls back to
+the wireframe drawing. On a phone the picture scales to the column, the strokes scale with it and the stones shrink so they
+do not hide what they point at. The registry is unit-tested for files, alt text and marks inside the picture.
+
 _2026-10-19: the Studio design pass, part two: Home, Post a photo, the tour, the splash and offline page (PORTS card 132)._
 
 **Decision.** A finished step is laid only in the calm mark colours (`look.calm`), so "On the website" is never the

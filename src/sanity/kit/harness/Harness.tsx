@@ -40,26 +40,14 @@ import {
   StepPath,
   UiChip,
 } from '../ui';
-import type { GuideShotData } from '../../../lib/studio-look';
+import { PLACEHOLDER_SHOT, type GuideShotData } from '../../../lib/studio-look';
 import { SurfacesBench } from './Surfaces';
 
 /** The Studio's two font stacks, as sanity.config.ts uses them. */
 const fonts = (brand as { studio: { fonts: { display: string; body: string } } }).studio.fonts;
 
-/** An illustrative shot: a drawing of the editor, kept in public/guide-shots/. */
-export const EXAMPLE_SHOT: GuideShotData = {
-  src: '/guide-shots/example-editor.svg',
-  alt: 'A drawing of the editor: the page form on the left and the Publish button at the bottom right.',
-  width: 1280,
-  height: 760,
-  marks: [
-    { kind: 'ring', x: 80.5, y: 88.5, w: 17, h: 8, label: 'The Publish button' },
-    { kind: 'stone', x: 34, y: 33, label: 'Type in the boxes. It saves as a draft.' },
-    { kind: 'stone', x: 89, y: 80, label: 'Publish when it reads right.' },
-    { kind: 'arrow', x: 66, y: 64, toX: 79, toY: 87 },
-  ],
-  caption: 'An illustration, not a screenshot. Real captures replace it later.',
-};
+/** The wireframe a guide shows for a shot key the site has no capture for (card 130). */
+export const EXAMPLE_SHOT: GuideShotData = PLACEHOLDER_SHOT;
 
 function mockStudioConfig(): Config {
   const base = config as Config & { projectId: string; dataset: string };

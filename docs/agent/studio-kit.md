@@ -487,7 +487,28 @@ arrows, positioned in PERCENT of the picture so a recapture at another size keep
 label? } | { kind: 'arrow', x, y, toX, toY, label? }], caption? }`. `src` is a file in `public/guide-shots/` or an
 https address; anything else is not drawn. Capture at 1280 wide in the light appearance, under 300 KB. Labelled
 marks become a numbered key under the picture, which is what a screen reader hears beside the `alt`.
-`public/guide-shots/example-editor.svg` is a placeholder until real captures land.
+A guide does not write the picture out: it asks for one by key (below), and `public/guide-shots/example-editor.svg` is
+the wireframe shown when a site has no capture for that key.
+
+**Real captures in the guides (card 130).** A guide block is `{ kind: 'shot', key: 'publish-button' }`. The key is
+looked up in the site's own registry, `src/sanity/guides/shots.ts` (site-owned, not PORTABLE; the starter ships it empty),
+which holds a `GuideShotData` per key: the WebP in `public/guide-shots/`, its alt text, its size and its marks. So the
+guide text is the same on every site and only the pictures and coordinates are per site. `resolveShot()` in
+`studio-look.ts` does the lookup: a block with its own `src` and `alt` is drawn as written; a key with an entry is drawn
+from it (a `caption`, `alt` or `marks` on the block wins); a key with no entry draws `PLACEHOLDER_SHOT`, the wireframe,
+captioned as a drawing. `src/lib/guide-shots.test.ts` checks every entry (file present and under 200 KB, alt text, marks
+inside the picture, no em-dashes in labels).
+
+To add a capture: (1) sign in to the live Studio and capture at about 1500 px wide, light appearance. (2) Crop to the
+useful part. (3) Cover the account avatar (top right of the navbar, bottom left of an open editor) and any personal name,
+such as the greeting on Home; never ship a capture with either. Do the covering and cropping in one scratch script with
+`sharp` or Playwright, not by adding a dependency: composite the cover patches onto the full image FIRST, then crop
+(sharp's `extract` runs before `composite`, so doing both in one chain puts the patch in the wrong place). (4) Save as
+WebP, quality about 80, under about 150 KB. (5) Measure each control's box in the capture's pixels and convert to percent
+of the cropped picture (`x = (px - cropLeft) / cropWidth * 100`); a ring is the control's box grown by about 3 px, a stone
+sits just outside it or on a corner, never over the control's own words. (6) Write the entry, with one short label per
+stone in the site's plain voice. Stones are numbered in the order they appear in `marks`. (7) Look at the guide in the
+kit harness (`/kit-harness/guide/?view=page&g=<slug>`) at 1280 and 375.
 
 **The test bench** (`/kit-harness/studio/` and `/kit-harness/guide/`, dev server only; `getStaticPaths` returns
 nothing in a build). `studio` is the real Studio signed in as a pretend administrator through Sanity's

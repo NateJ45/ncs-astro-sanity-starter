@@ -32,7 +32,10 @@
 //   - `icon` is a NAME, never an emoji: one of GUIDE_ICON_MEANINGS in
 //     src/lib/studio-look.ts ('clock'), or a meaning from the icon registry
 //     ('times'), so the guide wears the site's own art for it (card 128).
-//   - A picture of the Studio: a { kind: 'shot' } block (GuideShot, card 128).
+//   - A picture of the Studio: a { kind: 'shot', key: 'publish-button' } block, which
+//     the site's registry (src/sanity/guides/shots.ts, card 130) turns into its own
+//     capture with marks; with no entry it shows a wireframe. Or write the picture
+//     in place: { kind: 'shot', src, alt, width, height, marks } (GuideShot, card 128).
 //   - src/lib/studio-guides.test.ts enforces the structural half of this.
 // =============================================================================
 
@@ -115,6 +118,8 @@ export const guides: Guide[] = [
           'Wait two or three minutes. The website rebuilds itself and your change appears.',
         ],
       },
+      // A picture from this site's registry (src/sanity/guides/shots.ts, card 130).
+      { kind: 'shot', key: 'publish-button' },
       {
         kind: 'callout',
         tone: 'primary',
