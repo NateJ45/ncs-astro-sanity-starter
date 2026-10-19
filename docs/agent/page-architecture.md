@@ -90,7 +90,7 @@ Custom `page` documents expose `SECTION_TYPES` (the eleven general blocks only).
 3. Inserts `SectionDivider.astro` between adjacent content blocks of differing surfaces automatically.
 4. Delegates rendering to individual section components in `src/components/sections/`.
 
-The cadence logic is in `src/lib/sectionCadence.ts` (unit-tested). Blocks have no color field and never call `SectionDivider` directly. Since 2026-10-18 the five content blocks carry a `look` (Standard, Quiet, Feature; `src/lib/section-looks.ts`), which the cadence resolves with the neighbours in view: Quiet is the plain surface and restarts the rhythm, Feature is the deep brand band outside the alternation and never touches another dark band (rule 9 as amended, PORTS.md card 122). This means an editor can reorder sections in Studio without ever producing a background collision or a missing divider.
+The cadence logic is in `src/lib/sectionCadence.ts` (unit-tested). Blocks have no color field and never call `SectionDivider` directly. Since 2026-10-18 the five content blocks carry a `look` (Standard, Quiet, Feature; `src/lib/section-looks.ts`), which the cadence resolves with the neighbours in view: Quiet is the plain surface and restarts the rhythm, Feature is the deep brand band outside the alternation and never touches another dark band (rule 9 as amended, PORTS.md card 124). This means an editor can reorder sections in Studio without ever producing a background collision or a missing divider.
 
 ### `additionalSectionsField`
 

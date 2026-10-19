@@ -381,6 +381,15 @@ on-page probe can), and seen under `wrangler dev` with the site fonts loading in
 once there is code, Site settings' "Code on every page" tab, both Checkup findings opening the right field, and the
 boxed frame in Presentation.
 
+### 25. Card 122 (hidden and password pages, link checks): the signed-in and deployed checks (opened 2026-10-18)
+
+Unit-tested (`private-pages`, `studio-checkup-quality`, `sitemap-filter`, `link-report`), the static half of
+`tests/private-pages.spec.ts` in the suite, and the Worker half against `wrangler dev` with the fixture page. Not yet
+seen signed in: making a page from Pages, Private pages and confirming its id starts `privatePage.` (draft and
+published), the password input saving a hash, a published private page opening on a deployed Worker with
+`PRIVATE_PAGE_SECRET` set, the new Checkup findings on real data, and the first Monday link-health run saving
+`linkReport.latest` (needs the `SANITY_API_WRITE_TOKEN` repo secret).
+
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 
 PORTS.md card 109 (page templates, picture picker, patterns, synced sections, guardrails) was built, type-checked,

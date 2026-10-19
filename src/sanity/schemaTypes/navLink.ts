@@ -66,6 +66,9 @@ export const navLink = defineType({
         // Pages built by the editor (slug-based route /[slug]).
         { type: 'page' },
       ],
+      // A page hidden from Google and the menus (card 122) is left out of the
+      // picker. A link already pointing at one keeps working.
+      options: { filter: '!(_type == "page" && hideFromSearch == true)' },
       hidden: ({ parent }) => parent?.linkType !== 'internal',
     }),
     defineField({
