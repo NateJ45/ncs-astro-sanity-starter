@@ -1,6 +1,6 @@
 -- The email backbone (PORTS.md card 127): the newsletter's subscribers, its send
 -- log and per-person delivery claims, and RSVPs. Copied from MAIL_DDL in
--- src/lib/mail-db.ts; mail-db.test.ts fails if the two differ, so edit the DDL
+-- src/lib/mail-db.ts; mail-newsletter.test.ts fails if the two differ, so edit the DDL
 -- there first.
 --
 -- Apply it to the same CONTACT_DB database as the earlier migrations:

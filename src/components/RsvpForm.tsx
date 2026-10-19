@@ -38,15 +38,51 @@ interface Props {
   /** Where to send people when RSVPs are off: usually the contact page. */
   contactHref?: string;
   idPrefix?: string;
-  /** The site's primary button classes. */
-  buttonClassName?: string;
+  /**
+   * The site's own form classes, so the RSVP form matches its other forms (rule 17,
+   * one button family). Anything left out keeps the shared-token default below.
+   */
+  classes?: Partial<RsvpClasses>;
 }
 
-type Phase = 'checking' | 'open' | 'off' | 'closed' | 'full' | 'sending' | 'done';
+export interface RsvpClasses {
+  form: string;
+  field: string;
+  label: string;
+  input: string;
+  check: string;
+  checkbox: string;
+  error: string;
+  alert: string;
+  note: string;
+  panel: string;
+  text: string;
+  done: string;
+  doneTitle: string;
+  button: string;
+}
 
-const FIELD =
-  'min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none';
-const LABEL = 'mb-1 block text-sm font-semibold text-foreground';
+/** The defaults: the shared design tokens every site in the family has. */
+export const RSVP_CLASSES: RsvpClasses = {
+  form: 'space-y-m rounded-md border border-border bg-card p-l',
+  field: '',
+  label: 'mb-1 block text-sm font-semibold text-foreground',
+  input:
+    'min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none',
+  check: 'flex min-h-[44px] items-center gap-s text-foreground',
+  checkbox: 'size-5',
+  error: 'mt-xs text-sm text-destructive',
+  alert: 'rounded-md border border-destructive bg-destructive/10 p-s text-sm text-foreground',
+  note: 'text-sm text-foreground/80',
+  panel: 'rounded-md border border-border bg-card p-l',
+  text: 'text-foreground',
+  done: 'rounded-md border border-primary bg-muted p-l',
+  doneTitle: 'font-display text-h4 text-foreground',
+  button:
+    'press-tactile inline-flex min-h-[44px] items-center justify-center rounded-sm bg-primary-dark px-l py-s text-sm font-semibold text-white transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60',
+};
+
+type Phase = 'checking' | 'open' | 'off' | 'closed' | 'full' | 'sending' | 'done';
 
 export default function RsvpForm({
   eventKey,
@@ -56,8 +92,9 @@ export default function RsvpForm({
   closedAtBuild = false,
   contactHref = '/contact/',
   idPrefix = 'rsvp',
-  buttonClassName = 'press-tactile inline-flex min-h-[44px] items-center justify-center rounded-sm bg-primary-dark px-l py-s text-sm font-semibold text-white transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60',
+  classes,
 }: Props) {
+  const c: RsvpClasses = { ...RSVP_CLASSES, ...classes };
   const [phase, setPhase] = useState<Phase>(closedAtBuild ? 'closed' : 'checking');
   const [waitlist, setWaitlist] = useState(false);
   const [seatsLeft, setSeatsLeft] = useState<number | null>(null);
@@ -158,8 +195,7 @@ export default function RsvpForm({
     }
   }
 
-  if (phase === 'checking')
-    return <p className="text-sm text-foreground/70">Loading the RSVP form…</p>;
+  if (phase === 'checking') return <p className={c.note}>Loading the RSVP form…</p>;
 
   if (phase === 'off' || phase === 'closed' || phase === 'full') {
     const text =
@@ -169,8 +205,8 @@ export default function RsvpForm({
           ? `${eventName} is full. Thank you for your interest.`
           : `RSVPs for ${eventName} open here soon.`;
     return (
-      <div role="status" className="rounded-md border border-border bg-card p-l">
-        <p className="text-foreground">
+      <div role="status" className={c.panel}>
+        <p className={c.text}>
           {text}{' '}
           <a href={contactHref} className="underline underline-offset-2 hover:text-link">
             Get in touch
@@ -183,17 +219,13 @@ export default function RsvpForm({
 
   if (phase === 'done' && result) {
     return (
-      <div
-        role="status"
-        aria-live="polite"
-        className="rounded-md border border-primary bg-muted p-l"
-      >
-        <p className="font-display text-h4 text-foreground">
+      <div role="status" aria-live="polite" className={c.done}>
+        <p className={c.doneTitle}>
           {result.status === 'waitlist'
             ? 'You are on the waiting list.'
             : 'Thank you, you are booked in.'}
         </p>
-        <p className="mt-s text-foreground/80">
+        <p className={c.text}>
           {result.emailed
             ? 'We have emailed you the details. If it is not in your inbox, check your spam folder.'
             : 'We have your reply.'}
@@ -204,7 +236,7 @@ export default function RsvpForm({
 
   const err = (name: string) =>
     errors[name] ? (
-      <p id={`${idPrefix}-${name}-error`} className="mt-xs text-sm text-destructive">
+      <p id={`${idPrefix}-${name}-error`} className={c.error}>
         {errors[name]}
       </p>
     ) : null;
@@ -216,23 +248,18 @@ export default function RsvpForm({
       onSubmit={onSubmit}
       noValidate
       aria-busy={phase === 'sending'}
-      className="space-y-m rounded-md border border-border bg-card p-l"
+      className={c.form}
     >
       {seatsLeft !== null && seatsLeft > 0 && seatsLeft <= 20 && (
-        <p className="text-sm text-foreground/80">
+        <p className={c.note}>
           {seatsLeft === 1 ? 'One place left.' : `${seatsLeft} places left.`}
         </p>
       )}
       {seatsLeft === 0 && waitlist && (
-        <p className="text-sm text-foreground/80">
-          This event is full. Reply below to join the waiting list.
-        </p>
+        <p className={c.note}>This event is full. Reply below to join the waiting list.</p>
       )}
       {message && (
-        <div
-          role="alert"
-          className="rounded-md border border-destructive bg-destructive/10 p-s text-sm text-foreground"
-        >
+        <div role="alert" className={c.alert}>
           {message}
         </div>
       )}
@@ -248,8 +275,8 @@ export default function RsvpForm({
         </label>
       </div>
 
-      <div>
-        <label htmlFor={`${idPrefix}-name`} className={LABEL}>
+      <div className={c.field || undefined}>
+        <label htmlFor={`${idPrefix}-name`} className={c.label}>
           Your name
         </label>
         <input
@@ -261,13 +288,13 @@ export default function RsvpForm({
           maxLength={120}
           aria-invalid={Boolean(errors.name)}
           aria-describedby={described('name')}
-          className={FIELD}
+          className={c.input}
         />
         {err('name')}
       </div>
 
-      <div>
-        <label htmlFor={`${idPrefix}-email`} className={LABEL}>
+      <div className={c.field || undefined}>
+        <label htmlFor={`${idPrefix}-email`} className={c.label}>
           Email, for your confirmation
         </label>
         <input
@@ -278,14 +305,14 @@ export default function RsvpForm({
           autoComplete="email"
           aria-invalid={Boolean(errors.email)}
           aria-describedby={described('email')}
-          className={FIELD}
+          className={c.input}
         />
         {err('email')}
       </div>
 
       {maxParty > 1 && (
-        <div>
-          <label htmlFor={`${idPrefix}-party`} className={LABEL}>
+        <div className={c.field || undefined}>
+          <label htmlFor={`${idPrefix}-party`} className={c.label}>
             How many people, including you?
           </label>
           <select
@@ -294,7 +321,7 @@ export default function RsvpForm({
             defaultValue="1"
             aria-invalid={Boolean(errors.partySize)}
             aria-describedby={described('partySize')}
-            className={FIELD}
+            className={c.input}
           >
             {Array.from({ length: maxParty }, (_, i) => (
               <option key={i + 1} value={i + 1}>
@@ -317,8 +344,8 @@ export default function RsvpForm({
         );
         if (q.kind === 'checkbox') {
           return (
-            <div key={i}>
-              <label htmlFor={id} className="flex min-h-[44px] items-center gap-s text-foreground">
+            <div key={i} className={c.field || undefined}>
+              <label htmlFor={id} className={c.check}>
                 <input
                   id={id}
                   name={name}
@@ -326,7 +353,7 @@ export default function RsvpForm({
                   value="yes"
                   aria-invalid={Boolean(errors[name])}
                   aria-describedby={described(name)}
-                  className="size-5"
+                  className={c.checkbox}
                 />
                 <span>{label}</span>
               </label>
@@ -335,8 +362,8 @@ export default function RsvpForm({
           );
         }
         return (
-          <div key={i}>
-            <label htmlFor={id} className={LABEL}>
+          <div key={i} className={c.field || undefined}>
+            <label htmlFor={id} className={c.label}>
               {label}
             </label>
             {q.kind === 'textarea' ? (
@@ -348,7 +375,7 @@ export default function RsvpForm({
                 required={q.required}
                 aria-invalid={Boolean(errors[name])}
                 aria-describedby={described(name)}
-                className={FIELD}
+                className={c.input}
               />
             ) : q.kind === 'select' ? (
               <select
@@ -358,7 +385,7 @@ export default function RsvpForm({
                 defaultValue=""
                 aria-invalid={Boolean(errors[name])}
                 aria-describedby={described(name)}
-                className={FIELD}
+                className={c.input}
               >
                 <option value="">Choose one</option>
                 {q.options.map((o) => (
@@ -377,7 +404,7 @@ export default function RsvpForm({
                 required={q.required}
                 aria-invalid={Boolean(errors[name])}
                 aria-describedby={described(name)}
-                className={FIELD}
+                className={c.input}
               />
             )}
             {err(name)}
@@ -385,7 +412,7 @@ export default function RsvpForm({
         );
       })}
 
-      <button type="submit" disabled={phase === 'sending'} className={buttonClassName}>
+      <button type="submit" disabled={phase === 'sending'} className={c.button}>
         {phase === 'sending'
           ? 'Sending…'
           : seatsLeft === 0 && waitlist

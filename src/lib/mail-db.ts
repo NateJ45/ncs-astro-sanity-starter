@@ -8,7 +8,7 @@
 // send log and RSVPs. It is the CONTACT_DB binding; no second database to create.
 //
 // MAIL_DDL is the source of truth; migrations/NNNN_mail.sql carries a copy and
-// src/lib/mail-db.test.ts fails if the two differ (the same rule as the other
+// src/lib/mail-newsletter.test.ts fails if the two differ (the same rule as the other
 // migrations). A site numbers its file after its own last migration.
 //
 // WHAT IS STORED, AND WHAT IS NOT.
