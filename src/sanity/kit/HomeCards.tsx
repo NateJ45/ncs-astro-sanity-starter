@@ -445,7 +445,7 @@ export function PagesMap({ groups }: { groups: PageMapGroup[] }) {
     let cancelled = false;
     client
       .fetch<MapRow[]>(
-        `*[_type in $types && !(_id in path("versions.**"))]{ _id, _type, "name": coalesce(title, name, heading, internalTitle) }`,
+        `*[_type in $types && !(_id in path("versions.**"))]{ _id, _type, "name": coalesce(title, name, heading, internalTitle) + select(hideFromSearch == true => " (hidden)", "") }`,
         { types: listTypes },
       )
       .then((r) => !cancelled && setDocs(r ?? []))

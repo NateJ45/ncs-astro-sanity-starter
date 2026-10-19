@@ -701,6 +701,107 @@ guides.push({
   ],
 });
 
+// ── Private pages and link checks (PORTS.md card 122) ──────────────────────
+// Appended like the blocks above, so a site rewriting its guides keeps them.
+guides.push(
+  {
+    slug: 'make-a-page-private',
+    category: 'Pages and words',
+    title: 'Make a page private',
+    icon: '#',
+    lead: 'Hide a page from Google and the menus, or put it behind a password.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'There are two ways to keep a page quiet. Pick the one that fits.',
+      },
+      { kind: 'h', text: 'Hidden: anyone with the link can open it' },
+      {
+        kind: 'p',
+        text: 'Good for a page you only send to some people, like a sign-up form for one event. It stays off Google, the menus and the site search, but it is not secret.',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Open the page under **Pages**, **Custom pages**.',
+          'Click the `Search & sharing` tab.',
+          'Turn on `Hide this page from Google and the menus`.',
+          'Click `Publish`. Share the page address with the people who need it.',
+        ],
+      },
+      { kind: 'h', text: 'Private: only people with the password can see it' },
+      {
+        kind: 'p',
+        text: 'Good for things meant for members only. Visitors are asked for a password before they see anything.',
+      },
+      {
+        kind: 'steps',
+        items: [
+          'Go to **Pages**, **Private pages (password)** and click the `+` button.',
+          'Give it a title and click `Generate` beside the web address.',
+          'Add sections the same way as any other page.',
+          'Under **Only people with the password can see this**, type a password and click `Save password`. Write it down somewhere safe: nobody can look it up later.',
+          'Click `Publish`. Copy the address shown under the password and share it, with the password, with the people who need it.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'caution',
+        title: 'Pictures are less private than words.',
+        text: 'The words on a private page are locked away. Pictures are stored where someone determined could find them, so keep anything truly sensitive as text, and never put photos of children on a page because it is private.',
+      },
+      {
+        kind: 'bullets',
+        items: [
+          '**Changing the password** asks everyone for the new one. Use it if someone should no longer have access.',
+          'Someone who types the right password is not asked again on that device for two weeks.',
+          'Too many wrong tries and the page asks the person to wait a while.',
+          'Private pages change the moment you publish. There is no rebuild to wait for.',
+        ],
+      },
+      {
+        kind: 'seealso',
+        items: ['Show someone a page before it goes live', 'What the SEO boxes do'],
+      },
+    ],
+  },
+  {
+    slug: 'keep-links-working',
+    category: 'Housekeeping',
+    title: 'Keep links working',
+    icon: '~',
+    lead: 'What the Checkup says about links and headings, and how to fix each one.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'p',
+        text: 'Once a week the website checks every link to another website. Anything that has stopped working shows in the `Checkup`, with an `Edit` button that opens the page it is on.',
+      },
+      { kind: 'h', text: 'What it looks for' },
+      {
+        kind: 'bullets',
+        items: [
+          '**A link to another website that no longer works**: change it to the right address, or take it out.',
+          '**A link to a page that is not on the website**: pick the page from the list instead of typing its address.',
+          '**Links that do not say where they go**: change "click here" or "read more" to words like "Our service times". People using screen readers often hear the links on their own.',
+          '**A web address typed into the text**: select some words, click the link button and paste the address there instead.',
+          '**Headings out of order**: use the headings in order, the bigger one first, then the next size down under it. Do not pick a size just for how it looks.',
+          '**A page nobody can click through to**: add it to a menu or link to it from another page. If that is on purpose, hide it from Google and the menus.',
+          '**A Google title or description that gets cut off**: shorten it so the important words come first.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Some websites refuse to be checked.',
+        text: 'A few sites, like some social media pages, turn away automatic checks. Those are not reported as broken. Open them yourself now and then.',
+      },
+      { kind: 'seealso', items: ['Make a page private', 'What the SEO boxes do'] },
+    ],
+  },
+);
+
 /**
  * Which guides "Help for this page" shows for each document type (kit.config.ts
  * guide.forType, PORTS.md card 110). '*' is the fallback for anything unlisted.
@@ -708,7 +809,15 @@ guides.push({
  */
 export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   '*': ['edit-a-page', 'help-panel'],
-  page: ['edit-a-page', 'share-a-preview', 'rename-a-page', 'seo-fields', 'add-a-widget'],
+  page: [
+    'edit-a-page',
+    'share-a-preview',
+    'rename-a-page',
+    'seo-fields',
+    'make-a-page-private',
+    'add-a-widget',
+  ],
+  privatePage: ['make-a-page-private', 'edit-a-page'],
   homePage: ['edit-a-page', 'images-and-alt', 'seo-fields'],
   siteSettings: ['menus-and-footer', 'website-status', 'add-a-widget'],
   businessInfo: ['menus-and-footer'],

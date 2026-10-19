@@ -12,8 +12,11 @@ name: Link health
 # party has a bad minute teaches everyone to ignore the build. This runs on its
 # own schedule instead, where a red run is information rather than a blocker.
 #
-# It needs no secrets: a public dataset is readable over the plain query API,
-# and the script uses only built-in fetch.
+# It needs no secrets to check: a public dataset is readable over the plain
+# query API, and the script uses only built-in fetch. With the optional
+# SANITY_API_WRITE_TOKEN secret (the one publish-due.yml uses) it also saves the
+# result as `linkReport.latest`, which the Studio's Checkup lists page by page
+# with an Edit button (PORTS.md card 122). Without it, nothing is saved.
 #
 # A GONE link (404, 410, or a host that never answers) fails the run, which
 # mails the repo owner. A link that answers but refuses a script, which is what
@@ -45,4 +48,5 @@ jobs:
         env:
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
-        run: node scripts/check-live-links.mjs --verbose
+          SANITY_API_WRITE_TOKEN: ${{ secrets.SANITY_API_WRITE_TOKEN }}
+        run: node scripts/check-live-links.mjs --verbose --write-report

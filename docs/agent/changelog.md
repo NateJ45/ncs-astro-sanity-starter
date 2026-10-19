@@ -1,5 +1,13 @@
 # Change history
 
+_2026-10-18: hidden pages, password pages, and link and heading checks in the Checkup (PORTS card 122)._
+
+**Decision.** "Hide this page from Google and the menus" now also keeps a page out of the menus, the menu picker and
+site search. Password pages are a separate type, `privatePage`, stored under a private id path because the dataset is
+public (a password on an ordinary page would leave its words readable over the API), served by a server-rendered
+route with a hashed password, a signed cookie and a rate limit, and never built. The Checkup gained dead external
+links (from the weekly link check), internal links to missing pages, skipped headings, vague link words, long Google
+text, pages nobody can reach, and private-page guards. Detail and the security note: `docs/agent/private-pages.md`.
 _2026-10-18: custom code, safe by default (PORTS card 121)._
 
 **Decision.** Editors can paste a widget (a countdown, a sign-up gadget, a map, something an AI wrote) into the block
