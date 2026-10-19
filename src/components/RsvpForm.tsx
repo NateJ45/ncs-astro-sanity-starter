@@ -144,6 +144,25 @@ export default function RsvpForm({
       const v = data.get(`q${i}`);
       answers[String(i)] = q.kind === 'checkbox' ? (v ? 'yes' : '') : String(v ?? '');
     });
+    // The obvious gaps are caught here, so a quick press of the button on an empty form
+    // says what is missing instead of reaching the server's bot check. The server checks
+    // everything again.
+    const local: Record<string, string> = {};
+    if (!String(data.get('name') ?? '').trim()) local.name = 'Please tell us your name.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(data.get('email') ?? '').trim())) {
+      local.email = 'Please enter a valid email address, so we can confirm.';
+    }
+    questions.forEach((q, i) => {
+      if (q.required && !answers[String(i)]) local[`q${i}`] = 'Please answer this one.';
+    });
+    if (Object.keys(local).length) {
+      setErrors(local);
+      setMessage('Please check the boxes marked below.');
+      requestAnimationFrame(() => {
+        formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+      });
+      return;
+    }
     setErrors({});
     setMessage('');
     setPhase('sending');
