@@ -384,8 +384,11 @@ boxed frame in Presentation.
 ### 24. Card 122 (writing help, Before you publish, AI visitors): signed-in checks and the key (opened 2026-10-18)
 
 Unit-tested (`studio-ai.test.ts` with a mocked fetch, `studio-prepublish.test.ts`, `studio-analytics.test.ts`),
-`astro check` and the build clean. The starter has no Sanity project, so the signed-in look was checked on
-first-baptist-auburn (its PENDING). Still open here: the first real suggestion against the Claude API (needs
+`astro check`, the build and `npm test` clean. The route was checked on first-baptist-auburn under `astro dev`
+(configured, 403 cross-site, 401 without a session) and its Studio loads with the plugin, signed out. Still open:
+signed in, in light and dark at 375 and 1280, the Suggest buttons under a Google description, a photo description
+and a summary, "Improve this paragraph" and its dialog (and that Use this lands in the right block), and the Before
+you publish panel with its Show me links; the first real suggestion against the Claude API (needs
 `ANTHROPIC_API_KEY` on a deployed site; OPERATIONS.md, "Writing help", with the spend limit), checking that
 `thinking: between_tools` plus `fallbacks: "default"` is accepted on Sonnet 5.5 for the photo description (the route
 logs the status; drop `fallbacks` if it 400s), and the AI assistants line on a Visitors card with real referrals.

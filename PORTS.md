@@ -9177,9 +9177,8 @@ sites `no`.
 
 ## Card 122: Studio writing help (Claude API), a "Before you publish" panel, AI assistants on the Visitors card (2026-10-18)
 
-**Origin:** the Squarespace and Wix comparison (studio research, 2026-10-18), items 1, 4 and 5: both builders now ship
-AI writing help in the editor, a pre-publish check and (Squarespace) an AI visibility report. Our editors are
-non-writers, photo descriptions are already required (card 111's Checkup), and the Checkup and Fix-it list already
+**Origin:** hosted site builders now ship AI writing help in the editor, a pre-publish check and an AI visibility
+report (2026-10-18). Our editors are non-writers, photo descriptions are already required (card 111's Checkup), and the Checkup and Fix-it list already
 exist, so all three are small. Built in the starter, then first-baptist-auburn.
 
 **Canonical:** PORTABLE: `src/lib/studio-ai.ts` (+ test), `src/pages/api/studio/ai.ts`, `src/sanity/ai/index.ts`,
@@ -9225,8 +9224,10 @@ for a handful of editors). Writing the suggestion straight into the field (the e
 
 **Verified.** `test:unit` (prompt builder, image URL, answer reading, the hourly limit and `studio-auth` fail-closed
 cases with a stubbed fetch; the panel's draft swap; the llms and example rules; the AI referrer group and trend),
-`astro check`, build, `npm test`. The signed-in look on first-baptist-auburn (its PENDING). Not yet seen: a real
-suggestion from the API (needs the key; `docs/PENDING.md` item 24).
+`astro check`, build, `npm test`. On first-baptist-auburn under `astro dev`: `GET /api/studio/ai/` answers
+`configured`, a cross-site POST is 403 and a POST without a Sanity session is 401; the Studio loads with the plugin
+and no console errors (signed out). Not yet seen: the buttons and the panel signed in, and a real suggestion from the
+API (needs the key; `docs/PENDING.md` item 24).
 
 **Adopting it in a site.** Needs cards 106, 111, 115 and 117 (`studioApi`). Copy the PORTABLE files, add
 `ncsWritingHelp()` to `sanity.config.ts` plugins before the kit, add the two rules and `publishPanel: true` in

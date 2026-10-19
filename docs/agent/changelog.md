@@ -2,7 +2,7 @@
 
 _2026-10-18: writing help, "Before you publish" and AI visitors in the Studio (PORTS card 122)._
 
-**Decision.** Three editor features from the Squarespace and Wix comparison. "Suggest" buttons under the Google
+**Decision.** Three editor features that hosted site builders now ship. "Suggest" buttons under the Google
 description, photo description and summary fields, and "Improve this paragraph" in rich text, ask a new Worker route
 (`/api/studio/ai/`, guarded like deploy-status, an hourly limit per person) that calls the Claude API with a plain fetch
 in the site's own voice; the editor accepts, edits or ignores every suggestion, and nothing is written or published by
