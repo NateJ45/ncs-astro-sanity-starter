@@ -366,7 +366,10 @@ Generic (`genericRules()`): pictures with no description (skipping `altExemptFie
 Google description (`seoTypes`, unless hidden from search), links to anything unpublished or gone, changes waiting more
 than 14 days, recent unpublished changes, the Trash, and the last publish. Opt-in: `unconfirmedRule()` (text containing
 "to be confirmed" or `[confirm]`, or any `confirmed` or `...Confirmed` box left unticked at any depth; PORTS.md card
-66). A site adds its own rules in `kit.config.ts`. A rule is `{ id, run(ctx) }` returning one finding or null; a rule
+66). Links, headings and pages (`qualityRules()`, card 122): dead external links from the weekly link report,
+typed internal links to missing pages, skipped heading levels, vague link words and bare web addresses, long Google
+titles and descriptions, pages nothing links to, and two private-page guards (`docs/agent/private-pages.md`).
+Report documents (`REPORT_TYPES`, e.g. `linkReport`) reach rules as `ctx.reports`, never as content. A site adds its own rules in `kit.config.ts`. A rule is `{ id, run(ctx) }` returning one finding or null; a rule
 that throws is skipped.
 
 ## /build-info.json and the commit

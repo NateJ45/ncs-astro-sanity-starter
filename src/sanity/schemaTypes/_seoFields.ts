@@ -15,7 +15,7 @@
 // So the helper contributes exactly two new things to a type that already had
 // SEO fields:
 //   - `seoPreview`, a value-less field whose custom input draws the previews;
-//   - `hideFromSearch`, the "keep this page out of Google" switch.
+//   - `hideFromSearch`, the "hide this page from Google and the menus" switch.
 //
 // hideFromSearch has to be honoured in TWO places by the site, or it is a dead
 // control: a `<meta name="robots" content="noindex, follow">` on the page, and
@@ -93,13 +93,17 @@ export function seoFields(opts: SeoFieldsOptions): FieldDefinition[] {
       fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     });
 
+  // Card 122 widened it from "out of Google" to "out of Google and the menus":
+  // the same switch also drops the page from the automatic menus, the menu
+  // link picker, site search and the Checkup's "no way to reach it" check.
+  // The field NAME stays (renaming would lose every page's setting).
   const hideFromSearch = defineField({
     name: 'hideFromSearch',
-    title: 'Keep this page out of Google',
+    title: 'Hide this page from Google and the menus',
     type: 'boolean',
     group,
     description:
-      'Turn this on to ask search engines to skip this page. The page stays on the site and anyone with the address can still open it.',
+      'People with the link can still open it. It is left out of Google, the menus and the site search. For a page only some people should see, make a Private page instead.',
   });
 
   return [snippet, title, description, image, hideFromSearch];

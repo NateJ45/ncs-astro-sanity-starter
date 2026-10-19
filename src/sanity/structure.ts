@@ -28,6 +28,7 @@ import { staffDesk } from './kit/shared';
 import { brandIcon, typeIcon, type BrandIcon } from './brandIcons';
 import { kitConfig } from './kit.config';
 import { TRASH_TYPE } from '../lib/studio-trash';
+import { privateDocId } from '../lib/private-pages';
 import { WEEK_TYPE } from '../lib/studio-kit';
 import { tableListItem } from './workflow';
 import { TABLES } from './tables.config';
@@ -65,6 +66,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'journalEntry', // scaffold: journal
   'journalCategory', // scaffold: journal
   'page', // custom pages, placed explicitly under "Pages"
+  'privatePage', // private pages (card 122), placed explicitly under "Pages"
   'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
   TRASH_TYPE, // the Studio kit's Trash, placed explicitly at the bottom
@@ -245,6 +247,27 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               S.documentTypeListItem('page')
                 .title('Custom pages (build your own)')
                 .icon(typeIcon('page')),
+
+              // Private pages (PORTS.md card 122): only people with the
+              // password can open them. EVERY ONE IS STORED UNDER THE
+              // privatePage. ID PATH, which Sanity never serves to the public
+              // API, and this child resolver is what does it: a new page made
+              // from this list gets a fresh id, and the editor opens it as
+              // privatePage.<that id>. Existing rows already carry the prefix.
+              // The global "Create" menu and Duplicate are switched off for
+              // this type in sanity.config.ts so nothing makes one elsewhere.
+              S.listItem()
+                .id('privatePage')
+                .title('Private pages (password)')
+                .icon(typeIcon('privatePage'))
+                .schemaType('privatePage')
+                .child(
+                  S.documentTypeList('privatePage')
+                    .title('Private pages')
+                    .child((id: string) =>
+                      S.document().schemaType('privatePage').documentId(privateDocId(id)),
+                    ),
+                ),
 
               S.divider(),
 

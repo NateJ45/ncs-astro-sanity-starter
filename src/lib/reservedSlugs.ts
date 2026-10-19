@@ -40,6 +40,8 @@ export const RESERVED_SLUGS = new Set([
   // The embedded Sanity Studio, a src/pages route since card 120. A custom
   // page called "studio" would take the editor's own address.
   'studio',
+  // Private pages live under /private/<slug>/ (card 122, server-rendered).
+  'private',
   '404',
   'sitemap-index.xml',
   'og',

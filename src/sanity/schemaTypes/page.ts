@@ -85,6 +85,13 @@ export const page = defineType({
       initialValue: false,
       description:
         'Off by default, so you can build and preview privately. Turn on when you want visitors to find it in the menu.',
+      // Hidden pages never reach a menu (getNavPages, card 122); say so here.
+      validation: (Rule) =>
+        Rule.custom((on, ctx) =>
+          on === true && (ctx.document as { hideFromSearch?: boolean })?.hideFromSearch === true
+            ? 'This page is hidden from Google and the menus (Search & sharing), so it will not show in the menu.'
+            : true,
+        ).warning(),
     }),
     defineField({
       name: 'navGroup',
@@ -117,6 +124,12 @@ export const page = defineType({
       type: 'boolean',
       group: 'menu',
       initialValue: false,
+      validation: (Rule) =>
+        Rule.custom((on, ctx) =>
+          on === true && (ctx.document as { hideFromSearch?: boolean })?.hideFromSearch === true
+            ? 'This page is hidden from Google and the menus (Search & sharing), so it will not show in the footer.'
+            : true,
+        ).warning(),
     }),
 
     // ── Archived ──────────────────────────────────────────────────────────────
@@ -191,12 +204,15 @@ export const page = defineType({
       slug: 'slug.current',
       inNav: 'addToMainNav',
       archived: 'archived',
+      hidden: 'hideFromSearch',
     },
-    prepare: ({ title, slug, inNav, archived }) => ({
+    prepare: ({ title, slug, inNav, archived, hidden }) => ({
       title: title || 'Untitled page',
       subtitle: archived
         ? `Archived  ·  /${slug ?? '...'}`
-        : `/${slug ?? '...'}${inNav ? '  ·  in menu' : ''}`,
+        : hidden
+          ? `/${slug ?? '...'}  ·  hidden from Google and menus`
+          : `/${slug ?? '...'}${inNav ? '  ·  in menu' : ''}`,
     }),
   },
 });
