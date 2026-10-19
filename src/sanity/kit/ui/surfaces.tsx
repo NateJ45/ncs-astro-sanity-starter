@@ -19,7 +19,12 @@
 //   CheckPath     a checklist as a path: each stone is the checkbox and fills
 //                 when done; the connector is laid between finished stones
 //   LiveSteps     Saved, Building, On the website as three stones (and a
-//                 compact copy for the navbar line)
+//                 compact copy for the navbar line); finished stones use the
+//                 calm colours (look.calm), never the careful one
+//   Card 132:     DateBlock (a date chalked on a stone), ArtRow / ArtRows
+//                 (Home's list rows), Figure (a display-font number),
+//                 MarkBars (bars in the calm colours), StepTrail (named steps
+//                 across: Post a photo, the tour); TileCard takes an href
 //
 // Everything sits inside a KitScope (primitives.tsx) for its variables and its
 // stylesheet (css.ts). Motion is the look's verb and stops under reduced motion.
@@ -616,8 +621,8 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 /**
  * A date on a stone: the month in small caps over the day in the display font,
- * inside a hand-laid outline in a mark colour (cycling by `index`), like a date
- * chalked on a stepping stone. `date` is an ISO date or date-time. Decorative:
+ * on a laid stone in a mark colour (cycling by `index`), like a date chalked
+ * on a stepping stone. `date` is an ISO date or date-time. Decorative:
  * the row's own words carry the full date for a screen reader.
  */
 export function DateBlock({ date, index = 0 }: { date: string; index?: number }) {
@@ -625,9 +630,10 @@ export function DateBlock({ date, index = 0 }: { date: string; index?: number })
   const d = new Date(date.length <= 10 ? `${date}T12:00:00` : date);
   if (Number.isNaN(d.getTime())) return null;
   const s = t.stones[index % t.stones.length];
+  // A laid stone in the mark colour, the date chalked on it (the stone's own AA text colour).
   return (
-    <span className="ui-date" aria-hidden>
-      <Stone size={56} seed={index * 7 + 2} fill={t.surface} edge={s.fill} />
+    <span className="ui-date" aria-hidden style={{ color: s.text }}>
+      <Stone size={58} index={index} seed={index * 7 + 2} />
       <span className="ui-date__words">
         <span className="ui-date__month">{MONTHS[d.getMonth()]}</span>
         <span className="ui-date__day">{d.getDate()}</span>
@@ -673,12 +679,12 @@ export function ArtRow({
       <span className="ui-row__words">
         <span className="ui-row__title">{title}</span>
         {meta && <span className="ui-row__meta">{meta}</span>}
+        {tag && <span className="ui-row__tag">{tag}</span>}
       </span>
-      {tag && <span className="ui-row__tag">{tag}</span>}
     </>
   );
   return (
-    <li className="ui-row">
+    <li className={['ui-row', action ? 'ui-row--action' : ''].join(' ').trim()}>
       {href ? (
         <a className="ui-row__hit" href={href} onClick={onClick}>
           {inner}

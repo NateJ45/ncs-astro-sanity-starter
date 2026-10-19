@@ -386,7 +386,7 @@ export function DraftRowView({
       onClick={link.onClick}
       action={
         canPublish || canDiscard ? (
-          <span style={{ display: 'grid', gap: 6, justifyItems: 'end' }}>
+          <span style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
             {canPublish && (
               <KitAction strong disabled={busy} onClick={onPublish}>
                 Publish

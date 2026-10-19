@@ -262,11 +262,11 @@ export const UI_CSS = `
 .ncs-ui .ui-empty .ui-art{margin-bottom:6px}
 /* ===== Card 132: rows, dates, numbers, the trail ===== */
 .ncs-ui .ui-state--todo{display:inline-grid}
-.ncs-ui .ui-date{position:relative;display:grid;place-items:center;width:56px;height:50px;flex:none}
+.ncs-ui .ui-date{position:relative;display:grid;place-items:center;width:58px;height:52px;flex:none}
 .ncs-ui .ui-date>.ui-stone{position:absolute;inset:0}
 .ncs-ui .ui-date__words{position:relative;display:grid;justify-items:center;line-height:1}
-.ncs-ui .ui-date__month{font:700 10.5px/1 var(--ui-body);letter-spacing:.14em;text-transform:uppercase;color:var(--ui-muted)}
-.ncs-ui .ui-date__day{margin-top:3px;font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:22px;color:var(--ui-heading)}
+.ncs-ui .ui-date__month{font:700 10.5px/1 var(--ui-body);letter-spacing:.14em;text-transform:uppercase;color:inherit}
+.ncs-ui .ui-date__day{margin-top:3px;font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:22px;color:inherit}
 .ncs-ui .ui-rows{list-style:none;margin:0;padding:0;display:grid}
 .ncs-ui .ui-row{display:flex;align-items:center;gap:10px;min-width:0;border-top:1px solid var(--ui-rule)}
 .ncs-ui .ui-row:first-child{border-top:0}
@@ -278,12 +278,13 @@ export const UI_CSS = `
 .ncs-ui .ui-row__hit:not(.ui-row__hit--still):hover .ui-row__title{color:var(--ui-heading);text-decoration:underline;text-underline-offset:3px}
 .ncs-ui .ui-row__hit:focus-visible{outline:3px solid var(--ui-focus);outline-offset:2px}
 .ncs-ui .ui-row__words{flex:1;display:grid;gap:1px;min-width:0}
+.ncs-ui .ui-row--action{flex-wrap:wrap;gap:0}
+.ncs-ui .ui-row--action .ui-row__action{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:0 0 12px 58px}
 .ncs-ui .ui-row__title{font-weight:650;font-size:15.5px;line-height:1.35;color:var(--ui-ink);overflow-wrap:anywhere}
 .ncs-ui .ui-row__meta{font-size:14px;line-height:1.4;color:var(--ui-muted)}
-.ncs-ui .ui-row__tag{flex:none}
+.ncs-ui .ui-row__tag{display:block;margin-top:5px}
 .ncs-ui .ui-row__tag .ui-tag{font-size:11px;padding:6px 11px 6px 9px}
 .ncs-ui .ui-row__action{flex:none}
-@media (max-width:480px){.ncs-ui .ui-row__hit{flex-wrap:wrap}.ncs-ui .ui-row__tag{flex-basis:100%;padding-left:58px}}
 @media (prefers-reduced-motion:reduce){.ncs-ui .ui-row__hit .ui-art,.ncs-ui .ui-row__hit .ui-date{transition:none;transform:none!important}}
 .ncs-ui .ui-figure{display:grid;gap:2px}
 .ncs-ui .ui-figure__value{font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:clamp(40px,3vw + 22px,56px);line-height:1;color:var(--ui-heading);letter-spacing:-.01em;font-variant-numeric:lining-nums}
