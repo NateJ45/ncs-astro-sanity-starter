@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-19: Home's banner look is a style slot, not site CSS (PORTS card 135)._
+
+**Decision.** Five sites restyled Home's banner with CSS files that selected the kit's class names and Sanity's `data-ui` markup, so a kit rename would have switched their looks off without a failing test. The look is now data in `kitConfig.homeBanner.style` (eyebrow, greeting, title, the button's shape and colours, the background, the motif's place, a stamp), checked for contrast and for anything that could break a stylesheet, and the only markup a site may select is a short documented set (`data-hb-part` names, `data-hb-*` attributes, `--hb-*` variables) that a unit test holds. It lives in `kit.config.ts` beside the banner's other fields, not in `brand.config.json`, because a banner's fonts and button are not devices the whole Studio shares and a TypeScript type catches a wrong key. With no style set the banner is unchanged. The five sites' rules are written as migration recipes in studio-kit.md.
+
 _2026-10-19: a "How to" beside fields, and icons on every field group (PORTS card 134)._
 
 **Decision.** A field the guides config names (by field name, or by schema type) gets a quiet "How to" chip after its

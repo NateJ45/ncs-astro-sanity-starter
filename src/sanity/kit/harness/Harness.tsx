@@ -42,6 +42,8 @@ import {
 } from '../ui';
 import { PLACEHOLDER_SHOT, type GuideShotData } from '../../../lib/studio-look';
 import { SurfacesBench } from './Surfaces';
+import { HomeBanner } from '../HomeBanner';
+import { BANNER_LOOKS } from './bannerLooks';
 
 /** The Studio's two font stacks, as sanity.config.ts uses them. */
 const fonts = (brand as { studio: { fonts: { display: string; body: string } } }).studio.fonts;
@@ -82,6 +84,31 @@ function StudioBench() {
   );
 }
 
+/**
+ * Card 135: Home's banner with a style from bannerLooks.ts (?look=fbcm|presacademy|reid|mas|stonesteps),
+ * or the site's own (?look=site, the default) or none (?look=none), so each shape and the
+ * stamp can be looked at without a signed-in Studio.
+ */
+function BannerBench({ look }: { look: string }) {
+  const site = kitConfig.homeBanner ?? {};
+  const banner =
+    look === 'site'
+      ? site
+      : look === 'none'
+        ? { ...site, style: undefined }
+        : { ...site, style: BANNER_LOOKS[look]?.style };
+  return (
+    <HomeBanner
+      now={new Date('2026-10-19T09:30:00')}
+      hello="Good morning"
+      firstName="Ann"
+      title={brand.name}
+      intro="You cannot break the website by editing. Nothing goes live until you press Publish."
+      banner={banner}
+    />
+  );
+}
+
 function GuideBench() {
   const q = new URLSearchParams(window.location.search);
   const scheme = q.get('scheme') === 'dark' ? 'dark' : 'light';
@@ -109,7 +136,8 @@ function GuideBench() {
       <Card style={{ minHeight: '100vh' }} padding={[3, 4, 5]}>
         <div
           style={{
-            maxWidth: view === 'panel' ? 380 : view === 'surfaces' ? 1100 : 820,
+            maxWidth:
+              view === 'panel' ? 380 : view === 'surfaces' || view === 'banner' ? 1100 : 820,
             margin: '0 auto',
           }}
         >
@@ -125,6 +153,7 @@ function GuideBench() {
           )}
           {(view === 'page' || view === 'panel') && page}
           {view === 'surfaces' && <SurfacesBench part={q.get('part') ?? 'all'} />}
+          {view === 'banner' && <BannerBench look={q.get('look') ?? 'none'} />}
           {view === 'ui' && (
             <KitScope>
               <div style={{ display: 'grid', gap: 36 }}>

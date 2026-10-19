@@ -250,6 +250,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 130 | Real screenshots in the Site Guide: per-site shot registry                     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 131 | Every Studio surface in the design language (first pass)                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 134 | Field "How to" chip to the Site Guide; icons on every field group              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 135 | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -9878,3 +9879,46 @@ inherited keys, cached). Kit harness `/kit-harness/studio/`: a page's Google tit
 section, Escape closes it, at 1280 and 375.
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19).
+
+## Card 135: Home's banner look is a style slot, and the hooks a site may select are documented and tested (2026-10-19)
+
+**Origin:** the rollout of cards 128 to 134 to fbcm, presacademy, reid-design-site, mas-monograms and stonesteps-50k. All
+five restyled Home's banner (and a few other kit surfaces) with a site CSS file that selected the kit's class names
+(`.ncs-hb__go`, `.ncs-hb__who`, `.ncs-hb__motif`, `.ncs-ui .ui-banner__title`) and Sanity's markup (`[data-ui='Stack']`,
+`[data-ui='Button']`, `h1[data-ui='Heading']`). A kit rename would have switched each look off with no failing test.
+
+**PORTABLE, new:** `src/lib/studio-banner-style.ts` (the type, the checks, the shape CSS, the hook lists),
+`src/lib/studio-banner-style.test.ts` (the gate), `src/sanity/kit/harness/bannerLooks.ts` (the five sites' looks as slot
+entries: the test's proof of coverage and the migration recipes).
+
+**PORTABLE, changed:** `src/sanity/kit/HomeBanner.tsx` (the `data-hb-part` attributes, the resolved style, the stamp),
+`src/sanity/kit/types.ts` (`HomeBannerConfig.style`), `src/sanity/kit/harness/Harness.tsx` (`?view=banner&look=<key>`),
+`docs/agent/studio-kit.md` ("Home's banner style" and the migration notes).
+
+**Per site, not portable:** `kit.config.ts` `homeBanner.style`, when a site wants a look. Nothing else: no site CSS.
+
+**What it changes.** `homeBanner.style` sets the date line (words with `{date}`, face, size, weight, tracking, case,
+colour, a hairline or dot before it), the greeting (face, italic), the title (face, size, leading, case, colour, a hard
+echo, an outlined last letter), the button (shape `pill`, `square`, `tag`, `plate` or `stitched`, its colours and
+words), the background (colour, texture, a line along the foot), where the motif sits (`foot` or `behind-right`) and a
+stamp. Every value is checked: colours must be hex and read on the banner (4.5:1 for the date line and the button's
+words, 3:1 for large text and marks), fonts and lengths are stripped of anything that could close a rule, and a value
+that fails is dropped and named in `resolveBannerStyle().notes`. The only markup a site may select beyond the config is
+`data-hb-part` (13 names), the `data-hb-*` state attributes and the `--hb-*` variables, all listed in `studio-kit.md`.
+With no style the banner is byte for byte what it was.
+
+**Why `kitConfig.homeBanner.style` and not `brand.config.json` `studio.look`.** The style changes the same elements as
+`homeBanner.mark`, `motif`, `accent` and `lettering`, which already live in `kit.config.ts`; it is TypeScript, so a
+wrong key fails `npm run check`; and a banner's face and button are not devices the whole Studio shares, which is what
+`studio.look` is for.
+
+**Gates.** Unit (`studio-banner-style.test.ts`): no style emits nothing; every documented part is in HomeBanner.tsx and
+every part in it is documented; a full style produces every documented attribute and variable; the static CSS selects
+every attribute; the docs list every part, attribute and variable; each of the five sites' looks resolves with no ignored
+value and every chip shape is used; the contrast and injection guards. Kit bench `/kit-harness/guide/?view=banner&look=none|fbcm|presacademy|reid|mas|stonesteps`
+at 1280 and 375: no horizontal scroll, each look draws.
+
+**Not covered, and why:** the other kit surfaces sites restyle by class name (`.ui-eyebrow`, the Site Guide's list, the
+splash). docs/PENDING.md item 31.
+
+**Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19; Auburn sets no style).

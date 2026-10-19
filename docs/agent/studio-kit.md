@@ -39,6 +39,7 @@ are commented in that site's `src/sanity/kit.config.ts`.
 | Deploy status (111)     | `src/pages/api/studio/deploy-status.ts`, `src/lib/deploy-status.ts`, `src/lib/studio-auth.ts`                                                        | GET the newest deploy run's outcome; POST "Try again" (same origin + Sanity session); tests in `deploy-status.test.ts`                                    |
 | Home cards (115)        | `src/sanity/kit/HomeCards.tsx`, `src/lib/studio-home.ts`                                                                                             | Coming up, Fix-it list, Visitors, Your pages, and the Panel frame; pure parts tested in `studio-home.test.ts`                                             |
 | Home banner (118)       | `src/sanity/kit/HomeBanner.tsx`, `src/lib/studio-banner.ts`                                                                                          | The navy welcome at the top of Home; `kitConfig.homeBanner`; pure parts tested in `studio-banner.test.ts`                                                 |
+| Banner style (135)      | `src/lib/studio-banner-style.ts`, `src/sanity/kit/harness/bannerLooks.ts`                                                                            | `kitConfig.homeBanner.style`: the banner's look as data, and the only hooks a site may select; tested in `studio-banner-style.test.ts`                    |
 | Icons (119)             | `src/sanity/brandIcons.tsx`, `src/sanity/artIcon.tsx`, `src/lib/studio-icons.ts`                                                                     | Not the kit plugin: icons by meaning and list-row pictures; the site's art in `brandIconArt.tsx`; tests in `studio-icons.test.ts`                         |
 | Design language (128)   | `src/sanity/kit/ui/`, `src/lib/studio-look.ts`                                                                                                       | Shared primitives in the site's own devices (`brand.config.json` `studio.look`); tests in `studio-look.test.ts`                                           |
 | Surfaces (131)          | `src/sanity/kit/ui/surfaces.tsx`, `src/sanity/kit/harness/Surfaces.tsx`                                                                              | Tool headings, Home cards, findings, the path checklist, Is it live, quick-update tiles, Home rows and figures (132); see "Every surface in the language" |
@@ -363,12 +364,108 @@ Everything site-specific is optional, in `kitConfig.homeBanner`:
 | `accent`      | The colour of the editor's name. The greeting is 24px (large text), so it needs 3:1 on the banner, or is ignored. |
 | `lettering`   | `{ text, family, src, colors }`: part of the name in the site's own display font, letters cycling `colors`.       |
 | `siteUrl`     | Where View the website goes, when it is not the address the Studio is open on.                                    |
+| `style`       | The banner's look as data (card 135): see "Home's banner style" below.                                            |
 
 The lettering's font file must be the site's own (a path starting `/`, same origin), loaded by a small `@font-face`
 the banner writes; colours under 3:1 on the banner are dropped, and the heading font shows until the file loads. The
 mark and motif are decorative (`alt=""`); the heading carries the name, with an `aria-label` when it is lettered.
 The starter sets only `mark: '/favicon.svg'`. Keep a site's banner files out of `public/studio/`, which is the Studio's
 own address; a folder such as `public/studio-banner/` is clear of it.
+
+## Home's banner style (card 135)
+
+A site sets the banner's look as data, in `kitConfig.homeBanner.style` (type `HomeBannerStyle`,
+`src/lib/studio-banner-style.ts`). It sits beside the banner's other fields (`mark`, `motif`, `accent`, `lettering`)
+because it changes the same elements, and it is TypeScript, so a wrong key fails `npm run check`.
+`brand.config.json` `studio.look` stays for the devices the whole Studio shares (marker, stone, connector, texture); a
+banner's font, button and title are not that. With no `style` the banner is exactly what it was, so a site that sets none
+does not move.
+
+**Only these hooks are supported.** Before card 135, five sites restyled the banner with a CSS file that selected the
+kit's class names (`.ncs-hb__go`, `.ncs-hb__who`, `.ncs-hb__motif`) and Sanity's own markup (`[data-ui='Stack']`,
+`[data-ui='Button']`, `h1[data-ui='Heading']`). A kit rename silently turned that look off. Do not do that. The banner's
+class names (`ncs-hb*`) and Sanity's `data-ui` attributes are the kit's to change. What a site may rely on is this
+section's lists, and `src/lib/studio-banner-style.test.ts` fails if any entry disappears or is renamed.
+
+| Key                       | What it sets                                                                                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `background.color`        | The banner's colour instead of the navbar's. White text must reach 7:1 on it, or it is ignored.                                                             |
+| `background.texture`      | A tiling picture in `public/` over the colour.                                                                                                              |
+| `background.rule`         | A one-pixel line along the foot, in this colour.                                                                                                            |
+| `eyebrow`                 | The date line: `text` (`{date}` is today's date, as in "Today, {date}"), `font`, `size`, `weight`, `tracking`, `case` (`upper` or `none`), `color` (4.5:1). |
+| `eyebrow.mark`            | `{ kind: 'rule' or 'dot', color }`: a short hairline or a round dot before the words (3:1).                                                                 |
+| `greeting`                | `font`, `italic`, `weight` of "Good morning, Ann".                                                                                                          |
+| `title`                   | The site's name: `font`, `weight`, `size` (a length or `clamp()`), `leading`, `tracking`, `case`, `color` (3:1).                                            |
+| `title.echo`              | `{ color, offset }`: a hard shadow down and right, as a poster echoes its type.                                                                             |
+| `title.lastLetterOutline` | Draws the last letter of the lettered part (`homeBanner.lettering`) as an outline in this colour.                                                           |
+| `chip`                    | "View the website": `shape`, `bg`, `fg`, `hoverBg`, `hoverFg`, `edge`, `ring`, `halo`, and `font`, `size`, `weight`, `tracking`, `case` for its words.      |
+| `motif.place`             | `foot` (the strip under the words, the default) or `behind-right` (behind the words at the right, full height, from 600px).                                 |
+| `stamp`                   | `{ text, color, font }`: a claim struck at an angle above the button, from 900px. Decorative, hidden from screen readers.                                   |
+
+Chip shapes: `pill`; `square` (2px corners; add `halo` for a ring standing 3px off it); `tag` (a notched left edge with a
+punched hole, the arrow nudging right on hover); `plate` (a hard shadow and 2px edge in `edge`, a slight skew, lifts on
+hover); `stitched` (a dashed stitch inside the edge in `edge`, the hover fill sewn across from the left). A shape needs
+`bg` and `fg` as hex colours that reach 4.5:1 together, or the button stays as Sanity draws it. `hoverBg` defaults to a
+lighter `bg`, `hoverFg` to `fg`, `edge` to `fg`, and `ring` (the keyboard focus ring) to `edge`.
+
+Every value is checked. A colour must be a hex and must read on the banner; a font is a stack the site already loads
+(the kit loads no fonts); a length is a CSS length or a `clamp()`, `calc()`, `min()` or `max()` of them; nothing that
+could close a CSS rule gets through. A value that fails is dropped and the rest still apply (`resolveBannerStyle().notes`
+says which, and the unit test holds every site's entry clean).
+
+**Documented hooks for what config cannot say.** A site that needs one extra touch (a second ornament, a different
+border) may select these and nothing else. Select a part by its attribute, never by `.ncs-hb__*` or Sanity's `[data-ui]`.
+
+| Hook                                                                                                                                                      | What it is                                                                                                                                                                                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-hb-part` values: `banner`, `body`, `mark`, `eyebrow`, `greeting`, `name`, `title`, `lettering`, `lettering-last`, `intro`, `chip`, `stamp`, `motif` | One per element. `banner` is the root, `body` the padded area, `mark` the site's mark, `name` the editor's name in the greeting, `lettering` the part of the title in the site's own font, `lettering-last` its last letter, `intro` the reassurance line, `chip` the button's wrapper. |
+| `data-hb-bg`, `data-hb-texture`, `data-hb-rule`                                                                                                           | On the root, when the style sets that background piece.                                                                                                                                                                                                                                 |
+| `data-hb-motif`                                                                                                                                           | On the root: `foot` or `behind-right`.                                                                                                                                                                                                                                                  |
+| `data-hb-mark`                                                                                                                                            | On the eyebrow: `rule` or `dot`.                                                                                                                                                                                                                                                        |
+| `data-hb-shape`, `data-hb-halo`, `data-hb-stamp`                                                                                                          | On the chip's wrapper: the shape, a standing ring, a stamp beside it.                                                                                                                                                                                                                   |
+| `--hb-bg`, `--hb-rule`, `--hb-texture`                                                                                                                    | The background colour, the line colour and the texture's `url()`, on the root.                                                                                                                                                                                                          |
+| `--hb-mark-color`                                                                                                                                         | The eyebrow mark's colour.                                                                                                                                                                                                                                                              |
+| `--hb-chip-bg`, `--hb-chip-fg`, `--hb-chip-bg-hover`, `--hb-chip-fg-hover`, `--hb-chip-edge`, `--hb-chip-ring`, `--hb-chip-halo`                          | The chip's resolved colours. Read them in extra CSS (`background: var(--hb-chip-bg)`); set them in config.                                                                                                                                                                              |
+| `--hb-title-outline`, `--hb-stamp-color`                                                                                                                  | The outline and stamp colours.                                                                                                                                                                                                                                                          |
+
+Adding a part, attribute or variable means adding it to `HOME_BANNER_PARTS`, `HOME_BANNER_ATTRS` or `HOME_BANNER_VARS`, to
+this list and to the rule that reads it, in one commit. Removing or renaming one is a breaking change: it needs a port
+card and a note here for every site that uses it.
+
+**Bench.** `/kit-harness/guide/?view=banner&look=<key>` on the dev server draws the banner with a style (`none`, `fbcm`,
+`presacademy`, `reid`, `mas`, `stonesteps`); the entries are in `src/sanity/kit/harness/bannerLooks.ts` and are the
+recipes below.
+
+### Migrating a site's banner CSS onto the slot
+
+Copy the site's entry from `bannerLooks.ts` into its `kit.config.ts` as `homeBanner.style`, delete the matching rules
+from the site's CSS file, and open Studio Home at 1280 and 375 to check. The five sites as of 2026-10-19:
+
+- **fbcm** (`src/sanity/studioHomeBanner.css`, imported by `sanity.config.ts`; the whole file goes). Rule 1 (the date
+  line as tracked capitals after a gold hairline) is `eyebrow` with `font`, `size`, `weight`, `tracking`,
+  `case: 'upper'`, `color` and `mark: { kind: 'rule', color }`. Rule 2 (the italic Castoro greeting) is `greeting`. Rule 3
+  (the square gold plate with a standing ring) is `chip` with `shape: 'square'`, `bg`, `fg`, `hoverBg`, `halo`, `ring` and
+  the Sofia Sans words. Rule 4 (the rendering behind the words, and the gold line under the banner) is
+  `motif.place: 'behind-right'` and `background.rule`. The `@import` of the font package stays with the site.
+- **presacademy** (`src/sanity/studioLook.css`, rule 3 only: `.ncs-hb__go a[data-ui='Button']`). It is `chip` with
+  `shape: 'pill'`, `bg`, `fg`, `hoverBg`, `size`, `weight`, `tracking`, `case`. Rules 1 and 2 (the mono face on
+  `.ui-eyebrow`, `.ui-tag` and `.ui-stone > b`, and the contents-page list on
+  `section[aria-labelledby^='guide-group-']`) are not banner styling and have no slot yet: they stay in the site's CSS
+  and are listed in docs/PENDING.md.
+- **reid-design-site** (`src/sanity/studioArt.css`, part 2: `.ncs-hb__go > a[data-ui='Button']`). It is `chip` with
+  `shape: 'tag'`, `bg`, `fg`, `hoverBg`. Parts 1 and 3 (`.ncs-sp__mark` and `.ncs-sp__button` on the splash and offline
+  page) are the splash's, not the banner's, and stay.
+- **mas-monograms** (`src/sanity/studioArt.css`, the whole file: `.ncs-hb .ncs-hb__go a[data-ui='Button']`). It is `chip`
+  with `shape: 'stitched'`, `bg`, `fg`, `hoverBg`, `hoverFg`, `edge` (the stitch), `ring` and the spaced capitals. The
+  file can go.
+- **stonesteps-50k** (`src/sanity/studioArt.css`, the five `ncs-hb` blocks). `h1[data-ui='Heading']` and its last-letter
+  rule are `title` (`font`, `weight`, `size`, `leading`, `tracking`, `case`, `color`, `echo`, `lastLetterOutline`). The
+  date line with its blaze dot is `eyebrow` with `mark: { kind: 'dot' }`. The stamp (`.ncs-hb__go::before`) is `stamp`.
+  The plate button is `chip` with `shape: 'plate'`. The last block (`.ncs-ui .ui-banner__title` and
+  `.ui-banner__eyebrow`) styles the Site Guide's banner, not Home's, so it stays until that banner gets a slot.
+
+Check by eye when migrating: the `stitched` focus ring and the `plate`'s skewed text are drawn by the kit now, and
+fbcm's gold line under the banner applies at every width (its old rule applied from 600px).
 
 ## Icons and list-row pictures (card 119)
 

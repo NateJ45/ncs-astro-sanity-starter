@@ -15,6 +15,12 @@
 //   - "View the website", opening the live site in a new tab;
 //   - the site's mark, and optionally a decorative strip along the foot.
 //
+// Card 135: the banner's look (eyebrow, greeting, title, the button, the background,
+// the motif's place, a stamp) is kitConfig.homeBanner.style, resolved by
+// src/lib/studio-banner-style.ts. Elements carry data-hb-part names; those names, the
+// data-hb-* attributes and the --hb-* variables are the ONLY markup a site may select
+// (docs/agent/studio-kit.md, "Home's banner style"; a unit test holds them).
+//
 // It is navy in BOTH appearances, like the navbar. The site-specific parts are
 // all in kitConfig.homeBanner (types.ts); the decisions that need no React
 // (which colours are readable, the font rule, the link) are in
@@ -39,6 +45,7 @@ import {
   siteHref,
   splitName,
 } from '../../lib/studio-banner';
+import { eyebrowText, resolveBannerStyle } from '../../lib/studio-banner-style';
 import { todayLine } from '../../lib/studio-home';
 import type { HomeBannerConfig } from './types';
 
@@ -95,12 +102,21 @@ export function HomeBanner({ now, hello, firstName, title, intro, banner = {} }:
     typeof window === 'undefined' ? undefined : window.location.origin,
   );
   const markSrc = banner.markOnDark ?? banner.mark;
+  // Card 135: the site's style slot, checked. Nothing set: no extra CSS, no extra attributes.
+  const look = useMemo(() => resolveBannerStyle(banner.style, bg), [banner.style, bg]);
 
   return (
     <ThemeProvider theme={chrome} scheme="dark">
-      <style>{CSS + (face ?? '')}</style>
-      <Card radius={4} className="ncs-hb" as="section" aria-label="Welcome">
-        <Box padding={[4, 5, 6]}>
+      <style>{CSS + (face ?? '') + (look.css ? '\n' + look.css : '')}</style>
+      <Card
+        radius={4}
+        className="ncs-hb"
+        as="section"
+        aria-label="Welcome"
+        data-hb-part="banner"
+        {...look.root}
+      >
+        <Box padding={[4, 5, 6]} data-hb-part="body">
           <div className="ncs-hb__row">
             <div className="ncs-hb__who">
               {markSrc && (
@@ -108,6 +124,7 @@ export function HomeBanner({ now, hello, firstName, title, intro, banner = {} }:
                   className={['ncs-hb__mark', banner.markOnDark ? '' : 'ncs-hb__mark--disc']
                     .join(' ')
                     .trim()}
+                  data-hb-part="mark"
                   style={banner.markOnDark ? undefined : { background: STUDIO_COLORS.white }}
                 >
                   {/* Decorative: the site's name is the heading right beside it. */}
@@ -115,24 +132,35 @@ export function HomeBanner({ now, hello, firstName, title, intro, banner = {} }:
                 </div>
               )}
               <Stack gap={4} style={{ minWidth: 0 }}>
-                <Text size={1} muted weight="semibold" style={{ letterSpacing: '0.04em' }}>
-                  {todayLine(now)}
+                <Text
+                  size={1}
+                  muted
+                  weight="semibold"
+                  style={{ letterSpacing: '0.04em' }}
+                  data-hb-part="eyebrow"
+                  {...look.eyebrow}
+                >
+                  {eyebrowText(look.eyebrowTemplate, todayLine(now))}
                 </Text>
-                <p className="ncs-hb__hello" style={{ fontFamily: body }}>
+                <p className="ncs-hb__hello" style={{ fontFamily: body }} data-hb-part="greeting">
                   {`${hello}, `}
-                  <span style={accent ? { color: accent } : undefined}>{firstName}</span>
+                  <span style={accent ? { color: accent } : undefined} data-hb-part="name">
+                    {firstName}
+                  </span>
                 </p>
                 <Heading
                   as="h1"
                   size={[3, 4, 5]}
                   style={{ lineHeight: 1.15, textWrap: 'balance' }}
                   aria-label={letters ? title : undefined}
+                  data-hb-part="title"
                 >
                   {parts && letters ? (
                     <>
                       {parts.before}
                       <span
                         aria-hidden
+                        data-hb-part="lettering"
                         style={{
                           fontFamily: letteringStack(banner.lettering!.family, display),
                           fontWeight: 400,
@@ -140,7 +168,11 @@ export function HomeBanner({ now, hello, firstName, title, intro, banner = {} }:
                         }}
                       >
                         {letters.map((l, i) => (
-                          <span key={i} style={l.color ? { color: l.color } : undefined}>
+                          <span
+                            key={i}
+                            style={l.color ? { color: l.color } : undefined}
+                            data-hb-part={i === letters.length - 1 ? 'lettering-last' : undefined}
+                          >
                             {l.char}
                           </span>
                         ))}
@@ -151,14 +183,14 @@ export function HomeBanner({ now, hello, firstName, title, intro, banner = {} }:
                     title
                   )}
                 </Heading>
-                <Box style={{ maxWidth: 560 }}>
+                <Box style={{ maxWidth: 560 }} data-hb-part="intro">
                   <Text size={2} muted style={{ lineHeight: 1.6 }}>
                     {intro}
                   </Text>
                 </Box>
               </Stack>
             </div>
-            <div className="ncs-hb__go">
+            <div className="ncs-hb__go" data-hb-part="chip" {...look.chip}>
               <Button
                 as="a"
                 href={href}
@@ -171,6 +203,12 @@ export function HomeBanner({ now, hello, firstName, title, intro, banner = {} }:
                 fontSize={2}
                 padding={4}
               />
+              {look.stamp && (
+                // Decorative claim, drawn above the button from 900px (card 135).
+                <span data-hb-part="stamp" aria-hidden>
+                  {look.stamp.text}
+                </span>
+              )}
             </div>
           </div>
         </Box>
@@ -183,6 +221,7 @@ export function HomeBanner({ now, hello, firstName, title, intro, banner = {} }:
             )}
             <img
               className="ncs-hb__motif"
+              data-hb-part="motif"
               src={banner.motif}
               alt=""
               aria-hidden

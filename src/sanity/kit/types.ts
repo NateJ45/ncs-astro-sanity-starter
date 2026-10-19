@@ -14,6 +14,7 @@ import type { CheckGroup } from '../../lib/page-checks';
 import type { CheckupRule } from '../../lib/studio-checkup';
 import type { FieldGuideMap, QuickFieldKind, StudioTarget } from '../../lib/studio-kit';
 import type { BrandIconKey } from '../../lib/studio-icons';
+import type { HomeBannerStyle } from '../../lib/studio-banner-style';
 import type { GallerySpec } from '../../lib/photo-post';
 
 /**
@@ -238,6 +239,12 @@ export interface HomeBannerConfig {
   lettering?: { text: string; family: string; src: string; colors?: string[] };
   /** Where "View the website" goes. Default: the address the Studio is open on. */
   siteUrl?: string;
+  /**
+   * The banner's look (card 135): eyebrow, greeting, title, the button, the background, the
+   * motif's place and a stamp, as data. A site never styles the banner by class name; see
+   * `HomeBannerStyle` and docs/agent/studio-kit.md, "Home's banner style".
+   */
+  style?: HomeBannerStyle;
 }
 
 export interface KitConfig {
