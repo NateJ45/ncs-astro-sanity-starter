@@ -241,7 +241,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 121 | Custom code in its own box; opt-in on-page and site-wide code                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 122 | Hidden and password pages; Checkup link, heading and orphan checks             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 123 | Studio writing help (Claude API), Before you publish panel, AI visitors        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 124 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer | n/a | no | yes | no | no | n/a | n/a | n/a | no |
+| 124 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
