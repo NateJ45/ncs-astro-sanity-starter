@@ -16,6 +16,15 @@ sequence).
 
 ## Waiting on a human
 
+### 32. Card 136: GA4 and Search Console against a real property (opened 2026-10-19)
+
+**Blocker: studio-status deployed with `SiteData`, and one site bound to it.** The mapping is tested on fixture answers
+and a mock binding, but no real property has been read. To close: merge and deploy NateJ45/studio-status#18, bind
+`SITE_DATA` and set `SITE_DATA_KEY` on one GA4 site (`docs/agent/studio-kit.md`, "Google Analytics and Search
+Console"), and compare Home's numbers with GA4's Traffic acquisition (session default channel group) and Search
+Console's Performance for the same dates. Check that GA4 accepts the `batchRunReports` dimension mix and that the "AI
+Assistant" channel arrives as named.
+
 ### 28. Card 127 (the email backbone): a real send, and the Studio buttons signed in (opened 2026-10-18)
 
 **Blocker: a sending domain and a signed-in Studio.** Unit-tested on real SQLite and exercised under `wrangler dev` with
