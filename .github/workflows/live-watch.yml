@@ -1,0 +1,33 @@
+name: Live watch
+
+# PORTS.md card 138. CI builds from a pinned content snapshot, so a client
+# editing the live site can never turn a pull request red. This is the other
+# half: a scheduled, NON-BLOCKING check of the real site. It is not a required
+# check, never runs on a pull request, and a red run only mails the owner. A
+# finding means the content moved: fix a redirect, restore a page, or refresh
+# the snapshot (`node scripts/snapshot.mjs export`). Never revert the client.
+#
+# THIS REPO IS A TEMPLATE: SITE_URL is unset here, so the job logs and exits 0.
+# In a site repo set the SITE_URL repo variable to the live origin
+# (e.g. https://www.example.com) and uncomment the schedule.
+
+on:
+  # schedule:
+  #   - cron: '40 11 * * *' # daily
+  workflow_dispatch:
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # No `npm ci`: the script uses only built-in fetch.
+      - name: Check the live site
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: node scripts/live-watch.mjs

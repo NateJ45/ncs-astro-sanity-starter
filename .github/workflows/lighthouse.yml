@@ -68,8 +68,9 @@ jobs:
       # Same build ci.yml runs: consumes the committed src/lib/sanity.types.ts,
       # emits dist/client (audited here) and dist/server (the SSR bundle for
       # /studio and /preview, which lhci never sees).
+      # From the pinned content snapshot, like ci.yml (PORTS.md card 138).
       - name: Build
-        run: npm run build
+        run: node scripts/snapshot.mjs run -- npm run build
 
       # Accessibility is a hard gate (minScore 1) in lighthouserc.json, as are
       # LCP 4500ms and CLS 0.1; performance, best-practices and SEO are

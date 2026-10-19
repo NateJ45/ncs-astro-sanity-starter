@@ -149,8 +149,13 @@ jobs:
       # site, so there is no separate `sanity build` step. Do NOT add one back:
       # `sanity build` writes to ./dist by default and would clobber the Astro
       # output.
+      # Built from the PINNED content snapshot (ci/sanity-snapshot.ndjson.gz), never
+      # the live dataset (PORTS.md card 138): a client renaming a page in the
+      # Studio must not be able to turn this red. scripts/snapshot.mjs starts a
+      # local query server, sets SANITY_SNAPSHOT_URL, runs the build, stops it.
+      # On a repo with no Sanity project (this template) it just runs the build.
       - name: Build (site + embedded Studio)
-        run: npm run build
+        run: node scripts/snapshot.mjs run -- npm run build
 
       # linkinator over dist/client. The skip pattern is
       # `^https?://(?!(localhost|127[.]0[.]0[.]1)[:/])`, which excludes external
