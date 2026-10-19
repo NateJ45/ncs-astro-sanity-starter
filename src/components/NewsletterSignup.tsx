@@ -3,7 +3,7 @@
 // cost JS on pages where the footer is never scrolled to.
 //
 // Where a sign-up goes (src/lib/subscribe.ts): the ESP form when Site settings has
-// one, else the site's OWN list (/api/subscribe/, double opt-in, PORTS.md card 121)
+// one, else the site's OWN list (/api/subscribe/, double opt-in, PORTS.md card 127)
 // when the Worker has it switched on, else Web3Forms.
 //
 // Renders NOTHING (null) when:

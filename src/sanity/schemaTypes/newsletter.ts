@@ -1,6 +1,6 @@
 // Safe to edit by hand
 // =============================================================================
-// newsletter - one issue of the email newsletter (PORTS.md card 121)
+// newsletter - one issue of the email newsletter (PORTS.md card 127)
 // =============================================================================
 // Written here, sent from here: "Send a test to me" and "Send to everyone" sit
 // beside Publish (src/sanity/mail/). Only the PUBLISHED issue is ever sent, and

@@ -63,7 +63,9 @@ test('every reserved slug is a route this repo serves, a scaffolded one, or a bu
     'styleguide',
     // The embedded Studio (src/pages/studio/index.astro, card 120).
     'studio',
-    // The newsletter's link pages and archive (src/pages/email/, src/pages/newsletter/, card 121).
+    // Password pages (src/pages/private/[slug].astro, card 122).
+    'private',
+    // The newsletter's link pages and archive (src/pages/email/, src/pages/newsletter/, card 127).
     'email',
     'newsletter',
   ]);

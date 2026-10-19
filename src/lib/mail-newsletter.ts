@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// mail-newsletter - sending an issue to the list (PORTS.md card 121)
+// mail-newsletter - sending an issue to the list (PORTS.md card 127)
 // =============================================================================
 // The Studio's Newsletter document has two buttons, "Send a test to me" and
 // "Send to everyone". Both call /api/studio/newsletter/, which runs this file.

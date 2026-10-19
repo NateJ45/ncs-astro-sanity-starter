@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /api/unsubscribe/?t=<signed token> - leave the newsletter list (PORTS.md card 121)
+// /api/unsubscribe/?t=<signed token> - leave the newsletter list (PORTS.md card 127)
 // =============================================================================
 // POST only, for two callers:
 //   - the button on /email/unsubscribe/ (the footer link of every issue opens

@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// RSVPs - who is coming to what (PORTS.md card 121)
+// RSVPs - who is coming to what (PORTS.md card 127)
 // =============================================================================
 // A tool at the top of the Studio. The left list is every event with an RSVP
 // section and its headcount; picking one shows the replies as a table and

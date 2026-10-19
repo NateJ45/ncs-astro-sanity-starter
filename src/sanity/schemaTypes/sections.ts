@@ -24,6 +24,8 @@ import { PlayIcon } from '@sanity/icons/Play';
 import { ThLargeIcon } from '@sanity/icons/ThLarge';
 import { EarthGlobeIcon } from '@sanity/icons/EarthGlobe';
 import { CodeBlockIcon } from '@sanity/icons/CodeBlock';
+import { CodeTextInput } from '../components/CodeTextInput';
+import { codeWarningMessage } from '../../lib/custom-code';
 import { SyncIcon } from '@sanity/icons/Sync';
 import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
@@ -498,52 +500,71 @@ export const logoStripSection = defineType({
   },
 });
 
-// ── 11. Embed section ───────────────────────────────────────────────────────
-// Sandboxed iframe embed. Accepts either a URL (Calendly, Cal.com, Tally, etc.)
-// or raw embed code from a trusted provider. SELF_CONTAINED — manages its own surface.
-//
-// SECURITY NOTE: embedCode is rendered as-is on the live site. Only paste code
-// from providers you trust. The same trust model applies here as for any content
-// in the CMS.
+// ── 11. Custom code or embed (PORTS.md card 121) ─────────────────────────────
+// A provider's page by URL (sandboxed iframe, unchanged), or pasted code. Pasted
+// code runs in ITS OWN BOX by default (CustomCodeFrame: srcdoc iframe, no
+// allow-same-origin), so it cannot read the site's cookies or storage, where the
+// embedded Studio keeps an editor's session. "Runs directly on the page" is the
+// opt-out for trusted provider snippets, and the Checkup lists every page using
+// it. Field NAMES are unchanged (rule 1): embedUrl, embedCode, heightHint.
+// SELF_CONTAINED: manages its own surface. Trust model: docs/agent/custom-code.md.
 export const embedSection = defineType({
   name: 'embedSection',
-  title: 'Embed (form, scheduler, or widget)',
+  title: 'Custom code or embed',
   type: 'object',
   icon: CodeBlockIcon,
-  description: 'Only paste embed code from providers you trust. It renders as-is on the live site.',
+  description:
+    'Show a form, map, calendar or small widget from another website, or paste code you were given (by a provider, or by an AI). Check it in Preview before you publish.',
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'headline', title: 'Headline (optional)', type: 'string' }),
     defineField({ name: 'subhead', title: 'Subhead (optional)', type: 'text', rows: 2 }),
     defineField({
       name: 'embedUrl',
-      title: 'Embed URL',
+      title: 'Web address to show',
       type: 'url',
       description:
-        'Use for providers that embed via URL: Calendly, Cal.com, Tally, Google Forms. Paste the full URL.',
+        'For providers that give you a link to embed: Calendly, Cal.com, Tally, Google Forms. Paste the full address. Use this OR the code box below, not both.',
       validation: (R) => R.uri({ scheme: ['http', 'https'] }),
     }),
     defineField({
       name: 'embedCode',
-      title: 'Embed code (raw iframe)',
+      title: 'Custom code',
       type: 'text',
-      rows: 4,
+      rows: 12,
+      components: { input: CodeTextInput },
       description:
-        'Use for providers that give a raw iframe snippet. Only paste from providers you trust.',
-      validation: (R) =>
+        'Paste HTML, with any CSS and JavaScript inside it. It runs in its own box on the page, so it cannot change the rest of the website or see anything private. The box grows to fit what is inside.',
+      validation: (R) => [
         R.custom((value, context) => {
-          const doc = context.document as Record<string, unknown> | undefined;
-          if (value && doc?.embedUrl) {
-            return 'Fill in either Embed URL or Embed code, not both.';
+          const parent = context.parent as { embedUrl?: string } | undefined;
+          if (value && parent?.embedUrl) {
+            return 'Fill in either the web address or the custom code, not both.';
           }
           return true;
         }),
+        R.custom((value, context) => {
+          const parent = context.parent as { runsOnPage?: boolean } | undefined;
+          return codeWarningMessage(value, parent?.runsOnPage === true);
+        }).warning(),
+      ],
+    }),
+    defineField({
+      name: 'runsOnPage',
+      title: 'Runs directly on the page',
+      type: 'boolean',
+      initialValue: false,
+      hidden: ({ parent }) => !(parent as { embedCode?: string } | undefined)?.embedCode,
+      description:
+        'Leave this off. Turn it on only for code from a provider you trust that will not work in its own box, such as some giving or booking widgets. When on, the code can do anything the website can, including reading what a signed-in editor is doing. The Checkup lists every page where this is on.',
     }),
     defineField({
       name: 'heightHint',
       title: 'Height',
       type: 'string',
       initialValue: 'medium',
+      description:
+        'For a web address, how tall the box is. Custom code sizes itself; this is only the space it holds while it loads.',
       options: {
         list: [
           { title: 'Short (around 400px)', value: 'short' },
@@ -555,10 +576,14 @@ export const embedSection = defineType({
     }),
   ],
   preview: {
-    select: { title: 'headline', eyebrow: 'eyebrow', url: 'embedUrl' },
-    prepare: ({ title, eyebrow, url }) => ({
-      title: title || eyebrow || 'Embed',
-      subtitle: url ? `Embed: ${url.slice(0, 50)}` : 'Embed (code snippet)',
+    select: { title: 'headline', eyebrow: 'eyebrow', url: 'embedUrl', onPage: 'runsOnPage' },
+    prepare: ({ title, eyebrow, url, onPage }) => ({
+      title: title || eyebrow || 'Custom code or embed',
+      subtitle: url
+        ? `Web address: ${String(url).slice(0, 50)}`
+        : onPage
+          ? 'Custom code (runs directly on the page)'
+          : 'Custom code (in its own box)',
     }),
   },
 });
@@ -624,7 +649,7 @@ export const pageSectionSchemas = [
   spacerSection,
   logoStripSection,
   embedSection,
-  // The email backbone (card 121): replies kept in D1, never in Sanity.
+  // The email backbone (card 127): replies kept in D1, never in Sanity.
   rsvpSection,
 ];
 

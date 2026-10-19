@@ -1,4 +1,4 @@
--- The email backbone (PORTS.md card 121): the newsletter's subscribers, its send
+-- The email backbone (PORTS.md card 127): the newsletter's subscribers, its send
 -- log and per-person delivery claims, and RSVPs. Copied from MAIL_DDL in
 -- src/lib/mail-db.ts; mail-db.test.ts fails if the two differ, so edit the DDL
 -- there first.

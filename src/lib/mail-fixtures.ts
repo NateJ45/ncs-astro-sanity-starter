@@ -1,6 +1,6 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// mail-fixtures - made-up content for exercising mail locally (PORTS.md card 121)
+// mail-fixtures - made-up content for exercising mail locally (PORTS.md card 127)
 // =============================================================================
 // `npm run preview` with MAIL_TEST_FIXTURES=1 in .dev.vars lets the routes load
 // these instead of Sanity, so the subscribe, RSVP and send flows can be tried

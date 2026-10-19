@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /api/studio/rsvps/ - RSVP counts and replies for the Studio (PORTS.md card 121)
+// /api/studio/rsvps/ - RSVP counts and replies for the Studio (PORTS.md card 127)
 // =============================================================================
 // GET                          -> { events: counts per event }
 // GET ?event=<key>             -> that event's replies

@@ -37,7 +37,7 @@ export function bearerToken(request: Request): string | null {
 export interface StudioUser {
   id: string;
   name?: string;
-  /** The login's email, when Sanity gives one. Used only as the "Send a test to me" address (card 121). */
+  /** The login's email, when Sanity gives one. Used only as the "Send a test to me" address (card 127). */
   email?: string;
 }
 

@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /api/studio/newsletter/ - the Studio's newsletter buttons (PORTS.md card 121)
+// /api/studio/newsletter/ - the Studio's newsletter buttons (PORTS.md card 127)
 // =============================================================================
 // GET  ?id=<issue>  -> list size, this issue's send status, the signed-in email
 // GET               -> list size and the last sends (Home's Newsletter card)

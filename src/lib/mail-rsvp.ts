@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// mail-rsvp - RSVPs for an event page (PORTS.md card 121)
+// mail-rsvp - RSVPs for an event page (PORTS.md card 127)
 // =============================================================================
 // An "RSVP" section on any page (VBS, Easter breakfast, homecoming) asks for a
 // name, an email, how many are coming and the editor's own questions

@@ -293,7 +293,7 @@ export interface KitConfig {
      */
     comingUp?: boolean;
     /**
-     * The email backbone (card 121): Home's Newsletter card and the RSVP rows in
+     * The email backbone (card 127): Home's Newsletter card and the RSVP rows in
      * "Coming up". Needs ncsMailTools registered. Missing counts as off.
      */
     mail?: boolean;

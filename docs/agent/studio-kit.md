@@ -316,7 +316,10 @@ Generic (`genericRules()`): pictures with no description (skipping `altExemptFie
 Google description (`seoTypes`, unless hidden from search), links to anything unpublished or gone, changes waiting more
 than 14 days, recent unpublished changes, the Trash, and the last publish. Opt-in: `unconfirmedRule()` (text containing
 "to be confirmed" or `[confirm]`, or any `confirmed` or `...Confirmed` box left unticked at any depth; PORTS.md card
-66). A site adds its own rules in `kit.config.ts`. A rule is `{ id, run(ctx) }` returning one finding or null; a rule
+66). Links, headings and pages (`qualityRules()`, card 122): dead external links from the weekly link report,
+typed internal links to missing pages, skipped heading levels, vague link words and bare web addresses, long Google
+titles and descriptions, pages nothing links to, and two private-page guards (`docs/agent/private-pages.md`).
+Report documents (`REPORT_TYPES`, e.g. `linkReport`) reach rules as `ctx.reports`, never as content. A site adds its own rules in `kit.config.ts`. A rule is `{ id, run(ctx) }` returning one finding or null; a rule
 that throws is skipped.
 
 ## /build-info.json and the commit
@@ -344,7 +347,7 @@ and staff view place `messages`. PORTS.md card 117 has the full file list.
 - **Table panes** (`DocumentTable.tsx`, `tableListItem()`): columns per site in `src/sanity/tables.config.ts`;
   `studio-table.test.ts` fails if a column is missing from its projection. Always an extra desk item beside the
   normal list.
-- **Mail** (`src/sanity/mail/`, `ncsMailTools()` before the kit, card 121): "Send a test to me" and "Send to
+- **Mail** (`src/sanity/mail/`, `ncsMailTools()` before the kit, card 127): "Send a test to me" and "Send to
   everyone" on the `newsletter` type (`/api/studio/newsletter/`, batches until done, never twice), the **RSVPs** tool
   (`/api/studio/rsvps/`, counts, replies, CSV), Home's Newsletter card and RSVP rows in Coming up
   (`features.mail`), and one RSVP line on top of Messages. Same auth order as Messages. The tested halves are

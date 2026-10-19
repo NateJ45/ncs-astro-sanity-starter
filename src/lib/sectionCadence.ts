@@ -51,7 +51,7 @@ export const CONTENT_TYPES = new Set([
   'storySection', // scaffold: about
   'serviceAreaSection',
   'guaranteeSection',
-  // The email backbone (card 121)
+  // The email backbone (card 127)
   'rsvpSection',
 ]);
 

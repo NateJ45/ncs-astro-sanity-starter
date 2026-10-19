@@ -117,13 +117,14 @@ export const TYPE_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   journalCategory: 'category',
   journalEntry: 'post',
   page: 'pages',
+  privatePage: 'privacy',
   sectionPreset: 'savedSection',
   redirect: 'redirect',
   // Plugin types (the kit's Trash and weekly tick, the workflow's share links).
   trashedItem: 'trash',
   studioWeek: 'times',
   previewShare: 'link',
-  // The email backbone (card 121).
+  // The email backbone (card 127).
   newsletter: 'message',
 };
 

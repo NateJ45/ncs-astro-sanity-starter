@@ -24,6 +24,7 @@
 // =============================================================================
 
 import type { StudioTarget } from './studio-kit.ts';
+import { onPageCodePaths, siteCodeFieldsInUse } from './custom-code.ts';
 
 export type Severity = 'Needs doing' | 'Worth a look' | 'For information';
 
@@ -69,7 +70,17 @@ export interface CheckupContext {
   nameOf: (doc: Doc) => string;
   /** A readable name for a type ("Announcement"). */
   typeTitle: (type: string) => string;
+  /**
+   * Reports written by scheduled jobs (REPORT_TYPES, e.g. the weekly link
+   * check, card 122). Kept OUT of docs/published/drafts, so a weekly write
+   * never reads as "the last change was published today" and no content rule
+   * walks a report as if it were a page.
+   */
+  reports: Doc[];
 }
+
+/** Document types that are reports about the site, not content (card 122). */
+export const REPORT_TYPES = new Set(['linkReport']);
 
 export interface CheckupRule {
   id: string;
@@ -280,6 +291,52 @@ export function genericRules(opts: GenericRuleOptions = {}): CheckupRule[] {
       },
     },
     {
+      // Pasted code switched to run directly on the page (PORTS.md card 121).
+      // Not wrong in itself (a giving or booking widget may need it), so it is
+      // listed for information: every page where code runs outside its box.
+      id: 'code-runs-on-page',
+      run: ({ published, nameOf }) => {
+        const hits: Array<{ doc: Doc; field: string }> = [];
+        for (const doc of published) {
+          if (doc._type === trashType) continue;
+          for (const path of onPageCodePaths(doc)) {
+            hits.push({ doc, field: pathString([...path, 'runsOnPage']) });
+          }
+        }
+        if (!hits.length) return null;
+        const docs = [...new Map(hits.map((h) => [h.doc._id, h.doc])).values()];
+        return {
+          severity: 'For information',
+          label: `Code that runs directly on the page: ${plural(docs.length, 'page')}`,
+          detail: `On ${listNames(docs.map(nameOf))}. This code is not in its own box, so it can do anything the website can, including reading what a signed-in editor is doing. Keep it only for a provider you trust, such as a giving or booking service. If you are not sure, turn the switch off and check the page still works.`,
+          ...openFirst([hits[0].doc], hits[0].field),
+          items: itemsOf(docs, nameOf, (d) => hits.find((h) => h.doc._id === d._id)?.field),
+          itemLabel: 'Code runs directly on the page',
+        };
+      },
+    },
+    {
+      // Site settings' "Code on every page" (PORTS.md card 121).
+      id: 'code-on-every-page',
+      run: ({ published, nameOf }) => {
+        const hits = published.filter(
+          (d) => d._type !== trashType && siteCodeFieldsInUse(d).length > 0,
+        );
+        if (!hits.length) return null;
+        const where = [...new Set(hits.flatMap((d) => siteCodeFieldsInUse(d)))].map((f) =>
+          f === 'headCode' ? 'the page head' : 'the end of every page',
+        );
+        return {
+          severity: 'For information',
+          label: 'Code on every page',
+          detail: `${listNames(hits.map(nameOf))} adds code to ${listNames(where)} on every page of the website. It runs directly on the page, outside any box. Keep it only if you still need it and trust where it came from.`,
+          ...openFirst(hits, siteCodeFieldsInUse(hits[0])[0]),
+          items: itemsOf(hits, nameOf, (d) => siteCodeFieldsInUse(d)[0]),
+          itemLabel: 'Code on every page',
+        };
+      },
+    },
+    {
       // Changes started a while ago and never published.
       id: 'old-drafts',
       run: ({ drafts, now, nameOf }) => {
@@ -401,10 +458,13 @@ export function runCheckup(
   rules: CheckupRule[],
   opts: Pick<CheckupContext, 'nameOf' | 'typeTitle'> & { now?: number },
 ): CheckResult[] {
+  const reports = docs.filter((d) => REPORT_TYPES.has(d._type));
+  const content = docs.filter((d) => !REPORT_TYPES.has(d._type));
   const ctx: CheckupContext = {
-    docs,
-    published: docs.filter((d) => !isDraftId(d._id)),
-    drafts: docs.filter((d) => isDraftId(d._id)),
+    docs: content,
+    published: content.filter((d) => !isDraftId(d._id)),
+    drafts: content.filter((d) => isDraftId(d._id)),
+    reports,
     now: opts.now ?? Date.now(),
     nameOf: opts.nameOf,
     typeTitle: opts.typeTitle,

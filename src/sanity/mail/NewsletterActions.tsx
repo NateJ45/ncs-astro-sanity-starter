@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// "Send a test to me" and "Send to everyone" on a Newsletter (PORTS.md card 121)
+// "Send a test to me" and "Send to everyone" on a Newsletter (PORTS.md card 127)
 // =============================================================================
 // Both call /api/studio/newsletter/ with the Studio session (studioApi), and the
 // Worker does the rest from the PUBLISHED issue: these buttons send an id, never

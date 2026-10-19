@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// mail-db - the D1 tables behind the newsletter and RSVPs (PORTS.md card 121)
+// mail-db - the D1 tables behind the newsletter and RSVPs (PORTS.md card 127)
 // =============================================================================
 // ONE database for everything people send the site: the contact form, the form
 // builder, the Messages statuses, and now the subscriber list, the newsletter

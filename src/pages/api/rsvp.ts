@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /api/rsvp/ - replies to an RSVP section (PORTS.md card 121)
+// /api/rsvp/ - replies to an RSVP section (PORTS.md card 127)
 // =============================================================================
 // GET  ?event=<page id>:<block key>
 //        -> { ready, closed, full, seatsLeft, waitlist }  The form asks before it

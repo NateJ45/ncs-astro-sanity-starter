@@ -6,7 +6,7 @@
 // Signature notes:
 //   - `formActionUrl`: the ESP's form-action endpoint (e.g. a ConvertKit, MailerLite, or
 //     Kit form URL). When absent, the site's own list (/api/subscribe/, double opt-in,
-//     PORTS.md card 121) when it is switched on, then Web3Forms (PUBLIC_WEB3FORMS_KEY).
+//     PORTS.md card 127) when it is switched on, then Web3Forms (PUBLIC_WEB3FORMS_KEY).
 //   - `audienceId`: optional audience / list / group ID for ESPs that accept it as a
 //     query param or body field. Passed through in the Web3Forms fallback as metadata.
 //   - `tag`: optional ESP tag slug (e.g. "quiz-result", "guide-download"). Added as
@@ -150,7 +150,7 @@ export async function subscribeEmail(opts: SubscribeOptions): Promise<SubscribeR
     }
   }
 
-  // --- Path A2: the site's own list (/api/subscribe/, PORTS.md card 121) ------
+  // --- Path A2: the site's own list (/api/subscribe/, PORTS.md card 127) ------
   // Double opt-in, stored in the site's D1, sent through the email backbone.
   // Tried when no ESP form is set. A static host (404/405) or a Worker that is
   // not set up yet (503 unavailable) falls through to Web3Forms, so nothing

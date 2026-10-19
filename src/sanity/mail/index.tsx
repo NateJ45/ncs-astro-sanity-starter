@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// ncsMailTools - the Studio side of the email backbone (PORTS.md card 121)
+// ncsMailTools - the Studio side of the email backbone (PORTS.md card 127)
 // =============================================================================
 //   - "Send a test to me" and "Send to everyone" on the Newsletter type.
 //   - the "RSVPs" tool: counts per event, the replies, a CSV download.

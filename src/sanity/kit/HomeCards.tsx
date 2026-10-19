@@ -163,7 +163,7 @@ export function ComingUp({ types, children }: { types: string[]; children?: Reac
           ))}
         </Stack>
       )}
-      {/* Extra rows a site's tools add, like RSVP headcounts (card 121). */}
+      {/* Extra rows a site's tools add, like RSVP headcounts (card 127). */}
       {children}
     </Panel>
   );
@@ -447,7 +447,7 @@ export function PagesMap({ groups }: { groups: PageMapGroup[] }) {
     let cancelled = false;
     client
       .fetch<MapRow[]>(
-        `*[_type in $types && !(_id in path("versions.**"))]{ _id, _type, "name": coalesce(title, name, heading, internalTitle) }`,
+        `*[_type in $types && !(_id in path("versions.**"))]{ _id, _type, "name": coalesce(title, name, heading, internalTitle) + select(hideFromSearch == true => " (hidden)", "") }`,
         { types: listTypes },
       )
       .then((r) => !cancelled && setDocs(r ?? []))

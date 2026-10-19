@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// mail-env - the Worker's mail settings, read in one place (PORTS.md card 121)
+// mail-env - the Worker's mail settings, read in one place (PORTS.md card 127)
 // =============================================================================
 // Every mail route builds its dependencies here, so the setting names live in
 // one file and OPERATIONS.md "Email" can list them once:

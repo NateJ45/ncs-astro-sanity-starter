@@ -196,7 +196,7 @@ export default defineConfig({
         'page',
       ],
     }),
-    // Newsletter send buttons and the RSVPs tool (the email backbone, card 121).
+    // Newsletter send buttons and the RSVPs tool (the email backbone, card 127).
     // Before the kit, so the kit's tool order and staff view place "rsvps".
     ncsMailTools(),
     // The Studio kit (src/sanity/kit/, settings in src/sanity/kit.config.ts):
@@ -248,7 +248,13 @@ export default defineConfig({
         ? prev.filter((option) => option.templateId !== 'page')
         : prev;
       if (creationContext.type === 'global') {
-        return options.filter((option) => !SINGLETON_TYPES.has(option.templateId));
+        // Private pages (card 122) are made from Pages -> Private pages only,
+        // where structure.ts gives them their privatePage. id. Made anywhere
+        // else they would get an ordinary (public) id.
+        return options.filter(
+          (option) =>
+            !SINGLETON_TYPES.has(option.templateId) && option.templateId !== 'privatePage',
+        );
       }
       return options;
     },
@@ -262,6 +268,10 @@ export default defineConfig({
       // copy is a second document claiming an address that is already taken.
       // See src/sanity/components/pageActions.tsx.
       if (PAGE_OPS_TYPES.has(schemaType)) {
+        base = base.filter(({ action }) => action !== 'duplicate');
+      }
+      // A duplicate of a private page would get an ordinary, PUBLIC id (card 122).
+      if (schemaType === 'privatePage') {
         base = base.filter(({ action }) => action !== 'duplicate');
       }
 

@@ -241,7 +241,7 @@ export function MessagesTool() {
             What people sent through the website's forms. Mark each one so everyone can see what
             still needs an answer.
           </Text>
-          {/* RSVP headcounts for upcoming events (card 121); nothing when there are none. */}
+          {/* RSVP headcounts for upcoming events (card 127); nothing when there are none. */}
           <RsvpInboxNote />
 
           {error && (

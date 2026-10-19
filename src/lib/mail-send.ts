@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// mail-send - the ONE way the Worker sends email (the email backbone, PORTS.md card 121)
+// mail-send - the ONE way the Worker sends email (the email backbone, PORTS.md card 127)
 // =============================================================================
 // Every route that emails anybody (the contact form, the form builder, newsletter
 // confirmations and issues, RSVP confirmations) asks pickMailer() for a sender

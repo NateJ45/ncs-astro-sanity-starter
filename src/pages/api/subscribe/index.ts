@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// /api/subscribe/ - join the newsletter list (PORTS.md card 121)
+// /api/subscribe/ - join the newsletter list (PORTS.md card 127)
 // =============================================================================
 // GET  -> { ready }   Can the site's own list take sign-ups? The sign-up box
 //                     asks before it shows itself; it never learns why not.

@@ -43,6 +43,70 @@ export type Redirect = {
   note?: string;
 };
 
+export type PrivatePage = {
+  _id: string;
+  _type: 'privatePage';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  password?: {
+    alg?: string;
+    iterations?: number;
+    salt?: string;
+    hash?: string;
+    setAt?: string;
+  };
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & LogoStripSection)
+    | ({
+        _key: string;
+      } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
+  >;
+};
+
+export type Slug = {
+  _type: 'slug';
+  current?: string;
+  source?: string;
+};
+
 export type JournalEntryReference = {
   _ref: string;
   _type: 'reference';
@@ -78,12 +142,6 @@ export type Newsletter = {
     text?: string;
   };
   showOnWebsite?: boolean;
-};
-
-export type Slug = {
-  _type: 'slug';
-  current?: string;
-  source?: string;
 };
 
 export type JournalCategory = {
@@ -488,6 +546,8 @@ export type SiteSettings = {
     showBudgetCalculator?: boolean;
   };
   satisfactionGuarantee?: string;
+  headCode?: string;
+  bodyEndCode?: string;
 };
 
 export type HomePageReference = {
@@ -946,6 +1006,7 @@ export type EmbedSection = {
   subhead?: string;
   embedUrl?: string;
   embedCode?: string;
+  runsOnPage?: boolean;
   heightHint?: 'short' | 'medium' | 'tall';
 };
 
@@ -2302,9 +2363,10 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | Photo
   | Redirect
+  | PrivatePage
+  | Slug
   | JournalEntryReference
   | Newsletter
-  | Slug
   | JournalCategory
   | ProcessStep
   | Service

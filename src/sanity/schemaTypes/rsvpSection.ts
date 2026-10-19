@@ -1,6 +1,6 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// rsvpSection - "RSVP": let people say they are coming (PORTS.md card 121)
+// rsvpSection - "RSVP": let people say they are coming (PORTS.md card 127)
 // =============================================================================
 // A section for any page (VBS, Easter breakfast, homecoming, a workshop). The
 // block IS the event: there is no events collection, because sites in the

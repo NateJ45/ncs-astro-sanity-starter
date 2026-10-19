@@ -2,7 +2,7 @@
 // Foundation, edit with care
 // =============================================================================
 // /api/subscribe/confirm/?t=<signed token> - the link in "Please confirm your email"
-// (PORTS.md card 121). Confirms, then sends the reader to a plain page on the
+// (PORTS.md card 127). Confirms, then sends the reader to a plain page on the
 // site that says what happened: /email/confirmed/, or /email/link-problem/ for a
 // link that is broken, expired or from before the secret changed.
 // =============================================================================

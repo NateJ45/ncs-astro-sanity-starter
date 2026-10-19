@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// The email backbone's sender, signed links and template (PORTS.md card 121):
+// The email backbone's sender, signed links and template (PORTS.md card 127):
 // provider choice, both wire formats, opt-in signing, and the CAN-SPAM footer.
 
 import { describe, it } from 'node:test';

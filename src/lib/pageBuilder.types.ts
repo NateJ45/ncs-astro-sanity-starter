@@ -349,11 +349,13 @@ export interface ProjectedEmbedSection {
   subhead?: string;
   embedUrl?: string;
   embedCode?: string;
+  /** Card 121: run embedCode directly on the page instead of in its own box. */
+  runsOnPage?: boolean;
   heightHint?: 'short' | 'medium' | 'tall';
 }
 
 /**
- * rsvpSection - an RSVP form for one event (card 121). CONTENT type.
+ * rsvpSection - an RSVP form for one event (card 127). CONTENT type.
  * `pageId` is projected (^._id) so the form can name its event.
  */
 export interface ProjectedRsvpSection {

@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// mail-studio - the Studio's two protected mail routes (PORTS.md card 121)
+// mail-studio - the Studio's two protected mail routes (PORTS.md card 127)
 // =============================================================================
 //   /api/studio/newsletter/   the list's size, an issue's send status, and the
 //                             "Send a test to me" / "Send to everyone" buttons.

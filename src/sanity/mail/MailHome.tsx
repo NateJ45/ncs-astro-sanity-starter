@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// The mail pieces Home and the Messages inbox show (PORTS.md card 121)
+// The mail pieces Home and the Messages inbox show (PORTS.md card 127)
 // =============================================================================
 //   NewsletterCard   Home: how many people get the newsletter, and the last
 //                    issue that went. "Not set up yet" until the Worker has

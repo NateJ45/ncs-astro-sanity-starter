@@ -2,7 +2,7 @@
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
 // mail-template - every email the site sends, in the site's own colours
-// (the email backbone, PORTS.md card 121)
+// (the email backbone, PORTS.md card 127)
 // =============================================================================
 // One renderer for the newsletter, the "please confirm" email and the RSVP
 // confirmation, so they all look like they came from the same place. Input is a

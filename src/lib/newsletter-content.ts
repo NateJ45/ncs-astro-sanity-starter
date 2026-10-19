@@ -1,7 +1,7 @@
 // Safe to edit by hand
 // =============================================================================
 // newsletter-content - THIS SITE's newsletter: what an issue holds, the brand,
-// the footer address (the email backbone, PORTS.md card 121)
+// the footer address (the email backbone, PORTS.md card 127)
 // =============================================================================
 // The send engine (src/lib/mail-newsletter.ts, PORTABLE) knows nothing about
 // sermons, posts or events. This file is where a site says what its issue

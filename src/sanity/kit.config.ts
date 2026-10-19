@@ -17,6 +17,7 @@
 
 import type { KitConfig } from './kit/types';
 import { genericRules, unconfirmedRule } from '../lib/studio-checkup';
+import { qualityRules } from '../lib/studio-checkup-quality';
 import { guides, GUIDE_CATEGORIES, GUIDES_FOR_TYPE } from './guides/content';
 import { makeGuideView } from './components/GuideView';
 import { envVal } from './urls';
@@ -103,6 +104,27 @@ export const kitConfig: KitConfig = {
       // Flags text marked "to be confirmed" or "[confirm]" and unticked
       // `confirmed` boxes. Harmless when nothing carries them.
       unconfirmedRule(),
+      // Links, headings, long Google text, pages nobody can reach, private
+      // pages (PORTS.md card 122). fixedPaths are this site's built routes;
+      // routes maps each slugged type to its address.
+      ...qualityRules({
+        seoTypes: SEO_TYPES,
+        fixedPaths: [
+          '/',
+          '/about/', // scaffold: about
+          '/services/', // scaffold: services
+          '/process/', // scaffold: process
+          '/faq/', // scaffold: faq
+          '/journal/', // scaffold: journal
+          '/contact/',
+          '/privacy/',
+        ],
+        routes: {
+          page: (slug) => `/${slug}/`,
+          privatePage: (slug) => `/private/${slug}/`,
+          journalEntry: (slug) => `/journal/${slug}/`, // scaffold: journal
+        },
+      }),
     ],
     ignoreTypes: ['sectionPreset', 'studioGuide', 'studioNotes', 'redirect'],
   },
@@ -135,6 +157,8 @@ export const kitConfig: KitConfig = {
       ],
     },
     { title: 'Pages you built', listType: 'page' },
+    // Password pages (card 122), listed by name like the pages above.
+    { title: 'Private pages', listType: 'privatePage' },
     {
       title: 'Lists',
       links: [
@@ -234,7 +258,7 @@ export const kitConfig: KitConfig = {
     // set up yet" until the Worker has CF_ANALYTICS_TOKEN, CF_ACCOUNT_ID and
     // CF_WEB_ANALYTICS_SITE_TAG (OPERATIONS.md, "Visitor numbers").
     visitors: true,
-    // The email backbone (card 121): the Newsletter card and RSVP counts. Each
+    // The email backbone (card 127): the Newsletter card and RSVP counts. Each
     // says "not set up yet" until the Worker has the settings (OPERATIONS.md, "Email").
     mail: true,
     // Card 110: the status line under the top bar, and the help panel.

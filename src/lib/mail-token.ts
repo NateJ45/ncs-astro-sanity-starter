@@ -2,7 +2,7 @@
 // Foundation, edit with care
 // =============================================================================
 // mail-token - signed links for "confirm your subscription" and "unsubscribe"
-// (the email backbone, PORTS.md card 121)
+// (the email backbone, PORTS.md card 127)
 // =============================================================================
 // A link in an email carries everything the Worker needs (which address, what
 // for, until when) plus an HMAC-SHA256 signature made with the Worker secret

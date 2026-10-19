@@ -85,7 +85,7 @@
   // Optional, both as secrets: TURNSTILE_SECRET (plus PUBLIC_TURNSTILE_SITE_KEY
   // in .env) and WEB3FORMS_KEY, the fallback for a site with no email binding.
   //
-  // ── The email backbone (PORTS.md card 121, src/lib/mail-env.ts) ──────────
+  // ── The email backbone (PORTS.md card 127, src/lib/mail-env.ts) ──────────
   // The newsletter, RSVPs and every form email go through ONE sender: the EMAIL
   // binding above (Cloudflare Email Sending) or Resend (secret RESEND_API_KEY,
   // any domain verified in Resend, so it works before the client's domain is on
@@ -122,6 +122,12 @@
   // random characters: npx wrangler secret put SHARE_PREVIEW_SECRET
   // Without it the dialog says links are not set up and the /preview route
   // ignores ?share=. The Messages tool reads CONTACT_DB above (no new binding).
+
+  // ── Password pages (src/pages/private/[slug].astro) ──────────────────────
+  // PORTS.md card 122. One secret, 32+ random characters, signs the access
+  // cookie: npx wrangler secret put PRIVATE_PAGE_SECRET
+  // Pages are read with SANITY_TOKEN (above). Without both, /private/* shows
+  // "not ready yet" and never a page. docs/agent/private-pages.md.
 
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {

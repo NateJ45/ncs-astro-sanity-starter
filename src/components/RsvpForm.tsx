@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// RsvpForm - the reply form inside an RSVP section (PORTS.md card 121)
+// RsvpForm - the reply form inside an RSVP section (PORTS.md card 127)
 // =============================================================================
 // Hydrates client:visible. Before it shows the form it asks /api/rsvp/ about the
 // event, so it can say plainly when replies are closed, when the event is full,

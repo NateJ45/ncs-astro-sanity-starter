@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// rsvpData - the Studio's view of RSVP events (PORTS.md card 121)
+// rsvpData - the Studio's view of RSVP events (PORTS.md card 127)
 // =============================================================================
 // Two halves joined here: the EVENTS come from Sanity (every published page or
 // saved section with an RSVP block: name, date, places), the COUNTS from the

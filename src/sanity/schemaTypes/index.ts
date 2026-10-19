@@ -17,6 +17,7 @@ import { journalPage } from './journalPage'; // scaffold: journal
 import { navLink } from './navLink';
 import { newsletter } from './newsletter';
 import { page } from './page';
+import { privatePage } from './privatePage';
 import { pageSectionSchemas, syncedSection } from './sections';
 import { richSectionSchemas } from './richSections';
 import { notFoundPage } from './notFoundPage';
@@ -72,10 +73,13 @@ export const schemaTypes = [
   processStep, // scaffold: process
   journalCategory, // scaffold: journal
   journalEntry, // scaffold: journal
-  // One issue of the email newsletter (card 121); subscribers live in D1, never here.
+  // One issue of the email newsletter (card 127); subscribers live in D1, never here.
   newsletter,
   // Custom pages built from the section library (multi-instance, not a singleton)
   page,
+  // Pages only people with the password can see (card 122). Stored under the
+  // privatePage. id path, which the public API never serves.
+  privatePage,
   // One saved section, kept for reuse on other pages. Not content: nothing
   // about a preset reaches the live site until it is added to a page.
   sectionPreset,

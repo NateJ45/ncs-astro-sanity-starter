@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// The newsletter list and sends (PORTS.md card 121), run against real SQLite
+// The newsletter list and sends (PORTS.md card 127), run against real SQLite
 // (node:sqlite, src/lib/mail-sqlite.ts) with the real MAIL_DDL: double opt-in,
 // the same answer whatever the list holds, unsubscribe, batching, never twice.
 

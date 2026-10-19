@@ -95,7 +95,7 @@ async function passesTurnstile(
 }
 
 /**
- * Email through the site's backbone (src/lib/mail-send.ts, PORTS.md card 121):
+ * Email through the site's backbone (src/lib/mail-send.ts, PORTS.md card 127):
  * Cloudflare Email Sending, or Resend, whichever the Worker is set up for.
  * Returns null on success, or the reason it failed. The message is the same
  * one this route always sent; on Cloudflare the backbone keeps the old shape

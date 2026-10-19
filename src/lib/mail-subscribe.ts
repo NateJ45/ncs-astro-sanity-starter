@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care (the words are safe to edit)
 // =============================================================================
-// mail-subscribe - joining and leaving the newsletter list (PORTS.md card 121)
+// mail-subscribe - joining and leaving the newsletter list (PORTS.md card 127)
 // =============================================================================
 // DOUBLE OPT-IN. Signing up stores the address as "pending" and emails a signed
 // link (src/lib/mail-token.ts). Only following that link makes it "subscribed",
