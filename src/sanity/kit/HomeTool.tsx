@@ -48,19 +48,7 @@ import {
   useValidationStatus,
   useWorkspace,
 } from 'sanity';
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Checkbox,
-  Dialog,
-  Flex,
-  Grid,
-  Spinner,
-  Stack,
-  Text,
-} from '@sanity/ui';
+import { Box, Button, Card, Dialog, Flex, Grid, Stack, Text } from '@sanity/ui';
 import { useToast } from '@sanity/ui/toast';
 import {
   checklist,
@@ -73,7 +61,6 @@ import {
   weekKey,
   weekStart,
   WEEK_TYPE,
-  type LiveState,
 } from '../../lib/studio-kit';
 import { publishedIdOf, type CheckResult } from '../../lib/studio-checkup';
 import {
@@ -97,6 +84,8 @@ import {
   Visitors,
 } from './HomeCards';
 import { GuideVideos } from './GuideVideos';
+import { CheckPath, KitAction, KitLoading, LiveSteps, StoneTag } from './ui';
+import { LIVE_STEP_WORDS, liveSteps, pathProgress } from '../../lib/studio-look';
 import { HomeBanner } from './HomeBanner';
 import { NewsletterCard, RsvpComingUp } from '../mail/MailHome';
 import type { KitConfig, QuickAction, ThisWeekTask } from './types';
@@ -177,55 +166,42 @@ function ThisWeek({
   const firstDayName = firstDay === 0 ? 'Sunday' : 'Monday';
 
   return (
-    <Panel title={title}>
+    <Panel
+      title={title}
+      edge
+      action={
+        rows ? (
+          <span className="ui-muted">{pathProgress(rows.map((r) => r.done)).text}</span>
+        ) : undefined
+      }
+    >
       {rows === null ? (
-        <Spinner muted />
+        <KitLoading />
       ) : (
         <Stack gap={4}>
-          {tasks.map((t, i) => {
-            const row = rows[i];
-            const link = t.target ? linkTo(t.target) : null;
-            return (
-              <Flex key={t.id} gap={3} align="flex-start">
-                <Box style={{ flexShrink: 0, paddingTop: 2 }}>
-                  {row.tickable ? (
-                    <Checkbox
-                      id={`week-${t.id}`}
-                      checked={row.done}
-                      disabled={saving === t.id}
-                      onChange={(e) => void toggle(t.id, e.currentTarget.checked)}
-                      style={{ width: 24, height: 24 }}
-                    />
-                  ) : (
-                    <Badge tone={row.done ? 'positive' : 'default'} fontSize={1} padding={2}>
-                      {row.done ? 'Done' : 'To do'}
-                    </Badge>
-                  )}
-                </Box>
-                <Stack gap={2} flex={1}>
-                  <Text size={2} weight="semibold">
-                    {row.tickable ? <label htmlFor={`week-${t.id}`}>{t.title}</label> : t.title}
-                  </Text>
-                  <Text size={1} muted style={{ lineHeight: 1.5 }}>
-                    {t.detail}
-                    {row.by === 'content' || row.by === 'checkup' ? ' Ticked for you.' : ''}
-                  </Text>
-                </Stack>
-                {!row.done && link && (
-                  <Button
-                    as="a"
-                    href={link.href}
-                    onClick={link.onClick}
-                    text={t.targetLabel ?? 'Do it'}
-                    mode="ghost"
-                    tone="primary"
-                    fontSize={1}
-                    padding={2}
-                  />
-                )}
-              </Flex>
-            );
-          })}
+          {/* Card 131: the list as a path; each stone is the tick and fills when done. */}
+          <CheckPath
+            idPrefix="week"
+            onToggle={(id, on) => void toggle(id, on)}
+            items={tasks.map((t, i) => {
+              const row = rows[i];
+              const link = t.target ? linkTo(t.target) : null;
+              return {
+                id: t.id,
+                title: t.title,
+                detail: t.detail,
+                done: row.done,
+                tickable: row.tickable,
+                busy: saving === t.id,
+                note: row.by === 'content' || row.by === 'checkup' ? 'Ticked for you.' : undefined,
+                action: link ? (
+                  <KitAction href={link.href} onClick={link.onClick}>
+                    {t.targetLabel ?? 'Do it'}
+                  </KitAction>
+                ) : undefined,
+              };
+            })}
+          />
           <Quiet>{`The list starts fresh every ${firstDayName}.`}</Quiet>
         </Stack>
       )}
@@ -234,19 +210,6 @@ function ThisWeek({
 }
 
 // -----------------------------------------------------------------------------
-
-const LIVE_TONE: Record<LiveState, 'positive' | 'primary' | 'caution' | 'default'> = {
-  live: 'positive',
-  'on-its-way': 'primary',
-  slow: 'caution',
-  unknown: 'default',
-};
-const LIVE_BADGE: Record<LiveState, string> = {
-  live: 'Up to date',
-  'on-its-way': 'Updating',
-  slow: 'Taking a while',
-  unknown: 'Not sure',
-};
 
 function IsItLive({ slowAfter, helperName }: { slowAfter: number; helperName: string }) {
   // Shared with the navbar line (NavbarStatus.tsx), so the two never disagree.
@@ -257,39 +220,27 @@ function IsItLive({ slowAfter, helperName }: { slowAfter: number; helperName: st
   const status = state ? liveStatus(state.builtAt, state.lastPublish, now, slowAfter) : null;
   const problem = state ? deployProblem(state.deploy, helperName) : null;
   return (
-    <Panel title="Is it live?">
+    <Panel title="Is it live?" meaning="publishing">
       {!status || !state ? (
-        <Spinner muted />
+        <KitLoading />
       ) : problem ? (
         // Card 111: the newest deploy failed. Nothing is on its way, so say so.
-        <Stack gap={3}>
-          <Flex>
-            <Badge tone="critical" fontSize={1} padding={2}>
-              Did not go through
-            </Badge>
-          </Flex>
+        // Card 131: the middle stone did not go down.
+        <Stack gap={4}>
+          <LiveSteps states={liveSteps('failed')} words={LIVE_STEP_WORDS} />
           <Text size={2} style={{ lineHeight: 1.6 }}>
             {problem.message}
           </Text>
           <Flex>
-            <Button
-              text="Try again"
-              tone="critical"
-              fontSize={1}
-              padding={2}
-              disabled={retry.busy}
-              onClick={() => void retry.tryAgain()}
-            />
+            <KitAction strong disabled={retry.busy} onClick={() => void retry.tryAgain()}>
+              Try again
+            </KitAction>
           </Flex>
           {retry.note && <Quiet>{retry.note}</Quiet>}
         </Stack>
       ) : (
-        <Stack gap={3}>
-          <Flex>
-            <Badge tone={LIVE_TONE[status.state]} fontSize={1} padding={2}>
-              {LIVE_BADGE[status.state]}
-            </Badge>
-          </Flex>
+        <Stack gap={4}>
+          <LiveSteps states={liveSteps(status.state)} words={LIVE_STEP_WORDS} />
           <Text size={2} style={{ lineHeight: 1.6 }}>
             {status.message}
           </Text>
@@ -346,11 +297,11 @@ function RecentEdits({ ignoreTypes }: { ignoreTypes: string[] }) {
 
   const now = Date.now();
   return (
-    <Panel title="Recent edits">
+    <Panel title="Recent edits" meaning="document">
       {failed ? (
         <Quiet>The list could not load just now.</Quiet>
       ) : rows === null ? (
-        <Spinner muted />
+        <KitLoading />
       ) : rows.length === 0 ? (
         <Quiet>Nothing has been edited yet.</Quiet>
       ) : (
@@ -376,11 +327,7 @@ function RecentEdits({ ignoreTypes }: { ignoreTypes: string[] }) {
                       {typeTitle(r._type)}, {timeAgo(r._updatedAt, now)}
                     </Text>
                   </Stack>
-                  {draft && (
-                    <Badge tone="caution" fontSize={0} padding={2}>
-                      Not published
-                    </Badge>
-                  )}
+                  {draft && <StoneTag tone="tip">Not published</StoneTag>}
                 </Flex>
               </Card>
             );
@@ -617,11 +564,11 @@ function PickUp({ ignoreTypes }: { ignoreTypes: string[] }) {
   // Nothing waiting: say nothing. Home stays calm when there is nothing to do.
   if (!failed && rows && rows.length === 0) return null;
   return (
-    <Panel title="Pick up where you left off">
+    <Panel title="Pick up where you left off" meaning="step">
       {failed ? (
         <Quiet>The list of unpublished changes could not load just now.</Quiet>
       ) : rows === null ? (
-        <Spinner muted />
+        <KitLoading />
       ) : (
         <Stack gap={3}>
           <Quiet>
@@ -729,7 +676,7 @@ export function makeHomeTool(config: KitConfig) {
             )}
             {config.features.mail && <NewsletterCard helperName={config.helper.name} />}
             <RecentEdits ignoreTypes={ignore} />
-            <Panel title={`Ask ${config.helper.name}`}>
+            <Panel title={`Ask ${config.helper.name}`} meaning="message">
               <Quiet>
                 Stuck, or something looks wrong? Say what you were trying to do and what happened.
                 Nothing is ever lost by asking.
@@ -754,7 +701,7 @@ export function makeHomeTool(config: KitConfig) {
           {pages.length > 0 && <PagesMap groups={pages} />}
 
           {config.features.guide && config.guide.guides.some((g) => g.video) && (
-            <Panel title="Watch how it is done">
+            <Panel title="Watch how it is done" meaning="preview">
               <GuideVideos
                 guides={config.guide.guides}
                 max={3}

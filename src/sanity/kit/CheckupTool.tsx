@@ -9,123 +9,128 @@
 // there" button that goes through the router (useStudioLink).
 // =============================================================================
 
-import { ActivityIcon } from '@sanity/icons/Activity';
-import { Badge, Box, Button, Card, Flex, Spinner, Stack, Text } from '@sanity/ui';
+import type { MouseEvent } from 'react';
+import { Box } from '@sanity/ui';
 import { isAllClear, type CheckResult, type Severity } from '../../lib/studio-checkup';
+import type { StudioTarget } from '../../lib/studio-kit';
 import { ToolHeading, useCheckup, useStudioLink } from './shared';
+import {
+  AllClear,
+  KitAction,
+  KitLoading,
+  KitNotice,
+  KitScope,
+  levelOf,
+  ResultCard,
+  SeverityGroup,
+  type Level,
+} from './ui';
 import type { KitConfig } from './types';
 
+/** Kept for any site code that still reads it; the kit draws severity as stones now (card 131). */
 export const SEVERITY_TONE: Record<Severity, 'critical' | 'caution' | 'primary'> = {
   'Needs doing': 'critical',
   'Worth a look': 'caution',
   'For information': 'primary',
 };
 
-function ResultCard({ r }: { r: CheckResult }) {
-  const linkTo = useStudioLink();
-  const link = r.target ? linkTo(r.target) : null;
+type LinkFor = (target: StudioTarget) => {
+  href: string;
+  onClick: (e: MouseEvent<HTMLElement>) => void;
+};
+
+const LEVELS: Level[] = ['needs', 'worth', 'good'];
+
+/**
+ * Card 131: the findings as white cards with their severity along the left
+ * edge, grouped "Needs doing / Worth a look / Good to know"; all clear is the
+ * laid path. Presentational, so the kit harness renders it with fixtures.
+ */
+export function CheckupView({
+  results,
+  failed,
+  busy,
+  onRun,
+  linkTo,
+}: {
+  results: CheckResult[] | null;
+  failed: boolean;
+  busy: boolean;
+  onRun: () => void;
+  linkTo: LinkFor;
+}) {
   return (
-    <Card padding={4} radius={3} border tone={SEVERITY_TONE[r.severity]}>
-      <Stack gap={4}>
-        <Flex align="center" gap={3} wrap="wrap">
-          <Badge tone={SEVERITY_TONE[r.severity]} padding={2} fontSize={2}>
-            {r.severity}
-          </Badge>
-          <Text size={3} weight="semibold">
-            {r.label}
-          </Text>
-        </Flex>
-        <Text size={2} style={{ lineHeight: 1.6 }}>
-          {r.detail}
-        </Text>
-        {link && (
-          <Flex>
-            <Button
-              as="a"
-              href={link.href}
-              onClick={link.onClick}
-              text={`${r.targetLabel ?? 'Take me there'} →`}
-              tone="primary"
-              mode="ghost"
-              fontSize={2}
-              padding={3}
-            />
-          </Flex>
+    <KitScope>
+      <div style={{ display: 'grid', gap: 28 }}>
+        <div>
+          <KitAction onClick={onRun} disabled={busy}>
+            {busy ? 'Checking...' : 'Check again'}
+          </KitAction>
+        </div>
+        {failed ? (
+          <KitNotice tone="tip" title="The check could not finish just now">
+            Your website is fine. Press Check again in a minute.
+          </KitNotice>
+        ) : results === null ? (
+          <KitLoading label="Checking the website" />
+        ) : (
+          <>
+            {isAllClear(results) && <AllClear lead="Nothing needs fixing right now." />}
+            {LEVELS.map((level) => {
+              const rows = results.filter((r) => levelOf(r.severity) === level);
+              if (!rows.length) return null;
+              return (
+                <SeverityGroup key={level} level={level} count={rows.length}>
+                  {rows.map((r) => {
+                    const link = r.target ? linkTo(r.target) : null;
+                    return (
+                      <ResultCard
+                        key={r.id}
+                        level={level}
+                        title={r.label}
+                        detail={r.detail}
+                        action={
+                          link ? (
+                            <KitAction href={link.href} onClick={link.onClick}>
+                              {`${r.targetLabel ?? 'Take me there'} →`}
+                            </KitAction>
+                          ) : undefined
+                        }
+                      />
+                    );
+                  })}
+                </SeverityGroup>
+              );
+            })}
+          </>
         )}
-      </Stack>
-    </Card>
+      </div>
+    </KitScope>
   );
 }
 
 export function makeCheckupTool(config: KitConfig) {
   return function CheckupTool() {
     const { results, failed, busy, run } = useCheckup(config);
-    const todo = (results ?? []).filter((r) => r.severity !== 'For information');
-    const info = (results ?? []).filter((r) => r.severity === 'For information');
-
+    const linkTo = useStudioLink();
     return (
       <Box padding={[4, 4, 5]} style={{ overflowY: 'auto', height: '100%' }}>
-        <Stack gap={5} style={{ maxWidth: 760, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gap: 32, maxWidth: 780, margin: '0 auto' }}>
           <ToolHeading
-            icon={ActivityIcon}
+            meaning="checkup"
+            label="Checkup"
             lead="A quick look over the website for things worth fixing, such as a picture with no description or a link to a page that is gone. Nothing is changed here. It only points the way."
           >
             What needs attention
           </ToolHeading>
-
-          <Flex>
-            <Button
-              text={busy ? 'Checking...' : 'Check again'}
-              mode="ghost"
-              fontSize={2}
-              padding={3}
-              disabled={busy}
-              onClick={() => void run()}
-            />
-          </Flex>
-
-          {failed ? (
-            <Card padding={4} radius={3} tone="caution" border>
-              <Text size={2}>
-                The check could not finish just now. Your website is fine; press Check again in a
-                minute.
-              </Text>
-            </Card>
-          ) : results === null ? (
-            <Flex align="center" gap={3}>
-              <Spinner muted />
-              <Text size={2} muted>
-                Checking...
-              </Text>
-            </Flex>
-          ) : (
-            <Stack gap={3}>
-              {isAllClear(results) && (
-                <Card padding={4} radius={3} tone="positive" border>
-                  <Flex align="center" gap={3} wrap="wrap">
-                    <Badge tone="positive" padding={2} fontSize={2}>
-                      All clear
-                    </Badge>
-                    <Text size={3}>Nothing needs fixing right now.</Text>
-                  </Flex>
-                </Card>
-              )}
-              {todo.map((r) => (
-                <ResultCard key={r.id} r={r} />
-              ))}
-              {info.length > 0 && (
-                <Box paddingTop={3}>
-                  <Text size={2} weight="semibold">
-                    Good to know
-                  </Text>
-                </Box>
-              )}
-              {info.map((r) => (
-                <ResultCard key={r.id} r={r} />
-              ))}
-            </Stack>
-          )}
-        </Stack>
+          <CheckupView
+            results={results}
+            failed={failed}
+            busy={busy}
+            onRun={() => void run()}
+            linkTo={linkTo}
+          />
+        </div>
       </Box>
     );
   };

@@ -227,6 +227,8 @@ export function makeQuickUpdateTool(config: KitConfig) {
             <>
               <ToolHeading
                 icon={BoltIcon}
+                meaning="post"
+                label="Quick update"
                 lead="The quick jobs, made for a phone. Pick one, fill in a few boxes, and it goes on the website."
               >
                 Quick update

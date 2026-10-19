@@ -26,7 +26,7 @@ import {
 } from 'sanity';
 import { CheckmarkCircleIcon } from '@sanity/icons/CheckmarkCircle';
 import { CloseIcon } from '@sanity/icons/Close';
-import { Badge, Box, Button, Card, Flex, Spinner, Stack, Text } from '@sanity/ui';
+import { Box, Button, Card, Flex, Text } from '@sanity/ui';
 import type { CheckGroup } from '../../lib/page-checks';
 import {
   CHECKUP_QUERY,
@@ -37,7 +37,19 @@ import {
 } from '../../lib/studio-checkup';
 import { forDocument, type DocFinding } from '../../lib/studio-prepublish';
 import { WEEK_TYPE } from '../../lib/studio-kit';
-import { SEVERITY_TONE } from './CheckupTool';
+import {
+  AllClear,
+  KitAction,
+  KitLoading,
+  KitNotice,
+  KitScope,
+  levelOf,
+  ResultCard,
+  SeverityGroup,
+  type Level,
+} from './ui';
+
+const LEVELS: Level[] = ['needs', 'worth', 'good'];
 import { API_VERSION, readSiteFiles, useStudioLink, useTypeTitle } from './shared';
 import type { KitConfig } from './types';
 
@@ -77,35 +89,22 @@ function FindingCard({
   const go = f.field
     ? linkTo({ doc: publishedIdOf(documentId), type: documentType, field: f.field })
     : null;
+  // Card 131: a white card with its severity along the left edge.
   return (
-    <Card padding={3} radius={2} border tone={SEVERITY_TONE[f.severity]}>
-      <Stack gap={3}>
-        <Flex>
-          <Badge tone={SEVERITY_TONE[f.severity]} fontSize={0} padding={2}>
-            {f.severity}
-          </Badge>
-        </Flex>
-        <Text size={1} weight="semibold">
-          {f.label}
-        </Text>
-        <Text size={1} muted style={{ lineHeight: 1.5 }}>
-          {f.detail}
-        </Text>
-        {go && (
-          <Flex>
-            <Button
-              as="a"
-              href={go.href}
-              onClick={go.onClick}
-              text="Show me"
-              mode="ghost"
-              fontSize={1}
-              padding={2}
-            />
-          </Flex>
-        )}
-      </Stack>
-    </Card>
+    <ResultCard
+      dense
+      showLevel
+      level={levelOf(f.severity)}
+      title={f.label}
+      detail={f.detail}
+      action={
+        go ? (
+          <KitAction href={go.href} onClick={go.onClick}>
+            Show me
+          </KitAction>
+        ) : undefined
+      }
+    />
   );
 }
 
@@ -164,63 +163,65 @@ export function makePublishPanel(config: KitConfig) {
           </Flex>
         </Card>
         <Box flex={1} padding={4} style={{ overflowY: 'auto' }}>
-          <Stack gap={4}>
-            <Text size={1} muted style={{ lineHeight: 1.6 }}>
-              A last look at this page as it will be once you publish. Nothing here stops you
-              publishing; it points at things worth a second look.
-            </Text>
-            {failed && (
-              <Text size={1} muted>
-                The check could not run just now.
-              </Text>
-            )}
-            {!failed && findings === null && <Spinner muted />}
-            {clear && (
-              <Card padding={3} radius={2} border tone="positive">
-                <Flex align="center" gap={2}>
-                  <Text size={2}>
-                    <CheckmarkCircleIcon />
-                  </Text>
-                  <Text size={1} weight="semibold">
-                    Nothing to look at. Ready when you are.
-                  </Text>
-                </Flex>
-              </Card>
-            )}
-            {(findings ?? []).map((f, i) => (
-              <FindingCard
-                key={`${f.ruleId}-${f.field ?? i}`}
-                f={f}
-                documentId={documentId}
-                documentType={documentType}
-              />
-            ))}
-            {groups.map((g) => (
-              <Card key={g.id} padding={3} radius={2} border tone="caution">
-                <Stack gap={3}>
-                  <Text size={1} weight="semibold">
-                    {g.title}: {g.findings.length} to look at
-                  </Text>
-                  {g.findings.map((f, i) => (
-                    <Text key={`${f.where}-${i}`} size={1} muted>
-                      <strong>{f.where}</strong>: {f.detail}
-                    </Text>
-                  ))}
-                </Stack>
-              </Card>
-            ))}
-            {state && (
-              <Flex>
-                <Button
-                  text="Check again"
-                  mode="ghost"
-                  fontSize={1}
-                  padding={2}
-                  onClick={() => void reload()}
+          <KitScope>
+            <div style={{ display: 'grid', gap: 16, fontSize: 15 }}>
+              <p className="ui-muted" style={{ lineHeight: 1.6 }}>
+                A last look at this page as it will be once you publish. Nothing here stops you
+                publishing; it points at things worth a second look.
+              </p>
+              {failed && (
+                <KitNotice tone="tip" title="The check could not run just now">
+                  Press Check again in a minute.
+                </KitNotice>
+              )}
+              {!failed && findings === null && <KitLoading label="Looking over the page" />}
+              {clear && (
+                <AllClear
+                  compact
+                  title="Ready when you are"
+                  lead="Nothing to look at on this page."
                 />
-              </Flex>
-            )}
-          </Stack>
+              )}
+              {LEVELS.map((level) => {
+                const rows = (findings ?? []).filter((f) => levelOf(f.severity) === level);
+                if (!rows.length) return null;
+                return (
+                  <SeverityGroup key={level} level={level} count={rows.length}>
+                    {rows.map((f, i) => (
+                      <FindingCard
+                        key={`${f.ruleId}-${f.field ?? i}`}
+                        f={f}
+                        documentId={documentId}
+                        documentType={documentType}
+                      />
+                    ))}
+                  </SeverityGroup>
+                );
+              })}
+              {groups.map((g) => (
+                <ResultCard
+                  key={g.id}
+                  level="worth"
+                  dense
+                  title={`${g.title}: ${g.findings.length} to look at`}
+                  detail={
+                    <>
+                      {g.findings.map((f, i) => (
+                        <span key={`${f.where}-${i}`} style={{ display: 'block', marginTop: 4 }}>
+                          <strong>{f.where}</strong>: {f.detail}
+                        </span>
+                      ))}
+                    </>
+                  }
+                />
+              ))}
+              {state && (
+                <div>
+                  <KitAction onClick={() => void reload()}>Check again</KitAction>
+                </div>
+              )}
+            </div>
+          </KitScope>
         </Box>
       </Flex>
     );

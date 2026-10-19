@@ -3,3 +3,4 @@
 export * from './primitives';
 export { GuideShot } from './GuideShot';
 export { LOOK, SURFACE_RADIUS } from './look';
+export * from './surfaces';

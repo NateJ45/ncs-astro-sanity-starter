@@ -13,6 +13,7 @@
 //           checking the chrome: the navbar status line, the Site Guide tool.
 //   guide   the Guide's pieces on a bare page in the Studio theme:
 //           ?view=index|page|panel|ui, &g=<guide slug>, &scheme=light|dark.
+//           ?view=surfaces&part=all|tool|checkup|clear|loading|failed|home (card 131).
 //
 // Screenshots: scripts/studio-harness-shots.mjs (run with the dev server up).
 // =============================================================================
@@ -40,6 +41,7 @@ import {
   UiChip,
 } from '../ui';
 import type { GuideShotData } from '../../../lib/studio-look';
+import { SurfacesBench } from './Surfaces';
 
 /** The Studio's two font stacks, as sanity.config.ts uses them. */
 const fonts = (brand as { studio: { fonts: { display: string; body: string } } }).studio.fonts;
@@ -115,7 +117,12 @@ function GuideBench() {
   return (
     <ThemeProvider theme={theme} scheme={scheme}>
       <Card style={{ minHeight: '100vh' }} padding={[3, 4, 5]}>
-        <div style={{ maxWidth: view === 'panel' ? 380 : 820, margin: '0 auto' }}>
+        <div
+          style={{
+            maxWidth: view === 'panel' ? 380 : view === 'surfaces' ? 1100 : 820,
+            margin: '0 auto',
+          }}
+        >
           {view === 'index' && (
             <GuideIndex
               guides={guides}
@@ -127,6 +134,7 @@ function GuideBench() {
             />
           )}
           {(view === 'page' || view === 'panel') && page}
+          {view === 'surfaces' && <SurfacesBench part={q.get('part') ?? 'all'} />}
           {view === 'ui' && (
             <KitScope>
               <div style={{ display: 'grid', gap: 36 }}>
