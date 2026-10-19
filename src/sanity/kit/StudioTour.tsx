@@ -201,6 +201,8 @@ export function TourPopoverCard({
         aria-describedby={`${titleId}-body`}
         tabIndex={-1}
         data-tour-popover=""
+        // Inline: a kit rule on dialogs clears the background, and a sheet must be opaque.
+        style={{ background: 'var(--ui-surface)' }}
       >
         <div className="ncs-tour-pop__head">
           <div style={{ minWidth: 0 }}>
