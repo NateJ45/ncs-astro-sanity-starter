@@ -47,6 +47,10 @@ The core component set, by role. All in `src/components/` unless noted.
 - `SectionHeading.astro` -- eyebrow + brand hairline accent + headline + subhead. Used by text-variant Hero and every interior section heading. Supports `tone="inverse"` for dark FinalCta panels. Accepts `scriptAccent?` for the optional calligraphic accent word (see `docs/agent/polish-layer.md`).
 - `ReadingProgress.astro` -- fixed 3px accent track at the top of `<article>`-wrapped pages. Used on journal posts.
 
+**Photos:**
+
+- `Lightbox.astro` + `LightboxLink.astro` (PORTABLE, PORTS.md card 124) -- the full-screen photo viewer. Wrap a Sanity photo in `<LightboxLink source={img} caption={...}>` (a real link to the full-size picture, so it works with JS off), mark the container `data-lightbox-group` (the viewer steps through that group only), and render `<Lightbox />` once in the component. Used by `GalleryGrid.astro` and the journal post photos (`JournalPortableText.tsx` spreads the same attributes). Native `<dialog>`, no dependency; styles in `src/styles/lightbox.css` (imported by globals.css); logic in `src/lib/lightbox.ts`; driven by `tests/lightbox.spec.ts` on `/styleguide/looks/`.
+
 **Marketing cards (all share the brand-stripe + resting-shadow rhythm):**
 
 - `ServiceCard.astro` -- service tier (price + features + best-for + CTA).

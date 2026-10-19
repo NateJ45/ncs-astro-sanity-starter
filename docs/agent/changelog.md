@@ -1,5 +1,17 @@
 # Change history
 
+_2026-10-18: section looks and a photo viewer (PORTS card 124)._
+
+**Decision.** Editors can pick a section's look instead of a colour. The five content blocks (text, image + text,
+gallery, quote, video) carry a `look` radio: Standard follows the page rhythm, Quiet is always the plain page, Feature
+is the brand's deep band with light text. SectionRenderer's cadence resolves the look with the neighbours in view, so
+the page still alternates and two dark bands never touch; every surface is a measured AA pair. Rule 9 now allows that
+one enum and still forbids free colour fields, and the gate test says so. Unset means Standard, so no page moved
+(parity). Gallery photos and journal post photos now open a full-screen viewer (native `<dialog>`, no dependency):
+caption and position, arrows and swipe, Escape, a focus trap and focus return, reduced motion respected, and with
+JavaScript off each photo is a link to the full-size picture. A Squarespace-style free background picker was weighed
+and left out: it is how a site drifts.
+
 _2026-10-18: the Studio on a phone, "Post a photo", and earlier versions from the nightly backups (PORTS card 125)._
 
 **Decision.** `/studio` installs to a phone's home screen: its own manifest (`/studio/manifest.webmanifest`, scope

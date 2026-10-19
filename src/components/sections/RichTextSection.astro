@@ -4,7 +4,7 @@
 // cadence stays correct no matter the order. Safe to edit by hand.
 import SectionHeading from '@/components/SectionHeading.astro';
 import PortableText from '@/components/PortableText';
-import { surfaceClass } from '@/lib/surfaces';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
 
 interface Props {
   eyebrow?: string;
@@ -15,7 +15,8 @@ interface Props {
   body?: any;
   width?: 'normal' | 'narrow';
   align?: 'left' | 'center';
-  surface?: 'background' | 'muted';
+  /** From SectionRenderer's cadence, including the band an editor's look asks for. */
+  surface?: CadenceSurface;
   headingId: string;
 }
 

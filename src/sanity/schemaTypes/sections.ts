@@ -27,7 +27,13 @@ import { CodeBlockIcon } from '@sanity/icons/CodeBlock';
 import { CodeTextInput } from '../components/CodeTextInput';
 import { codeWarningMessage } from '../../lib/custom-code';
 import { SyncIcon } from '@sanity/icons/Sync';
-import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
+import {
+  columnsField,
+  headingAccentField,
+  hideWhenRich,
+  lookField,
+  richTwin,
+} from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
 
 // Shared image field with required alt text (accessibility + SEO).
@@ -180,6 +186,7 @@ export const richTextSection = defineType({
         layout: 'radio',
       },
     }),
+    lookField('richTextSection'),
   ],
   preview: {
     select: { title: 'heading', body: 'body' },
@@ -209,6 +216,7 @@ export const imageTextSection = defineType({
     defineField({ name: 'heading', title: 'Heading', type: 'string' }),
     proseBody('body', 'Text'),
     defineField({ name: 'cta', title: 'Button (optional)', type: 'ctaBlock' }),
+    lookField('imageTextSection'),
   ],
   preview: {
     select: { title: 'heading', media: 'image' },
@@ -250,6 +258,7 @@ export const gallerySection = defineType({
       ],
     }),
     columnsField('gallerySection'),
+    lookField('gallerySection'),
   ],
   preview: {
     select: { images: 'images', heading: 'heading' },
@@ -282,6 +291,7 @@ export const quoteSection = defineType({
       type: 'string',
       description: 'Context that adds credibility. Example: "Location" or "Project type".',
     }),
+    lookField('quoteSection'),
   ],
   preview: {
     select: { title: 'quote', subtitle: 'attribution' },
@@ -406,6 +416,7 @@ export const videoSection = defineType({
     }),
     defineField({ name: 'heading', title: 'Heading (optional)', type: 'string' }),
     defineField({ name: 'caption', title: 'Caption (optional)', type: 'string' }),
+    lookField('videoSection'),
   ],
   preview: {
     select: { title: 'heading', url: 'url' },

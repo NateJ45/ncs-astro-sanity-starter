@@ -3,17 +3,21 @@
 // link into an embed URL; renders nothing if the link isn't recognized.
 // Surface comes from SectionRenderer. Safe to edit by hand.
 import SectionHeading from '@/components/SectionHeading.astro';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
 
 interface Props {
   url?: string;
   heading?: string;
   caption?: string;
-  surface?: 'background' | 'muted';
+  /** From SectionRenderer's cadence, including the band an editor's look asks for. */
+  surface?: CadenceSurface;
   headingId: string;
 }
 
 const { url, heading, caption, surface = 'background', headingId } = Astro.props as Props;
-const bg = surface === 'muted' ? 'bg-muted' : 'bg-background';
+// Surface classes come from src/lib/surfaces.ts (the measured pairs). Same
+// strings as the ternary that was here for 'background' and 'muted'.
+const bg = surfaceClass(surface);
 
 function embedUrl(u?: string): string | null {
   if (!u) return null;

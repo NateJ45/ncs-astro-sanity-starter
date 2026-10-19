@@ -20,6 +20,7 @@ import { withTrailingSlash } from '@/lib/href';
 import { PortableText as PT, type PortableTextComponents } from '@portabletext/react';
 import type { PortableTextBlock } from '@portabletext/types';
 import { urlFor, parseSanityAssetDimensions } from '@/lib/sanity';
+import { viewerSources } from '@/lib/lightbox';
 import { slugify } from '@/lib/slugify';
 import BeforeAfterSlider from '@/components/BeforeAfterSlider';
 
@@ -67,6 +68,35 @@ function videoEmbedSrc(url: string): string | null {
     /* fall through */
   }
   return null;
+}
+
+/**
+ * The attributes that make a post photo open the full-screen viewer
+ * (src/components/Lightbox.astro, which the journal entry page loads). The
+ * href is the full-size photo, so with JavaScript off the photo is a link.
+ * Same shape as LightboxLink.astro, for a React-rendered photo.
+ */
+function lightboxProps(img: { alt?: string; caption?: string } & Record<string, unknown>) {
+  const dims = parseSanityAssetDimensions(img as never);
+  const { href, srcset } = viewerSources(
+    (w) =>
+      urlFor(img as never)
+        .width(w)
+        .fit('max')
+        .quality(80)
+        .auto('format')
+        .url(),
+    dims?.width,
+  );
+  return {
+    href,
+    className: 'lightbox-link',
+    'data-lightbox': '',
+    'data-lightbox-srcset': srcset,
+    'data-lightbox-alt': img.alt ?? '',
+    'data-lightbox-caption': img.caption || undefined,
+    'aria-label': img.alt ? `View larger: ${img.alt}` : 'View photo larger',
+  };
 }
 
 function makeComponents(): PortableTextComponents {
@@ -225,16 +255,18 @@ function makeComponents(): PortableTextComponents {
               : 'my-l max-w-2xl mx-auto';
         return (
           <figure className={wrapperClass}>
-            <img
-              src={url}
-              srcSet={`${url} 1x, ${url2x} 2x`}
-              width={dims?.width}
-              height={dims?.height}
-              alt={value.alt ?? ''}
-              loading="lazy"
-              decoding="async"
-              className="h-auto w-full rounded-md"
-            />
+            <a {...lightboxProps(value)}>
+              <img
+                src={url}
+                srcSet={`${url} 1x, ${url2x} 2x`}
+                width={dims?.width}
+                height={dims?.height}
+                alt={value.alt ?? ''}
+                loading="lazy"
+                decoding="async"
+                className="h-auto w-full rounded-md"
+              />
+            </a>
             {value.caption && (
               <figcaption className="mt-s text-center text-sm text-muted-foreground italic">
                 {value.caption}
@@ -381,15 +413,17 @@ function makeComponents(): PortableTextComponents {
                       layout === 'row' ? 'w-[80%] shrink-0 snap-start md:w-auto md:shrink' : ''
                     }
                   >
-                    <img
-                      src={url}
-                      width={800}
-                      height={600}
-                      alt={img.alt ?? ''}
-                      loading="lazy"
-                      decoding="async"
-                      className="aspect-[4/3] h-full w-full rounded-md object-cover"
-                    />
+                    <a {...lightboxProps(img)}>
+                      <img
+                        src={url}
+                        width={800}
+                        height={600}
+                        alt={img.alt ?? ''}
+                        loading="lazy"
+                        decoding="async"
+                        className="aspect-[4/3] h-full w-full rounded-md object-cover"
+                      />
+                    </a>
                     {img.caption && (
                       <p className="mt-xs text-xs text-muted-foreground italic">{img.caption}</p>
                     )}
