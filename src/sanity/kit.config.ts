@@ -19,6 +19,7 @@ import type { KitConfig } from './kit/types';
 import { genericRules, unconfirmedRule } from '../lib/studio-checkup';
 import { qualityRules } from '../lib/studio-checkup-quality';
 import { exampleTextRule, llmsRules } from '../lib/studio-prepublish';
+import { TOURS, WELCOME, WHATS_NEW } from './studio-tours';
 import { guides, GUIDE_CATEGORIES, GUIDE_FOR_FIELD, GUIDES_FOR_TYPE } from './guides/content';
 import { makeGuideView } from './components/GuideView';
 import { envVal } from './urls';
@@ -222,6 +223,13 @@ export const kitConfig: KitConfig = {
   // checks as the "Check this page..." action, on the page-builder types.
   pageCheck: { types: [...PAGE_BUILDER_TYPES], run: (doc, client) => runPageCheck(client, doc) },
 
+  // Card 137: the spotlight tours, the welcome and What's new live in
+  // studio-tours.ts (plain data, unit-tested). tourSteps stays as the fallback
+  // a site without `tours` still uses.
+  tours: TOURS,
+  welcome: WELCOME,
+  whatsNew: WHATS_NEW,
+
   tourSteps: [
     {
       title: 'This is Home',
@@ -252,6 +260,47 @@ export const kitConfig: KitConfig = {
       short: 'Help',
       meaning: 'help',
       body: 'Site Guide in the top bar has step-by-step help for every job, and you can print any of it. Stuck? Home has a card for asking for help.',
+    },
+  ],
+
+  // Quick update jobs as data (card 137): no build function, the kit does the
+  // saving. A fork swaps these for its own weekly jobs. Shapes and the six job
+  // kinds: docs/agent/studio-kit.md, "Quick update jobs".
+  quickUpdate: [
+    {
+      id: 'banner-message',
+      title: 'Put up a banner message',
+      detail: 'A short line across the top of every page, until the day you pick.',
+      meaning: 'notice',
+      job: {
+        kind: 'create',
+        type: 'announcement',
+        defaults: { internalTitle: 'Banner from Quick update', style: 'info', enabled: true },
+      },
+      fields: [
+        { name: 'message', title: 'The message', kind: 'string', required: true, max: 160 },
+        { name: 'endDate', title: 'Take it down after', kind: 'datetime' },
+      ],
+      doneMessage: 'The banner shows on every page once the website updates.',
+    },
+    {
+      id: 'header-button',
+      title: 'Show or hide the header button',
+      meaning: 'settings',
+      job: {
+        kind: 'toggle',
+        doc: 'siteSettings',
+        field: 'headerCta.show',
+        onLabel: 'The header button is showing',
+        offLabel: 'The header button is hidden',
+      },
+    },
+    {
+      id: 'phone-number',
+      title: 'Change the phone number',
+      meaning: 'contact',
+      job: { kind: 'edit', doc: 'siteSettings' },
+      fields: [{ name: 'phone', title: 'Phone number', kind: 'string', max: 40 }],
     },
   ],
 

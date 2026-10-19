@@ -46,7 +46,8 @@ import { withPublishNote } from './publishNote';
 import { makeQuickUpdateTool } from './QuickUpdateTool';
 import { makeEarlierVersions } from './EarlierVersions';
 import { staffViewFor, useStaffView } from './shared';
-import { StudioTour } from './StudioTour';
+import { StudioTour, registerTours } from './StudioTour';
+import { allTours } from '../../lib/studio-tour';
 import {
   DeleteForeverAction,
   makeMoveToTrashAction,
@@ -102,13 +103,16 @@ export function ncsStudioKit(config: KitConfig) {
   // guides config maps to a Site Guide section. Null when nothing is mapped.
   const FieldGuideField = makeFieldGuide(config);
 
+  // Card 137: the tours, known before any tool draws its "How this screen works".
+  if (config.features.tour) registerTours(allTours(config.tours, config.tourSteps));
+
   function KitLayout(props: LayoutProps) {
     const { staffView } = useStaffView(config);
     return (
       <>
         {staffView && <style>{STAFF_CSS}</style>}
         {props.renderDefault(props)}
-        {config.features.tour && <StudioTour steps={config.tourSteps} />}
+        {config.features.tour && <StudioTour config={config} />}
       </>
     );
   }

@@ -14,6 +14,9 @@ a phone-sized Quick update tool, empty lists that explain themselves, and `scrip
 the way it was on Tuesday". Round four (2026-10-18, PORTS.md card 115) brought Home up to the WordPress staff
 dashboard: a dated greeting, "Coming up" (what publishes by itself), a Fix-it list by name with Edit buttons, real
 visitor numbers from Cloudflare Web Analytics, a "Your pages" map and a "Watch how it is done" row of guide videos.
+Card 137 (2026-10-19) made the Studio teach itself: spotlight tours anchored to real Studio UI, a welcome and a
+dated "What's new", the site's own recorded clips with captions, Quick update jobs written as data, and scripts
+that photograph and film the local Studio.
 
 This doc is PORTABLE: it describes the kit, never one site. A site's own choices (its staff, weekly jobs, extra rules)
 are commented in that site's `src/sanity/kit.config.ts`.
@@ -212,6 +215,173 @@ and valid for its type (slugs, required fields). Afterwards it offers "Open it i
 first: one column, 72px buttons, 16px-plus inputs. With `kitConfig.postPhoto` set, "Post a photo" (card 125) is the
 first button, and it alone is enough to give the tool; unlike the forms it saves a DRAFT. Add `'quick-update'` to `staffTools` for the staff view.
 `lastSunday()` and `comingSunday()` in `studio-kit.ts` are there for `initial` values.
+
+## Spotlight tours, welcome and What's new (card 137)
+
+Card 106's one stepped dialog is now a tour engine (`kit/StudioTour.tsx`, pure half `src/lib/studio-tour.ts`, tested
+in `studio-tour.test.ts`). A tour is a list of stops; each stop dims the screen, cuts a lit hole round its anchor and
+opens a popover beside it in the card 128 language (the tour's name as an eyebrow on the site's deep colour, the
+step's art on a stone, the title in the site's lettering, the words, a row of stones for progress, and Back, Next and
+Skip). Focus moves into the popover and stays there (Tab cycles), Right and Left step, Escape skips, focus goes back
+where it was. Reduced motion: no glide. Under 600px the popover is a sheet along the foot of the screen (the top, when
+the anchor is low). An anchor that is not on screen after 1.5 s is not an error: the popover sits in the middle.
+
+The data lives in the site's own `src/sanity/studio-tours.ts` (plain data, so `studio-tour.test.ts` checks it:
+references, dates, no em-dashes) and is passed through `kit.config.ts` as `tours`, `welcome` and `whatsNew`. The old
+`tourSteps` still work: with no `tours`, they become one first-run tour with no anchors.
+
+```ts
+// src/sanity/studio-tours.ts
+import type { TourDef, WelcomeConfig, WhatsNewEntry } from '../lib/studio-tour.ts';
+export const TOURS: TourDef[] = [
+  {
+    id: 'first-run',                 // stable: storage remembers it
+    title: 'A quick tour',           // the eyebrow on every popover
+    role: 'everyone',                // 'everyone' | 'editor' (full Studio) | 'staff' (staff view)
+    firstRun: true,                  // offered once, the first time (the first match for the person's view)
+    tool: undefined,                 // or a tool name: this tour is that tool's "How this screen works"
+    version: 1,                      // bump to show it again to people who saw it
+    steps: [
+      {
+        anchor: 'home-this-week',    // see the anchor list below; optional
+        title: 'This week',
+        body: 'One or two plain sentences.',
+        short: 'Week',               // optional; the stone's tooltip
+        meaning: 'step',             // optional BrandIconKey for the stone's art
+        placement: 'auto',           // 'auto' | 'top' | 'bottom' | 'left' | 'right' | 'center'
+        goTo: { tool: 'home' },      // optional StudioTarget opened first
+      },
+    ],
+  },
+];
+export const WELCOME: WelcomeConfig = { title, body, points?: string[] /* up to 4 */, tour?: 'first-run', version?: 1 };
+export const WHATS_NEW: WhatsNewEntry[] = [{ date: '2026-10-19', title, items: string[], tour?: 'first-run' }];
+```
+
+**Anchors** (`anchorSelectors()`):
+
+| Anchor                                                        | Lights up                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| a kit hook                                                    | `home-banner`, `home-quick-actions`, `home-pick-up`, `home-this-week`, `home-is-it-live`, `home-fix-it`, `home-coming-up`, `home-recent`, `home-ask`, `home-visitors`, `home-pages`, `home-videos`, `home-help`, `quick-list`, `guide-index`, `guide-videos`, `navbar-status` (each a `data-tour` attribute) |
+| `quick-submit`, `quick-pick`, `quick-field-<name>`            | an open Quick update form's button, its pick list, one of its fields                                                                                                                                                                                                                                         |
+| `newsletter-send-everyone`                                    | the newsletter's "Yes, send it to everyone" (card 127)                                                                                                                                                                                                                                                       |
+| `field:<path>`                                                | a field in the open document (`field:raceDate`; Sanity's `data-testid="field-<path>"`)                                                                                                                                                                                                                       |
+| `quick:<form id>`                                             | one Quick update tile (`data-quick`; `quick:post-photo` for Post a photo)                                                                                                                                                                                                                                    |
+| `tool:<name>`                                                 | a tool tab in the top bar (`tool:structure`, `tool:quick-update`)                                                                                                                                                                                                                                            |
+| `tools`, `search`, `account`                                  | the tool row, the search box, the avatar menu                                                                                                                                                                                                                                                                |
+| `publish`, `document-actions`, `document-menu`                | the Publish button, the bar at the foot of an open document, the "..." beside Publish                                                                                                                                                                                                                        |
+| `document-form`, `pane:list`, `pane:document`, `new-document` | the open form, the first list pane, the document pane, the "+" on a list                                                                                                                                                                                                                                     |
+| `css:<selector>`                                              | anything else                                                                                                                                                                                                                                                                                                |
+
+Sanity's own names are lists of selectors tried in order (`SANITY_ANCHORS`), because Sanity renames test ids between
+majors. When one stops matching, fix it there and here; the tour still runs (centred) meanwhile. A stop on a document
+needs `goTo: { doc, type }` first, since Publish is only on screen with a document open.
+
+**When things open.** First visit: the welcome (if set), whose "Show me around" starts the person's first-run tour;
+with no welcome, that tour opens by itself. A new person's changelog is marked read. Later visits: What's new entries
+dated after the last one this person saw, newest first, once. Home's foot has "Show me around", "How this screen
+works" (the `home` tool tour, if any) and "What's new"; the Site Guide has "Show me around" and its own tool tour;
+Quick update and the Checkup show "How this screen works" under their heading when a tour names their tool
+(`TourButton`, any surface can use it). Code can call `startTour(id?)` or fire `TOUR_OPEN_EVENT` with `{ detail: { id } }`.
+
+**Remembering.** localStorage, per Sanity user: `ncs-studio-kit:<user>:tour:<id>:v<version>`,
+`...:welcome:v<version>`, `...:whats-new` (the newest date seen). The card 106 key `ncs-studio-kit-tour-v1:<user>`
+counts as having seen `first-run`. When storage throws, nothing opens by itself (never nag). The capture scripts set
+`ncs-studio-kit:quiet` so nothing covers a recording; clear it by hand if a browser ever has it.
+
+## Quick update jobs as data (card 137)
+
+A form may declare a `job` instead of a `build` function; the kit does the saving (`src/lib/studio-quick-jobs.ts`,
+tested). Each form keeps its `id`, `title`, `detail`, `icon` or `meaning`, `submitLabel`, and the done screen's
+`doneTitle` and `doneMessage`. Card 111 forms with `build` keep working.
+
+```ts
+quickUpdate: [
+  // create: a new document, published (draft: true saves a draft instead)
+  { id: 'notice', title: 'Put up a notice', meaning: 'notice',
+    job: { kind: 'create', type: 'notice', defaults: { showOnHome: true }, slugFrom: 'title', draft: false },
+    fields: [
+      { name: 'title', title: 'Headline', kind: 'string', required: true, max: 80 },
+      { name: 'body', title: 'The notice', kind: 'text', as: 'blocks' },      // Portable Text paragraphs
+      { name: 'until', title: 'Take it down after', kind: 'date', path: 'display.until' },
+    ] },
+  // edit: change fields on one document (a singleton); the form starts from what is there
+  { id: 'times', title: 'Change the service times', job: { kind: 'edit', doc: 'siteSettings' },
+    fields: [{ name: 'sunday', title: 'Sunday', kind: 'string', path: 'facts.sundayTime' }] },
+  // append: add an item to a list on one document (top by default; at: 'end' for the bottom)
+  { id: 'prayer', title: 'Add a prayer request', job: { kind: 'append', doc: 'prayerList', array: 'items', itemType: 'prayerItem', at: 'start' },
+    fields: [{ name: 'text', title: 'The request', kind: 'text', required: true }] },
+  // upload: one file or picture into one field (the kit draws the picker)
+  { id: 'bulletin', title: 'Upload this week\'s bulletin', job: { kind: 'upload', doc: 'bulletinPage', field: 'file', asset: 'file', accept: 'application/pdf' } },
+  // toggle: one true/false field, with what each state says
+  { id: 'banner', title: 'Banner on or off', job: { kind: 'toggle', doc: 'siteSettings', field: 'banner.show', onLabel: 'The banner is showing', offLabel: 'The banner is hidden' } },
+  // edit with pick: choose the document from a list first (newest first), then edit a few fields
+  { id: 'event', title: 'Change an event', job: { kind: 'edit', pick: { type: 'event', filter: 'date >= now()', order: 'date asc', titleField: 'title', label: 'Which event?' } },
+    fields: [{ name: 'time', title: 'Start time', kind: 'datetime', path: 'start' }, { name: 'photo', title: 'Photo', kind: 'image' }] },
+  // link: a tile that opens another tool, document or list, keeping that tool's own safeguards
+  // (the newsletter's test send comes first; Quick update never sends mail itself)
+  { id: 'newsletter', title: 'Send the newsletter', job: { kind: 'link', target: { tool: 'newsletter' } } },
+  // when: any form shows only in its season ('MM-DD' every year, may wrap the new year; 'YYYY-MM-DD' once)
+  { id: 'race-week', title: 'Race week notice', when: { from: '10-18', to: '10-26' }, job: { kind: 'create', type: 'notice' },
+    fields: [{ name: 'title', title: 'Headline', kind: 'string', required: true }] },
+  // schedule: a new document saved as a DRAFT with its publish time (the kit asks "When should it go up?")
+  { id: 'later', title: 'Post something for later', job: { kind: 'schedule', type: 'notice', at: 'publishAt', slugFrom: 'title' },
+    fields: [{ name: 'title', title: 'Headline', kind: 'string', required: true }] },
+],
+```
+
+Field kinds: `string`, `text`, `date`, `datetime`, `url`, `number`, `boolean` (a checkbox; its `description` is the
+words beside it), `select` (`options: [{ title, value }]`), `file`, `image` (`accept`). Every field takes `path`
+(dot-separated, default its `name`), `as: 'blocks' | 'slug'`, `required`, `max`, `description`, `initial(now)`.
+An `edit` names `doc` (a singleton) or `pick` (`{ type, filter?, order?, titleField?, label? }`: published documents of the type, up to 60). A `link` job draws a tile that goes to `target` (any StudioTarget) with no form. `when` hides a form outside its season.
+Edit, append, upload and toggle write to the published document AND its draft when one is open (so the two never
+drift), creating the published document if it is missing; an emptied box in an edit clears that field. Schedule needs
+the type to have the `publishAt` field (`publishAtField()`) and the publish-due workflow; Home's "Coming up" lists it.
+Like card 111, a job skips the Studio's validation: put every required field of the type in `fields` or `defaults`.
+
+## Guide videos, the site's own clips (card 137)
+
+On top of card 115's links, a site keeps its own recorded clips in `src/sanity/guides/videos.ts` (site-owned,
+`GuideVideoData` in `src/lib/guide-videos.ts`): `{ title, src: '/guide-videos/x.mp4', webm?, poster, captions (.vtt),
+duration?, width?, height? }`, files in `public/guide-videos/`. A guide names a clip by KEY, as its `video`
+(`video: 'post-a-notice'`) or as a body block (`{ kind: 'video', key: 'post-a-notice', caption? }`). The Home "Watch
+how it is done" row and the Site Guide's row show the poster (a lazy image) with Play; pressing it puts the `<video>`
+in place (webm then mp4 sources, English captions on by default), so nothing heavy loads until asked. An unknown key
+plays nothing and the row hides itself. `guide-videos.test.ts` checks every entry's files, poster and captions, an
+8 MB ceiling, and that every key a guide names exists.
+
+## Pictures and videos from the local Studio (card 137)
+
+Two scripts drive the LOCAL Studio in Playwright's Chromium, through `tools/studio-media/session.mjs`: by default the
+kit harness (`http://localhost:4321/kit-harness/studio`, the real Studio signed in as a pretend administrator, reading
+the dataset; set `base` for another address). They cover the account avatar and the editor's name (the harness's
+"Ann Harness", plus `cover.selectors` and `cover.names`), refuse every write to Sanity (mutations, actions and uploads
+are aborted), mark the welcome and tours as seen so nothing covers the screen, and run one at a time
+(`tools/.studio-media.lock`). Pass `--serve` to start and stop the dev server; on Nathan's PC wrap the whole command
+in the machine build lock. Steps (shared, checked by `scripts/lib/studio-media.mjs`): `goto {path}`, `click {target}`
+(`fake: true` draws a ring instead of clicking), `hover`, `type {target, text}`, `press {key}`, `wait {ms}`,
+`waitFor {target}`, `scroll`, `ring {target, hold}`, `caption {text}`; any step may carry `caption` and `ms`. A target
+is CSS, `text:Words` or `role:button|Name`.
+
+**Screenshots** (card 130's registry): `node tools/guide-shots/capture.mjs [key ...] [--serve]` reads
+`tools/guide-shots/shots.json` (`{ base?, viewport?, cover?, shots: [{ key, path, steps?, waitFor?, clip?, pad?,
+quality?, measure?: { "label": "selector" } }] }`), writes `public/guide-shots/<key>.webp`, and prints the size, the
+weight and the entry for `src/sanity/guides/shots.ts` with a ring and a stone already placed for every `measure`
+control. Write the alt text yourself.
+
+**Videos**: `node tools/tutorial-videos/record.mjs tools/tutorial-videos/scripts/<slug>.json [--serve] [--music <path>]`.
+A script is `{ slug, title, start?: '/', viewport?, ready?, settle?, tail?, cover?, steps }`; a step with
+`poster: true` is the poster (else the screen after the first step). Captions: plain, second person, at most two lines
+of about 44 characters, no em-dashes. With ffmpeg on PATH it trims the boot, writes an H.264 mp4 and a VP9 webm;
+without, it keeps Playwright's webm. Always a VTT and a poster. It prints the `videos.ts` entry. Then
+`node tools/tutorial-videos/checkframes.mjs <slug>` tiles one frame per caption into `tools/tutorial-videos/chk/`:
+look at every one (caption matches the screen, no name or avatar). Keep clips 30 to 90 seconds at 1280 by 800.
+
+**Music.** `--music <path>` or `TUTORIAL_MUSIC=<path>` mixes a bed under the clip: levelled to -22 LUFS, faded in over
+1 s and out over the last 2 s, looped when the clip is longer and trimmed to it. No path: silent. Keep the track
+OUTSIDE the repo (Nathan's is in `_assets/video-music/` at the Projects root): the repos are public and the track's
+licence is not theirs. Only the finished clips are committed; `.gitignore` drops `*.mp3`, `*.wav`, `work/` and `chk/`
+under `tools/`.
 
 ## Empty lists (card 111)
 
@@ -795,7 +965,7 @@ and staff view place `messages`. PORTS.md card 117 has the full file list.
 ## Not built yet
 
 Tracked in the starter's `docs/PENDING.md` item 14: the rest of the Worker routes (Ask form, link check, monthly report)
-and the recorded tutorial videos themselves (the slot exists, card 115). The publish checklist inspector landed as
+and the recorded clips for each site (the player, the registry and the recorder landed with card 137). The publish checklist inspector landed as
 "Before you publish" with card 123. Studio auth and deploy status landed with card 111; visitors (from Cloudflare
 Web Analytics, not GA4) with card 115.
 

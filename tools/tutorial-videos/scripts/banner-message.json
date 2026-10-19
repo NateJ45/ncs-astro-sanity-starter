@@ -1,0 +1,32 @@
+{
+  "slug": "banner-message",
+  "title": "Put up a banner message",
+  "start": "/",
+  "steps": [
+    {
+      "do": "caption",
+      "text": "Home opens first. Quick update has the short jobs.",
+      "ms": 2200,
+      "poster": true
+    },
+    { "do": "goto", "path": "/quick-update", "caption": "Open Quick update in the top bar." },
+    {
+      "do": "ring",
+      "target": "[data-quick=\"banner-message\"]",
+      "caption": "Pick Put up a banner message."
+    },
+    { "do": "click", "target": "[data-quick=\"banner-message\"]" },
+    {
+      "do": "type",
+      "target": "#quick-message",
+      "text": "Closed on Monday for the holiday.",
+      "caption": "Type the message. Keep it short."
+    },
+    {
+      "do": "ring",
+      "target": "text:Put it on the website",
+      "caption": "Press the button. It is on the website in a few minutes.",
+      "ms": 2400
+    }
+  ]
+}

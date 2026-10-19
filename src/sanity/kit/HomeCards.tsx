@@ -80,6 +80,7 @@ export function Panel({
   meaning,
   edge,
   tone,
+  tour,
 }: {
   title: string;
   children: ReactNode;
@@ -91,13 +92,17 @@ export function Panel({
   edge?: boolean;
   /** Card 131: a gentle callout ground (note) instead of the white card. */
   tone?: Tone;
+  /** Card 137: the data-tour hook a spotlight tour anchors to ("home-this-week"). */
+  tour?: string;
 }) {
   // Card 131: the kit's own card (ui/surfaces.tsx KitBox) in the site's devices.
   return (
     <KitScope>
-      <KitBox title={title} action={action} meaning={meaning} edge={edge} tone={tone}>
-        {children}
-      </KitBox>
+      <div data-tour={tour}>
+        <KitBox title={title} action={action} meaning={meaning} edge={edge} tone={tone}>
+          {children}
+        </KitBox>
+      </div>
     </KitScope>
   );
 }
@@ -275,7 +280,7 @@ export function ComingUp({ types, children }: { types: string[]; children?: Reac
   }, [client, types]);
 
   return (
-    <Panel title="Coming up" meaning="event">
+    <Panel title="Coming up" meaning="event" tour="home-coming-up">
       {failed ? (
         <Quiet>The list could not load just now.</Quiet>
       ) : rows === null ? (
@@ -415,6 +420,7 @@ export function FixItList({ results, failed }: { results: CheckResult[] | null; 
 
   return (
     <Panel
+      tour="home-fix-it"
       title="Fix-it list"
       meaning="checkup"
       action={list && list.total > 0 ? whole : undefined}
@@ -517,7 +523,7 @@ const plural = (n: number, one: string, many: string) =>
 export function Visitors({ enabled, helperName }: { enabled: boolean; helperName: string }) {
   const state = useVisitors(enabled);
   return (
-    <Panel title="Visitors" meaning="people">
+    <Panel title="Visitors" meaning="people" tour="home-visitors">
       {state.kind === 'loading' ? (
         <KitLoading />
       ) : state.kind === 'not-set-up' ? (
@@ -661,7 +667,7 @@ export function PagesMap({ groups }: { groups: PageMapGroup[] }) {
 
   const resolved = docs ? resolvePageMap(groups, docs) : null;
   return (
-    <Panel title="Your pages" meaning="content">
+    <Panel title="Your pages" meaning="content" tour="home-pages">
       {!resolved ? (
         <KitLoading />
       ) : (

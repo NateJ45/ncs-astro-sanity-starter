@@ -53,6 +53,7 @@ export function makeNavbarStatus(config: KitConfig) {
     const home = config.features.home ? linkTo({ tool: 'home' }) : null;
     return (
       <Card
+        data-tour="navbar-status"
         tone={status.tone}
         borderBottom
         paddingX={[3, 3, 4]}

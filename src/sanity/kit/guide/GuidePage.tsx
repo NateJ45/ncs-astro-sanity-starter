@@ -32,6 +32,8 @@ import {
   type GuideShotBlock,
 } from '../../../lib/studio-look';
 import { GUIDE_SHOTS } from '../../guides/shots';
+import type { GuideVideoBlock } from '../../../lib/guide-videos';
+import { GuideVideoBlockView } from '../GuideVideos';
 import { guideSectionId, type StudioTarget } from '../../../lib/studio-kit';
 import type { KitGuide } from '../types';
 import {
@@ -66,7 +68,9 @@ export type KitGuideBlock =
     }
   | { kind: 'seealso'; items: string[] }
   | ({ kind: 'shot' } & GuideShotBlock)
-  | { kind: 'quote'; text: string; cite?: string };
+  | { kind: 'quote'; text: string; cite?: string }
+  /** Card 137: one of the site's clips, by key (src/sanity/guides/videos.ts). */
+  | ({ kind: 'video' } & GuideVideoBlock);
 
 const TONES: Record<string, Tone> = {
   primary: 'note',
@@ -234,6 +238,8 @@ function Block({ block, props }: { block: KitGuideBlock; props: GuidePageProps }
       const shot = resolveShot(block, GUIDE_SHOTS);
       return shot ? <GuideShot shot={shot} /> : null;
     }
+    case 'video':
+      return <GuideVideoBlockView videoKey={block.key} caption={block.caption} />;
     case 'quote':
       return <PullQuote cite={block.cite}>{block.text}</PullQuote>;
     default:

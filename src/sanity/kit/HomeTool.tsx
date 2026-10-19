@@ -70,7 +70,6 @@ import { publishedIdOf, type CheckResult } from '../../lib/studio-checkup';
 import {
   API_VERSION,
   PUBLISHED_EVENT,
-  TOUR_OPEN_EVENT,
   useCheckup,
   useLiveData,
   useStaffView,
@@ -92,7 +91,8 @@ import {
   type QuickTile,
   type RecentRow,
 } from './HomeCards';
-import { GuideVideos } from './GuideVideos';
+import { GuideVideos, hasVideo } from './GuideVideos';
+import { TourButton, WHATS_NEW_EVENT, startTour } from './StudioTour';
 import { ArtRows, CheckPath, KitAction, KitLoading, KitScope, LiveSteps } from './ui';
 import { LIVE_STEP_WORDS, liveSteps, pathProgress } from '../../lib/studio-look';
 import { HomeBanner } from './HomeBanner';
@@ -179,6 +179,7 @@ function ThisWeek({
 
   return (
     <Panel
+      tour="home-this-week"
       title={title}
       edge
       action={
@@ -232,7 +233,7 @@ function IsItLive({ slowAfter, helperName }: { slowAfter: number; helperName: st
   const status = state ? liveStatus(state.builtAt, state.lastPublish, now, slowAfter) : null;
   const problem = state ? deployProblem(state.deploy, helperName) : null;
   return (
-    <Panel title="Is it live?" meaning="publishing">
+    <Panel title="Is it live?" meaning="publishing" tour="home-is-it-live">
       {!status || !state ? (
         <KitLoading />
       ) : problem ? (
@@ -304,7 +305,7 @@ function RecentEdits({ ignoreTypes }: { ignoreTypes: string[] }) {
 
   const now = Date.now();
   return (
-    <Panel title="Recent edits" meaning="document">
+    <Panel title="Recent edits" meaning="document" tour="home-recent">
       {failed ? (
         <Quiet>The list could not load just now.</Quiet>
       ) : rows === null ? (
@@ -503,7 +504,7 @@ function PickUp({ ignoreTypes }: { ignoreTypes: string[] }) {
   // Nothing waiting: say nothing. Home stays calm when there is nothing to do.
   if (!failed && rows && rows.length === 0) return null;
   return (
-    <Panel title="Pick up where you left off" meaning="step">
+    <Panel title="Pick up where you left off" meaning="step" tour="home-pick-up">
       {failed ? (
         <Quiet>The list of unpublished changes could not load just now.</Quiet>
       ) : rows === null ? (
@@ -587,10 +588,14 @@ export function makeHomeTool(config: KitConfig) {
     return (
       <Box padding={[4, 4, 5]} style={{ overflowY: 'auto', height: '100%' }}>
         <Stack gap={5} style={{ maxWidth: 1040, margin: '0 auto' }}>
-          <Welcome config={config} />
+          <div data-tour="home-banner">
+            <Welcome config={config} />
+          </div>
 
           {/* Card 132: the quick actions and the ways in, as job tiles. */}
-          <QuickTiles tiles={tiles} />
+          <div data-tour="home-quick-actions">
+            <QuickTiles tiles={tiles} />
+          </div>
 
           <PickUp ignoreTypes={ignore} />
 
@@ -612,7 +617,7 @@ export function makeHomeTool(config: KitConfig) {
             )}
             {config.features.mail && <NewsletterCard helperName={config.helper.name} />}
             <RecentEdits ignoreTypes={ignore} />
-            <Panel title={`Ask ${config.helper.name}`} meaning="message">
+            <Panel title={`Ask ${config.helper.name}`} meaning="message" tour="home-ask">
               <Quiet>
                 Stuck, or something looks wrong? Say what you were trying to do and what happened.
                 Nothing is ever lost by asking.
@@ -629,8 +634,8 @@ export function makeHomeTool(config: KitConfig) {
 
           {pages.length > 0 && <PagesMap groups={pages} />}
 
-          {config.features.guide && config.guide.guides.some((g) => g.video) && (
-            <Panel title="Watch how it is done" meaning="preview">
+          {config.features.guide && config.guide.guides.some(hasVideo) && (
+            <Panel title="Watch how it is done" meaning="preview" tour="home-videos">
               <GuideVideos
                 guides={config.guide.guides}
                 max={3}
@@ -649,7 +654,7 @@ export function makeHomeTool(config: KitConfig) {
 
           {/* Card 132: the help line and the switches as the kit's quiet links. */}
           <KitScope>
-            <div style={{ display: 'grid', gap: 14 }}>
+            <div style={{ display: 'grid', gap: 14 }} data-tour="home-help">
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <span className="ui-muted">Need help?</span>
                 {config.features.guide && (
@@ -665,11 +670,18 @@ export function makeHomeTool(config: KitConfig) {
                 )}
               </div>
               <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+                {/* Card 137: the person's first-run tour, this screen's, and the changelog. */}
                 {config.features.tour && (
-                  <KitAction quiet onClick={() => window.dispatchEvent(new Event(TOUR_OPEN_EVENT))}>
-                    Take the tour again
+                  <KitAction quiet onClick={() => startTour()}>
+                    Show me around
                   </KitAction>
                 )}
+                {config.features.tour && <TourButton tool="home" staff={staffView} />}
+                {config.features.tour && config.whatsNew?.length ? (
+                  <KitAction quiet onClick={() => window.dispatchEvent(new Event(WHATS_NEW_EVENT))}>
+                    What&apos;s new
+                  </KitAction>
+                ) : null}
                 {staffView ? (
                   <KitAction quiet onClick={() => (overridden ? reset() : switchTo('full'))}>
                     Show the full Studio

@@ -13,7 +13,8 @@ import type { MouseEvent } from 'react';
 import { Box } from '@sanity/ui';
 import { isAllClear, type CheckResult, type Severity } from '../../lib/studio-checkup';
 import type { StudioTarget } from '../../lib/studio-kit';
-import { ToolHeading, useCheckup, useStudioLink } from './shared';
+import { ToolHeading, useCheckup, useStaffView, useStudioLink } from './shared';
+import { TourButton } from './StudioTour';
 import {
   AllClear,
   KitAction,
@@ -113,6 +114,7 @@ export function makeCheckupTool(config: KitConfig) {
   return function CheckupTool() {
     const { results, failed, busy, run } = useCheckup(config);
     const linkTo = useStudioLink();
+    const { staffView } = useStaffView(config);
     return (
       <Box padding={[4, 4, 5]} style={{ overflowY: 'auto', height: '100%' }}>
         <div style={{ display: 'grid', gap: 32, maxWidth: 780, margin: '0 auto' }}>
@@ -123,6 +125,7 @@ export function makeCheckupTool(config: KitConfig) {
           >
             What needs attention
           </ToolHeading>
+          <TourButton tool="checkup" staff={staffView} />
           <CheckupView
             results={results}
             failed={failed}

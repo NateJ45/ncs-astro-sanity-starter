@@ -66,3 +66,11 @@ test-results/
 # which limits the damage but is not a reason to commit one.
 sanity-backup-*.tar.gz
 sanity-backup-*.tar.gz.enc
+
+# Card 137: the Studio capture and recording working files. Music tracks never go in
+# a repo (public; the licence is not the repo's): keep them outside it.
+tools/.studio-media.lock/
+tools/tutorial-videos/work/
+tools/tutorial-videos/chk/
+tools/**/*.mp3
+tools/**/*.wav

@@ -374,7 +374,18 @@ export function checklist(
 // Quick update forms (PORTS.md card 111)
 // -----------------------------------------------------------------------------
 
-export type QuickFieldKind = 'string' | 'text' | 'date' | 'datetime' | 'url';
+/** Card 111's five kinds, plus card 137's number, boolean, select, file and image. */
+export type QuickFieldKind =
+  | 'string'
+  | 'text'
+  | 'date'
+  | 'datetime'
+  | 'url'
+  | 'number'
+  | 'boolean'
+  | 'select'
+  | 'file'
+  | 'image';
 
 export interface QuickFieldRule {
   name: string;
@@ -383,6 +394,8 @@ export interface QuickFieldRule {
   required?: boolean;
   /** For 'string' and 'text': the most characters allowed. */
   max?: number;
+  /** For 'select' (card 137): the choices. */
+  options?: { title: string; value: string }[];
 }
 
 /** Plain-words problems with a quick form's answers, by field name. Empty means good to go. */
@@ -405,6 +418,10 @@ export function quickFormErrors(
       errors[f.name] = 'Pick a date.';
     } else if (f.kind === 'datetime' && Number.isNaN(Date.parse(v))) {
       errors[f.name] = 'Pick a date and time.';
+    } else if (f.kind === 'number' && !Number.isFinite(Number(v))) {
+      errors[f.name] = 'Type a number.';
+    } else if (f.kind === 'select' && f.options && !f.options.some((o) => o.value === v)) {
+      errors[f.name] = 'Pick one of the choices.';
     }
   }
   return errors;
