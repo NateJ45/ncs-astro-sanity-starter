@@ -153,3 +153,41 @@ describe('the write', () => {
     assert.equal(backupDate('other.enc'), null);
   });
 });
+
+// Card 125: the Studio's "Earlier versions" runs this script in CI, where the
+// log is public, so it must be able to say what differs without the words.
+import {
+  changeSummary as valueFree,
+  markerLine,
+  restoreRefusal,
+  sameContent,
+} from './restore-doc.mjs';
+
+describe('earlier versions (card 125)', () => {
+  it('the value-free summary names fields and list lengths only', () => {
+    const rows = valueFree(
+      { _id: 'a', _type: 'page', title: 'Now words', sections: [1, 2, 3] },
+      { _id: 'a', _type: 'page', title: 'Old words', sections: [1] },
+    );
+    assert.deepEqual(rows, [
+      { field: 'sections', change: 'changed', then: 1, now: 3 },
+      { field: 'title', change: 'changed', then: null, now: null },
+    ]);
+    assert.ok(!JSON.stringify(rows).includes('words'));
+  });
+  it('same content ignores the API fields', () => {
+    assert.ok(sameContent({ _id: 'a', _rev: '1', t: 1 }, { _id: 'a', _rev: '2', t: 1 }));
+    assert.ok(!sameContent({ t: 1 }, { t: 2 }));
+  });
+  it("never restores Sanity's own documents", () => {
+    assert.equal(restoreRefusal({ _id: 'aboutPage', _type: 'aboutPage' }), null);
+    assert.ok(restoreRefusal({ _id: '_.groups.administrator', _type: 'system.group' }));
+    assert.ok(restoreRefusal({ _id: 'image-abc', _type: 'sanity.imageAsset' }));
+    assert.ok(restoreRefusal({ _type: 'page' }));
+  });
+  it('the marker is one line the endpoint can read back', () => {
+    const line = markerLine('NCS_RESTORE', { id: 'a', applied: true, fields: 2 });
+    assert.equal(line, 'NCS_RESTORE {"id":"a","applied":true,"fields":2}');
+    assert.ok(!line.includes('\n'));
+  });
+});
