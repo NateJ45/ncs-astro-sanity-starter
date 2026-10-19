@@ -306,6 +306,13 @@ export interface KitConfig {
    */
   pages?: PageMapGroup[];
 
+  /**
+   * Types Home's "Recent edits" and "Pick up" skip, on top of `checkup.ignoreTypes`
+   * (card 129). For documents a script writes (nightly imports) that are not an
+   * editor's work but should still be checked. Missing: only the Checkup list.
+   */
+  recentIgnoreTypes?: string[];
+
   /** Home's quick actions, in order. Empty or missing shows the two plain buttons. */
   quickActions?: QuickAction[];
 

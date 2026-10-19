@@ -123,6 +123,20 @@ live? card (`kit/shared.tsx`): on mount, every minute, on window focus, and four
 `PUBLISHED_EVENT` that `publishNote` and Home's Publish fire). With no `/build-info.json` it draws nothing.
 `features.navbarStatus: false` removes it.
 
+## Sign-in method (card 129)
+
+The kit's Worker routes (`/api/studio/*`) check a Bearer session token, which the Studio keeps in localStorage under
+`__studio_auth_token_<projectId>` (`studioToken()` in `kit/shared.tsx`). Sanity's default sign-in is `dual`: a cookie
+where the browser allows one, a token otherwise. A cookie session sends no Bearer header, so every kit route answers 401,
+and which editors got a cookie depended on when and how they last signed in. `sanity.config.ts` therefore sets
+`auth: { loginMethod: 'token' }`. After a site takes that line, each editor signs out and in once; when a browser still
+has no token the kit says so plainly (`SIGN_IN_ONCE_NOTE`, `signInNote()` in `src/lib/studio-signin.ts`) instead of "sign
+in again". The routes keep their own 401 words for a request that did carry a token.
+
+`recentIgnoreTypes` (kit config, optional) hides types from Home's Recent edits and Pick up only. `checkup.ignoreTypes`
+also drives the Checkup and the Before you publish panel; use `recentIgnoreTypes` for documents a script writes
+(nightly imports) that should still be checked.
+
 ## "The last update didn't go through" (card 111)
 
 The build-time comparison cannot tell a slow build from a failed one, so a failed build used to read as "taking longer
@@ -564,6 +578,8 @@ Findings from the step 0 spike (2026-10-17), for the Worker half:
   fallback.
 
 ## Adopting it in a site
+
+Add `auth: { loginMethod: 'token' }` to `sanity.config.ts` (card 129) and tell each editor to sign out and in once.
 
 Copy the PORTABLE files listed above, write the site's `kit.config.ts` (start from the starter's), take the
 `structure.ts` changes (explicit singleton ids, `staffDesk` wrapper, Trash item, `media.*` filter) and the

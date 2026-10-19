@@ -12,6 +12,8 @@
 // workflow tools do not reach into the kit's internals.
 // =============================================================================
 
+import { SIGN_IN_ONCE_NOTE } from '../../lib/studio-signin';
+
 export const WORKFLOW_API_VERSION = '2025-02-19';
 
 type ClientLike = { config: () => { token?: string; projectId?: string } };
@@ -51,6 +53,8 @@ export async function studioApi<T>(
       cache: 'no-store',
     });
     const body = (await res.json().catch(() => ({}))) as ApiAnswer<T>['body'];
+    // A 401 with no token is a cookie session: say the one-time switch (card 129).
+    if (res.status === 401 && !token) body.error = SIGN_IN_ONCE_NOTE;
     return { status: res.status, body };
   } catch {
     return {

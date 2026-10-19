@@ -100,6 +100,7 @@ import { GuideVideos } from './GuideVideos';
 import { HomeBanner } from './HomeBanner';
 import { NewsletterCard, RsvpComingUp } from '../mail/MailHome';
 import type { KitConfig, QuickAction, ThisWeekTask } from './types';
+import { recentEditsIgnore } from '../../lib/studio-signin';
 
 const NOT_SYSTEM = `!(_type match "sanity.*") && !(_type match "system.*") && !(_type match "media.*") && !(_id in path("versions.**")) && !(_id match "_.**")`;
 
@@ -644,7 +645,10 @@ export function makeHomeTool(config: KitConfig) {
     const { staffView, switchTo, reset, overridden } = useStaffView(config);
     const quick = config.quickActions ?? [];
     // The kit's weekly tick documents (card 111) are bookkeeping, never an edit.
-    const ignore = useMemo(() => [...config.checkup.ignoreTypes, WEEK_TYPE], []); // config is fixed for the Studio's life
+    const ignore = useMemo(
+      () => recentEditsIgnore(config.checkup.ignoreTypes, config.recentIgnoreTypes, WEEK_TYPE),
+      [],
+    ); // config is fixed for the Studio's life
     const linkTo = useStudioLink();
     const guide = linkTo({ tool: 'site-guide' });
     const content = linkTo({ tool: 'structure' });
