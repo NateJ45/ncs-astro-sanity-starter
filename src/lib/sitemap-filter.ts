@@ -6,17 +6,20 @@
 // Lifted out of astro.config.mjs so it has a test (src/lib/sitemap-filter.test.ts).
 // A page stays OUT of the sitemap when it is Studio plumbing (/studio, /preview),
 // a page for nobody (/404, the /styleguide wall), a password page (/private,
-// which is never built anyway), the newsletter's link pages (/email, card 127) or a custom page the editor hid from Google and
-// the menus (page.hideFromSearch, read at build time into `hiddenPaths`).
+// which is never built anyway), the newsletter's link pages (/email, card 127)
+// or a custom page the editor hid from Google and the menus (page.hideFromSearch,
+// read at build time into `hiddenPaths`).
 // =============================================================================
 
 /** Path prefixes that never belong in a sitemap. */
+// '/search' is the visitor search page (card 126): noindex, nothing of its own for Google.
 export const SITEMAP_EXCLUDED_PREFIXES = [
   '/404',
   '/studio',
   '/preview',
   '/styleguide',
   '/private',
+  '/search',
   '/email',
 ];
 

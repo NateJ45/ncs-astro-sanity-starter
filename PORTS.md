@@ -241,6 +241,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 121 | Custom code in its own box; opt-in on-page and site-wide code                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 122 | Hidden and password pages; Checkup link, heading and orphan checks             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 123 | Studio writing help (Claude API), Before you publish panel, AI visitors        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 126 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 127 | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
@@ -9293,6 +9294,73 @@ help" for the key and spend limit. Marked-file order: the starter merges first, 
 
 **Status, 2026-10-18.** Starter `yes`. first-baptist-auburn on branch `feat/studio-ai`, PR after this merges. Other
 sites `no`.
+
+## Card 126: visitor site search (Pagefind) and share buttons with no third-party code (2026-10-18)
+
+**Origin:** first-baptist-auburn wanted visitors to find a sermon, a news post or "where do I park" without knowing
+which page it is on, and to pass a sermon on to a friend. Built in the starter, opt-in, then switched on in
+first-baptist-auburn.
+
+**Canonical:** PORTABLE: `scripts/build-search-index.mjs`, `src/lib/site-search.ts` (+ `.test.ts`),
+`src/lib/site-search-client.ts`, `src/lib/share-links.ts` (+ `.test.ts`), `src/components/search/SiteSearch.astro`,
+`SearchPanel.astro`, `SearchButton.astro`, `SearchMeta.astro`, `src/components/ShareButtons.astro`,
+`src/pages/search/[...search].astro`, `tests/search.spec.ts`. Per site (NOT portable): `src/data/site.ts` `search`
+(the switch, placeholder, suggestions), where Header and MobileNav put the button, which templates pass `searchType`
+and carry `<SearchMeta>` / `<ShareButtons>`, the `package.json` lines, and
+`'search'` in the reserved slugs (both copies and the test).
+
+**What it adds.**
+
+- **One switch.** `site.search.enabled` (off in the starter). Off builds no button, no dialog, no `/search/` page and no
+  index: `[...search].astro` returns no paths, Header renders `<SiteSearch>` only when on, and the index script finds no
+  marked page and exits 0 without importing pagefind.
+- **The index.** `pagefind` 1.5.2, exact pin, devDependency (outside the matched set of rule 8). `npm run build` is now
+  `with-workerd astro build && node scripts/build-search-index.mjs`, so CI, Lighthouse and deploy all ship
+  `dist/client/pagefind/`, served by the Worker as static assets. BaseLayout puts `data-pagefind-body` on `<main>` when
+  search is on and the page is not `noindex`: header, footer and nav are never indexed, and 404, `/search/`, the
+  styleguide walls and any page kept out of Google stay out of search too. The Studio and `/preview` are SSR and never
+  reach `dist/client`. Each page's type is a Pagefind filter from BaseLayout's new `searchType` prop (default `page`;
+  `question` on the FAQ, `journal` on posts; a church site adds `sermon`, `series`, `news`). `<SearchMeta date passage>`
+  adds the date and a sermon's passage as metadata, written as element text so "John 3:16-18, 21" survives.
+- **The dialog.** A native `<dialog>` with `showModal()`: focus trapped, page inert, Escape closes (handled first, as
+  Chrome otherwise spends one Escape clearing `type=search`), focus returns. Opened by anything with
+  `data-site-search-open` (a real link to `/search/`, so no-JS and Ctrl-click still work), by `/` and Ctrl/Cmd+K, and
+  by the mobile menu's "Search the site" row through a `site-search:open` event fired from Radix's `onCloseAutoFocus`, so
+  the two modals never fight over focus. The trigger listener is on the capture phase: Astro's ClientRouter also
+  listens for link clicks on `document` and otherwise navigates to `/search/` first. Full screen under 640px. A short
+  fade and rise, none under reduced motion.
+- **Lazy.** First load carries the dialog markup and a small trigger script only. The panel code is a separate chunk and
+  Pagefind's JS and index arrive on first open; text typed while they load is searched as soon as they land.
+- **The panel.** Labelled `role="search"` form, type filter buttons (`aria-pressed`, shown when a term matches two or
+  more types), one polite live region ("6 results for "grace" in Sermons."), results with type, date and passage, Down
+  and Up arrows between the box and the results, "Show more results" in tens, and friendly suggestion links (from
+  `site.search.suggestions`) before a search and when nothing matches. Excerpts are split into text runs by
+  `excerptParts()` and drawn with `textContent`, never `innerHTML`. Styled from the theme tokens (`--background`,
+  `--foreground`, `--border`, `--muted`, `--link`, `--ring`, `--font-display`), so a reskin restyles it.
+- **Share buttons.** `<ShareButtons title path>`: Facebook and X share pages, a `mailto:` and Copy link, as plain links
+  in the outline button style; a "Share" button for the device share sheet appears only where `navigator.share` exists
+  and the pointer is coarse. No SDKs, no pixels, nothing from Facebook or X until a visitor clicks. In the starter it
+  sits under each journal post.
+
+**Weighed and left out.** Pagefind's own UI (`pagefind-ui.js`): heavier, its own look, and harder to fit the site's
+grammar; the JS API plus our panel is smaller and themed by tokens. Pagefind writes its UI files into
+`dist/client/pagefind/` anyway; nothing loads them. A share count or any network SDK: tracking, weight, and a
+third-party script on a church's sermon page.
+
+**Verified.** Starter with the switch on: `npm run build` (index written), `tests/search.spec.ts` green (header button
+finds `/contact/`, keyboard `/`, arrows, Escape; no results shows suggestions; `/search/?q=`; axe clean on the open
+dialog and the page; the mobile menu row), screenshots at 375 and 1280 in light and dark; then switched back off.
+
+**Adopting it in a site.** Copy the PORTABLE files, `npm install --save-dev --save-exact pagefind@1.5.2` then `npm ci`,
+add the `search` block to `src/data/site.ts`, chain `node scripts/build-search-index.mjs` onto `build`, add the
+`searchType` prop and the two `<main>` attributes to BaseLayout, put `<SearchButton>` in the header (desktop and
+mobile), `{site.search.enabled && <SiteSearch />}` once in Header, the MobileNav `search` prop, `searchType` and
+`<SearchMeta>` on the templates, `<ShareButtons>` where wanted, reserve `'search'`, keep `/search/` out of the sitemap,
+then build and run `npx playwright test tests/search.spec.ts`. Marked-file order: the starter
+merges first, then the site PR.
+
+**Status, 2026-10-18.** Starter `yes` (switch off). first-baptist-auburn on branch `feat/site-search`, on, PR after
+this merges. Other sites `no`.
 
 ## Card 127: the email backbone: one sender (Cloudflare or Resend), a newsletter with double opt-in, RSVPs (2026-10-18)
 
