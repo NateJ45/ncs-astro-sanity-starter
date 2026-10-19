@@ -4,7 +4,7 @@
 // The kit harness's surfaces bench (PORTS.md card 131): DEV SERVER ONLY
 // =============================================================================
 // /kit-harness/guide/?view=surfaces&scheme=light|dark&part=<name> (tool, checkup, clear,
-// loading, failed, home, quick, empty) draws the
+// loading, failed, home, quick, empty, google) draws the
 // card 131 surfaces with made-up data, since the real ones need a signed-in
 // Studio: the tool heading, the Checkup (findings and all clear), Home's
 // cards (Fix-it list, the Sunday checklist as a path, "Is it live?" in every
@@ -15,6 +15,9 @@
 // the real presentational pieces in HomeCards.tsx and mail/MailHome.tsx.
 // Card 132 also added part=photo (Post a photo's trail and its three led steps,
 // with buttons to move the trail) and part=tour (TourCard on two steps).
+// Card 136 added part=google: the Visitors card read from Google Analytics 4
+// (made-up GA4 numbers, its own small print), the Search Console card ("Found
+// on Google") and the calm "finish connecting Google" state.
 // =============================================================================
 
 import { useState } from 'react';
@@ -24,8 +27,11 @@ import { CheckupView } from '../CheckupTool';
 import { ToolHeading } from '../shared';
 import { comingUp } from '../../../lib/studio-home';
 import type { VisitorsReport } from '../../../lib/studio-analytics';
+import type { SearchReport } from '../../../lib/studio-google';
 import {
   ComingUpRows,
+  ConnectGoogle,
+  SearchBody,
   DraftRowView,
   QuickTiles,
   RecentRows,
@@ -269,6 +275,66 @@ const VISITORS: VisitorsReport = {
   at: new Date().toISOString(),
 } as VisitorsReport;
 
+// Card 136: the same card read from GA4, and the Search Console card.
+const VISITORS_GA4: VisitorsReport = {
+  ...VISITORS,
+  provider: 'ga4',
+  thisWeek: 268,
+  lastWeek: 241,
+  days: VISITORS.days.map((d, i) => ({ ...d, visits: [24, 31, 40, 33, 29, 47, 64][i % 7] })),
+  sources: [
+    { group: 'search', label: 'Searched for it', visits: 121 },
+    { group: 'direct', label: 'Typed it in or used a bookmark', visits: 84 },
+    { group: 'social', label: 'Social media', visits: 37 },
+    { group: 'ai', label: 'AI assistants', visits: 15 },
+    { group: 'other', label: 'A link on another website', visits: 11 },
+  ],
+  ai: { thisWeek: 15, lastWeek: 9 },
+};
+
+const SEARCH: SearchReport = {
+  configured: true,
+  clicks: 184,
+  clicksBefore: 152,
+  impressions: 6240,
+  impressionsBefore: 6410,
+  position: 8.4,
+  positionBefore: 9.6,
+  queries: [
+    { query: 'church near me', clicks: 52, impressions: 2100 },
+    { query: 'first baptist church service times', clicks: 41, impressions: 380 },
+    { query: 'harvest supper 2026', clicks: 19, impressions: 140 },
+    { query: 'sunday school for kids', clicks: 11, impressions: 420 },
+    { query: 'church directions parking', clicks: 6, impressions: 90 },
+  ],
+  pages: [
+    { path: '/', clicks: 96, impressions: 3100 },
+    { path: '/plan-your-visit/', clicks: 44, impressions: 1200 },
+    { path: '/events/harvest-supper/', clicks: 21, impressions: 300 },
+    { path: '/sermons/', clicks: 14, impressions: 800 },
+    { path: '/about/', clicks: 9, impressions: 400 },
+  ],
+  from: new Date(Date.now() - 30 * DAY_MS).toISOString().slice(0, 10),
+  to: new Date(Date.now() - 3 * DAY_MS).toISOString().slice(0, 10),
+  at: new Date().toISOString(),
+};
+
+function GoogleCards136() {
+  return (
+    <div style={{ display: 'grid', gap: 20 }}>
+      <KitBox title="Visitors" meaning="people">
+        <VisitorsBody report={VISITORS_GA4} />
+      </KitBox>
+      <KitBox title="Found on Google" meaning="search">
+        <SearchBody report={SEARCH} />
+      </KitBox>
+      <KitBox title="Found on Google (not connected yet)" meaning="search">
+        <ConnectGoogle helperName="Nathan" />
+      </KitBox>
+    </div>
+  );
+}
+
 function HomeCards132() {
   return (
     <div style={{ display: 'grid', gap: 20 }}>
@@ -499,6 +565,11 @@ export function SurfacesBench({ part }: { part: string }) {
         </KitScope>
       )}
       {show('photo') && <PhotoBench />}
+      {show('google') && (
+        <KitScope>
+          <GoogleCards136 />
+        </KitScope>
+      )}
       {show('tour') && <TourBench />}
     </div>
   );

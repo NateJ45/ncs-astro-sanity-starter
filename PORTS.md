@@ -253,6 +253,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 133 | Studio polish from a signed-in review: Home's ways-in tiles                    | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
 | 134 | Field "How to" chip to the Site Guide; icons on every field group              | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
 | 135 | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 136 | Visitors card reads GA4 via studio-status; Search Console card on Home         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -9986,3 +9987,63 @@ splash). docs/PENDING.md item 31.
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19; Auburn sets no style).
 
 **Rolled out, 2026-10-19.** Applied on fbcm (no matrix column), presacademy, reid-design-site, mas-monograms, stonesteps-50k.
+
+## Card 136: Home's Visitors card reads Google Analytics 4, and a Search Console card, through studio-status (2026-10-19)
+
+**Origin:** fbcm, presacademy, reid-design-site, mas-monograms, stonesteps-50k and nixoncreativestudio count visitors
+with GA4 (`PUBLIC_GA_ID`), not Cloudflare Web Analytics, so card 115's Visitors card said "Not set up yet" there. Nathan
+wanted their GA4 numbers on Home the way Site Kit shows them on his WordPress sites, plus Search Console.
+
+**Design.** No Google key in any site Worker. The studio's own Worker, studio-status (NateJ45/studio-status), already
+holds the studio's read-only service account (`GA4_SA_KEY`, GA4 Viewer on every property, Restricted on the Search
+Console properties). It gains a `SiteData` `WorkerEntrypoint` (`src/site-data.ts` there, NateJ45/studio-status#18)
+with `siteAnalytics(siteKey, requests)` and `searchConsole(siteKey, queries)`, a site-key-to-property map and a 3-hour
+cache. A site binds `SITE_DATA` to it and names itself with `SITE_DATA_KEY`. RPC is reachable only through a binding in
+the same account, so it needs no token or allow-list. The site builds the report bodies and maps the answers (tested
+here); studio-status adds only the property, the token and the cache.
+
+**PORTABLE, new:** `src/lib/studio-google.ts` (which source, the binding call, the GA4 batch and its mapping onto
+`VisitorsReport`, the Search Console queries and `SearchReport`, the plain words), `src/pages/api/studio/search.ts`
+(the Search Console route), `src/lib/google-auth.ts` (the OPTIONAL fallback: a service-account JWT signed with
+WebCrypto inside the site Worker, for a site outside the studio's account), and the tests `studio-google.test.ts` and
+`google-auth.test.ts`.
+
+**PORTABLE, changed:** `src/pages/api/studio/visitors.ts` (picks Cloudflare or GA4, the connect state, thirty-minute
+cache for Google), `src/lib/studio-analytics.ts` (`VisitorsReport.provider`), `src/sanity/kit/HomeCards.tsx` (the GA4
+small print, `ConnectGoogle`, `SearchConsole` and `SearchBody` drawn under Visitors), `src/sanity/kit/harness/Surfaces.tsx`
+(`part=google`), `docs/agent/studio-kit.md` ("Google Analytics and Search Console").
+
+**Per site, not portable:** `wrangler.jsonc` (the `SITE_DATA` service binding, entrypoint `SiteData`, and the
+`SITE_DATA_KEY` var; commented in the template), `.dev.vars.example`, and the site's entry in studio-status.
+
+**Settings.** `SITE_DATA` (service binding to `studio-status`, entrypoint `SiteData`), `SITE_DATA_KEY` (`fbcm`,
+`presacademy`, `reid`, `mas`, `stonesteps`, `ncs`), `ANALYTICS_PROVIDER` (`cloudflare` | `ga4`; unset means
+whichever is set up, Cloudflare first, so card 115 sites do not move). Fallback only: secret `GOOGLE_SERVICE_ACCOUNT`,
+vars `GA4_PROPERTY_ID` and `SEARCH_CONSOLE_SITE`; the binding wins when both are present.
+
+**What it changes.** With GA4 picked, the Visitors card shows sessions as visits, day by day, the most-read pages and
+how people found the site, from one `batchRunReports`. GA4's own "AI Assistant" channel (and the `ai-assistant`
+medium) feeds the AI assistants group directly; a source-name list (chatgpt, perplexity, copilot, gemini, claude and the
+rest) is the fallback. The small print says "From Google Analytics, updated a few hours ago". A "Found on Google" card
+under it shows clicks ("Clicks from Google") and impressions ("Times you appeared") for the 28 days ending three days
+ago against the 28 before, the average place, "Searches that found you" and the pages Google sent people to; hidden
+when not set up, including when studio-status has no Search Console property for the site. A Google 401/403, a key
+studio-status does not know or a broken fallback key shows "Ask <helper> to finish connecting Google", never detail.
+Both routes check same origin, then a Sanity member, then the settings, and cache thirty minutes per Worker instance.
+No new cookies, nothing new on the public site.
+
+**Gates.** Unit: `studio-google.test.ts` (the provider pick with and without the binding, a mock `SiteData` binding:
+the request bodies and site key it receives, the mapped answers, `not-set-up` keeping the card hidden, `connect`,
+`unknown-site` and `no-key` as "finish connecting", `failed` and a throwing binding as "could not load", the binding
+winning over a fallback key with fetch never called; the GA4 and Search Console fixtures, the AI Assistant channel and
+the fallback names; the fallback path's 403, broken key, 500 and 401 token drop; both routes failing closed in order);
+`google-auth.test.ts` (a throwaway RSA key made in the test: the JWT verifies, the claims and scopes, the token cache,
+a refused key is a set-up error with no secret in the message). Nothing calls Google. Kit bench
+`/kit-harness/guide/?view=surfaces&part=google` at 1280 and 375, light and dark; `part=home` (the Cloudflare card)
+unchanged. studio-status: `npx tsc` and `wrangler deploy --dry-run`.
+
+**Not covered, and why:** studio-status has not been deployed with `SiteData`, and no site binds it yet, so no real
+property has been read. docs/PENDING.md item 32.
+
+**Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19; stays on Cloudflare),
+studio-status (NateJ45/studio-status#18, the `SiteData` side).

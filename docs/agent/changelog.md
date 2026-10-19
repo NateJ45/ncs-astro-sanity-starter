@@ -1,5 +1,17 @@
 # Change history
 
+_2026-10-19: Home's Visitors card reads Google Analytics 4, and a Search Console card (PORTS card 136)._
+
+**Decision.** No Google key in any site Worker: the studio's own Worker, studio-status, already holds the read-only
+service account, so it gains a `SiteData` RPC entrypoint and each site binds to it (`SITE_DATA`, `SITE_DATA_KEY`). The
+site builds the report bodies and maps the answers onto the same shape the Cloudflare source makes, so the card draws
+either. `ANALYTICS_PROVIDER` picks the source; unset, Cloudflare wins when it is set up, so no existing site moves.
+GA4's own AI Assistant channel feeds the AI assistants group, with the source names as a fallback. Search Console is
+its own card under Visitors, hidden until set up, reading 28 days that end three days ago because Google's search
+figures lag. A refused key says "finish connecting Google" and nothing more. The in-Worker JWT sign-in, built first,
+stays as a tested optional fallback for a site outside the studio's account. Fixtures, a mock binding and a throwaway
+key in the tests; nothing calls Google.
+
 _2026-10-19: Home's banner look is a style slot, not site CSS (PORTS card 135)._
 
 **Decision.** Five sites restyled Home's banner with CSS files that selected the kit's class names and Sanity's `data-ui` markup, so a kit rename would have switched their looks off without a failing test. The look is now data in `kitConfig.homeBanner.style` (eyebrow, greeting, title, the button's shape and colours, the background, the motif's place, a stamp), checked for contrast and for anything that could break a stylesheet, and the only markup a site may select is a short documented set (`data-hb-part` names, `data-hb-*` attributes, `--hb-*` variables) that a unit test holds. It lives in `kit.config.ts` beside the banner's other fields, not in `brand.config.json`, because a banner's fonts and button are not devices the whole Studio shares and a TypeScript type catches a wrong key. With no style set the banner is unchanged. The five sites' rules are written as migration recipes in studio-kit.md.
