@@ -121,10 +121,12 @@ export const UI_CSS = `
 
 /* GuideShot */
 .ncs-ui .ui-shot{display:grid;gap:12px}
-.ncs-ui .ui-shot__frame{position:relative;border-radius:var(--ui-radius);overflow:hidden;border:1px solid var(--ui-rule);background:var(--ui-surface);box-shadow:0 18px 40px -28px rgb(0 0 0 / .45)}
+.ncs-ui .ui-shot__frame{container-type:inline-size;position:relative;border-radius:var(--ui-radius);overflow:hidden;border:1px solid var(--ui-rule);background:var(--ui-surface);box-shadow:0 18px 40px -28px rgb(0 0 0 / .45)}
 .ncs-ui .ui-shot__frame>img,.ncs-ui .ui-shot__frame>.ui-shot__art{display:block;width:100%;height:auto}
 .ncs-ui .ui-shot__marks{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .ncs-ui .ui-shot__stone{position:absolute;transform:translate(-50%,-50%)}
+@container (max-width:560px){.ncs-ui .ui-shot__stone .ui-stone{transform:scale(.72)}}
+@container (max-width:400px){.ncs-ui .ui-shot__stone .ui-stone{transform:scale(.56)}}
 .ncs-ui .ui-shot__key{list-style:none;padding:0;display:grid;gap:8px;font-size:15px;color:var(--ui-muted)}
 .ncs-ui .ui-shot__key li{display:flex;gap:10px;align-items:center}
 .ncs-ui .ui-shot__cap{font-size:15px;color:var(--ui-muted)}

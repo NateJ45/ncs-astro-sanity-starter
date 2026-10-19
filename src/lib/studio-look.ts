@@ -20,6 +20,7 @@
 //   - inlineParts(): the guide text marks (**bold**, `button`, _aside_);
 //   - chipKind(): which real Studio button a `button` name is drawn as;
 //   - shotMarks(): GuideShot annotations, checked and clamped.
+//   - resolveShot(): a guide's shot block by key into the site's registry (card 130).
 // studio-look.test.ts is the gate, including a contrast check on every token.
 // =============================================================================
 
@@ -690,6 +691,56 @@ export function shotSrc(src: unknown): string | null {
   if (typeof src !== 'string') return null;
   if (isPublicPath(src)) return src;
   return /^https:\/\/[^/]/.test(src) ? src : null;
+}
+
+/**
+ * A guide's shot block (card 130). Either a KEY into the site's shot registry
+ * (src/sanity/guides/shots.ts), so the guide text stays site-neutral while each
+ * site draws its own captures, or a full shot written in place. Anything the
+ * block sets itself (a caption, an alt, marks) wins over the registry's.
+ */
+export type GuideShotBlock = Partial<GuideShotData> & { key?: string };
+
+/**
+ * The wireframe drawing shown when a guide asks for a key the site has no
+ * capture for (public/guide-shots/example-editor.svg). It says it is a drawing,
+ * so a site with no screenshots yet still reads sensibly.
+ */
+export const PLACEHOLDER_SHOT: GuideShotData = {
+  src: '/guide-shots/example-editor.svg',
+  alt: 'A drawing of the editor: the page form on the left and the Publish button at the bottom right.',
+  width: 1280,
+  height: 760,
+  marks: [
+    { kind: 'ring', x: 80.5, y: 88.5, w: 17, h: 8, label: 'The Publish button' },
+    { kind: 'stone', x: 34, y: 33, label: 'Type in the boxes. It saves as a draft.' },
+    { kind: 'stone', x: 89, y: 80, label: 'Publish when it reads right.' },
+    { kind: 'arrow', x: 66, y: 64, toX: 79, toY: 87 },
+  ],
+  caption: 'A drawing, not a screenshot. This site has not added its own picture of this yet.',
+};
+
+/**
+ * The shot to draw for a guide block, or null when there is nothing to draw.
+ * A block with its own src and alt is drawn as written; a block with a key is
+ * looked up in the site's registry, and a key with no entry falls back to the
+ * wireframe drawing so a guide never shows a hole.
+ */
+export function resolveShot(
+  block: GuideShotBlock,
+  registry: Record<string, GuideShotData>,
+): GuideShotData | null {
+  if (block.src && block.alt) return block as GuideShotData;
+  const key = typeof block.key === 'string' ? block.key : '';
+  if (!key) return null;
+  const found = Object.prototype.hasOwnProperty.call(registry, key) ? registry[key] : undefined;
+  const base = found ?? PLACEHOLDER_SHOT;
+  return {
+    ...base,
+    ...(block.alt ? { alt: block.alt } : {}),
+    ...(block.caption ? { caption: block.caption } : {}),
+    ...(block.marks ? { marks: block.marks } : {}),
+  };
 }
 
 // -----------------------------------------------------------------------------

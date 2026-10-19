@@ -422,8 +422,9 @@ status), and the AI assistants line on a Visitors card with real referrals.
 ### 29. Card 128 (Studio design language, Site Guide): captures, art, the signed-in checks (opened 2026-10-18)
 
 Unit-tested (`studio-look.test.ts`), checked, built and Playwright-clean, and seen in the dev bench at 375 and 1280 in
-light and dark (`/kit-harness/guide/`, `/kit-harness/studio/`). Still open: (a) real Studio screenshots for `GuideShot`
-in place of the wireframe `public/guide-shots/example-editor.svg`; (b) hand-drawn art for the guide meanings that have
+light and dark (`/kit-harness/guide/`, `/kit-harness/studio/`). Still open: (a) DONE for first-baptist-auburn by card 130
+(a per-site shot registry, `src/sanity/guides/shots.ts`; other sites still show the wireframe until they capture their own,
+see studio-kit.md "Real captures in the guides"); (b) hand-drawn art for the guide meanings that have
 only a placeholder glyph on a stone (a Gemini brief is drafted for first-baptist-auburn); (c) the navbar status line: a
 signed-in check on the live Studio, since the clipping seen once was not reproduced under mock auth (the text now wraps,
 so ask for a screenshot with the exact width if it persists); (d) the next card: redraw the remaining roughly twenty
