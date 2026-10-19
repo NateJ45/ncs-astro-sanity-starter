@@ -256,6 +256,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 136 | Visitors card reads GA4 via studio-status; Search Console card on Home         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 137 | Spotlight tours, welcome, What's new, own clips, Quick update jobs as data     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 138 | Warn when a site's `studio.look` is still the neutral marker and stone         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 139 | Success toasts carry the Is-it-live stones (KitToastBody)                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10109,3 +10110,7 @@ minimal config, the site agent writes Auburn's own).
 **PORTABLE:** `src/lib/studio-look.ts` (`neutralLookWarnings()`, tested in `studio-look.test.ts`), `scripts/check-studio-look.mjs`, `npm run check:look`. Prints one sentence per device still on the default (marker, stone, mark colours, connector); exits 0 unless `--strict`. The starter itself is neutral on purpose, so it warns here.
 
 **Adopting:** copy the three files, add the `check:look` script to package.json, run it once. Sites that already name their devices (Auburn) print the quiet line.
+
+## Card 139: toasts in the site's voice (2026-10-19)
+
+**Origin:** the Studio-look audit: toasts were plain text. **PORTABLE, changed:** `kit/ui/surfaces.tsx` (`KitToastBody`), `kit/ui/css.ts`, `kit/publishNote.tsx` (mini three stones after Publish), `kit/trash.tsx` (success toasts), `harness/Surfaces.tsx` (`part=toast`), `docs/agent/studio-kit.md`. Sites with their own look get their stones and fonts for free; nothing to configure.
