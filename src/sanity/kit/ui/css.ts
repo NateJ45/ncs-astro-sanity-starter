@@ -77,7 +77,7 @@ export const UI_CSS = `
 .ncs-ui .ui-howto{display:inline-flex;align-items:center;gap:6px;margin-left:8px;font:600 12.5px/1.2 var(--ui-body);letter-spacing:.02em;padding:4px 10px 4px 8px;border:1px solid var(--chip-border);border-radius:var(--ui-tag-radius);background:transparent;color:var(--ui-heading);cursor:pointer;vertical-align:.04em;white-space:nowrap;transition:background-color .15s ease,border-color .15s ease}
 .ncs-ui .ui-howto:hover{background:var(--chip-bg);border-color:var(--ui-marker)}
 .ncs-ui .ui-howto:active{transform:translateY(1px)}
-.ncs-ui .ui-howto .ui-marker{height:8px;width:auto;flex:none}
+.ncs-ui .ui-howto .ui-marker{height:10px;width:14px;max-width:14px;flex:none;object-fit:contain;overflow:hidden}
 .ncs-ui .ui-howto:focus-visible{outline:3px solid var(--ui-focus);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.ncs-ui .ui-howto{transition:none}.ncs-ui .ui-howto:active{transform:none}}
 

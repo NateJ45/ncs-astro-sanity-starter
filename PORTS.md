@@ -10070,7 +10070,7 @@ captions; the row and the dialog read the registry), `guide/GuidePage.tsx` (`{ k
 and `HomeCards.tsx` (`data-tour` hooks; "Show me around", "How this screen works", "What's new"), `GuideTool.tsx`,
 `CheckupTool.tsx`, `NavbarStatus.tsx` (hooks and tour buttons), `index.tsx` (passes the config, registers the tours),
 `types.ts` (`tours`, `welcome`, `whatsNew`, `QuickForm.job`, field `path` / `as` / `options` / `accept`, `doneTitle`),
-`src/lib/studio-kit.ts` (the new field kinds in `quickFormErrors`), `src/sanity/mail/NewsletterActions.tsx` (a `data-tour` hook on the send button), `docs/agent/studio-kit.md` (four sections with the
+`src/lib/studio-kit.ts` (the new field kinds in `quickFormErrors`), `src/sanity/mail/NewsletterActions.tsx` (a `data-tour` hook on the send button), `src/sanity/kit/ui/css.ts` (the card 134 "How to" chip boxes its marker at 14 by 10, so wide marker art no longer draws a long bar, from the fbcm audit), `PostPhoto.tsx` (`postPhoto.draftNote` and `tileLead`), `docs/agent/studio-kit.md` (four sections with the
 exact shapes).
 
 **Per site, not portable:** `src/sanity/studio-tours.ts` (TOURS, WELCOME, WHATS_NEW), `src/sanity/guides/videos.ts`
