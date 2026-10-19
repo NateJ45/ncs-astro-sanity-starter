@@ -741,7 +741,7 @@ guides.push(
           'Go to **Pages**, **Private pages (password)** and click the `+` button.',
           'Give it a title and click `Generate` beside the web address.',
           'Add sections the same way as any other page.',
-          'Under **Only people with the password can see this**, type a password and click `Save password`. Write it down somewhere safe: nobody can look it up later, not even us.',
+          'Under **Only people with the password can see this**, type a password and click `Save password`. Write it down somewhere safe: nobody can look it up later.',
           'Click `Publish`. Copy the address shown under the password and share it, with the password, with the people who need it.',
         ],
       },
