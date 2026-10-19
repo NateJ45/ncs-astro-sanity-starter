@@ -15,6 +15,7 @@ import { journalCategory } from './journalCategory'; // scaffold: journal
 import { journalEntry } from './journalEntry'; // scaffold: journal
 import { journalPage } from './journalPage'; // scaffold: journal
 import { navLink } from './navLink';
+import { newsletter } from './newsletter';
 import { page } from './page';
 import { pageSectionSchemas, syncedSection } from './sections';
 import { richSectionSchemas } from './richSections';
@@ -71,6 +72,8 @@ export const schemaTypes = [
   processStep, // scaffold: process
   journalCategory, // scaffold: journal
   journalEntry, // scaffold: journal
+  // One issue of the email newsletter (card 121); subscribers live in D1, never here.
+  newsletter,
   // Custom pages built from the section library (multi-instance, not a singleton)
   page,
   // One saved section, kept for reuse on other pages. Not content: nothing

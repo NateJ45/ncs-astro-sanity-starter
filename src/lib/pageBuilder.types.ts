@@ -352,6 +352,27 @@ export interface ProjectedEmbedSection {
   heightHint?: 'short' | 'medium' | 'tall';
 }
 
+/**
+ * rsvpSection - an RSVP form for one event (card 121). CONTENT type.
+ * `pageId` is projected (^._id) so the form can name its event.
+ */
+export interface ProjectedRsvpSection {
+  _type: 'rsvpSection';
+  _key: string;
+  pageId?: string;
+  heading?: string;
+  intro?: string;
+  eventName?: string;
+  startsAt?: string;
+  where?: string;
+  capacity?: number;
+  waitlist?: boolean;
+  maxParty?: number;
+  closesAt?: string;
+  questions?: unknown[];
+  confirmationNote?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Church-reverse-port: dynamicListSection
 // ---------------------------------------------------------------------------
@@ -432,5 +453,6 @@ export type PageBuilderBlock =
   | ProjectedLogoStripSection
   | ProjectedTeamSection
   | ProjectedEmbedSection
+  | ProjectedRsvpSection
   // Church-reverse-port
   | ProjectedDynamicListSection;

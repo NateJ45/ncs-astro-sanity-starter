@@ -63,6 +63,9 @@ test('every reserved slug is a route this repo serves, a scaffolded one, or a bu
     'styleguide',
     // The embedded Studio (src/pages/studio/index.astro, card 120).
     'studio',
+    // The newsletter's link pages and archive (src/pages/email/, src/pages/newsletter/, card 121).
+    'email',
+    'newsletter',
   ]);
   // Not pages: two are emitted by the build, one is the asset directory.
   const artefacts = new Set(['sitemap-index.xml', 'og', '_astro']);

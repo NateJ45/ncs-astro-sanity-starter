@@ -31,3 +31,15 @@ Two capabilities have no route of their own and are removed the same way: **`tes
 The section-driven pages (home/about/services/process) render whichever `pageBuilder` array Sanity provides. If the array is absent (fresh clone, no Sanity project), the route falls back to code-defined defaults in `src/data/defaultSections.ts`, so the site is never blank.
 
 Every core route except `/`, `/contact`, `/privacy`, `/404` and the Studio and preview machinery belongs to a scaffold capability, so a fork that does not want it runs one command. The `scaffold:` column above says which.
+
+## Email routes (card 121)
+
+| Route                                                 | What                                                                       |
+| ----------------------------------------------------- | -------------------------------------------------------------------------- |
+| `/api/subscribe/` (SSR)                               | GET ready, POST sign-up (double opt-in)                                    |
+| `/api/subscribe/confirm/` (SSR)                       | the confirm link; 303 to `/email/confirmed/` or `/email/link-problem/`     |
+| `/api/unsubscribe/` (SSR)                             | POST only: the unsubscribe button and RFC 8058 one-click                   |
+| `/api/rsvp/` (SSR)                                    | GET an event's state, POST a reply                                         |
+| `/api/studio/newsletter/`, `/api/studio/rsvps/` (SSR) | the Studio's protected mail routes                                         |
+| `/email/[state]/`                                     | confirmed, unsubscribe, link-problem (static, noindex, out of the sitemap) |
+| `/newsletter/`, `/newsletter/<slug>/`                 | the archive; no pages at all when no issue is marked for the website       |

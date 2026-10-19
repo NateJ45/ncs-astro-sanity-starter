@@ -37,6 +37,8 @@ export function bearerToken(request: Request): string | null {
 export interface StudioUser {
   id: string;
   name?: string;
+  /** The login's email, when Sanity gives one. Used only as the "Send a test to me" address (card 121). */
+  email?: string;
 }
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -60,11 +62,15 @@ export async function verifyStudioUser(
     const me = (await res.json()) as {
       id?: string;
       name?: string;
+      email?: string;
       role?: string;
       roles?: Array<{ name?: string }>;
     };
     const hasRole = (Array.isArray(me.roles) && me.roles.length > 0) || Boolean(me.role);
-    return me.id && hasRole ? { id: me.id, name: me.name } : null;
+    if (!me.id || !hasRole) return null;
+    return typeof me.email === 'string' && me.email.includes('@')
+      ? { id: me.id, name: me.name, email: me.email }
+      : { id: me.id, name: me.name };
   } catch {
     return null;
   }

@@ -27,6 +27,7 @@ import { CodeBlockIcon } from '@sanity/icons/CodeBlock';
 import { SyncIcon } from '@sanity/icons/Sync';
 import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
+import { rsvpSection } from './rsvpSection';
 
 // Shared image field with required alt text (accessibility + SEO).
 const imageWithAlt = (name = 'image', title = 'Image') =>
@@ -623,6 +624,8 @@ export const pageSectionSchemas = [
   spacerSection,
   logoStripSection,
   embedSection,
+  // The email backbone (card 121): replies kept in D1, never in Sanity.
+  rsvpSection,
 ];
 
 // The general blocks on their own. A saved section accepts these (plus the rich
@@ -693,6 +696,11 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
       name: 'media',
       title: 'Media',
       of: ['gallerySection', 'videoSection', 'embedSection'],
+    },
+    {
+      name: 'signups',
+      title: 'Sign-ups',
+      of: ['rsvpSection'],
     },
     {
       name: 'business',

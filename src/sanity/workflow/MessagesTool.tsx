@@ -36,6 +36,7 @@ import {
   type MessageStatus,
 } from '../../lib/studio-messages';
 import { studioApi, WORKFLOW_API_VERSION } from './studioApi';
+import { RsvpInboxNote } from '../mail/MailHome';
 
 const API = '/api/studio/messages/';
 
@@ -240,6 +241,8 @@ export function MessagesTool() {
             What people sent through the website's forms. Mark each one so everyone can see what
             still needs an answer.
           </Text>
+          {/* RSVP headcounts for upcoming events (card 121); nothing when there are none. */}
+          <RsvpInboxNote />
 
           {error && (
             <Card padding={4} tone="critical" radius={3} border>

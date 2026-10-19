@@ -195,7 +195,9 @@ export default defineConfig({
           page.includes('/404') ||
           page.includes('/studio') ||
           page.includes('/preview') ||
-          page.includes('/styleguide')
+          page.includes('/styleguide') ||
+          // The newsletter's link pages (card 121): noindex, for readers of an email.
+          page.includes('/email/')
         )
           return false;
         try {

@@ -32,6 +32,7 @@ import LogoStrip from '@/components/sections/LogoStrip.astro';
 import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
+import RsvpSection from '@/components/sections/RsvpSection.astro';
 import { classifySections } from '@/lib/sectionCadence';
 import { expandSyncedSections } from '@/lib/authoring';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
@@ -288,6 +289,8 @@ const editKeyOf = (block: unknown) => {
           members={s.members ?? []}
           headingId={headingId}
         />
+      ) : s._type === 'rsvpSection' ? (
+        <RsvpSection block={s} surface={surface ?? 'background'} headingId={headingId} />
       ) : s._type === 'embedSection' ? (
         <EmbedSection
           eyebrow={s.eyebrow}

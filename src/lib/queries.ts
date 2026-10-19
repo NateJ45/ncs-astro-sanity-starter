@@ -30,6 +30,8 @@ export const CTA_PROJECTION = `{
 // The per-type arms, shared by a page's own sections and by the sections a
 // synced section shows (below), so a block renders the same either way.
 const SECTION_ARMS = `
+    // The RSVP form names its event "<document id>:<block key>" (card 121).
+    _type == "rsvpSection" => { "pageId": ^._id },
     _type == "heroSection" => {
       ...,
       backgroundImage${IMAGE_PROJECTION},

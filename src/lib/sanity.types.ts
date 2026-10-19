@@ -43,6 +43,49 @@ export type Redirect = {
   note?: string;
 };
 
+export type JournalEntryReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'journalEntry';
+};
+
+export type Newsletter = {
+  _id: string;
+  _type: 'newsletter';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  subject?: string;
+  date?: string;
+  slug?: Slug;
+  preheader?: string;
+  intro?: string;
+  posts?: Array<
+    {
+      _key: string;
+    } & JournalEntryReference
+  >;
+  notices?: Array<{
+    title?: string;
+    text?: string;
+    link?: string;
+    _type: 'notice';
+    _key: string;
+  }>;
+  note?: {
+    heading?: string;
+    text?: string;
+  };
+  showOnWebsite?: boolean;
+};
+
+export type Slug = {
+  _type: 'slug';
+  current?: string;
+  source?: string;
+};
+
 export type JournalCategory = {
   _id: string;
   _type: 'journalCategory';
@@ -52,12 +95,6 @@ export type JournalCategory = {
   title?: string;
   slug?: Slug;
   description?: string;
-};
-
-export type Slug = {
-  _type: 'slug';
-  current?: string;
-  source?: string;
 };
 
 export type ProcessStep = {
@@ -845,6 +882,9 @@ export type SectionPreset = {
       } & EmbedSection)
     | ({
         _key: string;
+      } & RsvpSection)
+    | ({
+        _key: string;
       } & FounderSection)
     | ({
         _key: string;
@@ -878,6 +918,25 @@ export type SectionPreset = {
       } & DynamicListSection)
   >;
   note?: string;
+};
+
+export type RsvpSection = {
+  _type: 'rsvpSection';
+  heading?: string;
+  intro?: string;
+  eventName?: string;
+  startsAt?: string;
+  where?: string;
+  capacity?: number;
+  waitlist?: boolean;
+  maxParty?: number;
+  closesAt?: string;
+  questions?: Array<
+    {
+      _key: string;
+    } & FormQuestion
+  >;
+  confirmationNote?: string;
 };
 
 export type EmbedSection = {
@@ -1124,13 +1183,6 @@ export type PrivacyPage = {
   }>;
 };
 
-export type JournalEntryReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'journalEntry';
-};
-
 export type CtaBlock = {
   _type: 'ctaBlock';
   label?: string;
@@ -1193,6 +1245,9 @@ export type Page = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -1592,6 +1647,9 @@ export type ProcessPage = {
       } & EmbedSection)
     | ({
         _key: string;
+      } & RsvpSection)
+    | ({
+        _key: string;
       } & SyncedSection)
     | ({
         _key: string;
@@ -1652,6 +1710,9 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -1754,6 +1815,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -1915,6 +1979,9 @@ export type HomePage = {
     | ({
         _key: string;
       } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2235,8 +2302,10 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | Photo
   | Redirect
-  | JournalCategory
+  | JournalEntryReference
+  | Newsletter
   | Slug
+  | JournalCategory
   | ProcessStep
   | Service
   | SanityImageCrop
@@ -2277,6 +2346,7 @@ export type AllSanitySchemaTypes =
   | SectionPresetReference
   | SyncedSection
   | SectionPreset
+  | RsvpSection
   | EmbedSection
   | LogoStripSection
   | SpacerSection
@@ -2290,7 +2360,6 @@ export type AllSanitySchemaTypes =
   | HeroSection
   | FormQuestion
   | PrivacyPage
-  | JournalEntryReference
   | CtaBlock
   | Page
   | JournalCategoryReference

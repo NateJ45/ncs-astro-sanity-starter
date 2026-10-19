@@ -114,7 +114,7 @@ export function useScheduledTypes(): string[] {
   );
 }
 
-export function ComingUp({ types }: { types: string[] }) {
+export function ComingUp({ types, children }: { types: string[]; children?: ReactNode }) {
   const client = useClient({ apiVersion: API_VERSION });
   const typeTitle = useTypeTitle();
   const [rows, setRows] = useState<ComingRow[] | null>(null);
@@ -163,6 +163,8 @@ export function ComingUp({ types }: { types: string[] }) {
           ))}
         </Stack>
       )}
+      {/* Extra rows a site's tools add, like RSVP headcounts (card 121). */}
+      {children}
     </Panel>
   );
 }

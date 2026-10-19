@@ -61,6 +61,7 @@ import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 import { ncsStudioKit } from './src/sanity/kit';
 import { kitConfig } from './src/sanity/kit.config';
 import { ncsWorkflowTools } from './src/sanity/workflow';
+import { ncsMailTools } from './src/sanity/mail';
 import { brandIcons, typeIcon, withBrandPreviews } from './src/sanity/brandIcons';
 
 // =============================================================================
@@ -195,6 +196,9 @@ export default defineConfig({
         'page',
       ],
     }),
+    // Newsletter send buttons and the RSVPs tool (the email backbone, card 121).
+    // Before the kit, so the kit's tool order and staff view place "rsvps".
+    ncsMailTools(),
     // The Studio kit (src/sanity/kit/, settings in src/sanity/kit.config.ts):
     // Home, Site Guide and Checkup tools, plain tool names, the staff view,
     // Trash instead of Delete, the note after Publish and the first-run tour.

@@ -40,6 +40,9 @@ export const RESERVED_SLUGS = new Set([
   // The embedded Sanity Studio, a src/pages route since card 120. A custom
   // page called "studio" would take the editor's own address.
   'studio',
+  // The email backbone (card 121): the newsletter's link pages and its archive.
+  'email',
+  'newsletter',
   '404',
   'sitemap-index.xml',
   'og',
