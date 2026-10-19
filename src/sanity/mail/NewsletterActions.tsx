@@ -238,6 +238,7 @@ function SendAllDialog({ id, subject }: { id: string; subject: string }) {
             tone="primary"
             icon={UsersIcon}
             text={sending ? 'Sending…' : progress ? 'Carry on sending' : 'Yes, send it to everyone'}
+            data-tour="newsletter-send-everyone"
             disabled={sending}
             onClick={() => void send()}
           />

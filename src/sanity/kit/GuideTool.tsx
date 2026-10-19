@@ -22,10 +22,12 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Box, Button, Flex, Stack, Text } from '@sanity/ui';
-import { GuideVideos, WatchButton } from './GuideVideos';
+import { GuideVideos, WatchButton, hasVideo } from './GuideVideos';
+import { TourButton, startTour } from './StudioTour';
+import { KitAction, KitScope } from './ui';
 import { GuideIndex, guideMatches, searchWords } from './guide/GuideIndex';
 import { GuidePage } from './guide/GuidePage';
-import { useStudioLink } from './shared';
+import { useStaffView, useStudioLink } from './shared';
 import type { KitConfig } from './types';
 
 /** Print only the open guide, without the Studio around it. */
@@ -47,6 +49,7 @@ export function makeGuideTool(config: KitConfig) {
     const [query, setQuery] = useState('');
     const [open, setOpen] = useState<string | null>(null);
     const linkTo = useStudioLink();
+    const { staffView } = useStaffView(config);
     const scroller = useRef<HTMLDivElement>(null);
     const openGuide = open ? guides.find((g) => g.slug === open) : undefined;
     const shown = guides.filter((g) => guideMatches(g, searchWords(query)));
@@ -81,7 +84,7 @@ export function makeGuideTool(config: KitConfig) {
                 padding={3}
                 onClick={() => window.print()}
               />
-              {openGuide.video && (
+              {hasVideo(openGuide) && (
                 <WatchButton guide={openGuide} text="Watch how it is done" fontSize={2} />
               )}
             </Flex>
@@ -97,7 +100,21 @@ export function makeGuideTool(config: KitConfig) {
             </div>
           </Stack>
         ) : (
-          <div style={COLUMN}>
+          <div style={COLUMN} data-tour="guide-index">
+            {/* Card 137: the tours, from Help as well as Home. */}
+            {config.features.tour && (
+              <KitScope>
+                <div
+                  style={{ display: 'flex', gap: 18, flexWrap: 'wrap', marginBottom: 12 }}
+                  data-kit-noprint=""
+                >
+                  <KitAction quiet onClick={() => startTour()}>
+                    Show me around
+                  </KitAction>
+                  <TourButton tool="guide" staff={staffView} />
+                </div>
+              </KitScope>
+            )}
             <GuideIndex
               guides={guides}
               categories={categories}
@@ -106,8 +123,8 @@ export function makeGuideTool(config: KitConfig) {
               onQuery={setQuery}
               onOpen={setOpen}
               videos={
-                shown.some((g) => g.video) ? (
-                  <Stack gap={3}>
+                shown.some(hasVideo) ? (
+                  <Stack gap={3} data-tour="guide-videos">
                     <Text size={1} weight="semibold" muted style={{ textTransform: 'uppercase' }}>
                       Watch how it is done
                     </Text>

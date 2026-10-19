@@ -254,6 +254,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 134 | Field "How to" chip to the Site Guide; icons on every field group              | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
 | 135 | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
 | 136 | Visitors card reads GA4 via studio-status; Search Console card on Home         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 137 | Spotlight tours, welcome, What's new, own clips, Quick update jobs as data     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10047,3 +10048,55 @@ property has been read. docs/PENDING.md item 32.
 
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch, 2026-10-19; stays on Cloudflare),
 studio-status (NateJ45/studio-status#18, the `SiteData` side).
+
+## Card 137: the Studio teaches itself: spotlight tours, welcome and What's new, the site's own clips, Quick update jobs as data, and capture scripts (2026-10-19)
+
+**Origin:** "make each Studio complete for its owner": full tours with pop-ups and modals, Site Guides full of
+screenshots and videos like Theology Matters' and FRT's, and a Quick update that covers the owner's weekly jobs. Six
+site agents write each site's steps, scripts and jobs as data; this card is the shared engine they adopt.
+
+**PORTABLE, new:** `src/lib/studio-tour.ts` (+ test: anchors, which tour, storage keys, What's new, popover geometry,
+config checks, and a run over the site's own `studio-tours.ts`), `src/lib/studio-quick-jobs.ts` (+ test),
+`src/lib/guide-videos.ts` (+ test, which also checks the site's `videos.ts` and every key a guide names),
+`scripts/lib/studio-media.mjs` (+ test: script and shot config checks, WebVTT, ffmpeg arguments with the music bed,
+percent marks), `tools/studio-media/session.mjs` (the local Studio in Playwright: dev server, cover, write guard,
+steps, run lock), `tools/tutorial-videos/record.mjs`, `tools/tutorial-videos/checkframes.mjs`,
+`tools/guide-shots/capture.mjs`.
+
+**PORTABLE, changed:** `src/sanity/kit/StudioTour.tsx` (rewritten as the tour host, `Spotlight`, `TourPopoverCard`,
+`WelcomeCard`, `WhatsNewCard`, `TourButton`, `startTour`; `TourCard` kept), `QuickUpdateTool.tsx` (jobs, new field
+kinds, the done screen, "How this screen works"), `GuideVideos.tsx` (`GuideClip`: poster, Play, mp4 and webm,
+captions; the row and the dialog read the registry), `guide/GuidePage.tsx` (`{ kind: 'video', key }`), `HomeTool.tsx`
+and `HomeCards.tsx` (`data-tour` hooks; "Show me around", "How this screen works", "What's new"), `GuideTool.tsx`,
+`CheckupTool.tsx`, `NavbarStatus.tsx` (hooks and tour buttons), `index.tsx` (passes the config, registers the tours),
+`types.ts` (`tours`, `welcome`, `whatsNew`, `QuickForm.job`, field `path` / `as` / `options` / `accept`, `doneTitle`),
+`src/lib/studio-kit.ts` (the new field kinds in `quickFormErrors`), `src/sanity/mail/NewsletterActions.tsx` (a `data-tour` hook on the send button), `src/sanity/kit/ui/css.ts` (the card 134 "How to" chip boxes its marker at 14 by 10, so wide marker art no longer draws a long bar, from the fbcm audit), `PostPhoto.tsx` (`postPhoto.draftNote` and `tileLead`), `docs/agent/studio-kit.md` (four sections with the
+exact shapes).
+
+**Per site, not portable:** `src/sanity/studio-tours.ts` (TOURS, WELCOME, WHATS_NEW), `src/sanity/guides/videos.ts`
+(the clip registry), `tools/guide-shots/shots.json`, `tools/tutorial-videos/scripts/*.json`, `kit.config.ts`
+(`tours: TOURS, welcome: WELCOME, whatsNew: WHATS_NEW`, the `quickUpdate` jobs), the `.gitignore` lines for
+`tools/` working files and music, and `public/guide-videos/`, `public/guide-shots/`.
+
+**What it changes.** A tour stop dims the Studio and lights its anchor (a kit `data-tour` hook, a Quick update tile, a
+documented Sanity name such as `publish` or `tool:structure`, or `css:`), with a branded popover beside it: Back, Next,
+Skip, a row of progress stones, focus kept inside, arrow keys and Escape, reduced motion, a bottom sheet on a phone.
+A missing anchor centres the popover instead of failing. Tours are first run (per role: staff view or full Studio),
+on demand ("Show me around" on Home and in the Site Guide) and per tool ("How this screen works"). A welcome modal and
+a dated What's new open once per person (localStorage; storage that throws opens nothing). Old `tourSteps` still work.
+Quick update forms can declare `create`, `edit` (a named document, or one picked from a list), `append`, `upload`, `toggle`, `schedule` or `link` (a tile into another tool, such as the newsletter with its test send first) jobs as data, and `when` hides a form outside its season; `build`
+forms still work. Guides play the site's own recorded clips by key, poster first, nothing loaded until Play. The
+recorder films the local Studio from a JSON script with captions, trims, writes mp4, webm, VTT and a poster, mixes an
+optional music bed kept outside the repo, and prints the registry entry; the capture script does the same for card
+130's screenshots, with marks measured.
+
+**Gates.** Unit: `studio-tour.test.ts`, `studio-quick-jobs.test.ts`, `guide-videos.test.ts`, `studio-media.test.mjs`
+(also over the site's tours, clips, scripts and shot config). Rendered: the welcome, a tour popover and What's new
+on the kit harness at 1280 and 375.
+
+**Not covered, and why:** the recorded clips themselves are per site (the site agents record them); Sanity's own anchor
+selectors are pinned to Sanity 6 and re-checked on each upgrade; a tour cannot follow a stop into a document the
+harness cannot open signed out. docs/PENDING.md item 32.
+
+**Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch `feat/tours-videos`, 2026-10-19; a
+minimal config, the site agent writes Auburn's own).

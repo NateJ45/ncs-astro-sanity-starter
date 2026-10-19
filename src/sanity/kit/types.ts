@@ -16,6 +16,11 @@ import type { FieldGuideMap, QuickFieldKind, StudioTarget } from '../../lib/stud
 import type { BrandIconKey } from '../../lib/studio-icons';
 import type { HomeBannerStyle } from '../../lib/studio-banner-style';
 import type { GallerySpec } from '../../lib/photo-post';
+import type { QuickJob, QuickSeason } from '../../lib/studio-quick-jobs';
+import type { TourDef, WelcomeConfig, WhatsNewEntry } from '../../lib/studio-tour';
+
+export type { QuickJob, QuickSeason } from '../../lib/studio-quick-jobs';
+export type { TourDef, TourStop, WelcomeConfig, WhatsNewEntry } from '../../lib/studio-tour';
 
 /**
  * One recurring job on Home's "This week" card. It is ticked one of three ways
@@ -55,6 +60,14 @@ export interface QuickField {
   max?: number;
   /** A starting value ("2026-10-18"), worked out when the form opens. */
   initial?: (now: Date) => string;
+  /** Card 137 jobs: where the answer goes, dot-separated. Default: name. */
+  path?: string;
+  /** Card 137 jobs: 'blocks' stores text as Portable Text, 'slug' as a slug. */
+  as?: 'blocks' | 'slug';
+  /** For 'select': the choices. */
+  options?: { title: string; value: string }[];
+  /** For 'file' and 'image': the picker's accept ("application/pdf"). */
+  accept?: string;
 }
 
 /** What a Quick update form saves: a whole document, without its id. */
@@ -74,19 +87,29 @@ export interface QuickForm {
   icon?: ComponentType;
   /** Card 131: the site's art for the tile (its stone icon); the icon is the fallback. */
   meaning?: BrandIconKey;
-  fields: QuickField[];
+  /** Card 137: show this job only between these days (race week, Advent). */
+  when?: QuickSeason;
+  /** The form's fields. Not needed by 'toggle', 'upload' and 'link' jobs. */
+  fields?: QuickField[];
+  /**
+   * Card 137: a job declared as data (create, edit, append, upload, toggle,
+   * schedule; src/lib/studio-quick-jobs.ts). Use this OR build.
+   */
+  job?: QuickJob;
   /** The button at the bottom of the form ("Put it on the website"). */
   submitLabel?: string;
   /**
    * The answers (trimmed; a datetime as ISO) to a whole document. May be async, to look
    * something up with the client (the pastor's person id, say).
    */
-  build: (
+  build?: (
     values: Record<string, string>,
     ctx: { now: Date; client: SanityClient },
   ) => QuickDoc | Promise<QuickDoc>;
   /** One sentence after it is saved ("The notice shows until the day you picked."). */
   doneMessage?: string;
+  /** The done screen's heading. Default "Done. It is published." (a draft: "Saved."). */
+  doneTitle?: string;
 }
 
 /**
@@ -117,6 +140,13 @@ export interface PostPhotoConfig {
       now: Date;
     }) => QuickDoc;
   };
+  /**
+   * Card 137: the words for "it is a draft", on the Quick update tile and at the top of the
+   * form. Default: "Saved as a draft for you to publish." / "It is saved as a draft for you to
+   * check and publish."
+   */
+  tileLead?: string;
+  draftNote?: string;
   /** One line above the picker, for a site rule ("Only post children with a parent's permission."). */
   note?: string;
 }
@@ -355,7 +385,17 @@ export interface KitConfig {
   /** How long a rebuild usually takes, for the navbar countdown. Default 3. */
   typicalUpdateMinutes?: number;
 
+  /** Card 106's single tour. Still works; with `tours` set it is ignored. */
   tourSteps: TourStep[];
+
+  /** Card 137: spotlight tours (first run, per role, on demand, per tool). */
+  tours?: TourDef[];
+
+  /** Card 137: the welcome modal, once per person. Missing: the first-run tour opens by itself. */
+  welcome?: WelcomeConfig;
+
+  /** Card 137: the dated changelog behind "What's new". */
+  whatsNew?: WhatsNewEntry[];
 
   /** After this many minutes, "on its way" becomes "taking longer than usual". */
   liveSlowAfterMinutes: number;

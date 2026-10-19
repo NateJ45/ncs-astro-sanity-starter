@@ -119,6 +119,12 @@ domain and their mail.
 
 ## Known gaps, deliberately open
 
+### 32. Card 137: tours, clips and jobs per site, and the signed-in checks (opened 2026-10-19)
+
+The engine, the recorder and the capture script are in; each site writes its own `studio-tours.ts`, Quick update jobs, `shots.json` and video scripts, records its clips and fills `videos.ts`. Still to check signed in on a live Studio: a tour stop on a document (`publish`, `document-actions`; the harness opens documents read-only), the staff-view first-run tour, an `upload` and a `schedule` job saving for real. Sanity's own anchor selectors (`SANITY_ANCHORS` in `src/lib/studio-tour.ts`) are pinned to Sanity 6: re-check them on each Sanity upgrade (a stale one centres the popover, nothing breaks). Detail: `docs/agent/studio-kit.md` "Spotlight tours".
+
+Asked by the site audits and not built yet: a "This week" job that ticks itself from Messages activity (Messages live in the Worker's D1, so a GROQ `query` cannot see them; it needs a `check: 'messages'` that asks `/api/studio/messages/` for unanswered ones). Also reported by Stone Steps: the card 134 "How to" chip not drawing on its `raceDate` (datetime) field. Not reproduced: Sanity 6's PrimitiveField passes the description the same way for date and datetime, and the lookup is by field name; check the race document signed in.
+
 ### 31. Card 135: kit surfaces the banner slot does not cover (opened 2026-10-19)
 
 The slot covers Home's banner only. Sites still restyle other kit markup by class name: presacademy's mono face on `.ui-eyebrow`, `.ui-tag` and `.ui-stone > b` and its contents-page Site Guide list (`section[aria-labelledby^='guide-group-']`, `.ui-card`), reid-design-site's splash mark and offline button (`.ncs-sp__mark`, `.ncs-sp__button`), and stonesteps-50k's Site Guide banner (`.ui-banner__title`, `.ui-banner__eyebrow`). Each needs the same treatment: a typed `studio.look` key or a documented `data-` hook and a test, then a migration note. Until then those rules keep working only as long as the class names do. Also: the five sites' PRs to move their banner CSS onto the slot (studio-kit.md "Migrating a site's banner CSS onto the slot"); the entries in `src/sanity/kit/harness/bannerLooks.ts` are the recipes.
