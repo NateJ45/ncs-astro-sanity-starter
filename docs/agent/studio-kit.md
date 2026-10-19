@@ -41,6 +41,7 @@ are commented in that site's `src/sanity/kit.config.ts`.
 | Home banner (118)       | `src/sanity/kit/HomeBanner.tsx`, `src/lib/studio-banner.ts`                                                                                          | The navy welcome at the top of Home; `kitConfig.homeBanner`; pure parts tested in `studio-banner.test.ts`                                               |
 | Icons (119)             | `src/sanity/brandIcons.tsx`, `src/sanity/artIcon.tsx`, `src/lib/studio-icons.ts`                                                                     | Not the kit plugin: icons by meaning and list-row pictures; the site's art in `brandIconArt.tsx`; tests in `studio-icons.test.ts`                       |
 | Design language (128)   | `src/sanity/kit/ui/`, `src/lib/studio-look.ts`                                                                                                       | Shared primitives in the site's own devices (`brand.config.json` `studio.look`); tests in `studio-look.test.ts`                                         |
+| Surfaces (131)          | `src/sanity/kit/ui/surfaces.tsx`, `src/sanity/kit/harness/Surfaces.tsx`                                                                              | Tool headings, Home cards, findings, the path checklist, Is it live, quick-update tiles; see "Every surface in the language"                            |
 | Guide videos (115)      | `src/sanity/kit/GuideVideos.tsx`                                                                                                                     | "Watch how it is done" on Home and in the Site Guide; `videoSource()` in `studio-home.ts`                                                               |
 | Visitors route (115)    | `src/pages/api/studio/visitors.ts`, `src/lib/studio-analytics.ts`                                                                                    | Cloudflare Web Analytics GraphQL through the Worker (same origin + Sanity session); tests in `studio-analytics.test.ts`                                 |
 | Weekly ticks (111)      | `src/sanity/kit/weekType.ts`                                                                                                                         | `studioWeek` document per week for hand-ticked jobs; `checklist()` and `weekKey()` in `studio-kit.ts`                                                   |
@@ -442,7 +443,7 @@ Also outside the kit plugin; site choices in `src/sanity/studioEdges.config.ts`.
 The kit's own look, so the Studio's middle reads like the site and not like a generic app. Shared, PORTABLE primitives
 in `src/sanity/kit/ui/` (import from `kit/ui`), the pure half in `src/lib/studio-look.ts` (tested in
 `studio-look.test.ts`, including a contrast gate over every token in both schemes). The Site Guide and its index are
-the first surfaces drawn in it; the next card moves the other kit surfaces over.
+the first surfaces drawn in it; card 131 (below) moves the other kit surfaces over.
 
 **The site's devices** are named in `brand/brand.config.json` `studio.look` (schema in `brand.config.schema.json`).
 Every family site should differ in FORM, not only colour. Unset keys take the starter's neutral defaults.
@@ -492,6 +493,52 @@ marks become a numbered key under the picture, which is what a screen reader hea
 nothing in a build). `studio` is the real Studio signed in as a pretend administrator through Sanity's
 `createMockAuthStore`: reads of a public dataset work, anything that needs a real session fails quietly. `guide`
 draws the guide pieces in the Studio theme: `?view=index|page|panel|ui&g=<slug>&scheme=light|dark`.
+
+## Every surface in the language (card 131)
+
+Card 128 drew the primitives and the Site Guide. Card 131 carries them onto the rest of the Studio, so the cards,
+panels, badges and checklists below Home's banner stop looking like a generic app. The pieces are in
+`src/sanity/kit/ui/surfaces.tsx` (PORTABLE, presentational, data in by props) and are drawn by the look, so each
+family site gets its own devices and the starter's neutral defaults stay tidy.
+
+| Piece           | What it is                                                                         | Where it is used                                |
+| --------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `ToolHead`      | the rule, the meaning's art on its stone, a display-font title, a lead             | `ToolHeading` (Checkup, Quick update)           |
+| `KitBox`        | a white card: the marker (or a meaning's art), a display-font title, an action     | Home's `Panel` (every Home card)                |
+| `KitAction`     | a pill link or button in the heading colour; `strong` fills it, `quiet` underlines | "Take me there", "Edit", "Do it", "Check again" |
+| `ResultCard`    | a finding: white card, severity along the left edge; `dense` for rows              | Checkup, Fix-it list, Before you publish, Help  |
+| `SeverityGroup` | "Needs doing / Worth a look / Good to know" over a group, with a count             | Checkup, Before you publish                     |
+| `AllClear`      | three laid stones, a display-font line, the motif sill (`compact` drops the sill)  | Checkup, Fix-it list, Before you publish        |
+| `CheckPath`     | a checklist as a path: the stone is the checkbox and fills when done               | Home's This week / This Sunday                  |
+| `LiveSteps`     | Saved, Building, On the website as three stones; `compact` for the navbar          | Home's "Is it live?", the navbar status line    |
+| `TileCard`      | a job tile: colour edge on top, art on a stone, display-font title                 | Quick update                                    |
+| `DoneCard`      | the path laid so far, a display-font line, the next buttons, the sill              | Quick update's done screen, Post a photo's      |
+
+**Rules.**
+
+- Wrap every piece in a `KitScope`. The stylesheet now goes into `<head>` once (id `ncs-ui-css`), however many scopes
+  a screen has. Its link and focus rules skip Sanity's own elements (`:not([data-ui])`), so a Sanity `Button` inside a
+  scope keeps its colours.
+- Severity is words plus colour, never colour alone: a group says "Needs doing", a dense row says its level in small
+  caps. The left edge is `tones.<tone>.edge`, guarded at 3:1 on the white card in both schemes.
+- A stone that is not done yet is an outline with its number in the muted colour (AA). Done stones take the site's mark
+  colours in order and a tick, also guarded at 3:1 on the card.
+- The step states are pure and tested in `studio-look.ts`: `liveSteps(state)`, `stepsLabel()` (the screen reader
+  sentence, "Saved, done. Building, in progress. On the website, not yet."), `pathProgress()` ("2 of 4 done").
+- Motion: a newly ticked stone is laid (`lay`) or its connector drawn (`draw`); the stone being built pulses a ring.
+  Both stop under reduced motion, and the stones already done when a card opens never animate.
+- A quick-update form can name a `meaning` (types.ts `QuickForm`) so its tile draws the site's art; the icon is the
+  fallback.
+- Prayer requests in Messages are a gentle `note` (sky) callout, never caution; statuses are stone tags.
+
+**The bench.** `/kit-harness/guide/?view=surfaces&part=<tool|checkup|clear|loading|failed|home|quick>` draws every
+piece with made-up data in light or dark (`&scheme=dark`), since the real screens need a signed-in Studio
+(`src/sanity/kit/harness/Surfaces.tsx`, dev only).
+
+**Still to do** (`docs/PENDING.md`): Post a photo's form as a three-stone path, branded empty lists and
+CollectionIntro, the tour's stone progress row, Home's quick actions as tiles, Coming up date blocks, ArtTiles on
+Recent edits and Pick up rows, Visitors in mark colours, the splash and offline page, then the Section Look thumbnails,
+the field "How to" chip and the sign-in heading.
 
 ## Checkup rules
 

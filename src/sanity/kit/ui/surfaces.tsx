@@ -464,3 +464,74 @@ export function LiveSteps({
     </ol>
   );
 }
+
+// -----------------------------------------------------------------------------
+// Quick update: the job tiles and the done screen
+// -----------------------------------------------------------------------------
+
+/** A big job tile: the colour edge along the top, the art on its stone, a display-font title. */
+export function TileCard({
+  title,
+  lead,
+  meaning,
+  icon,
+  onClick,
+  dataQuick,
+}: {
+  title: ReactNode;
+  lead?: ReactNode;
+  meaning?: BrandIconKey;
+  icon?: ComponentType;
+  onClick?: () => void;
+  /** Kept for tests and hooks that find a tile by its job ("post-photo"). */
+  dataQuick?: string;
+}) {
+  const t = useLookTokens();
+  return (
+    <button type="button" className="ui-tile" onClick={onClick} data-quick={dataQuick}>
+      <ColourEdge />
+      <span className="ui-tile__in">
+        <ArtTile
+          meaning={meaning}
+          icon={meaning ? undefined : icon}
+          size={60}
+          ground={t.tones.note.bg}
+          seed={String(title).length + 5}
+        />
+        <span style={{ minWidth: 0 }}>
+          <span className="ui-tile__title">{title}</span>
+          {lead && <span className="ui-tile__lead">{lead}</span>}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+/** Done: the path laid so far (Saved, then Building), a display-font line, what to do next. */
+export function DoneCard({
+  title,
+  lead,
+  states,
+  children,
+}: {
+  title: ReactNode;
+  lead?: ReactNode;
+  /** The three stones; a published job is on its way, a draft is only saved. */
+  states: readonly StepState[];
+  /** The buttons. */
+  children?: ReactNode;
+}) {
+  return (
+    <div className="ui-clear ui-done" role="status">
+      <div className="ui-clear__in">
+        <LiveSteps states={states} words={['Saved', 'Building', 'On the website']} />
+        <p className="ui-clear__title" style={{ marginTop: 10 }}>
+          {title}
+        </p>
+        {lead && <p className="ui-clear__lead">{lead}</p>}
+        {children && <div className="ui-done__actions">{children}</div>}
+      </div>
+      <Sill />
+    </div>
+  );
+}

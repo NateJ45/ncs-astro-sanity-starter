@@ -3,7 +3,8 @@
 // =============================================================================
 // The kit harness's surfaces bench (PORTS.md card 131): DEV SERVER ONLY
 // =============================================================================
-// /kit-harness/guide/?view=surfaces&scheme=light|dark&part=<name> draws the
+// /kit-harness/guide/?view=surfaces&scheme=light|dark&part=<name> (tool, checkup, clear,
+// loading, failed, home, quick) draws the
 // card 131 surfaces with made-up data, since the real ones need a signed-in
 // Studio: the tool heading, the Checkup (findings and all clear), Home's
 // cards (Fix-it list, the Sunday checklist as a path, "Is it live?" in every
@@ -17,6 +18,8 @@ import { CheckupView } from '../CheckupTool';
 import { ToolHeading } from '../shared';
 import {
   AllClear,
+  DoneCard,
+  TileCard,
   CheckPath,
   KitAction,
   KitBox,
@@ -145,6 +148,37 @@ export function SurfacesBench({ part }: { part: string }) {
       )}
       {show('failed') && (
         <CheckupView results={null} failed busy={false} onRun={() => {}} linkTo={noLink} />
+      )}
+      {show('quick') && (
+        <KitScope>
+          <div style={{ display: 'grid', gap: 14, maxWidth: 560 }}>
+            <TileCard
+              dataQuick="post-photo"
+              meaning="image"
+              title="Post a photo"
+              lead="From your camera or your photos. Saved as a draft for you to publish."
+            />
+            <TileCard
+              meaning="notice"
+              title="Put up a notice"
+              lead="A line for this week's notices."
+            />
+            <TileCard
+              meaning="scripture"
+              title="Add a sermon"
+              lead="Last Sunday's recording and reading."
+            />
+            <TileCard meaning="times" title="This week" lead="What is on, day by day." />
+            <DoneCard
+              states={liveSteps('on-its-way')}
+              title="Done. It is published."
+              lead="The website updates itself in a few minutes. Home shows when it is live."
+            >
+              <KitAction strong>Back to quick updates</KitAction>
+              <KitAction href="#">Open it in the full editor</KitAction>
+            </DoneCard>
+          </div>
+        </KitScope>
       )}
       {show('home') && (
         <KitScope>
