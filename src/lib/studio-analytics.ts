@@ -228,6 +228,12 @@ export interface AnalyticsAnswer {
 
 export interface VisitorsReport {
   configured: true;
+  /**
+   * Where the numbers came from (card 136). Only the small print under the card
+   * changes: Cloudflare counts every few minutes, Google Analytics lags a few hours.
+   * Missing means Cloudflare (a report from before card 136).
+   */
+  provider?: 'cloudflare' | 'ga4';
   /** Visits in the last seven days (the seven newest chart days). */
   thisWeek: number;
   /** Visits in the seven days before that. */
@@ -316,6 +322,7 @@ export function visitorsReport(
 
   return {
     configured: true,
+    provider: 'cloudflare',
     thisWeek: total(SERIES_DAYS - 7, SERIES_DAYS),
     lastWeek: total(SERIES_DAYS - 14, SERIES_DAYS - 7),
     days: series,

@@ -27,3 +27,19 @@ SANITY_TOKEN=
 # "Suggest" buttons do not appear. In production:
 #   npx wrangler secret put ANTHROPIC_API_KEY
 ANTHROPIC_API_KEY=
+
+# ── Google Analytics 4 and Search Console on Home (PORTS.md card 136) ───────
+# The studio's sites read Google through studio-status (the SITE_DATA service
+# binding and the SITE_DATA_KEY var in wrangler.jsonc), so they need nothing
+# here. A local `wrangler dev` reaches studio-status only when it also runs
+# locally. OPTIONAL FALLBACK for a site outside the studio's account: its own
+# service-account JSON key, whole, on ONE line, plus the plain settings
+#   GA4_PROPERTY_ID      the numeric property id, not the G- measurement id
+#   SEARCH_CONSOLE_SITE  sc-domain:example.com or https://example.com/
+# In production: npx wrangler secret put GOOGLE_SERVICE_ACCOUNT
+# ANALYTICS_PROVIDER: cloudflare or ga4 (unset: whichever is set up, Cloudflare first).
+# Setup: docs/agent/studio-kit.md, "Google Analytics and Search Console".
+GOOGLE_SERVICE_ACCOUNT=
+GA4_PROPERTY_ID=
+SEARCH_CONSOLE_SITE=
+ANALYTICS_PROVIDER=

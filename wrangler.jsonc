@@ -111,11 +111,29 @@
   // and the account id and Web Analytics site tag (NOT the beacon token) are
   // plain vars. Without all three the card says "not set up yet". Steps:
   // OPERATIONS.md, "Visitor numbers".
+  //
+  // PORTS.md card 136: OR read Google Analytics 4 instead, and add the Search
+  // Console card ("Found on Google"), through the studio's own Worker
+  // studio-status (it holds the read-only service account and each site's
+  // properties; no Google key in this Worker). Bind its SiteData entrypoint
+  // and name this site with SITE_DATA_KEY (its key in studio-status's
+  // src/site-data.ts). ANALYTICS_PROVIDER picks the Visitors source
+  // ("cloudflare" or "ga4"); unset means whichever is set up, Cloudflare first.
+  // Steps: docs/agent/studio-kit.md, "Google Analytics and Search Console".
+  // "services": [
+  //   { "binding": "SITE_DATA", "service": "studio-status", "entrypoint": "SiteData" }
+  // ],
   // "vars": {
   //   "GITHUB_REPO": "<owner>/<repo>",
   //   "CF_ACCOUNT_ID": "<32 hex>",
-  //   "CF_WEB_ANALYTICS_SITE_TAG": "<32 hex>"
+  //   "CF_WEB_ANALYTICS_SITE_TAG": "<32 hex>",
+  //   "ANALYTICS_PROVIDER": "ga4",
+  //   "SITE_DATA_KEY": "<key, e.g. fbcm>"
   // },
+  // Optional fallback for a site OUTSIDE the studio's account (no binding):
+  // its own service-account key, `npx wrangler secret put GOOGLE_SERVICE_ACCOUNT`,
+  // plus vars "GA4_PROPERTY_ID" (numeric, not the G- id) and
+  // "SEARCH_CONSOLE_SITE" ("sc-domain:<domain>" or "https://<domain>/").
 
   // ── Private preview links (src/pages/api/studio/share-preview.ts) ───────────
   // PORTS.md card 117. "Share a preview" in the Studio needs one secret, 32+

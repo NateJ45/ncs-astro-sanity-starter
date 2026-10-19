@@ -20,15 +20,19 @@
 //                HomeTool.tsx; the rows are drawn here.
 //   Fix-it list  the Checkup's findings by name, each with Edit; the rules are
 //                the Checkup's own (useCheckup), never repeated here.
-//   Visitors     /api/studio/visitors/ (Cloudflare Web Analytics through the
-//                Worker): the week as a display-font figure against the week
-//                before, then the last seven days, the most-read pages and
-//                where people came from as bars in the mark colours, each with
-//                its number beside it.
+//   Visitors     /api/studio/visitors/ (Cloudflare Web Analytics, or Google
+//                Analytics 4 since card 136, through the Worker): the week as a
+//                display-font figure against the week before, then the last
+//                seven days, the most-read pages and where people came from as
+//                bars in the mark colours, each with its number beside it.
+//   Found on Google  /api/studio/search/ (Search Console, card 136), drawn
+//                right under Visitors and hidden until it is set up: clicks
+//                and appearances over four weeks against the four before, the
+//                average place, the searches and the pages.
 //   Your pages   kitConfig.pages: every page the editor can change, grouped.
 //
 // Card 132: the presentational pieces (QuickTiles, ComingUpRows, RecentRows,
-// DraftRowView, VisitorsBody) take their data and links by props, so the kit
+// DraftRowView, VisitorsBody, SearchBody) take their data and links by props, so the kit
 // harness (harness/Surfaces.tsx, part=home) draws them with made-up data.
 // =============================================================================
 
@@ -45,6 +49,12 @@ import { Card, Flex, Grid, Stack, Text } from '@sanity/ui';
 import { countBySeverity, publishedIdOf, type CheckResult } from '../../lib/studio-checkup';
 import { comingUp, fixItList, resolvePageMap, type ComingRow } from '../../lib/studio-home';
 import { aiCompare, weekCompare, type VisitorsReport } from '../../lib/studio-analytics';
+import {
+  periodCompare,
+  positionWords,
+  windowWords,
+  type SearchReport,
+} from '../../lib/studio-google';
 import { timeAgo, type StudioTarget } from '../../lib/studio-kit';
 import { typeIconKey, type BrandIconKey } from '../../lib/studio-icons';
 import { ICON_MAPS } from '../brandIcons';
@@ -470,6 +480,8 @@ type VisitorsState =
   | { kind: 'not-set-up' }
   | { kind: 'signed-out' }
   | { kind: 'failed' }
+  /** Card 136: Google refused the key or the property, a set-up job for the helper. */
+  | { kind: 'connect' }
   | { kind: 'ok'; report: VisitorsReport };
 
 function useVisitors(enabled: boolean): VisitorsState {
@@ -490,8 +502,9 @@ function useVisitors(enabled: boolean): VisitorsState {
         if (r.status === 404) return { kind: 'not-set-up' } as const;
         const j = (await r.json().catch(() => null)) as Partial<
           Omit<VisitorsReport, 'configured'>
-        > & { configured?: boolean; error?: string };
+        > & { configured?: boolean; error?: string; connect?: boolean };
         if (j && j.configured === false) return { kind: 'not-set-up' } as const;
+        if (j && j.connect === true) return { kind: 'connect' } as const;
         if (!r.ok || !j || j.error || !Array.isArray(j.days)) return { kind: 'failed' } as const;
         return { kind: 'ok', report: j as VisitorsReport } as const;
       })
@@ -514,24 +527,37 @@ const shortDay = (date: string) => {
 const plural = (n: number, one: string, many: string) =>
   `${n.toLocaleString('en-US')} ${n === 1 ? one : many}`;
 
+/** Card 136: what a card says when Google refuses the key. Calm, no detail. */
+export function ConnectGoogle({ helperName }: { helperName: string }) {
+  return (
+    <Quiet>{`Ask ${helperName} to finish connecting Google. Nothing is wrong with the website itself.`}</Quiet>
+  );
+}
+
 export function Visitors({ enabled, helperName }: { enabled: boolean; helperName: string }) {
   const state = useVisitors(enabled);
   return (
-    <Panel title="Visitors" meaning="people">
-      {state.kind === 'loading' ? (
-        <KitLoading />
-      ) : state.kind === 'not-set-up' ? (
-        <Quiet>
-          {`Not set up yet. Once ${helperName} switches it on, this shows how many people visited the website this week, which pages they read most and how they found it.`}
-        </Quiet>
-      ) : state.kind === 'signed-out' ? (
-        <Quiet>Sign out and back in to the Studio to see visitor numbers.</Quiet>
-      ) : state.kind === 'failed' ? (
-        <Quiet>The visitor numbers could not load just now. Try again later.</Quiet>
-      ) : (
-        <VisitorsBody report={state.report} />
-      )}
-    </Panel>
+    <>
+      <Panel title="Visitors" meaning="people">
+        {state.kind === 'loading' ? (
+          <KitLoading />
+        ) : state.kind === 'not-set-up' ? (
+          <Quiet>
+            {`Not set up yet. Once ${helperName} switches it on, this shows how many people visited the website this week, which pages they read most and how they found it.`}
+          </Quiet>
+        ) : state.kind === 'signed-out' ? (
+          <Quiet>Sign out and back in to the Studio to see visitor numbers.</Quiet>
+        ) : state.kind === 'failed' ? (
+          <Quiet>The visitor numbers could not load just now. Try again later.</Quiet>
+        ) : state.kind === 'connect' ? (
+          <ConnectGoogle helperName={helperName} />
+        ) : (
+          <VisitorsBody report={state.report} />
+        )}
+      </Panel>
+      {/* Card 136: the Search Console card sits right under Visitors, hidden until set up. */}
+      <SearchConsole enabled={enabled} helperName={helperName} />
+    </>
   );
 }
 
@@ -603,8 +629,138 @@ export function VisitorsBody({ report }: { report: VisitorsReport }) {
         </Stack>
       </Grid>
       <p className="ui-muted" style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>
-        Counted by Cloudflare without cookies. Numbers are close estimates and update every few
-        minutes.
+        {report.provider === 'ga4'
+          ? 'From Google Analytics, updated a few hours ago. A visit is one sitting on the website, however many pages it takes in.'
+          : 'Counted by Cloudflare without cookies. Numbers are close estimates and update every few minutes.'}
+      </p>
+    </Stack>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Found on Google (/api/studio/search/, card 136)
+// -----------------------------------------------------------------------------
+
+/** The route's path. */
+export const SEARCH_PATH = '/api/studio/search/';
+
+type SearchState =
+  | { kind: 'hidden' }
+  | { kind: 'failed' }
+  | { kind: 'connect' }
+  | { kind: 'ok'; report: SearchReport };
+
+function useSearch(enabled: boolean): SearchState {
+  const client = useClient({ apiVersion: API_VERSION });
+  // Starts hidden, not loading: a site without Search Console never sees the card flash in.
+  const [state, setState] = useState<SearchState>({ kind: 'hidden' });
+
+  useEffect(() => {
+    if (!enabled) return;
+    let cancelled = false;
+    const token = studioToken(client);
+    fetch(SEARCH_PATH, {
+      cache: 'no-store',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then(async (r) => {
+        // Signed out, no route, or not set up: stay hidden (Visitors already says sign in).
+        if (r.status === 401 || r.status === 403 || r.status === 404) {
+          return { kind: 'hidden' } as const;
+        }
+        const j = (await r.json().catch(() => null)) as
+          | (Partial<Omit<SearchReport, 'configured'>> & {
+              configured?: boolean;
+              error?: string;
+              connect?: boolean;
+            })
+          | null;
+        if (j && j.configured === false) return { kind: 'hidden' } as const;
+        if (j && j.connect === true) return { kind: 'connect' } as const;
+        if (!r.ok || !j || j.error || !Array.isArray(j.queries)) return { kind: 'failed' } as const;
+        return { kind: 'ok', report: j as SearchReport } as const;
+      })
+      .catch(() => ({ kind: 'failed' }) as const)
+      .then((s) => !cancelled && setState(s));
+    return () => {
+      cancelled = true;
+    };
+  }, [client, enabled]);
+
+  return state;
+}
+
+export function SearchConsole({ enabled, helperName }: { enabled: boolean; helperName: string }) {
+  const state = useSearch(enabled);
+  if (state.kind === 'hidden') return null;
+  return (
+    <Panel title="Found on Google" meaning="search">
+      {state.kind === 'failed' ? (
+        <Quiet>The search numbers could not load just now. Try again later.</Quiet>
+      ) : state.kind === 'connect' ? (
+        <ConnectGoogle helperName={helperName} />
+      ) : (
+        <SearchBody report={state.report} />
+      )}
+    </Panel>
+  );
+}
+
+/** Clicks and appearances against the four weeks before, the average place, the searches and the pages. */
+export function SearchBody({ report }: { report: SearchReport }) {
+  return (
+    <Stack gap={5}>
+      <Grid gridTemplateColumns={[1, 1, 3]} gap={5} style={{ alignItems: 'start' }}>
+        <Figure
+          value={report.clicks.toLocaleString('en-US')}
+          label="Clicks from Google"
+          sub={periodCompare(report.clicks, report.clicksBefore, 'click', 'clicks')}
+        />
+        <Figure
+          value={report.impressions.toLocaleString('en-US')}
+          label="Times you appeared"
+          sub={periodCompare(report.impressions, report.impressionsBefore, 'time', 'times')}
+        />
+        <Figure
+          value={report.position === null ? 'None yet' : report.position.toLocaleString('en-US')}
+          label="Average place in the results"
+          sub={positionWords(report.position, report.positionBefore)}
+        />
+      </Grid>
+      <Grid gridTemplateColumns={[1, 1, 2]} gap={5} style={{ alignItems: 'start' }}>
+        <Stack gap={3}>
+          <BarsHead>Searches that found you</BarsHead>
+          {report.queries.length === 0 ? (
+            <Quiet>No searches to show yet.</Quiet>
+          ) : (
+            <MarkBars
+              label="Clicks from Google over four weeks, by what people searched for"
+              rows={report.queries.map((q) => ({
+                label: q.query,
+                value: q.clicks,
+                text: plural(q.clicks, 'click', 'clicks'),
+              }))}
+            />
+          )}
+        </Stack>
+        <Stack gap={3}>
+          <BarsHead>Pages people opened from Google</BarsHead>
+          {report.pages.length === 0 ? (
+            <Quiet>No pages to show yet.</Quiet>
+          ) : (
+            <MarkBars
+              label="Clicks from Google over four weeks, by page"
+              rows={report.pages.map((p) => ({
+                label: p.path === '/' ? 'Home page' : p.path,
+                value: p.clicks,
+                text: plural(p.clicks, 'click', 'clicks'),
+              }))}
+            />
+          )}
+        </Stack>
+      </Grid>
+      <p className="ui-muted" style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>
+        {`From Google Search Console, ${windowWords(report.from, report.to)}, against the four weeks before. Google's search figures run about three days behind, so the newest days are not in yet.`}
       </p>
     </Stack>
   );
