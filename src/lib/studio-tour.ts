@@ -117,7 +117,11 @@ export const SANITY_ANCHORS: Record<string, string[]> = {
   /** The open document's pane. */
   'pane:document': ['[data-testid="document-pane"]', '[data-ui="DocumentPane"]'],
   /** The "+" (create new) at the top of a list pane. */
-  'new-document': ['[data-testid="action-intent-button"]', 'a[aria-label^="Create new"]'],
+  'new-document': [
+    '[data-testid="action-intent-button"]',
+    '[data-testid="new-document-button"]',
+    'a[aria-label^="Create new"]',
+  ],
 };
 
 /** The CSS selectors an anchor name stands for, in the order to try them. */

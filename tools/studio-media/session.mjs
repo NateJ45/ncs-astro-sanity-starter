@@ -215,8 +215,17 @@ export async function openStudio({
       await page.goto(base + p, { waitUntil: 'domcontentloaded' });
     } else {
       if (!page.url().startsWith(new URL(root).origin + basePath)) {
+        // A first load under 600px wide sends the harness to /home with no trailing
+        // slash, which the dev server answers with a 404: load it wide, then narrow it.
+        const want = page.viewportSize();
+        if (want && want.width < 600)
+          await page.setViewportSize({ width: 1280, height: want.height });
         await page.goto(root, { waitUntil: 'domcontentloaded' });
         await page.waitForLoadState('networkidle', { timeout: 40_000 }).catch(() => {});
+        if (want && want.width < 600) {
+          await page.waitForTimeout(1500);
+          await page.setViewportSize(want);
+        }
       }
       if (p !== '/' || new URL(page.url()).pathname !== basePath + '/') {
         await page.evaluate(
