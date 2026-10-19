@@ -63,6 +63,7 @@ import { ncsStudioKit } from './src/sanity/kit';
 import { ncsWritingHelp } from './src/sanity/ai';
 import { kitConfig } from './src/sanity/kit.config';
 import { ncsWorkflowTools } from './src/sanity/workflow';
+import { ncsMailTools } from './src/sanity/mail';
 import { brandIcons, typeIcon, withBrandPreviews } from './src/sanity/brandIcons';
 
 // =============================================================================
@@ -202,6 +203,9 @@ export default defineConfig({
     // appear only once the Worker has ANTHROPIC_API_KEY; nothing is written
     // until the editor presses "Use this".
     ncsWritingHelp(),
+    // Newsletter send buttons and the RSVPs tool (the email backbone, card 127).
+    // Before the kit, so the kit's tool order and staff view place "rsvps".
+    ncsMailTools(),
     // The Studio kit (src/sanity/kit/, settings in src/sanity/kit.config.ts):
     // Home, Site Guide and Checkup tools, plain tool names, the staff view,
     // Trash instead of Delete, the note after Publish and the first-run tour.

@@ -465,6 +465,11 @@ and staff view place `messages`. PORTS.md card 117 has the full file list.
 - **Table panes** (`DocumentTable.tsx`, `tableListItem()`): columns per site in `src/sanity/tables.config.ts`;
   `studio-table.test.ts` fails if a column is missing from its projection. Always an extra desk item beside the
   normal list.
+- **Mail** (`src/sanity/mail/`, `ncsMailTools()` before the kit, card 127): "Send a test to me" and "Send to
+  everyone" on the `newsletter` type (`/api/studio/newsletter/`, batches until done, never twice), the **RSVPs** tool
+  (`/api/studio/rsvps/`, counts, replies, CSV), Home's Newsletter card and RSVP rows in Coming up
+  (`features.mail`), and one RSVP line on top of Messages. Same auth order as Messages. The tested halves are
+  `src/lib/mail-*.ts`; setup is OPERATIONS.md "Email".
 - **Morning change note**: not Studio code. `.github/workflows/change-note.yml` + `scripts/change-note.mjs`.
 
 ## Rules that bite

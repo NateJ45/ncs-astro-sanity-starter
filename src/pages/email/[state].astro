@@ -1,0 +1,114 @@
+---
+// Safe to edit by hand (the words especially)
+// =============================================================================
+// /email/confirmed/, /email/unsubscribe/, /email/link-problem/
+// The plain pages the newsletter's links land on (PORTS.md card 127).
+// =============================================================================
+//   confirmed     after "Yes, sign me up" in the confirmation email
+//                 (/api/subscribe/confirm/ redirects here).
+//   unsubscribe   the footer link of every issue. A button, not the link
+//                 itself, does the unsubscribing: mail scanners open every
+//                 link in an email, and must not take a reader off the list.
+//   link-problem  a confirm link that is broken, expired or too old.
+// Static and noindex; the unsubscribe button posts to /api/unsubscribe/.
+// =============================================================================
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getSiteSettings } from '@/lib/queries';
+import { site } from '@/data/site';
+
+export function getStaticPaths() {
+  return [
+    { params: { state: 'confirmed' } },
+    { params: { state: 'unsubscribe' } },
+    { params: { state: 'link-problem' } },
+  ];
+}
+
+const { state } = Astro.params as { state: 'confirmed' | 'unsubscribe' | 'link-problem' };
+const siteSettings = await getSiteSettings();
+
+const COPY = {
+  confirmed: {
+    title: 'You are on the list',
+    body: `Thank you for confirming. The next ${site.name} newsletter will come to your inbox. Every issue has an unsubscribe link at the bottom, if you ever change your mind.`,
+  },
+  unsubscribe: {
+    title: 'Unsubscribe from the newsletter',
+    body: 'Press the button and we will stop sending you the newsletter. You will not need to log in or give a reason.',
+  },
+  'link-problem': {
+    title: 'That link did not work',
+    body: 'The link may be incomplete, or more than a week old. Sign up again on the website and we will send you a fresh one.',
+  },
+} as const;
+const copy = COPY[state];
+---
+
+<BaseLayout title={copy.title} description={copy.body} siteSettings={siteSettings} noindex>
+  <section class="mx-auto max-w-prose px-m py-section-lg" aria-labelledby="email-state-heading">
+    <h1 id="email-state-heading" class="font-display text-h1 text-foreground">
+      {copy.title}
+    </h1>
+    <p class="mt-m text-lg leading-relaxed text-foreground/85" data-email-body>
+      {copy.body}
+    </p>
+    {state === 'unsubscribe' && (
+      <div class="mt-l" data-unsubscribe>
+        <button
+          type="button"
+          class="press-tactile inline-flex min-h-[44px] items-center justify-center rounded-sm bg-primary-dark px-l py-s text-sm font-semibold text-white transition-colors hover:bg-accent-dark disabled:opacity-60"
+          data-unsubscribe-button
+        >
+          Unsubscribe me
+        </button>
+        <p
+          class="mt-m text-foreground/85"
+          role="status"
+          aria-live="polite"
+          data-unsubscribe-status
+        />
+      </div>
+    )}
+    <p class="mt-l">
+      <a href="/" class="underline underline-offset-2 hover:text-link">
+        Back to the home page
+      </a>
+    </p>
+  </section>
+</BaseLayout>
+
+<script>
+  // The unsubscribe button: POST the token from this page's address to the Worker.
+  const box = document.querySelector<HTMLElement>('[data-unsubscribe]');
+  const button = box?.querySelector<HTMLButtonElement>('[data-unsubscribe-button]');
+  const status = box?.querySelector<HTMLElement>('[data-unsubscribe-status]');
+  const token = new URLSearchParams(location.search).get('t');
+  if (box && button && status) {
+    if (!token) {
+      button.disabled = true;
+      status.textContent =
+        'This page needs the link from the bottom of a newsletter. Open that link again.';
+    }
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      status.textContent = 'Working on it…';
+      try {
+        const res = await fetch(`/api/unsubscribe/?t=${encodeURIComponent(token ?? '')}`, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+        });
+        const body = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+        if (res.ok && body.ok) {
+          button.hidden = true;
+          status.textContent = 'Done. You will not get the newsletter any more.';
+        } else {
+          button.disabled = false;
+          status.textContent = body.error ?? 'That did not work. Please try again in a minute.';
+        }
+      } catch {
+        button.disabled = false;
+        status.textContent = 'Could not reach the website. Check your connection and try again.';
+      }
+    });
+  }
+</script>

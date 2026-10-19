@@ -1,0 +1,72 @@
+---
+// Safe to edit by hand
+// RSVP section (PORTS.md card 127): the heading and intro, the event's when and
+// where, and the reply form (RsvpForm, PORTABLE). CONTENT type: SectionRenderer
+// hands it the page's alternating surface. The block's event key is
+// "<page id>:<block key>"; `pageId` comes from the projection (^._id).
+import SectionHeading from '@/components/SectionHeading.astro';
+import RsvpForm from '@/components/RsvpForm';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
+import { eventKey, normalizeRsvpBlock, whenWords } from '@/lib/mail-rsvp';
+import { TIME_ZONE } from '@/lib/newsletter-content';
+import type { ProjectedRsvpSection } from '@/lib/pageBuilder.types';
+
+interface Props {
+  block: ProjectedRsvpSection;
+  surface?: CadenceSurface | null;
+  headingId: string;
+}
+
+const { block, surface = 'background', headingId } = Astro.props as Props;
+const pageId = block.pageId ?? '';
+const ev = normalizeRsvpBlock(block, pageId);
+const key = eventKey(pageId, block._key ?? '');
+const when = whenWords(ev?.startsAt ?? null, TIME_ZONE);
+const closed = ev?.closesAt ? Date.parse(ev.closesAt) <= Date.now() : false;
+const bg = surfaceClass(surface ?? 'background');
+---
+
+{ev && key && (
+  <section class={bg} aria-labelledby={headingId} data-rsvp={key}>
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      <div class="split">
+        <div>
+          <SectionHeading
+            headline={block.heading || ev.name}
+            subhead={block.intro}
+            headingId={headingId}
+          />
+          <dl class="mt-l space-y-s text-foreground/85">
+            {block.heading && (
+              <div>
+                <dt class="text-sm font-semibold text-foreground">Event</dt>
+                <dd>{ev.name}</dd>
+              </div>
+            )}
+            {when && (
+              <div>
+                <dt class="text-sm font-semibold text-foreground">When</dt>
+                <dd>{when}</dd>
+              </div>
+            )}
+            {ev.where && (
+              <div>
+                <dt class="text-sm font-semibold text-foreground">Where</dt>
+                <dd>{ev.where}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+        <RsvpForm
+          client:visible
+          eventKey={key}
+          eventName={ev.name}
+          questions={ev.questions}
+          maxParty={ev.maxParty}
+          closedAtBuild={closed}
+          idPrefix={`${headingId}-rsvp`}
+        />
+      </div>
+    </div>
+  </section>
+)}

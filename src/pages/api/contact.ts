@@ -27,6 +27,7 @@ import {
   type CleanSubmission,
 } from '@/lib/contact-submission';
 import { site } from '@/data/site';
+import { workerMailer, type MailWorkerEnv } from '@/lib/mail-env';
 
 export const prerender = false;
 
@@ -42,14 +43,15 @@ interface D1Lite {
   };
 }
 
-interface ContactEnv {
+interface ContactEnv extends Omit<MailWorkerEnv, 'CONTACT_DB'> {
   /** D1 database holding contact_submissions. */
   CONTACT_DB?: D1Lite;
-  /** Cloudflare Email Sending binding. */
-  EMAIL?: { send: (message: Record<string, unknown>) => Promise<{ messageId?: string }> };
   /** Where notifications go. Must be a verified destination on the free path. */
   CONTACT_TO?: string;
-  /** Who they come from. Must belong to a domain onboarded for sending. */
+  /**
+   * Who they come from (MAIL_FROM wins when both are set). Must belong to a domain the
+   * email provider can send from. EMAIL (Cloudflare) or RESEND_API_KEY picks the provider.
+   */
   CONTACT_FROM?: string;
   /** Turnstile server key. Turnstile is skipped entirely when unset. */
   TURNSTILE_SECRET?: string;
@@ -92,34 +94,28 @@ async function passesTurnstile(
   }
 }
 
-/** Cloudflare Email Sending. Returns null on success, or the reason it failed. */
+/**
+ * Email through the site's backbone (src/lib/mail-send.ts, PORTS.md card 127):
+ * Cloudflare Email Sending, or Resend, whichever the Worker is set up for.
+ * Returns null on success, or the reason it failed. The message is the same
+ * one this route always sent; on Cloudflare the backbone keeps the old shape
+ * and the retry without Reply-To.
+ */
 async function notifyByEmail(e: ContactEnv, s: CleanSubmission): Promise<string | null> {
-  if (!e.EMAIL || !e.CONTACT_TO || !e.CONTACT_FROM) return 'email binding not configured';
+  const { mailer, reason } = workerMailer(e);
+  if (!mailer || !e.CONTACT_TO) return reason ?? 'no CONTACT_TO';
   const note = buildNotification(s, site.name);
-
-  const message: Record<string, unknown> = {
+  // Reply-To is the difference between hitting reply and copying an address
+  // out of the body.
+  const r = await mailer.send({
     to: e.CONTACT_TO,
-    from: { email: e.CONTACT_FROM, name: `${site.name} contact form` },
+    fromName: `${site.name} contact form`,
     subject: note.subject,
     text: note.text,
     html: note.html,
-  };
-
-  try {
-    // Reply-To is the difference between hitting reply and copying an address
-    // out of the body. It is sent as a custom header, and the send is retried
-    // WITHOUT it if the transport rejects the field: an enquiry that arrives
-    // slightly less conveniently beats one that does not arrive.
-    await e.EMAIL.send({ ...message, headers: [{ key: 'Reply-To', value: s.email }] });
-    return null;
-  } catch {
-    try {
-      await e.EMAIL.send(message);
-      return null;
-    } catch (err) {
-      return err instanceof Error ? err.message : 'send failed';
-    }
-  }
+    replyTo: s.email,
+  });
+  return r.ok ? null : (r.error ?? 'send failed');
 }
 
 /**

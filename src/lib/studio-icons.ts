@@ -124,6 +124,8 @@ export const TYPE_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   trashedItem: 'trash',
   studioWeek: 'times',
   previewShare: 'link',
+  // The email backbone (card 127).
+  newsletter: 'message',
 };
 
 /** Field groups by name, across every type. A site adds or overrides in brand.config.json. */
@@ -148,6 +150,7 @@ export const TOOL_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   checkup: 'checkup',
   'quick-update': 'quickUpdate',
   messages: 'message',
+  rsvps: 'people',
   media: 'image',
   vision: 'code',
 };

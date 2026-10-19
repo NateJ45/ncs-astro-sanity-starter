@@ -16,6 +16,14 @@ sequence).
 
 ## Waiting on a human
 
+### 24. Card 127 (the email backbone): a real send, and the Studio buttons signed in (opened 2026-10-18)
+
+**Blocker: a sending domain and a signed-in Studio.** Unit-tested on real SQLite and exercised under `wrangler dev` with
+a local D1 and the local `send_email` binding (OPERATIONS.md "Email"). Not yet seen: an email arriving through Resend
+or Cloudflare (and how Gmail and Outlook show the template in dark mode), "Send a test to me" and "Send to everyone"
+pressed signed in, the RSVPs tool and its CSV opened in Excel, Home's Newsletter card with real numbers, and the
+List-Unsubscribe one-click button in Gmail.
+
 ### 1. Verify the live preview against a real Sanity project
 
 **Blocker: this template has no Sanity project, by design.**
