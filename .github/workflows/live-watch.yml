@@ -29,5 +29,5 @@ jobs:
       # No `npm ci`: the script uses only built-in fetch.
       - name: Check the live site
         env:
-          SITE_URL: ${{ vars.SITE_URL }}
+          SITE_URL: ${{ vars.SITE_URL || vars.PRODUCTION_URL }}
         run: node scripts/live-watch.mjs
