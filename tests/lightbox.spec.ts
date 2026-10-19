@@ -92,7 +92,9 @@ test('Tab stays inside the viewer, Escape closes and focus returns', async ({ pa
   await expect(dialog).toBeHidden();
   await expect(opener).toBeFocused();
   // The page scrolls again once the viewer is shut.
-  expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe('');
+  // Polled: the browser hands focus back as the dialog shuts, a moment BEFORE
+  // the dialog's `close` event runs the viewer's own clean-up.
+  await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe('');
 });
 
 test('a swipe steps to the next photo', async ({ page }) => {
