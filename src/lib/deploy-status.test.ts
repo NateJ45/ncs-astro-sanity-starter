@@ -147,7 +147,7 @@ describe('the Studio session check', () => {
       'abc123',
       answer(200, { id: 'pX', name: 'Ann', roles: [{ name: 'editor' }] }),
     );
-    assert.deepEqual(user, { id: 'pX', name: 'Ann' });
+    assert.deepEqual(user, { id: 'pX', name: 'Ann', roles: ['editor'] });
   });
   it('no role, no id, a 401, a throw or a bad project id all fail closed', async () => {
     assert.equal(await verifyStudioUser('t', 'abc123', answer(200, { id: 'pX', roles: [] })), null);

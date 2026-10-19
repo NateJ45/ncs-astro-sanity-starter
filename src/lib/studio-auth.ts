@@ -37,6 +37,8 @@ export function bearerToken(request: Request): string | null {
 export interface StudioUser {
   id: string;
   name?: string;
+  /** The member's role names on this project ("administrator", "editor", "viewer"...). Card 125. */
+  roles: string[];
 }
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -63,8 +65,12 @@ export async function verifyStudioUser(
       role?: string;
       roles?: Array<{ name?: string }>;
     };
+    const roles = [
+      ...(Array.isArray(me.roles) ? me.roles.map((r) => r?.name ?? '').filter(Boolean) : []),
+      ...(me.role ? [me.role] : []),
+    ];
     const hasRole = (Array.isArray(me.roles) && me.roles.length > 0) || Boolean(me.role);
-    return me.id && hasRole ? { id: me.id, name: me.name } : null;
+    return me.id && hasRole ? { id: me.id, name: me.name, roles } : null;
   } catch {
     return null;
   }

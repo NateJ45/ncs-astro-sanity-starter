@@ -27,6 +27,12 @@
 // The navbar wordmark's URL is resolved here at build time and handed to the
 // Studio in #ncs-studio-boot (read by StudioLook.tsx). Site choices live in
 // src/sanity/studioEdges.config.ts.
+//
+// THE PHONE APP (card 125). This page links /studio/manifest.webmanifest (not
+// the public site's /site.webmanifest) and registers the Studio's service
+// worker, scope /studio/, in a production build only. Both stay on this page:
+// the public website never registers a worker and never installs as an app.
+// Shapes and reasons: src/lib/studio-app.ts and public/studio/sw.js.
 // =============================================================================
 import { StudioComponentHash } from '@sanity/astro/studio/studio-component.tsx';
 import brand from '../../../brand/brand.config.json';
@@ -34,12 +40,18 @@ import { STUDIO_COLORS } from '../../sanity/studioTheme';
 import { studioEdges } from '../../sanity/studioEdges.config';
 import { pickWordmark, type StudioBootData } from '../../lib/studio-route';
 import StudioSplashMotif from '../../sanity/StudioSplashMotif.astro';
+import { STUDIO_MANIFEST_PATH, STUDIO_SCOPE, STUDIO_SW_PATH } from '../../lib/studio-app';
 // The brand's font files, the same ones the Studio loads (card 116).
 import '../../sanity/studioFonts.css';
 
 export const prerender = true;
 
 const name = brand.name;
+const appName = studioEdges.app?.shortName ?? name;
+// The worker only in a real build: under `astro dev` it would sit in front of
+// Vite's own files and outlive the dev server.
+const registerWorker = import.meta.env.PROD;
+const workerScript = `if ('serviceWorker' in navigator) { addEventListener('load', function () { navigator.serviceWorker.register(${JSON.stringify(STUDIO_SW_PATH)}, { scope: ${JSON.stringify(STUDIO_SCOPE)} }).catch(function () {}); }); }`;
 const fonts = (brand as { studio?: { fonts?: { display?: string; body?: string } } }).studio?.fonts;
 const displayFont = fonts?.display ?? 'Georgia, serif';
 const bodyFont = fonts?.body ?? 'system-ui, sans-serif';
@@ -89,7 +101,12 @@ const splashVars = [
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="manifest" href={STUDIO_MANIFEST_PATH} />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content={appName} />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    {registerWorker && <script is:inline set:html={workerScript} />}
     <script is:inline>
       // Paint in the scheme the Studio is about to use: the editor's last pick
       // in the Appearance menu, else light (sanity.config seeds light for a
