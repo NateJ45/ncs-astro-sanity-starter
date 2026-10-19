@@ -4,7 +4,7 @@
 // The kit harness's surfaces bench (PORTS.md card 131): DEV SERVER ONLY
 // =============================================================================
 // /kit-harness/guide/?view=surfaces&scheme=light|dark&part=<name> (tool, checkup, clear,
-// loading, failed, home, quick) draws the
+// loading, failed, home, quick, empty) draws the
 // card 131 surfaces with made-up data, since the real ones need a signed-in
 // Studio: the tool heading, the Checkup (findings and all clear), Home's
 // cards (Fix-it list, the Sunday checklist as a path, "Is it live?" in every
@@ -19,6 +19,7 @@ import { ToolHeading } from '../shared';
 import {
   AllClear,
   DoneCard,
+  EmptyState,
   TileCard,
   CheckPath,
   KitAction,
@@ -148,6 +149,16 @@ export function SurfacesBench({ part }: { part: string }) {
       )}
       {show('failed') && (
         <CheckupView results={null} failed busy={false} onRun={() => {}} linkTo={noLink} />
+      )}
+      {show('empty') && (
+        <KitScope style={{ maxWidth: 720 }}>
+          <EmptyState
+            meaning="scripture"
+            title="Nothing in Sermons yet"
+            lead="Each Sunday's sermon goes here: the recording, the reading and who preached."
+            action={<KitAction strong>+ Add the first sermon</KitAction>}
+          />
+        </KitScope>
       )}
       {show('quick') && (
         <KitScope>

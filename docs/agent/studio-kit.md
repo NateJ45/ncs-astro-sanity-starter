@@ -512,6 +512,7 @@ family site gets its own devices and the starter's neutral defaults stay tidy.
 | `CheckPath`     | a checklist as a path: the stone is the checkbox and fills when done               | Home's This week / This Sunday                  |
 | `LiveSteps`     | Saved, Building, On the website as three stones; `compact` for the navbar          | Home's "Is it live?", the navbar status line    |
 | `TileCard`      | a job tile: colour edge on top, art on a stone, display-font title                 | Quick update                                    |
+| `EmptyState`    | the type's art large, a display-font title, one strong button, the sill            | the desk's empty lists (`emptyList.tsx`)        |
 | `DoneCard`      | the path laid so far, a display-font line, the next buttons, the sill              | Quick update's done screen, Post a photo's      |
 
 **Rules.**
@@ -535,8 +536,8 @@ family site gets its own devices and the starter's neutral defaults stay tidy.
 piece with made-up data in light or dark (`&scheme=dark`), since the real screens need a signed-in Studio
 (`src/sanity/kit/harness/Surfaces.tsx`, dev only).
 
-**Still to do** (`docs/PENDING.md`): Post a photo's form as a three-stone path, branded empty lists and
-CollectionIntro, the tour's stone progress row, Home's quick actions as tiles, Coming up date blocks, ArtTiles on
+**Still to do** (`docs/PENDING.md`): Post a photo's form as a three-stone path, CollectionIntro (empty lists are
+done: `EmptyState` in `emptyList.tsx`), the tour's stone progress row, Home's quick actions as tiles, Coming up date blocks, ArtTiles on
 Recent edits and Pick up rows, Visitors in mark colours, the splash and offline page, then the Section Look thumbnails,
 the field "How to" chip and the sign-in heading.
 

@@ -257,4 +257,6 @@ export const UI_CSS = `
 @media (prefers-reduced-motion:reduce){.ncs-ui .ui-tile{transition:none}.ncs-ui .ui-tile:hover{transform:none}}
 .ncs-ui .ui-done .ui-live{max-width:420px}
 .ncs-ui .ui-done__actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.ncs-ui .ui-empty .ui-clear__in{padding:34px 30px 28px;gap:12px}
+.ncs-ui .ui-empty .ui-art{margin-bottom:6px}
 `;

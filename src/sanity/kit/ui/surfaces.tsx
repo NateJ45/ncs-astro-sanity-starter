@@ -535,3 +535,43 @@ export function DoneCard({
     </div>
   );
 }
+
+// -----------------------------------------------------------------------------
+// Empty lists
+// -----------------------------------------------------------------------------
+
+/** A list with nothing in it yet: the type's art large, a display-font title, one button, the sill. */
+export function EmptyState({
+  title,
+  lead,
+  meaning,
+  icon,
+  action,
+}: {
+  title: ReactNode;
+  lead?: ReactNode;
+  meaning?: BrandIconKey;
+  icon?: ComponentType;
+  action?: ReactNode;
+}) {
+  const t = useLookTokens();
+  return (
+    <section className="ui-clear ui-empty">
+      <div className="ui-clear__in">
+        {(meaning || icon) && (
+          <ArtTile
+            meaning={meaning}
+            icon={meaning ? undefined : icon}
+            size={104}
+            ground={t.tones.note.bg}
+            seed={9}
+          />
+        )}
+        <h2 className="ui-clear__title">{title}</h2>
+        {lead && <p className="ui-clear__lead">{lead}</p>}
+        {action && <div className="ui-done__actions">{action}</div>}
+      </div>
+      <Sill />
+    </section>
+  );
+}

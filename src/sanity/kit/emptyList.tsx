@@ -24,8 +24,8 @@ import type { ComponentType, ReactElement } from 'react';
 import { defineLocaleResourceBundle } from 'sanity';
 import type { ListItemBuilder, StructureBuilder, StructureResolverContext } from 'sanity/structure';
 import { useRouter } from 'sanity/router';
-import { Box, Button, Card, Stack, Text } from '@sanity/ui';
-import { AddIcon } from '@sanity/icons/Add';
+import { Box } from '@sanity/ui';
+import { EmptyState, KitAction, KitScope } from './ui';
 import { API_VERSION } from './shared';
 
 /** The default "nothing here" words, for every list emptyAwareList() does not wrap. */
@@ -62,27 +62,20 @@ function emptyPane(o: EmptyAwareOptions): () => ReactElement {
   function EmptyListPane() {
     const router = useRouter();
     return (
+      // Card 131: the type's art large, a display-font title, one button, the site's sill.
       <Box padding={[4, 4, 5]}>
-        <Card padding={[4, 4, 5]} radius={3} border>
-          <Stack gap={4}>
-            <Text size={3} weight="semibold">
-              {`Nothing in ${o.title} yet`}
-            </Text>
-            <Text size={2} muted style={{ lineHeight: 1.6 }}>
-              {o.explain}
-            </Text>
-            <Box>
-              <Button
-                icon={AddIcon}
-                text={o.createLabel ?? 'Create the first one'}
-                tone="primary"
-                fontSize={2}
-                padding={4}
-                onClick={() => router.navigateIntent('create', { type: o.type })}
-              />
-            </Box>
-          </Stack>
-        </Card>
+        <KitScope style={{ maxWidth: 720 }}>
+          <EmptyState
+            icon={o.icon}
+            title={`Nothing in ${o.title} yet`}
+            lead={o.explain}
+            action={
+              <KitAction strong onClick={() => router.navigateIntent('create', { type: o.type })}>
+                {`+ ${o.createLabel ?? 'Create the first one'}`}
+              </KitAction>
+            }
+          />
+        </KitScope>
       </Box>
     );
   }

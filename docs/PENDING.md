@@ -115,7 +115,7 @@ domain and their mail.
 Card 131's first pass redrew tool headings, Home's cards, the findings (Checkup, Fix-it list, Before you publish,
 Help), the weekly checklist as a path, "Is it live?" and the navbar line, Quick update's tiles and done screens, and
 Messages' statuses in the design language. Still to do, in the audit's order: Post a photo's form as a three-stone
-path (a camera stone exists for Auburn); branded empty lists (`emptyList.tsx`) and CollectionIntro; the tour with a
+path (a camera stone exists for Auburn); CollectionIntro (empty lists are done); the tour with a
 stone progress row; KitLoading for the spinners left in EarlierVersions, MailHome, RsvpTool, NewsletterActions,
 DocumentTable, SharePreviewAction and WritingHelp; Home's quick actions as tiles with the colour edge; Coming up rows
 with date blocks; Recent edits and Pick up rows with art tiles; Visitors in mark colours with a display-font number;
