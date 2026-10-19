@@ -16,6 +16,33 @@ each new surface rebuilding its own look.
 **Left open.** Real screenshots for GuideShot, art for guide meanings with none, a signed-in look at the navbar status
 line, and the next card's roughly twenty surfaces (`docs/PENDING.md`).
 
+_2026-10-18: section looks and a photo viewer (PORTS card 124)._
+
+**Decision.** Editors can pick a section's look instead of a colour. The five content blocks (text, image + text,
+gallery, quote, video) carry a `look` radio: Standard follows the page rhythm, Quiet is always the plain page, Feature
+is the brand's deep band with light text. SectionRenderer's cadence resolves the look with the neighbours in view, so
+the page still alternates and two dark bands never touch; every surface is a measured AA pair. Rule 9 now allows that
+one enum and still forbids free colour fields, and the gate test says so. Unset means Standard, so no page moved
+(parity). Gallery photos and journal post photos now open a full-screen viewer (native `<dialog>`, no dependency):
+caption and position, arrows and swipe, Escape, a focus trap and focus return, reduced motion respected, and with
+JavaScript off each photo is a link to the full-size picture. A Squarespace-style free background picker was weighed
+and left out: it is how a site drifts.
+
+_2026-10-18: the Studio on a phone, "Post a photo", and earlier versions from the nightly backups (PORTS card 125)._
+
+**Decision.** `/studio` installs to a phone's home screen: its own manifest (`/studio/manifest.webmanifest`, scope
+`/studio/`, standalone, the site's name and icons plus a padded maskable one, the Studio's navy and paper) and a small
+service worker scoped to `/studio/` that keeps only the hashed code files, icons and an offline page ("You're
+offline"). It never stores a Sanity answer, a login or anything from `/api/`, and fetches the boot page fresh every
+time. Quick update gains "Post a photo": camera or gallery, a required description, into a gallery on any page or a new
+post, saved as a DRAFT only (the editor presses Publish), with the photo redrawn smaller and without its EXIF location.
+Every document gains an "Earlier versions" panel that reaches the last 14 nightly backups: the Worker
+(`/api/studio/earlier-versions/`, same origin, a signed-in editor, rate limited) starts `restore-doc.yml` with the
+existing deploy token, CI decrypts and either lists which fields differ (names and list lengths only, because public
+run logs are public) or writes ONE draft after a dry run, with `NCS_PRODUCTION_WRITE` on that one step. Weighed and
+left out: decrypting in the Worker (it would need the passphrase and a backup can exceed a Worker's memory), and a
+network-first-with-timeout shell (a stale boot page can point at code a later deploy removed).
+
 _2026-10-18: visitor site search and share buttons (PORTS card 126)._
 
 **Decision.** Sites can switch on search (`site.search.enabled`, off in the starter). Pagefind 1.5.2, pinned as a
@@ -46,6 +73,7 @@ public (a password on an ordinary page would leave its words readable over the A
 route with a hashed password, a signed cookie and a rate limit, and never built. The Checkup gained dead external
 links (from the weekly link check), internal links to missing pages, skipped headings, vague link words, long Google
 text, pages nobody can reach, and private-page guards. Detail and the security note: `docs/agent/private-pages.md`.
+
 _2026-10-18: custom code, safe by default (PORTS card 121)._
 
 **Decision.** Editors can paste a widget (a countdown, a sign-up gadget, a map, something an AI wrote) into the block

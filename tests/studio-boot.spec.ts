@@ -34,7 +34,10 @@ test.describe('Studio boot page', () => {
     for (const colorScheme of ['light', 'dark'] as const) {
       const ctx = await browser.newContext({ javaScriptEnabled: false, colorScheme });
       const page = await ctx.newPage();
-      await page.goto('/studio/', { waitUntil: 'domcontentloaded' });
+      // 'load', not 'domcontentloaded': with JavaScript off, DOMContentLoaded
+      // fires before the stylesheets arrive, and the Studio's CSS grew past the
+      // point where it reliably wins that race (card 123 added Sanity UI's).
+      await page.goto('/studio/', { waitUntil: 'load' });
       await expect(page).toHaveTitle(site.name);
       const splash = page.locator('[data-studio-splash]');
       await expect(splash).toBeVisible();

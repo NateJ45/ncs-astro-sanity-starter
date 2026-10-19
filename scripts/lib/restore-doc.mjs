@@ -155,3 +155,60 @@ export function backupDate(fileName) {
   const m = /sanity-backup-(\d{4}-\d{2}-\d{2})/.exec(fileName);
   return m ? m[1] : null;
 }
+
+// -----------------------------------------------------------------------------
+// Earlier versions in the Studio (PORTS.md card 125)
+// -----------------------------------------------------------------------------
+// The Studio's "Earlier versions" panel asks GitHub Actions to run this script
+// (.github/workflows/restore-doc.yml), because only CI holds BACKUP_PASSPHRASE.
+// The run's log is how the answer gets back, and on a PUBLIC repository anyone
+// can read a run's log. So in CI the script runs with --no-values: it says
+// WHICH fields differ and how many items a list had, never what any field
+// said. These helpers are that value-free half.
+
+/** One field that differs, without its words: safe for a public log. */
+export function changeSummary(current, backup) {
+  const count = (v) => (Array.isArray(v) ? v.length : null);
+  const keys = new Set([...Object.keys(current ?? {}), ...Object.keys(backup ?? {})]);
+  const rows = [];
+  for (const k of [...keys].sort()) {
+    if (SYSTEM.has(k)) continue;
+    const now = current ? current[k] : undefined;
+    const then = backup ? backup[k] : undefined;
+    if (JSON.stringify(now) === JSON.stringify(then)) continue;
+    const change = now === undefined ? 'restored' : then === undefined ? 'cleared' : 'changed';
+    rows.push({ field: k, change, then: count(then), now: count(now) });
+  }
+  return rows;
+}
+
+/**
+ * Why a backup copy must not be written back, or null. Sanity's own system
+ * documents (asset records, roles, anything with an id starting "_.") are never
+ * restored one at a time.
+ */
+export function restoreRefusal(doc) {
+  if (!doc || typeof doc._id !== 'string' || typeof doc._type !== 'string') {
+    return 'that backup copy has no id or type.';
+  }
+  if (publishedId(doc._id).startsWith('_')) {
+    return "that is one of Sanity's own system documents; it is never restored on its own.";
+  }
+  if (/^(sanity|system)\./.test(doc._type)) {
+    return `"${doc._type}" is one of Sanity's own document types; it is never restored on its own.`;
+  }
+  return null;
+}
+
+/** Same document content, ignoring the API fields. */
+export function sameContent(a, b) {
+  return changeSummary(a, b).length === 0;
+}
+
+/**
+ * The line the Studio's endpoint reads back out of the run log
+ * (src/lib/earlier-versions.ts parseMarker). One line, JSON, value-free.
+ */
+export function markerLine(name, payload) {
+  return `${name} ${JSON.stringify(payload)}`;
+}

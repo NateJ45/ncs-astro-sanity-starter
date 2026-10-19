@@ -411,6 +411,14 @@ signed-in check on the live Studio, since the clipping seen once was not reprodu
 so ask for a screenshot with the exact width if it persists); (d) the next card: redraw the remaining roughly twenty
 Studio surfaces from `kit/ui`.
 
+### 27. Card 125 (Studio app, Post a photo, Earlier versions): the signed-in and on-device checks (opened 2026-10-18)
+
+Unit-tested (`studio-app.test.ts`, `photo-post.test.ts`, `earlier-versions.test.ts`, `restore-doc.test.mjs`) and
+`tests/studio-app.spec.ts` on the build (manifest valid, worker on /studio/ only, offline page, Chrome's installability
+check clean). Not yet done: install it on a real iPhone and Android phone; post a photo from a phone camera into a
+gallery and into a post (signed in), then publish it; and a real Earlier versions round trip on a site with backups
+running (scan, then restore into a page, then Discard changes), which also proves the job-log read through the token.
+
 ### 16. Authoring kit: click it through in a logged-in Studio (opened 2026-10-18)
 
 PORTS.md card 109 (page templates, picture picker, patterns, synced sections, guardrails) was built, type-checked,

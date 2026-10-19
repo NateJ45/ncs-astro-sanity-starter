@@ -1,0 +1,136 @@
+---
+// Foundation, edit with care
+//
+// THE LOOKS WALL: one page stacking the content blocks in every look an editor
+// can pick (src/lib/section-looks.ts, rule 9 as amended 2026-10-18), rendered
+// through the real SectionRenderer so the cadence resolves them exactly as it
+// would on a live page: Standard alternating, Quiet on the plain page, Feature
+// in the deep brand band, and a Feature that would touch the closing CTA band
+// shown falling back to Standard.
+//
+// It is also the fixture tests/lightbox.spec.ts drives: a gallery with
+// captions, a second gallery on the Feature band, and nothing else that opens
+// the viewer. Fixed data, fake Sanity image references (the spec answers the
+// CDN with a local picture). noindex, out of the sitemap ('/styleguide' is
+// filtered in astro.config.mjs) and under a reserved slug, like the other walls.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import { site } from '@/data/site';
+
+const image = (alt: string, key: string, dims = '1600x1067') => ({
+  _type: 'image',
+  _key: key,
+  alt,
+  asset: {
+    _type: 'reference',
+    _ref: `image-0123456789abcdef0123456789abcdef01234567-${dims}-jpg`,
+  },
+});
+
+const para = (key: string, text: string) => ({
+  _type: 'block',
+  _key: key,
+  style: 'normal',
+  markDefs: [],
+  children: [{ _type: 'span', _key: `${key}-s`, marks: [], text }],
+});
+
+const SECTIONS: Record<string, unknown>[] = [
+  {
+    _type: 'heroSection',
+    _key: 'hero',
+    eyebrow: 'Styleguide',
+    headline: 'Section looks',
+    subhead: 'Standard, Quiet and Feature, as the page rhythm resolves them.',
+    size: 'short',
+  },
+  {
+    _type: 'richTextSection',
+    _key: 'standard-text',
+    eyebrow: 'Standard',
+    heading: 'Follows the page rhythm',
+    body: [
+      para(
+        's1',
+        'Plain and soft bands take turns on their own. Most sections never need anything else.',
+      ),
+    ],
+  },
+  {
+    _type: 'gallerySection',
+    _key: 'standard-gallery',
+    heading: 'A gallery on the plain page',
+    columns: 3,
+    images: [
+      { ...image('Volunteers setting out chairs', 'g1'), caption: 'Setting up on Saturday' },
+      { ...image('A table of food at the picnic', 'g2', '1200x1600'), caption: 'The picnic' },
+      image('The front steps in the snow', 'g3'),
+    ],
+  },
+  {
+    _type: 'quoteSection',
+    _key: 'feature-quote',
+    look: 'feature',
+    quote: 'The one thing on this page we most want you to remember.',
+    attribution: 'Feature look',
+    detail: 'The deep brand band',
+  },
+  {
+    _type: 'imageTextSection',
+    _key: 'standard-imagetext',
+    imageSide: 'left',
+    eyebrow: 'Standard',
+    heading: 'The rhythm carries on after a Feature',
+    body: [para('i1', 'A Feature band sits outside the alternation, so this one is soft.')],
+    image: image('A person reading by a window', 'it1'),
+  },
+  {
+    _type: 'richTextSection',
+    _key: 'quiet-text',
+    look: 'quiet',
+    eyebrow: 'Quiet',
+    heading: 'Always the plain page colour',
+    body: [para('q1', 'No band at all. The next Standard section turns soft again.')],
+  },
+  {
+    _type: 'gallerySection',
+    _key: 'feature-gallery',
+    look: 'feature',
+    heading: 'A gallery on the Feature band',
+    columns: 2,
+    images: [
+      { ...image('A choir singing', 'f1'), caption: 'Choir, Easter morning' },
+      image('Children painting stones', 'f2'),
+    ],
+  },
+  {
+    _type: 'richTextSection',
+    _key: 'standard-after',
+    heading: 'Standard again',
+    body: [para('a1', 'Soft, because the Quiet section above restarted the rhythm.')],
+  },
+  {
+    _type: 'quoteSection',
+    _key: 'feature-before-cta',
+    look: 'feature',
+    quote: 'Asked for Feature, shown as Standard: it would touch the closing band.',
+    attribution: 'Two dark bands never touch',
+  },
+  {
+    _type: 'ctaBandSection',
+    _key: 'cta',
+    headline: 'The closing call to action',
+    subhead: 'Always the Ink band.',
+    cta: { _type: 'ctaBlock', label: 'Get in touch', linkType: 'external', externalUrl: '#' },
+  },
+];
+---
+
+<BaseLayout
+  title={`Looks wall | ${site.name}`}
+  description="Fixed-data wall of the section looks. Not for visitors."
+  noindex
+>
+  <SectionRenderer sections={SECTIONS} idPrefix="looks" />
+</BaseLayout>

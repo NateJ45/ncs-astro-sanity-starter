@@ -1,0 +1,137 @@
+/* PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file */
+/* The photo viewer's styles (src/components/Lightbox.astro). Imported by
+   globals.css rather than by the component, so they ride in the one site
+   stylesheet and a page that never opens the viewer gets no extra inline
+   <style> block (the parity gate holds every page to that). */
+
+/* The viewer is the same dark room on a light or a dark page: a photo reads
+   best on near-black, and the controls are measured against it (white on
+   rgb(12 13 15), well past AA). Colours are literals on purpose so a band's
+   re-pointed tokens (the Feature look) can never leak in. */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgb(12 13 15);
+  color: #f4f4f2;
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+.lightbox::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
+.lightbox__figure {
+  display: grid;
+  height: 100%;
+  margin: 0;
+  padding: 4rem 1rem 1.25rem;
+  grid-template-rows: minmax(0, 1fr) auto;
+  justify-items: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+.lightbox__img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.lightbox__caption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1rem;
+  max-width: 48rem;
+  text-align: center;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.lightbox__count {
+  color: #c9cbcf;
+  font-variant-numeric: tabular-nums;
+}
+.lightbox__btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: #f4f4f2;
+  cursor: pointer;
+}
+.lightbox__btn:hover {
+  background: rgb(255 255 255 / 0.2);
+}
+.lightbox__btn:focus-visible {
+  outline: 2px solid #f4f4f2;
+  outline-offset: 2px;
+}
+.lightbox__btn[hidden] {
+  display: none;
+}
+.lightbox__close {
+  top: 0.75rem;
+  right: 0.75rem;
+}
+.lightbox__prev,
+.lightbox__next {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.lightbox__prev {
+  left: 0.5rem;
+}
+.lightbox__next {
+  right: 0.5rem;
+}
+@media (min-width: 768px) {
+  .lightbox__figure {
+    padding: 4rem 5rem 1.5rem;
+  }
+  .lightbox__prev {
+    left: 1rem;
+  }
+  .lightbox__next {
+    right: 1rem;
+  }
+}
+/* The photo that opens the viewer says so on hover and focus. */
+.lightbox-link {
+  display: block;
+  cursor: zoom-in;
+}
+/* Drawn INSIDE the photo: galleries round their corners with overflow
+   hidden, which would clip a ring drawn outside. */
+.lightbox-link:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: -3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lightbox[open] {
+    animation: lightbox-in 180ms ease-out;
+  }
+  .lightbox__img {
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+  }
+  .lightbox__img.is-ready {
+    opacity: 1;
+  }
+}
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+  }
+}

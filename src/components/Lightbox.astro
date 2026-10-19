@@ -1,0 +1,224 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// Lightbox - the full-screen photo viewer behind every LightboxLink
+// =============================================================================
+// Renders no markup. Put <Lightbox /> once in any component that renders
+// LightboxLinks (GalleryGrid does); Astro bundles the script and the styles
+// once per page however many galleries there are.
+//
+// HOW IT WORKS. One delegated click listener on the document. A click on an
+// `a[data-lightbox]` (a LightboxLink) opens a native <dialog> as a modal, built
+// on first use. Its photos are every LightboxLink inside the same
+// `[data-lightbox-group]`, so a gallery steps through itself and nothing else.
+// A modified click (new tab, new window) is left to the browser.
+//
+//   - Caption and "3 of 8" under the photo, in a polite live region.
+//   - Arrow keys and swipes step; the ends wrap. Escape, the close button or a
+//     click on the dark surround closes.
+//   - showModal() makes the page behind inert; Tab and Shift+Tab are also kept
+//     to the viewer's own buttons (the trap), and focus goes back to the photo
+//     that opened it.
+//   - The fade is only there when the reader has not asked for reduced motion.
+//   - The page behind does not scroll while it is open.
+//
+// No dependency. The decisions (wrap, swipe, trap, counter) live in
+// src/lib/lightbox.ts, where node --test pins them; tests/lightbox.spec.ts
+// drives this file in a real browser.
+// =============================================================================
+---
+
+<script>
+  import { counterLabel, stepIndex, swipeStep, trapStep } from '@/lib/lightbox';
+
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  interface Viewer {
+    dialog: HTMLDialogElement;
+    img: HTMLImageElement;
+    text: HTMLElement;
+    count: HTMLElement;
+    close: HTMLButtonElement;
+    prev: HTMLButtonElement;
+    next: HTMLButtonElement;
+  }
+
+  let viewer: Viewer | null = null;
+  let items: HTMLAnchorElement[] = [];
+  let index = 0;
+  let opener: HTMLElement | null = null;
+  let restoreOverflow = '';
+
+  /** A 24px line icon. Paths only, so it inherits currentColor. */
+  function icon(d: string): SVGSVGElement {
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '24');
+    svg.setAttribute('height', '24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'currentColor');
+    path.setAttribute('stroke-width', '1.75');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    svg.append(path);
+    return svg;
+  }
+
+  function button(cls: string, label: string, d: string): HTMLButtonElement {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `lightbox__btn ${cls}`;
+    b.setAttribute('aria-label', label);
+    b.append(icon(d));
+    return b;
+  }
+
+  function build(): Viewer {
+    const dialog = document.createElement('dialog');
+    dialog.className = 'lightbox';
+    dialog.setAttribute('aria-label', 'Photo viewer');
+
+    const figure = document.createElement('figure');
+    figure.className = 'lightbox__figure';
+    const img = document.createElement('img');
+    img.className = 'lightbox__img';
+    img.decoding = 'async';
+    img.sizes = '100vw';
+    const caption = document.createElement('figcaption');
+    caption.className = 'lightbox__caption';
+    caption.setAttribute('aria-live', 'polite');
+    const text = document.createElement('span');
+    text.className = 'lightbox__text';
+    const count = document.createElement('span');
+    count.className = 'lightbox__count';
+    caption.append(text, count);
+    figure.append(img, caption);
+
+    const close = button('lightbox__close', 'Close photo viewer', 'M6 6l12 12M18 6L6 18');
+    const prev = button('lightbox__prev', 'Previous photo', 'M15 5l-7 7 7 7');
+    const next = button('lightbox__next', 'Next photo', 'M9 5l7 7-7 7');
+
+    // The order in the DOM is the Tab order: close first (where focus lands),
+    // then previous and next.
+    dialog.append(close, figure, prev, next);
+    document.body.append(dialog);
+
+    close.addEventListener('click', () => dialog.close());
+    prev.addEventListener('click', () => go(-1));
+    next.addEventListener('click', () => go(1));
+
+    // A click on the dark surround (the dialog itself, not the photo or a
+    // button) closes, unless the pointer just finished a swipe.
+    let downX = 0;
+    let downY = 0;
+    let swiped = false;
+    dialog.addEventListener('pointerdown', (e) => {
+      downX = e.clientX;
+      downY = e.clientY;
+      swiped = false;
+    });
+    dialog.addEventListener('pointerup', (e) => {
+      if (items.length < 2) return;
+      const step = swipeStep(e.clientX - downX, e.clientY - downY);
+      if (step !== 0) {
+        swiped = true;
+        go(step);
+      }
+    });
+    dialog.addEventListener('click', (e) => {
+      if (swiped) return;
+      const t = e.target as Element;
+      if (t === dialog || t === figure) dialog.close();
+    });
+
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        go(1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        go(-1);
+      } else if (e.key === 'Tab') {
+        const controls = [close, prev, next].filter((b) => !b.hidden);
+        const at = controls.indexOf(document.activeElement as HTMLButtonElement);
+        const to = trapStep(at, controls.length, e.shiftKey);
+        if (to >= 0) {
+          e.preventDefault();
+          controls[to].focus();
+        }
+      }
+    });
+
+    dialog.addEventListener('close', () => {
+      document.documentElement.style.overflow = restoreOverflow;
+      img.removeAttribute('src');
+      img.removeAttribute('srcset');
+      opener?.focus();
+      opener = null;
+    });
+
+    return { dialog, img, text, count, close, prev, next };
+  }
+
+  function show(i: number) {
+    if (!viewer) return;
+    index = stepIndex(i, 0, items.length);
+    const a = items[index];
+    const { img, text, count } = viewer;
+    img.classList.remove('is-ready');
+    img.onload = () => img.classList.add('is-ready');
+    img.alt = a.dataset.lightboxAlt ?? '';
+    // Set srcset before src so the browser picks from the ladder once.
+    if (a.dataset.lightboxSrcset) img.srcset = a.dataset.lightboxSrcset;
+    img.src = a.href;
+    if (img.complete) img.classList.add('is-ready');
+    text.textContent = a.dataset.lightboxCaption ?? '';
+    count.textContent = counterLabel(index, items.length);
+    // Warm the neighbours so a step does not wait on the network.
+    for (const d of [-1, 1]) {
+      const n = items[stepIndex(index, d, items.length)];
+      if (n && n !== a) {
+        const pre = new Image();
+        pre.sizes = '100vw';
+        if (n.dataset.lightboxSrcset) pre.srcset = n.dataset.lightboxSrcset;
+        pre.src = n.href;
+      }
+    }
+  }
+
+  function go(delta: number) {
+    if (items.length < 2) return;
+    show(index + delta);
+  }
+
+  function open(link: HTMLAnchorElement) {
+    const group = link.closest('[data-lightbox-group]') ?? document;
+    items = Array.from(group.querySelectorAll<HTMLAnchorElement>('a[data-lightbox]'));
+    viewer ??= build();
+    const single = items.length < 2;
+    viewer.prev.hidden = single;
+    viewer.next.hidden = single;
+    opener = link;
+    restoreOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    show(Math.max(0, items.indexOf(link)));
+    viewer.dialog.showModal();
+    viewer.close.focus();
+  }
+
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const link = (e.target as Element | null)?.closest?.('a[data-lightbox]');
+    if (!(link instanceof HTMLAnchorElement)) return;
+    // No <dialog> support (very old browsers): let the link open the photo.
+    if (typeof HTMLDialogElement !== 'function') return;
+    e.preventDefault();
+    open(link);
+  });
+</script>
