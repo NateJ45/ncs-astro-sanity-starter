@@ -122,6 +122,18 @@ export interface PostPhotoConfig {
   galleryTypes: string[];
   /** Where a gallery and its photos live. Default: pageBuilder / gallerySection / images / alt / caption. */
   gallery?: Partial<GallerySpec>;
+  /**
+   * Card 143: documents with a photo list of their own (a room story's gallery),
+   * offered as places for the photo beside the page galleries. Draft only, like the rest.
+   */
+  stories?: {
+    types: string[];
+    field?: string;
+    altField?: string;
+    captionField?: string | null;
+    /** "Room story": the word before each name in the list. */
+    noun?: string;
+  };
   /** A new post made from the photo, saved as a draft. Missing: galleries only. */
   post?: {
     /** "A new journal post", as the choice reads. */

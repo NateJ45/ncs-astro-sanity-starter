@@ -10153,6 +10153,12 @@ behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
 
 **Origin:** the Studio-look audit: toasts were plain text. **PORTABLE, changed:** `kit/ui/surfaces.tsx` (`KitToastBody`), `kit/ui/css.ts`, `kit/publishNote.tsx` (mini three stones after Publish), `kit/trash.tsx` (success toasts), `harness/Surfaces.tsx` (`part=toast`), `docs/agent/studio-kit.md`. Sites with their own look get their stones and fonts for free; nothing to configure.
 
+## Card 143: `postPhoto.stories`, photos onto a document's own list (2026-10-19)
+
+**Origin:** Reid Design's phone job "add photos to a room story that already exists": the photo list lives on the story itself, not in a page-builder gallery section, so Post a photo had nowhere to put it. Cards 139 to 142 belong to the Studio-look audit; this one is 143.
+
+**PORTABLE, changed:** `src/lib/photo-post.ts` (`StorySpec`, `storySpec`, `storyQuery`, `storyChoices`, `GalleryChoice.story`), `src/sanity/kit/PostPhoto.tsx` (lists the stories beside the galleries and writes to the draft's own list), `src/sanity/kit/types.ts` (`postPhoto.stories`), `photo-post.test.ts`, `docs/agent/studio-kit.md`. Config only; a site that sets no `stories` behaves as before.
+
 ## Card 141: Quick update's yes/no is a drawn switch (2026-10-19)
 
 **Origin:** mas-monograms reported the Quick update "Sold" checkbox was invisible in real Chrome. A native checkbox depends on the browser and on whatever form resets the Studio carries, so it can vanish.

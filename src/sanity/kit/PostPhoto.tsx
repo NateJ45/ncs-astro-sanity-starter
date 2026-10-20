@@ -36,6 +36,11 @@ import { UploadIcon } from '@sanity/icons/Upload';
 import {
   fitWithin,
   galleryChoices,
+  storyChoices,
+  storyQuery,
+  storySpec,
+  type GalleryDoc,
+  type StoryDoc,
   galleryPath,
   galleryQuery,
   gallerySpec,
@@ -144,6 +149,7 @@ async function addToGallery(
   spec: ReturnType<typeof gallerySpec>,
   choice: GalleryChoice,
   image: Record<string, unknown>,
+  storyField?: string,
 ): Promise<Saved> {
   const draftId = `drafts.${choice.docId}`;
   const [draft, published] = await Promise.all([
@@ -152,7 +158,7 @@ async function addToGallery(
   ]);
   const base = draft ?? published;
   if (!base) throw new Error('That page is not there any more.');
-  const path = galleryPath(spec, choice.sectionKey);
+  const path = choice.story && storyField ? storyField : galleryPath(spec, choice.sectionKey);
   const tx = client.transaction();
   if (!draft && published) {
     // Start the page's draft from the published copy, as the Studio does on a
@@ -168,7 +174,9 @@ async function addToGallery(
 
   // A gallery removed in the draft makes the patch a silent no-op: say so.
   const check = await client.fetch<number>(
-    `count(*[_id == $id][0].${spec.builderField}[_key == $section][0].${spec.field}[_key == $photo])`,
+    choice.story && storyField
+      ? `count(*[_id == $id][0].${storyField}[_key == $photo])`
+      : `count(*[_id == $id][0].${spec.builderField}[_key == $section][0].${spec.field}[_key == $photo])`,
     { id: draftId, section: choice.sectionKey, photo: image._key },
   );
   if (!check) throw new Error('That gallery is not on the page any more. Pick another one.');
@@ -180,6 +188,10 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
   const typeTitle = useTypeTitle();
   const linkTo = useStudioLink();
   const spec = useMemo(() => gallerySpec(config.gallery), [config.gallery]);
+  const stories = useMemo(
+    () => (config.stories ? storySpec(config.stories) : null),
+    [config.stories],
+  );
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -198,15 +210,28 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
   // The galleries, drafts included (a gallery added but not yet published shows).
   useEffect(() => {
     let live = true;
-    client
-      .withConfig({ perspective: 'drafts' })
-      .fetch(galleryQuery(spec), { types: config.galleryTypes })
-      .then((docs) => live && setChoices(galleryChoices(docs ?? [], typeTitle)))
+    const drafts = client.withConfig({ perspective: 'drafts' });
+    Promise.all([
+      config.galleryTypes.length
+        ? drafts.fetch<GalleryDoc[]>(galleryQuery(spec), { types: config.galleryTypes })
+        : Promise.resolve([] as GalleryDoc[]),
+      stories
+        ? drafts.fetch<StoryDoc[]>(storyQuery(stories), { types: stories.types })
+        : Promise.resolve([] as StoryDoc[]),
+    ])
+      .then(
+        ([docs, storyDocs]) =>
+          live &&
+          setChoices([
+            ...storyChoices(storyDocs ?? [], typeTitle, stories?.noun),
+            ...galleryChoices(docs ?? [], typeTitle),
+          ]),
+      )
       .catch(() => live && setChoices([]));
     return () => {
       live = false;
     };
-  }, [client, spec, config.galleryTypes, typeTitle]);
+  }, [client, spec, stories, config.galleryTypes, typeTitle]);
 
   useEffect(() => {
     if (!file) return setPreviewUrl(null);
@@ -246,7 +271,14 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
         contentType: prepared.type,
       });
       setStep('Saving the draft...');
-      const image = photoValue(spec, asset._id, alt, caption, key());
+      const chosen = choices?.find((c) => `${c.docId}:${c.sectionKey}` === target);
+      const image = photoValue(
+        chosen?.story && stories ? stories : spec,
+        asset._id,
+        alt,
+        caption,
+        key(),
+      );
       if (target === 'post' && config.post) {
         const { _key, ...cover } = image;
         void _key;
@@ -263,7 +295,7 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
       } else {
         const choice = choices?.find((c) => `${c.docId}:${c.sectionKey}` === target);
         if (!choice) throw new Error('Pick where the photo goes.');
-        setSaved(await addToGallery(client, spec, choice, image));
+        setSaved(await addToGallery(client, spec, choice, image, stories?.field));
       }
     } catch (err) {
       setFailed(

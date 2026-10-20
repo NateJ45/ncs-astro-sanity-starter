@@ -7,6 +7,9 @@ import {
   DEFAULT_GALLERY,
   fitWithin,
   galleryChoices,
+  storyChoices,
+  storyQuery,
+  storySpec,
   galleryPath,
   galleryQuery,
   gallerySpec,
@@ -95,6 +98,33 @@ describe('the galleries', () => {
         ['home', 'g1', 'Home: Sunday (12 photos)'],
         ['page-1', 'a', 'Youth: Gallery 1 (1 photo)'],
         ['page-1', 'b', 'Youth: Gallery 2 (0 photos)'],
+      ],
+    );
+  });
+});
+
+describe('stories with their own photo list (card 143)', () => {
+  it('names the list and its fields, and refuses odd names', () => {
+    const s = storySpec({ types: ['project'] });
+    assert.deepEqual([s.field, s.altField, s.captionField], ['gallery', 'alt', 'caption']);
+    assert.throws(() => storySpec({ types: ['project'], field: 'a.b' }));
+    assert.ok(storyQuery(s).includes('count(coalesce(gallery, []))'));
+  });
+  it('one choice per document, the draft winning, labelled with its photo count', () => {
+    const choices = storyChoices(
+      [
+        { _id: 'p1', _type: 'project', title: 'Old title', count: 3 },
+        { _id: 'drafts.p1', _type: 'project', title: 'New title', count: 4 },
+        { _id: 'p2', _type: 'project', title: '', count: 1 },
+      ],
+      () => 'Room story',
+      'Room story',
+    );
+    assert.deepEqual(
+      choices.map((c) => [c.docId, c.story, c.label]),
+      [
+        ['p1', true, 'Room story: New title (4 photos)'],
+        ['p2', true, 'Room story: Room story (1 photo)'],
       ],
     );
   });
