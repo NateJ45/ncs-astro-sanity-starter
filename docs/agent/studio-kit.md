@@ -934,6 +934,8 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 
 **Quick update on a wide pane (card 148).** The tile list is a grid (`auto-fill` from 300px) and an open form shows a "How this goes" rail (`.ui-quick__rail`, `LiveSteps`: Fill in, Save, On the website) beside it from 860px up. Under that width it is the phone layout: one column, no rail.
 
+**Helpers in the kit's callouts (card 149).** The writing helper's suggestion (`WritingHelp.tsx`) and the private-page password status (`PrivatePasswordInput.tsx`) are `KitNotice`s (note, tip, careful), so they take the site's stones and colours. Bench: `part=helpers`.
+
 **Still to do** (`docs/PENDING.md`): the sign-in heading (blocked in sanity 6.19; see "The edges" above). The field
 "How to" chip landed with card 134 (below).
 
