@@ -14,6 +14,7 @@ import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnv } from './lib/loadEnv.mjs';
+import { snapshotClientOptions } from './snapshot.mjs';
 import { readBrandConfig, resolveSiteIdentity } from './lib/site-identity.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -42,6 +43,8 @@ const client = createClient({
   useCdn: !readToken,
   perspective: 'published',
   ...(readToken ? { token: readToken } : {}),
+  // CI reads a pinned snapshot (PORTS.md card 138); empty unless SANITY_SNAPSHOT_URL is set.
+  ...snapshotClientOptions(process.env),
 });
 
 /** Flatten Portable Text blocks into plain text (paragraphs separated by blank lines). */

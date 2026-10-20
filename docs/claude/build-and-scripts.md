@@ -37,3 +37,15 @@ Standalone scripts:
 - A note on `npx sanity build`: it writes to `./dist` by default, which would clobber the Astro build. The Studio is built by `astro build`, so there is no `studio:build` script. If you ever need a standalone bundle, pass an output dir: `npx sanity build .studio-dist`.
 
 `public/og-default.png` is committed to the repo because it is a real asset shipped to visitors.
+
+## CI builds from a pinned content snapshot (PORTS.md card 138)
+
+A client edit in the Studio (renaming a page slug, retitling, moving a nav item, adding or removing a page) must never turn CI red or block a merge or a deploy. So CI never reads the live dataset. `scripts/snapshot.mjs` (PORTABLE) does three things:
+
+- `node scripts/snapshot.mjs export` writes the published documents to `ci/sanity-snapshot.ndjson.gz` (read-only against Sanity; the policy's `blockedTypes` are refused). Commit the result. Run it on purpose, when the content has moved and you are ready to update whatever names a page.
+- `node scripts/snapshot.mjs run -- <command>` starts a local query server (groq-js, 127.0.0.1) over that file, sets `SANITY_SNAPSHOT_URL`, runs the command, stops the server. The same wrapper is how you reproduce CI locally: `node scripts/snapshot.mjs run -- npm run build`. With no snapshot and no Sanity project (the template) it just runs the command.
+- `serve` runs the server alone.
+
+Every build-time Sanity read honours `SANITY_SNAPSHOT_URL`: `src/lib/sanity.ts`, the `cmsQuery` in `astro.config.mjs` (redirects), and the build scripts that call `createClient` (spread `snapshotClientOptions(process.env)`). Unset (deploys, dev, one-off scripts) they read the live dataset as before. `deploy.yml` never uses the snapshot: production always builds live. Images stay on cdn.sanity.io.
+
+The snapshot covers documents only, so a test that names a page is stable until someone refreshes it; the refresh is a PR of ours, and that is the moment the tests that name the page are updated. The other half is `live-watch.yml` (`scripts/live-watch.mjs`, scheduled, not required, never on a PR): it crawls the LIVE sitemap and reports pages that are not 200, lack a title or h1, or are linked but 404, so a redirect lost to a rename is found without ever blocking a merge. Both CI shapes keep the required `build` and `test` job names.

@@ -1,5 +1,5 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
-// scripts/check-studio-look.mjs (PORTS.md card 138): `npm run check:look`.
+// scripts/check-studio-look.mjs (PORTS.md card 139): `npm run check:look`.
 // Warns when a site's brand/brand.config.json `studio.look` still has the starter's
 // neutral marker, stone, colours or connector. Never fails the run unless --strict.
 // Run through node --experimental-strip-types so it can read the tested TS.

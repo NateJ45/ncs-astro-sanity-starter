@@ -255,8 +255,9 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 135 | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
 | 136 | Visitors card reads GA4 via studio-status; Search Console card on Home         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 137 | Spotlight tours, welcome, What's new, own clips, Quick update jobs as data     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 138 | Warn when a site's `studio.look` is still the neutral marker and stone         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 139 | Success toasts carry the Is-it-live stones (KitToastBody)                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 138 | CI builds from a pinned content snapshot; scheduled live-watch (non-blocking)  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 139 | Warn when a site's `studio.look` is still the neutral marker and stone         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 140 | Success toasts carry the Is-it-live stones (KitToastBody)                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10103,7 +10104,41 @@ harness cannot open signed out. docs/PENDING.md item 32.
 **Applied to:** ncs-astro-sanity-starter (canonical), first-baptist-auburn (branch `feat/tours-videos`, 2026-10-19; a
 minimal config, the site agent writes Auburn's own).
 
-## Card 138: `npm run check:look`, a warning for a Studio still in the neutral look (2026-10-19)
+## Card 138: CI builds from a pinned content snapshot, and a scheduled live-watch checks the real site (2026-10-19)
+
+**Origin:** the church (fbcm) renamed its Staff page slug to `ministers` in the Studio. fbcm CI built against the LIVE
+dataset and its tests named `/staff`, so `build`, `test`, the e2e shards and the link check all went red on a docs-only
+PR. Sites are handed to clients; an editor renaming a page must never turn CI red or block a merge or a deploy. fbcm's
+earlier attempt (rewriting 24 specs to be content-agnostic plus an `@content` watch) was set aside: it touches every test
+in every repo and still reads live content. Pinning the content removes the coupling for all of them at once.
+
+**PORTABLE, new:** `scripts/snapshot.mjs` (`export`, `serve`, `run -- <cmd>`; a groq-js query server over a committed
+`ci/sanity-snapshot.ndjson.gz`, answering `/v<ver>/data/query/<dataset>` GET and POST; `snapshotClientOptions(env)`),
+`scripts/lib/snapshot.test.mjs`, `scripts/live-watch.mjs`, `.github/workflows/live-watch.yml`. `groq-js` 2.0.0 is a
+devDependency (already in the tree through `sanity`; pinned to that version).
+
+**Per site, not portable:** `ci/sanity-snapshot.ndjson.gz` (the data); a one-line spread in `src/lib/sanity.ts`
+(`snapshotUrl`), in `cmsQuery` of `astro.config.mjs` where it exists, and in every build-time script that calls
+`createClient`; `ci.yml`, `lighthouse.yml`, `visual.yml` wrap their build in `node scripts/snapshot.mjs run --`;
+the `SITE_URL` repo variable and the `live-watch.yml` schedule; `CLAUDE.md` / tests rules and the test inventory.
+
+**What it changes.** CI reads the published documents as of the last `export`, through a local server, with no token and
+no network to Sanity for documents. `deploy.yml` is untouched: production builds live. Required checks keep their names;
+nothing in the shape of `ci.yml` changes except the build command. A tests-name-a-page fixture is now stable until the
+snapshot is refreshed, and the refresh is a deliberate PR of ours. `live-watch` is the replacement for noticing a break:
+daily, not required, never on a PR, and a red scheduled run mails the owner.
+
+**Gates.** `scripts/lib/snapshot.test.mjs` (options, ndjson, params, a GET and POST round trip, a bad query is a 400).
+Proof per site: build from the snapshot, then `npm run parity compare` where a parity baseline exists, and a throwaway
+rename (snapshot copy with a page slug changed in the editor's way) that leaves `build` and `test` green.
+
+**Not covered, and why:** images and files are still fetched from cdn.sanity.io (a deleted asset could 404 in a
+screenshot test); the snapshot can go stale, which only matters when a deliberate refresh is needed; Studio-side
+behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
+
+**Applied to:** ncs-astro-sanity-starter (canonical).
+
+## Card 139: `npm run check:look`, a warning for a Studio still in the neutral look (2026-10-19)
 
 **Origin:** the Studio-look audit (2026-10-18) found the kit's design language (cards 128, 131, 132) already complete in the starter, so the one missing piece was a nudge: a new site that keeps the dot marker and round stones has not given its Studio a character of its own.
 
@@ -10111,6 +10146,6 @@ minimal config, the site agent writes Auburn's own).
 
 **Adopting:** copy the three files, add the `check:look` script to package.json, run it once. Sites that already name their devices (Auburn) print the quiet line.
 
-## Card 139: toasts in the site's voice (2026-10-19)
+## Card 140: toasts in the site's voice (2026-10-19)
 
 **Origin:** the Studio-look audit: toasts were plain text. **PORTABLE, changed:** `kit/ui/surfaces.tsx` (`KitToastBody`), `kit/ui/css.ts`, `kit/publishNote.tsx` (mini three stones after Publish), `kit/trash.tsx` (success toasts), `harness/Surfaces.tsx` (`part=toast`), `docs/agent/studio-kit.md`. Sites with their own look get their stones and fonts for free; nothing to configure.

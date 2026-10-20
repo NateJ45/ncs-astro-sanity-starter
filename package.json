@@ -117,6 +117,7 @@
     "@typescript-eslint/parser": "^8.71.2",
     "eslint": "^10.12.0",
     "eslint-plugin-astro": "^3.2.1",
+    "groq-js": "2.0.0",
     "http-server": "^14.1.1",
     "linkinator": "^8.1.0",
     "opentype.js": "^2.0.0",

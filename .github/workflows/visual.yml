@@ -97,10 +97,12 @@ jobs:
           PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
           PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
         run: |
+          # The webServer builds the site, so the whole run sits inside the
+          # snapshot wrapper (PORTS.md card 138).
           if [ "${{ inputs.update }}" = "true" ]; then
-            npm run test:visual:update
+            node scripts/snapshot.mjs run -- npm run test:visual:update
           else
-            npm run test:visual
+            node scripts/snapshot.mjs run -- npm run test:visual
           fi
 
       # On a check run this is the evidence of what moved. On an update run it

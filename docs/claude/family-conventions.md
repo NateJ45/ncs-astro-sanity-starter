@@ -22,6 +22,7 @@ does not make it cheaper.
 ## Working with Claude
 
 - Use Claude Code from the desktop app, not the terminal. Show diffs clearly so they read well in that UI.
+- CI never reads live content (PORTS.md card 138): the build, Playwright shards, Lighthouse and visual runs all go through `node scripts/snapshot.mjs run -- <cmd>`, which serves the committed `ci/sanity-snapshot.ndjson.gz`. A client renaming a page in the Studio cannot turn a check red. Refresh the snapshot deliberately (`node scripts/snapshot.mjs export`) and update whatever names a page in the same PR. The scheduled `live-watch.yml` checks the real site and blocks nothing.
 - Prefer Plan Mode for any multi-file change, especially when touching Sanity schemas (schema changes propagate to live content).
 - Pause for confirmation before installing new dependencies.
 - When proposing design changes, describe the visual outcome in plain language, not just the code.

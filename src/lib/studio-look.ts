@@ -773,7 +773,7 @@ export function lookInput(brand: unknown): StudioLookInput | undefined {
 }
 
 /**
- * Card 138: a site that ships the starter's neutral marker and stone unchanged
+ * Card 139: a site that ships the starter's neutral marker and stone unchanged
  * has not given its Studio a character of its own. Returns one plain sentence
  * per device still on the default (marker, stone, connector, motion, mark
  * colours), or nothing when the site has settled its own. A warning, never an

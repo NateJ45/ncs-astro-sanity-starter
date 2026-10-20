@@ -257,7 +257,7 @@ describe('calm stones (card 132)', () => {
   });
 });
 
-describe('studio look: neutral warnings (card 138)', () => {
+describe('studio look: neutral warnings (card 139)', () => {
   it('flags every neutral device in an empty look', () => {
     assert.equal(neutralLookWarnings(undefined).length, 4);
   });
