@@ -10206,3 +10206,7 @@ behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
 ## Card 149: the AI suggestion and the password status in the kit's callouts (2026-10-20)
 
 **Origin:** the Studio-look audit. Both were plain Sanity UI cards with a stock tone. **PORTABLE, changed:** `sanity/ai/WritingHelp.tsx` (the suggestion is a `KitNotice` "A suggestion", the editable text and its three buttons inside it), `sanity/components/PrivatePasswordInput.tsx` (the status is a `KitNotice`: tip when a password is set, careful when not, with a title that says it), `kit/harness/Surfaces.tsx` (`part=helpers`), `docs/agent/studio-kit.md`. Behaviour unchanged.
+
+## Card 150: Quick update tiles keep their colour edge at the top (2026-10-20)
+
+**Origin:** a signed-in look at fbcm's Quick update showed the gold edge of some tiles sitting 3px or 14px below the card's top while its neighbours sat flush. The tile is a `<button>`, and a button centres its content vertically, so in a row where one tile's text is shorter the whole inside (edge and all) slid down by half the spare height; measured: edge offsets of 1, 3 and 14px on nine equal-height tiles. **PORTABLE, changed:** `kit/ui/css.ts` (`.ui-tile` is a flex column that starts at the top, the edge does not shrink, the inside takes the rest), `docs/agent/studio-kit.md`. No config, no markup change; links (`a.ui-tile`) are unaffected.

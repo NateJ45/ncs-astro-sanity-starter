@@ -261,10 +261,10 @@ export const UI_CSS = `
 .ncs-ui .ui-live--compact .ui-state--now::after{inset:-3px;border-width:1.5px}
 
 /* Quick update tiles and the done screen */
-.ncs-ui .ui-tile{position:relative;display:block;width:100%;padding:0;overflow:hidden;text-align:left;font:inherit;color:inherit;cursor:pointer;background:var(--ui-surface);border:1px solid var(--ui-rule);border-radius:var(--ui-radius);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
-.ncs-ui .ui-tile>.ui-edge{display:block}
+.ncs-ui .ui-tile{position:relative;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;width:100%;padding:0;overflow:hidden;text-align:left;font:inherit;color:inherit;cursor:pointer;background:var(--ui-surface);border:1px solid var(--ui-rule);border-radius:var(--ui-radius);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.ncs-ui .ui-tile>.ui-edge{display:block;flex:none}
 .ncs-ui a.ui-tile:not([data-ui]){color:inherit;text-decoration:none}
-.ncs-ui .ui-tile__in{display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;align-items:start;padding:18px 20px 20px;min-height:96px}
+.ncs-ui .ui-tile__in{flex:1 1 auto;display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;align-items:start;padding:18px 20px 20px;min-height:96px}
 .ncs-ui .ui-tile__title{display:block;font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:22px;line-height:1.2;color:var(--ui-heading);text-wrap:balance}
 .ncs-ui .ui-tile__lead{display:block;margin-top:5px;font-size:15px;line-height:1.5;color:var(--ui-muted)}
 .ncs-ui .ui-tile:hover{transform:translateY(-2px);box-shadow:0 12px 26px -16px rgb(0 0 0 / .4);border-color:var(--ui-heading)}
