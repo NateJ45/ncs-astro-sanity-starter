@@ -49,8 +49,17 @@ import {
 } from '../../lib/studio-quick-jobs';
 import { API_VERSION, PUBLISHED_EVENT, ToolHeading, useStaffView, useStudioLink } from './shared';
 import { TourButton } from './StudioTour';
-import { DoneCard, KitAction, KitNotice, KitScope, KitSwitch, TileCard } from './ui';
-import { liveSteps } from '../../lib/studio-look';
+import {
+  DoneCard,
+  KitAction,
+  KitBox,
+  KitNotice,
+  KitScope,
+  KitSwitch,
+  LiveSteps,
+  TileCard,
+} from './ui';
+import { liveSteps, type StepState } from '../../lib/studio-look';
 import type { KitConfig, QuickField, QuickForm } from './types';
 
 const INPUT_TYPE: Partial<Record<QuickField['kind'], string>> = {
@@ -468,89 +477,111 @@ function QuickFormView({ form: given, onBack }: { form: QuickForm; onBack: () =>
         ? 'Save it for that time'
         : 'Put it on the website');
 
+  // Card 148: on a wide pane the form has a rail beside it showing where it goes.
+  const railStates: StepState[] = busy ? ['done', 'now', 'todo'] : ['now', 'todo', 'todo'];
+
   return (
-    <Stack gap={5}>
-      <Flex>
-        <Button
-          icon={ArrowLeftIcon}
-          text="Back"
-          mode="bleed"
-          fontSize={2}
-          padding={3}
-          onClick={onBack}
-        />
-      </Flex>
-      <Stack gap={3}>
-        <Text as="h2" size={4} weight="semibold">
-          {form.title}
-        </Text>
-        {form.detail && (
-          <Text size={2} muted style={{ lineHeight: 1.6 }}>
-            {form.detail}
-          </Text>
-        )}
-      </Stack>
-      {needsPick ? (
-        <PickList
-          pick={needsPick}
-          onPick={(id) => {
-            setLoading(true);
-            setPicked(id);
-          }}
-        />
-      ) : loading ? (
-        <Text size={2} muted>
-          Getting what is there now...
-        </Text>
-      ) : (
-        <>
-          {job?.kind === 'toggle' && (
-            <KitScope>
-              <KitNotice
-                tone={isOn ? 'tip' : 'plain'}
-                title={isOn ? (job.onLabel ?? 'It is on') : (job.offLabel ?? 'It is off')}
-              >
-                {isOn ? 'Press the button to turn it off.' : 'Press the button to turn it on.'}
-              </KitNotice>
-            </KitScope>
-          )}
-          {fields.map((f) => (
-            <FieldInput
-              key={f.name}
-              field={f}
-              value={values[f.name] ?? ''}
-              error={errors[f.name]}
-              onChange={(v) => setValues((old) => ({ ...old, [f.name]: v }))}
-              onFile={(file) => {
-                setFiles((old) => {
-                  const next = { ...old };
-                  if (file) next[f.name] = file;
-                  else delete next[f.name];
-                  return next;
-                });
-                setValues((old) => ({ ...old, [f.name]: file?.name ?? '' }));
-              }}
+    <div className="ui-quick-wrap">
+      <div className="ui-quick">
+        <div className="ui-quick__form">
+          <Stack gap={5}>
+            <Flex>
+              <Button
+                icon={ArrowLeftIcon}
+                text="Back"
+                mode="bleed"
+                fontSize={2}
+                padding={3}
+                onClick={onBack}
+              />
+            </Flex>
+            <Stack gap={3}>
+              <Text as="h2" size={4} weight="semibold">
+                {form.title}
+              </Text>
+              {form.detail && (
+                <Text size={2} muted style={{ lineHeight: 1.6 }}>
+                  {form.detail}
+                </Text>
+              )}
+            </Stack>
+            {needsPick ? (
+              <PickList
+                pick={needsPick}
+                onPick={(id) => {
+                  setLoading(true);
+                  setPicked(id);
+                }}
+              />
+            ) : loading ? (
+              <Text size={2} muted>
+                Getting what is there now...
+              </Text>
+            ) : (
+              <>
+                {job?.kind === 'toggle' && (
+                  <KitScope>
+                    <KitNotice
+                      tone={isOn ? 'tip' : 'plain'}
+                      title={isOn ? (job.onLabel ?? 'It is on') : (job.offLabel ?? 'It is off')}
+                    >
+                      {isOn
+                        ? 'Press the button to turn it off.'
+                        : 'Press the button to turn it on.'}
+                    </KitNotice>
+                  </KitScope>
+                )}
+                {fields.map((f) => (
+                  <FieldInput
+                    key={f.name}
+                    field={f}
+                    value={values[f.name] ?? ''}
+                    error={errors[f.name]}
+                    onChange={(v) => setValues((old) => ({ ...old, [f.name]: v }))}
+                    onFile={(file) => {
+                      setFiles((old) => {
+                        const next = { ...old };
+                        if (file) next[f.name] = file;
+                        else delete next[f.name];
+                        return next;
+                      });
+                      setValues((old) => ({ ...old, [f.name]: file?.name ?? '' }));
+                    }}
+                  />
+                ))}
+              </>
+            )}
+            {failed && (
+              <KitScope>
+                <KitNotice tone="careful" title="That did not save">
+                  Check your connection and press the button again.
+                </KitNotice>
+              </KitScope>
+            )}
+            <Button
+              text={busy ? 'Saving...' : submitText}
+              tone="primary"
+              fontSize={2}
+              padding={4}
+              disabled={busy || loading || Boolean(needsPick)}
+              onClick={() => void submit()}
+              data-tour="quick-submit"
             />
-          ))}
-        </>
-      )}
-      {failed && (
-        <KitScope>
-          <KitNotice tone="careful" title="That did not save">
-            Check your connection and press the button again.
-          </KitNotice>
-        </KitScope>
-      )}
-      <Button
-        text={busy ? 'Saving...' : submitText}
-        tone="primary"
-        fontSize={2}
-        padding={4}
-        disabled={busy || loading || Boolean(needsPick)}
-        onClick={() => void submit()}
-        data-tour="quick-submit"
-      />
-    </Stack>
+          </Stack>
+        </div>
+        <aside className="ui-quick__rail" aria-label="How this goes">
+          <KitScope>
+            <KitBox title="How this goes" meaning="post">
+              <LiveSteps states={railStates} words={['Fill in', 'Save', 'On the website']} />
+              <p className="ui-muted" style={{ marginTop: 12 }}>
+                Nothing changes for visitors until you press the button. Then the website updates
+                itself in a few minutes.
+              </p>
+            </KitBox>
+          </KitScope>
+        </aside>
+      </div>
+    </div>
   );
 }
 
@@ -565,7 +596,10 @@ export function makeQuickUpdateTool(config: KitConfig) {
     const shown = forms.filter((f) => inSeason(f.when, new Date()));
     return (
       <Box padding={[3, 4, 5]} style={{ overflowY: 'auto', height: '100%' }}>
-        <Stack gap={5} style={{ maxWidth: 560, margin: '0 auto' }}>
+        <Stack
+          gap={5}
+          style={{ maxWidth: open === 'photo' ? 560 : open ? 1040 : 1200, margin: '0 auto' }}
+        >
           {open === 'photo' && photo ? (
             <PostPhoto config={photo} onBack={() => setOpen(null)} />
           ) : open && open !== 'photo' ? (
@@ -582,7 +616,14 @@ export function makeQuickUpdateTool(config: KitConfig) {
               </ToolHeading>
               <TourButton tool="quick-update" staff={staffView} />
               <KitScope>
-                <div style={{ display: 'grid', gap: 14 }} data-tour="quick-list">
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: 14,
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
+                  }}
+                  data-tour="quick-list"
+                >
                   {photo && (
                     <TileCard
                       dataQuick="post-photo"

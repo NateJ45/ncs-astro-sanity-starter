@@ -932,6 +932,8 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 
 **Checkup in columns (card 147).** `CheckupView` shows a `LevelSummary` strip (counts per level) and the levels as columns (`.ui-checkup`, `auto-fill` from 340px), so a wide pane is used and a phone gets one column. Bench: `part=checkup`.
 
+**Quick update on a wide pane (card 148).** The tile list is a grid (`auto-fill` from 300px) and an open form shows a "How this goes" rail (`.ui-quick__rail`, `LiveSteps`: Fill in, Save, On the website) beside it from 860px up. Under that width it is the phone layout: one column, no rail.
+
 **Still to do** (`docs/PENDING.md`): the sign-in heading (blocked in sanity 6.19; see "The edges" above). The field
 "How to" chip landed with card 134 (below).
 
