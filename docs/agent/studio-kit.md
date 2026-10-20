@@ -941,15 +941,15 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 
 ### Part two (card 132)
 
-| Piece       | What it is                                                                                | Where it is used                                  |
-| ----------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `DateBlock` | the month in small caps over the day in the display font, inside a stone outline          | Home's Coming up and RSVP rows                    |
-| `ArtRow(s)` | a list row: the type's art on a small stone (or a `lead`), title, muted line, tag, action | Recent edits, Pick up, Coming up, the newsletter  |
-| `Figure`    | a headline number in the display font with its words                                      | Visitors, newsletter subscribers, CollectionIntro |
-| `MarkBars`  | bars in the calm mark colours, each with its number in words                              | Visitors                                          |
-| `StepTrail` | named steps across: laid, ringed, waiting (`LiveSteps` with one column per word)          | Post a photo, the tour                            |
-| `TileCard`  | now takes `href` (a real link) as well as `onClick`; art top left, 52px (card 133)        | Home's ways in, Quick update                      |
-| `TileCard`  | the tile is a flex column that starts at the top, so a `<button>` tile no longer centres its inside and drops the colour edge below the card top (card 150) | Home's ways in, Quick update |
+| Piece       | What it is                                                                                                                                                  | Where it is used                                  |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `DateBlock` | the month in small caps over the day in the display font, inside a stone outline                                                                            | Home's Coming up and RSVP rows                    |
+| `ArtRow(s)` | a list row: the type's art on a small stone (or a `lead`), title, muted line, tag, action                                                                   | Recent edits, Pick up, Coming up, the newsletter  |
+| `Figure`    | a headline number in the display font with its words                                                                                                        | Visitors, newsletter subscribers, CollectionIntro |
+| `MarkBars`  | bars in the calm mark colours, each with its number in words                                                                                                | Visitors                                          |
+| `StepTrail` | named steps across: laid, ringed, waiting (`LiveSteps` with one column per word)                                                                            | Post a photo, the tour                            |
+| `TileCard`  | now takes `href` (a real link) as well as `onClick`; art top left, 52px (card 133)                                                                          | Home's ways in, Quick update                      |
+| `TileCard`  | the tile is a flex column that starts at the top, so a `<button>` tile no longer centres its inside and drops the colour edge below the card top (card 150) | Home's ways in, Quick update                      |
 
 - **Done means calm.** `look.<scheme>.calm` lists the stones that may say "done": every mark colour except one within
   28 degrees of the careful hue (`calmStones()`, tested). `StateStone calm`, `LiveSteps`, `AllClear` and `MarkBars`
