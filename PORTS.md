@@ -10136,7 +10136,9 @@ rename (snapshot copy with a page slug changed in the editor's way) that leaves 
 screenshot test); the snapshot can go stale, which only matters when a deliberate refresh is needed; Studio-side
 behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
 
-**Applied to:** ncs-astro-sanity-starter (canonical).
+**Follow-up (2026-10-19):** `live-watch.mjs` treats a missing `<h1>` as a warning, not a failure. The first live run on fbcm found `/visitor/` without one, and a daily red run for a nicety would have been muted.
+
+**Applied to:** ncs-astro-sanity-starter (canonical), stonesteps-50k, reid-design-site, fbcm (2026-10-19). Measured and not coupled (CI already builds on the empty placeholder, nothing to pin): presacademy, mas-monograms, first-baptist-auburn (only its non-required visual workflow reads live ids).
 
 ## Card 139: `npm run check:look`, a warning for a Studio still in the neutral look (2026-10-19)
 

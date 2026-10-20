@@ -10,7 +10,7 @@
 //   node scripts/live-watch.mjs https://www.example.com
 //
 // It reads /sitemap-index.xml (or /sitemap.xml), fetches every page, and reports
-// any that are not 200, or that have no <title> or <h1>. It also follows each
+// any that are not 200 or have no <title> (a missing <h1> is only a warning, so the run does not cry wolf). It also follows each
 // page's same-site links one hop and reports links that are 404. Exit 1 when
 // anything is wrong, so a SCHEDULED workflow run goes red and GitHub mails the
 // owner. It never runs on a pull request and blocks no merge or deploy. A
@@ -59,6 +59,7 @@ const pages = [...new Set(map.map((u) => new URL(u).pathname))];
 console.log(`live-watch: ${pages.length} pages from the sitemap at ${origin}`);
 
 const problems = [];
+const warnings = [];
 const links = new Map(); // path -> first page that links to it
 const pool = async (items, n, fn) => {
   let i = 0;
@@ -73,7 +74,7 @@ await pool(pages, 8, async (path) => {
   const r = await get(origin + path);
   if (r.status !== 200) return problems.push(`${r.status || 'ERR'}  ${path}  (in the sitemap)`);
   if (!/<title>[^<]+<\/title>/i.test(r.text)) problems.push(`no <title>  ${path}`);
-  if (!/<h1[\s>]/i.test(r.text)) problems.push(`no <h1>  ${path}`);
+  if (!/<h1[\s>]/i.test(r.text)) warnings.push(`no <h1>  ${path}`);
   for (const m of r.text.matchAll(/<a\s[^>]*href="([^"#?]+)[^"]*"/gi)) {
     const href = m[1];
     if (!href.startsWith('/') || href.startsWith('//') || /\.[a-z0-9]{2,5}$/i.test(href)) continue;
@@ -90,6 +91,7 @@ await pool(toCheck, 8, async (path) => {
     problems.push(`${r.status || 'ERR'}  ${path}  (linked from ${links.get(path)})`);
 });
 
+for (const w of warnings.sort()) console.warn(`  warning: ${w}`);
 if (problems.length) {
   console.error(`live-watch: ${problems.length} problem(s) on ${origin}`);
   for (const p of problems.sort()) console.error(`  ${p}`);
