@@ -52,7 +52,7 @@ import {
   useValidationStatus,
   useWorkspace,
 } from 'sanity';
-import { Box, Button, Dialog, Flex, Grid, Stack, Text } from '@sanity/ui';
+import { Box, Button, Dialog, Flex, Stack, Text } from '@sanity/ui';
 import { useToast } from '@sanity/ui/toast';
 import {
   checklist,
@@ -587,114 +587,133 @@ export function makeHomeTool(config: KitConfig) {
 
     return (
       <Box padding={[4, 4, 5]} style={{ overflowY: 'auto', height: '100%' }}>
-        <Stack gap={5} style={{ maxWidth: 1040, margin: '0 auto' }}>
-          <div data-tour="home-banner">
-            <Welcome config={config} />
-          </div>
-
-          {/* Card 132: the quick actions and the ways in, as job tiles. */}
-          <div data-tour="home-quick-actions">
-            <QuickTiles tiles={tiles} />
-          </div>
-
-          <PickUp ignoreTypes={ignore} />
-
-          <Grid gridTemplateColumns={[1, 1, 2]} gap={4} style={{ alignItems: 'start' }}>
-            {config.thisWeek.length > 0 && (
-              <ThisWeek
-                tasks={config.thisWeek}
-                firstDay={config.weekStartsOn}
-                title={config.thisWeekTitle ?? 'This week'}
-                checkupResults={config.features.checkup ? checkup.results : null}
-              />
-            )}
-            <IsItLive slowAfter={config.liveSlowAfterMinutes} helperName={config.helper.name} />
-            {config.features.checkup && (
-              <FixItList results={checkup.results} failed={checkup.failed} />
-            )}
-            {config.features.comingUp !== false && scheduledTypes.length > 0 && (
-              <ComingUp types={scheduledTypes}>{config.features.mail && <RsvpComingUp />}</ComingUp>
-            )}
-            {config.features.mail && <NewsletterCard helperName={config.helper.name} />}
-            <RecentEdits ignoreTypes={ignore} />
-            <Panel title={`Ask ${config.helper.name}`} meaning="message" tour="home-ask">
-              <Quiet>
-                Stuck, or something looks wrong? Say what you were trying to do and what happened.
-                Nothing is ever lost by asking.
-              </Quiet>
-              {ask && (
-                <Flex paddingTop={3}>
-                  <KitAction href={ask}>{`Email ${config.helper.name}`}</KitAction>
-                </Flex>
-              )}
-            </Panel>
-          </Grid>
-
-          <Visitors enabled={config.features.visitors} helperName={config.helper.name} />
-
-          {pages.length > 0 && <PagesMap groups={pages} />}
-
-          {config.features.guide && config.guide.guides.some(hasVideo) && (
-            <Panel title="Watch how it is done" meaning="preview" tour="home-videos">
-              <GuideVideos
-                guides={config.guide.guides}
-                max={3}
-                footer={(hidden) =>
-                  hidden > 0 ? (
-                    <Flex>
-                      <KitAction quiet href={guide.href} onClick={guide.onClick}>
-                        {`${hidden} more in the Site Guide`}
-                      </KitAction>
-                    </Flex>
-                  ) : null
-                }
-              />
-            </Panel>
-          )}
-
-          {/* Card 132: the help line and the switches as the kit's quiet links. */}
-          <KitScope>
-            <div style={{ display: 'grid', gap: 14 }} data-tour="home-help">
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-                <span className="ui-muted">Need help?</span>
-                {config.features.guide && (
-                  <KitAction href={guide.href} onClick={guide.onClick}>
-                    Site Guide
-                  </KitAction>
-                )}
-                {config.features.guide && <span className="ui-muted">or</span>}
-                {ask ? (
-                  <KitAction href={ask}>{`Ask ${config.helper.name}`}</KitAction>
-                ) : (
-                  <span className="ui-muted">{`Ask ${config.helper.name}`}</span>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
-                {/* Card 137: the person's first-run tour, this screen's, and the changelog. */}
-                {config.features.tour && (
-                  <KitAction quiet onClick={() => startTour()}>
-                    Show me around
-                  </KitAction>
-                )}
-                {config.features.tour && <TourButton tool="home" staff={staffView} />}
-                {config.features.tour && config.whatsNew?.length ? (
-                  <KitAction quiet onClick={() => window.dispatchEvent(new Event(WHATS_NEW_EVENT))}>
-                    What&apos;s new
-                  </KitAction>
-                ) : null}
-                {staffView ? (
-                  <KitAction quiet onClick={() => (overridden ? reset() : switchTo('full'))}>
-                    Show the full Studio
-                  </KitAction>
-                ) : (
-                  <KitAction quiet onClick={() => (overridden ? reset() : switchTo('staff'))}>
-                    See the staff view
-                  </KitAction>
-                )}
-              </div>
+        {/* Card 145: a dashboard. The banner and the ways in run across the top; on a wide pane
+            the status (Is it live, the Checkup, this week) sits in a rail at the right and the
+            rest of Home in the main column; on a phone the status comes first, then the rest. */}
+        <div className="ui-dash-wrap">
+          <div className="ui-dash">
+            <div className="ui-dash__banner" data-tour="home-banner">
+              <Welcome config={config} />
             </div>
-          </KitScope>
-        </Stack>
+
+            <div className="ui-dash__tiles" data-tour="home-quick-actions">
+              <QuickTiles tiles={tiles} />
+            </div>
+
+            <aside className="ui-dash__rail" aria-label="Where things stand">
+              <IsItLive slowAfter={config.liveSlowAfterMinutes} helperName={config.helper.name} />
+              {config.features.checkup && (
+                <FixItList results={checkup.results} failed={checkup.failed} />
+              )}
+              {config.thisWeek.length > 0 && (
+                <ThisWeek
+                  tasks={config.thisWeek}
+                  firstDay={config.weekStartsOn}
+                  title={config.thisWeekTitle ?? 'This week'}
+                  checkupResults={config.features.checkup ? checkup.results : null}
+                />
+              )}
+              <Panel title={`Ask ${config.helper.name}`} meaning="message" tour="home-ask">
+                <Quiet>
+                  Stuck, or something looks wrong? Say what you were trying to do and what happened.
+                  Nothing is ever lost by asking.
+                </Quiet>
+                {ask && (
+                  <Flex paddingTop={3}>
+                    <KitAction href={ask}>{`Email ${config.helper.name}`}</KitAction>
+                  </Flex>
+                )}
+              </Panel>
+            </aside>
+
+            <div className="ui-dash__main">
+              <div className="ui-dash__wide">
+                <PickUp ignoreTypes={ignore} />
+              </div>
+              {config.features.comingUp !== false && scheduledTypes.length > 0 && (
+                <ComingUp types={scheduledTypes}>
+                  {config.features.mail && <RsvpComingUp />}
+                </ComingUp>
+              )}
+              {config.features.mail && <NewsletterCard helperName={config.helper.name} />}
+              <RecentEdits ignoreTypes={ignore} />
+              <div className="ui-dash__wide">
+                <Visitors enabled={config.features.visitors} helperName={config.helper.name} />
+              </div>
+              {pages.length > 0 && (
+                <div className="ui-dash__wide">
+                  <PagesMap groups={pages} />
+                </div>
+              )}
+              {config.features.guide && config.guide.guides.some(hasVideo) && (
+                <div className="ui-dash__wide">
+                  <Panel title="Watch how it is done" meaning="preview" tour="home-videos">
+                    <GuideVideos
+                      guides={config.guide.guides}
+                      max={3}
+                      footer={(hidden) =>
+                        hidden > 0 ? (
+                          <Flex>
+                            <KitAction quiet href={guide.href} onClick={guide.onClick}>
+                              {`${hidden} more in the Site Guide`}
+                            </KitAction>
+                          </Flex>
+                        ) : null
+                      }
+                    />
+                  </Panel>
+                </div>
+              )}
+            </div>
+
+            <div className="ui-dash__foot">
+              <KitScope>
+                <div style={{ display: 'grid', gap: 14 }} data-tour="home-help">
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span className="ui-muted">Need help?</span>
+                    {config.features.guide && (
+                      <KitAction href={guide.href} onClick={guide.onClick}>
+                        Site Guide
+                      </KitAction>
+                    )}
+                    {config.features.guide && <span className="ui-muted">or</span>}
+                    {ask ? (
+                      <KitAction href={ask}>{`Ask ${config.helper.name}`}</KitAction>
+                    ) : (
+                      <span className="ui-muted">{`Ask ${config.helper.name}`}</span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
+                    {/* Card 137: the person's first-run tour, this screen's, and the changelog. */}
+                    {config.features.tour && (
+                      <KitAction quiet onClick={() => startTour()}>
+                        Show me around
+                      </KitAction>
+                    )}
+                    {config.features.tour && <TourButton tool="home" staff={staffView} />}
+                    {config.features.tour && config.whatsNew?.length ? (
+                      <KitAction
+                        quiet
+                        onClick={() => window.dispatchEvent(new Event(WHATS_NEW_EVENT))}
+                      >
+                        What&apos;s new
+                      </KitAction>
+                    ) : null}
+                    {staffView ? (
+                      <KitAction quiet onClick={() => (overridden ? reset() : switchTo('full'))}>
+                        Show the full Studio
+                      </KitAction>
+                    ) : (
+                      <KitAction quiet onClick={() => (overridden ? reset() : switchTo('staff'))}>
+                        See the staff view
+                      </KitAction>
+                    )}
+                  </div>
+                </div>
+              </KitScope>
+            </div>
+          </div>
+        </div>
       </Box>
     );
   };

@@ -323,4 +323,20 @@ export const UI_CSS = `
 .ncs-ui .ui-switch__label{flex:1;min-width:0}
 .ncs-ui .ui-switch__state{flex:none;font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--ui-ink)}
 @media (prefers-reduced-motion:reduce){.ncs-ui .ui-switch__track,.ncs-ui .ui-switch__thumb{transition:none}}
+/* Card 145: Home as a dashboard (not under .ncs-ui: it lays out Sanity UI cards too). */
+.ui-dash-wrap{container-type:inline-size;width:100%}
+.ui-dash{display:grid;gap:24px;grid-template-columns:minmax(0,1fr);grid-template-areas:"banner" "tiles" "rail" "main" "foot";max-width:1760px;margin:0 auto;align-items:start}
+.ui-dash__banner{grid-area:banner;min-width:0}
+.ui-dash__tiles{grid-area:tiles;min-width:0}
+.ui-dash__rail{grid-area:rail;display:grid;gap:24px;min-width:0}
+.ui-dash__main{grid-area:main;display:grid;gap:24px;grid-template-columns:minmax(0,1fr);min-width:0}
+.ui-dash__foot{grid-area:foot;min-width:0}
+.ui-dash__wide{grid-column:1 / -1;min-width:0}
+@container (min-width:960px){
+  .ui-dash{grid-template-columns:minmax(0,1fr) minmax(340px,400px);grid-template-areas:"banner rail" "tiles rail" "main rail" "foot foot"}
+  .ui-dash__rail{position:sticky;top:0;align-self:start}
+}
+@container (min-width:1500px){
+  .ui-dash__main{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 `;
