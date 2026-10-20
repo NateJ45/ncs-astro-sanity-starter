@@ -313,4 +313,6 @@ export const UI_CSS = `
 @media (max-width:480px){.ncs-ui .ui-bars__row{grid-template-columns:minmax(0,1fr) auto}.ncs-ui .ui-bars__track{grid-column:1 / -1;grid-row:2}}
 .ncs-ui .ui-trail .ui-live{max-width:520px}
 .ncs-ui .ui-tour-trail .ui-live{max-width:none}
+.ncs-ui.ui-toast{display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.45}
+.ncs-ui.ui-toast .ui-toast__steps{display:flex;align-items:center}
 `;

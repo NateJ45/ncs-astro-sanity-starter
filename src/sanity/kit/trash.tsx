@@ -37,6 +37,7 @@ import {
   restoreDocs,
 } from '../../lib/studio-trash';
 import { API_VERSION } from './shared';
+import { KitToastBody } from './ui';
 
 const errText = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
@@ -73,8 +74,12 @@ export function makeMoveToTrashAction(
         toast.push({
           status: 'success',
           title: 'Moved to Trash',
-          description:
-            'It comes off the website at the next update. To bring it back, open "Trash (bring things back)" in Content.',
+          description: (
+            <KitToastBody>
+              It comes off the website at the next update. To bring it back, open "Trash (bring
+              things back)" in Content.
+            </KitToastBody>
+          ),
           duration: 12000,
           closable: true,
         });
@@ -170,10 +175,13 @@ export const RestoreAction: DocumentActionComponent = (props: DocumentActionProp
         toast.push({
           status: 'success',
           title: 'It is back',
-          description:
-            doc.wasPublished === false
-              ? 'It is back where it was. It was never on the website, so it still needs Publish.'
-              : 'It is back where it was, and on the website again at the next update.',
+          description: (
+            <KitToastBody>
+              {doc.wasPublished === false
+                ? 'It is back where it was. It was never on the website, so it still needs Publish.'
+                : 'It is back where it was, and on the website again at the next update.'}
+            </KitToastBody>
+          ),
           duration: 12000,
           closable: true,
         });

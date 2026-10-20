@@ -25,6 +25,7 @@
     "parity": "node scripts/page-parity.mjs",
     "cutover": "node scripts/cutover.mjs",
     "sync-check": "node scripts/sync-check.mjs",
+    "check:look": "node --experimental-strip-types scripts/check-studio-look.mjs",
     "ports:next": "node scripts/next-port-card.mjs",
     "restore:doc": "node scripts/restore-doc.mjs",
     "deadweight": "node scripts/find-dead-weight.mjs",

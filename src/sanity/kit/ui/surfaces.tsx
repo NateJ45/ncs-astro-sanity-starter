@@ -39,7 +39,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from 'react';
-import { stepsLabel, type StepState } from '../../../lib/studio-look';
+import { LIVE_STEP_WORDS, stepsLabel, type StepState } from '../../../lib/studio-look';
 import type { BrandIconKey } from '../../../lib/studio-icons';
 import {
   ArtTile,
@@ -47,6 +47,7 @@ import {
   Marker,
   SectionRule,
   Sill,
+  KitScope,
   Stone,
   useLookTokens,
   type Tone,
@@ -775,5 +776,35 @@ export function StepTrail({ words, current }: { words: readonly string[]; curren
     <div className="ui-trail">
       <LiveSteps states={states} words={words} />
     </div>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Card 140: toasts in the site's voice
+// -----------------------------------------------------------------------------
+
+/**
+ * The body of a success toast (a React node for `toast.push({ description })`):
+ * the plain sentence, and, for a publish, the three steps as small stones so the
+ * editor sees where the update is. Sanity owns the toast frame and title; this
+ * is all that can be drawn inside it.
+ */
+export function KitToastBody({
+  children,
+  steps,
+}: {
+  children: ReactNode;
+  steps?: readonly StepState[];
+}) {
+  return (
+    <KitScope className="ui-toast">
+      <span className="ui-toast__text">{children}</span>
+      {steps && (
+        <span className="ui-toast__steps">
+          <LiveSteps states={steps} words={LIVE_STEP_WORDS} compact />
+          <span className="ui-sr">{stepsLabel(LIVE_STEP_WORDS, steps)}</span>
+        </span>
+      )}
+    </KitScope>
   );
 }
