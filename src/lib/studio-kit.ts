@@ -481,6 +481,16 @@ export function fieldGuideLookup(
   };
 }
 
+/**
+ * Card 142: Sanity 6's date and datetime inputs draw their own header (title,
+ * description, time zone) from the schema type, so a "How to" chip in the field's
+ * description slot never shows. True when the type chain says the field is one of
+ * them, and the chip goes under the input instead.
+ */
+export function drawsOwnHeader(typeNames: readonly string[]): boolean {
+  return typeNames.some((n) => n === 'date' || n === 'datetime');
+}
+
 /** The anchor id of a guide section ("What alt text is" -> "what-alt-text-is"). */
 export function guideSectionId(slug: string, heading: string): string {
   const s = heading

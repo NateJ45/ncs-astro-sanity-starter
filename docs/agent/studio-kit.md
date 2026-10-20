@@ -920,6 +920,8 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 
 **Toasts (card 140).** `KitToastBody` (`kit/ui/surfaces.tsx`) is the React-node description of a success toast: the sentence and, after a publish, the three Is-it-live stones (`liveSteps('on-its-way')`). Sanity owns the toast frame and title. Used by `publishNote.tsx` and Trash/restore; bench: `part=toast`.
 
+**How to on date fields (card 142).** Sanity 6 date and datetime inputs draw their own header, so the chip goes under the input, not in the description (`drawsOwnHeader()` in `studio-kit.ts`).
+
 **Still to do** (`docs/PENDING.md`): the sign-in heading (blocked in sanity 6.19; see "The edges" above). The field
 "How to" chip landed with card 134 (below).
 

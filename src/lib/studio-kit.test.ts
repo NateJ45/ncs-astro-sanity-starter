@@ -8,6 +8,7 @@ import {
   checklist,
   comingSunday,
   deployProblem,
+  drawsOwnHeader,
   fieldGuideLookup,
   firstName,
   guideSectionId,
@@ -347,5 +348,18 @@ describe('fieldGuideLookup (card 134)', () => {
       'guide-images-and-alt--what-alt-text-is',
     );
     assert.equal(guideSectionId('x', '  '), 'guide-x--section');
+  });
+});
+
+describe('drawsOwnHeader (card 142)', () => {
+  it('is true for date and datetime, and for a type built on them', () => {
+    assert.equal(drawsOwnHeader(['datetime']), true);
+    assert.equal(drawsOwnHeader(['date']), true);
+    assert.equal(drawsOwnHeader(['raceDay', 'datetime']), true);
+  });
+  it('is false for every other field', () => {
+    assert.equal(drawsOwnHeader(['string']), false);
+    assert.equal(drawsOwnHeader(['seoTitle', 'string']), false);
+    assert.equal(drawsOwnHeader([]), false);
   });
 });
