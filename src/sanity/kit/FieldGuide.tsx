@@ -22,7 +22,7 @@
 import { useState, type ComponentType } from 'react';
 import type { FieldProps, SchemaType } from 'sanity';
 import { Dialog } from '@sanity/ui';
-import { fieldGuideLookup, type FieldGuideLink } from '../../lib/studio-kit';
+import { drawsOwnHeader, fieldGuideLookup, type FieldGuideLink } from '../../lib/studio-kit';
 import type { GuideViewProps, KitConfig } from './types';
 import { KitScope, Marker } from './ui';
 
@@ -103,6 +103,19 @@ export function makeFieldGuide(config: KitConfig): ComponentType<FieldProps> | n
   return function FieldGuideField(props: FieldProps) {
     const link = lookup(props.name, typeChain(props.schemaType));
     if (!link || !known.has(link.guide)) return props.renderDefault(props);
+    // Card 142: Sanity 6's date and datetime inputs draw their OWN header (title,
+    // description, time zone) from the schema type, so the description slot is never
+    // shown and a chip put there never appears. Put the chip under the input instead.
+    if (drawsOwnHeader(typeChain(props.schemaType))) {
+      return (
+        <>
+          {props.renderDefault(props)}
+          <div style={{ marginTop: 6 }}>
+            <HowTo link={link} field={props.title || props.name} />
+          </div>
+        </>
+      );
+    }
     const description = (
       <>
         {props.description}

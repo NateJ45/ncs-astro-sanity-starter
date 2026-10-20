@@ -924,6 +924,8 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 
 **Switch (card 141).** `KitSwitch` (`kit/ui/surfaces.tsx`) draws a Quick update yes/no field: a `role="switch"` button, a track and thumb in the look's colours, "Yes" or "No" in words. Do not use a native checkbox in the kit; it can be invisible in real Chrome. Bench: `part=switch`.
 
+**How to on date fields (card 142).** Sanity 6 date and datetime inputs draw their own header, so the chip goes under the input, not in the description (`drawsOwnHeader()` in `studio-kit.ts`).
+
 **Still to do** (`docs/PENDING.md`): the sign-in heading (blocked in sanity 6.19; see "The edges" above). The field
 "How to" chip landed with card 134 (below).
 
