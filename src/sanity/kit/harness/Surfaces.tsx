@@ -44,6 +44,7 @@ import type { RsvpOverview } from '../../mail/rsvpData';
 // Card 132: Post a photo's three-stone path and the tour (parts photo, tour).
 import { PHOTO_STEPS, PhotoStep } from '../PostPhoto';
 import { TourCard } from '../StudioTour';
+import { EmptyTrashPane } from '../trash';
 import {
   AllClear,
   ArtRows,
@@ -446,6 +447,7 @@ export function SurfacesBench({ part }: { part: string }) {
           <KitSwitch id="b2" checked onChange={() => {}} label="This one has sold" />
         </KitScope>
       )}
+      {show('trash') && <EmptyTrashPane />}
       {show('toast') && (
         <KitScope style={{ maxWidth: 360, display: 'grid', gap: 16 }}>
           <div style={{ padding: 12, border: '1px solid #ccc', borderRadius: 6 }}>
