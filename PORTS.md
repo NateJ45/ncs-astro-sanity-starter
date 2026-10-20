@@ -262,6 +262,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 142 | How-to chip on date and datetime fields (they draw their own header)                | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 146 | The Trash desk item shows a page of its own when empty (trashListItem)              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 145 | Home is a full-width dashboard: status rail at the right, main column, mobile-first | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 147 | Checkup in columns by level, with a count strip (LevelSummary)                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10191,3 +10192,7 @@ behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
 **Origin:** Home was a single column capped at 1040px with one two-column grid, so on a desktop pane it left half the screen empty and put "Is it live?" below the fold. Nathan asked for a SaaS-level dashboard view.
 
 **PORTABLE, changed:** `kit/HomeTool.tsx` (the layout: banner and ways in across the top, then a main column and a STATUS RAIL: Is it live, the Checkup, This week, Ask), `kit/ui/css.ts` (`.ui-dash*`, container queries so it follows the pane's width, not the window's), `docs/agent/studio-kit.md`. Wide pane (960px and up): main left, rail right and sticky; 1500px and up: the main column's cards go two across; narrow or phone: one column with the status first. No config; the cards keep each site's look.
+
+## Card 147: the Checkup uses the whole pane (2026-10-20)
+
+**Origin:** the Checkup was one narrow column (780px) down the middle of a wide pane. Now a count strip (`LevelSummary`: a stone, a number and the level in words) sits above the findings, and the levels (Needs doing, Worth a look, Good to know) are columns side by side on a wide pane, one column on a phone. **PORTABLE, changed:** `kit/CheckupTool.tsx`, `kit/ui/surfaces.tsx` (`LevelSummary`), `kit/ui/css.ts`, `docs/agent/studio-kit.md`. No config.

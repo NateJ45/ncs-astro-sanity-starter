@@ -339,4 +339,9 @@ export const UI_CSS = `
 @container (min-width:1500px){
   .ui-dash__main{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+/* Card 147: the Checkup in columns by level, with a count strip above */
+.ncs-ui .ui-levels{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:10px 28px}
+.ncs-ui .ui-levels__item{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:var(--ui-muted)}
+.ncs-ui .ui-levels__item b{font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:24px;line-height:1;color:var(--ui-ink)}
+.ncs-ui .ui-checkup{display:grid;gap:28px 24px;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));align-items:start}
 `;

@@ -273,6 +273,30 @@ export function SeverityGroup({
   );
 }
 
+/**
+ * Card 147: how many findings at each level, at a glance: a stone, a number
+ * and the level in words. A level with none is left out.
+ */
+export function LevelSummary({ counts }: { counts: Partial<Record<Level, number>> }) {
+  const t = useLookTokens();
+  const levels = (['needs', 'worth', 'good'] as Level[]).filter((l) => (counts[l] ?? 0) > 0);
+  if (!levels.length) return null;
+  return (
+    <ul className="ui-levels" aria-label="How many of each">
+      {levels.map((l) => {
+        const tone = t.tones[LEVEL_TONE[l]];
+        return (
+          <li key={l} className="ui-levels__item">
+            <Stone size={22} fill={tone.fill} edge={tone.mark} seed={l.length * 11} />
+            <b>{counts[l]}</b>
+            <span>{LEVEL_WORDS[l]}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 /** One finding: a white card, its severity along the left edge. */
 export function ResultCard({
   level,
