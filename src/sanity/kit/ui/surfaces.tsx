@@ -808,3 +808,54 @@ export function KitToastBody({
     </KitScope>
   );
 }
+
+// -----------------------------------------------------------------------------
+// Card 141: a switch that is drawn, not a native checkbox
+// -----------------------------------------------------------------------------
+
+/**
+ * An on/off switch for a yes-or-no question. It is a button with role="switch"
+ * and a track and thumb drawn in the look's colours, so it shows in every
+ * browser whatever the Studio's own form resets do to a native checkbox (the
+ * Quick update "Sold" box was invisible in real Chrome). The state is also
+ * said in words ("Yes" / "No"), never colour alone.
+ */
+export function KitSwitch({
+  id,
+  checked,
+  onChange,
+  label,
+  describedBy,
+  labelledBy,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (next: boolean) => void;
+  label: ReactNode;
+  describedBy?: string;
+  /** The id of the question's heading, so the name reads "Sold, This one has sold". */
+  labelledBy?: string;
+}) {
+  return (
+    <KitScope>
+      <button
+        type="button"
+        id={id}
+        role="switch"
+        aria-checked={checked}
+        aria-describedby={describedBy}
+        aria-labelledby={labelledBy ? `${labelledBy} ${id}-label` : undefined}
+        className={['ui-switch', checked ? 'is-on' : ''].join(' ').trim()}
+        onClick={() => onChange(!checked)}
+      >
+        <span className="ui-switch__track" aria-hidden>
+          <span className="ui-switch__thumb" />
+        </span>
+        <span className="ui-switch__label" id={`${id}-label`}>
+          {label}
+        </span>
+        <span className="ui-switch__state">{checked ? 'Yes' : 'No'}</span>
+      </button>
+    </KitScope>
+  );
+}
