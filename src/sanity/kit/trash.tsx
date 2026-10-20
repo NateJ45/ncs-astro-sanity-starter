@@ -23,7 +23,9 @@ import {
   type DocumentActionComponent,
   type DocumentActionProps,
 } from 'sanity';
+import { Box } from '@sanity/ui';
 import { useToast } from '@sanity/ui/toast';
+import type { ListItemBuilder, StructureBuilder, StructureResolverContext } from 'sanity/structure';
 import { useRouter } from 'sanity/router';
 import { RestoreIcon } from '@sanity/icons/Restore';
 import { TrashIcon } from '@sanity/icons/Trash';
@@ -37,7 +39,7 @@ import {
   restoreDocs,
 } from '../../lib/studio-trash';
 import { API_VERSION } from './shared';
-import { KitToastBody } from './ui';
+import { EmptyState, KitScope, KitToastBody } from './ui';
 
 const errText = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
@@ -294,3 +296,52 @@ export const trashedItemType = defineType({
     }),
   },
 });
+
+// -----------------------------------------------------------------------------
+// Card 144: the Trash on the desk, with a page of its own when it is empty
+// -----------------------------------------------------------------------------
+
+/** What an empty Trash says: nothing is lost, and what goes here waits to be brought back. */
+export function EmptyTrashPane() {
+  return (
+    <Box padding={[4, 4, 5]}>
+      <KitScope style={{ maxWidth: 720 }}>
+        <EmptyState
+          meaning="trash"
+          icon={TrashIcon}
+          title="Nothing in the Trash"
+          lead='When you press "Move to Trash" on a page, a post or anything else, a copy waits here, so you can bring it back with one click.'
+        />
+      </KitScope>
+    </Box>
+  );
+}
+
+/**
+ * The desk's Trash item (keep the id 'trash': the Checkup's "Open the Trash"
+ * links to it). Shows the list when there is something in it and
+ * EmptyTrashPane when there is not. Use it in structure.ts in place of a plain
+ * list item for TRASH_TYPE.
+ */
+export function trashListItem(
+  S: StructureBuilder,
+  context: StructureResolverContext,
+  icon?: Parameters<ListItemBuilder['icon']>[0],
+): ListItemBuilder {
+  const item = S.listItem()
+    .id('trash')
+    .title('Trash (bring things back)')
+    .child(async () => {
+      const count = await context
+        .getClient({ apiVersion: API_VERSION })
+        .fetch<number>('count(*[_type == $type])', { type: TRASH_TYPE })
+        .catch(() => 1); // when unsure, show the real list
+      return count > 0
+        ? S.documentTypeList(TRASH_TYPE)
+            .id('trash-list')
+            .title('Trash')
+            .defaultOrdering([{ field: 'deletedAt', direction: 'desc' }])
+        : S.component(EmptyTrashPane).id('trash-empty').title('Trash');
+    });
+  return icon ? item.icon(icon) : item;
+}

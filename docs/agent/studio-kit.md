@@ -926,6 +926,8 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 
 **How to on date fields (card 142).** Sanity 6 date and datetime inputs draw their own header, so the chip goes under the input, not in the description (`drawsOwnHeader()` in `studio-kit.ts`).
 
+**Empty Trash (card 144).** `trashListItem()` (`kit/trash.tsx`) is the desk's Trash item: the list when something is in it, `EmptyTrashPane` (the kit's `EmptyState`) when not. Keep the id `trash`. Bench: `part=trash`.
+
 **Still to do** (`docs/PENDING.md`): the sign-in heading (blocked in sanity 6.19; see "The edges" above). The field
 "How to" chip landed with card 134 (below).
 
