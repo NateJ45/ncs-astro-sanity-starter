@@ -344,4 +344,12 @@ export const UI_CSS = `
 .ncs-ui .ui-levels__item{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:var(--ui-muted)}
 .ncs-ui .ui-levels__item b{font-family:var(--ui-display);font-weight:var(--ui-display-weight);font-size:24px;line-height:1;color:var(--ui-ink)}
 .ncs-ui .ui-checkup{display:grid;gap:28px 24px;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));align-items:start}
+/* Card 148: Quick update's form with a rail beside it on a wide pane (phones: the form alone) */
+.ui-quick-wrap{container-type:inline-size;width:100%}
+.ui-quick{display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+.ui-quick__rail{display:none}
+@container (min-width:860px){
+  .ui-quick{grid-template-columns:minmax(0,600px) minmax(280px,1fr);align-items:start}
+  .ui-quick__rail{display:block;position:sticky;top:0}
+}
 `;
