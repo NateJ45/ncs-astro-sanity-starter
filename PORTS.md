@@ -10171,3 +10171,9 @@ behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
 **Origin:** stonesteps-50k's "Race day" (a datetime) showed no How-to chip though its name was mapped. Sanity 6's `DateTimeInput` and `DateInput` draw their OWN header (title, description, time zone) from the schema type, so the field wrapper's description slot, where card 134 puts the chip, is never shown for them.
 
 **PORTABLE, changed:** `kit/FieldGuide.tsx` (for a date or datetime field the chip is rendered under the input), `src/lib/studio-kit.ts` (`drawsOwnHeader()`, tested in `studio-kit.test.ts`), `docs/agent/studio-kit.md`. Nothing to configure; a mapped date field now gets its chip.
+
+## Card 144: Post a photo's example and empty line are the site's own (2026-10-20)
+
+**Origin:** adopting card 143 on Reid Design: with no room story yet the form said to add a "Photo gallery" section to a page (wrong for a stories-only site), and the "Describe the photo" example was a church choir.
+
+**PORTABLE, changed:** `kit/PostPhoto.tsx`, `kit/types.ts` (`postPhoto.altExample`, `postPhoto.emptyNote`), `docs/agent/studio-kit.md`. Both are optional; the stories-only empty line is new default wording.
