@@ -264,6 +264,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 145 | Home is a full-width dashboard: status rail at the right, main column, mobile-first | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 147 | Checkup in columns by level, with a count strip (LevelSummary)                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 148 | Quick update uses a wide pane: tile grid, and the form with a path rail beside it   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 149 | AI suggestion and the private-page password status are the kit's callouts           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10201,3 +10202,7 @@ behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
 ## Card 148: Quick update on a wide pane (2026-10-20)
 
 **Origin:** Quick update was a 560px column made for a phone, which it stays, but on a desktop it left most of the pane empty. **PORTABLE, changed:** `kit/QuickUpdateTool.tsx` (the tile list is a grid, three or four across on a wide pane; the form view has a "How this goes" rail beside it, Fill in, Save, On the website, with the step that is happening ringed), `kit/ui/css.ts` (`.ui-quick*`, container queries), `docs/agent/studio-kit.md`. Phones are unchanged: one column, no rail.
+
+## Card 149: the AI suggestion and the password status in the kit's callouts (2026-10-20)
+
+**Origin:** the Studio-look audit. Both were plain Sanity UI cards with a stock tone. **PORTABLE, changed:** `sanity/ai/WritingHelp.tsx` (the suggestion is a `KitNotice` "A suggestion", the editable text and its three buttons inside it), `sanity/components/PrivatePasswordInput.tsx` (the status is a `KitNotice`: tip when a password is set, careful when not, with a title that says it), `kit/harness/Surfaces.tsx` (`part=helpers`), `docs/agent/studio-kit.md`. Behaviour unchanged.

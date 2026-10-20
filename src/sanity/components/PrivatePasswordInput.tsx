@@ -13,7 +13,7 @@
 // =============================================================================
 import { useState } from 'react';
 import { set, unset, useFormValue, type ObjectInputProps } from 'sanity';
-import { Box, Button, Card, Flex, Stack, Text, TextInput } from '@sanity/ui';
+import { Box, Button, Flex, Stack, Text, TextInput } from '@sanity/ui';
 import {
   hashPassword,
   isPasswordRecord,
@@ -22,6 +22,7 @@ import {
   type PasswordRecord,
 } from '../../lib/private-pages';
 import { SITE_URL_FOR_PREVIEW } from '../urls';
+import { KitNotice, KitScope } from '../kit/ui';
 
 function when(iso: string | undefined): string {
   if (!iso) return '';
@@ -65,15 +66,19 @@ export function PrivatePasswordInput(props: ObjectInputProps) {
 
   return (
     <Stack gap={4}>
-      <Card padding={3} radius={2} tone={record ? 'positive' : 'caution'} border>
-        <Text size={1}>
+      {/* Card 149: the status is the kit's callout, its stone the marker. */}
+      <KitScope>
+        <KitNotice
+          tone={record ? 'tip' : 'careful'}
+          title={record ? 'A password is set' : 'No password yet'}
+        >
           {record
-            ? `A password is set${record.setAt ? ` (since ${when(record.setAt)})` : ''}. ${
+            ? `${record.setAt ? `Set ${when(record.setAt)}. ` : ''}${
                 saved ? 'Publish to use the new one.' : 'Type a new one below to change it.'
               }`
-            : 'No password yet. Nobody can open this page until you set one and publish.'}
-        </Text>
-      </Card>
+            : 'Nobody can open this page until you set one and publish.'}
+        </KitNotice>
+      </KitScope>
 
       {!readOnly && (
         <Stack gap={2}>

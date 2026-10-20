@@ -45,6 +45,7 @@ import type { RsvpOverview } from '../../mail/rsvpData';
 import { PHOTO_STEPS, PhotoStep } from '../PostPhoto';
 import { TourCard } from '../StudioTour';
 import { EmptyTrashPane } from '../trash';
+import { SuggestionCard } from '../../ai/WritingHelp';
 import {
   AllClear,
   ArtRows,
@@ -60,6 +61,7 @@ import {
   SeverityStone,
   StepTrail,
   type CheckItem,
+  KitNotice,
   KitSwitch,
   KitToastBody,
 } from '../ui';
@@ -448,6 +450,22 @@ export function SurfacesBench({ part }: { part: string }) {
         </KitScope>
       )}
       {show('trash') && <EmptyTrashPane />}
+      {show('helpers') && (
+        <KitScope style={{ maxWidth: 560, display: 'grid', gap: 16 }}>
+          <SuggestionCard
+            text="Join us on Sunday at 10:30 for worship, followed by lunch in the hall."
+            onUse={() => {}}
+            onAgain={() => {}}
+            onClose={() => {}}
+          />
+          <KitNotice tone="tip" title="A password is set">
+            Set 12 October. Type a new one below to change it.
+          </KitNotice>
+          <KitNotice tone="careful" title="No password yet">
+            Nobody can open this page until you set one and publish.
+          </KitNotice>
+        </KitScope>
+      )}
       {show('toast') && (
         <KitScope style={{ maxWidth: 360, display: 'grid', gap: 16 }}>
           <div style={{ padding: 12, border: '1px solid #ccc', borderRadius: 6 }}>
