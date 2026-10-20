@@ -59,6 +59,7 @@ import {
   SeverityStone,
   StepTrail,
   type CheckItem,
+  KitSwitch,
   KitToastBody,
 } from '../ui';
 
@@ -439,6 +440,12 @@ export function SurfacesBench({ part }: { part: string }) {
   const show = (p: string) => part === 'all' || part === p;
   return (
     <div style={{ display: 'grid', gap: 40 }}>
+      {show('switch') && (
+        <KitScope style={{ maxWidth: 420, display: 'grid', gap: 16 }}>
+          <KitSwitch id="b1" checked={false} onChange={() => {}} label="This one has sold" />
+          <KitSwitch id="b2" checked onChange={() => {}} label="This one has sold" />
+        </KitScope>
+      )}
       {show('toast') && (
         <KitScope style={{ maxWidth: 360, display: 'grid', gap: 16 }}>
           <div style={{ padding: 12, border: '1px solid #ccc', borderRadius: 6 }}>

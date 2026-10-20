@@ -258,6 +258,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 138 | CI builds from a pinned content snapshot; scheduled live-watch (non-blocking)  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 139 | Warn when a site's `studio.look` is still the neutral marker and stone         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 140 | Success toasts carry the Is-it-live stones (KitToastBody)                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 141 | Quick update's yes/no field is a drawn switch, not a native checkbox           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10157,3 +10158,9 @@ behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
 **Origin:** Reid Design's phone job "add photos to a room story that already exists": the photo list lives on the story itself, not in a page-builder gallery section, so Post a photo had nowhere to put it. Cards 139 to 142 belong to the Studio-look audit; this one is 143.
 
 **PORTABLE, changed:** `src/lib/photo-post.ts` (`StorySpec`, `storySpec`, `storyQuery`, `storyChoices`, `GalleryChoice.story`), `src/sanity/kit/PostPhoto.tsx` (lists the stories beside the galleries and writes to the draft's own list), `src/sanity/kit/types.ts` (`postPhoto.stories`), `photo-post.test.ts`, `docs/agent/studio-kit.md`. Config only; a site that sets no `stories` behaves as before.
+
+## Card 141: Quick update's yes/no is a drawn switch (2026-10-19)
+
+**Origin:** mas-monograms reported the Quick update "Sold" checkbox was invisible in real Chrome. A native checkbox depends on the browser and on whatever form resets the Studio carries, so it can vanish.
+
+**PORTABLE, changed:** `kit/ui/surfaces.tsx` (`KitSwitch`: a button with role="switch", a track and thumb in the look's colours, and the state also said as Yes or No), `kit/ui/css.ts`, `kit/QuickUpdateTool.tsx` (boolean fields use it; the question's title names the switch), `harness/Surfaces.tsx` (`part=switch`), `docs/agent/studio-kit.md`. Nothing to configure.
