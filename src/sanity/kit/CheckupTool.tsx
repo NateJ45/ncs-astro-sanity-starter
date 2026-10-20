@@ -22,6 +22,7 @@ import {
   KitNotice,
   KitScope,
   levelOf,
+  LevelSummary,
   ResultCard,
   SeverityGroup,
   type Level,
@@ -77,32 +78,41 @@ export function CheckupView({
         ) : (
           <>
             {isAllClear(results) && <AllClear lead="Nothing needs fixing right now." />}
-            {LEVELS.map((level) => {
-              const rows = results.filter((r) => levelOf(r.severity) === level);
-              if (!rows.length) return null;
-              return (
-                <SeverityGroup key={level} level={level} count={rows.length}>
-                  {rows.map((r) => {
-                    const link = r.target ? linkTo(r.target) : null;
-                    return (
-                      <ResultCard
-                        key={r.id}
-                        level={level}
-                        title={r.label}
-                        detail={r.detail}
-                        action={
-                          link ? (
-                            <KitAction href={link.href} onClick={link.onClick}>
-                              {`${r.targetLabel ?? 'Take me there'} →`}
-                            </KitAction>
-                          ) : undefined
-                        }
-                      />
-                    );
-                  })}
-                </SeverityGroup>
-              );
-            })}
+            <LevelSummary
+              counts={{
+                needs: results.filter((r) => levelOf(r.severity) === 'needs').length,
+                worth: results.filter((r) => levelOf(r.severity) === 'worth').length,
+                good: results.filter((r) => levelOf(r.severity) === 'good').length,
+              }}
+            />
+            <div className="ui-checkup">
+              {LEVELS.map((level) => {
+                const rows = results.filter((r) => levelOf(r.severity) === level);
+                if (!rows.length) return null;
+                return (
+                  <SeverityGroup key={level} level={level} count={rows.length}>
+                    {rows.map((r) => {
+                      const link = r.target ? linkTo(r.target) : null;
+                      return (
+                        <ResultCard
+                          key={r.id}
+                          level={level}
+                          title={r.label}
+                          detail={r.detail}
+                          action={
+                            link ? (
+                              <KitAction href={link.href} onClick={link.onClick}>
+                                {`${r.targetLabel ?? 'Take me there'} →`}
+                              </KitAction>
+                            ) : undefined
+                          }
+                        />
+                      );
+                    })}
+                  </SeverityGroup>
+                );
+              })}
+            </div>
           </>
         )}
       </div>
@@ -117,7 +127,7 @@ export function makeCheckupTool(config: KitConfig) {
     const { staffView } = useStaffView(config);
     return (
       <Box padding={[4, 4, 5]} style={{ overflowY: 'auto', height: '100%' }}>
-        <div style={{ display: 'grid', gap: 32, maxWidth: 780, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gap: 32, maxWidth: 1360, margin: '0 auto' }}>
           <ToolHeading
             meaning="checkup"
             label="Checkup"

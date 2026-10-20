@@ -930,6 +930,8 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 
 **Home as a dashboard (card 145).** The status rail runs the full height at the right, from the top of the page, so "Is it live?" is on screen with the greeting. `HomeTool.tsx` lays Home out as `.ui-dash` (`kit/ui/css.ts`): the banner and the ways in at the top left, a main column (Pick up, Coming up, Newsletter, Recent edits, Visitors, Your pages, videos) and a status rail (Is it live, Checkup, This week, Ask). The layout follows the pane's width with container queries: 960px and up puts the rail at the right (sticky), 1500px and up lays the main cards two across, and anything narrower is one column with the status first. A new Home card goes in the main column, or in the rail only if it is a status.
 
+**Checkup in columns (card 147).** `CheckupView` shows a `LevelSummary` strip (counts per level) and the levels as columns (`.ui-checkup`, `auto-fill` from 340px), so a wide pane is used and a phone gets one column. Bench: `part=checkup`.
+
 **Still to do** (`docs/PENDING.md`): the sign-in heading (blocked in sanity 6.19; see "The edges" above). The field
 "How to" chip landed with card 134 (below).
 
