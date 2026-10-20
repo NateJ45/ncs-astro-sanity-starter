@@ -260,7 +260,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 140 | Success toasts carry the Is-it-live stones (KitToastBody)                      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 141 | Quick update's yes/no field is a drawn switch, not a native checkbox           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 142 | How-to chip on date and datetime fields (they draw their own header)           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
-| 144 | The Trash desk item shows a page of its own when empty (trashListItem)         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 146 | The Trash desk item shows a page of its own when empty (trashListItem)         | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10173,7 +10173,13 @@ behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
 
 **PORTABLE, changed:** `kit/FieldGuide.tsx` (for a date or datetime field the chip is rendered under the input), `src/lib/studio-kit.ts` (`drawsOwnHeader()`, tested in `studio-kit.test.ts`), `docs/agent/studio-kit.md`. Nothing to configure; a mapped date field now gets its chip.
 
-## Card 144: an empty Trash has a page of its own (2026-10-20)
+## Card 144: Post a photo's example and empty line are the site's own (2026-10-20)
+
+**Origin:** adopting card 143 on Reid Design: with no room story yet the form said to add a "Photo gallery" section to a page (wrong for a stories-only site), and the "Describe the photo" example was a church choir.
+
+**PORTABLE, changed:** `kit/PostPhoto.tsx`, `kit/types.ts` (`postPhoto.altExample`, `postPhoto.emptyNote`), `docs/agent/studio-kit.md`. Both are optional; the stories-only empty line is new default wording.
+
+## Card 146: an empty Trash has a page of its own (2026-10-20)
 
 **Origin:** the Studio-look audit (Trash: greyed art, warmer words, an empty state). An empty Trash was Sanity's plain "no documents" pane.
 

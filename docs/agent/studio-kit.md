@@ -418,7 +418,7 @@ quickUpdate: [
 
 `postPhoto.tileLead` and `postPhoto.draftNote` reword Post a photo's "saved as a draft" lines (a shop: "Saved for you to check before it goes in the shop.").
 
-`postPhoto.stories` (card 143) adds documents that keep a photo list of their own, such as a room story's `gallery`, to the places a photo can go: `{ types: ['project'], field?: 'gallery', altField?: 'alt', captionField?: 'caption', noun?: 'Room story' }`. Each document appears as "Room story: Title (n photos)"; the photo goes onto the DRAFT (made from the published copy when there is none), alt text required, never published. One photo per pass, with "Post another photo" on the done card. `galleryTypes` may be empty when only stories are offered.
+`postPhoto.stories` (card 143) adds documents that keep a photo list of their own, such as a room story's `gallery`, to the places a photo can go: `{ types: ['project'], field?: 'gallery', altField?: 'alt', captionField?: 'caption', noun?: 'Room story' }`. Each document appears as "Room story: Title (n photos)"; the photo goes onto the DRAFT (made from the published copy when there is none), alt text required, never published. One photo per pass, with "Post another photo" on the done card. `galleryTypes` may be empty when only stories are offered. `postPhoto.altExample` (card 144) swaps the church example in "Describe the photo" for one in the site's world, and `postPhoto.emptyNote` words the line shown when there is nowhere to put a photo yet (default: "There is no room story to add a photo to yet. Start one in the full editor first." for a stories-only site).
 
 Field kinds: `string`, `text`, `date`, `datetime`, `url`, `number`, `boolean` (a checkbox; its `description` is the
 words beside it), `select` (`options: [{ title, value }]`), `file`, `image` (`accept`). Every field takes `path`
@@ -926,7 +926,7 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 
 **How to on date fields (card 142).** Sanity 6 date and datetime inputs draw their own header, so the chip goes under the input, not in the description (`drawsOwnHeader()` in `studio-kit.ts`).
 
-**Empty Trash (card 144).** `trashListItem()` (`kit/trash.tsx`) is the desk's Trash item: the list when something is in it, `EmptyTrashPane` (the kit's `EmptyState`) when not. Keep the id `trash`. Bench: `part=trash`.
+**Empty Trash (card 146).** `trashListItem()` (`kit/trash.tsx`) is the desk's Trash item: the list when something is in it, `EmptyTrashPane` (the kit's `EmptyState`) when not. Keep the id `trash`. Bench: `part=trash`.
 
 **Still to do** (`docs/PENDING.md`): the sign-in heading (blocked in sanity 6.19; see "The edges" above). The field
 "How to" chip landed with card 134 (below).

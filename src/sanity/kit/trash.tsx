@@ -298,7 +298,7 @@ export const trashedItemType = defineType({
 });
 
 // -----------------------------------------------------------------------------
-// Card 144: the Trash on the desk, with a page of its own when it is empty
+// Card 146: the Trash on the desk, with a page of its own when it is empty
 // -----------------------------------------------------------------------------
 
 /** What an empty Trash says: nothing is lost, and what goes here waits to be brought back. */

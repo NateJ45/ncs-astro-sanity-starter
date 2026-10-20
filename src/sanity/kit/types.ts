@@ -134,6 +134,10 @@ export interface PostPhotoConfig {
     /** "Room story": the word before each name in the list. */
     noun?: string;
   };
+  /** Card 144: the example in "Describe the photo" ("The oak dresser against the sage wall"). */
+  altExample?: string;
+  /** Card 144: the line shown when there is nowhere to put a photo yet. Default: says so for the site's `stories` or galleries. */
+  emptyNote?: string;
   /** A new post made from the photo, saved as a draft. Missing: galleries only. */
   post?: {
     /** "A new journal post", as the choice reads. */

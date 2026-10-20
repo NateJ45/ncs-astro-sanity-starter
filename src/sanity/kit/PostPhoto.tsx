@@ -440,8 +440,8 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
               Describe the photo
             </Text>
             <Text size={1} muted style={{ lineHeight: 1.5 }}>
-              What is in it, for someone who cannot see it. For example: "The children's choir
-              singing at the Christmas service".
+              What is in it, for someone who cannot see it. For example: "
+              {config.altExample ?? "The children's choir singing at the Christmas service"}".
             </Text>
             <TextArea
               id="photo-alt"
@@ -520,8 +520,10 @@ export function PostPhoto({ config, onBack }: { config: PostPhotoConfig; onBack:
                 })}
                 {!choices.length && !config.post && (
                   <Text size={1} muted style={{ lineHeight: 1.5 }}>
-                    No page has a photo gallery yet. Add a "Photo gallery" section to a page in the
-                    full editor first.
+                    {config.emptyNote ??
+                      (stories && !config.galleryTypes.length
+                        ? `There is no ${(stories.noun ?? 'document').toLowerCase()} to add a photo to yet. Start one in the full editor first.`
+                        : 'No page has a photo gallery yet. Add a "Photo gallery" section to a page in the full editor first.')}
                   </Text>
                 )}
               </Stack>
