@@ -418,6 +418,8 @@ quickUpdate: [
 
 `postPhoto.tileLead` and `postPhoto.draftNote` reword Post a photo's "saved as a draft" lines (a shop: "Saved for you to check before it goes in the shop.").
 
+`postPhoto.stories` (card 143) adds documents that keep a photo list of their own, such as a room story's `gallery`, to the places a photo can go: `{ types: ['project'], field?: 'gallery', altField?: 'alt', captionField?: 'caption', noun?: 'Room story' }`. Each document appears as "Room story: Title (n photos)"; the photo goes onto the DRAFT (made from the published copy when there is none), alt text required, never published. One photo per pass, with "Post another photo" on the done card. `galleryTypes` may be empty when only stories are offered.
+
 Field kinds: `string`, `text`, `date`, `datetime`, `url`, `number`, `boolean` (a checkbox; its `description` is the
 words beside it), `select` (`options: [{ title, value }]`), `file`, `image` (`accept`). Every field takes `path`
 (dot-separated, default its `name`), `as: 'blocks' | 'slug'`, `required`, `max`, `description`, `initial(now)`.
@@ -919,6 +921,8 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
 **Neutral look warning (card 139).** `npm run check:look` warns when `studio.look` still has the neutral marker, stone, colours or connector (`neutralLookWarnings()` in `studio-look.ts`). Never fails unless `--strict`.
 
 **Toasts (card 140).** `KitToastBody` (`kit/ui/surfaces.tsx`) is the React-node description of a success toast: the sentence and, after a publish, the three Is-it-live stones (`liveSteps('on-its-way')`). Sanity owns the toast frame and title. Used by `publishNote.tsx` and Trash/restore; bench: `part=toast`.
+
+**Switch (card 141).** `KitSwitch` (`kit/ui/surfaces.tsx`) draws a Quick update yes/no field: a `role="switch"` button, a track and thumb in the look's colours, "Yes" or "No" in words. Do not use a native checkbox in the kit; it can be invisible in real Chrome. Bench: `part=switch`.
 
 **How to on date fields (card 142).** Sanity 6 date and datetime inputs draw their own header, so the chip goes under the input, not in the description (`drawsOwnHeader()` in `studio-kit.ts`).
 

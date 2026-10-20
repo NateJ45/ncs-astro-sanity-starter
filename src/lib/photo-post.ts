@@ -75,11 +75,88 @@ export interface GalleryDoc {
   galleries?: Array<{ _key?: string; heading?: string | null; count?: number | null }> | null;
 }
 
+/**
+ * Card 143: photos that live straight on a document, not in a page-builder
+ * gallery (a room story's own `gallery` list). The tool then offers each such
+ * document as a place for the photo.
+ */
+export interface StorySpec {
+  /** Document types that hold a photo list of their own (["project"]). */
+  types: string[];
+  /** The photo list field on that type. Default 'gallery'. */
+  field: string;
+  /** The photo's description field. Default 'alt'. */
+  altField: string;
+  /** The photo's caption field, or null. Default 'caption'. */
+  captionField: string | null;
+  /** The word for one of them in the list ("Room story"). Default: the type's title. */
+  noun?: string;
+}
+
+/** The spec with defaults; throws on a field name that is not plain. */
+export function storySpec(partial: Partial<StorySpec> & { types: string[] }): StorySpec {
+  const spec = {
+    field: 'gallery',
+    altField: 'alt',
+    captionField: 'caption' as string | null,
+    ...partial,
+  };
+  for (const n of [spec.field, spec.altField, spec.captionField ?? 'x'])
+    if (!IDENT.test(n)) throw new Error('postPhoto: a story field name is not valid');
+  return spec;
+}
+
+/** GROQ for every document of $types, with its photo count. Run with the drafts perspective. */
+export function storyQuery(spec: StorySpec): string {
+  return (
+    `*[_type in $types]{_id, _type, "title": coalesce(title, heading, name), ` +
+    `"count": count(coalesce(${spec.field}, []))} | order(title asc)`
+  );
+}
+
+export interface StoryDoc {
+  _id: string;
+  _type: string;
+  title?: string | null;
+  count?: number | null;
+}
+
+/** One choice per document (a draft and its published copy count once), labelled "Name (n photos)". */
+export function storyChoices(
+  docs: StoryDoc[],
+  typeTitle: (type: string) => string = (t) => t,
+  noun?: string,
+): GalleryChoice[] {
+  const out: GalleryChoice[] = [];
+  const seen = new Set<string>();
+  // A draft is listed before nothing; prefer it, since it is the newer text.
+  const sorted = [...docs].sort(
+    (a, b) => Number(b._id.startsWith('drafts.')) - Number(a._id.startsWith('drafts.')),
+  );
+  for (const d of sorted) {
+    const docId = publishedId(d._id);
+    if (seen.has(docId)) continue;
+    seen.add(docId);
+    const n = d.count ?? 0;
+    const name = (d.title ?? '').trim() || typeTitle(d._type);
+    out.push({
+      docId,
+      docType: d._type,
+      sectionKey: '',
+      story: true,
+      label: `${noun ? noun + ': ' : ''}${name} (${n} photo${n === 1 ? '' : 's'})`,
+    });
+  }
+  return out;
+}
+
 export interface GalleryChoice {
   /** The document's published id. */
   docId: string;
   docType: string;
   sectionKey: string;
+  /** Card 143: the photo goes on the document's own list (no gallery section). */
+  story?: boolean;
   /** "Home: Photos from Sunday (12 photos)". */
   label: string;
 }

@@ -49,7 +49,7 @@ import {
 } from '../../lib/studio-quick-jobs';
 import { API_VERSION, PUBLISHED_EVENT, ToolHeading, useStaffView, useStudioLink } from './shared';
 import { TourButton } from './StudioTour';
-import { DoneCard, KitAction, KitNotice, KitScope, TileCard } from './ui';
+import { DoneCard, KitAction, KitNotice, KitScope, KitSwitch, TileCard } from './ui';
 import { liveSteps } from '../../lib/studio-look';
 import type { KitConfig, QuickField, QuickForm } from './types';
 
@@ -130,16 +130,14 @@ function FieldInput({
     input = <TextArea {...common} rows={4} onChange={(e) => onChange(e.currentTarget.value)} />;
   } else if (field.kind === 'boolean') {
     input = (
-      <label htmlFor={id} style={{ display: 'flex', gap: 12, alignItems: 'center', ...big }}>
-        <input
-          id={id}
-          type="checkbox"
-          checked={value === 'true'}
-          onChange={(e) => onChange(e.currentTarget.checked ? 'true' : 'false')}
-          style={{ width: 24, height: 24 }}
-        />
-        <span>{field.description ?? 'Yes'}</span>
-      </label>
+      <KitSwitch
+        id={id}
+        checked={value === 'true'}
+        onChange={(on) => onChange(on ? 'true' : 'false')}
+        label={field.description ?? 'Yes'}
+        describedBy={describedBy}
+        labelledBy={`${id}-title`}
+      />
     );
   } else if (field.kind === 'select') {
     input = (
@@ -184,7 +182,7 @@ function FieldInput({
   return (
     <Stack gap={3} data-tour={`quick-field-${field.name}`}>
       {field.kind === 'boolean' ? (
-        <Text size={2} weight="semibold">
+        <Text size={2} weight="semibold" id={`${id}-title`}>
           {field.title}
         </Text>
       ) : (
