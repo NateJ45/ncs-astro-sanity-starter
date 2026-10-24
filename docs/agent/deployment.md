@@ -142,18 +142,45 @@ apply to responses the Worker generates itself, so the SSR routes (`/preview/**`
 `/api/draft-mode/*`) carry none of these headers. Site-wide:
 
 - `Strict-Transport-Security` (HSTS, one year, includeSubDomains)
-- `Content-Security-Policy: frame-ancestors 'self'`, which replaces the legacy
-  `X-Frame-Options` (there is no `X-Frame-Options` header; an older version of this doc
-  said `DENY`, which would break the Presentation tool's iframe of `/preview/*`)
+- `Content-Security-Policy`: `frame-ancestors 'self'` (replaces the legacy
+  `X-Frame-Options`; `DENY` would break the Presentation tool's iframe of `/preview/*`),
+  plus `object-src 'none'`, `base-uri 'self'` and a `script-src` written at build time
+  (below, PORTS.md card 153)
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Cross-Origin-Opener-Policy: same-origin`
 
-A full Content-Security-Policy is intentionally not included; doing it right requires
-testing against all third-party scripts in use (Sanity CDN, Web3Forms, Cloudflare
-Analytics, GA4, any embed). See `stack-and-config.md` for why the meta-CSP approach was
-abandoned, and the header comment in `public/_headers` for the Studio's grants.
-reid-design-site's `public/_headers` (2026-09-29) is a tested full policy to start from.
+**The script policy (PORTS.md card 153, from fbc-auburn's Lighthouse "Ensure CSP is effective
+against XSS" flag, 2026-10-24).** `public/_headers` says only `frame-ancestors 'self'` on the
+`/*` rule. `scripts/build-csp.mjs` (PORTABLE) runs after `astro build` (part of
+`npm run build`) and rewrites that line in `dist/client/_headers` to add
+`object-src 'none'; base-uri 'self'; script-src ...`, where the list is `'self'`,
+`'wasm-unsafe-eval'` (Pagefind's WebAssembly), every external script origin in the built pages,
+a sha256 hash of every inline script on every page (inside Custom code `srcdoc` frames too, which
+inherit the page's policy), and `'unsafe-inline'` last, which browsers ignore once hashes are
+present. Helpers and tests: `scripts/lib/csp.mjs`.
+
+- **Why one site-wide list, not a policy per page, and not Astro's `security.csp`:** the page
+  router (`<ClientRouter />`) runs the next page's inline scripts under the FIRST page's policy,
+  and Astro's own CSP feature does not support the router at all.
+- **Only scripts are restricted.** No `default-src`, so images, frames, styles, fonts and
+  fetches are untouched.
+- **What can still break:** a script that pasted code adds AT RUNTIME from an origin not in the
+  HTML (a widget whose loader pulls a second script from another host). List that origin in
+  `scripts/csp-origins.json` (the site's own file, not PORTABLE; a JSON array of origins such as
+  `["https://widget.example.com"]`). GA4's tag is handled inside the script.
+- **The Studio detaches it** (`/studio/*`: `! Content-Security-Policy`, then `frame-ancestors`
+  only), per trap 1 below.
+- **Trusted Types are not required** (`require-trusted-types-for`). Lighthouse lists it, unscored;
+  enforcing it would break the router, Pagefind's results and the React islands, which all write
+  HTML strings, and a report-only trial logs console errors that cost the Best Practices score.
+- The build fails if the `/*` line is missing, so the policy never quietly drops to none.
+- SSR routes (`/preview/**`, `/api/*`, password pages) are Worker responses and get no
+  `_headers` at all, so the policy never reaches them.
+
+For a full policy (`default-src` and the rest), reid-design-site's `public/_headers`
+(2026-09-29) is a tested start, and the header comment in `public/_headers` lists the Studio's
+grants. `stack-and-config.md` says why the meta-CSP approach was abandoned.
 
 **Rules for the SAME path do not merge (PORTS.md card 59).** Before adding any rule
 other than `/*`, know two things, both measured under `npm run preview`:
