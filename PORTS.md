@@ -267,6 +267,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 149 | AI suggestion and the private-page password status are the kit's callouts           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 151 | Component type fixes: FAQ size through cn, 12px labels, safe-centred logo row       | n/a     | n/a         | yes      | no               | no            | n/a            | no                 | no                  | no             |
 | 152 | Church Trac pattern: form band, page reader, link boxes (church sites, no code)     | n/a     | n/a         | n/a      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10226,3 +10227,49 @@ behaviour is not content-dependent. Detail: `docs/claude/build-and-scripts.md`.
 3. **Church Trac page reader.** Church Trac has no feed or API for its pages, so `church-trac-page.ts` reads a published page's HTML (a hundred-line tokenizer, no dependency), keeps headings, paragraphs, images, buttons and columns, drops template text and unsafe links, and the site draws it in its own type. One fetch per page per build, two tries, failure logged and shown as "Read it on Church Trac"; a daily rebuild keeps it within a day. Test against saved real pages (fbcm's `tests/fixtures/churchtrac-*.html`), never the live site in CI. fbcm hard-codes its two newsletters; Auburn makes it a band that names the page.
 
 **Where it lives:** fbcm `src/lib/church-links.ts`, `church-trac-form.ts`, `church-trac-page.ts`, `church-trac-newsletters.ts`, `OPERATIONS.md` "Switching to Church Trac"; FBC Auburn `docs/agent/church-trac.md`. **Also:** the iCal calendar (`church-calendar.ts`) is the fourth Church Trac feed, already in both sites.
+
+## Card 153: a build-time script-src for the public pages (2026-10-24)
+
+**Origin:** first-baptist-auburn's mobile Lighthouse report flagged its CSP as missing `script-src` and `object-src`
+("Ensure CSP is effective against XSS"). Astro's own `security.csp` does not support `<ClientRouter />`, and the router
+runs the next page's inline scripts under the FIRST page's policy, so a per-page policy cannot work either. Built in
+first-baptist-auburn (NateJ45/fbc-auburn#140), then generalised here.
+
+**Canonical:** PORTABLE: `scripts/build-csp.mjs`, `scripts/lib/csp.mjs` (+ `csp.test.mjs`). Per site (NOT portable):
+the `/*` `Content-Security-Policy: frame-ancestors 'self'` line and the `/studio/*` detach rule in `public/_headers`,
+the `npm run build` chain in `package.json`, the optional `scripts/csp-origins.json` (a JSON array of extra origins),
+and the "Security headers" section of `docs/agent/deployment.md` plus the note in `docs/agent/custom-code.md`.
+
+**What it does.** `npm run build` is now `with-workerd astro build && node scripts/build-csp.mjs && node
+scripts/build-search-index.mjs`. The script reads every built page in `dist/client` (not `/studio`), including the
+documents inside Custom code `srcdoc` frames (they inherit the page's policy), and rewrites the `/*` rule's CSP line in
+`dist/client/_headers` to `frame-ancestors 'self'; object-src 'none'; base-uri 'self'; script-src ...`. The list is
+`'self'`, `'wasm-unsafe-eval'` (Pagefind's WebAssembly; it allows wasm compilation, never JS eval), every external
+`<script src>` origin, GA4's `googletagmanager.com` when a page carries the tag, the site's `csp-origins.json`, one
+sorted sha256 per inline script on any page, `'unsafe-hashes'` plus hashes if an inline `on*=` handler exists, and
+`'unsafe-inline'` last (ignored by any browser that understands hashes; only a pre-hash browser reads it). JSON-LD and
+other non-running script types are skipped. `default-src` is deliberately unset, so images, frames, styles, fonts and
+fetches are untouched. The build FAILS if the placeholder line is missing, so the policy never silently drops to none.
+`/studio/*` detaches the policy (`! Content-Security-Policy`, then `frame-ancestors 'self'` only; card 59 trap 1).
+Trusted Types are not required: enforcing them breaks the router, Pagefind and the React islands.
+
+**Verified in the starter (2026-10-24)** under `npm run build` then `npm run preview` (wrangler dev): a page carries the
+full policy, `/studio/` carries `frame-ancestors 'self'` only, a `/_astro/*` file carries the full policy (no effect on a script
+response) and keeps its immutable cache line, nine pages in a row through the router, search (switched on locally for the check), the Custom code wall at `/styleguide/sections/` and the Studio load with no CSP violations, and
+`npm run test:unit` passes. fbc-auburn measured Lighthouse best-practices 100 with it.
+
+**Applied:** starter (this card); first-baptist-auburn (origin, fbc-auburn#140; its copies take the PORTABLE marker in a
+follow-up PR after this merges). fbcm and Crestview are not matrix columns: fbcm sends only `frame-ancestors` today and can
+take it as-is.
+
+**Who should take it.** As-is (their `_headers` still say only `frame-ancestors 'self'`): stonesteps-50k, fbcm, and
+mas-monograms (its line lists extra frame-ancestors origins, so either drop them, as the Studio is embedded, or change
+`PLACEHOLDER` to match). presacademy, reid-design-site and nixoncreativestudio already send a full policy with
+`script-src 'self' 'unsafe-inline' ...`, which Lighthouse rates as not effective; they want the hashes too, but their
+`script-src` lives inside a `default-src` policy, so that port needs `build-csp.mjs` to rewrite only the `script-src`
+directive (a small extension to this card, decide when the first of them is ported). wcp, 2ndpreschicago and
+ncs-church-starter are archived.
+
+**Gotcha:** a widget that pasted code adds AT RUNTIME from a host that is not in the HTML (a loader that pulls a second
+script) is blocked. Put its origin in `scripts/csp-origins.json` and rebuild. Verify every port under `npm run preview`,
+never a plain static server: only wrangler applies `_headers`.

@@ -2,13 +2,19 @@
 # prerendered page, /studio/, the /_astro/* files). Not to responses the Worker writes
 # itself: the SSR routes (/preview/**, /api/draft-mode/*) get none of them.
 #
-# Content-Security-Policy beyond frame-ancestors is intentionally NOT set here.
-# Getting it right needs real testing against this project's actual embeds
-# (Sanity CDN, Web3Forms POST, Calendly iframe, the Cloudflare Analytics beacon),
-# and a half-right CSP silently breaks widgets rather than failing loudly. A
-# project that wants one should copy presacademy's block, which is a tested
-# example, and then verify every embed under `npm run preview` (wrangler dev) --
-# a plain static file server sends no headers, so it proves nothing.
+# Content-Security-Policy (PORTS.md card 153): the /* line below says only
+# frame-ancestors here. scripts/build-csp.mjs runs after every build and rewrites
+# THAT LINE in dist/client/_headers to add object-src 'none', base-uri 'self' and a
+# script-src listing 'self', Pagefind's 'wasm-unsafe-eval', the external script
+# origins the pages load and a hash of every inline script on every page (one
+# site-wide list, because the page router runs the next page's scripts under the
+# first page's policy). Keep that line byte-for-byte or the build fails.
+# default-src is NOT set, so images, frames, styles, fonts and fetches are not
+# restricted. The Studio detaches the policy (/studio/* below, trap 1). Verify any
+# change under `npm run preview` (wrangler dev): a plain static file server sends
+# no headers, so it proves nothing. Detail: docs/agent/deployment.md ("Security headers").
+#
+# If a full policy (default-src and the rest) is ever added, the notes below hold.
 #
 # WHEN YOU DO ADD A FULL CSP, the embedded Studio and the live preview need:
 #   connect-src   https://api.sanity.io https://*.api.sanity.io
@@ -68,3 +74,9 @@
 /_astro/*
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=31536000, immutable
+
+# The Studio keeps only frame-ancestors (trap 1 above): its bundles, blob workers and
+# Sanity's own scripts are not in the public pages' script-src (card 153).
+/studio/*
+  ! Content-Security-Policy
+  Content-Security-Policy: frame-ancestors 'self'

@@ -75,3 +75,12 @@ not be appended to it. The boxed frame renders in Presentation exactly as on the
 Do not loosen the sandbox, do not move the site-wide code into the shared projection, and do not render pasted code
 with `set:html` anywhere except the two opt-outs above. If a provider genuinely needs the page, that is what the switch
 is for, and the Checkup keeps it visible.
+
+## The script policy (PORTS.md card 153)
+
+An `srcdoc` frame inherits the page's Content-Security-Policy, and the public pages send a
+`script-src` (docs/agent/deployment.md, "Security headers"). The build hashes every inline script it
+finds inside a Custom code frame and allows every `<script src>` origin in it, so pasted code that
+was published before the build runs as before. A script the pasted code ADDS at runtime from a
+different origin is blocked: list that origin in `scripts/csp-origins.json`.
+Pasted code reaches the live site only through a rebuild, which recomputes the policy.
