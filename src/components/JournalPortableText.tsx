@@ -123,10 +123,12 @@ function makeComponents(): PortableTextComponents {
           {children}
         </p>
       ),
+      // Headings inside a post sit one step below the page's own section headings (card 151):
+      // a body H2 was the full section size with section-sized space above it.
       h2: ({ children }) => (
         <h2
           id={makeHeadingId(seen, children)}
-          className="mt-section-lg mb-m scroll-mt-24 font-display text-h2 text-foreground"
+          className="mt-l mb-s scroll-mt-24 font-display text-h3 text-foreground"
         >
           {children}
         </h2>
@@ -134,7 +136,7 @@ function makeComponents(): PortableTextComponents {
       h3: ({ children }) => (
         <h3
           id={makeHeadingId(seen, children)}
-          className="mt-section-md mb-s scroll-mt-24 font-display text-h3 text-foreground"
+          className="mt-l mb-xs scroll-mt-24 font-display text-h4 text-foreground"
         >
           {children}
         </h3>
@@ -142,7 +144,7 @@ function makeComponents(): PortableTextComponents {
       h4: ({ children }) => (
         <h4
           id={makeHeadingId(seen, children)}
-          className="mt-l mb-s scroll-mt-24 font-display text-h4 text-foreground"
+          className="mt-m mb-xs scroll-mt-24 font-display text-h5 text-foreground"
         >
           {children}
         </h4>
@@ -280,7 +282,7 @@ function makeComponents(): PortableTextComponents {
       pullQuote: ({ value }) => {
         if (!value?.quote) return null;
         return (
-          <figure className="my-section-lg border-y border-border-soft py-section-md text-center">
+          <figure className="my-l border-y border-border-soft py-l text-center">
             <span
               aria-hidden="true"
               className="mb-[-1.5rem] block font-display text-[clamp(3rem,6vw,5rem)] leading-none text-link/45 select-none"
@@ -292,7 +294,7 @@ function makeComponents(): PortableTextComponents {
             </blockquote>
             {value.attribution && (
               <figcaption className="mt-l text-xs tracking-widest text-foreground/80 uppercase">
-                — {value.attribution}
+                {value.attribution}
               </figcaption>
             )}
           </figure>

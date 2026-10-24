@@ -31,12 +31,14 @@ const {
 const validLogos = logos.filter((l) => l?.asset);
 const hasHeading = !!(eyebrow || headline);
 
-// Row: single flex row that scrolls horizontally on narrow screens.
+// Row: single flex row that scrolls horizontally on narrow screens. `justify-center-safe`, not
+// `justify-center`: a centred row that overflows pushes its first logo off the left edge where the
+// scroll cannot reach it; the safe form centres only when the row fits (card 151).
 // Grid: wraps across rows (2-3 per row on small, 4-6 per row on large).
 const containerClass =
   layout === 'grid'
     ? 'flex flex-wrap justify-center gap-x-l gap-y-m'
-    : 'flex flex-row flex-nowrap overflow-x-auto gap-x-l items-center justify-center';
+    : 'flex flex-row flex-nowrap overflow-x-auto gap-x-l items-center justify-center-safe';
 ---
 
 {validLogos.length > 0 && (

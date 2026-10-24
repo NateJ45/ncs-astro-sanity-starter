@@ -113,7 +113,7 @@ export default function StatsCounter({ stats }: Props) {
                 run={visible}
               />
             </span>
-            <span className="mt-2 block text-[0.62rem] tracking-eyebrow text-muted-foreground uppercase">
+            <span className="mt-2 block text-xs tracking-eyebrow text-muted-foreground uppercase">
               {stat.label}
             </span>
           </div>

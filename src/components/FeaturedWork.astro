@@ -136,7 +136,7 @@ const heroHref = hero?.slug?.current ? `/portfolio/${hero.slug.current}/` : '#';
             {/* Room-type chip top-left — same chip pattern as ProjectCard. */}
             {heroRoomLabel && (
               <span
-                class="absolute top-m left-m z-[2] inline-flex items-center rounded-full bg-bg/85 px-2.5 py-1 text-[0.65rem] font-semibold tracking-eyebrow text-primary-dark uppercase backdrop-blur-sm"
+                class="absolute top-m left-m z-[2] inline-flex items-center rounded-full bg-bg/85 px-2.5 py-1 text-xs font-semibold tracking-eyebrow text-primary-dark uppercase backdrop-blur-sm"
                 aria-hidden="true"
               >
                 {heroRoomLabel}
@@ -146,7 +146,7 @@ const heroHref = hero?.slug?.current ? `/portfolio/${hero.slug.current}/` : '#';
             {/* Featured pin — only when this project is flagged as featured. */}
             {hero?.featured && (
               <span
-                class="absolute top-m right-m z-[2] inline-flex items-center gap-1 rounded-full bg-primary-dark px-2.5 py-1 text-[0.65rem] font-semibold tracking-eyebrow text-white uppercase"
+                class="absolute top-m right-m z-[2] inline-flex items-center gap-1 rounded-full bg-primary-dark px-2.5 py-1 text-xs font-semibold tracking-eyebrow text-white uppercase"
                 aria-hidden="true"
               >
                 ★ Featured
@@ -225,7 +225,7 @@ const heroHref = hero?.slug?.current ? `/portfolio/${hero.slug.current}/` : '#';
 
                   <div class="flex min-w-0 flex-1 flex-col justify-center py-m pr-m">
                     {cRoom && (
-                      <p class="text-[0.65rem] font-semibold tracking-eyebrow text-link uppercase">
+                      <p class="text-xs font-semibold tracking-eyebrow text-link uppercase">
                         {cRoom}
                       </p>
                     )}
