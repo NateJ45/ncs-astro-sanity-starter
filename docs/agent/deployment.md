@@ -175,6 +175,13 @@ present. Helpers and tests: `scripts/lib/csp.mjs`.
   enforcing it would break the router, Pagefind's results and the React islands, which all write
   HTML strings, and a report-only trial logs console errors that cost the Best Practices score.
 - The build fails if the `/*` line is missing, so the policy never quietly drops to none.
+- **One known console error, harmless (decided 2026-10-24).** On an in-site click to a page whose
+  last script is an inline module, Astro's router (`astro/dist/transitions/router.js`, `runScripts`)
+  appends an empty `<script type="module" src="data:application/javascript,">` only to wait for that
+  module to run. The policy blocks it and Chrome logs "Loading the script 'data:application/javascript,'
+  violates ... Content Security Policy". Nothing breaks: the router resolves on `onerror` as well as
+  `onload`. It never happens on a first load, so Lighthouse does not see it. `data:` stays OUT of
+  `script-src` on purpose: it is a common way to slip a script past a policy.
 - SSR routes (`/preview/**`, `/api/*`, password pages) are Worker responses and get no
   `_headers` at all, so the policy never reaches them.
 

@@ -10270,6 +10270,12 @@ mas-monograms (its line lists extra frame-ancestors origins, so either drop them
 directive (a small extension to this card, decide when the first of them is ported). wcp, 2ndpreschicago and
 ncs-church-starter are archived.
 
+**Known, harmless console error (found live on fbc-auburn, 2026-10-24):** on an in-site click, Astro's router appends an
+empty `data:application/javascript,` module script after a page's last inline module, only to wait for it. The policy
+blocks it and the console logs a CSP error; the router resolves on `onerror` too, so nothing breaks, and a first load
+(what Lighthouse measures) never does it. Decided: leave `data:` out of `script-src`. A port check that sees only this
+error has passed. Detail: `docs/agent/deployment.md`, "Security headers".
+
 **Gotcha:** a widget that pasted code adds AT RUNTIME from a host that is not in the HTML (a loader that pulls a second
 script) is blocked. Put its origin in `scripts/csp-origins.json` and rebuild. Verify every port under `npm run preview`,
 never a plain static server: only wrangler applies `_headers`.
