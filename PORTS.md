@@ -10258,8 +10258,8 @@ full policy, `/studio/` carries `frame-ancestors 'self'` only, a `/_astro/*` fil
 response) and keeps its immutable cache line, nine pages in a row through the router, search (switched on locally for the check), the Custom code wall at `/styleguide/sections/` and the Studio load with no CSP violations, and
 `npm run test:unit` passes. fbc-auburn measured Lighthouse best-practices 100 with it.
 
-**Applied:** starter (this card); first-baptist-auburn (origin, fbc-auburn#140; its copies take the PORTABLE marker in a
-follow-up PR after this merges). fbcm and Crestview are not matrix columns: fbcm sends only `frame-ancestors` today and can
+**Applied:** starter (this card); first-baptist-auburn (origin, fbc-auburn#140; PORTABLE copies since fbc-auburn#147,
+2026-10-24, sync-check clean). fbcm and Crestview are not matrix columns: fbcm sends only `frame-ancestors` today and can
 take it as-is.
 
 **Who should take it.** As-is (their `_headers` still say only `frame-ancestors 'self'`): stonesteps-50k, fbcm, and
