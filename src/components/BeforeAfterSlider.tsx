@@ -173,13 +173,13 @@ export default function BeforeAfterSlider({
           {/* Editorial pill labels — opacity tracks the slider position so the
               dominant image's label fades back. Subtle, not shouty. */}
           <span
-            className="absolute top-s left-s rounded-full bg-white/85 px-2.5 py-1 text-[0.65rem] font-semibold tracking-eyebrow text-primary-dark uppercase backdrop-blur-sm transition-opacity"
+            className="absolute top-s left-s rounded-full bg-white/85 px-2.5 py-1 text-xs font-semibold tracking-eyebrow text-primary-dark uppercase backdrop-blur-sm transition-opacity"
             style={{ opacity: beforeOpacity }}
           >
             Before
           </span>
           <span
-            className="absolute top-s right-s rounded-full bg-primary-dark/95 px-2.5 py-1 text-[0.65rem] font-semibold tracking-eyebrow text-white uppercase backdrop-blur-sm transition-opacity"
+            className="absolute top-s right-s rounded-full bg-primary-dark/95 px-2.5 py-1 text-xs font-semibold tracking-eyebrow text-white uppercase backdrop-blur-sm transition-opacity"
             style={{ opacity: afterOpacity }}
           >
             After

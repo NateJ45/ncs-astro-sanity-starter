@@ -132,7 +132,7 @@ const heroDate = formatDate(hero?.publishedAt);
 
             {hero?.featured && (
               <span
-                class="absolute top-m right-m inline-flex items-center gap-1 rounded-full bg-primary-dark px-2.5 py-1 text-[0.65rem] font-semibold tracking-eyebrow text-white uppercase"
+                class="absolute top-m right-m inline-flex items-center gap-1 rounded-full bg-primary-dark px-2.5 py-1 text-xs font-semibold tracking-eyebrow text-white uppercase"
                 aria-hidden="true"
               >
                 ★ Featured
@@ -147,7 +147,7 @@ const heroDate = formatDate(hero?.publishedAt);
             <div class="absolute inset-x-0 bottom-0 p-l pr-28 md:p-section-md md:pr-36">
               <div class="flex flex-wrap items-center gap-x-m gap-y-xs">
                 {heroPrimaryCategory?.title && (
-                  <span class="inline-flex items-center rounded-full bg-bg/85 px-2.5 py-1 text-[0.65rem] font-semibold tracking-eyebrow text-primary-dark uppercase backdrop-blur-sm">
+                  <span class="inline-flex items-center rounded-full bg-bg/85 px-2.5 py-1 text-xs font-semibold tracking-eyebrow text-primary-dark uppercase backdrop-blur-sm">
                     {heroPrimaryCategory.title}
                   </span>
                 )}
@@ -226,7 +226,7 @@ const heroDate = formatDate(hero?.publishedAt);
 
                   <div class="flex min-w-0 flex-1 flex-col justify-center py-m pr-m">
                     {cCat?.title && (
-                      <p class="truncate text-[0.65rem] font-semibold tracking-eyebrow text-link uppercase">
+                      <p class="truncate text-xs font-semibold tracking-eyebrow text-link uppercase">
                         {cCat.title}
                       </p>
                     )}
