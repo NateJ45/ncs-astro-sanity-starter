@@ -122,11 +122,13 @@ test('collects file links inside the indexed main only', () => {
     type: 'bulletin',
     date: 'October 12, 2026',
     note: 'Order of service',
+    described: true,
     source: "This week's bulletin",
     sourceUrl: '/bulletin/',
     language: 'en',
   });
   assert.equal(links[1].title, 'Camp & sign-up form');
+  assert.equal(links[1].described, false);
   assert.equal(links[1].type, 'file');
 });
 
@@ -172,13 +174,22 @@ test('mergeFileLinks keeps one entry per file and the first explicit details', (
   };
   const merged = mergeFileLinks([
     { ...base, url: '/x.pdf' },
-    { ...base, url: '/x.pdf', title: 'Notes: Grace', type: 'notes', date: 'Oct 1', source: 'B' },
+    {
+      ...base,
+      url: '/x.pdf',
+      title: 'Notes: Grace',
+      described: true,
+      type: 'notes',
+      date: 'Oct 1',
+      source: 'B',
+    },
     { ...base, url: '/y.pdf' },
   ]);
   assert.equal(merged.length, 2);
   assert.equal(merged[0].type, 'notes');
   assert.equal(merged[0].date, 'Oct 1');
   assert.equal(merged[0].source, 'A');
+  assert.equal(merged[0].title, 'Notes: Grace');
 });
 
 test('cacheKey uses the Sanity SHA-1 when the URL has one', () => {

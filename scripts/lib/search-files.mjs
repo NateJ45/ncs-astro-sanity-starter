@@ -18,6 +18,10 @@
 //   data-search-date="October 12, 2026"             shown under the title
 //   data-search-note="Due back by June 1"           searchable, shown nowhere
 //
+// A FORMAT WE DO NOT READ (audio, images, slides) is left out unless its link
+// names it with data-search-title: a bare "Download the recording" link is
+// not worth a result of its own.
+//
 // NEVER FAILS THE BUILD. A file that will not download, is too big, is in a
 // format we cannot read or has no text layer (a scanned page) is still indexed
 // by its title, note and the page that links it, and gets one warning line.
@@ -188,6 +192,8 @@ export function collectFileLinks(html, pageUrl) {
     out.push({
       url: cleanFileUrl(href),
       title: attr(tag, 'data-search-title') || text,
+      // True when the page named the file on purpose (data-search-title).
+      described: Boolean(attr(tag, 'data-search-title')),
       type: attr(tag, 'data-search-type') || 'file',
       date: attr(tag, 'data-search-date') || '',
       note: attr(tag, 'data-search-note') || '',
@@ -211,10 +217,13 @@ export function mergeFileLinks(links) {
       byUrl.set(l.url, { ...l });
       continue;
     }
+    if (l.described && !had.described) {
+      had.title = l.title;
+      had.described = true;
+    }
     if (had.type === 'file' && l.type !== 'file') had.type = l.type;
     if (!had.date && l.date) had.date = l.date;
     if (!had.note && l.note) had.note = l.note;
-    if (l.title && l.title.length > had.title.length && had.type === 'file') had.title = l.title;
   }
   return [...byUrl.values()];
 }

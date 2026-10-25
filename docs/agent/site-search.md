@@ -45,7 +45,9 @@ result, so a phrase inside a bulletin finds the bulletin. The code is `scripts/l
   the first page in path order.
 - **What a result shows.** The type, a format tag (PDF, Word, Text), the date, the title, a matching excerpt from
   inside the file, and "PDF file, from <page title>". The link opens the file itself.
-- **When a file can't be read** (download over 20 s, over 25 MB, another format, or a scan with no text layer, meaning
+- **Other formats** (audio, images, slides) are not read. They get a title-only result only when the link carries
+  `data-search-title`, so a bare "Download the recording" link adds nothing.
+- **When a file can't be read** (download over 20 s, over 25 MB, or a scan with no text layer, meaning
   under 10 characters a page), it is still indexed by its title, note and page, and the build log names it once. The
   build never fails over a file. A scan becomes searchable when it is re-exported as a text PDF (most scanner apps
   have an OCR or "searchable PDF" option). There is deliberately no OCR in the build.

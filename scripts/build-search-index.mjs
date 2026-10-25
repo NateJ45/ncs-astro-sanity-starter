@@ -129,11 +129,14 @@ if (files.length) {
     const read = reads[i];
     tally[read.status]++;
     if (read.cached) tally.cached++;
+    // A format we don't read inside (audio, images) earns a result only when
+    // the page named it; a bare "Download the recording" link is left out.
+    if (read.status === 'skipped' && !link.described) continue;
     if (read.status === 'scanned') {
       console.warn(
         `[search] "${link.title}" (${link.url}) looks like a scan with no text layer; it is found by its title only. Re-export it as a text PDF to make its words searchable.`,
       );
-    } else if (read.status === 'failed' || read.status === 'skipped') {
+    } else if (read.status === 'failed') {
       console.warn(
         `[search] "${link.title}" (${link.url}): ${read.reason}; found by its title only`,
       );
@@ -156,7 +159,7 @@ await pagefind.close();
 writeFileSync(join(SITE_DIR, 'pagefind', 'words.json'), JSON.stringify(topWords(counts)));
 
 const fileNote = READ_FILES
-  ? `${files.length} files (${tally.read} read, ${tally.scanned} scanned, ${tally.failed} failed, ${tally.skipped} not readable; ${tally.cached} from cache)`
+  ? `${files.length} files (${tally.read} read, ${tally.scanned} scanned, ${tally.failed} failed, ${tally.skipped} other formats; ${tally.cached} from cache)`
   : 'files not read (--no-files)';
 console.log(
   `[search] index written to dist/client/pagefind/: ${added.page_count} pages, ${fileNote}, ${counts.size} distinct words`,

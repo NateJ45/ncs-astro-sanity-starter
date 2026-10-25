@@ -10302,8 +10302,8 @@ build time and imported only when a page links a file of that kind.
    never from a Sanity query, so expired, scheduled, private and noindex files stay out with no extra logic. Links can
    carry `data-search-title`, `data-search-type` (`bulletin`, `notes`, `newsletter`, `form`, `policy`, `download`), `data-search-date`
    and `data-search-note`; a bare link still works (type `file`, title from its text). A file that will not
-   download (20 s timeout), is over 25 MB, is another format, or is a scan (under 10 characters a page) is indexed by
-   title only and logged once; the build never fails over a file. Text is cached by the Sanity SHA-1 in
+   download (20 s timeout), is over 25 MB or is a scan (under 10 characters a page) is indexed by
+   title only and logged once; the build never fails over a file. Audio, images and other formats are left out unless the link carries `data-search-title`. Text is cached by the Sanity SHA-1 in
    `node_modules/.cache/search-files/`, kept by `actions/cache`, so a file is read once ever. The asset URLs are
    immutable, so CI reading them does not break card 138.
 2. **"Did you mean".** The build counts every indexed word into `dist/client/pagefind/words.json` (top 20k). With no
