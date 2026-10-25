@@ -146,9 +146,25 @@ apply to responses the Worker generates itself, so the SSR routes (`/preview/**`
   `X-Frame-Options`; `DENY` would break the Presentation tool's iframe of `/preview/*`),
   plus `object-src 'none'`, `base-uri 'self'` and a `script-src` written at build time
   (below, PORTS.md card 153)
+- A second `Content-Security-Policy: form-action 'self'` (PORTS.md card 159): forms may post to
+  this site only, which stops an injected form sending what a visitor types elsewhere. It is a
+  separate line because build-csp.mjs needs the first line byte-for-byte; both policies are
+  enforced, so it only adds this one rule. **A pasted form that posts elsewhere** (a donate
+  button, a mailing-list signup in a Custom code block, whose srcdoc frame inherits the page's
+  policy) needs its origin added to that line, e.g. `form-action 'self' https://www.paypal.com`.
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Cross-Origin-Opener-Policy: same-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=(), usb=(), magnetometer=(), gyroscope=()`
+  (card 159): device features no page uses, refused for the page and every frame in it. Autoplay,
+  fullscreen and encrypted media are not listed, so embedded video players keep working.
+  `interest-cohort` is left out on purpose: Chrome logs an "unrecognized feature" error for it.
+
+**Caching (card 159).** `/_astro/*` is a year, immutable (the names carry a content hash).
+`/og/*`, `/favicon.svg`, `/favicon.ico` and `/apple-touch-icon.png` get a day plus a week of
+`stale-while-revalidate`: their names are fixed, so never mark them immutable. A font or texture the
+CSS needs belongs under `src/assets/` (Vite hashes it into `/_astro/`), not `public/`. HTML has no
+rule: Cloudflare's `max-age=0, must-revalidate` with an ETag, because every page is rebuilt on publish.
 
 **The script policy (PORTS.md card 153, from fbc-auburn's Lighthouse "Ensure CSP is effective
 against XSS" flag, 2026-10-24).** `public/_headers` says only `frame-ancestors 'self'` on the
@@ -163,6 +179,11 @@ present. Helpers and tests: `scripts/lib/csp.mjs`.
 - **Why one site-wide list, not a policy per page, and not Astro's `security.csp`:** the page
   router (`<ClientRouter />`) runs the next page's inline scripts under the FIRST page's policy,
   and Astro's own CSP feature does not support the router at all.
+- **The line has a size limit** (card 159): Cloudflare rejects a `_headers` line over 2,000
+  characters, and each inline-script hash adds about 53. `vite.build.assetsInlineLimit: 0` in
+  `astro.config.mjs` keeps small component scripts out of the pages as hashed `/_astro/` files, so only
+  `is:inline` scripts need a hash. Watch the build's `[csp] ... (N bytes)` line when adding an
+  `is:inline` script; `scripts/lib/headers-line-limit.test.mjs` fails when a built line is over the limit.
 - **Only scripts are restricted.** No `default-src`, so images, frames, styles, fonts and
   fetches are untouched.
 - **What can still break:** a script that pasted code adds AT RUNTIME from an origin not in the

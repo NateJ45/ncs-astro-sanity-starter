@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/with-workerd.mjs astro build && node scripts/build-csp.mjs && node scripts/build-search-index.mjs",
+    "build": "node scripts/with-workerd.mjs astro build && node scripts/purge-page-css.mjs && node scripts/build-csp.mjs && node scripts/build-search-index.mjs",
     "build:full": "npm run typegen && npm run build",
     "preview": "wrangler dev -c dist/server/wrangler.json",
     "astro": "astro",
