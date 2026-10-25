@@ -221,6 +221,8 @@ export interface PagefindResultData {
   excerpt?: string;
   meta?: Record<string, string | undefined>;
   filters?: Record<string, string[] | undefined>;
+  /** Word positions that matched. Empty when Pagefind matched loosely, not on a real word. */
+  locations?: number[];
 }
 
 /** Maps one Pagefind result to what the panel draws. */

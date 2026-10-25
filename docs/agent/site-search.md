@@ -71,7 +71,7 @@ only when a search comes up short, so a normal search costs nothing extra:
    "1 Corinthians 13"; abbreviations that are also names or words, like "Tim", "Dan" and "Col", change only before a
    chapter number). With none at all, it also searches each meaningful word of a multi-word search alone. Results
    merge with the original search's results first.
-2. **Still none:** it fetches `/pagefind/words.json` once (the site's own words with counts, written by the build) and
+2. **Still none** (or Pagefind's own loose match found a page without matching any word on it): it fetches `/pagefind/words.json` once (the site's own words with counts, written by the build) and
    corrects each unknown word to the nearest common one: 1 edit for words of 4 to 6 letters, 2 beyond, a swap of two
    neighbouring letters counting as one edit, and never a word that starts a real word. The live region reads
    'Nothing found for "baptsim". Showing 4 results for "baptism".' and a "Search for "baptsim" instead" button runs

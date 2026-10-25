@@ -338,13 +338,17 @@ export function mountSearchPanel(
     let found = await widen(pf, primary, res, filterOpt, mine);
     if (!found) return;
     let corrected: string | null = null;
-    if (found.results.length === 0 && !exact) {
+    // Pagefind 1.5 sometimes returns a page for a typo without matching any
+    // word on it ("baptsim"). Treat that like nothing found and try the
+    // corrected spelling, keeping the loose results if it finds no better.
+    if (!exact && (await missed(found.results))) {
+      if (mine !== ticket) return;
       const fix = suggestCorrection(term, await loadWords());
       if (mine !== ticket) return;
       if (fix) {
         const fixed = await widen(pf, fix, await pf.search(fix, filterOpt), filterOpt, mine);
         if (!fixed) return;
-        if (fixed.results.length) {
+        if (fixed.results.length && !(await missed(fixed.results))) {
           found = fixed;
           corrected = fix;
         }
@@ -391,6 +395,17 @@ export function mountSearchPanel(
       if (mergeResults(lists).length >= MIN_RESULTS) break;
     }
     return { results: mergeResults(lists), counts: maxCounts(allCounts) };
+  }
+
+  /** True when nothing was found, or the best result matched no actual word. */
+  async function missed(list: PagefindResult[]): Promise<boolean> {
+    if (list.length === 0) return true;
+    try {
+      const top = await list[0].data();
+      return Array.isArray(top.locations) && top.locations.length === 0;
+    } catch {
+      return false;
+    }
   }
 
   /** Shows "Search for "baptsim" instead" under a corrected search, or hides it. */
