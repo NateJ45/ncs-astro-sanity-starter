@@ -1,6 +1,6 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // =============================================================================
-// build-search-index.mjs - write the Pagefind search index (PORTS.md card 126)
+// build-search-index.mjs - write the Pagefind search index (PORTS.md cards 126, 154)
 // =============================================================================
 // Runs straight after `astro build` (package.json "build"), so CI, Lighthouse
 // and deploy all ship the same index. It reads the static HTML in dist/client
@@ -19,29 +19,55 @@
 // pages (404, /search/, /styleguide) are skipped by BaseLayout, and the Studio
 // and /preview (their own layouts, SSR) never reach dist/client at all.
 //
-// Usage: node scripts/build-search-index.mjs [--site dist/client]
+// UPLOADED FILES (card 154). Every PDF, Word (.docx) and .txt file an indexed
+// page links to is read and added as its own result, so a phrase inside a
+// bulletin finds the bulletin. scripts/lib/search-files.mjs has the detail; a
+// file that cannot be read is still indexed by its title and never fails the
+// build. Text is cached in node_modules/.cache/search-files/.
+//
+// "DID YOU MEAN". The words of every indexed page and file are counted into
+// dist/client/pagefind/words.json, which the browser fetches only when a
+// search finds nothing, to suggest the nearest real word.
+//
+// Usage: node scripts/build-search-index.mjs [--site dist/client] [--no-files]
 // =============================================================================
-import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { readdirSync, readFileSync, statSync, existsSync, writeFileSync } from 'node:fs';
+import { join, resolve, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  collectFileLinks,
+  countWords,
+  defaultCacheDir,
+  fileRecord,
+  htmlToText,
+  indexedMain,
+  mapLimit,
+  mergeFileLinks,
+  readFile,
+  topWords,
+} from './lib/search-files.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const argIdx = process.argv.indexOf('--site');
 const SITE_DIR = resolve(ROOT, argIdx > -1 ? process.argv[argIdx + 1] : 'dist/client');
+const READ_FILES = !process.argv.includes('--no-files');
 
-/** True when any built page opted into the index. Stops at the first hit. */
-function anyPageMarked(dir) {
+/** Every built HTML file, skipping Pagefind's own output and Astro's assets. */
+function htmlFiles(dir, out = []) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (name === 'pagefind' || name === '_astro') continue;
     const st = statSync(p);
-    if (st.isDirectory()) {
-      if (anyPageMarked(p)) return true;
-    } else if (name.endsWith('.html') && readFileSync(p, 'utf8').includes('data-pagefind-body')) {
-      return true;
-    }
+    if (st.isDirectory()) htmlFiles(p, out);
+    else if (name.endsWith('.html')) out.push(p);
   }
-  return false;
+  return out;
+}
+
+/** dist/client/sermons/grace/index.html -> /sermons/grace/ */
+function pageUrl(file) {
+  const rel = relative(SITE_DIR, file).split(sep).join('/');
+  return `/${rel}`.replace(/index\.html$/, '').replace(/\.html$/, '/');
 }
 
 if (!existsSync(SITE_DIR)) {
@@ -49,7 +75,12 @@ if (!existsSync(SITE_DIR)) {
   process.exit(1);
 }
 
-if (!anyPageMarked(SITE_DIR)) {
+const pages = htmlFiles(SITE_DIR)
+  .sort()
+  .map((file) => ({ file, html: readFileSync(file, 'utf8') }))
+  .filter((p) => p.html.includes('data-pagefind-body'));
+
+if (pages.length === 0) {
   console.log('[search] site search is off (src/data/site.ts search.enabled); no index written');
   process.exit(0);
 }
@@ -77,13 +108,56 @@ if (added.errors.length) {
   process.exit(1);
 }
 
+// ---- words and file links from the indexed pages ----------------------------
+const counts = new Map();
+const links = [];
+for (const { file, html } of pages) {
+  const main = indexedMain(html);
+  if (main === null) continue;
+  countWords(counts, htmlToText(main));
+  links.push(...collectFileLinks(html, pageUrl(file)));
+}
+
+// ---- uploaded files ---------------------------------------------------------
+const files = READ_FILES ? mergeFileLinks(links) : [];
+const tally = { read: 0, scanned: 0, failed: 0, skipped: 0, cached: 0 };
+if (files.length) {
+  const cacheDir = defaultCacheDir(ROOT);
+  const reads = await mapLimit(files, 4, (link) => readFile(link, { siteDir: SITE_DIR, cacheDir }));
+  for (let i = 0; i < files.length; i++) {
+    const link = files[i];
+    const read = reads[i];
+    tally[read.status]++;
+    if (read.cached) tally.cached++;
+    if (read.status === 'scanned') {
+      console.warn(
+        `[search] "${link.title}" (${link.url}) looks like a scan with no text layer; it is found by its title only. Re-export it as a text PDF to make its words searchable.`,
+      );
+    } else if (read.status === 'failed' || read.status === 'skipped') {
+      console.warn(
+        `[search] "${link.title}" (${link.url}): ${read.reason}; found by its title only`,
+      );
+    }
+    countWords(counts, read.text);
+    const res = await index.addCustomRecord(fileRecord(link, read));
+    if (res.errors?.length) {
+      console.warn(`[search] could not add "${link.title}" to the index:`, res.errors);
+    }
+  }
+}
+
 const written = await index.writeFiles({ outputPath: join(SITE_DIR, 'pagefind') });
 if (written.errors.length) {
   console.error('[search] writing the index failed:', written.errors);
   process.exit(1);
 }
-
 await pagefind.close();
+
+writeFileSync(join(SITE_DIR, 'pagefind', 'words.json'), JSON.stringify(topWords(counts)));
+
+const fileNote = READ_FILES
+  ? `${files.length} files (${tally.read} read, ${tally.scanned} scanned, ${tally.failed} failed, ${tally.skipped} not readable; ${tally.cached} from cache)`
+  : 'files not read (--no-files)';
 console.log(
-  `[search] index written to dist/client/pagefind/ (${added.page_count} HTML files read)`,
+  `[search] index written to dist/client/pagefind/: ${added.page_count} pages, ${fileNote}, ${counts.size} distinct words`,
 );

@@ -75,6 +75,10 @@ export const site = {
   // content, written after `astro build` by scripts/build-search-index.mjs.
   // `suggestions` are the friendly links shown before a search and when
   // nothing matches: two or three, hrefs ending in a slash (rule 19).
+  // `synonyms` (card 154) are groups of words and phrases that mean the same
+  // thing to this site's visitors; when a search finds fewer than three
+  // results, the other words in its group are searched too. Write them in the
+  // visitor's words ("kids") and the site's words ("children").
   search: {
     enabled: false as boolean,
     placeholder: 'Search the site',
@@ -82,6 +86,12 @@ export const site = {
       { label: 'Get in touch', href: '/contact/' },
       { label: 'Questions people ask', href: '/faq/' },
     ],
+    synonyms: [
+      ['contact', 'get in touch', 'email', 'phone'],
+      ['price', 'prices', 'cost', 'fees', 'rates'],
+      ['hours', 'opening times', 'open'],
+      ['directions', 'address', 'location', 'map', 'parking'],
+    ] as string[][],
   },
 
   // Public repo URL (used in footer credit if shown)

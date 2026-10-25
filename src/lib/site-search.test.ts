@@ -9,6 +9,13 @@ import {
   resultHref,
   statusText,
   toResultView,
+  expandBibleRef,
+  expandQuery,
+  fallbackTerms,
+  mergeResults,
+  editDistance,
+  suggestCorrection,
+  correctedStatusText,
 } from './site-search.ts';
 
 test('type labels: known, unknown and empty', () => {
@@ -83,4 +90,94 @@ test('toResultView maps a Pagefind result', () => {
   const bare = toResultView({ url: '/x/' });
   assert.equal(bare.type, 'page');
   assert.equal(bare.title, 'Untitled page');
+});
+
+test('toResultView carries a file result’s format and source page', () => {
+  const view = toResultView({
+    url: 'https://cdn.sanity.io/files/p/d/abc.pdf',
+    meta: { title: 'Bulletin for October 12', format: 'PDF', source: 'Bulletins' },
+    filters: { type: ['bulletin'] },
+  });
+  assert.equal(view.href, 'https://cdn.sanity.io/files/p/d/abc.pdf');
+  assert.equal(view.typeLabel, 'Bulletin');
+  assert.equal(view.format, 'PDF');
+  assert.equal(view.source, 'Bulletins');
+  assert.equal(typePlural('notes'), 'Sermon notes');
+});
+
+test('expandBibleRef spells out book abbreviations', () => {
+  assert.equal(expandBibleRef('Jn 3:16'), 'John 3:16');
+  assert.equal(expandBibleRef('1cor 13'), '1 Corinthians 13');
+  assert.equal(expandBibleRef('II Tim 2'), '2 Timothy 2');
+  assert.equal(expandBibleRef('ps. 23'), 'Psalms 23');
+  assert.equal(expandBibleRef('rev'), 'Revelation');
+  // Names and words stay unless a chapter follows.
+  assert.equal(expandBibleRef('pastor Tim'), 'pastor Tim');
+  assert.equal(expandBibleRef('Dan 7'), 'Daniel 7');
+  assert.equal(expandBibleRef('youth camp'), 'youth camp');
+  assert.equal(expandBibleRef('John 3'), 'John 3');
+});
+
+test('expandQuery swaps synonyms and phrases, whole words only', () => {
+  const groups = [
+    ['kids', 'children', 'nursery'],
+    ['VBS', 'Vacation Bible School'],
+  ];
+  assert.deepEqual(expandQuery('kids ministry', groups), ['children ministry', 'nursery ministry']);
+  assert.deepEqual(expandQuery('vacation bible school dates', groups), ['VBS dates']);
+  assert.deepEqual(expandQuery('skids', groups), []);
+  assert.deepEqual(expandQuery('Jn 3', groups), ['John 3']);
+  assert.deepEqual(expandQuery('', groups), []);
+});
+
+test('fallbackTerms splits a multi-word search into its meaningful words', () => {
+  assert.deepEqual(fallbackTerms('where is the youth zzzz'), ['youth', 'zzzz']);
+  assert.deepEqual(fallbackTerms('grace'), []);
+  assert.deepEqual(fallbackTerms('the grace'), []);
+});
+
+test('mergeResults keeps the first list and adds new ones by score', () => {
+  const merged = mergeResults([
+    [{ id: 'a', score: 1 }],
+    [
+      { id: 'b', score: 2 },
+      { id: 'a', score: 9 },
+    ],
+    [{ id: 'c', score: 5 }],
+  ]);
+  assert.deepEqual(
+    merged.map((r) => r.id),
+    ['a', 'c', 'b'],
+  );
+});
+
+test('editDistance counts swaps as one edit and stops early', () => {
+  assert.equal(editDistance('baptsim', 'baptism'), 1);
+  assert.equal(editDistance('grace', 'grace'), 0);
+  assert.equal(editDistance('kitten', 'sitting', 3), 3);
+  assert.equal(editDistance('a', 'abcdef', 2), 3);
+});
+
+test('suggestCorrection fixes typos against the site’s own words', () => {
+  const vocab = [
+    ['baptism', 12],
+    ['worship', 30],
+    ['grace', 20],
+    ['brace', 1],
+    ['children', 8],
+  ] as const;
+  assert.equal(suggestCorrection('baptsim', vocab), 'baptism');
+  assert.equal(suggestCorrection('Worshp times', vocab), 'Worship times');
+  assert.equal(suggestCorrection('grase', vocab), 'grace');
+  assert.equal(suggestCorrection('grace', vocab), null);
+  assert.equal(suggestCorrection('chil', vocab), null);
+  assert.equal(suggestCorrection('zzzzzzz', vocab), null);
+  assert.equal(suggestCorrection('baptsim', []), null);
+});
+
+test('correctedStatusText says what was searched instead', () => {
+  assert.equal(
+    correctedStatusText(3, 'baptism', 'baptsim'),
+    'Nothing found for "baptsim". Showing 3 results for "baptism".',
+  );
 });

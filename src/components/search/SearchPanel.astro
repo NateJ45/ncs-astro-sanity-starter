@@ -18,6 +18,9 @@
 //   - Down arrow from the box moves into the results, Up/Down walk them, Up
 //     from the first result returns to the box; Escape closes the dialog
 //   - filter buttons are toggle buttons (aria-pressed)
+//   - a corrected spelling ("baptsim" -> "baptism") is said in the live region,
+//     with a real button to search the original spelling instead (card 154)
+//   - a file result names its format and the page it came from in its text
 //
 // Look: the site's own tokens (--background, --foreground, --border, --muted,
 // --link, --ring, --font-display), so a reskin restyles search for free. The
@@ -39,9 +42,11 @@ const statusId = `site-search-${id}-status`;
 const resultsId = `site-search-${id}-results`;
 const suggestions = site.search.suggestions ?? [];
 const placeholder = site.search.placeholder;
+// Synonym groups for the client's "try other words" pass (card 154).
+const synonyms = JSON.stringify(site.search.synonyms ?? []);
 ---
 
-<div class="site-search" data-site-search-panel>
+<div class="site-search" data-site-search-panel data-search-synonyms={synonyms}>
   <form class="site-search__form" role="search" action="/search/" method="get">
     <label for={inputId} class="sr-only">
       Search this site
@@ -78,6 +83,8 @@ const placeholder = site.search.placeholder;
     aria-live="polite"
     data-search-status
   ></p>
+
+  <p class="site-search__correction" data-search-correction hidden></p>
 
   <ol
     id={resultsId}
@@ -249,6 +256,21 @@ const placeholder = site.search.placeholder;
     font-weight: 600;
     color: var(--link);
   }
+  .site-search__result-format {
+    padding: 0 0.375rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 0.25rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--foreground);
+  }
+  .site-search__result-source {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+    overflow-wrap: anywhere;
+  }
   .site-search__result-title {
     display: block;
     font-family: var(--font-display);
@@ -273,6 +295,33 @@ const placeholder = site.search.placeholder;
     background: transparent;
     color: var(--foreground);
     font-weight: 600;
+  }
+
+  .site-search__correction {
+    margin: -0.5rem 0 0;
+  }
+  .site-search__correction[hidden] {
+    display: none;
+  }
+  .site-search__correction-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--link);
+    font: inherit;
+    font-size: 0.875rem;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+  }
+  .site-search__correction-button:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 
   .site-search__more {
