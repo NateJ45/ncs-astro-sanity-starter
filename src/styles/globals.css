@@ -505,6 +505,93 @@ html.motion [data-reveal].is-visible {
   transform: translateY(-100%);
 }
 
+/* Header compaction (PORTS.md card 157). Header.astro's script sets
+   data-scrolled past 64px of scroll and clears it only at 8px or less, so the
+   bar cannot flip back and forth near the top. Transforms only: the bar keeps
+   its layout height, so nothing under it reflows (no CLS). From lg up the bar
+   slides up by --hdr-top (the accent stripe plus the eyebrow strip, measured by
+   the script) and by --hdr-tighten more; its row contents slide down by half
+   of that, so the row's padding halves on both sides, and the logo scales from
+   48px to 40px. Below lg the bar keeps its size and only gains the shadow. The
+   global reduced-motion reset makes every change instant. */
+.site-header[data-scrolled] {
+  box-shadow: 0 10px 24px -20px rgb(0 0 0 / 0.45);
+}
+@media (min-width: 1024px) {
+  .site-header {
+    --hdr-tighten: var(--spacing-m);
+  }
+  .site-header[data-scrolled]:not([data-state='hidden']) {
+    transform: translateY(calc(-1 * (var(--hdr-top, 0px) + var(--hdr-tighten))));
+  }
+  /* Opacity is listed too, so the logo link keeps its hover fade. */
+  .site-header__row > * {
+    transition:
+      transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 150ms ease;
+  }
+  .site-header[data-scrolled] .site-header__row > * {
+    transform: translateY(calc(var(--hdr-tighten) / 2));
+  }
+  .site-header__logo {
+    transform-origin: 0 50%;
+  }
+  html[data-header='centered'] .site-header__logo {
+    transform-origin: 50% 50%;
+  }
+  .site-header[data-scrolled] .site-header__row > .site-header__logo {
+    transform: translateY(calc(var(--hdr-tighten) / 2)) scale(calc(40 / 48));
+  }
+}
+
+/* Mobile menu (MobileNav.astro, card 157): a native <dialog> opened with
+   showModal(), so it sits in the top layer. The UA's centred-box defaults are
+   undone so it is a full-height drawer on the right. Closed, the UA rule keeps
+   it display:none, so nothing here sets display on the dialog itself. */
+.mobile-menu {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(380px, 90vw);
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--foreground);
+  overflow: visible;
+}
+.mobile-menu::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}
+.mobile-menu__panel {
+  height: 100%;
+  overscroll-behavior: contain;
+  box-shadow: -12px 0 32px -20px rgb(0 0 0 / 0.45);
+}
+/* The page behind does not scroll while the menu is open. */
+html:has(.mobile-menu[open]) {
+  overflow: hidden;
+}
+/* The drawer slides in from the right (transform only); the backdrop fades. */
+.mobile-menu[open] .mobile-menu__panel {
+  animation: mobile-menu-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.mobile-menu[open]::backdrop {
+  animation: mobile-menu-fade 200ms ease-out both;
+}
+@keyframes mobile-menu-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes mobile-menu-fade {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Card lift on hover. Marketing cards (project, journal, service) opt in via
    .card-lift; pairs with the existing border + image scale transitions. */
 .card-lift {
