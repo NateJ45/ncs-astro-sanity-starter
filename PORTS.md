@@ -269,6 +269,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 152 | Church Trac pattern: form band, page reader, link boxes (church sites, no code)     | n/a     | n/a         | n/a      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10320,3 +10321,31 @@ inside the test, no binaries committed), `npm run check`. End to end on first-ba
 **Applied:** starter (this card). first-baptist-auburn: origin, see the status line added with its PR.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn). Others take it with card 126.
+
+## Card 161: `snapshot.mjs run` reads the project id from the snapshot (2026-10-25)
+
+**Origin:** first-baptist-auburn. Its CI `site` job built 19 pages where a local snapshot build of the same
+snapshot built 28, and Plan your visit lost its Church and FAQPage JSON-LD. The job had no `PUBLIC_SANITY_*`
+env. `sanityFetch` (src/lib/sanity.ts) treats a missing project id as "no Sanity" and returns its fallback
+without a request, so `SANITY_SNAPSHOT_URL` was set and the snapshot server was never asked anything. Nothing
+failed: every check passed against a site built from fallbacks.
+
+**Canonical:** PORTABLE `scripts/snapshot.mjs` (+ `scripts/lib/snapshot.test.mjs`).
+
+**What it does.** `run` merges .env into the env (`loadEnv`) and, when there is still no
+`PUBLIC_SANITY_PROJECT_ID`, takes the project and dataset from the snapshot's own asset URLs
+(`cdn.sanity.io/images/<project>/<dataset>/...`, pure helper `snapshotProjectEnv`), so image URLs come out
+right too, and logs `snapshot: project <id>/<dataset> (read from the snapshot)`. With no id anywhere and no asset
+in the snapshot it stops with an error rather than build a site from fallbacks. A set id is never overridden.
+The template path (no snapshot file, no project id) is unchanged.
+
+**Per site (not portable):** set `PUBLIC_SANITY_PROJECT_ID` / `PUBLIC_SANITY_DATASET` at the workflow level in
+`ci.yml` and `lighthouse.yml` anyway (fbcm and stonesteps-50k already do), so every job agrees.
+
+**Verified in the starter (2026-10-25):** `npm run test:scripts`. End to end on first-baptist-auburn: see its PR.
+
+**Applied:** starter (this card). first-baptist-auburn: origin, see its PR. fbcm and stonesteps-50k set the env
+already, so the copy is drift-only for them.
+
+**Who should take it.** Every site with a `ci/sanity-snapshot.ndjson.gz` (card 138): today fbcm,
+first-baptist-auburn, stonesteps-50k.
