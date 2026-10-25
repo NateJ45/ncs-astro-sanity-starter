@@ -69,6 +69,12 @@ export interface SurfacePair {
   };
   /** True when the band is the same colour in both themes. */
   themeStatic?: boolean;
+  /**
+   * The custom property the focus ring takes inside a DARK band, when the band re-points it
+   * (globals.css). The gate holds it to 3:1 against `tokens.bg` in both themes. Unset on
+   * the light surfaces, which keep the page ring.
+   */
+  ring?: string;
   /** True when src/lib/sectionCadence.ts can assign this surface to a section. */
   inCadence?: boolean;
   /**
@@ -126,6 +132,7 @@ export const SECTION_SURFACES: SurfacePair[] = [
     dotDark: '#1E2024',
     dotInk: '#FBFBFA',
     themeStatic: true,
+    ring: '--color-bg',
     tokens: {
       bg: '--color-accent-dark',
       text: '--color-bg',
@@ -151,6 +158,7 @@ export const SECTION_SURFACES: SurfacePair[] = [
     dotInk: '#FBFBFA',
     themeStatic: true,
     inCadence: true,
+    ring: '--feature-foreground',
     accentToken: '--feature-accent',
     tokens: {
       bg: '--feature',

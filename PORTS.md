@@ -269,6 +269,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 152 | Church Trac pattern: form band, page reader, link boxes (church sites, no code)     | n/a     | n/a         | n/a      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 156 | Contact form no-JS post + error summary, FAQ landmark, dark-band rings              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10320,3 +10321,51 @@ inside the test, no binaries committed), `npm run check`. End to end on first-ba
 **Applied:** starter (this card). first-baptist-auburn: origin, see the status line added with its PR.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn). Others take it with card 126.
+
+## Card 156: contact form without JS, one-pass errors, kept drafts; FAQ landmark; focus rings on dark bands (2026-10-25)
+
+**Origin:** first-baptist-auburn's 2026-10-25 audit (Auburn PRs 170 and 173). Four findings that are not church
+specific: a contact form that sent its answers to the address bar with scripting off, a form that stopped at the first
+problem, a draft left in localStorage on shared computers, a second "Common questions" landmark inside an already
+labelled section, and a focus ring that nearly vanished on the near-black band.
+
+**Canonical:** none new. Changed, all "Safe to edit" or "Foundation" in the starter, so sites take them by hand:
+`src/components/ContactForm.tsx`, `src/components/FaqAccordion.tsx`, `src/pages/contact.astro`,
+`src/lib/surfaces.ts` (+ `surfaces.test.ts`), `src/styles/globals.css`, new `tests/contact-form.spec.ts`.
+
+**What it does.**
+
+1. **No JavaScript.** The form is `method="post" action="/api/contact/"`, so scripting off never turns the answers
+   into a GET query string. `/api/contact/` (PORTABLE, left alone) reads JSON only, so a plain post still gets a 400:
+   `contact.astro` therefore carries a `<noscript>` notice that points at the email and phone. A real no-JS send
+   needs the endpoint to accept a form-encoded body and redirect; that is a change to a PORTABLE file and is a
+   separate card.
+2. **Every problem in one pass.** `validate()` also covers the editor-written questions (required, email shape), each
+   field gets `aria-invalid` and `aria-describedby` for its own line, and an error summary (`role="alert"`,
+   `tabindex="-1"`) takes focus after a failed submit and links to each field. Every required label carries the
+   same `*` (`RequiredCue`) with a one-line key above the form.
+3. **Draft.** Kept in `sessionStorage` (this tab only, wrapped in try/catch), cleared on success; a draft an older
+   build left in `localStorage` is removed on load. Answers to editor-written questions are still not kept (the editor
+   can reword them at any time).
+4. **Prefill.** `/contact/?topic=<word>` picks the first list answer containing the word (hyphens read as spaces; the
+   project type on the built-in form, the first list question on an editor-written one) and `&about=<short text>`
+   starts the message with "About <text>: ". Control characters are stripped and the text is cut at 80 characters.
+   Nothing the visitor typed is overwritten.
+5. **FAQ landmark.** `FaqAccordion` renders a `<section aria-labelledby>` only when a category heading exists; with no
+   category the wrapper is a plain `<div>`, because the section that holds it is already the labelled region (axe
+   `landmark-unique`).
+6. **Dark-band rings.** `globals.css` sets `--ring` to the band's light ink inside `[data-dark-surface]` and the Ink band
+   (`.bg-accent-dark`); the Feature band already did. `data-light-surface` opts a light card back out.
+   `surfaces.ts` gains `ring`, and `surfaces.test.ts` holds each dark band's ring to 3:1 in both themes and checks
+   that `globals.css` really sets it. A new dark section adds `data-dark-surface`.
+
+**Not ported:** Auburn's "planning to visit" line (`?visit=sunday-11`), its `btn-auburn` button classes, the Auburn
+white and navy ring literals (the starter uses its own tokens), the heading size and `--heading-solid` edits in
+`FaqAccordion`, and the Home hero / board selectors that carried `--ring` in `auburn.css`.
+
+**Verified in the starter (2026-10-25):** see the PR for the gate output (check, build, unit, `contact-form.spec.ts`).
+
+**Applied:** starter (this card). first-baptist-auburn = source (applied).
+
+**Who should take it.** Every site with a contact form or an FAQ. Sites with their own dark bands add
+`data-dark-surface`.

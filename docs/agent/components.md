@@ -93,7 +93,7 @@ The Portable Text renderer (`JournalPortableText.tsx`) detects image orientation
 
 **Contact page pieces:**
 
-- `ContactForm.tsx` -- Name / Email / Phone / Message, plus any project-specific fields. See form section in `docs/agent/sanity.md`.
+- `ContactForm.tsx` -- Name / Email / Phone / Message, plus any project-specific fields; posts as a plain form with scripting off, lists every error in a focused summary, keeps the draft in sessionStorage, reads `?topic=` and `&about=`. See form section in `docs/agent/sanity.md`.
 - `CopyEmailButton.tsx` -- mailto link + clipboard fallback.
 - `CalendlyInline.tsx` -- click-to-load Calendly iframe placeholder. Heavy widget stays off the budget until the visitor opts in.
 
