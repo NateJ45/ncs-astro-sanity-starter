@@ -378,8 +378,11 @@ export function fileRecord(link, read) {
   if (link.source) meta.source = link.source;
   if (link.sourceUrl) meta.source_url = link.sourceUrl;
   // The title and note lead, so a file is findable by them even with no text
-  // layer, and its own words follow.
-  const content = [link.title, link.note, read.text].filter(Boolean).join('. ');
+  // layer, and its own words follow. Skip either when the file's text already
+  // says it, so the excerpt does not repeat itself.
+  const said = (read.text ?? '').toLowerCase();
+  const lead = [link.title, link.note].filter((t) => t && !said.includes(t.toLowerCase()));
+  const content = [...lead, read.text].filter(Boolean).join('. ');
   return {
     url: link.url,
     content: content || link.title || 'Download',

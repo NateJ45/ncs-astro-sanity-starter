@@ -63,6 +63,9 @@ result, so a phrase inside a bulletin finds the bulletin. The code is `scripts/l
 Pagefind matches word stems and prefixes, but it forgives no typos and knows no synonyms. The client fills the gaps,
 only when a search comes up short, so a normal search costs nothing extra:
 
+0. **A Bible reference** typed short ("Jn 3", "1cor 13") is searched spelled out first, so that book's sermons lead,
+   and the search as typed is added after.
+
 1. **Fewer than 3 results:** it also searches each synonym swap from `site.search.synonyms` (groups of words and
    phrases, whole-word, case-insensitive) and the spelled-out Bible books ("Jn 3:16" to "John 3:16", "1cor 13" to
    "1 Corinthians 13"; abbreviations that are also names or words, like "Tim", "Dan" and "Col", change only before a

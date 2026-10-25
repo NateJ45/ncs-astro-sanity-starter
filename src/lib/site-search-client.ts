@@ -23,6 +23,7 @@
 // =============================================================================
 import {
   correctedStatusText,
+  expandBibleRef,
   expandQuery,
   fallbackTerms,
   mergeResults,
@@ -319,13 +320,22 @@ export function mountSearchPanel(
       : allTypes.length
         ? { filters: { type: { any: allTypes } } }
         : {};
+    // "Jn 3" means John 3: search the spelled-out book first, so its sermons
+    // lead, then add whatever the search as typed finds.
+    const bible = expandBibleRef(term);
+    const primary = bible !== term ? bible : term;
     const res = immediate
-      ? await pf.search(term, filterOpt)
-      : await pf.debouncedSearch(term, filterOpt, 220);
+      ? await pf.search(primary, filterOpt)
+      : await pf.debouncedSearch(primary, filterOpt, 220);
     // null means a newer keystroke superseded this one.
     if (!res || mine !== ticket) return;
+    if (primary !== term) {
+      const typed = await pf.search(term, filterOpt);
+      if (mine !== ticket) return;
+      res.results = mergeResults([res.results, typed.results]);
+    }
 
-    let found = await widen(pf, term, res, filterOpt, mine);
+    let found = await widen(pf, primary, res, filterOpt, mine);
     if (!found) return;
     let corrected: string | null = null;
     if (found.results.length === 0 && !exact) {

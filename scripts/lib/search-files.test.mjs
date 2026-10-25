@@ -310,6 +310,14 @@ test('fileRecord leads with title and note and carries type and source', () => {
   });
 });
 
+test('fileRecord does not repeat a title the file already starts with', () => {
+  const rec = fileRecord(
+    { url: '/f.docx', title: 'Fall festival sign-up', type: 'form' },
+    { text: 'Fall festival sign-up Bring a pie', format: 'Word' },
+  );
+  assert.equal(rec.content, 'Fall festival sign-up Bring a pie');
+});
+
 test('words lower-cases, drops accents, digits, short words and possessives', () => {
   assert.deepEqual(words("God's café: 3 Hymns, an AWANA night"), [
     'god',
