@@ -1,0 +1,80 @@
+/* Safe to edit by hand.
+   The printed page (PORTS.md card 155). Before this sheet, a printed page could come out blank
+   below the first screen: scroll reveals ([data-reveal], stagger grids, the image curtain) wait
+   for an IntersectionObserver that print never triggers, so everything past the first screen
+   sat on its hidden starting state; and light text on a band or card that browsers do not paint
+   in print (background graphics are off by default) vanished into the paper.
+
+   This sheet sits on top of the minimal print block at the end of globals.css (which already
+   hides the header, the footer and fixed chrome, underlines links and appends external URLs),
+   and is imported last in BaseLayout.astro so it wins ties.
+
+   Three layers:
+     1. Motion: every animated unit shows finished, nothing transitions.
+     2. Decoration: slideshows, curtains and iframes do not print.
+     3. Ink: every surface prints black on white, so a coloured band or a dark card stays
+        readable and cheap to print. Pictures (<img>, inline SVG) stay.
+
+   A new reveal or entrance mechanism that starts hidden needs a line in layer 1.
+   tests/print.spec.ts fails when any text in <main> would print invisible. */
+
+@media print {
+  /* ---- 1. Motion: everything at rest ------------------------------------------------------- */
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  [data-reveal],
+  html.motion [data-reveal],
+  html.motion [data-stagger-grid] > *,
+  [data-stagger-grid] > *:not(.is-filtered-out),
+  .hero-entry-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+  /* The image curtain is a panel laid OVER a picture to uncover it; in print it is just in the way. */
+  .img-curtain {
+    display: none !important;
+  }
+  /* The process connector draws itself on scroll; print the finished line. */
+  .step-connector::after {
+    transform: scaleY(1) !important;
+  }
+
+  /* ---- 2. Decoration ------------------------------------------------------------------------ */
+  /* A slideshow or Ken Burns background is a photo behind text; with ink on white the text carries. */
+  .hero-slideshow,
+  .hero-slide,
+  iframe {
+    display: none !important;
+  }
+
+  /* ---- 3. Ink: black on white everywhere ----------------------------------------------------- */
+  html,
+  body,
+  main {
+    background: #ffffff !important;
+  }
+  main *,
+  main *::before,
+  main *::after {
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    color: #000000 !important;
+  }
+  /* Bands keep a hairline so the page still reads in sections. */
+  main section + section {
+    border-top: 1px solid #cccccc;
+  }
+  main :is(h1, h2, h3) {
+    break-after: avoid;
+  }
+  main :is(li, figure, blockquote) {
+    break-inside: avoid;
+  }
+}
