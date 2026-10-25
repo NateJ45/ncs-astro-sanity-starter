@@ -10320,3 +10320,43 @@ inside the test, no binaries committed), `npm run check`. End to end on first-ba
 **Applied:** starter (this card). first-baptist-auburn: origin, see the status line added with its PR.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn). Others take it with card 126.
+
+## Card 158: One accent button per page, named section anchors, a 404 with search, calendar files (2026-10-25)
+
+**Origin:** first-baptist-auburn's 2026-10-25 audit (its PRs #171, #172, #173): pages with several filled accent
+buttons where none stood out, sections nobody could link to, a 404 with no way to search, and per-gathering `.ics`
+files. Generalised here.
+
+**Canonical:** PORTABLE: `src/lib/cta-budget.ts` (+ test), `src/lib/section-anchors.ts` (+ test), `src/lib/ics.ts`
+(+ test). Per site (NOT portable): the wiring in `SectionRenderer.astro` (which blocks draw a primary button, the
+`anchors` prop), the `primaryVariant` prop on `Hero.astro` and `FinalCta.astro`, and `src/pages/404.astro`.
+
+**What it does.**
+
+1. **One accent button.** `primaryBudget(rows, drawsPrimary)` gives the first section that draws a primary button
+   (a hero with a main button, or a closing band) the `primary` variant and every later one `secondary`;
+   `SectionRenderer` passes it to `Hero` and `FinalCta` as `primaryVariant`. A renderer concern, so blocks still carry
+   no colour field (rule 9). A Hero or FinalCta drawn outside the renderer is not counted.
+2. **Named anchors.** `sectionAnchors()` gives every section with a heading (`heading`, else `headline`) a unique id
+   made from it (`/about/#our-story`), stega stripped so the preview matches the live page, cut to 48 characters at a
+   word break, prefixed `section-` before a digit, `-2`/`-3` on a repeat, never one of `RESERVED_IDS` or another
+   section's numbered id. Unnamed sections keep `<idPrefix>-<n>`. `overrides` pins a name to a block `_key` (Auburn's
+   `SECTION_ANCHORS` map plugs in there). The styleguide pages pass `anchors="numbered"`, since they draw one renderer
+   per fixture.
+3. **404 with search.** With `site.search.enabled`, a plain GET form to `/search/?q=` (works without JavaScript);
+   under it, search on or off, the site's `site.search.suggestions` as "Pages people often look for".
+4. **Calendar files.** `buildIcs()`: escaping, 75-octet folding that never splits a character, CRLF, typed or raw
+   RRULE, TZID wall times with VTIMEZONE for the four US zones, UTC instants, all-day dates. No route in the starter;
+   the file's header shows the `src/pages/calendar/[key].ics.ts` endpoint a site adds.
+
+**Not ported:** Auburn's gatherings (Church facts service times, `src/lib/gatherings.ts`, the `/calendar/<key>.ics`
+route), because the starter has no recurring gatherings. Its only event-like content is the RSVP block (`startsAt`, a
+UTC instant), a natural first consumer, not wired here. Auburn's "navy" quiet variant and its extra primary-button
+blocks (steps rail, walk) are site-specific; its 404 brick path is brand art.
+
+**Auburn can adopt the libs:** `gatheringIcs()` maps onto `buildIcs({ events: [{ start: { date, time, tzid:
+'America/New_York' }, duration: 'PT1H', rrule: { freq: 'WEEKLY', byDay: [day] }, ... }] })` and gains line folding
+(its long LOCATION lines are not folded today); `anchorFor()` becomes `sectionAnchors(..., { overrides:
+SECTION_ANCHORS })`, which also names its other sections from their headings, so check its pages' links first.
+
+**Applied:** starter (this card). first-baptist-auburn = source (applied).

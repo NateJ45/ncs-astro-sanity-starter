@@ -68,6 +68,11 @@ interface Props {
    * layouts fixture. With no image, split renders exactly as bleed does.
    */
   variant?: SiteLayout['hero'];
+  /**
+   * The main button's variant. SectionRenderer passes 'secondary' when an earlier
+   * section on the page already drew the one accent button (cta-budget.ts, card 158).
+   */
+  primaryVariant?: 'primary' | 'secondary';
 }
 
 const {
@@ -83,6 +88,7 @@ const {
   rotatingWords,
   scriptAccent,
   variant,
+  primaryVariant = 'primary',
 } = Astro.props as Props;
 
 const heroVariant = variant ?? layout.hero;
@@ -302,7 +308,7 @@ const wrapperHeight =
         )}
         {(primaryCta || secondaryCta) && (
           <div class="mt-l flex flex-wrap gap-s">
-            {primaryCta && <CtaLink cta={primaryCta} variant="primary" onDark />}
+            {primaryCta && <CtaLink cta={primaryCta} variant={primaryVariant} onDark />}
             {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" onDark />}
           </div>
         )}
@@ -343,7 +349,7 @@ const wrapperHeight =
             no buttons at all (PORTS.md card 105). */}
         {(primaryCta || secondaryCta) && (
           <div class="mt-l flex flex-wrap gap-s">
-            {primaryCta && <CtaLink cta={primaryCta} variant="primary" />}
+            {primaryCta && <CtaLink cta={primaryCta} variant={primaryVariant} />}
             {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" />}
           </div>
         )}
