@@ -10322,7 +10322,38 @@ inside the test, no binaries committed), `npm run check`. End to end on first-ba
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn). Others take it with card 126.
 
-## Card 156: contact form without JS, one-pass errors, kept drafts; FAQ landmark; focus rings on dark bands (2026-10-25)
+## Card 155: Print stylesheet and the regex-backslash guard (2026-10-25)
+
+**Origin.** first-baptist-auburn, PR #170 (audit 2026-10-25, two findings).
+
+**Canonical (PORTABLE-marked).** `scripts/lib/regex-backslash.mjs`, `scripts/lib/regex-backslash.test.mjs`.
+Not marked: `src/styles/print.css` (each site lists its own start-hidden classes) and `tests/print.spec.ts` (Auburn's
+copy also pins its own `beforeprint` handler and extra routes).
+
+**What it does.**
+
+1. **Regex-backslash guard.** Git Bash heredocs on this PC strip backslashes, so `/(\s+)/` written through one becomes
+   `/(s+)/`: valid JavaScript that silently matches the letter s. The detector scans every tracked `.ts`, `.tsx`,
+   `.mjs`, `.js` and `.astro` file (frontmatter and `<script>` bodies) with the TypeScript scanner and fails the
+   `test:scripts` run on a backslash-free regex or `new RegExp('...')` that still holds `s+`, `d{2}`, `[^s]` and the
+   like. Passes on the starter as it stands (nothing to fix).
+2. **Print stylesheet.** `src/styles/print.css`, imported last in `BaseLayout.astro`, on top of the minimal print block
+   in `globals.css`. Print never scrolls, so `[data-reveal]`, `[data-stagger-grid]` children, `.hero-entry-stagger`,
+   the image curtain and the process connector stayed on their hidden starting state and a printed page went blank
+   below the first screen. Print now shows them finished, drops the hero slideshow and iframes, and prints `main`
+   black on white (background fills are not printed, so light-on-dark text vanished). `tests/print.spec.ts`
+   print-emulates every route in `tests/routes.ts` and fails when text in `<main>` would print invisible, plus one
+   test that proves a reveal really is hidden on screen and shown in print.
+
+**Not ported.** `src/lib/flow-split.ts` (the starter has no word splitter; it is Auburn's flow layer). Auburn's
+`beforeprint` handler in `motion.ts` (no equivalent script here; the CSS alone covers it). Auburn's brand-specific
+print rules (brick slabs, Sunday bar, placeholder notes, building sketch). Known gap: `StatsCounter` counts up from 0
+on scroll, so it prints 0 until scrolled into view.
+
+**Applied.** starter (this card). first-baptist-auburn: source (applied). Other sites take the two guard files
+byte-identical and write their own `print.css` from the starter's, extending layer 1 with their own reveal classes.
+
+## Card 156: contact form posts safely without JS, one-pass errors, kept drafts; FAQ landmark; focus rings on dark bands (2026-10-25)
 
 **Origin:** first-baptist-auburn's 2026-10-25 audit (Auburn PRs 170 and 173). Four findings that are not church
 specific: a contact form that sent its answers to the address bar with scripting off, a form that stopped at the first
