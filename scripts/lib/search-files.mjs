@@ -70,7 +70,8 @@ function attr(tag, name) {
 
 /**
  * The indexed part of a built page: the inner HTML of the <main> that carries
- * data-pagefind-body, or null when the page is not indexed.
+ * data-pagefind-body, without its data-pagefind-ignore blocks, or null when the
+ * page is not indexed.
  */
 export function indexedMain(html) {
   const open = html.match(/<main\b[^>]*>/i);
@@ -78,7 +79,62 @@ export function indexedMain(html) {
   if (/\sdata-pagefind-ignore\s*=\s*["']?all/i.test(open[0])) return null;
   const start = open.index + open[0].length;
   const end = html.indexOf('</main>', start);
-  return html.slice(start, end === -1 ? undefined : end);
+  return stripIgnored(html.slice(start, end === -1 ? undefined : end));
+}
+
+const VOID_TAGS = new Set([
+  'area',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'source',
+  'track',
+  'wbr',
+]);
+
+/**
+ * HTML with every element marked data-pagefind-ignore taken out, so the word
+ * counts and file links match what Pagefind itself indexes. Walks the tags,
+ * counting depth, so nested markup inside an ignored block goes with it.
+ */
+export function stripIgnored(html) {
+  const tagRe = /<(\/?)([a-zA-Z][\w-]*)\b[^>]*?(\/?)>/g;
+  let out = '';
+  let last = 0;
+  let skipName = null;
+  let depth = 0;
+  for (const m of html.matchAll(tagRe)) {
+    const [tag, closing, rawName, selfClose] = m;
+    const name = rawName.toLowerCase();
+    const isVoid = VOID_TAGS.has(name) || selfClose === '/';
+    if (skipName === null) {
+      if (!closing && /\sdata-pagefind-ignore\b/i.test(tag)) {
+        if (isVoid) {
+          out += html.slice(last, m.index);
+          last = m.index + tag.length;
+          continue;
+        }
+        out += html.slice(last, m.index);
+        skipName = name;
+        depth = 1;
+      }
+      continue;
+    }
+    if (name !== skipName || isVoid) continue;
+    depth += closing ? -1 : 1;
+    if (depth === 0) {
+      last = m.index + tag.length;
+      skipName = null;
+    }
+  }
+  // An ignored block left open runs to the end; drop the rest.
+  if (skipName !== null) return out + ' ';
+  return out + html.slice(last);
 }
 
 /** The page's own name for a "From ..." line: its h1, else <title>. */

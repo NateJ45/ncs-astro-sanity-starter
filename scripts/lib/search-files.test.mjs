@@ -13,6 +13,7 @@ import {
   fileRecord,
   indexedMain,
   isFileHref,
+  stripIgnored,
   mapLimit,
   mergeFileLinks,
   readFile,
@@ -135,6 +136,19 @@ test('a page that is not indexed gives no links', () => {
   assert.deepEqual(collectFileLinks(html, '/x/'), []);
   const ignored = `<html><main data-pagefind-body data-pagefind-ignore="all"><a href="/a.pdf">a</a></main></html>`;
   assert.deepEqual(collectFileLinks(ignored, '/x/'), []);
+});
+
+test('stripIgnored drops ignored blocks with everything nested inside', () => {
+  const html =
+    '<p>keep</p><div data-pagefind-ignore="all"><div><p>pill <a href="/x.pdf">x</a></p></div></div><p>also</p><img data-pagefind-ignore src="a"><span>end</span>';
+  assert.equal(stripIgnored(html), '<p>keep</p><p>also</p><span>end</span>');
+  const main = page(
+    `<details data-pagefind-ignore="all"><a href="/n.pdf">notes</a></details><a href="/k.pdf">k</a>`,
+  );
+  assert.deepEqual(
+    collectFileLinks(main, '/x/').map((l) => l.url),
+    ['/k.pdf'],
+  );
 });
 
 test('isFileHref accepts Sanity files and local pdf/docx/txt, nothing else', () => {
