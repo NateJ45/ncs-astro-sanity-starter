@@ -268,6 +268,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 151 | Component type fixes: FAQ size through cn, 12px labels, safe-centred logo row       | n/a     | n/a         | yes      | no               | no            | n/a            | no                 | no                  | no             |
 | 152 | Church Trac pattern: form band, page reader, link boxes (church sites, no code)     | n/a     | n/a         | n/a      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10279,3 +10280,43 @@ error has passed. Detail: `docs/agent/deployment.md`, "Security headers".
 **Gotcha:** a widget that pasted code adds AT RUNTIME from a host that is not in the HTML (a loader that pulls a second
 script) is blocked. Put its origin in `scripts/csp-origins.json` and rebuild. Verify every port under `npm run preview`,
 never a plain static server: only wrangler applies `_headers`.
+
+## Card 154: search reads uploaded files, forgives typos, knows the site's words (2026-10-25)
+
+**Origin:** first-baptist-auburn asked for search "as robust and complete as possible". Card 126's Pagefind index read
+only page HTML, so a bulletin PDF was found by its title alone; Pagefind 1.5 has no fuzzy matching ("baptsim" found
+nothing), no synonyms, and a multi-word search where one word matched nothing returned nothing. Built here first.
+
+**Canonical:** PORTABLE: `scripts/build-search-index.mjs`, `scripts/lib/search-files.mjs` (+ `search-files.test.mjs`),
+`src/lib/site-search.ts` (+ test), `src/lib/site-search-client.ts`, `src/components/search/SearchPanel.astro`,
+`tests/search.spec.ts`. Per site (NOT portable): `site.search.synonyms` in `src/data/site.ts`, the
+`data-search-*` attributes on a site's own file links, and the `actions/cache` step in `ci.yml` (site job),
+`deploy.yml` and `lighthouse.yml`. New exact-pinned devDependencies: `unpdf` 1.8.1 and `mammoth` 1.13.0, used only at
+build time and imported only when a page links a file of that kind.
+
+**What it does.**
+
+1. **Files.** After `astro build`, every link to `cdn.sanity.io/files/...` (or a same-site `.pdf`/`.docx`/`.txt`)
+   inside an indexed `<main>` becomes its own Pagefind record: the text read out of the file, led by its title and
+   optional note, with type, date, format ("PDF") and the linking page as "From ...". Files come from the BUILT PAGES,
+   never from a Sanity query, so expired, scheduled, private and noindex files stay out with no extra logic. Links can
+   carry `data-search-title`, `data-search-type` (`bulletin`, `notes`, `newsletter`, `form`, `policy`, `download`), `data-search-date`
+   and `data-search-note`; a bare link still works (type `file`, title from its text). A file that will not
+   download (20 s timeout), is over 25 MB or is a scan (under 10 characters a page) is indexed by
+   title only and logged once; the build never fails over a file. Audio, images and other formats are left out unless the link carries `data-search-title`. Text is cached by the Sanity SHA-1 in
+   `node_modules/.cache/search-files/`, kept by `actions/cache`, so a file is read once ever. The asset URLs are
+   immutable, so CI reading them does not break card 138.
+2. **"Did you mean".** The build counts every indexed word into `dist/client/pagefind/words.json` (top 20k). With no
+   results, the client fetches it once, corrects each unknown word to the nearest frequent one (1 edit up to six
+   letters, 2 beyond, swaps count as one, never a prefix of a real word), searches that and says so: "Nothing found for
+   "baptsim". Showing 4 results for "baptism"." plus a "Search for "baptsim" instead" button.
+3. **Other ways to say it.** Under three results, the client also searches the site's synonym groups and spelled-out
+   Bible books ("Jn 3" -> "John 3", "1cor" -> "1 Corinthians"; names like "Tim" change only before a chapter), and with
+   none, each meaningful word alone. Results merge by Pagefind id, the original search's results first.
+
+**Verified in the starter (2026-10-25):** `npm run test:unit` (fixture PDF, blank "scanned" PDF and DOCX are built
+inside the test, no binaries committed), `npm run check`. End to end on first-baptist-auburn's real content: see its PR.
+
+**Applied:** starter (this card). first-baptist-auburn: origin, see the status line added with its PR.
+
+**Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn). Others take it with card 126.

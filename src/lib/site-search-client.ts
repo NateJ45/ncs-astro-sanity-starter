@@ -13,19 +13,36 @@
 //
 // Everything a result shows is set with textContent (see excerptParts in
 // site-search.ts), never innerHTML.
+//
+// WHEN A SEARCH COMES UP SHORT (card 154). Fewer than MIN_RESULTS results and
+// the client also searches the synonyms and Bible-book spellings
+// (expandQuery), then, for nothing at all, each word on its own
+// (fallbackTerms), merging what they find. Still nothing, and it corrects the
+// spelling against pagefind/words.json (suggestCorrection), searches that
+// instead and offers a button to search the original after all.
 // =============================================================================
 import {
+  correctedStatusText,
+  expandBibleRef,
+  expandQuery,
+  fallbackTerms,
+  mergeResults,
+  suggestCorrection,
   statusText,
   toResultView,
   typeFilters,
   typePlural,
   type PagefindResultData,
+  type SynonymGroups,
 } from './site-search';
 
 const PAGE_SIZE = 10;
+/** Below this many results, the client tries other ways to say the search. */
+const MIN_RESULTS = 3;
 
 interface PagefindResult {
   id: string;
+  score?: number;
   data: () => Promise<PagefindResultData>;
 }
 interface PagefindSearch {
@@ -77,6 +94,51 @@ export function loadPagefind(): Promise<PagefindApi> {
   return pagefindPromise;
 }
 
+let wordsPromise: Promise<[string, number][]> | null = null;
+/** The site's own words for spelling help, fetched only when first needed. */
+function loadWords(): Promise<[string, number][]> {
+  wordsPromise ??= fetch('/pagefind/words.json')
+    .then((r) => (r.ok ? (r.json() as Promise<[string, number][]>) : []))
+    .catch(() => {
+      wordsPromise = null;
+      return [];
+    });
+  return wordsPromise;
+}
+
+/** The site's synonym groups, handed over by SearchPanel as JSON. */
+function readSynonyms(panel: HTMLElement): SynonymGroups {
+  try {
+    const parsed: unknown = JSON.parse(panel.dataset.searchSynonyms ?? '[]');
+    return Array.isArray(parsed)
+      ? parsed.filter(
+          (g): g is string[] => Array.isArray(g) && g.every((w) => typeof w === 'string'),
+        )
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Filter counts across several searches. Results overlap, so each type shows
+ * the largest single count: never more than are really there.
+ */
+function maxCounts(
+  list: (PagefindSearch['totalFilters'] | undefined)[],
+): Record<string, Record<string, number>> {
+  const out: Record<string, Record<string, number>> = {};
+  for (const counts of list) {
+    for (const [key, byValue] of Object.entries(counts ?? {})) {
+      out[key] ??= {};
+      for (const [value, n] of Object.entries(byValue)) {
+        out[key][value] = Math.max(out[key][value] ?? 0, n);
+      }
+    }
+  }
+  return out;
+}
+
 export interface SearchPanelHandle {
   /** Runs a search as if typed (the /search/ page uses it for ?q=). */
   run: (term: string) => void;
@@ -98,12 +160,16 @@ export function mountSearchPanel(
   const filters = panel.querySelector<HTMLElement>('[data-search-filters]')!;
   const more = panel.querySelector<HTMLButtonElement>('[data-search-more]')!;
   const suggest = panel.querySelector<HTMLElement>('[data-search-suggest]');
+  const correction = panel.querySelector<HTMLElement>('[data-search-correction]');
+  const synonyms = readSynonyms(panel);
 
   let term = '';
   let activeType: string | null = null;
   let results: PagefindResult[] = [];
   let shown = 0;
   let ticket = 0;
+  /** True for one search: the visitor asked for their own spelling, so no correction. */
+  let exact = false;
 
   function setSuggest(mode: 'idle' | 'none' | 'hidden') {
     if (suggest) suggest.hidden = mode === 'hidden';
@@ -170,6 +236,12 @@ export function mountSearchPanel(
       type.className = 'site-search__result-type';
       type.textContent = view.typeLabel;
       meta.append(type);
+      if (view.format) {
+        const f = document.createElement('span');
+        f.className = 'site-search__result-format';
+        f.textContent = view.format;
+        meta.append(f);
+      }
       for (const extra of [view.date, view.passage]) {
         if (!extra) continue;
         const s = document.createElement('span');
@@ -195,6 +267,15 @@ export function mountSearchPanel(
 
       a.append(meta, title);
       if (view.excerpt.length) a.append(excerpt);
+      if (view.format) {
+        // A file opens in the phone's or browser's own viewer; say so.
+        const from = document.createElement('span');
+        from.className = 'site-search__result-source';
+        from.textContent = view.source
+          ? `${view.format} file, from ${view.source}`
+          : `${view.format} file`;
+        a.append(from);
+      }
       li.append(a);
       list.append(li);
     }
@@ -214,6 +295,7 @@ export function mountSearchPanel(
     }
     if (!term) {
       clear();
+      setCorrection(null);
       status.textContent = '';
       setSuggest('idle');
       return;
@@ -225,6 +307,7 @@ export function mountSearchPanel(
     } catch {
       if (mine !== ticket) return;
       clear();
+      setCorrection(null);
       status.textContent = import.meta.env.DEV
         ? 'Search runs on the built site. Run npm run build, then npm run preview.'
         : 'Search is not available right now. Please try again in a moment.';
@@ -237,22 +320,109 @@ export function mountSearchPanel(
       : allTypes.length
         ? { filters: { type: { any: allTypes } } }
         : {};
+    // "Jn 3" means John 3: search the spelled-out book first, so its sermons
+    // lead, then add whatever the search as typed finds.
+    const bible = expandBibleRef(term);
+    const primary = bible !== term ? bible : term;
     const res = immediate
-      ? await pf.search(term, filterOpt)
-      : await pf.debouncedSearch(term, filterOpt, 220);
+      ? await pf.search(primary, filterOpt)
+      : await pf.debouncedSearch(primary, filterOpt, 220);
     // null means a newer keystroke superseded this one.
     if (!res || mine !== ticket) return;
+    if (primary !== term) {
+      const typed = await pf.search(term, filterOpt);
+      if (mine !== ticket) return;
+      res.results = mergeResults([res.results, typed.results]);
+    }
+
+    let found = await widen(pf, primary, res, filterOpt, mine);
+    if (!found) return;
+    let corrected: string | null = null;
+    // Pagefind 1.5 sometimes returns a page for a typo without matching any
+    // word on it ("baptsim"). Treat that like nothing found and try the
+    // corrected spelling, keeping the loose results if it finds no better.
+    if (!exact && (await missed(found.results))) {
+      if (mine !== ticket) return;
+      const fix = suggestCorrection(term, await loadWords());
+      if (mine !== ticket) return;
+      if (fix) {
+        const fixed = await widen(pf, fix, await pf.search(fix, filterOpt), filterOpt, mine);
+        if (!fixed) return;
+        if (fixed.results.length && !(await missed(fixed.results))) {
+          found = fixed;
+          corrected = fix;
+        }
+      }
+    }
+    exact = false;
 
     clear();
-    results = res.results;
-    renderFilters(res.totalFilters ?? res.filters);
-    status.textContent = statusText(
-      results.length,
-      term,
-      activeType ? typePlural(activeType) : undefined,
-    );
+    results = found.results;
+    renderFilters(found.counts);
+    const where = activeType ? typePlural(activeType) : undefined;
+    status.textContent = corrected
+      ? correctedStatusText(results.length, corrected, term)
+      : statusText(results.length, term, where);
+    setCorrection(corrected ? term : null);
     setSuggest(results.length === 0 ? 'none' : 'hidden');
     await renderMore();
+  }
+
+  /**
+   * Adds what other ways of saying the search find, when the search itself
+   * found fewer than MIN_RESULTS. Returns null if a newer search took over.
+   */
+  async function widen(
+    pf: PagefindApi,
+    q: string,
+    res: PagefindSearch,
+    filterOpt: { filters?: PagefindFilters },
+    mine: number,
+  ): Promise<{ results: PagefindResult[]; counts: PagefindSearch['totalFilters'] } | null> {
+    const counts = res.totalFilters ?? res.filters;
+    if (res.results.length >= MIN_RESULTS) return { results: res.results, counts };
+    const tries = expandQuery(q, synonyms);
+    const lists = [res.results];
+    const allCounts = [counts];
+    for (const pass of [tries, res.results.length === 0 ? fallbackTerms(q) : []]) {
+      for (const t of pass) {
+        const more = await pf.search(t, filterOpt);
+        if (mine !== ticket) return null;
+        lists.push(more.results);
+        allCounts.push(more.totalFilters ?? more.filters);
+      }
+      // Single words are a last resort: skip them if the variants found enough.
+      if (mergeResults(lists).length >= MIN_RESULTS) break;
+    }
+    return { results: mergeResults(lists), counts: maxCounts(allCounts) };
+  }
+
+  /** True when nothing was found, or the best result matched no actual word. */
+  async function missed(list: PagefindResult[]): Promise<boolean> {
+    if (list.length === 0) return true;
+    try {
+      const top = await list[0].data();
+      return Array.isArray(top.locations) && top.locations.length === 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Shows "Search for "baptsim" instead" under a corrected search, or hides it. */
+  function setCorrection(original: string | null) {
+    if (!correction) return;
+    correction.replaceChildren();
+    correction.hidden = !original;
+    if (!original) return;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'site-search__correction-button';
+    b.textContent = `Search for "${original}" instead`;
+    b.addEventListener('click', () => {
+      exact = true;
+      void search(original, true).then(() => input.focus());
+    });
+    correction.append(b);
   }
 
   // ---- events -------------------------------------------------------------

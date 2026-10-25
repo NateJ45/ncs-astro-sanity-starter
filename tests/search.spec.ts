@@ -5,7 +5,7 @@ import { settle } from './helpers';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
-// Visitor site search and share buttons (PORTS.md card 126).
+// Visitor site search and share buttons (PORTS.md cards 126 and 154).
 //
 // Search is opt-in (src/data/site.ts search.enabled). A site with it off has
 // no /pagefind/ index, and every search test skips itself; the starter ships
@@ -130,6 +130,39 @@ test.describe('site search', () => {
     await expect(dialog.locator('a[data-search-result]').first()).toBeVisible({ timeout: 10_000 });
     const results = await new AxeBuilder({ page }).include('[data-site-search-dialog]').analyze();
     expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+  });
+
+  // Card 154: a typo is corrected against the site's own words, and the
+  // visitor can still search their own spelling.
+  test('a misspelt word is corrected, with a way back to the original', async ({ page }) => {
+    const word = (await contactWord(page)).toLowerCase();
+    test.skip(word.length < 5, 'the contact heading has no word long enough to misspell');
+    // Swap two middle letters: one edit away, and not the start of a real word.
+    const typo = word[0] + word[2] + word[1] + word.slice(3);
+    test.skip(typo === word, 'swapping those letters changes nothing');
+    await page.goto(`/search/?q=${encodeURIComponent(typo)}`, { waitUntil: 'domcontentloaded' });
+    await settle(page);
+    const panel = page.locator('[data-search-page]');
+    await expect(panel.locator('a[data-search-result][href="/contact/"]')).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(panel.locator('[data-search-status]')).toContainText(
+      `Nothing found for "${typo}"`,
+    );
+    const back = panel.getByRole('button', { name: `Search for "${typo}" instead` });
+    await back.click();
+    await expect(panel.locator('[data-search-status]')).toHaveText(/^Nothing found for/);
+    await expect(panel.locator('[data-search-correction]')).toBeHidden();
+  });
+
+  test('a multi-word search still finds pages when one word matches nothing', async ({ page }) => {
+    const word = await contactWord(page);
+    const q = `${word} qzxqzxqzx`;
+    await page.goto(`/search/?q=${encodeURIComponent(q)}`, { waitUntil: 'domcontentloaded' });
+    await settle(page);
+    await expect(
+      page.locator('[data-search-page] a[data-search-result][href="/contact/"]'),
+    ).toBeVisible({ timeout: 10_000 });
   });
 
   test('the mobile menu opens search', async ({ page }) => {

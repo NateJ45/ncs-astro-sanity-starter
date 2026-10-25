@@ -65,6 +65,15 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
+      # Text read out of uploaded files for site search, kept between runs so each
+      # file is fetched and read once (PORTS.md card 154). After npm ci, which
+      # empties node_modules. Sanity file URLs are content hashes, so it never goes stale.
+      - uses: actions/cache@v6
+        with:
+          path: node_modules/.cache/search-files
+          key: search-files-${{ github.run_id }}
+          restore-keys: search-files-
+
       # Same build ci.yml runs: consumes the committed src/lib/sanity.types.ts,
       # emits dist/client (audited here) and dist/server (the SSR bundle for
       # /studio and /preview, which lhci never sees).
