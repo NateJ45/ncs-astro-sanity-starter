@@ -40,6 +40,8 @@ interface Props {
   /** Fallback label if cta.label is missing. */
   fallbackLabel?: string;
   class?: string;
+  /** GA4 `cta_click` name (PORTS.md card 89). Omit for a link that is not a main CTA. */
+  track?: string;
 }
 
 const {
@@ -49,6 +51,7 @@ const {
   fallbackHref = '/contact',
   fallbackLabel = 'Get in touch',
   class: extraClass = '',
+  track,
 } = Astro.props as Props;
 
 // Map Sanity document _type to its route. Mirrors the routes in src/pages/.
@@ -125,6 +128,7 @@ const variantClasses = (() => {
 
 <a
   href={href}
+  data-track={track}
   class:list={[baseClasses, variantClasses, extraClass]}
   target={newTab ? '_blank' : undefined}
   rel={newTab ? 'noopener noreferrer' : undefined}

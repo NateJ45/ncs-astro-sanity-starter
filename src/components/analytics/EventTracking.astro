@@ -1,0 +1,36 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+/* ============================================================================
+   Conversion events (PORTS.md card 89)
+   ============================================================================
+   Foundation, edit with care.
+
+   GA4 enhanced measurement already covers outbound clicks, file downloads,
+   scroll, site search and form_start/form_submit for plain HTML forms. It does
+   NOT see the actions a client cares about: a tap on a phone number, a tap on
+   an email link, a React form that posts with fetch(), or "the main button".
+   This adds those four, and nothing else:
+
+     tel: link           click_to_call  { link_url }
+     mailto: link        click_email    { link_url }
+     [data-track="x"]    cta_click      { cta_name, link_url? }
+     window.ncsTrackLead generate_lead  { form_name, form_location }
+
+   Rendered by Analytics.astro only when the GA tag renders, with the SAME
+   production-hostname guard as GoogleAnalytics.astro (card 58), so a developer
+   .env cannot file localhost events. The script is the text of
+   event-tracking-snippet.js, inlined (no tag, no request of its own), and that
+   file is what the unit test runs. Never put form values or names in event
+   parameters: GA4 forbids PII.
+   ============================================================================ */
+import snippet from './event-tracking-snippet.js?raw';
+
+// Same hostname rule as GoogleAnalytics.astro: apex and www, or null (anywhere)
+// when `site` is unset.
+const siteHost = Astro.site?.hostname ?? '';
+const apex = siteHost.replace(/^www./, '');
+const gaHosts: string[] | null = apex ? [apex, `www.${apex}`] : null;
+const code = `(function (gaHosts) {${snippet}})(${JSON.stringify(gaHosts)});`;
+---
+
+<script is:inline set:html={code} />

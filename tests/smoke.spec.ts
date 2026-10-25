@@ -58,3 +58,20 @@ test('GA4 sends nothing from localhost, even when the id is built in', async ({ 
     'undefined',
   );
 });
+
+// The conversion-event layer (PORTS.md card 89) renders only with the GA tag.
+// A build without PUBLIC_GA_ID, which is what CI ships, must not carry it at
+// all. When a local .env does bake an id in, the script is legitimately there
+// (and the hostname guard above keeps it inert), so only the absent half is
+// asserted on the build that lacks the tag. The click behaviour itself is
+// unit-tested in src/lib/event-tracking.test.ts.
+test('conversion-event script is absent from a build without PUBLIC_GA_ID', async ({ page }) => {
+  const html = await (await page.request.get('/')).text();
+  const hasGaTag = html.includes('gtag/js?id=');
+  test.skip(hasGaTag, 'this build has PUBLIC_GA_ID baked in');
+  expect(html).not.toContain('ncsTrackLead');
+  await page.goto('/', { waitUntil: 'load' });
+  expect(
+    await page.evaluate(() => typeof (window as { ncsTrackLead?: unknown }).ncsTrackLead),
+  ).toBe('undefined');
+});

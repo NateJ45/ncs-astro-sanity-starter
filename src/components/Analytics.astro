@@ -45,10 +45,14 @@
    prerendered, so they must be set on the build environment, not the runtime
    one.
 
+   The conversion-event layer (tel, mailto, data-track, generate_lead) renders
+   with the GA tag and nowhere else: see PORTS.md card 89.
+
    See PORTS.md card 54.
    ============================================================================ */
 
 import CloudflareBeacon from './analytics/CloudflareBeacon.astro';
+import EventTracking from './analytics/EventTracking.astro';
 import GoogleAnalytics from './analytics/GoogleAnalytics.astro';
 
 // The env reading lives in src/lib/analytics-config.ts rather than here, so the
@@ -60,3 +64,4 @@ import { cfAnalyticsToken, gaId, hasCfAnalytics, hasGa } from '@/lib/analytics-c
 
 {hasCfAnalytics && <CloudflareBeacon token={cfAnalyticsToken} />}
 {hasGa && <GoogleAnalytics gaId={gaId} />}
+{hasGa && <EventTracking />}

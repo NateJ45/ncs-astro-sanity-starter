@@ -406,6 +406,8 @@ export default function ContactForm({
 
       if (result.ok) {
         setStatus('success');
+        // GA4 conversion (PORTS.md card 89). No-op unless the tracking layer is on.
+        (window as { ncsTrackLead?: (form: string) => void }).ncsTrackLead?.('contact');
         try {
           localStorage.removeItem(DRAFT_KEY);
         } catch {
