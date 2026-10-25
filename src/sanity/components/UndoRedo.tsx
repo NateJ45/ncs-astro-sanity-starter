@@ -232,7 +232,7 @@ export const UndoAction: DocumentActionComponent = (props: DocumentActionProps) 
     icon: UndoIcon,
     disabled: busy || !hasDraft,
     title: hasDraft
-      ? 'Step back one change: a section you added, a photo you cleared, a colour you picked. Ctrl+Z outside a text box does the same.'
+      ? 'Step back one change: a section you added, a photo you cleared, a color you picked. Ctrl+Z outside a text box does the same.'
       : 'Nothing to undo yet. There is no unpublished change on this page.',
     onHandle: () => {
       undo();
