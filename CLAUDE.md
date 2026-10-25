@@ -94,7 +94,7 @@ Files are either safe to edit by hand (`docs/claude/safe-to-edit.md`) or foundat
 
 ## Vault
 
-Business context and decisions live in the studio vault, not here: `_vault/clients/ncs-starter.md` at the Projects root (internal; no Work log rows). Read its `## Current state` first. Update repo docs in the same piece of work as any change; repo docs stay in the repo, and no vault notes are created inside this repo.
+Business context and decisions live in the studio vault, not here: `_vault/clients/ncs-starter.md` at the Projects root (internal; log a Work log row per session of real work, adding a `## Work log` section to the note if missing). Read its `## Current state` first. Update repo docs in the same piece of work as any change; repo docs stay in the repo, and no vault notes are created inside this repo.
 
 ## Ports
 
