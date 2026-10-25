@@ -46,6 +46,8 @@ const TYPE_LABELS: Record<string, string> = {
   bulletin: 'Bulletin',
   notes: 'Sermon notes',
   form: 'Form',
+  newsletter: 'Newsletter',
+  policy: 'Policy',
 };
 
 /** Plural labels for the filter buttons above the results. */
@@ -63,6 +65,8 @@ const TYPE_PLURALS: Record<string, string> = {
   bulletin: 'Bulletins',
   notes: 'Sermon notes',
   form: 'Forms',
+  newsletter: 'Newsletters',
+  policy: 'Policies',
 };
 
 /** The order filter buttons appear in; unknown types follow alphabetically. */
@@ -77,7 +81,9 @@ const TYPE_ORDER = [
   'question',
   'bulletin',
   'notes',
+  'newsletter',
   'form',
+  'policy',
   'download',
   'file',
 ];

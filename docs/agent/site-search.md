@@ -40,7 +40,7 @@ result, so a phrase inside a bulletin finds the bulletin. The code is `scripts/l
   noindex, private, expired or not-yet-published page links to stays out by itself. Links in the header or footer
   don't count.
 - **Describing a file** (optional, on the `<a>`): `data-search-title` (else the link text), `data-search-type`
-  (`bulletin`, `notes`, `form`, `download`; else `file`, shown as "Download"), `data-search-date` (already
+  (`bulletin`, `notes`, `newsletter`, `form`, `policy`, `download`; else `file`, shown as "Download"), `data-search-date` (already
   formatted) and `data-search-note` (searchable, never shown). A file linked from several pages is one result, from
   the first page in path order.
 - **What a result shows.** The type, a format tag (PDF, Word, Text), the date, the title, a matching excerpt from
@@ -79,7 +79,7 @@ to true equivalents.
 ## Types, dates and passages
 
 - A template passes `searchType` to BaseLayout: `page` (default), `question` (FAQ), `journal` / `news` (posts),
-  `sermon`, `series`, `event`; files add `bulletin`, `notes`, `form`, `download` and `file`. Labels for known types live in `src/lib/site-search.ts`; an unknown type is title-cased.
+  `sermon`, `series`, `event`; files add `bulletin`, `notes`, `newsletter`, `form`, `policy`, `download` and `file`. Labels for known types live in `src/lib/site-search.ts`; an unknown type is title-cased.
   The filter buttons above the results appear when a search matches two or more types.
 - `<SearchMeta date={formatDate(...)} passage={...} />` anywhere inside the page adds the date and Bible passage shown
   under a result's title. Pass the date already formatted for reading.

@@ -10300,7 +10300,7 @@ build time and imported only when a page links a file of that kind.
    inside an indexed `<main>` becomes its own Pagefind record: the text read out of the file, led by its title and
    optional note, with type, date, format ("PDF") and the linking page as "From ...". Files come from the BUILT PAGES,
    never from a Sanity query, so expired, scheduled, private and noindex files stay out with no extra logic. Links can
-   carry `data-search-title`, `data-search-type` (`bulletin`, `notes`, `form`, `download`), `data-search-date`
+   carry `data-search-title`, `data-search-type` (`bulletin`, `notes`, `newsletter`, `form`, `policy`, `download`), `data-search-date`
    and `data-search-note`; a bare link still works (type `file`, title from its text). A file that will not
    download (20 s timeout), is over 25 MB, is another format, or is a scan (under 10 characters a page) is indexed by
    title only and logged once; the build never fails over a file. Text is cached by the Sanity SHA-1 in
