@@ -76,6 +76,46 @@ Do not loosen the sandbox, do not move the site-wide code into the shared projec
 with `set:html` anywhere except the two opt-outs above. If a provider genuinely needs the page, that is what the switch
 is for, and the Checkup keeps it visible.
 
+## Paste-and-go and the provider registry (PORTS.md card 172)
+
+The block has one paste box at the top (`src/sanity/components/EmbedPasteInput.tsx`, PORTABLE). A
+link, or code that is only an iframe, goes into `embedUrl`; other code into `embedCode`, with
+`runsOnPage` switched on when every script in it comes from a known service. Nothing new is
+stored: `src/lib/embed-providers.ts` (PORTABLE) works the plan out again in the Studio and on every
+build (rule 15), and `EmbedSection.astro` renders from it.
+
+- **The registry** (`EMBED_PROVIDERS`): YouTube, Vimeo, Facebook video, Google Maps, Google
+  Calendar, Google Forms, Spotify, Apple Podcasts, Church Trac, Planning Center, Tithe.ly,
+  Givelify, Subsplash, SignUpGenius, Calendly. Each has hosts, a size (16:9 for video, a fixed
+  height for players, maps and forms) and, where it hands out script code, its script hosts.
+  Share links are turned into embeddable ones (a YouTube watch link into
+  `youtube-nocookie.com/embed/...`, a Spotify episode into its player, a Calendar `?cid=` into
+  `embed?src=`). A link that cannot be framed (a `maps.app.goo.gl` share link, a Facebook page,
+  a Form's edit link) is an error on the field with what to paste instead, and the site shows
+  nothing for it. A known service's frame also gets `allow-popups-to-escape-sandbox` and its
+  `allow` list (payment, fullscreen). The Height choice hides when the service sets the size.
+  The church services cost a site that never pastes them nothing.
+- **The guard rail.** With "Runs directly on the page" on, code still goes in its box unless
+  every `<script src>` belongs to a known service or to the site's
+  `site.embeds.approvedScriptOrigins` (`src/data/site.ts`, empty by default), and inline scripts
+  or `on*` handlers only ride along with such a script. The Studio says who must approve it. An
+  unknown LINK still works, framed in the sandboxed iframe. To approve a service for every site,
+  add it to the registry in the starter with a test; for one site's one-off widget, add its origin
+  to `approvedScriptOrigins`. The styleguide's own probes pass `trustedCode` to `SectionRenderer`
+  (repo-written code only, never Sanity content).
+- **Per-site words.** `EMBED_WORDS` in `src/sanity/schemaTypes/sections.ts` names who approves
+  ("your web designer") and the services the empty block suggests; it goes to
+  `makeEmbedPasteInput()` and `describePlan()`.
+- **CSP**: a known service's code (boxed or on the page) carries `data-embed-provider="<id>"` on
+  its wrapper. `scripts/build-csp.mjs` reads those ids from the built pages and adds that
+  service's script hosts and their subdomains to `script-src`, only when a page uses the service
+  (`docs/agent/deployment.md`, "Security headers"). A marker typed into pasted code by hand names
+  no origin of its own: only registry ids count. Tests: `src/lib/embed-providers.test.ts`,
+  `scripts/lib/csp.test.mjs`, `tests/embed-guard.spec.ts`.
+- **Not verified against real snippets**: the script hosts for Givelify, Subsplash and
+  SignUpGenius are each service's main domain. If a real snippet loads from elsewhere, the
+  Studio says "not known" and the fix is a registry line.
+
 ## The script policy (PORTS.md card 153)
 
 An `srcdoc` frame inherits the page's Content-Security-Policy, and the public pages send a

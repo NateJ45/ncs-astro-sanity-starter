@@ -44,6 +44,9 @@ const para = (key: string, text: string) => ({
   children: [{ _type: 'span', _key: `${key}-s`, marks: [], text }],
 });
 
+/** A calendar day `n` days after the build, as YYYY-MM-DD. */
+const inDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+
 const cta = (label: string) => ({
   _type: 'ctaBlock',
   label,
@@ -106,6 +109,30 @@ const CODE_CHECKS: Record<string, unknown>[] = [
     heightHint: 'short',
     embedCode: ON_PAGE_PROBE,
     runsOnPage: true,
+  },
+];
+
+// Paste-and-go guard (PORTS.md card 172, tests/embed-guard.spec.ts): rendered
+// WITHOUT trustedCode, like Sanity content. Script code from an unknown service
+// asks to run on the page and must land in its box; a YouTube share link
+// becomes the private player at 16:9.
+const GUARD_CHECKS: Record<string, unknown>[] = [
+  {
+    _type: 'embedSection',
+    _key: 'guard-unknown',
+    headline: 'Unknown script code asking for the page',
+    heightHint: 'short',
+    embedCode: ON_PAGE_PROBE.replace('data-on-page-probe', 'data-guard-probe').replace(
+      '[data-on-page-probe]',
+      '[data-guard-probe]',
+    ),
+    runsOnPage: true,
+  },
+  {
+    _type: 'embedSection',
+    _key: 'guard-youtube',
+    headline: 'A pasted YouTube link',
+    embedUrl: 'https://youtu.be/dQw4w9WgXcQ',
   },
 ];
 
@@ -346,6 +373,151 @@ const SECTIONS: Record<string, unknown>[] = [
       href: '#',
     })),
   },
+  // ── The builder kit (builderSections.ts, PORTS.md card 173) ────────────────
+  // Dated blocks take dates relative to the build day, so the countdown always
+  // reads "12 days to go" and the event's dates are always still to come.
+  {
+    _type: 'columnsSection',
+    _key: 'columns',
+    heading: 'How it works',
+    textColumns: ['Ask', 'Plan', 'Do'].map((heading, i) => ({
+      _key: `col${i}`,
+      heading,
+      body: [para(`col${i}p`, 'A few sentences about this step, in plain words.')],
+    })),
+  },
+  {
+    _type: 'buttonRowSection',
+    _key: 'buttons',
+    heading: 'Where would you like to go?',
+    layout: 'cards',
+    links: [
+      ['Visit us', 'Opening hours and how to find us.'],
+      ['Book a call', 'Fifteen minutes to talk it through.'],
+      ['Read the guide', 'Everything in one place.'],
+    ].map(([label, note], i) => ({ _key: `ql${i}`, link: cta(label), note })),
+  },
+  {
+    _type: 'photoSection',
+    _key: 'photo',
+    image: image('A wide photo of the space'),
+    caption: 'A caption under the photo.',
+  },
+  {
+    _type: 'accordionSection',
+    _key: 'accordion',
+    heading: 'Good to know',
+    items: ['Is there parking?', 'Can I bring a friend?', 'How long does it take?'].map(
+      (question, i) => ({
+        _key: `qa${i}`,
+        question,
+        answer: [para(`qa${i}a`, 'A short, friendly answer.')],
+      }),
+    ),
+  },
+  {
+    _type: 'tabsSection',
+    _key: 'tabs',
+    heading: 'Pick what fits',
+    tabs: ['Mornings', 'Evenings', 'Weekends'].map((label, i) => ({
+      _key: `tab${i}`,
+      label,
+      body: [para(`tab${i}p`, `What happens in the ${label.toLowerCase()}, in a few sentences.`)],
+    })),
+  },
+  {
+    _type: 'countdownSection',
+    _key: 'countdown',
+    eventName: 'The summer open house',
+    startDate: inDays(12),
+    intro: 'Come and see what we do. Everyone is welcome.',
+    duringText: 'It is happening now. Come and join us!',
+    afterText: 'Thank you to everyone who came!',
+    link: cta('Find out more'),
+  },
+  {
+    _type: 'noticeSection',
+    _key: 'notice',
+    message: 'We are closed on Monday for the holiday. Call (555) 555-0100 if it cannot wait.',
+    urgency: 'urgent',
+  },
+  {
+    _type: 'timelineSection',
+    _key: 'timeline',
+    heading: 'Our story',
+    entries: [
+      ['2014', 'Where it began', 'Two people and one good idea.'],
+      ['2019', 'A bigger home', 'We moved into the space we are in today.'],
+      ['Today', 'Where we are now', 'A small team, and a lot of happy people.'],
+    ].map(([year, title, text], i) => ({ _key: `tl${i}`, year, title, text })),
+  },
+  {
+    _type: 'letterSection',
+    _key: 'letter',
+    eyebrow: 'A note from our founder',
+    greeting: 'Dear friends,',
+    body: [
+      para('lt0', 'Thank you for stopping by. We started this to make one hard thing easier.'),
+      para('lt1', 'If there is anything we can do for you, we would love to hear from you.'),
+    ],
+    signOff: 'With thanks,',
+    name: 'Alex Morgan',
+    role: 'Founder',
+  },
+  {
+    _type: 'eventDetailsSection',
+    _key: 'event',
+    eyebrow: 'Save the date',
+    title: 'Summer open house',
+    occurrences: [
+      { _key: 'ev0', date: inDays(30), startTime: '10:00', endTime: '12:00', label: 'Morning' },
+      { _key: 'ev1', date: inDays(30), startTime: '18:00', endTime: '20:00', label: 'Evening' },
+    ],
+    place: 'The community hall\n123 Main Street, Springfield',
+    note: 'A relaxed look around, a chance to meet the team, and coffee on us.',
+    button: cta('Sign up'),
+    showCalendar: true,
+  },
+  {
+    _type: 'scheduleSection',
+    _key: 'schedule',
+    heading: 'The day',
+    days: [
+      {
+        _key: 'sd0',
+        title: 'Saturday',
+        items: [
+          ['10:00', 'Doors open', 'Coffee in the hall'],
+          ['11:00', 'Welcome and tour', ''],
+          ['13:00', 'Lunch', 'Bring a friend'],
+        ].map(([startTime, title, note], i) => ({ _key: `si0${i}`, startTime, title, note })),
+      },
+      {
+        _key: 'sd1',
+        title: 'Sunday',
+        items: [
+          ['10:30', 'Workshop', 'Places are limited'],
+          ['12:00', 'Questions and answers', ''],
+        ].map(([startTime, title, note], i) => ({ _key: `si1${i}`, startTime, title, note })),
+      },
+    ],
+  },
+  {
+    _type: 'photoCardsSection',
+    _key: 'photocards',
+    heading: 'What to expect',
+    cards: [
+      ['A warm welcome', 'Someone will meet you at the door.'],
+      ['Time to look around', 'Take as long as you like.'],
+      ['Real answers', 'Ask us anything.'],
+    ].map(([title, body], i) => ({
+      _key: `pc${i}`,
+      image: image(title),
+      title,
+      body,
+      link: cta('Read more'),
+    })),
+  },
 ];
 ---
 
@@ -364,6 +536,9 @@ const SECTIONS: Record<string, unknown>[] = [
     </div>
   ))}
   <div data-custom-code-checks>
-    <SectionRenderer sections={CODE_CHECKS} idPrefix="fx-code" anchors="numbered" />
+    <SectionRenderer sections={CODE_CHECKS} idPrefix="fx-code" anchors="numbered" trustedCode />
+  </div>
+  <div data-embed-guard-checks>
+    <SectionRenderer sections={GUARD_CHECKS} idPrefix="fx-guard" anchors="numbered" />
   </div>
 </BaseLayout>

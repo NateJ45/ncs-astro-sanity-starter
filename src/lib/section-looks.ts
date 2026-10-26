@@ -85,6 +85,21 @@ export const LOOKS_BY_TYPE: Record<string, SectionLook[]> = {
   gallerySection: ALL,
   quoteSection: ALL,
   videoSection: ALL,
+  // The builder kit (builderSections.ts, PORTS.md card 173). Content blocks an
+  // editor stacks into a page, so they vary like the five above. The wide photo
+  // and the letter offer no Feature: a photo is its own emphasis, and a letter
+  // is a sheet of paper that should sit on the page, not on a dark band.
+  columnsSection: ALL,
+  buttonRowSection: ALL,
+  photoSection: ['standard', 'quiet'],
+  accordionSection: ALL,
+  tabsSection: ALL,
+  countdownSection: ALL,
+  timelineSection: ALL,
+  letterSection: ['standard', 'quiet'],
+  eventDetailsSection: ALL,
+  scheduleSection: ALL,
+  photoCardsSection: ALL,
 };
 
 /** The options a block's `look` field offers, in display order. */

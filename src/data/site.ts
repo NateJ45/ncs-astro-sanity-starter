@@ -30,6 +30,11 @@ export const site = {
   url: `https://${_domain}`,
   // BCP 47 language tag for the <html lang> attribute. Change if the site is not in English.
   lang: 'en',
+  // IANA time zone the site's calendar runs on: which day "today" is for a
+  // dated notice, a countdown or an event's past dates (the builder kit,
+  // PORTS.md card 173), a short link's last day (card 171), and the times in
+  // RSVP emails. Change it for a site outside US Eastern.
+  timeZone: 'America/New_York',
 
   /** Short display name alias — same as name, kept for any consumer that
    *  accessed the old `site.studio` property. */
@@ -92,6 +97,15 @@ export const site = {
       ['hours', 'opening times', 'open'],
       ['directions', 'address', 'location', 'map', 'parking'],
     ] as string[][],
+  },
+
+  // The Custom code or embed block (PORTS.md card 172, src/lib/embed-providers.ts).
+  // `approvedScriptOrigins`: script origins ("https://widget.example.com") whose
+  // pasted code may run directly on the page although the shared registry does
+  // not know the service. Leave it empty and add a registry entry in the starter
+  // where you can; this list is for a one-off widget on this site only.
+  embeds: {
+    approvedScriptOrigins: [] as string[],
   },
 
   // Public repo URL (used in footer credit if shown)
