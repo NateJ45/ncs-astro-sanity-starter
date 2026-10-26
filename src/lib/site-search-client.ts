@@ -337,6 +337,15 @@ export function mountSearchPanel(
 
     let found = await widen(pf, primary, res, filterOpt, mine);
     if (!found) return;
+    // Card 165: the visitor asked for their own spelling on purpose ("Search for
+    // "cnotact" instead"), so Pagefind's loose pages, which matched no word on
+    // them, are dropped. Shown, they read as a match ("1 result for "cnotact"").
+    if (exact) {
+      const kept = await matchedOnly(found.results);
+      if (mine !== ticket) return;
+      if (kept.length !== found.results.length)
+        found = { results: kept, counts: kept.length ? found.counts : undefined };
+    }
     let corrected: string | null = null;
     // Pagefind 1.5 sometimes returns a page for a typo without matching any
     // word on it ("baptsim"). Treat that like nothing found and try the
@@ -395,6 +404,20 @@ export function mountSearchPanel(
       if (mergeResults(lists).length >= MIN_RESULTS) break;
     }
     return { results: mergeResults(lists), counts: maxCounts(allCounts) };
+  }
+
+  /** The results that matched at least one word on their page (card 165). */
+  async function matchedOnly(list: PagefindResult[]): Promise<PagefindResult[]> {
+    const kept: PagefindResult[] = [];
+    for (const r of list) {
+      try {
+        const d = await r.data();
+        if (!Array.isArray(d.locations) || d.locations.length > 0) kept.push(r);
+      } catch {
+        kept.push(r);
+      }
+    }
+    return kept;
   }
 
   /** True when nothing was found, or the best result matched no actual word. */
