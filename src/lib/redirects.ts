@@ -144,7 +144,7 @@ export function buildRedirectMap(docs: readonly RedirectDoc[]): Record<string, R
 }
 
 // =============================================================================
-// File-style sources (PORTS.md card 159, 2026-10-25)
+// File-style sources (PORTS.md card 160, 2026-10-25)
 // =============================================================================
 // With trailingSlash 'always', Astro writes every redirect source with a
 // trailing slash, so "/index.htm" reaches _redirects as "/index.htm/". The host

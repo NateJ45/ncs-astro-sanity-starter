@@ -270,7 +270,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 156 | Contact form no-JS post + error summary, FAQ landmark, dark-band rings              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 159 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | partial        |
+| 160 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | partial        |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10492,7 +10492,50 @@ SECTION_ANCHORS })`, which also names its other sections from their headings, so
 
 **Applied:** starter (this card). first-baptist-auburn = source: it takes `src/lib/ics.ts` (+ test) byte-identical, and its `gatheringIcs()` now builds on `buildIcs()` (long LOCATION lines are folded); it keeps its own `src/lib/section-anchors.ts` (a key map with a different API, unmarked, a recorded fork) and its own button budget in `SectionRenderer.astro` (the navy variant), so it does not carry `cta-budget.ts`.
 
-## Card 159: Redirects from file-style addresses get an exact slashless rule (2026-10-25)
+## Card 159: page weight, cache and security headers, share images (2026-10-25)
+
+**Origin:** first-baptist-auburn's site audit (fbc-auburn#176 CSP, #177 performance). Every page inlined the CSS
+of every component its module graph reached, about half of it dead; the build-time CSP line from card 153 grew with
+every small component script until it passed Cloudflare's 2,000-character limit for a `_headers` line and a deploy
+failed (gotcha `cloudflare-headers-line-limit-breaks-hashed-csp`); a noindex page still named a canonical; share
+images from Sanity could be WebP.
+
+**Canonical:** PORTABLE: `scripts/purge-page-css.mjs`, `scripts/lib/css-purge.mjs` (+ `css-purge.test.mjs`). Per site
+(NOT portable): the `build` script order in `package.json`, `public/_headers`, `astro.config.mjs`, `BaseLayout.astro`.
+
+**What it does.**
+
+1. **Per-page CSS purge.** `npm run build` runs `purge-page-css.mjs` after `astro build` and before `build-csp.mjs`
+   (the CSP hashes scripts only, so the order does not change it). For each built page it drops every inline style
+   rule whose selector needs a class found nowhere in the page's HTML or its scripts (followed through imports).
+   Rules without classes, `:not()`, `@font-face`, `@keyframes` and other at-rules are never touched; a script that
+   builds class names from pieces lists a prefix in `KEEP`. **Measured on the starter (16 pages):** with the default
+   `inlineStylesheets: 'auto'` only 11 KB of CSS is inline in total, so the purge removes 0% and costs nothing; with
+   `inlineStylesheets: 'always'` (what Auburn runs) inline CSS goes from 2,052 KB to 1,015 KB, 51% removed, about
+   128 KB to 63 KB a page. The step only pays on a site that inlines; it is harmless on one that does not.
+2. **Headers** (`public/_headers`): a second `Content-Security-Policy: form-action 'self'` line (kept apart so card
+   153's `/*` line stays byte-for-byte), `Permissions-Policy` refusing camera, microphone, geolocation, usb,
+   magnetometer and gyroscope, and a day plus a week of `stale-while-revalidate` for `/og/*`, the favicons and the
+   apple touch icon. `/_astro/*` already carried the immutable year. HSTS is unchanged (`includeSubDomains` stays).
+   `docs/agent/deployment.md` says a pasted form that posts off-site needs its origin on `form-action`.
+3. **`vite.build.assetsInlineLimit: 0`** in `astro.config.mjs`: small scripts ship as hashed `/_astro/` files, not
+   inline, so the CSP hash list stays short. The starter's line is 652 bytes with 10 inline scripts. New
+   `scripts/lib/headers-line-limit.test.mjs` (part of `test:unit`) pins the config and fails if a built or source
+   `_headers` line passes 2,000 characters.
+4. **No canonical on a noindex page** (`BaseLayout.astro`), with `tests/noindex-canonical.spec.ts`.
+5. **JPEG share images:** `ogUrlFromImage` asks Sanity for `format('jpg').quality(80)` instead of `auto('format')`.
+
+**Not ported.** Fonts and textures moved to `src/assets/`: the starter has none in `public/` (its fonts come from
+`@fontsource` and are already hashed). Auburn's `og-card.mjs` change was only a font path, so the starter's
+`render-og.mjs` (PORTABLE) is untouched; the JPEG change lives in BaseLayout. `svg-path-compact` (stone icons),
+`print-icons.mjs`, the HSTS relaxation and the Toaster removal are Auburn-only: the starter's Toaster is still used
+by `CopyEmailButton.tsx`. Auburn's `page-weight.spec.ts` is Auburn-specific.
+
+**Applied:** starter (this card); first-baptist-auburn = source (applied). Other sites: copy the two PORTABLE files,
+add the purge step to `build`, and apply the `_headers`, config and BaseLayout changes by hand. Gotcha note's
+"Ported to" box for the starter can now be ticked once this merges.
+
+## Card 160: Redirects from file-style addresses get an exact slashless rule (2026-10-25)
 
 **Origin:** stonesteps-50k, 2026-10-25. Its #158 added Search Console redirects for `/index.htm` and
 `/index_files/Registration.htm`; CI was green and both still 404ed live. Vault gotcha:

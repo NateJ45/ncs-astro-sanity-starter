@@ -89,7 +89,8 @@ function ogPathForRoute(pathname: string): string {
 // to the next source) or if the URL builder throws on a malformed object.
 function ogUrlFromImage(img: any): string | null {
   if (!img?.asset) return null;
-  try { return urlFor(img).width(1200).height(630).fit('crop').auto('format').url(); } catch { return null; }
+  // JPEG, not auto/WebP: some link scrapers (older LinkedIn, some chat apps) skip WebP (card 159).
+  try { return urlFor(img).width(1200).height(630).fit('crop').format('jpg').quality(80).url(); } catch { return null; }
 }
 
 // OG image priority: explicit ogImage prop (a real photo passed by detail
@@ -157,7 +158,9 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {/* No canonical on a noindex page (the 404, /search/, a hidden page): "do not index this" and
+        "this is the address to index" contradict each other (card 159). */}
+    {!noindex && <link rel="canonical" href={canonical} />}
     {/* scaffold: journal */}
     <link rel="alternate" type="application/rss+xml" title={`${site.name} Journal`} href="/journal/rss.xml" />
     {/* scaffold:end */}

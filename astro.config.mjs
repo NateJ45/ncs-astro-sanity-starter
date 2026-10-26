@@ -111,7 +111,7 @@ if (guarded.dropped.length) {
 }
 const cmsRedirects = guarded.redirects;
 
-// FILE-STYLE REDIRECT SOURCES (PORTS.md card 159). trailingSlash 'always' makes
+// FILE-STYLE REDIRECT SOURCES (PORTS.md card 160). trailingSlash 'always' makes
 // Astro write "/index.htm" into _redirects as "/index.htm/", and the host only
 // adds a trailing slash to extensionless paths, so the old address 404s. After
 // the build (the adapter appends its rules to _redirects in the same hook) this
@@ -233,6 +233,14 @@ export default defineConfig({
     fileStyleRedirects(),
   ],
   vite: {
+    // Never inline an asset as a data: URI (card 159). build-csp.mjs lists a hash for every inline
+    // script on every page in ONE Content-Security-Policy line of dist/client/_headers, and
+    // Cloudflare rejects a _headers line over 2,000 characters (the deploy fails). Vite's default
+    // inlines files under 4 KB, which turned small scripts into inline ones and pushed the line
+    // past the limit. 0 serves them as hashed /_astro/ files (cached a year, covered by 'self').
+    // Gotcha: _vault/gotchas/cloudflare-headers-line-limit-breaks-hashed-csp.md. A unit test
+    // (scripts/lib/headers-line-limit.test.mjs) fails when a built line is over the limit.
+    build: { assetsInlineLimit: 0 },
     // Read by src/pages/build-info.json.ts (see BUILD_COMMIT above).
     define: { __NCS_BUILD_COMMIT__: JSON.stringify(BUILD_COMMIT) },
     // fixSanityDedupeAlias() repairs @sanity/astro's dev-only alias, which is

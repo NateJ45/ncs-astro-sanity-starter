@@ -167,7 +167,7 @@ test('normalizeRedirectPath still drops query and fragment on the SOURCE side', 
   assert.equal(normalizeRedirectPath('/a/b?x=1#frag'), '/a/b');
 });
 
-// ---- file-style sources (card 159) -----------------------------------------
+// ---- file-style sources (card 160) -----------------------------------------
 
 test('isFileStyleSource spots a file-looking last segment only', () => {
   assert.equal(isFileStyleSource('/index.htm'), true);

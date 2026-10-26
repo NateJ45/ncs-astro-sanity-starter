@@ -8,8 +8,8 @@
 
 - `<title>` -- unique per page, 50-60 characters, brand name as suffix ("Services -- Studio Starter"). Pulled from the page singleton's `seoTitle` field, falls back to the page's primary headline.
 - `<meta name="description">` -- unique per page, 150-160 characters, written as a sentence a human would click. Pulled from `seoDescription`. No marketing puffery; match the on-page voice.
-- `<link rel="canonical">` -- absolute URL computed from `Astro.url.pathname` + `site.domain`. Prevents a workers.dev URL or staging domain from competing with the production domain once DNS cuts over.
-- Open Graph + Twitter meta -- set in BaseLayout. The OG image resolves in priority order: (1) the `ogImage` prop a page passes (detail pages pass their real hero/cover photo, served from cdn.sanity.io); (2) the page singleton's `seoImage` field -- a per-page override set in the page's SEO section in Studio; (3) `siteSettings.seoImage` -- the site-wide default social image; (4) the auto-generated branded card at `/og/<route>.png` (from `npm run og:pages`); (5) `og-default.png`. Sanity images (2 and 3) run through `urlFor().width(1200).height(630).fit('crop')` via the `ogUrlFromImage` helper. BaseLayout also emits `og:locale`, `og:image:alt`, and a theme-aware `theme-color`.
+- `<link rel="canonical">` -- absolute URL computed from `Astro.url.pathname` + `site.domain`. Prevents a workers.dev URL or staging domain from competing with the production domain once DNS cuts over. Not emitted on a noindex page (404, `/search/`, a hidden page): "do not index" and "index this address" contradict each other (card 159).
+- Open Graph + Twitter meta -- set in BaseLayout. The OG image resolves in priority order: (1) the `ogImage` prop a page passes (detail pages pass their real hero/cover photo, served from cdn.sanity.io); (2) the page singleton's `seoImage` field -- a per-page override set in the page's SEO section in Studio; (3) `siteSettings.seoImage` -- the site-wide default social image; (4) the auto-generated branded card at `/og/<route>.png` (from `npm run og:pages`); (5) `og-default.png`. Sanity images (2 and 3) run through `urlFor().width(1200).height(630).fit('crop').format('jpg').quality(80)` (JPEG, because some link scrapers skip WebP; card 159) via the `ogUrlFromImage` helper. BaseLayout also emits `og:locale`, `og:image:alt`, and a theme-aware `theme-color`.
 - `<html lang="en">`. Update this if the site ships in another language.
 
 **OG regeneration is a per-project step.** The `og-default.png` committed in the starter is a placeholder. Run `npm run og` after updating the brand inputs in `scripts/generate-og-default.mjs` (brand colors, tagline, wordmark) to regenerate it for the actual project.
@@ -120,7 +120,7 @@ build drops it with a `[redirects] skipped ...` warning and leaves the document 
 Studio (`src/lib/redirect-guard.ts`, card 22's 2026-09-29 addendum).
 
 An OLD address that looks like a file (`/index.htm`, `/about.php`) needs one more step
-(card 159). With `trailingSlash: 'always'` Astro writes it as `/index.htm/`, and the host
+(card 160). With `trailingSlash: 'always'` Astro writes it as `/index.htm/`, and the host
 only adds a trailing slash to extensionless paths, so the visitor would get a 404. The
 `fileStyleRedirects()` integration in `astro.config.mjs` puts an exact slashless rule for
 each one at the top of `dist/client/_redirects` after the build (the build log says

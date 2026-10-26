@@ -59,12 +59,21 @@
 # *.sanity.studio for a hosted Studio and the iframe-pane plugin; both are
 # retired. Re-add those origins only if you deliberately run a hosted Studio.)
 
+# form-action 'self' (card 159) is a SECOND Content-Security-Policy line, kept apart so the
+# frame-ancestors line above stays byte-for-byte for build-csp.mjs; both policies are enforced.
+# A pasted form that posts to another site (a donate button, a mailing-list signup in a Custom
+# code block) needs its origin added here, e.g. form-action 'self' https://www.paypal.com.
+# Permissions-Policy refuses device features no page uses; autoplay and fullscreen are not
+# listed, so embedded video players keep working.
+
 /*
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Content-Security-Policy: frame-ancestors 'self'
+  Content-Security-Policy: form-action 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), usb=(), magnetometer=(), gyroscope=()
 
 # Font files for pasted code (PORTS.md card 121). A "Custom code" block runs in a
 # sandboxed srcdoc iframe with an OPAQUE origin, and a font load is always a CORS
@@ -80,3 +89,17 @@
 /studio/*
   ! Content-Security-Policy
   Content-Security-Policy: frame-ancestors 'self'
+
+# Fixed-name files that change rarely: a day, then a week of stale-while-revalidate (card 159).
+# Never immutable: the names are not hashed. Hashed files under /_astro/ are covered above.
+/og/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/favicon.svg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/favicon.ico
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
