@@ -1,0 +1,49 @@
+---
+// Safe to edit by hand
+// A row of two to six links: as outline buttons (the page keeps its one filled
+// accent button for its main action, card 158, so these are all the secondary
+// family, rule 17), or as cards with a line of text. A card's button covers the
+// whole card (.bb-stretch), so the card is one big tap target with one link in it.
+import BuilderBand from './BuilderBand.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import { plain } from '@/lib/builder-blocks';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedButtonRowSection } from '@/lib/builderBlocks.types';
+
+interface Props {
+  block: ProjectedButtonRowSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface, headingId } = Astro.props;
+const links = (block.links ?? []).filter((l) => l?.link?.label);
+const cards = plain(block.layout) === 'cards';
+---
+
+{links.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Links"
+  >
+    {cards ? (
+      <ul class="bb-grid bb-grid--3" role="list">
+        {links.map((l) => (
+          <li class="bb-card bb-stretch">
+            {l.note && <p class="bb-card__note">{l.note}</p>}
+            <CtaLink cta={l.link} variant="secondary" />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <div class="bb-actions">
+        {links.map((l) => (
+          <CtaLink cta={l.link} variant="secondary" />
+        ))}
+      </div>
+    )}
+  </BuilderBand>
+)}

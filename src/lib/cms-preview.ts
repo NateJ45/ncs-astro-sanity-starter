@@ -102,6 +102,9 @@ const NON_STEGA_FIELDS = new Set([
   'imageSide',
   'layout',
   'linkType',
+  // A short link's "Where does it go?" and "For now, or for good?" (card 171).
+  'linkKind',
+  'lasting',
   // 2026-10-18: a content block's look (src/lib/section-looks.ts). The cadence
   // compares it to 'quiet' / 'feature'; an encoded value would render Standard.
   'look',
@@ -114,6 +117,12 @@ const NON_STEGA_FIELDS = new Set([
   'tone',
   'variant',
   'width',
+  // The builder kit (builderSections.ts, PORTS.md card 173): the notice's
+  // urgency picks its look, and the event and schedule times are read as
+  // "HH:MM" by src/lib/builder-blocks.ts. (`layout` above covers the button row.)
+  'urgency',
+  'startTime',
+  'endTime',
   // Not in this template yet, but standard enum names across the site family.
   // Carried so a block ported from a sibling repo is not a preview-only bug
   // waiting to be found.
