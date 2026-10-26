@@ -822,6 +822,7 @@ Every family site should differ in FORM, not only colour. Unset keys take the st
 | `edgeColors`           | The ColourEdge's colours, left to right                                                  | `markColors`           |
 | `lettering`            | Banner titles in the site's display lettering `{ family, src, colors }`                  | none: the heading font |
 | `motion`               | How things arrive: `lay` (stones set down in turn), `draw` (the connector draws), `none` | `draw`                 |
+| `splash`               | Under the splash's name: `path` (the stones) or `motif` (the site's own art, card 162)   | `path`                 |
 
 Every colour is guarded: text at AA (4.5:1), markers, stones and focus rings at 3:1, banner lettering at 3:1 on the
 chrome. A failing colour is nudged until it passes; an unusable value is ignored with a note (`resolveLook().notes`).
@@ -962,7 +963,9 @@ piece with made-up data in light or dark (`&scheme=dark`), since the real screen
   site's lettering when there is some, colours guarded at 3:1 on the page), five seeded stones along a gentle wave in
   the look's shape and colours joined by its connector. Loading lays and lifts them in a loop; offline leaves the last
   one unlaid (a dashed outline) and adds a "Try again" pill. `none` motion and reduced motion show the path laid and
-  still. `public/studio/sw.js` (cache `v2`) keeps the offline page and what it points at (stylesheet, fonts,
+  still. `studio.look.splash: 'motif'` (card 162) drops the path: the site's `StudioSplashMotif.astro` takes its
+  place above the note and moves itself (it owns its reduced-motion rule), and the offline page keeps only the motif
+  strip. `public/studio/sw.js` (cache `v2`) keeps the offline page and what it points at (stylesheet, fonts,
   lettering, motifs).
 - **`restore`** is a meaning (Earlier versions, the "Undo a change" guide's `restore` icon). A site with restore art
   maps it in `brandIconArt.tsx`.

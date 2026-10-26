@@ -1,5 +1,12 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+import { readFileSync } from 'node:fs';
 import { test, expect } from './fixtures';
+
+// Card 162: a site whose look sets `splash: "motif"` shows its own art, not the stone path.
+const brand = JSON.parse(readFileSync('brand/brand.config.json', 'utf8')) as {
+  studio?: { look?: { splash?: string } };
+};
+const stonePath = brand.studio?.look?.splash !== 'motif';
 
 // =============================================================================
 // The Studio as a phone app (PORTS.md card 125)
@@ -70,8 +77,11 @@ test.describe('Studio app', () => {
     await page.reload();
     await expect(page.locator('[data-studio-offline]')).toBeVisible();
     await expect(page.locator('h1')).toHaveText("You're offline");
-    // Card 132: the brand's path, last stone unlaid, and a real Try again button.
-    await expect(page.locator('[data-studio-offline] .ncs-sp__stone[data-unlaid]')).toHaveCount(1);
+    // Card 132: the brand's path, last stone unlaid, and a real Try again button. Card 162: no
+    // path at all when the site's own motif stands in for it.
+    await expect(page.locator('[data-studio-offline] .ncs-sp__stone[data-unlaid]')).toHaveCount(
+      stonePath ? 1 : 0,
+    );
     await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
     await expect(page.locator('body')).toContainText(
       'Your work is safe in the Studio. It will be here when the connection comes back.',

@@ -272,6 +272,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 156 | Contact form no-JS post + error summary, FAQ landmark, dark-band rings              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 160 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)             | n/a     | yes         | yes      | yes              | no            | n/a            | n/a                | n/a                 | yes            |
 | 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none | n/a     | yes         | yes      | yes              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 162 | `studio.look.splash: motif`: the site's own art replaces the splash's stone path    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10597,3 +10598,32 @@ already, so for them the copy only keeps sync-check green.
 
 **Who should take it.** Every site with a `ci/sanity-snapshot.ndjson.gz` (card 138): today fbcm,
 first-baptist-auburn, stonesteps-50k.
+
+## Card 162: The splash can lay the site's own art instead of the stone path (2026-10-25)
+
+**Origin:** first-baptist-auburn. Its site moved from stepping stones to brick (the mark is a brick wall
+laid brick by brick, the menu and footer sill lay themselves the same way), but the /studio loading splash
+still laid five pebbles joined by dashes, above a still strip of brick from `StudioSplashMotif.astro`. The
+splash's path is drawn by the PORTABLE `StudioSplash.astro` from `studio.look`, whose shapes are all stones.
+
+**Canonical:** PORTABLE `src/lib/studio-look.ts` (`SplashKind`, `StudioLookInput.splash`,
+`ResolvedLook.splash`, + `studio-look.test.ts`), `src/components/studio/StudioSplash.astro`,
+`brand/brand.config.schema.json`; docs in `docs/agent/studio-kit.md`.
+
+**What it does.** `studio.look.splash` is `path` (the default: nothing moves) or `motif`. With `motif` the
+splash draws no stone path. On the loading splash the slot, the site's own `src/sanity/StudioSplashMotif.astro`,
+moves up into the path's place, above "Opening the editor", and does its own motion (plain SVG and CSS, no
+script: React replaces the splash as it mounts). The offline page shows the name, the note, "Try again" and the
+motif strip, with no path. An unknown value falls back to `path` with a note, like every look key.
+
+**Per site (not portable):** `StudioSplashMotif.astro` is the site's. For `motif` it should carry its own
+looping motion and a `prefers-reduced-motion: reduce` rule that shows it still. Width is
+`.ncs-splash__motif`'s (`min(280px, 70vw)`).
+
+**Verified in the starter (2026-10-25):** `npm run check`, `npm run test:unit`; the starter's splash
+(no look block) renders unchanged. End to end on first-baptist-auburn: see its PR.
+
+**Applied:** starter (this card). first-baptist-auburn: origin, sets `splash: "motif"` and lays its brick strip.
+Every other site keeps the default, so the copy only keeps sync-check green.
+
+**Who should take it.** Any site whose own motif is not stones and wants the splash to match it.
