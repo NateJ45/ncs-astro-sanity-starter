@@ -12212,6 +12212,14 @@ timeline, letter, event details, schedule, photo cards), dressed as the race's p
 countdown and dated notice were skipped because its Photograph band, FAQ blocks, race clock and Race notices already do
 those jobs. No `look` (the site has none); the schedule's rows are `scheduleRow` (`scheduleItem` is a document
 type there). Race templates in four groups and three new patterns; `src/lib/ics.ts` copied (card 158's lib only).
+fbcm, 2026-10-26 (its PR #123): `partial` on purpose, eight of the twelve (columns, button row, wide photo, tabs,
+countdown, dated notice, event details, schedule) in the church's grammar (Titling h2, gold rule over a hairline, no
+boxes, square photos, no photo caption per its DESIGN.md). Skipped as duplicates of its church blocks: fold-outs
+(`faqSection`), timeline, letter and photo cards (`linkCardsSection`); the button row is buttons only. No `look`.
+Event details defaults its place to the church's address in Site settings (`churchPlace()`) and writes the calendar
+file through the site's own `ics.ts`, which gained an `allDay` flag. Grouped templates and patterns-as-code were
+already there (card 109); the Event template was rebuilt on the kit, a Weekend or retreat template and two patterns
+added (not seeded: that site seeds only with Nathan's OK).
 
 ## Card 177: Calendar files can skip or move one date of a repeating event (2026-10-26)
 
@@ -12279,6 +12287,9 @@ label, so none relied on an empty object drawing the fallback.
 button drawing "Get in touch".
 stonesteps-50k, 2026-10-26 (its PR #173): `yes`. No accent-button budget there, so only `ctaBlock` and `CtaLink`;
 `CtaLink` checks every link field before calling a button empty. Its CI snapshot held no label-less button.
+fbcm, 2026-10-26 (its PR #123): `yes`. No accent-button budget there, so only `ctaBlock` and `CtaLink`; with no
+`openInNewTab` default, an unset switch keeps a same-site path typed as a web address in the same tab. Its CI snapshot
+held no empty or affected button.
 
 ## Card 179: An open Studio reloads itself after a deploy (2026-10-26)
 
