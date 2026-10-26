@@ -502,7 +502,7 @@ export const siteSettings = defineType({
       title: 'Default social share image',
       type: 'image',
       description:
-        'The image shown when any page of the site is shared on social media or in a text message (the Open Graph image). Use a wide image, about 1200 by 630 pixels. Individual pages can override this in their own SEO section. Leave blank to use the auto-generated branded cards.',
+        'You can leave this empty. Every page already makes its own share picture (the site card with the page title on it), and a page with its own share image in its SEO section uses that instead. This picture is only used for the few pages the website cannot make a card for, like password pages. Use a wide image, about 1200 by 630 pixels.',
       options: { hotspot: true },
       fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),

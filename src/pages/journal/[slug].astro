@@ -124,6 +124,7 @@ const schemas = [
   ogType="article"
   ogArticle={{ publishedAt: entry.publishedAt, author: entry.author }}
   searchType="journal"
+  ogCard={{ kicker: dateLabel || 'Journal' }}
 >
   <SearchMeta date={dateLabel} />
   {/* Thin bronze progress bar tracking scroll through the article. */}

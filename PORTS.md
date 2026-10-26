@@ -278,6 +278,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 168 | Site settings logo rules and a square icon that becomes the favicon set at build    | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 169 | Share cards drawn at build (hash cache, Chrome fallback, og-default if no browser)  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10798,3 +10799,61 @@ logo warning says "a mark with the name beside it" instead of "the cross with th
 **Who should take it.** Every site whose owner might change their logo or icon: copy the five PORTABLE files and the
 test, add `node scripts/build-brand-icons.mjs` to `npm run build` after `astro build`, add the two fields (or the
 validation and input on an existing `logo`) and a site version of `BrandImageInput.tsx`, run typegen.
+
+## Card 169: Share cards make themselves at build time (2026-10-26)
+
+**Origin:** first-baptist-auburn (#212). Per-page share cards were committed PNGs drawn by hand with
+`npm run og:pages`, so a renamed page or a new post shared a stale card or none: the starter's BaseLayout pointed
+og:image at `/og/<route>.png` whether or not the file existed. The starter's own `public/og/` still held 23 cards
+from the client build it was forked from.
+
+**Canonical:** PORTABLE `scripts/build-og-cards.mjs` (the post-build step), `scripts/lib/og-build.mjs` and
+`og-build.test.mjs` (the marker, the HTML rewrites, the fallback), `src/lib/og-card-marker.ts` and its test (which
+share image a page uses, and the marker). Changed PORTABLE files: `scripts/lib/render-og.mjs` (new `ogCardHtml` and
+`renderOgHtml` exports, an optional kicker and mark, and a Chrome or Edge fallback when Playwright's Chromium is not
+installed; og-default.png's HTML is byte-identical without them) and `src/sanity/schemaTypes/_seoFields.ts` (the
+Social share image description no longer says "Leave blank to use the site default"). Site files:
+`scripts/lib/og-card.mjs` (the card design: `cardHtml`, `renderHtml`, `closeCards`), BaseLayout's `ogCard` prop,
+the `siteSettings.seoImage` description. Uses `scripts/lib/build-sanity-client.mjs` and `brand-icons.mjs` from card 168. Docs: `docs/agent/seo.md`, "Share images make themselves".
+
+**What it does.**
+
+- BaseLayout resolves the share image in this order: a picture the page passes (a post's cover), the page's own
+  Share image, **the generated card** at `/og/<route>.jpg` (every prerendered page), Site settings' default (now
+  only for pages rendered on request, the password pages), `og-default.png`. For the card it writes an
+  `x-og-card` marker (base64url JSON: title, kicker, home). Pages pass `ogCard`: Home `{ home: true }` (the site
+  name with the tagline), journal posts their date, the journal index its eyebrow.
+- `build-og-cards.mjs` (in `npm run build` after the icon step) draws each marked page's card as a JPEG into
+  `dist/client/og/`, adds `?v=<hash>` to og:image so Facebook and text apps refetch a changed card, and removes the
+  marker. Site settings' square icon (card 168), when uploaded, goes on every card as `mark`.
+- **Fast:** each card is cached by a hash of its full HTML in `node_modules/.cache/og-cards`, kept between CI,
+  Lighthouse and deploy runs by `actions/cache`; a warm build draws nothing.
+- **Never a red build:** Playwright's Chromium, else the machine's Chrome or Edge (a GitHub runner's Chrome); with no
+  browser, or a card that fails, those pages share `og-default.png` with a warning. No Sanity project still draws
+  every card (the starter's own build does), only the Studio icon is skipped.
+- Retired: `scripts/generate-og-pages.mjs`, `npm run og:pages`, apply-brand's rewrite of it, and the committed
+  `public/og/*.png`. `npm run og` still draws the committed `og-default.png`. deploy.yml's "add a freshness
+  check here" note is replaced: a card cannot go stale.
+
+**Switching it on.** Nothing: it runs in every build. A site with its own card design replaces
+`scripts/lib/og-card.mjs` and keeps the three exports.
+
+**Not ported:** Auburn's card design ("night": the navy tile ground, brick sill, building sketch, the title fitted
+from 108px down to 60px), which stays in its own `og-card.mjs`; the starter's card is the generic one from
+`render-og.mjs` in `og-theme.mjs`'s colors. Auburn's per-page kickers (sermons, series, bulletin) stay in its pages.
+
+**Verified (2026-10-26):** in the starter, `npm run check`, `npm run test:unit` (`og-build.test.mjs`,
+`og-card-marker.test.ts`) and `npm run build` with no project: "Share cards: 16 pages, 16 drawn" in 1.6 s, og:image
+reads `/og/home.jpg?v=<hash>` and no page keeps the marker; the generic card checked by eye (page card with a
+kicker, Home card). first-baptist-auburn's branch: `sync-check` all SAME (348), `npm run check`, `npm run test:unit`,
+`npm run build` against its dataset (29 night cards through the PORTABLE step). The no-browser fallback is the
+origin's code, unchanged; not re-run here.
+
+**Applied:** starter (this card). first-baptist-auburn: origin (its copies now match the starter's byte for byte).
+
+**Who should take it.** Every site: copy the four PORTABLE files and their tests plus the new `render-og.mjs` and
+`_seoFields.ts`, add the starter's `scripts/lib/og-card.mjs` (or the site's own design), add
+`node scripts/build-og-cards.mjs` to `npm run build` after `astro build`, swap BaseLayout's og:image block for
+`resolveShareImage`, add the `actions/cache` step, then delete `generate-og-pages.mjs` and `public/og/*.png`. Needs
+card 168's `build-sanity-client.mjs` and `brand-icons.mjs`. Sites whose `render-og.mjs` copy is checked by
+sync-check in CI take the new copy after this merges.
