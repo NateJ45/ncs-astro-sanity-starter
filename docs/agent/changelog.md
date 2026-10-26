@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-26: Playwright installs time out instead of hanging (PORTS card 70)._ Three docs-only PRs across the family sat 40 to 60 minutes in "Install Playwright system libraries" on 2026-10-26: the runner's Azure Ubuntu mirror fed a normal 30-second `install-deps` at 29 kB/s, and the workflows had no timeout, so a stuck apt could hold a required check for GitHub's 6-hour default. Each install attempt now runs under `timeout` (180s for `install-deps`, 360s for a full browser download), so a crawling first try is killed and the retry resumes the partial download; the step has `timeout-minutes` (8 and 15) and the Playwright job 30.
+
 _2026-10-25: one accent button per page, named section anchors, a 404 with search, calendar files (PORTS card 158)._
 
 **Decision.** The one-accent-button rule is the renderer's, not the editor's (rule 9): the first section that draws a primary button keeps it and the rest draw the secondary variant. Section ids come from the heading rather than a key map, so every site gets linkable sections with no data to keep; the cost is that a retitle moves the anchor, and a site that needs a fixed one pins it by block `_key`. The 404 search is a plain GET form, not the live panel, so it works without JavaScript and loads no Pagefind on an error page. The starter has no calendar, so only the `.ics` builder is ported; Auburn's gathering files are the reference wiring.
