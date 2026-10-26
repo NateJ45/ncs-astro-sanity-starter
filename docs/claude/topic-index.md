@@ -28,7 +28,6 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Performance budgets + Lighthouse                                                                         | `docs/agent/performance.md`                                          |
 | Content data + Sanity integration                                                                        | `docs/agent/sanity.md`                                               |
 | Social links read by URL host (platform and icon from the pasted link; card 167)                         | `docs/agent/sanity.md`                                               |
-| Custom code: the trust model (pasted widgets, the box, the opt-outs)                                     | `docs/agent/custom-code.md`                                          |
 | Custom code: the trust model (pasted widgets, the box, the opt-outs, the embed provider registry)        | `docs/agent/custom-code.md`                                          |
 | Studio kit (Home, Site Guide, Checkup, staff view, Trash; `kit.config.ts`)                               | `docs/agent/studio-kit.md`                                           |
 | Visitor site search (Pagefind, opt-in) + share buttons                                                   | `docs/agent/site-search.md`                                          |
