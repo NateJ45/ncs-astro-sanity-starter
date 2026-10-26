@@ -277,6 +277,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 167 | Social links read by URL host (16 platforms + plain link icon, WhatsApp rule)       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10741,3 +10742,48 @@ build: `tests/search.spec.ts` 8 passed (the misspelling test failed before); "cn
 **Applied:** starter (this card). first-baptist-auburn: origin. Every site with search on (card 126) takes the copy.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).
+
+## Card 167: Social links read by URL host (2026-10-26)
+
+**Origin:** first-baptist-auburn#205. The editor had to pick a platform from a dropdown for every social link, the
+dropdown lacked WhatsApp and most podcast and video hosts, and a wrong pick drew the wrong icon. A WhatsApp address
+that is not an invite or number link opens nothing for a visitor.
+
+**Canonical:** PORTABLE `src/lib/social-links.ts` (+ `social-links.test.ts`) and `src/lib/social-icons.ts`. Per-site
+wording stays in non-marked files: the `socialLinks` field in `src/sanity/schemaTypes/siteSettings.ts`, the callers
+(`Footer.astro` in the starter), `src/lib/schemas.ts`. Docs: `docs/agent/sanity.md`, "Social links read by URL host".
+
+**What it does.** Site settings > Social links rows are a pasted link plus an optional label. `platformFromUrl()`
+reads the platform from the host (Facebook, Instagram, YouTube, TikTok, WhatsApp, X, Threads, Spotify, Apple
+Podcasts, Vimeo, LinkedIn, Pinterest, Nextdoor, Flickr, Linktree, and Houzz for the starter's old dropdown);
+`socialIcon()` maps it to a Tabler icon, and anything else gets the plain link icon, named by the label or its domain.
+WhatsApp shows only as an https `chat.whatsapp.com/...` invite or `wa.me/...` number link, on the page and in the
+JSON-LD `sameAs`. The Studio row preview shows the button's name (or "Will not show"), and odd addresses (a
+platform's home page, a search results page, a bad WhatsApp link) get a warning, never an error. At most 10 draw.
+
+**Existing data.** The Platform dropdown is hidden, not removed (rule 1), with WhatsApp added to its list. A known
+host wins; a stored platform stands in only for an unknown address (a vanity domain), and an unknown stored value
+falls to the plain link. An empty list still falls back to `socialInstagram` / `socialFacebook`. The starter's URL
+field keeps `http` allowed and the row cap is a warning, so no saved row starts failing validation (Auburn, with its
+own data checked, requires https and errors past 10).
+
+**Switching it on.** Nothing: a site takes the two marked files and the test, then points its callers at
+`resolveSocialLinks(siteSettings, pinnedFacebook?)`, `socialLabel()` and `socialIcon()` and swaps its
+`socialLinks` schema for the starter's (keep the hidden `platform` field). `npm run typegen` after. An empty list
+draws nothing.
+
+**Not ported:** the header strip, phone menu and Contact page buttons. Auburn draws the list in all four places;
+the starter's header and phone menu still show only the legacy Instagram / Facebook fields, and the starter's
+Contact page has no social row, so moving them is a design change for each site rather than part of this card.
+Auburn's "Facebook from Church facts" is church data; the marked file only offers the generic `pinnedFacebook`
+argument that Auburn passes it through.
+
+**Verified (2026-10-26):** `social-links.test.ts` (14 tests: every host, unknown sites, older rows, the address
+beating a wrong stored platform, WhatsApp, the cap, the Studio warnings); `npm run check`, `npm run build`,
+`npm run test:unit` in the starter and first-baptist-auburn; first-baptist-auburn's snapshot build draws the same
+social buttons and `sameAs` as before. The starter's footer markup is unchanged apart from `flex-wrap`; with no
+Sanity data it draws no social row, so it was not screenshotted.
+
+**Applied:** starter (this card). first-baptist-auburn: origin (#205); its copies match after this card.
+
+**Who should take it.** Every site that shows social buttons (all of them use the footer list).

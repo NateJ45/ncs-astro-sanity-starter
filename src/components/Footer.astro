@@ -27,16 +27,8 @@
 
 import { getImage } from 'astro:assets';
 import { site } from '@/data/site';
-import {
-  IconBrandInstagram,
-  IconBrandFacebook,
-  IconBrandLinkedin,
-  IconBrandPinterest,
-  IconBrandYoutube,
-  IconBrandTiktok,
-  IconBrandX,
-  IconLink,
-} from '@tabler/icons-react';
+import { resolveSocialLinks, socialLabel, type SocialLink } from '@/lib/social-links';
+import { socialIcon } from '@/lib/social-icons';
 import { Mail, Phone } from 'lucide-react';
 import CopyEmailButton from '@/components/CopyEmailButton';
 import NewsletterSignup from '@/components/NewsletterSignup';
@@ -77,12 +69,6 @@ interface NewsletterConfig {
   audienceId?: string | null;
 }
 
-interface SocialLink {
-  platform?: string;
-  url?: string;
-  label?: string;
-}
-
 interface Props {
   siteSettings?:
     | (RawChromeSettings & {
@@ -91,7 +77,8 @@ interface Props {
         phone?: string;
         socialInstagram?: string;
         socialFacebook?: string;
-        socialLinks?: SocialLink[] | null;
+        socialLinks?:
+          { platform?: string | null; url?: string | null; label?: string | null }[] | null;
         serviceAreas?: string[];
         tagline?: string;
         footerCredit?: string;
@@ -116,44 +103,16 @@ const brandName = siteSettings?.title ?? site.name;
 const email = siteSettings?.email ?? '';
 const phone = siteSettings?.phone ?? '';
 
-// Social links: prefer the new socialLinks array; fall back to the legacy
-// socialInstagram / socialFacebook fields so existing datasets keep working.
+// Social links: the one shared list (src/lib/social-links.ts, PORTS.md card 167). The editor
+// pastes a link in Site settings > Social links and the icon and button name are read from its
+// address; an empty list falls back to the legacy socialInstagram / socialFacebook fields so
+// existing datasets keep working, and older rows keep the platform they picked.
 // The footer's own "show social buttons" switch (Site Settings -> Navigation).
 // Unset means yes, so an untouched site is unchanged.
-const showFooterSocials = chrome.showFooterSocials;
-const rawSocialLinks = showFooterSocials ? (siteSettings?.socialLinks ?? []) : [];
-const ig = showFooterSocials ? (siteSettings?.socialInstagram ?? '') : '';
-const fb = showFooterSocials ? (siteSettings?.socialFacebook ?? '') : '';
-const socialLinksToRender: SocialLink[] =
-  rawSocialLinks.length > 0
-    ? rawSocialLinks.filter((l) => l?.url)
-    : [
-        ...(ig ? [{ platform: 'Instagram', url: ig }] : []),
-        ...(fb ? [{ platform: 'Facebook', url: fb }] : []),
-      ];
+const socialLinksToRender: SocialLink[] = chrome.showFooterSocials
+  ? resolveSocialLinks(siteSettings)
+  : [];
 
-// Map platform name to a Tabler icon component.
-function socialIcon(platform: string | undefined) {
-  switch (platform) {
-    case 'Instagram':
-      return IconBrandInstagram;
-    case 'Facebook':
-      return IconBrandFacebook;
-    case 'LinkedIn':
-      return IconBrandLinkedin;
-    case 'Pinterest':
-      return IconBrandPinterest;
-    case 'YouTube':
-      return IconBrandYoutube;
-    case 'TikTok':
-      return IconBrandTiktok;
-    case 'X':
-      return IconBrandX;
-    // Tabler has no Houzz brand icon; the generic link icon covers it.
-    default:
-      return IconLink;
-  }
-}
 // Copyright auto-updates every build via new Date(). The "Site by..." line
 // (siteCredit + siteCreditUrl) is a SEPARATE concept that sits next to the
 // auto-year copyright in the thin bottom bar.
@@ -462,10 +421,10 @@ const latestProjects = allProjects.slice(0, 3);
       </div>
       <p class="mt-s text-sm text-foreground/75">{site.name}</p>
       {socialLinksToRender.length > 0 && (
-        <ul class="mt-m flex list-none justify-center gap-s p-0 text-sm md:justify-start">
+        <ul class="mt-m flex list-none flex-wrap justify-center gap-s p-0 text-sm md:justify-start">
           {socialLinksToRender.map((link) => {
             const Icon = socialIcon(link.platform);
-            const ariaLabel = link.label ?? link.platform ?? 'Social link';
+            const ariaLabel = socialLabel(link);
             return (
               <li>
                 <a

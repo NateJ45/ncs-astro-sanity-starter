@@ -480,6 +480,8 @@ export type SiteSettings = {
   socialInstagram?: string;
   socialFacebook?: string;
   socialLinks?: Array<{
+    url?: string;
+    label?: string;
     platform?:
       | 'Instagram'
       | 'Facebook'
@@ -487,11 +489,10 @@ export type SiteSettings = {
       | 'Pinterest'
       | 'YouTube'
       | 'TikTok'
+      | 'WhatsApp'
       | 'X'
       | 'Houzz'
       | 'Other';
-    url?: string;
-    label?: string;
     _type: 'socialLink';
     _key: string;
   }>;
