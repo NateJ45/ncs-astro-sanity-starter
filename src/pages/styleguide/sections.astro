@@ -109,6 +109,30 @@ const CODE_CHECKS: Record<string, unknown>[] = [
   },
 ];
 
+// Paste-and-go guard (PORTS.md card 172, tests/embed-guard.spec.ts): rendered
+// WITHOUT trustedCode, like Sanity content. Script code from an unknown service
+// asks to run on the page and must land in its box; a YouTube share link
+// becomes the private player at 16:9.
+const GUARD_CHECKS: Record<string, unknown>[] = [
+  {
+    _type: 'embedSection',
+    _key: 'guard-unknown',
+    headline: 'Unknown script code asking for the page',
+    heightHint: 'short',
+    embedCode: ON_PAGE_PROBE.replace('data-on-page-probe', 'data-guard-probe').replace(
+      '[data-on-page-probe]',
+      '[data-guard-probe]',
+    ),
+    runsOnPage: true,
+  },
+  {
+    _type: 'embedSection',
+    _key: 'guard-youtube',
+    headline: 'A pasted YouTube link',
+    embedUrl: 'https://youtu.be/dQw4w9WgXcQ',
+  },
+];
+
 const SECTIONS: Record<string, unknown>[] = [
   {
     _type: 'heroSection',
@@ -364,6 +388,9 @@ const SECTIONS: Record<string, unknown>[] = [
     </div>
   ))}
   <div data-custom-code-checks>
-    <SectionRenderer sections={CODE_CHECKS} idPrefix="fx-code" anchors="numbered" />
+    <SectionRenderer sections={CODE_CHECKS} idPrefix="fx-code" anchors="numbered" trustedCode />
+  </div>
+  <div data-embed-guard-checks>
+    <SectionRenderer sections={GUARD_CHECKS} idPrefix="fx-guard" anchors="numbered" />
   </div>
 </BaseLayout>

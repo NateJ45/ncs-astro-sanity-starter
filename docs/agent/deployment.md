@@ -192,6 +192,13 @@ present. Helpers and tests: `scripts/lib/csp.mjs`.
   HTML (a widget whose loader pulls a second script from another host). List that origin in
   `scripts/csp-origins.json` (the site's own file, not PORTABLE; a JSON array of origins such as
   `["https://widget.example.com"]`). GA4's tag is handled inside the script.
+- **Known embed services add their own origins** (PORTS.md card 172): the same script reads the
+  `data-embed-provider` ids the Custom code or embed block writes, looks each up in
+  `src/lib/embed-providers.ts`, and adds that service's script hosts and their subdomains
+  (`https://tithe.ly https://*.tithe.ly`) only to a build where a page uses it. The build log ends
+  `; embed services: Tithe.ly` when it does. The registry is TypeScript, so `package.json` runs the
+  script with `--experimental-strip-types` (needed on Node 22.12 to 22.17). One writer, one
+  2,000-character check. Detail: `docs/agent/custom-code.md`, "Paste-and-go".
 - **The Studio detaches it** (`/studio/*`: `! Content-Security-Policy`, then `frame-ancestors`
   only), per trap 1 below.
 - **Trusted Types are not required** (`require-trusted-types-for`). Lighthouse lists it, unscored;
