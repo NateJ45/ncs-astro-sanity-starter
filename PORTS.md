@@ -10796,6 +10796,7 @@ clicked through in this card (Auburn's #212 verified it).
 **Who should take it.** Any site whose editors print flyers or want campaign addresses: presacademy, mas-monograms,
 stonesteps-50k, reid-design-site, nixoncreativestudio. Copy the marked files, the schema, guides, tile, integration
 and `site.timeZone`, add `qrcode-generator`, run typegen.
+
 ## Card 172: Embed provider registry, paste-and-go and a per-build embed CSP (2026-10-26)
 
 **Origin:** first-baptist-auburn #212 (2026-10-26). Editors pasted YouTube watch links, Maps share links and giving
