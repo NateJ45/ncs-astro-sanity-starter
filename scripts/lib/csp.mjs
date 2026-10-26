@@ -80,3 +80,18 @@ export function scriptSrc({ inline, origins, handlers }, extraOrigins = []) {
   parts.push("'unsafe-inline'");
   return parts.join(' ');
 }
+
+/**
+ * The embed-provider ids a built page carries (PORTS.md card 172). The Custom
+ * code or embed block writes data-embed-provider="<id>" on the wrapper of code
+ * from a service in src/lib/embed-providers.ts; build-csp.mjs looks each id up
+ * there and adds that service's script origins. An id the registry does not know
+ * adds nothing, so a marker typed into pasted code names no origin of its own.
+ */
+export function embedProviderIds(html) {
+  const ids = new Set();
+  for (const m of String(html).matchAll(/\sdata-embed-provider\s*=\s*"([a-z0-9-]+)"/g)) {
+    ids.add(m[1]);
+  }
+  return ids;
+}
