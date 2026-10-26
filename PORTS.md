@@ -275,7 +275,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 162 | `studio.look.splash: motif`: the site's own art replaces the splash's stone path    | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
 | 163 | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 165 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 165 | Original-spelling search drops loose pages; build stops on a cut-off Pagefind index | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10691,7 +10691,7 @@ file-style redirects.
 
 **Who should take it.** Every site (they are all American English).
 
-## Card 165: Searching the original spelling drops pages that matched no word (2026-10-26)
+## Card 165: Searching the original spelling drops pages that matched no word; the build stops on a cut-off index (2026-10-26)
 
 **Origin:** first-baptist-auburn. Its CI failed `tests/search.spec.ts` ("a misspelt word is corrected, with a way
 back to the original") on a PR that touched no search code; the same build failed locally every time, while `main`'s
@@ -10700,15 +10700,26 @@ such word. Pagefind 1.5 sometimes returns a page for a typo without matching any
 empty). The corrected path already treated that as nothing found (card 154's `missed()`); the original-spelling path
 showed it as a match.
 
-**Canonical:** PORTABLE `src/lib/site-search-client.ts` (`matchedOnly()`); docs in `docs/agent/site-search.md`.
+**Canonical:** PORTABLE `src/lib/site-search-client.ts` (`matchedOnly()`), `scripts/build-search-index.mjs`,
+`scripts/lib/search-index-check.mjs` (+ test); docs in `docs/agent/site-search.md`.
 
 **What it does.** When the visitor presses "Search for "<their spelling>" instead", results whose data has no
 matched `locations` are dropped, and with none left the filter chips hide. Every other search is unchanged: loose
 pages still count as "missed" and trigger the correction, as before.
 
+**Second find, the same day.** Auburn's card 164 PR then failed every search test in CI three times running: its
+built `dist-client` artifact held a `pagefind/pagefind.js` cut off at exactly 32,768 of 45,555 bytes, so the page said
+"Search is not available right now". Re-running failed jobs reuses that artifact, which is why the failure repeated;
+a fresh run of the whole workflow builds it again. The likeliest cause is `pagefind.close()` stopping Pagefind's helper
+process before its last write flushed. Nothing failed at build time, and `deploy.yml` runs the same build, so it could
+have shipped. `build-search-index.mjs` now checks the index after closing (`incompleteIndexFiles()`: `pagefind.js`
+must end with its `export{...}` list, `pagefind-entry.json` must parse and name a language) and exits 1 with a plain
+line if not, so CI goes red and a deploy keeps the last good site.
+
 **Verified (2026-10-26):** `npm run check`, `npm run test:unit` in the starter. On first-baptist-auburn's snapshot
 build: `tests/search.spec.ts` 8 passed (the misspelling test failed before); "cnotact" then "Search for
-"cnotact" instead" reads "Nothing found"; "baptism" still finds its pages.
+"cnotact" instead" reads "Nothing found"; "baptism" still finds its pages. `incompleteIndexFiles()` passes a real build
+and names the CI artifact's cut-off file ("pagefind.js is cut off (32768 bytes, no closing export)").
 
 **Applied:** starter (this card). first-baptist-auburn: origin. Every site with search on (card 126) takes the copy.
 

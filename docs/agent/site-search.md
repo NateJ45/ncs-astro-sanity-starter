@@ -78,6 +78,11 @@ only when a search comes up short, so a normal search costs nothing extra:
    the original spelling uncorrected. That search drops any page Pagefind returned without matching a word on it
    (card 165), so a typo searched on purpose says "Nothing found" rather than "1 result" for an unrelated page.
 
+After writing the index the build checks it is whole (`scripts/lib/search-index-check.mjs`, card 165): a
+`pagefind.js` cut off as Pagefind closed once broke every search on a CI build without failing it. If the check
+fails, run the build again; in CI re-run the whole workflow, since re-running failed jobs reuses the built
+`dist-client`.
+
 Write synonyms in pairs of the visitor's words and the site's words: "kids" and "children", "VBS" and "Vacation Bible
 School", "give" and "tithe". A group that is too broad drags in noise; it only runs when results are thin, but keep it
 to true equivalents.

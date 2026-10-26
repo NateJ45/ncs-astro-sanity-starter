@@ -34,6 +34,7 @@
 import { readdirSync, readFileSync, statSync, existsSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { incompleteIndexFiles } from './lib/search-index-check.mjs';
 import {
   collectFileLinks,
   countWords,
@@ -155,6 +156,15 @@ if (written.errors.length) {
   process.exit(1);
 }
 await pagefind.close();
+// Card 165: a pagefind.js cut off as Pagefind closed broke every search on one CI
+// build without failing it. Stop the build instead, so a deploy keeps the last good site.
+const broken = incompleteIndexFiles(join(SITE_DIR, 'pagefind'));
+if (broken.length) {
+  console.error(
+    `[search] the written index is incomplete: ${broken.join('; ')}. Run the build again.`,
+  );
+  process.exit(1);
+}
 
 writeFileSync(join(SITE_DIR, 'pagefind', 'words.json'), JSON.stringify(topWords(counts)));
 
