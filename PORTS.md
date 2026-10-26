@@ -282,6 +282,8 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
+Row 70 (2026-10-26): the card gained install timeouts (see "Install timeouts" on the card). Every repo with a `yes` took them the same day (first-baptist-auburn too), so the cells stand.
+
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
 Row 110 (2026-10-18): needs card 106 (the kit) and card 103 (`@sanity/ui` 4) first; the sites without a Studio for staff
@@ -6471,6 +6473,29 @@ adopting; a repo with heavier tests will clear the bar.
 - `node_modules` cache in the shards: about 25s per shard for 372 MB of cache; marginal.
 - Lighthouse reusing the CI build: saves runner time (about 220s) but not wall time, and changes
   what the gate audits (the fixture build instead of the live-feed one).
+
+### Install timeouts (2026-10-26)
+
+**Origin:** fbcm#121, presacademy#138 and ncs-astro-sanity-starter#226 (all docs-only) sat 40 to 60 minutes in
+"Install Playwright system libraries (browsers cached)", which takes 24 to 42s on a normal run. Not a hang: the
+log shows `Fetched 99.6 MB in 57min 32s (28.8 kB/s)` from `azure.archive.ubuntu.com`, a throttled mirror. No job
+or step had `timeout-minutes`, so a crawling apt could hold a required check for GitHub's 6-hour default, and a
+plain `gh run cancel` did not land (a force-cancel did).
+
+**What it does.** Every Playwright install step (`ci.yml` and `visual.yml`) runs each attempt under coreutils
+`timeout`: 180s for `install-deps`, 360s for `install --with-deps` (a full download was 286s on fbcm's worst
+day). A killed first attempt falls through to the `||` retry, which resumes apt's partial download. The killed
+try's `sudo apt-get` outlives `timeout` and holds the dpkg lock (the first version's retry died in 1s with
+"Could not get lock", presacademy#139), so before retrying the step runs `pkill -x apt-get`, sets
+`DPkg::Lock::Timeout` to 60s, runs `dpkg --configure -a`, and drops the Azure line from
+`/etc/apt/apt-mirrors.txt` when another mirror is listed. Behind that, `timeout-minutes: 8` on the `install-deps` step, 15 on a browser download
+step, and 30 on the `e2e` (or `test`, `visual`) job. The step names, job names and the no-path-filter rule are
+unchanged, so `build` and `test` stay the required checks.
+
+**Applied (2026-10-26):** starter, fbcm, presacademy, stonesteps-50k, reid-design-site, mas-monograms (its
+two-job `ci.yml`: the `test` job and its one install step), nixoncreativestudio#146 (same two-job shape) and
+fbc-auburn#218 (which replaces the three 5-minute tries it had put on `install-deps` that morning). wcp-website
+was not on this pass.
 
 ## Card 71: Tracked `.claude/settings.json` deny rules and one shared conventions file (2026-10-03)
 
