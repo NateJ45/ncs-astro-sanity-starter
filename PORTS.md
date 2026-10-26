@@ -273,8 +273,8 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 160 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)             | n/a     | yes         | yes      | yes              | no            | n/a            | n/a                | n/a                 | yes            |
 | 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
 | 162 | `studio.look.splash: motif`: the site's own art replaces the splash's stone path    | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
-| 163 | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 163 | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept               | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10686,6 +10686,9 @@ file-style redirects.
 
 **Verified in the starter (2026-10-26):** `npm run test:unit` (1425 + 147 pass), `npm run check` (0 errors).
 
-**Applied:** starter (this card). Sites take the copies; each site's own strings get the same pass in the same PR.
+**Applied (2026-10-26):** starter #211. Each site took the copies (and card 163) with its own strings in the same
+PR: first-baptist-auburn#204, fbcm#119, presacademy#137, stonesteps-50k#168, reid-design-site#184,
+mas-monograms#150, nixoncreativestudio#144. The six Sanity datasets were checked the same day: nine fields fixed
+(Auburn 2, fbcm 2, presacademy 1, reid 2, mas 1), stonesteps had none.
 
 **Who should take it.** Every site (they are all American English).
