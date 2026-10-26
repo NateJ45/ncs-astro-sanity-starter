@@ -424,7 +424,7 @@ dist/server/wrangler.json`, then `npm run preview`.
 - **The Studio on a phone.** Nothing to switch on: `/studio/manifest.webmanifest` and `/studio/sw.js` ship with
   every build. Check after a deploy: open `/studio/` in Chrome, DevTools, Application, Manifest (no errors, the
   maskable icon looks right in the "Show only the minimum safe area" preview) and Service workers (scope `/studio/`).
-  To make it drop everything it keeps, bump `VERSION` in `public/studio/sw.js`. A new brand mark: `npm run favicon`.
+  To make it drop everything it keeps, bump `VERSION` in `public/studio/sw.js`. A new brand mark: `npm run favicon` (or, with no code change, the editor's Site settings > Square icon, which the build turns into the whole set; card 168).
 - **Post a photo.** `kitConfig.postPhoto` in `src/sanity/kit.config.ts`. Drafts only.
 - **Earlier versions.** Needs three things already used elsewhere: the nightly backup running
   (`sanity-backup.yml`, with `BACKUP_PASSPHRASE`), the repo secret `SANITY_API_WRITE_TOKEN` and variable
@@ -530,6 +530,7 @@ The items below apply to any project built on this starter. Replace the angle-br
 - [ ] Lighthouse: Performance 95+, Accessibility 100, Best Practices 100, SEO 100 on the deployed Cloudflare URL
 - [ ] Contact form test submission reaches the correct inbox
 - [ ] All external links open in a new tab with correct `rel` attributes
+- [ ] Cloudflare zone: add the Redirect Rule **Slashless page paths 301 to trailing slash** on the canonical host (PORTS.md card 89). Without it, Workers static assets answer `/about` with a 307, and Search Console keeps the slashless URL as canonical. Check: `curl -s -o /dev/null -w "%{http_code}" https://<host>/about` prints `301`.
 - [ ] Sitemap submitted to Google Search Console
 
 ---

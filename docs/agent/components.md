@@ -130,6 +130,8 @@ The desktop nav dropdowns live directly in `Header.astro` as SSR'd `<details>` (
 
 A PORTABLE, tested iCalendar builder for "Add to calendar" links: `buildIcs({ prodId, now, events })` handles escaping, 75-octet line folding, CRLF, RRULE (typed or raw), TZID wall times with the US zones' VTIMEZONE, UTC instants and all-day dates. The starter ships no route (it has no calendar of its own); the header comment shows the `src/pages/calendar/[key].ics.ts` endpoint a site adds. The RSVP block (`startsAt`, a UTC instant) is the natural first consumer.
 
+**Skipping or moving one date (card 177).** An event takes `exdate` (occurrences of its `rrule` that do not happen, written as EXDATE) and an event with `recurrenceId` replaces one occurrence of the series with the same `uid` (RECURRENCE-ID: the occurrence's original date-time; its `start` is the new one). Calendar apps that subscribed to the file then drop or move that one date and keep the series. `buildIcs` throws on what RFC 5545 forbids: an exception written differently from the start (UTC, all-day or another zone), an `exdate` with no `rrule`, or an override that repeats. The header comment has a worked example. first-baptist-auburn uses both for weeks a gathering is cancelled or meets at another time.
+
 Use it on any CTA over a hero image or any dark panel. `Hero.astro` (image variant) and `FinalCta.astro` set it automatically. Do NOT try to override secondary-variant colors via `class="text-bg ..."` -- Tailwind v4 generates utilities alphabetically and `text-link` beats `text-bg` in the cascade. Use the prop instead.
 
 ### Mobile-only alignment pattern
