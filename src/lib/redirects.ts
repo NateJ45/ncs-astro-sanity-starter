@@ -142,3 +142,63 @@ export function buildRedirectMap(docs: readonly RedirectDoc[]): Record<string, R
   }
   return map;
 }
+
+// =============================================================================
+// File-style sources (PORTS.md card 159, 2026-10-25)
+// =============================================================================
+// With trailingSlash 'always', Astro writes every redirect source with a
+// trailing slash, so "/index.htm" reaches _redirects as "/index.htm/". The host
+// adds that slash itself only for an EXTENSIONLESS path, so a request for
+// "/index.htm" never meets the rule and 404s. "/old-page" still works, in two
+// hops. Found on stonesteps-50k after a Search Console redirect deploy (a green
+// CI, a 404 live). The vault gotcha is
+// trailing-slash-always-skips-redirects-from-file-paths.
+//
+// The fix is an exact, slashless rule for each such source at the TOP of
+// _redirects, where the first match wins. The build writes them (the
+// file-style-redirects integration in astro.config.mjs); these two functions are
+// the pure part, so they are tested and safe to import from the Studio.
+
+/** True when the last path segment looks like a file: "/index.htm", "/a/b.php". */
+export function isFileStyleSource(source: string): boolean {
+  const path = source.replace(/\/+$/, '');
+  return /\/[^/]+\.[A-Za-z0-9]+$/.test(path);
+}
+
+/**
+ * One `_redirects` line per file-style source in an Astro `redirects` map, with
+ * the trailing slash taken off the source. A string value is Astro's shorthand
+ * for a 301. Dynamic sources ("/[slug].htm") are skipped: _redirects has its own
+ * placeholder syntax and these are not worth translating.
+ */
+export function fileStyleRedirectLines(
+  // Astro's own config type allows any 3xx, so this is wider than RedirectTarget.
+  map: Readonly<Record<string, string | { status?: number; destination: string }>>,
+): string[] {
+  const lines: string[] = [];
+  for (const [rawSource, value] of Object.entries(map ?? {})) {
+    const source = rawSource.replace(/\/+$/, '');
+    if (!isFileStyleSource(source) || source.includes('[')) continue;
+    const target = typeof value === 'string' ? { status: 301, destination: value } : value;
+    if (!target?.destination) continue;
+    lines.push(`${source} ${target.destination} ${target.status ?? 301}`);
+  }
+  return lines;
+}
+
+/**
+ * Put `lines` at the top of an existing _redirects body (or an empty one),
+ * skipping any whose source is already listed first-hand, so running the build
+ * step twice, or alongside a hand-written public/_redirects, adds nothing twice.
+ */
+export function prependRedirectLines(existing: string, lines: readonly string[]): string {
+  const listed = new Set(
+    existing
+      .split(/\r?\n/)
+      .map((l) => l.trim().split(/\s+/)[0])
+      .filter((s) => s && !s.startsWith('#')),
+  );
+  const fresh = lines.filter((l) => !listed.has(l.split(/\s+/)[0]));
+  if (fresh.length === 0) return existing;
+  return `${fresh.join('\n')}\n${existing}`;
+}

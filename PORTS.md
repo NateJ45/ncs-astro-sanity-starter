@@ -270,6 +270,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 156 | Contact form no-JS post + error summary, FAQ landmark, dark-band rings              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 159 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | partial        |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10490,3 +10491,32 @@ blocks (steps rail, walk) are site-specific; its 404 brick path is brand art.
 SECTION_ANCHORS })`, which also names its other sections from their headings, so check its pages' links first.
 
 **Applied:** starter (this card). first-baptist-auburn = source: it takes `src/lib/ics.ts` (+ test) byte-identical, and its `gatheringIcs()` now builds on `buildIcs()` (long LOCATION lines are folded); it keeps its own `src/lib/section-anchors.ts` (a key map with a different API, unmarked, a recorded fork) and its own button budget in `SectionRenderer.astro` (the navy variant), so it does not carry `cta-budget.ts`.
+
+## Card 159: Redirects from file-style addresses get an exact slashless rule (2026-10-25)
+
+**Origin:** stonesteps-50k, 2026-10-25. Its #158 added Search Console redirects for `/index.htm` and
+`/index_files/Registration.htm`; CI was green and both still 404ed live. Vault gotcha:
+`trailing-slash-always-skips-redirects-from-file-paths`. **Canonical:** PORTABLE `src/lib/redirects.ts`
+(`isFileStyleSource`, `fileStyleRedirectLines`, `prependRedirectLines`, + tests). Per site (NOT portable): the
+`fileStyleRedirects()` integration in `astro.config.mjs` and its entry in `integrations`.
+
+**Why.** With `trailingSlash: 'always'`, Astro writes every `redirects` source with a trailing slash, so
+`'/index.htm': '/'` reaches `_redirects` as `/index.htm/ / 301`. Cloudflare adds a trailing slash itself only to an
+extensionless path, so `/index.htm` never meets the rule and the asset layer answers 404. An extensionless source
+(`/the-course`) still works, in two hops. The live 404 even showed `CF-Cache-Status: HIT`, which reads like a stale
+deploy and is not: it is the cached 404 asset. Proved with `wrangler dev` on the built site before and after.
+
+**What it does.** After the build, `fileStyleRedirects()` reads the final `redirects` map (launch entries and editor
+entries alike, so a Studio redirect from an old `.html` or `.php` page is covered too), writes one exact, slashless
+line per file-style source (`/index.htm / 301`) at the top of `dist/client/_redirects`, and skips any source a
+hand-written `public/_redirects` already lists. The adapter appends its own rules to the same file in the same
+hook; the result is the same whichever runs first. Dynamic sources (`/[slug].htm`) are skipped.
+
+**Adapt per site:** copy the three functions (and tests) into `src/lib/redirects.ts`, add the integration block and
+`fileStyleRedirects()` to `integrations`. A site that already carries exact rules by hand in `public/_redirects`
+(stonesteps-50k#163) can keep them; the build step will not duplicate them. Check: build, then
+`grep -n '\.htm\|\.php' dist/client/_redirects`, and curl the slashless form on `wrangler dev` or live.
+
+**Applied:** starter (this card). stonesteps-50k = source, `partial`: exact hand-written rules in
+`public/_redirects` (#163), not the build step. No other family repo has a file-style redirect source today
+(checked each `origin/main`, 2026-10-25), so the others are `no` until a client files one.
