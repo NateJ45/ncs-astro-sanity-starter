@@ -318,6 +318,7 @@ unit tested), so they run the moment a file is chosen. `src/sanity/components/Br
 file) draws a preview under each field: the logo in the header in light and dark, the icon in a browser tab and on
 a home screen; the template's files when empty. A site that puts the icon somewhere else too (a footer mark, the
 share cards) reads `siteIcon` in its own query and adds the spot to the preview. Guide: "Change the logo or the icon".
+
 ## The builder kit: the smaller blocks, grouped templates, seeded patterns (PORTS.md card 173)
 
 Ported from first-baptist-auburn and made generic, so a client can put together an event page, a notice or a
