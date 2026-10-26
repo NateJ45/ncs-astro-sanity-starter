@@ -1,5 +1,8 @@
 # Change history
 
+_2026-10-26: calendar files can skip or move one date of a repeating event (PORTS card 177)._
+
+**Decision.** The exceptions live in `buildIcs` itself (`exdate`, `recurrenceId` on `IcsEvent`) rather than in each site splicing lines into the finished file, which is what first-baptist-auburn did first. Both are standard RFC 5545 properties, so a subscribed calendar keeps one series and changes only the date in question. Value types are checked against DTSTART and a bad combination throws at build time instead of shipping a file some apps reject. Events without exceptions are written byte for byte as before.
 _2026-10-26: the builder kit: twelve smaller blocks, grouped templates, patterns as code (PORTS card 173)._
 
 **Decision.** Ported from first-baptist-auburn and made generic: columns, a button row, a wide photo, fold-outs, tabs, a countdown, a dated notice, a timeline, a letter, event details, a schedule and photo cards, each a content block with a look (the notice draws its own band), no colour fields. Event details requires a typed place because the starter has no business address to fall back on; its calendar file is a `data:` link, so no route or file is published. Dates run on the new `site.timeZone`. Templates gain groups shown as "Group: Title"; patterns live in code and are seeded as drafts that are never overwritten. `withSiteGroups()` lets a fork add insert-menu groups without editing the base list. Auburn's hero "Photo behind the words" style was not ported: the starter's hero already draws its photo behind the words.
