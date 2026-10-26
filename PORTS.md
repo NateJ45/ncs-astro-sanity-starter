@@ -7715,6 +7715,26 @@ route file's name ends in an extension (`feed.xml.ts`, `[name].pdf.ts`). An exte
 files, such as `src/pages/files/[name].ts`, then answers `/files/<sha>.pdf` with a 404. Use one route per extension
 around a shared handler (fbcm#114). After porting, curl one real file URL, not only pages: `check:links` skips `/files/`.
 
+**Follow-up 2026-10-26: make the slash hop a 301 at the zone.** Slashed links fix our own pages, but old or outside
+links to `/about` still meet the Workers assets **307**, and Google kept slashless URLs as canonical (fbcm: 47 posts
+in "Duplicate, Google chose different canonical than user", because the Wix URLs had years of history). Every family
+zone now has a Single Redirect, placed after the host rule:
+
+```
+(http.host eq "<canonical host>" and http.request.method in {"GET" "HEAD"}
+ and not ends_with(http.request.uri.path, "/") and not http.request.uri.path contains "."
+ and not starts_with(http.request.uri.path, "/api/") and not starts_with(http.request.uri.path, "/files/")
+ and not starts_with(http.request.uri.path, "/cdn-cgi/")
+ and http.request.uri.path ne "/preview" and not starts_with(http.request.uri.path, "/preview/")
+ and http.request.uri.path ne "/studio" and not starts_with(http.request.uri.path, "/studio/"))
+```
+
+Dynamic target `concat("https://<canonical host>", http.request.uri.path, "/")`, **301**, query string kept. GET and
+HEAD only, so a POST to an API route still gets Astro's own 308. A `_redirects` source like `/old-page` now takes
+two permanent hops (`/old-page/`, then its target). It's a zone setting, not a repo file: record it in each site's
+OPERATIONS.md under "Cloudflare zone rules", and add any new SSR prefix to the exclusions. Applied 2026-10-26: fbcm,
+stonesteps-50k, mas-monograms, presacademy, nixoncreativestudio, reid-design-site.
+
 **Status.** Starter: merged with this PR. presacademy, reid-design-site, mas-monograms and stonesteps-50k merged 2026-10-09.
 nixoncreativestudio (#139, with a `check:slashes` CI guard) and fbcm (#112, #113, #114) merged 2026-10-25. 2ndpreschicago:
 not yet done (dormant).

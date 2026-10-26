@@ -514,6 +514,7 @@ The items below apply to any project built on this starter. Replace the angle-br
 - [ ] Lighthouse: Performance 95+, Accessibility 100, Best Practices 100, SEO 100 on the deployed Cloudflare URL
 - [ ] Contact form test submission reaches the correct inbox
 - [ ] All external links open in a new tab with correct `rel` attributes
+- [ ] Cloudflare zone: add the Redirect Rule **Slashless page paths 301 to trailing slash** on the canonical host (PORTS.md card 89). Without it, Workers static assets answer `/about` with a 307, and Search Console keeps the slashless URL as canonical. Check: `curl -s -o /dev/null -w "%{http_code}" https://<host>/about` prints `301`.
 - [ ] Sitemap submitted to Google Search Console
 
 ---
