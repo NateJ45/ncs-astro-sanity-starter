@@ -94,6 +94,15 @@ export const site = {
     ] as string[][],
   },
 
+  // The Custom code or embed block (PORTS.md card 172, src/lib/embed-providers.ts).
+  // `approvedScriptOrigins`: script origins ("https://widget.example.com") whose
+  // pasted code may run directly on the page although the shared registry does
+  // not know the service. Leave it empty and add a registry entry in the starter
+  // where you can; this list is for a one-off widget on this site only.
+  embeds: {
+    approvedScriptOrigins: [] as string[],
+  },
+
   // Public repo URL (used in footer credit if shown)
   repo: '',
 };

@@ -66,9 +66,22 @@ interface Props {
    * renderers (the styleguide fixtures) pass 'numbered' so their ids stay unique.
    */
   anchors?: 'named' | 'numbered';
+  /**
+   * Custom code written IN THIS REPO (the styleguide's isolation probes), not
+   * pasted by an editor: it may run on the page without being from a known
+   * service (src/lib/embed-providers.ts, PORTS.md card 172). Never set for
+   * Sanity content.
+   */
+  trustedCode?: boolean;
 }
 
-const { sections = [], idPrefix = 'section', editDoc, anchors = 'named' } = Astro.props as Props;
+const {
+  sections = [],
+  idPrefix = 'section',
+  editDoc,
+  anchors = 'named',
+  trustedCode = false,
+} = Astro.props as Props;
 // Synced sections (the authoring kit, PORTS.md card 109) are swapped for the
 // sections their saved copy holds BEFORE the cadence runs, so a synced band
 // takes its place in the alternating rhythm like any typed-in band (rule 9).
@@ -339,6 +352,7 @@ const editKeyOf = (block: unknown) => {
           embedUrl={s.embedUrl}
           embedCode={s.embedCode}
           runsOnPage={s.runsOnPage === true}
+          trustedCode={trustedCode}
           heightHint={s.heightHint ?? 'medium'}
           headingId={headingId}
         />

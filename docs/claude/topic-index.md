@@ -26,7 +26,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | SEO + JSON-LD                                                                                               | `docs/agent/seo.md`                                                  |
 | Performance budgets + Lighthouse                                                                            | `docs/agent/performance.md`                                          |
 | Content data + Sanity integration                                                                           | `docs/agent/sanity.md`                                               |
-| Custom code: the trust model (pasted widgets, the box, the opt-outs)                                        | `docs/agent/custom-code.md`                                          |
+| Custom code: the trust model (pasted widgets, the box, the opt-outs, the embed provider registry)           | `docs/agent/custom-code.md`                                          |
 | Studio kit (Home, Site Guide, Checkup, staff view, Trash; `kit.config.ts`)                                  | `docs/agent/studio-kit.md`                                           |
 | People: invite a Helper or an Administrator from the Studio, Simple view, roles by plan, the members secret | `docs/agent/studio-people.md`                                        |
 | Visitor site search (Pagefind, opt-in) + share buttons                                                      | `docs/agent/site-search.md`                                          |
