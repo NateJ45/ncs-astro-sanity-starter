@@ -62,6 +62,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...SINGLETON_TYPES,
   ...ORDERABLE_TYPES,
   'announcement', // placed explicitly under Content → Announcements
+  'popup', // placed explicitly under Content → Popups, after Announcements
   'testimonial', // scaffold: testimonials
   'faqItem', // scaffold: faq
   'faqCategory', // scaffold: faq
@@ -356,6 +357,9 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               S.documentTypeListItem('announcement')
                 .title('Announcements')
                 .icon(typeIcon('announcement')),
+              // Popups (card 170, schemaTypes/popup.ts): a box over the page, one at a time,
+              // with dates. Also built into the site at build time.
+              S.documentTypeListItem('popup').title('Popups').icon(typeIcon('popup')),
             ]),
         ),
 

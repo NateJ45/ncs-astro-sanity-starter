@@ -17,10 +17,12 @@ import { layout } from '@/data/layout';
 import { layoutAttrs } from '@/lib/site-layout';
 import { urlFor } from '@/lib/sanity';
 import { localBusinessSchema } from '@/lib/schemas';
-import { getActiveAnnouncement, getSiteCode } from '@/lib/queries';
+import { getActiveAnnouncement, getPopups, getSiteCode } from '@/lib/queries';
+import { pickPopup, popupShowsOn } from '@/lib/popup';
 import { isSiteCodeRoute } from '@/lib/custom-code';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
+import SitePopup from '@/components/SitePopup.astro';
 import BackToTop from '@/components/BackToTop';
 import Analytics from '@/components/Analytics.astro';
 import { Toaster } from '@/components/ui/sonner';
@@ -135,6 +137,13 @@ const siteCode = isSiteCodeRoute(Astro.url.pathname)
   ? await getSiteCode().catch(() => null)
   : null;
 const showAnnouncement = !!(announcement?.message);
+// The popup (PORTS.md card 170, src/lib/popup.ts): at most one, only on the pages it is meant
+// for, never on the Studio, the preview or a password page. With no popup the page carries no
+// popup markup and no script (SitePopup's script ships only where it renders).
+const popup = isSiteCodeRoute(Astro.url.pathname)
+  ? pickPopup(await getPopups().catch(() => []), Date.now())
+  : null;
+const showPopup = popupShowsOn(popup, Astro.url.pathname);
 
 // Map announcement style -> semantic Tailwind token classes.
 // Uses only existing semantic tokens (no new custom tokens introduced).
@@ -352,6 +361,9 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       the critical path on mobile.
     */}
     <BackToTop client:idle />
+
+    {/* The popup, when one is live for this page (SitePopup.astro has the rules). */}
+    {showPopup && popup && <SitePopup popup={popup} />}
 
     {/* Sonner toast region. Used by CopyEmailButton and ContactForm. Position bottom-right by default. */}
     <Toaster client:idle position="bottom-right" />

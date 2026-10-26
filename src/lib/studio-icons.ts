@@ -110,6 +110,7 @@ export const TYPE_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   studioGuide: 'guide',
   studioNotes: 'overview',
   announcement: 'notice',
+  popup: 'notice',
   testimonial: 'testimonial',
   faqCategory: 'questionGroup',
   faqItem: 'question',

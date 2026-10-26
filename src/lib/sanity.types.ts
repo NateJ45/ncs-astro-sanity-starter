@@ -14,6 +14,12 @@
 
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
+type ArrayOf<T> = Array<
+  T & {
+    _key: string;
+  }
+>;
+
 // Source: schema.json
 export type SanityImageAssetReference = {
   _ref: string;
@@ -289,6 +295,107 @@ export type FaqCategory = {
   displayOrder?: number;
 };
 
+export type PageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'page';
+};
+
+export type HomePageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'homePage';
+};
+
+export type AboutPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'aboutPage';
+};
+
+export type ServicesPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'servicesPage';
+};
+
+export type ProcessPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'processPage';
+};
+
+export type FaqPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'faqPage';
+};
+
+export type ContactPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'contactPage';
+};
+
+export type JournalPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'journalPage';
+};
+
+export type PrivacyPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'privacyPage';
+};
+
+export type Popup = {
+  _id: string;
+  _type: 'popup';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  text?: string;
+  button?: {
+    label?: string;
+    link?: string;
+  };
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  startDate?: string;
+  endDate?: string;
+  where?: 'all' | 'home' | 'chosen';
+  pages?: ArrayOf<
+    | PageReference
+    | HomePageReference
+    | AboutPageReference
+    | ServicesPageReference
+    | ProcessPageReference
+    | FaqPageReference
+    | ContactPageReference
+    | JournalPageReference
+    | PrivacyPageReference
+  >;
+  frequency?: 'visitor' | 'visit';
+  enabled?: boolean;
+};
+
 export type Announcement = {
   _id: string;
   _type: 'announcement';
@@ -548,69 +655,6 @@ export type SiteSettings = {
   satisfactionGuarantee?: string;
   headCode?: string;
   bodyEndCode?: string;
-};
-
-export type HomePageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'homePage';
-};
-
-export type AboutPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'aboutPage';
-};
-
-export type ServicesPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'servicesPage';
-};
-
-export type ProcessPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'processPage';
-};
-
-export type FaqPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'faqPage';
-};
-
-export type ContactPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'contactPage';
-};
-
-export type JournalPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'journalPage';
-};
-
-export type PrivacyPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'privacyPage';
-};
-
-export type PageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'page';
 };
 
 export type NavLink = {
@@ -2381,12 +2425,7 @@ export type AllSanitySchemaTypes =
   | FaqCategoryReference
   | FaqItem
   | FaqCategory
-  | Announcement
-  | StudioNotes
-  | StudioGuide
-  | NotFoundPage
-  | BusinessInfo
-  | SiteSettings
+  | PageReference
   | HomePageReference
   | AboutPageReference
   | ServicesPageReference
@@ -2395,7 +2434,13 @@ export type AllSanitySchemaTypes =
   | ContactPageReference
   | JournalPageReference
   | PrivacyPageReference
-  | PageReference
+  | Popup
+  | Announcement
+  | StudioNotes
+  | StudioGuide
+  | NotFoundPage
+  | BusinessInfo
+  | SiteSettings
   | NavLink
   | DynamicListSection
   | TeamSection

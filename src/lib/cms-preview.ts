@@ -114,6 +114,10 @@ const NON_STEGA_FIELDS = new Set([
   'tone',
   'variant',
   'width',
+  // Card 170: a popup's "Which pages" and "How often" (src/lib/popup.ts compares both;
+  // an encoded value would fall back to every page / once per visitor in the preview).
+  'where',
+  'frequency',
   // Not in this template yet, but standard enum names across the site family.
   // Carried so a block ported from a sibling repo is not a preview-only bug
   // waiting to be found.

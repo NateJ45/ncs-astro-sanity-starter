@@ -277,6 +277,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 170 | Popups: one at a time, date-windowed, after 4 s and some scroll (`popup.ts`)        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10741,3 +10742,46 @@ build: `tests/search.spec.ts` 8 passed (the misspelling test failed before); "cn
 **Applied:** starter (this card). first-baptist-auburn: origin. Every site with search on (card 126) takes the copy.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).
+
+## Card 170: Popups, one at a time, with guard rails (2026-10-26)
+
+**Origin:** first-baptist-auburn (#212, 2026-10-26): Content > Popups, so the editor can put a box with a short
+message and one button over the site for the few big things a year.
+
+**Canonical:** PORTABLE `src/lib/popup.ts` (which popup is live, where it shows, the overlap check, the dismissal key)
+and PORTABLE `src/lib/popup.test.ts`. Not marked, per site: `src/sanity/schemaTypes/popup.ts` (fields, wording,
+validation), `src/components/SitePopup.astro` (the dialog, its script and its look), `getPopups()` in
+`src/lib/queries.ts`, the BaseLayout hook, `/styleguide/popup/` and `tests/popup.spec.ts`. Already-PORTABLE file
+changed: `src/lib/studio-icons.ts` (`popup: 'notice'` in `TYPE_ICON_DEFAULTS`). Docs: `docs/agent/popups.md`.
+
+**What it does.** A `popup` document has a heading (60), message (200), one optional button (both halves or
+neither; a link starts with `/` or `https://`), an optional picture with alt text, Show from, a required Show
+until, which pages (every page, Home only, chosen pages from the site's singletons and Studio pages), how often (once
+per visitor or once per visit) and an on/off switch. The Studio warns when two switched-on popups overlap.
+BaseLayout reads the popups once per build, `pickPopup` keeps one (the newest started, else the soonest upcoming)
+and `popupShowsOn` renders `SitePopup` only where it belongs, never on `/studio`, `/preview`, `/api` or
+`/private`. The dialog opens after 4 seconds AND a quarter screen of scroll (8 seconds on a short page), waits while
+the phone menu is open, rechecks its dates in the browser, traps Tab, closes on Escape, Close or the backdrop, gives
+focus back, animates only under `no-preference`, hides in print, and uses the theme tokens so it follows light and
+dark. The dismissal is stored under `site-popup:<id>:<last edit>`, so an edited popup shows again. The chosen-page
+addresses come from the site's own `SINGLETON_LIVE_PATHS` (`nav-href.ts`, entries that end in a slash and carry no
+`#`), so `popup.ts` is the same file on every site.
+
+**Switching it on.** Nothing: with no popup documents nothing renders and no script ships. The editor adds one under
+Content > Popups; guide "Put up a popup".
+
+**Not ported:** Auburn's `publishAt` field on the popup (the starter has the field only on page singletons, with a
+tab group a popup does not have; Show from covers scheduling). Auburn's church copy and `btn-auburn` button stay in
+Auburn's own `SitePopup.astro` and schema; the starter uses `CtaLink`.
+
+**Verified (2026-10-26):** starter `npm run check`, `npm run build`, `npm run test:unit`, `npx playwright test
+tests/popup.spec.ts` (timing, focus trap and Shift+Tab, Escape and focus return, remembered on reload, axe in light
+and dark, 320px fit, print, reduced motion, no markup on Home or the Studio); screenshots at 375 and 1280 in light and
+dark. first-baptist-auburn on branch `port/card-170`: sync-check all SAME, check, snapshot build, unit tests, its
+`tests/popup.spec.ts`. The Studio overlap warning was not exercised in a signed-in Studio.
+
+**Applied:** starter (this card). first-baptist-auburn: origin (it takes the marked copies on `port/card-170`; the
+only visible change is the storage key name, so a popup closed before shows once more).
+
+**Who should take it.** Any site whose editor wants an occasional popup. A site taking it copies the two marked files,
+the schema, the component, the query, the BaseLayout hook and the structure entry, then runs `npm run typegen`.

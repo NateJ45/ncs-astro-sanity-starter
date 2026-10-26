@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-26: popups, one at a time, with guard rails (PORTS card 170)._
+
+**Decision.** A popup is its own document type (Content > Popups), not a style of Announcement, because it interrupts: the site shows one at a time (the newest started), it opens only after 4 seconds AND a quarter screen of scroll, it is remembered per visitor or per visit, and it must have an end date. A native `<dialog>` gives the inert page, Escape and focus return. With no popup documents nothing renders and no script ships. The logic is PORTABLE `src/lib/popup.ts`; page addresses come from each site's `SINGLETON_LIVE_PATHS`. Detail: `docs/agent/popups.md`.
+
 _2026-10-25: one accent button per page, named section anchors, a 404 with search, calendar files (PORTS card 158)._
 
 **Decision.** The one-accent-button rule is the renderer's, not the editor's (rule 9): the first section that draws a primary button keeps it and the rest draw the secondary variant. Section ids come from the heading rather than a key map, so every site gets linkable sections with no data to keep; the cost is that a retitle moves the anchor, and a site that needs a fixed one pins it by block `_key`. The 404 search is a plain GET form, not the live panel, so it works without JavaScript and loads no Pagefind on an error page. The starter has no calendar, so only the `.ics` builder is ported; Auburn's gathering files are the reference wiring.
