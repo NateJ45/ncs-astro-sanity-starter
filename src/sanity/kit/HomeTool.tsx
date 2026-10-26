@@ -635,7 +635,9 @@ export function makeHomeTool(config: KitConfig) {
                   {config.features.mail && <RsvpComingUp />}
                 </ComingUp>
               )}
-              {config.features.mail && <NewsletterCard helperName={config.helper.name} />}
+              {config.features.mail && config.features.newsletter !== false && (
+                <NewsletterCard helperName={config.helper.name} />
+              )}
               <RecentEdits ignoreTypes={ignore} />
               <div className="ui-dash__wide">
                 <Visitors enabled={config.features.visitors} helperName={config.helper.name} />
