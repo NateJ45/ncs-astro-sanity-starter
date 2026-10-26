@@ -118,7 +118,8 @@ const rows = classified.map((row, i) => ({ ...row, headingId: anchorIds[i] }));
 // An event's main button (the builder kit, card 173) counts too.
 const ctaVariant = primaryBudget(rows, ({ block }) =>
   block._type === 'ctaBandSection'
-    ? true
+    ? // A button left empty draws nothing (CtaLink), so it cannot hold the accent either.
+      !(block.cta && !block.cta.label && !block.cta.linkType && !block.cta.href)
     : block._type === 'heroSection'
       ? !!block.primaryCta
       : block._type === 'eventDetailsSection' && !!block.button?.label,
