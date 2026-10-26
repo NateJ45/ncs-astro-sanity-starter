@@ -276,6 +276,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 163 | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept               | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10715,5 +10716,28 @@ once a writer stops); `npm run test:scripts` 172 pass in first-baptist-auburn; t
 build writes the whole 45,555-byte `pagefind.js`.
 
 **Applied:** starter (this card). first-baptist-auburn: origin, with #204.
+
+**Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).
+
+## Card 166: Searching the original spelling drops pages that matched no word (2026-10-26)
+
+**Origin:** first-baptist-auburn. Its CI failed `tests/search.spec.ts` ("a misspelt word is corrected, with a way
+back to the original") on a PR that touched no search code; the same build failed locally every time, while `main`'s
+CI had passed. Pressing "Search for "cnotact" instead" showed "1 result for "cnotact"": the Give page, which has no
+such word. Pagefind 1.5 sometimes returns a page for a typo without matching any word on it (its `locations` are
+empty). The corrected path already treated that as nothing found (card 154's `missed()`); the original-spelling path
+showed it as a match.
+
+**Canonical:** PORTABLE `src/lib/site-search-client.ts` (`matchedOnly()`); docs in `docs/agent/site-search.md`.
+
+**What it does.** When the visitor presses "Search for "<their spelling>" instead", results whose data has no
+matched `locations` are dropped, and with none left the filter chips hide. Every other search is unchanged: loose
+pages still count as "missed" and trigger the correction, as before.
+
+**Verified (2026-10-26):** `npm run check`, `npm run test:unit` in the starter. On first-baptist-auburn's snapshot
+build: `tests/search.spec.ts` 8 passed (the misspelling test failed before); "cnotact" then "Search for
+"cnotact" instead" reads "Nothing found"; "baptism" still finds its pages.
+
+**Applied:** starter (this card). first-baptist-auburn: origin. Every site with search on (card 126) takes the copy.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).
