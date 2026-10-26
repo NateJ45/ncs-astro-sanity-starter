@@ -192,7 +192,6 @@ This rewrites:
 - `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json), and `src/sanity/studioFonts.css` (the font files the Studio loads). The Studio's colours are read from brand.config.json at build time (PORTS.md cards 110 and 116; optional `studio.accent`, `studio.paper`, `studio.chrome`); `npm run test:unit` is their contrast gate
 - `scripts/generate-og-default.mjs` -- `wordmark`, `tagline`
 - `scripts/og-theme.mjs` -- `OG_THEME` share-image colors and font stack (never `scripts/lib/render-og.mjs`, which is PORTABLE; card 104)
-- `scripts/generate-og-pages.mjs` -- `WORDMARK` fallback string
 - `wrangler.jsonc` -- `"name"` field (only when `workerName` is non-null in config)
 - `astro.config.mjs` -- `site:` URL (only when `domain` is not "example.com")
 - `public/og-default.png` -- regenerated from the new inputs
@@ -315,9 +314,9 @@ authoritative style guide for copy editing.
 4.5:1 and 5.5:1 for body text, or 3:1 and 3.5:1 for large UI), flag it explicitly so the
 designer can decide whether to push the token further.
 
-**Per-page OG images:** `npm run og:pages` generates per-route OG images from Sanity.
-This requires `PUBLIC_SANITY_PROJECT_ID` to be set in `.env`. Flag if the project is not
-yet connected to Sanity.
+**Per-page OG images:** drawn by `npm run build` itself (`scripts/build-og-cards.mjs`, PORTS.md
+card 169) from `scripts/og-theme.mjs` and the `brand.config.json` name, so a rebuild after the
+reskin is all it takes. A custom card design goes in `scripts/lib/og-card.mjs`.
 
 **Studio theme:** The Sanity Studio theme was updated by `apply-brand`, but the Studio must
 be rebuilt before editors see the new fonts. The Studio is embedded, so `npm run deploy` does it.

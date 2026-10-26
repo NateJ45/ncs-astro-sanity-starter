@@ -1,0 +1,64 @@
+---
+// Safe to edit by hand
+// A letter (a note from the owner, the director, the team): one narrow column on
+// a card set into the page. A small line above, the greeting in the display
+// font, the letter at a comfortable reading size, the sign-off, then the
+// signature picture (or the name in the display font when there is none), the
+// role in small capitals, and an optional button. A content block: the surface
+// comes from the cadence (rule 9); the card is the theme's own card surface, so
+// it reads in light and dark.
+import PortableText from '@/components/PortableText';
+import SanityImage from '@/components/SanityImage.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedLetterSection } from '@/lib/builderBlocks.types';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+import type { PortableTextBlock } from '@portabletext/types';
+
+interface Props {
+  block: ProjectedLetterSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface = 'background', headingId } = Astro.props;
+const body = (block.body ?? []) as PortableTextBlock[];
+const signature = block.signature?.asset ? (block.signature as SanityImageObject) : null;
+const greeting = block.greeting?.trim() || 'Dear friends,';
+---
+
+<section
+  class={surfaceClass(surface)}
+  data-builder-block="letterSection"
+  aria-labelledby={headingId}
+>
+  <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+    <article class="bb-letter">
+      {block.eyebrow && (
+        <p class="text-xs tracking-eyebrow text-foreground/80 uppercase">{block.eyebrow}</p>
+      )}
+      <h2 id={headingId} class="bb-letter__greeting">
+        {greeting}
+      </h2>
+      <PortableText value={body} className="bb-letter__body" />
+      <footer class="bb-letter__sign">
+        {block.signOff && <p class="bb-letter__off">{block.signOff}</p>}
+        {signature && (
+          <SanityImage
+            source={signature}
+            width={440}
+            sizes="220px"
+            quality={80}
+            class="bb-letter__signature"
+          />
+        )}
+        {block.name && <p class:list={['bb-letter__name', signature && 'sr-only']}>{block.name}</p>}
+        {block.role && <p class="bb-letter__role">{block.role}</p>}
+      </footer>
+      {block.link?.label && (
+        <p class="bb-actions">
+          <CtaLink cta={block.link} variant="secondary" />
+        </p>
+      )}
+    </article>
+  </div>
+</section>

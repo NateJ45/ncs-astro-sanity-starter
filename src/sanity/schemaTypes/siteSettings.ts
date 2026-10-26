@@ -7,6 +7,14 @@ import { ChevronDownIcon } from '@sanity/icons/ChevronDown';
 import { ListIcon } from '@sanity/icons/List';
 import { CodeTextInput } from '../components/CodeTextInput';
 import { codeWarningMessage } from '../../lib/custom-code';
+import { IconImageInput, LogoImageInput } from '../components/BrandImageInput';
+import { checkIcon, checkLogo } from '../../lib/brand-uploads';
+import {
+  MAX_SOCIAL_LINKS,
+  resolveSocialLink,
+  socialLabel,
+  socialUrlWarning,
+} from '../../lib/social-links';
 
 export const siteSettings = defineType({
   name: 'siteSettings',
@@ -284,14 +292,23 @@ export const siteSettings = defineType({
 
     // An uploaded logo replaces the built-in image logo at the top of every
     // page. Left blank, the template's own logo files keep rendering.
+    // PORTS.md card 168: size rules (src/lib/brand-uploads.ts, read from the
+    // asset id so they run the moment a file is chosen) and a preview under the
+    // field (BrandImageInput). The square icon below becomes the favicon set at
+    // build time (scripts/build-brand-icons.mjs).
     defineField({
       name: 'logo',
       title: 'Logo (optional)',
       type: 'image',
       group: 'identity',
       description:
-        'A logo image for the top of every page. Leave blank and the site keeps the logo files that ship with the template. When set, this image replaces them and is scaled to the header height, so upload it with any spare space already trimmed off. One image is used in both light and dark mode.',
-      options: { hotspot: true },
+        'A logo image for the top of every page. Leave blank and the site keeps the logo files that ship with the template. When set, this image replaces them and is scaled to the header height, so upload a wide logo, at least 560 pixels wide, with any spare space already trimmed off. An SVG file is best. One image is used in both light and dark mode.',
+      options: { hotspot: true, accept: 'image/svg+xml,image/png,image/webp,image/jpeg' },
+      components: { input: LogoImageInput },
+      validation: (Rule) => [
+        Rule.custom((v) => checkLogo(v as never).error ?? true),
+        Rule.custom((v) => checkLogo(v as never).warning ?? true).warning(),
+      ],
       fields: [
         defineField({
           name: 'alt',
@@ -306,6 +323,17 @@ export const siteSettings = defineType({
             ),
         }),
       ],
+    }),
+    defineField({
+      name: 'siteIcon',
+      title: 'Square icon (optional)',
+      type: 'image',
+      group: 'identity',
+      description:
+        'Leave blank and the site keeps the icon it shipped with. An upload becomes the little picture in the browser tab and the icon on a phone home screen. It must be square, at least 512 by 512 pixels (or an SVG), with its own background color rather than see-through, and simple enough to read when it is tiny. The website switches over a few minutes after you publish.',
+      options: { accept: 'image/svg+xml,image/png,image/webp,image/jpeg' },
+      components: { input: IconImageInput },
+      validation: (Rule) => Rule.custom((v) => checkIcon(v as never).error ?? true),
     }),
 
     defineField({
@@ -385,26 +413,56 @@ export const siteSettings = defineType({
       readOnly: true,
     }),
 
-    // New flexible social links array. Supports any platform.
-    // When this array has entries the Footer renders from it instead of the
-    // legacy socialInstagram / socialFacebook fields above.
+    // Social links (PORTS.md card 167): one row per account, in order. The editor pastes a link;
+    // the icon and the button's name are read from its address (src/lib/social-links.ts), so a
+    // new account needs no code change. The old Platform dropdown is kept, hidden, because
+    // existing rows carry it (rule 1); it only stands in for an address the site does not know.
+    // When this array has entries the Footer renders from it instead of the legacy
+    // socialInstagram / socialFacebook fields above.
     defineField({
       name: 'socialLinks',
       title: 'Social links',
       type: 'array',
       group: 'social',
       description:
-        'Add one entry per platform. The footer renders these in order. Leave empty to fall back to the legacy Instagram/Facebook fields (for existing sites).',
+        'Paste the link to any of your pages (Facebook, Instagram, YouTube, WhatsApp and more); the icon is picked for you. They show in this order in the footer.',
+      validation: (Rule) =>
+        // A warning, not an error, so a dataset that already holds more rows can still publish.
+        Rule.max(MAX_SOCIAL_LINKS).warning(
+          `Only the first ${MAX_SOCIAL_LINKS} links show. Take one out before adding another.`,
+        ),
       of: [
         defineArrayMember({
           type: 'object',
           name: 'socialLink',
+          title: 'Social link',
           fields: [
             defineField({
-              name: 'platform',
-              title: 'Platform',
+              name: 'url',
+              title: 'Link',
+              type: 'url',
+              description:
+                'The address of your page, starting https://. For WhatsApp, a group invite (https://chat.whatsapp.com/...) or a number link (https://wa.me/...).',
+              // http stays allowed so rows saved before card 167 still validate.
+              validation: (Rule) => [
+                Rule.required().uri({ scheme: ['http', 'https'] }),
+                Rule.custom((url) => socialUrlWarning(url as string | undefined) ?? true).warning(),
+              ],
+            }),
+            defineField({
+              name: 'label',
+              title: 'Label (optional)',
               type: 'string',
-              description: 'The social network or directory.',
+              description:
+                'What a screen reader says for the button, like "Our studio on TikTok". Leave empty to use the site’s name (Facebook, YouTube and so on).',
+            }),
+            // Retired by card 167: the icon now comes from the link. Hidden, not removed, because
+            // existing rows hold a value (rule 1). Still read for an address the site does not know.
+            defineField({
+              name: 'platform',
+              title: 'Platform (no longer needed)',
+              type: 'string',
+              hidden: true,
               options: {
                 list: [
                   { title: 'Instagram', value: 'Instagram' },
@@ -413,35 +471,24 @@ export const siteSettings = defineType({
                   { title: 'Pinterest', value: 'Pinterest' },
                   { title: 'YouTube', value: 'YouTube' },
                   { title: 'TikTok', value: 'TikTok' },
+                  { title: 'WhatsApp', value: 'WhatsApp' },
                   { title: 'X (Twitter)', value: 'X' },
                   { title: 'Houzz', value: 'Houzz' },
                   { title: 'Other', value: 'Other' },
                 ],
                 layout: 'dropdown',
               },
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'url',
-              title: 'URL',
-              type: 'url',
-              description: 'Full URL including https://.',
-              validation: (Rule) => Rule.required().uri({ scheme: ['http', 'https'] }),
-            }),
-            defineField({
-              name: 'label',
-              title: 'Label (optional)',
-              type: 'string',
-              description:
-                'Custom label for "Other" platforms. Used as the aria-label on the icon button.',
             }),
           ],
           preview: {
             select: { platform: 'platform', url: 'url', label: 'label' },
-            prepare: ({ platform, url, label }) => ({
-              title: label ? `${platform}: ${label}` : (platform ?? 'Social link'),
-              subtitle: url ?? '',
-            }),
+            prepare: ({ platform, url, label }) => {
+              const link = resolveSocialLink({ platform, url, label });
+              return {
+                title: link ? socialLabel(link) : 'Social link (paste a link)',
+                subtitle: link ? (url ?? '') : url ? `Will not show: ${url}` : '',
+              };
+            },
           },
         }),
       ],
@@ -480,7 +527,7 @@ export const siteSettings = defineType({
       title: 'Default social share image',
       type: 'image',
       description:
-        'The image shown when any page of the site is shared on social media or in a text message (the Open Graph image). Use a wide image, about 1200 by 630 pixels. Individual pages can override this in their own SEO section. Leave blank to use the auto-generated branded cards.',
+        'You can leave this empty. Every page already makes its own share picture (the site card with the page title on it), and a page with its own share image in its SEO section uses that instead. This picture is only used for the few pages the website cannot make a card for, like password pages. Use a wide image, about 1200 by 630 pixels.',
       options: { hotspot: true },
       fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     }),

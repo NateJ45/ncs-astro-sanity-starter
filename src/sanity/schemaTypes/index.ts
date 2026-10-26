@@ -3,6 +3,7 @@
 
 import { aboutPage } from './aboutPage'; // scaffold: about
 import { announcement } from './announcement';
+import { popup } from './popup';
 import { businessInfo } from './businessInfo';
 import { contactPage } from './contactPage';
 import { ctaBlock } from './ctaBlock';
@@ -27,6 +28,7 @@ import { processPage } from './processPage'; // scaffold: process
 import { processStep } from './processStep'; // scaffold: process
 import { redirect } from './redirect';
 import { sectionPreset } from './sectionPreset';
+import { shortLink } from './shortLink';
 import { service } from './service'; // scaffold: services
 import { servicesPage } from './servicesPage'; // scaffold: services
 import { siteSettings } from './siteSettings';
@@ -65,6 +67,7 @@ export const schemaTypes = [
 
   // Reusable content collections
   announcement, // site-wide banner collection (enabled + date-windowed)
+  popup, // popups (card 170): one at a time, date-windowed, src/lib/popup.ts
   testimonial, // scaffold: testimonials
   faqCategory, // scaffold: faq
   faqItem, // scaffold: faq
@@ -86,4 +89,6 @@ export const schemaTypes = [
   // Old address -> new address forwards, filed by hand or automatically on a
   // web-address change (see components/slugRedirect.tsx).
   redirect,
+  // Short addresses like /spring for flyers and QR codes (PORTS.md card 171).
+  shortLink,
 ];

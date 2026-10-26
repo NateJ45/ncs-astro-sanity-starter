@@ -1,0 +1,326 @@
+---
+// Safe to edit by hand
+// The popup (PORTS.md card 170): Content > Popups in the Studio (schemaTypes/popup.ts).
+// BaseLayout renders this only on pages the live popup is meant for (src/lib/popup.ts), so a
+// site with no popup ships no markup and no script. docs/agent/popups.md has the whole design.
+//
+// WHEN IT OPENS (the guard rail, chosen on purpose): never before the visitor has been on the
+// page 4 seconds AND has scrolled at least a quarter of a screen. Both, not either:
+//   - a timer alone interrupts someone still reading the first screen (opening hours, the
+//     address, the thing they came for);
+//   - scrolling shows they have read past the first screen and are browsing, so a box is less
+//     of an ambush; Google also counts a box covering content straight after a visitor lands
+//     from search as an intrusive interstitial;
+//   - a page too short to scroll a quarter screen opens it after 8 seconds instead.
+// It also waits while another dialog (the phone menu) is open, and never opens for print.
+//
+// HOW OFTEN: once per visitor (localStorage) or once per visit (sessionStorage), keyed by the
+// popup's id and last edit (popupSeenKey), so changing the popup shows it again. Storage that
+// throws (a private window) falls back to memory: once per page load sequence, never a loop.
+//
+// ACCESSIBLE: a native <dialog> opened with showModal() (the page behind is inert), focus kept
+// inside it by a Tab wrap, Escape closes it (the dialog's own cancel), a visible Close button,
+// a tap on the dimmed backdrop closes it, and focus returns to where it was. Motion only under
+// prefers-reduced-motion: no-preference. No layout shift: a modal dialog sits in the top layer.
+// Colors are the theme tokens (--card, --foreground, --ring), so it follows light and dark.
+import { urlFor } from '@/lib/sanity';
+import { popupSeenKey, type PopupDoc } from '@/lib/popup';
+import CtaLink from '@/components/CtaLink.astro';
+
+interface Props {
+  popup: PopupDoc;
+}
+const { popup } = Astro.props as Props;
+
+const image = (popup.image as { asset?: unknown; alt?: string } | null) ?? null;
+const imageSrc = image?.asset
+  ? urlFor(image as never)
+      .width(720)
+      .height(360)
+      .fit('crop')
+      .auto('format')
+      .quality(80)
+      .url()
+  : null;
+const href = popup.button?.link?.trim() || '';
+const label = popup.button?.label?.trim() || '';
+const external = /^https?:\/\//i.test(href);
+// CtaLink adds the trailing slash to a page on this site (rule 19) and opens an outside
+// address in a new tab.
+const cta = external
+  ? { label, linkType: 'external' as const, externalUrl: href }
+  : { label, href };
+---
+
+<dialog
+  class="site-popup"
+  aria-labelledby="site-popup-title"
+  aria-describedby={popup.text ? 'site-popup-text' : undefined}
+  data-popup
+  data-popup-key={popupSeenKey(popup)}
+  data-popup-start={popup.startDate ?? ''}
+  data-popup-end={popup.endDate ?? ''}
+  data-popup-frequency={popup.frequency === 'visit' ? 'visit' : 'visitor'}
+  data-pagefind-ignore="all"
+>
+  <div class="site-popup__card">
+    {imageSrc && (
+      <img
+        class="site-popup__img"
+        src={imageSrc}
+        alt={image?.alt ?? ''}
+        width="720"
+        height="360"
+        loading="lazy"
+        decoding="async"
+      />
+    )}
+    <div class="site-popup__body">
+      <h2 id="site-popup-title" class="site-popup__title">
+        {popup.title}
+      </h2>
+      {popup.text && (
+        <p id="site-popup-text" class="site-popup__text">
+          {popup.text}
+        </p>
+      )}
+      {label && href && (
+        <div class="site-popup__actions">
+          <CtaLink cta={cta} variant="primary" />
+        </div>
+      )}
+    </div>
+    <button type="button" class="site-popup__close" data-popup-close>
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+        <path
+          d="M6 6l12 12M18 6L6 18"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <span class="sr-only">Close</span>
+    </button>
+  </div>
+</dialog>
+
+<script>
+  // Timings (see the header): at least 4 s on the page AND a quarter screen of scroll; 8 s on a
+  // page too short to scroll that far.
+  const MIN_MS = 4000;
+  const SHORT_PAGE_MS = 8000;
+  const SCROLL_FRACTION = 0.25;
+  const memory = new Set<string>();
+
+  function store(freq: string): Storage | null {
+    try {
+      return freq === 'visit' ? window.sessionStorage : window.localStorage;
+    } catch {
+      return null;
+    }
+  }
+  function seen(key: string, freq: string): boolean {
+    if (memory.has(key)) return true;
+    try {
+      return store(freq)?.getItem(key) === '1';
+    } catch {
+      return false;
+    }
+  }
+  function remember(key: string, freq: string) {
+    memory.add(key);
+    try {
+      store(freq)?.setItem(key, '1');
+    } catch {
+      /* private window: memory only */
+    }
+  }
+
+  let cleanup: (() => void) | null = null;
+
+  function init() {
+    cleanup?.();
+    cleanup = null;
+    const dialog = document.querySelector<HTMLDialogElement>('dialog[data-popup]');
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+    const key = dialog.dataset.popupKey ?? '';
+    const freq = dialog.dataset.popupFrequency ?? 'visitor';
+    if (!key || seen(key, freq)) return;
+    // The dates again, in the visitor's own clock: exact even between site rebuilds.
+    const now = Date.now();
+    const start = Date.parse(dialog.dataset.popupStart ?? '');
+    const end = Date.parse(dialog.dataset.popupEnd ?? '');
+    if ((Number.isFinite(start) && now < start) || (Number.isFinite(end) && now > end)) return;
+
+    const loaded = performance.now();
+    let opener: Element | null = null;
+    let timer = 0;
+
+    const ready = () => {
+      if (performance.now() - loaded < MIN_MS) return false;
+      const room = document.documentElement.scrollHeight - window.innerHeight;
+      const need = window.innerHeight * SCROLL_FRACTION;
+      if (room < need) return performance.now() - loaded >= SHORT_PAGE_MS;
+      return window.scrollY >= need;
+    };
+    const tryOpen = () => {
+      if (dialog.open || seen(key, freq) || document.hidden) return;
+      if (window.matchMedia('print').matches) return;
+      if (document.querySelector('dialog[open]')) return; // the phone menu is open: wait
+      if (!ready()) return;
+      opener = document.activeElement;
+      dialog.showModal();
+      remember(key, freq);
+      dialog.querySelector<HTMLElement>('[data-popup-close]')?.focus();
+      stopWatching();
+    };
+    const onScroll = () => tryOpen();
+    const stopWatching = () => {
+      window.removeEventListener('scroll', onScroll);
+      window.clearInterval(timer);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    // A slow tick covers the visitor who scrolled early and then stopped, and the short page.
+    timer = window.setInterval(tryOpen, 1000);
+
+    const close = () => dialog.open && dialog.close();
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as HTMLElement;
+      if (t === dialog || t.closest('[data-popup-close]')) close(); // backdrop or Close
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const items = [...dialog.querySelectorAll<HTMLElement>('a[href], button')];
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    const onClose = () => {
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    };
+    const onPrint = () => close();
+    dialog.addEventListener('click', onClick);
+    dialog.addEventListener('keydown', onKey);
+    dialog.addEventListener('close', onClose);
+    window.addEventListener('beforeprint', onPrint);
+
+    cleanup = () => {
+      stopWatching();
+      dialog.removeEventListener('click', onClick);
+      dialog.removeEventListener('keydown', onKey);
+      dialog.removeEventListener('close', onClose);
+      window.removeEventListener('beforeprint', onPrint);
+      close();
+    };
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    cleanup?.();
+    cleanup = null;
+  });
+</script>
+
+<style>
+  .site-popup {
+    width: min(30rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) * 2);
+    background: var(--card);
+    color: var(--card-foreground);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.35);
+    overflow: auto;
+  }
+  .site-popup::backdrop {
+    background: rgb(0 0 0 / 0.55);
+  }
+  .site-popup__card {
+    position: relative;
+  }
+  .site-popup__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 1;
+    object-fit: cover;
+  }
+  .site-popup__body {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.75rem 1.5rem 1.5rem;
+  }
+  .site-popup__title {
+    margin: 0;
+    padding-right: 2.5rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.9rem);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .site-popup__text {
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .site-popup__actions {
+    margin-top: 0.5rem;
+  }
+  .site-popup__close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--card-foreground);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+    cursor: pointer;
+  }
+  .site-popup__close:hover {
+    background: var(--muted);
+  }
+  .site-popup__close:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .site-popup[open] {
+      animation: site-popup-in 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .site-popup[open]::backdrop {
+      animation: site-popup-fade 220ms ease-out;
+    }
+  }
+  @keyframes site-popup-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+  @keyframes site-popup-fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @media print {
+    .site-popup {
+      display: none !important;
+    }
+  }
+</style>

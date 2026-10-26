@@ -1,0 +1,43 @@
+---
+// Safe to edit by hand
+//
+// THE POPUP FIXTURE (PORTS.md card 170): SitePopup with fixed words, so tests/popup.spec.ts can
+// drive it without a popup in the Studio, and so its look can be checked at any width and in
+// both themes. A long page, so the "has scrolled a quarter screen" rule can be met. noindex, out
+// of the sitemap (astro.config.mjs filters '/styleguide') and under a reserved slug.
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SitePopup from '@/components/SitePopup.astro';
+import type { PopupDoc } from '@/lib/popup';
+import { site } from '@/data/site';
+
+const fixture: PopupDoc = {
+  _id: 'styleguide-popup',
+  _updatedAt: '2026-10-26T00:00:00Z',
+  title: 'Holiday hours',
+  text: 'We are open late every Thursday in December. Drop by and say hello.',
+  button: { label: 'See the details', link: '/contact' },
+  startDate: null,
+  endDate: null,
+  where: 'all',
+  frequency: 'visitor',
+};
+---
+
+<BaseLayout
+  title={`Popup | ${site.name}`}
+  description="The popup with fixed words, for checking. Not for visitors."
+  noindex
+>
+  <div class="mx-auto max-w-3xl space-y-8 px-4 py-12 sm:px-6" style="min-height: 300vh">
+    <h1 class="text-3xl">Popup fixture</h1>
+    <p>
+      Scroll down a little and wait four seconds. The popup opens once, then this browser remembers
+      it.{' '}
+      <a href="#below" id="opener-link">
+        A link to focus
+      </a>
+    </p>
+    <p id="below">The rest of the page.</p>
+  </div>
+  <SitePopup popup={fixture} />
+</BaseLayout>

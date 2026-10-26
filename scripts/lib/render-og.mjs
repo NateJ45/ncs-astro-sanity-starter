@@ -3,8 +3,10 @@
 // =============================================================================
 // The share card renderer
 // =============================================================================
-// One 1200x630 PNG. Used by generate-og-default.mjs (the single fallback) and
-// generate-og-pages.mjs (one per page singleton).
+// One 1200x630 card. Used by generate-og-default.mjs (the single fallback,
+// a committed PNG) and, through the site's scripts/lib/og-card.mjs, by
+// build-og-cards.mjs, which draws every page's card at build time (PORTS.md
+// card 169; ogCardHtml + renderOgHtml below).
 //
 // -----------------------------------------------------------------------------
 // WHY A BROWSER AND NOT SHARP'S TEXT RENDERER
@@ -22,9 +24,11 @@
 // which is the whole reason for the swap. Playwright is already a devDependency
 // because the test suite needs it.
 //
-// THE PNGs ARE COMMITTED and these scripts run by hand (`npm run og`,
-// `npm run og:pages`), so CI never needs a browser to build the site. If that
-// ever changes, the workflow needs `npx playwright install chromium`.
+// og-default.png is committed (`npm run og`). The per-page cards are drawn
+// during `npm run build` (card 169), so getBrowser() tries Playwright's own
+// Chromium first, then the machine's Chrome or Edge (a GitHub runner has
+// Chrome), and with none it throws "No browser ...", which build-og-cards.mjs
+// turns into og-default.png for those pages: a build never fails for a card.
 //
 // -----------------------------------------------------------------------------
 // THE CARD IS A THUMBNAIL FIRST
@@ -144,8 +148,18 @@ function wrapToLines(text, maxCharsPerLine = 28) {
   return lines;
 }
 
-function cardHtml(t, wordmark, lines) {
+function cardHtml(t, wordmark, lines, { kicker, mark } = {}) {
   const family = FONT_URI ? `BrandDisplay, ${t.fontDisplay}` : t.fontDisplay;
+  // Card 169's two optional pieces, emitted only when set, so a card without
+  // them (og-default.png) is byte-identical to what it always was.
+  const extraCss =
+    (mark ? `.mark{width:84px;height:84px;object-fit:contain}` : '') +
+    (kicker
+      ? `.kicker{font-size:26px;line-height:1.2;letter-spacing:.14em;text-transform:uppercase;color:${t.primary}}`
+      : '');
+  const extraTop =
+    (mark ? `<img class="mark" src="${esc(mark)}" alt="">` : '') +
+    (kicker ? `<div class="kicker">${esc(kicker)}</div>` : '');
   return `<!doctype html><html><head><meta charset="utf-8"><style>
   ${FONT_URI ? `@font-face{font-family:BrandDisplay;src:url(${FONT_URI}) format('woff2');font-display:block}` : ''}
   *{margin:0;padding:0;box-sizing:border-box}
@@ -160,10 +174,10 @@ function cardHtml(t, wordmark, lines) {
   .wordmark{font-size:96px;line-height:1.05;color:${t.primaryDark}}
   .rule{width:120px;height:2px;background:${t.primary}}
   .tagline{font-size:32px;line-height:1.35;color:${t.accent}}
-  </style></head><body>
+  ${extraCss}</style></head><body>
   <div class="card">
     <div class="frame"></div>
-    <div class="stack">
+    <div class="stack">${extraTop}
       <div class="wordmark">${esc(wordmark)}</div>
       <div class="rule"></div>
       <div class="tagline">${lines.map((l) => `<div>${esc(l)}</div>`).join('')}</div>
@@ -177,8 +191,18 @@ let browser = null;
 async function getBrowser() {
   if (browser) return browser;
   const { chromium } = await import('playwright');
-  browser = await chromium.launch();
-  return browser;
+  // Playwright's own Chromium, then the machine's Chrome or Edge (card 169).
+  let last;
+  for (const opts of [{}, { channel: 'chrome' }, { channel: 'msedge' }]) {
+    try {
+      browser = await chromium.launch(opts);
+      return browser;
+    } catch (err) {
+      last = err;
+    }
+  }
+  const why = String(last?.message ?? last).split('\n')[0];
+  throw new Error(`No browser to draw share cards with: ${why}`);
 }
 
 /**
@@ -194,6 +218,46 @@ export async function closeRenderer() {
   if (browser) {
     await browser.close();
     browser = null;
+  }
+}
+
+/**
+ * The card's HTML, for a caller that caches or renders it itself (card 169:
+ * build-og-cards.mjs hashes it, so a card is redrawn only when it changes).
+ *
+ * @param {object} opts
+ * @param {string} opts.wordmark - top-line brand text
+ * @param {string|string[]} opts.tagline - subtitle; a string is wrapped to ~28 chars/line
+ * @param {string} [opts.kicker] - optional small line at the top (a section, a date)
+ * @param {string} [opts.mark] - optional data: URI of the site's square icon, drawn above
+ * @param {Partial<typeof DEFAULTS>} [opts.theme] - colour/size overrides
+ */
+export function ogCardHtml({ wordmark, tagline, kicker, mark, theme = {} }) {
+  const t = { ...DEFAULTS, ...theme };
+  const lines = (Array.isArray(tagline) ? tagline : wrapToLines(tagline, 28)).slice(0, 3);
+  return cardHtml(t, wordmark, lines, { kicker, mark });
+}
+
+/**
+ * Draw a card's HTML to an image buffer (PNG, or JPEG with `quality`).
+ * @param {string} html
+ * @param {{ type?: 'png' | 'jpeg', quality?: number, theme?: Partial<typeof DEFAULTS> }} [opts]
+ * @returns {Promise<Buffer>}
+ */
+export async function renderOgHtml(html, { type = 'png', quality = 86, theme = {} } = {}) {
+  const t = { ...DEFAULTS, ...theme };
+  const b = await getBrowser();
+  const page = await b.newPage({
+    viewport: { width: t.width, height: t.height },
+    deviceScaleFactor: 1,
+  });
+  try {
+    await page.setContent(html, { waitUntil: 'load' });
+    // Without this the card can be photographed before the face decodes.
+    await page.evaluate(() => document.fonts.ready);
+    return await page.screenshot({ type, ...(type === 'jpeg' ? { quality } : {}) });
+  } finally {
+    await page.close();
   }
 }
 

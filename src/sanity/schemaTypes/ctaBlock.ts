@@ -3,6 +3,14 @@
 
 import { defineType, defineField } from 'sanity';
 
+// A button is in use once any part of it is filled in. Only then are its words and its link
+// type required: an optional button left empty must never block Publish.
+const inUse = (p: Record<string, unknown> | undefined): boolean =>
+  !!(
+    p &&
+    (p.label || p.linkType || p.internalLink || p.externalUrl || p.emailAddress || p.phoneNumber)
+  );
+
 export const ctaBlock = defineType({
   name: 'ctaBlock',
   title: 'CTA Block',
@@ -12,7 +20,12 @@ export const ctaBlock = defineType({
       name: 'label',
       title: 'Button text',
       type: 'string',
-      validation: (Rule) => Rule.required().max(40),
+      validation: (Rule) =>
+        Rule.max(40).custom((value, ctx) =>
+          inUse(ctx.parent as Record<string, unknown>) && !value
+            ? 'Add the button words, or clear the button to leave it off.'
+            : true,
+        ),
     }),
     defineField({
       name: 'linkType',
@@ -27,7 +40,12 @@ export const ctaBlock = defineType({
         ],
         layout: 'radio',
       },
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.custom((value, ctx) =>
+          inUse(ctx.parent as Record<string, unknown>) && !value
+            ? 'Pick where the button goes.'
+            : true,
+        ),
     }),
     defineField({
       name: 'internalLink',
@@ -74,7 +92,7 @@ export const ctaBlock = defineType({
       name: 'openInNewTab',
       title: 'Open in new tab',
       type: 'boolean',
-      initialValue: false,
+      // No initialValue: one would create a half-filled button on every new block.
     }),
   ],
   preview: {

@@ -102,6 +102,7 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     // site-wide (BaseLayout, Header, Footer, and the siteSettings query, which
     // folds businessInfo in), so each one is "Shown on every page".
     announcement: EVERY_PAGE,
+    popup: EVERY_PAGE,
     siteSettings: EVERY_PAGE,
     businessInfo: {
       ...EVERY_PAGE,

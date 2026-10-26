@@ -14,12 +14,36 @@
 
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
+type ArrayOf<T> = Array<
+  T & {
+    _key: string;
+  }
+>;
+
 // Source: schema.json
 export type SanityImageAssetReference = {
   _ref: string;
   _type: 'reference';
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: 'sanity.imageAsset';
+};
+
+export type TimelineEntryImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "timelineEntry.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
+};
+
+export type PhotoCardImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "photoCard.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
 };
 
 export type Photo = {
@@ -29,6 +53,101 @@ export type Photo = {
   crop?: SanityImageCrop;
   alt?: string;
   _type: 'image';
+};
+
+export type PageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'page';
+};
+
+export type HomePageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'homePage';
+};
+
+export type AboutPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'aboutPage';
+};
+
+export type ServicesPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'servicesPage';
+};
+
+export type ProcessPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'processPage';
+};
+
+export type FaqPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'faqPage';
+};
+
+export type ContactPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'contactPage';
+};
+
+export type JournalPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'journalPage';
+};
+
+export type JournalEntryReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'journalEntry';
+};
+
+export type PrivacyPageReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'privacyPage';
+};
+
+export type ShortLink = {
+  _id: string;
+  _type: 'shortLink';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  address?: string;
+  linkKind?: 'page' | 'url';
+  page?:
+    | PageReference
+    | HomePageReference
+    | AboutPageReference
+    | ServicesPageReference
+    | ProcessPageReference
+    | FaqPageReference
+    | ContactPageReference
+    | JournalPageReference
+    | JournalEntryReference
+    | PrivacyPageReference;
+  url?: string;
+  lasting?: 'temporary' | 'permanent';
+  expires?: string;
+  note?: string;
 };
 
 export type Redirect = {
@@ -97,6 +216,42 @@ export type PrivatePage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
       } & SyncedSection)
   >;
 };
@@ -105,13 +260,6 @@ export type Slug = {
   _type: 'slug';
   current?: string;
   source?: string;
-};
-
-export type JournalEntryReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'journalEntry';
 };
 
 export type Newsletter = {
@@ -287,6 +435,44 @@ export type FaqCategory = {
   title?: string;
   slug?: Slug;
   displayOrder?: number;
+};
+
+export type Popup = {
+  _id: string;
+  _type: 'popup';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  text?: string;
+  button?: {
+    label?: string;
+    link?: string;
+  };
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  startDate?: string;
+  endDate?: string;
+  where?: 'all' | 'home' | 'chosen';
+  pages?: ArrayOf<
+    | PageReference
+    | HomePageReference
+    | AboutPageReference
+    | ServicesPageReference
+    | ProcessPageReference
+    | FaqPageReference
+    | ContactPageReference
+    | JournalPageReference
+    | PrivacyPageReference
+  >;
+  frequency?: 'visitor' | 'visit';
+  enabled?: boolean;
 };
 
 export type Announcement = {
@@ -469,6 +655,13 @@ export type SiteSettings = {
     alt?: string;
     _type: 'image';
   };
+  siteIcon?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: 'image';
+  };
   availabilityStatus?: string;
   serviceAreas?: Array<string>;
   travelFees?: Array<{
@@ -480,6 +673,8 @@ export type SiteSettings = {
   socialInstagram?: string;
   socialFacebook?: string;
   socialLinks?: Array<{
+    url?: string;
+    label?: string;
     platform?:
       | 'Instagram'
       | 'Facebook'
@@ -487,11 +682,10 @@ export type SiteSettings = {
       | 'Pinterest'
       | 'YouTube'
       | 'TikTok'
+      | 'WhatsApp'
       | 'X'
       | 'Houzz'
       | 'Other';
-    url?: string;
-    label?: string;
     _type: 'socialLink';
     _key: string;
   }>;
@@ -548,69 +742,6 @@ export type SiteSettings = {
   satisfactionGuarantee?: string;
   headCode?: string;
   bodyEndCode?: string;
-};
-
-export type HomePageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'homePage';
-};
-
-export type AboutPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'aboutPage';
-};
-
-export type ServicesPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'servicesPage';
-};
-
-export type ProcessPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'processPage';
-};
-
-export type FaqPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'faqPage';
-};
-
-export type ContactPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'contactPage';
-};
-
-export type JournalPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'journalPage';
-};
-
-export type PrivacyPageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'privacyPage';
-};
-
-export type PageReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'page';
 };
 
 export type NavLink = {
@@ -945,6 +1076,42 @@ export type SectionPreset = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
       } & FounderSection)
     | ({
         _key: string;
@@ -978,6 +1145,471 @@ export type SectionPreset = {
       } & DynamicListSection)
   >;
   note?: string;
+};
+
+export type PhotoCardsSection = {
+  _type: 'photoCardsSection';
+  heading?: string;
+  intro?: string;
+  cards?: Array<{
+    image?: PhotoCardImage;
+    title?: string;
+    body?: string;
+    link?: CtaBlock;
+    _type: 'photoCard';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type ScheduleSection = {
+  _type: 'scheduleSection';
+  heading?: string;
+  intro?: string;
+  days?: Array<{
+    title?: string;
+    items?: Array<{
+      startTime?:
+        | '06:00'
+        | '06:15'
+        | '06:30'
+        | '06:45'
+        | '07:00'
+        | '07:15'
+        | '07:30'
+        | '07:45'
+        | '08:00'
+        | '08:15'
+        | '08:30'
+        | '08:45'
+        | '09:00'
+        | '09:15'
+        | '09:30'
+        | '09:45'
+        | '10:00'
+        | '10:15'
+        | '10:30'
+        | '10:45'
+        | '11:00'
+        | '11:15'
+        | '11:30'
+        | '11:45'
+        | '12:00'
+        | '12:15'
+        | '12:30'
+        | '12:45'
+        | '13:00'
+        | '13:15'
+        | '13:30'
+        | '13:45'
+        | '14:00'
+        | '14:15'
+        | '14:30'
+        | '14:45'
+        | '15:00'
+        | '15:15'
+        | '15:30'
+        | '15:45'
+        | '16:00'
+        | '16:15'
+        | '16:30'
+        | '16:45'
+        | '17:00'
+        | '17:15'
+        | '17:30'
+        | '17:45'
+        | '18:00'
+        | '18:15'
+        | '18:30'
+        | '18:45'
+        | '19:00'
+        | '19:15'
+        | '19:30'
+        | '19:45'
+        | '20:00'
+        | '20:15'
+        | '20:30'
+        | '20:45'
+        | '21:00'
+        | '21:15'
+        | '21:30'
+        | '21:45'
+        | '22:00'
+        | '22:15'
+        | '22:30'
+        | '22:45'
+        | '23:00'
+        | '23:15'
+        | '23:30'
+        | '23:45';
+      title?: string;
+      note?: string;
+      _type: 'scheduleItem';
+      _key: string;
+    }>;
+    _type: 'scheduleDay';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type EventDetailsSection = {
+  _type: 'eventDetailsSection';
+  eyebrow?: string;
+  title?: string;
+  occurrences?: Array<{
+    date?: string;
+    startTime?:
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    endTime?:
+      | '06:00'
+      | '06:15'
+      | '06:30'
+      | '06:45'
+      | '07:00'
+      | '07:15'
+      | '07:30'
+      | '07:45'
+      | '08:00'
+      | '08:15'
+      | '08:30'
+      | '08:45'
+      | '09:00'
+      | '09:15'
+      | '09:30'
+      | '09:45'
+      | '10:00'
+      | '10:15'
+      | '10:30'
+      | '10:45'
+      | '11:00'
+      | '11:15'
+      | '11:30'
+      | '11:45'
+      | '12:00'
+      | '12:15'
+      | '12:30'
+      | '12:45'
+      | '13:00'
+      | '13:15'
+      | '13:30'
+      | '13:45'
+      | '14:00'
+      | '14:15'
+      | '14:30'
+      | '14:45'
+      | '15:00'
+      | '15:15'
+      | '15:30'
+      | '15:45'
+      | '16:00'
+      | '16:15'
+      | '16:30'
+      | '16:45'
+      | '17:00'
+      | '17:15'
+      | '17:30'
+      | '17:45'
+      | '18:00'
+      | '18:15'
+      | '18:30'
+      | '18:45'
+      | '19:00'
+      | '19:15'
+      | '19:30'
+      | '19:45'
+      | '20:00'
+      | '20:15'
+      | '20:30'
+      | '20:45'
+      | '21:00'
+      | '21:15'
+      | '21:30'
+      | '21:45'
+      | '22:00'
+      | '22:15'
+      | '22:30'
+      | '22:45'
+      | '23:00'
+      | '23:15'
+      | '23:30'
+      | '23:45';
+    label?: string;
+    _type: 'eventDate';
+    _key: string;
+  }>;
+  place?: string;
+  note?: string;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  button?: CtaBlock;
+  showCalendar?: boolean;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type LetterSection = {
+  _type: 'letterSection';
+  eyebrow?: string;
+  greeting?: string;
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal';
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
+  signOff?: string;
+  signature?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  name?: string;
+  role?: string;
+  link?: CtaBlock;
+  look?: 'standard' | 'quiet';
+};
+
+export type TimelineSection = {
+  _type: 'timelineSection';
+  heading?: string;
+  intro?: string;
+  entries?: Array<{
+    year?: string;
+    title?: string;
+    text?: string;
+    image?: TimelineEntryImage;
+    _type: 'timelineEntry';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type NoticeSection = {
+  _type: 'noticeSection';
+  message?: string;
+  urgency?: 'info' | 'urgent';
+  label?: string;
+  link?: CtaBlock;
+  startDate?: string;
+  endDate?: string;
+};
+
+export type CountdownSection = {
+  _type: 'countdownSection';
+  eventName?: string;
+  startDate?: string;
+  endDate?: string;
+  intro?: string;
+  duringText?: string;
+  afterText?: string;
+  link?: CtaBlock;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type TabsSection = {
+  _type: 'tabsSection';
+  heading?: string;
+  intro?: string;
+  tabs?: Array<{
+    label?: string;
+    body?: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: 'span';
+        _key: string;
+      }>;
+      style?: 'normal';
+      listItem?: 'bullet' | 'number';
+      markDefs?: Array<{
+        href?: string;
+        _type: 'link';
+        _key: string;
+      }>;
+      level?: number;
+      _type: 'block';
+      _key: string;
+    }>;
+    _type: 'tabPanel';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type AccordionSection = {
+  _type: 'accordionSection';
+  heading?: string;
+  intro?: string;
+  items?: Array<{
+    question?: string;
+    answer?: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: 'span';
+        _key: string;
+      }>;
+      style?: 'normal';
+      listItem?: 'bullet' | 'number';
+      markDefs?: Array<{
+        href?: string;
+        _type: 'link';
+        _key: string;
+      }>;
+      level?: number;
+      _type: 'block';
+      _key: string;
+    }>;
+    _type: 'accordionItem';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type PhotoSection = {
+  _type: 'photoSection';
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  caption?: string;
+  look?: 'standard' | 'quiet';
+};
+
+export type ButtonRowSection = {
+  _type: 'buttonRowSection';
+  heading?: string;
+  intro?: string;
+  layout?: 'buttons' | 'cards';
+  links?: Array<{
+    link?: CtaBlock;
+    note?: string;
+    _type: 'quickLink';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type ColumnsSection = {
+  _type: 'columnsSection';
+  heading?: string;
+  intro?: string;
+  textColumns?: Array<{
+    heading?: string;
+    body?: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: 'span';
+        _key: string;
+      }>;
+      style?: 'normal';
+      listItem?: 'bullet' | 'number';
+      markDefs?: Array<{
+        href?: string;
+        _type: 'link';
+        _key: string;
+      }>;
+      level?: number;
+      _type: 'block';
+      _key: string;
+    }>;
+    _type: 'textColumn';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet' | 'feature';
 };
 
 export type RsvpSection = {
@@ -1314,6 +1946,42 @@ export type Page = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -1716,6 +2384,42 @@ export type ProcessPage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
       } & SyncedSection)
     | ({
         _key: string;
@@ -1779,6 +2483,42 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -1884,6 +2624,42 @@ export type AboutPage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2048,6 +2824,42 @@ export type HomePage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2375,11 +3187,23 @@ export type Geopoint = {
 
 export type AllSanitySchemaTypes =
   | SanityImageAssetReference
+  | TimelineEntryImage
+  | PhotoCardImage
   | Photo
+  | PageReference
+  | HomePageReference
+  | AboutPageReference
+  | ServicesPageReference
+  | ProcessPageReference
+  | FaqPageReference
+  | ContactPageReference
+  | JournalPageReference
+  | JournalEntryReference
+  | PrivacyPageReference
+  | ShortLink
   | Redirect
   | PrivatePage
   | Slug
-  | JournalEntryReference
   | Newsletter
   | JournalCategory
   | ProcessStep
@@ -2390,21 +3214,13 @@ export type AllSanitySchemaTypes =
   | FaqCategoryReference
   | FaqItem
   | FaqCategory
+  | Popup
   | Announcement
   | StudioNotes
   | StudioGuide
   | NotFoundPage
   | BusinessInfo
   | SiteSettings
-  | HomePageReference
-  | AboutPageReference
-  | ServicesPageReference
-  | ProcessPageReference
-  | FaqPageReference
-  | ContactPageReference
-  | JournalPageReference
-  | PrivacyPageReference
-  | PageReference
   | NavLink
   | DynamicListSection
   | TeamSection
@@ -2422,6 +3238,18 @@ export type AllSanitySchemaTypes =
   | SectionPresetReference
   | SyncedSection
   | SectionPreset
+  | PhotoCardsSection
+  | ScheduleSection
+  | EventDetailsSection
+  | LetterSection
+  | TimelineSection
+  | NoticeSection
+  | CountdownSection
+  | TabsSection
+  | AccordionSection
+  | PhotoSection
+  | ButtonRowSection
+  | ColumnsSection
   | RsvpSection
   | EmbedSection
   | LogoStripSection
