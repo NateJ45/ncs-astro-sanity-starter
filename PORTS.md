@@ -10561,7 +10561,7 @@ hook; the result is the same whichever runs first. Dynamic sources (`/[slug].htm
 (stonesteps-50k#163) can keep them; the build step will not duplicate them. Check: build, then
 `grep -n '\.htm\|\.php' dist/client/_redirects`, and curl the slashless form on `wrangler dev` or live.
 
-**Applied (2026-10-26):** the build step and tests in first-baptist-auburn#189, fbcm#115, presacademy#134,
+**Applied (2026-10-25):** the build step and tests in first-baptist-auburn#189, fbcm#115, presacademy#134,
 reid-design-site#181 and stonesteps-50k#164 (which keeps its hand-written rules; the step skips them, though
 its log line counts them as "added"). Earlier: starter (this card). stonesteps-50k = source, `partial`: exact hand-written rules in
 `public/_redirects` (#163), not the build step. No other family repo has a file-style redirect source today
@@ -10589,7 +10589,7 @@ The template path (no snapshot file, no project id) is unchanged.
 
 **Verified in the starter (2026-10-25):** `npm run test:scripts`. End to end on first-baptist-auburn: see its PR.
 
-**Applied (2026-10-26):** first-baptist-auburn#180 (the workflow env) and #192 (the copy), fbcm#115,
+**Applied (2026-10-25):** first-baptist-auburn#180 (the workflow env) and #192 (the copy), fbcm#115,
 presacademy#134, reid-design-site#181, stonesteps-50k#164.
 
 Earlier: starter (this card). first-baptist-auburn: origin, see its PR. fbcm and stonesteps-50k set the env
