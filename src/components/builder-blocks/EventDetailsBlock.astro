@@ -1,0 +1,182 @@
+---
+// Safe to edit by hand
+// Event details: the when and where of one event, so an editor can build an open
+// house or a workshop page on their own. The words on the text track of the
+// shared split (the small line, the name, a few sentences); the details on a card
+// in the narrow track: each date still to come as a big day numeral over its
+// month, the weekday, the time and a label, then the place, then the main button,
+// "Add to my calendar" and "Directions". With a photo, the photo takes the narrow
+// track and the card sits under the words. On a phone everything stacks.
+//
+// Worked out at build time (rule 15, src/lib/builder-blocks.ts): past dates drop
+// off and the block disappears once they all have, like a dated notice; the
+// calendar file covers every date to come and is handed over as the link itself
+// (a data: link), so no file is published; directions are a map search for the
+// typed place; each date is described to search engines as a schema.org Event.
+// The main button is the page's one accent button when SectionRenderer hands it
+// that (card 158), otherwise the outline button.
+import SanityImage from '@/components/SanityImage.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import {
+  dayOfMonth,
+  eventIcs,
+  eventJsonLd,
+  eventPlace,
+  icsFileName,
+  icsHref,
+  monthShort,
+  plain,
+  siteToday,
+  upcomingOccurrences,
+} from '@/lib/builder-blocks';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
+import { site } from '@/data/site';
+import type { ProjectedEventDetailsSection } from '@/lib/builderBlocks.types';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+interface Props {
+  block: ProjectedEventDetailsSection;
+  surface?: CadenceSurface;
+  headingId: string;
+  primaryVariant?: 'primary' | 'secondary';
+  isFirst?: boolean;
+  /** The build moment; tests pass a fixed one. */
+  now?: Date;
+}
+const {
+  block,
+  surface = 'background',
+  headingId,
+  primaryVariant = 'secondary',
+  isFirst = false,
+  now = new Date(),
+} = Astro.props;
+
+const rows = upcomingOccurrences(block.occurrences, siteToday(now, site.timeZone));
+const place = eventPlace(block.place);
+const title = block.title?.trim() || 'Event';
+const photo = block.image?.asset ? (block.image as SanityImageObject) : null;
+const host = new URL(site.url).host;
+const pageUrl = new URL(Astro.url.pathname, site.url).href;
+const ics =
+  block.showCalendar === false
+    ? ''
+    : eventIcs({
+        title,
+        occurrences: rows,
+        place,
+        note: block.note,
+        url: pageUrl,
+        uidBase: plain(block._key) || title,
+        host,
+        timeZone: site.timeZone,
+        now,
+      });
+const button = block.button?.label ? block.button : null;
+const ld = eventJsonLd({
+  title,
+  occurrences: rows,
+  place,
+  note: block.note,
+  url: pageUrl,
+  timeZone: site.timeZone,
+  organizer: { name: site.name, url: site.url },
+});
+---
+
+{rows.length > 0 && (
+  <section
+    class={surfaceClass(surface)}
+    data-builder-block="eventDetailsSection"
+    aria-labelledby={headingId}
+  >
+    <div
+      class:list={[
+        'split mx-auto max-w-content px-m py-section-lg bb-event',
+        photo ? 'bb-event--photo' : 'bb-event--plain',
+      ]}
+      data-reveal
+    >
+      {photo && (
+        <div class="bb-event__media">
+          <SanityImage
+            source={photo}
+            width={800}
+            sizes="(min-width: 64rem) 40vw, 100vw"
+            quality={75}
+            loading={isFirst ? 'eager' : 'lazy'}
+            fetchpriority={isFirst ? 'high' : undefined}
+            class="h-auto w-full rounded-lg object-cover"
+          />
+        </div>
+      )}
+
+      <div class="bb-event__words">
+        <SectionHeading eyebrow={block.eyebrow} headline={title} headingId={headingId} />
+        {block.note && <p class="bb-intro">{block.note}</p>}
+      </div>
+
+      <div class="bb-card bb-event__card">
+        <ul class="bb-event__dates" role="list">
+          {/* A second time on the same day sits under the first without repeating the
+                date; the weekday stays for screen readers. */}
+          {rows.map((r, i) => {
+            const same = i > 0 && rows[i - 1].date === r.date;
+            return (
+              <li class:list={['bb-event__date', same && 'bb-event__date--same']}>
+                <span class="bb-event__num" aria-hidden="true">
+                  {!same && <span class="bb-event__day">{dayOfMonth(r.date)}</span>}
+                  {!same && <span class="bb-event__month">{monthShort(r.date)}</span>}
+                </span>
+                <span class="bb-event__when">
+                  <span class:list={['bb-event__weekday', same && 'sr-only']}>{r.day}</span>
+                  <span class="bb-event__time">
+                    {r.time}
+                    {r.label && <span class="bb-event__label">{r.label}</span>}
+                  </span>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+
+        {place && (
+          <div class="bb-event__place">
+            <p class="bb-event__place-title">Where</p>
+            <p>
+              {place.lines.map((line) => (
+                <span class="block">{line}</span>
+              ))}
+            </p>
+          </div>
+        )}
+
+        <div class="bb-event__actions">
+          {button && <CtaLink cta={button} variant={primaryVariant} />}
+          {(ics || place) && (
+            <p class="bb-event__links">
+              {ics && (
+                <a class="bb-event__link" href={icsHref(ics)} download={icsFileName(title)}>
+                  Add to my calendar
+                </a>
+              )}
+              {place && (
+                <a
+                  class="bb-event__link"
+                  href={place.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Directions
+                  <span class="sr-only"> (opens in a new tab)</span>
+                </a>
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+    {ld && <script is:inline type="application/ld+json" set:html={ld} />}
+  </section>
+)}

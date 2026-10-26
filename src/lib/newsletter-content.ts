@@ -22,8 +22,8 @@ import type { IssueContent } from '@/lib/mail-newsletter';
 /** The list's name in sentences: "signed up for <LIST_NAME>". */
 export const LIST_NAME = `the ${site.name} newsletter`;
 
-/** Dates in emails (RSVP confirmations) are shown in this time zone. */
-export const TIME_ZONE = 'America/New_York';
+/** Dates in emails (RSVP confirmations) are shown in this time zone (site.timeZone). */
+export const TIME_ZONE = site.timeZone;
 
 export const MAIL_BRAND = brandFromConfig(brandConfig, site.name, site.url);
 

@@ -30,7 +30,7 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 
 **Settings and globals:**
 
-- `siteSettings` (singleton) -- email, phone, footer tagline, newsletter settings, section visibility flags, `businessType` (schema.org LocalBusiness subtype; drives the JSON-LD `@type` field -- defaults to `LocalBusiness` if unset), and `socialLinks` (structured array of platform + URL pairs, supersedes legacy flat social-URL fields). Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
+- `siteSettings` (singleton) -- email, phone, footer tagline, newsletter settings, section visibility flags, `businessType` (schema.org LocalBusiness subtype; drives the JSON-LD `@type` field -- defaults to `LocalBusiness` if unset), and `socialLinks` (rows of a pasted link and an optional label; the platform and icon are read from the link, see "Social links" below; supersedes legacy flat social-URL fields). Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
 - `businessInfo` (singleton) -- service areas, travel fee tiers, availability status, studio city/state, geo coordinates, `businessModel` (`'in-person'` or `'remote'`; controls which location/travel fields show in the Studio), and `additionalLocations` (array for multi-location businesses). Split from `siteSettings` so identity fields stay in one place and operational business facts in another. `getSiteSettings()` merges both documents and returns them under a single flat interface -- no component changes needed.
 
 **Page builder schemas:**
@@ -198,6 +198,29 @@ The `purpose` strings carry compressed voice guidance for each field. These are 
 
 **Activating Canvas** for the project (one-time): the toggle lives in [manage.sanity.io](https://manage.sanity.io) under the project's Canvas section.
 
+## Social links read by URL host (PORTS.md card 167)
+
+Site settings > Social links is a list of rows, each a pasted link and an optional label. There is no
+platform to pick: `platformFromUrl()` in PORTABLE `src/lib/social-links.ts` reads it from the link's host
+(16 named: Facebook, Instagram, YouTube, TikTok, WhatsApp, X, Threads, Spotify, Apple Podcasts, Vimeo, LinkedIn,
+Pinterest, Nextdoor, Flickr, Linktree, Houzz), and PORTABLE `src/lib/social-icons.ts` maps it to a Tabler icon.
+Any other address gets the plain link icon and is named by the editor's label, or its domain.
+
+- **Older data keeps working.** The old Platform dropdown is hidden, not removed (rule 1). The address wins when
+  it is known; a stored platform only stands in for an address the file does not know (a vanity domain). An empty
+  list falls back to the legacy `socialInstagram` / `socialFacebook` fields. The URL field still accepts
+  `http` so rows saved earlier validate.
+- **WhatsApp** shows only as an https group invite (`chat.whatsapp.com/...`) or number link (`wa.me/...`);
+  any other WhatsApp address is left out, on the page and in the JSON-LD `sameAs`.
+- **Studio:** each row's preview shows the name the button will read (or "Will not show"), and odd addresses
+  (a platform's home page, a search results page, a bad WhatsApp link) get a warning, never an error. More than
+  `MAX_SOCIAL_LINKS` (10) rows warns; only the first 10 draw.
+- **Callers:** `resolveSocialLinks(settings, pinnedFacebook?)` gives the ordered list; `socialLabel(link)`
+  gives the accessible name; `socialIcon(platform)` the icon. The starter draws them in `Footer.astro`. A
+  site that keeps a Facebook address elsewhere (first-baptist-auburn's Church facts) passes it as
+  `pinnedFacebook`, and it joins the front when the list has no Facebook row.
+- **Add a platform:** a row in `PLATFORMS` and a case in `socialIcon()`, in the starter, then sync out.
+
 ## Pages as first-class objects (PORTS.md cards 21 and 22)
 
 The `page` document type carries three verbs and one extra field beyond its content:
@@ -228,7 +251,10 @@ one would leave the site with a route and no document.
 What a WordPress block-editor handover gives a client, built on the page builder that is already here. Five parts:
 
 1. **Page templates.** `src/sanity/pageTemplates.ts` (the site's OWN file, not PORTABLE) lists the starting points
-   offered when a Custom page is made: Simple page, Landing page, Questions page, Blank page in the starter.
+   offered when a Custom page is made, in GROUPS (card 173): Basics (Simple page, Landing page, Questions page, Blank
+   page), About (About us, Meet the team), Events (Event page) and Announcements (Notice page) in the starter. The
+   new-document menu has no headings, so each shows as "Group: Title" (`templateMenuTitle()`), and the list is kept in
+   `TEMPLATE_GROUPS` order (tested). Templates are written with the builders in `src/sanity/templateBlocks.ts`.
    `sanity.config.ts` registers each as an initial value template on `page` (`value` is a function, so every new page
    gets fresh `_key`s from `freshKeys()` in `src/lib/authoring.ts`) and `newDocumentOptions` hides the stock `page`
    template, which stays registered so intents that name it keep working. Every example line starts `Example:`.
@@ -292,3 +318,36 @@ unit tested), so they run the moment a file is chosen. `src/sanity/components/Br
 file) draws a preview under each field: the logo in the header in light and dark, the icon in a browser tab and on
 a home screen; the template's files when empty. A site that puts the icon somewhere else too (a footer mark, the
 share cards) reads `siteIcon` in its own query and adds the spot to the preview. Guide: "Change the logo or the icon".
+## The builder kit: the smaller blocks, grouped templates, seeded patterns (PORTS.md card 173)
+
+Ported from first-baptist-auburn and made generic, so a client can put together an event page, a notice or a
+questions page the way a Squarespace page is built.
+
+- **Twelve blocks** in `src/sanity/schemaTypes/builderSections.ts`, spread into `pageSectionSchemas`: text in columns,
+  a row of buttons or link cards, one wide photo (opens in the photo viewer), fold-out questions (native `<details>`),
+  tabs (WAI-ARIA, readable without JavaScript), a countdown, a dated notice (self-contained band; takes itself down
+  after its last day), a timeline, a letter ("a note from" a role), event details, a schedule and cards with photos.
+  Drawn by `src/components/builder-blocks/` (`BuilderBlock.astro` picks the component; `SectionRenderer` has one
+  branch for all of them, `isBuilderBlock()`), styled by `src/styles/builder-blocks.css` (tokens only, so light, dark
+  and the Feature band all work), projected by arms in `SECTION_ARMS`, typed in `src/lib/builderBlocks.types.ts`.
+  Logic (dates, times, the calendar file, Event JSON-LD, card columns) is `src/lib/builder-blocks.ts`, pinned by
+  `builder-blocks.test.ts`; `tests/builder-blocks.spec.ts` drives the tabs, fold-outs, event links and notice.
+- **Event details** needs a typed place (there is no business address to fall back on in the starter). It drops past
+  dates at build time and disappears once all have passed, hands over an `.ics` as a `data:` link (no route, no file
+  published), links Directions to a map search for the place, and writes one schema.org `Event` per date. Its main
+  button can be the page's one accent button (card 158).
+- **Dates** are calendar days in `site.timeZone` (`src/data/site.ts`, also the RSVP email zone). The notice and the
+  countdown recount in the visitor's browser, so a page built yesterday is still right today.
+- **Looks** (card 124): every new block but the notice is a content block in `CONTENT_TYPES`; most offer Standard,
+  Quiet and Feature, the wide photo and the letter Standard and Quiet. No colour fields (rule 9); `urgency`,
+  `startTime` and `endTime` are in `NON_STEGA_FIELDS` (rule 8b).
+- **Insert menu groups.** `BUILDER_INSERT_GROUPS` adds the blocks to Basics and to two new groups, "Events and notices"
+  and "Fold-outs and tabs". They are merged in by `withSiteGroups()` (`src/lib/insert-groups.ts`, tested): a fork with
+  its own block library adds its groups to `SITE_INSERT_GROUPS` in `sections.ts` and never edits the base list.
+- **Patterns as code.** `src/sanity/sectionPatterns.ts` holds the site's saved-section patterns (the starter: a
+  closure notice, event details with a schedule, common questions). `npm run seed:patterns` (dry by default; production
+  needs `--apply` and `NCS_PRODUCTION_WRITE=yes`) writes each as a DRAFT `sectionPreset` with id `pattern-<id>`, and
+  skips any id that exists as a draft or published, so an editor's changes are never overwritten. Drafts on purpose:
+  "Add a copy" works from a draft, "Add synced" needs a published one, so example text cannot go live through a
+  synced section. The authoring test checks templates and patterns alike: known block types, fresh keys, the
+  `Example:` marker, the copy rules (no em-dashes, US spelling, no prices), the schema's limits and the page rules.

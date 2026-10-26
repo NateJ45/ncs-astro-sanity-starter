@@ -1,0 +1,106 @@
+---
+// Safe to edit by hand
+// Tabs: two to five labeled panels. Without JavaScript every panel shows in turn
+// under its own heading; the script turns them into a real tab list (arrow keys,
+// Home and End move between tabs, the WAI-ARIA tabs pattern) and hides the
+// panels' own headings visually, since the tab names them.
+import BuilderBand from './BuilderBand.astro';
+import PortableText from '@/components/PortableText';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedTabsSection } from '@/lib/builderBlocks.types';
+import type { PortableTextBlock } from '@portabletext/types';
+
+interface Props {
+  block: ProjectedTabsSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface, headingId } = Astro.props;
+const tabs = (block.tabs ?? []).filter((t) => t?.label);
+const Title = block.heading ? 'h3' : 'h2';
+const id = (i: number) => `${headingId}-tab-${i}`;
+---
+
+{tabs.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Tabs"
+  >
+    <div class="bb-tabs" data-bb-tabs>
+      <div class="bb-tablist" role="tablist" aria-label={block.heading || 'Tabs'}>
+        {tabs.map((t, i) => (
+          <button
+            type="button"
+            class="bb-tab"
+            role="tab"
+            id={`${id(i)}-button`}
+            aria-controls={id(i)}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {tabs.map((t, i) => (
+        <div class="bb-panel" id={id(i)} data-bb-panel>
+          <Title class="bb-title bb-panel__title">{t.label}</Title>
+          <PortableText value={(t.body ?? []) as PortableTextBlock[]} className="bb-prose" />
+        </div>
+      ))}
+    </div>
+  </BuilderBand>
+)}
+
+<script>
+  // Progressive: every panel is readable before this runs. Re-run after each
+  // client-side navigation, since the router swaps the page without a reload.
+  function setUpTabs() {
+    for (const root of document.querySelectorAll<HTMLElement>('[data-bb-tabs]')) {
+      if (root.dataset.bbTabsReady) continue;
+      root.dataset.bbTabsReady = '1';
+      const buttons = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+      const panels = [...root.querySelectorAll<HTMLElement>('[data-bb-panel]')];
+      panels.forEach((p, i) => {
+        p.setAttribute('role', 'tabpanel');
+        p.setAttribute('aria-labelledby', buttons[i]?.id ?? '');
+        p.tabIndex = 0;
+      });
+      const select = (n: number, focus = false) => {
+        buttons.forEach((b, i) => {
+          const on = i === n;
+          b.setAttribute('aria-selected', on ? 'true' : 'false');
+          b.tabIndex = on ? 0 : -1;
+          panels[i].hidden = !on;
+        });
+        if (focus) buttons[n]?.focus();
+      };
+      buttons.forEach((b, i) => {
+        b.addEventListener('click', () => select(i));
+        b.addEventListener('keydown', (e) => {
+          const last = buttons.length - 1;
+          const next =
+            e.key === 'ArrowRight'
+              ? (i + 1) % buttons.length
+              : e.key === 'ArrowLeft'
+                ? (i - 1 + buttons.length) % buttons.length
+                : e.key === 'Home'
+                  ? 0
+                  : e.key === 'End'
+                    ? last
+                    : null;
+          if (next === null) return;
+          e.preventDefault();
+          select(next, true);
+        });
+      });
+      select(0);
+    }
+  }
+  setUpTabs();
+  document.addEventListener('astro:page-load', setUpTabs);
+</script>

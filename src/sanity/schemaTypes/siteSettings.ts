@@ -9,6 +9,12 @@ import { CodeTextInput } from '../components/CodeTextInput';
 import { codeWarningMessage } from '../../lib/custom-code';
 import { IconImageInput, LogoImageInput } from '../components/BrandImageInput';
 import { checkIcon, checkLogo } from '../../lib/brand-uploads';
+import {
+  MAX_SOCIAL_LINKS,
+  resolveSocialLink,
+  socialLabel,
+  socialUrlWarning,
+} from '../../lib/social-links';
 
 export const siteSettings = defineType({
   name: 'siteSettings',
@@ -407,26 +413,56 @@ export const siteSettings = defineType({
       readOnly: true,
     }),
 
-    // New flexible social links array. Supports any platform.
-    // When this array has entries the Footer renders from it instead of the
-    // legacy socialInstagram / socialFacebook fields above.
+    // Social links (PORTS.md card 167): one row per account, in order. The editor pastes a link;
+    // the icon and the button's name are read from its address (src/lib/social-links.ts), so a
+    // new account needs no code change. The old Platform dropdown is kept, hidden, because
+    // existing rows carry it (rule 1); it only stands in for an address the site does not know.
+    // When this array has entries the Footer renders from it instead of the legacy
+    // socialInstagram / socialFacebook fields above.
     defineField({
       name: 'socialLinks',
       title: 'Social links',
       type: 'array',
       group: 'social',
       description:
-        'Add one entry per platform. The footer renders these in order. Leave empty to fall back to the legacy Instagram/Facebook fields (for existing sites).',
+        'Paste the link to any of your pages (Facebook, Instagram, YouTube, WhatsApp and more); the icon is picked for you. They show in this order in the footer.',
+      validation: (Rule) =>
+        // A warning, not an error, so a dataset that already holds more rows can still publish.
+        Rule.max(MAX_SOCIAL_LINKS).warning(
+          `Only the first ${MAX_SOCIAL_LINKS} links show. Take one out before adding another.`,
+        ),
       of: [
         defineArrayMember({
           type: 'object',
           name: 'socialLink',
+          title: 'Social link',
           fields: [
             defineField({
-              name: 'platform',
-              title: 'Platform',
+              name: 'url',
+              title: 'Link',
+              type: 'url',
+              description:
+                'The address of your page, starting https://. For WhatsApp, a group invite (https://chat.whatsapp.com/...) or a number link (https://wa.me/...).',
+              // http stays allowed so rows saved before card 167 still validate.
+              validation: (Rule) => [
+                Rule.required().uri({ scheme: ['http', 'https'] }),
+                Rule.custom((url) => socialUrlWarning(url as string | undefined) ?? true).warning(),
+              ],
+            }),
+            defineField({
+              name: 'label',
+              title: 'Label (optional)',
               type: 'string',
-              description: 'The social network or directory.',
+              description:
+                'What a screen reader says for the button, like "Our studio on TikTok". Leave empty to use the site’s name (Facebook, YouTube and so on).',
+            }),
+            // Retired by card 167: the icon now comes from the link. Hidden, not removed, because
+            // existing rows hold a value (rule 1). Still read for an address the site does not know.
+            defineField({
+              name: 'platform',
+              title: 'Platform (no longer needed)',
+              type: 'string',
+              hidden: true,
               options: {
                 list: [
                   { title: 'Instagram', value: 'Instagram' },
@@ -435,35 +471,24 @@ export const siteSettings = defineType({
                   { title: 'Pinterest', value: 'Pinterest' },
                   { title: 'YouTube', value: 'YouTube' },
                   { title: 'TikTok', value: 'TikTok' },
+                  { title: 'WhatsApp', value: 'WhatsApp' },
                   { title: 'X (Twitter)', value: 'X' },
                   { title: 'Houzz', value: 'Houzz' },
                   { title: 'Other', value: 'Other' },
                 ],
                 layout: 'dropdown',
               },
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'url',
-              title: 'URL',
-              type: 'url',
-              description: 'Full URL including https://.',
-              validation: (Rule) => Rule.required().uri({ scheme: ['http', 'https'] }),
-            }),
-            defineField({
-              name: 'label',
-              title: 'Label (optional)',
-              type: 'string',
-              description:
-                'Custom label for "Other" platforms. Used as the aria-label on the icon button.',
             }),
           ],
           preview: {
             select: { platform: 'platform', url: 'url', label: 'label' },
-            prepare: ({ platform, url, label }) => ({
-              title: label ? `${platform}: ${label}` : (platform ?? 'Social link'),
-              subtitle: url ?? '',
-            }),
+            prepare: ({ platform, url, label }) => {
+              const link = resolveSocialLink({ platform, url, label });
+              return {
+                title: link ? socialLabel(link) : 'Social link (paste a link)',
+                subtitle: link ? (url ?? '') : url ? `Will not show: ${url}` : '',
+              };
+            },
           },
         }),
       ],

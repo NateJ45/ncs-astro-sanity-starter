@@ -41,6 +41,7 @@
 
 import type { KitGuideBlock } from '../kit/guide/GuidePage';
 import { phoneGuides } from './phoneGuides.ts';
+import { linkGuides } from './links.ts';
 import type { FieldGuideMap } from '../../lib/studio-kit';
 
 export type DiyLevel = 'self' | 'ask' | 'mixed';
@@ -1071,6 +1072,9 @@ guides.push(
 // line when rewriting the guides above.
 guides.push(...phoneGuides(SITE.contactName));
 
+// Short links and QR codes (PORTS.md card 171, guides/links.ts).
+guides.push(...linkGuides);
+
 /**
  * Which guides "Help for this page" shows for each document type (kit.config.ts
  * guide.forType, PORTS.md card 110). '*' is the fallback for anything unlisted.
@@ -1094,6 +1098,7 @@ export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   siteSettings: ['menus-and-footer', 'website-status', 'add-a-widget'],
   businessInfo: ['menus-and-footer'],
   redirect: ['rename-a-page'],
+  shortLink: ['short-links', 'qr-codes'],
 };
 
 /**
