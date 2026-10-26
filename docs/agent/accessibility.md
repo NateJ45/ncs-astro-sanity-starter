@@ -69,10 +69,14 @@ Before launch and after any structural change, do one screen-reader pass with NV
 When the contact form fails validation or submission:
 
 - Error container has `role="alert"` and `aria-live="polite"`
-- Focus moves to the first invalid field on submit-attempt with errors
+- Every problem shows at once: an error summary (`role="alert"`, `tabindex="-1"`) takes focus on a failed submit and links to each field; each field has `aria-invalid` and `aria-describedby` for its own line (PORTS.md card 156)
 - Error text is visible AND descriptive ("Please enter an email address" not "Invalid input")
 - Inline validation runs on blur, not on every keystroke (avoids announcer spam)
 - Success states get a confirmation message in the same region so the reader announces it
+
+### Focus rings on dark bands
+
+The page ring (`--ring`) is tuned for Paper. Inside a dark band it takes the band's light ink: the Feature and Ink bands do this in `globals.css`, and any other dark section adds `data-dark-surface` (a light card sitting on it adds `data-light-surface`). `src/lib/surfaces.test.ts` measures each ring at 3:1 in both themes. A landmark list: an FAQ with no category headings renders a plain `<div>`, not a second `<section>` (`landmark-unique`).
 
 ### Animation discipline
 
