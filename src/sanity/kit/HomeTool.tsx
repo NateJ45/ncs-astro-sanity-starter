@@ -167,7 +167,7 @@ function ThisWeek({
       await (on ? patch.append('ticked', [id]) : patch).commit({ autoGenerateArrayKeys: false });
     } catch {
       setTicked(before);
-      toast.push({ status: 'error', title: 'That tick did not save. Try again in a moment.' });
+      toast.push({ status: 'error', title: 'That check did not save. Try again in a moment.' });
     } finally {
       setSaving(null);
     }
@@ -206,7 +206,7 @@ function ThisWeek({
                 done: row.done,
                 tickable: row.tickable,
                 busy: saving === t.id,
-                note: row.by === 'content' || row.by === 'checkup' ? 'Ticked for you.' : undefined,
+                note: row.by === 'content' || row.by === 'checkup' ? 'Checked for you.' : undefined,
                 action: link ? (
                   <KitAction href={link.href} onClick={link.onClick}>
                     {t.targetLabel ?? 'Do it'}

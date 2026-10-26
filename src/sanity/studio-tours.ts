@@ -75,7 +75,7 @@ export const TOURS: TourDef[] = [
         anchor: 'home-this-week',
         title: 'This week',
         meaning: 'step',
-        body: 'The jobs that come round every week. Each one ticks itself when it is done.',
+        body: 'The jobs that come around every week. Each one checks itself when it is done.',
       },
       {
         anchor: 'home-is-it-live',

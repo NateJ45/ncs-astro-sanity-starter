@@ -41,7 +41,7 @@ export const formQuestion = defineType({
           { title: 'Phone number', value: 'phone' },
           { title: 'Long text (a paragraph)', value: 'textarea' },
           { title: 'Choose one from a list', value: 'select' },
-          { title: 'Yes / no tick box', value: 'checkbox' },
+          { title: 'Yes / no checkbox', value: 'checkbox' },
         ],
         layout: 'radio',
       },
@@ -80,7 +80,7 @@ export const formQuestion = defineType({
         phone: 'Phone number',
         textarea: 'Long text',
         select: 'Choose one',
-        checkbox: 'Tick box',
+        checkbox: 'Checkbox',
       };
       const type = KINDS[kind as string] ?? 'Short text';
       return {

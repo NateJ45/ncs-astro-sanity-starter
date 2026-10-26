@@ -10675,7 +10675,9 @@ file-style redirects.
 **What it does.**
 
 1. **Spelling.** Text people read now says color, neighbor, neighborhoods, recognize, organizer, gray, labeled,
-   inquiry ("Website inquiry" is the contact email's default subject), judgment. Only strings changed: no
+   inquiry ("Website inquiry" is the contact email's default subject), judgment; and American words for a
+   checkbox ("Please check this box.", "Checked for you.", "Jobs checked by hand", "Yes / no checkbox"), "come
+   around". Only strings changed: no
    identifier, CSS class, Sanity field name or stored value was renamed (a renamed field would orphan stored
    content). Code comments are left as they are. Check with a sweep of quoted strings for British spellings.
 2. **CSP guard.** `build-csp.mjs` fails the build when the `Content-Security-Policy` line in `_headers` passes
