@@ -35,6 +35,7 @@ import { readdirSync, readFileSync, statSync, existsSync, writeFileSync } from '
 import { join, resolve, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  brokenScripts,
   collectFileLinks,
   countWords,
   defaultCacheDir,
@@ -45,6 +46,7 @@ import {
   mergeFileLinks,
   readFile,
   topWords,
+  waitForStableDir,
 } from './lib/search-files.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -149,12 +151,26 @@ if (files.length) {
   }
 }
 
-const written = await index.writeFiles({ outputPath: join(SITE_DIR, 'pagefind') });
+const OUT_DIR = join(SITE_DIR, 'pagefind');
+const written = await index.writeFiles({ outputPath: OUT_DIR });
 if (written.errors.length) {
   console.error('[search] writing the index failed:', written.errors);
   process.exit(1);
 }
+// writeFiles() can resolve before Pagefind's binary has flushed every file, and
+// close() stops the binary (card 165): wait for the folder to settle first, then
+// refuse to ship a script that was cut short.
+await waitForStableDir(OUT_DIR);
 await pagefind.close();
+const broken = brokenScripts(OUT_DIR);
+if (broken.length) {
+  for (const b of broken)
+    console.error(`[search] pagefind/${b.file} is not valid JavaScript (cut short?): ${b.error}`);
+  console.error(
+    '[search] the search index was not written whole; search would say it is not available. Run the build again.',
+  );
+  process.exit(1);
+}
 
 writeFileSync(join(SITE_DIR, 'pagefind', 'words.json'), JSON.stringify(topWords(counts)));
 

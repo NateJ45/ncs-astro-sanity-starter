@@ -275,6 +275,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 162 | `studio.look.splash: motif`: the site's own art replaces the splash's stone path    | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
 | 163 | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept               | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10692,3 +10693,27 @@ mas-monograms#150, nixoncreativestudio#144. The six Sanity datasets were checked
 (Auburn 2, fbcm 2, presacademy 1, reid 2, mas 1), stonesteps had none.
 
 **Who should take it.** Every site (they are all American English).
+
+## Card 165: the search index waits for Pagefind to finish writing (2026-10-26)
+
+**Origin:** first-baptist-auburn#204. Its CI artifact carried `pagefind/pagefind.js` cut at exactly 32,768 of 45,555
+bytes, so every search said "Search is not available right now" and the search spec failed twice on the same
+artifact. A local build of the same commit was whole. `build-search-index.mjs` (card 154) called
+`pagefind.close()` straight after `writeFiles()`, which can resolve before Pagefind's binary has flushed every file,
+and close() stops the binary. A deploy builds the same way, so live search could have shipped broken.
+
+**Canonical:** PORTABLE `scripts/build-search-index.mjs`, `scripts/lib/search-files.mjs` (+ `search-files.test.mjs`).
+
+**What it does.** After `writeFiles()` the build waits until `pagefind/` has stopped changing for half a second
+(`waitForStableDir`, at most 15 s), then closes Pagefind, then syntax-checks every `.js` Pagefind wrote
+(`brokenScripts`: `node --check` on a `.mjs` copy; a truncated file is a syntax error). If one is cut short the
+build fails with `[search] pagefind/<file> is not valid JavaScript (cut short?)`, so CI and the deploy stop
+instead of shipping a site whose search cannot start.
+
+**Verified (2026-10-26):** `search-files.test.mjs` (a whole module passes, a cut one is caught; the wait returns
+once a writer stops); `npm run test:scripts` 172 pass in first-baptist-auburn; the index step on Auburn's real
+build writes the whole 45,555-byte `pagefind.js`.
+
+**Applied:** starter (this card). first-baptist-auburn: origin, with #204.
+
+**Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).

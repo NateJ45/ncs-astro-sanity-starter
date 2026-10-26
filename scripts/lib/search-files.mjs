@@ -30,8 +30,20 @@
 // cached under that name and a file is fetched and read once, ever. CI and
 // deploy keep the cache folder between runs (actions/cache).
 // =============================================================================
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 /** File kinds we can read inside, by extension. */
@@ -390,6 +402,77 @@ export function fileRecord(link, read) {
     meta,
     filters: { type: [link.type || 'file'] },
   };
+}
+
+// ---- the written index (card 165) -------------------------------------------
+// Pagefind writes its output from a separate binary, and `writeFiles()` can
+// resolve before that binary has flushed every file. Calling `pagefind.close()`
+// straight away then stops it mid-write: on FBC Auburn's CI (2026-10-26) the
+// artifact's pagefind/pagefind.js was cut at exactly 32,768 of 45,555 bytes, and
+// every search said "Search is not available right now". So the build waits for
+// the folder to stop changing before closing, then syntax-checks every script it
+// wrote and fails if one is cut short, so a deploy never ships broken search.
+
+/** Every file under `dir` with its size, as one comparable string. */
+function dirFingerprint(dir) {
+  const out = [];
+  const walk = (d) => {
+    for (const name of readdirSync(d).sort()) {
+      const p = join(d, name);
+      const st = statSync(p);
+      if (st.isDirectory()) walk(p);
+      else out.push(`${p}:${st.size}`);
+    }
+  };
+  walk(dir);
+  return out.join('\n');
+}
+
+/**
+ * Resolves once `dir`'s files and sizes have not changed for `quietMs`, or after
+ * `maxMs` regardless. Returns how long it waited.
+ */
+export async function waitForStableDir(dir, { quietMs = 500, maxMs = 15_000, stepMs = 100 } = {}) {
+  const start = Date.now();
+  let last = existsSync(dir) ? dirFingerprint(dir) : '';
+  let quietSince = Date.now();
+  while (Date.now() - start < maxMs) {
+    await new Promise((ok) => setTimeout(ok, stepMs));
+    const now = existsSync(dir) ? dirFingerprint(dir) : '';
+    if (now !== last) {
+      last = now;
+      quietSince = Date.now();
+    } else if (Date.now() - quietSince >= quietMs) break;
+  }
+  return Date.now() - start;
+}
+
+/**
+ * The `.js` files directly in `dir` that are not valid JavaScript modules
+ * (`node --check` on a `.mjs` copy). A truncated file is a syntax error.
+ * @returns {{ file: string, error: string }[]}
+ */
+export function brokenScripts(dir) {
+  const bad = [];
+  const tmp = mkdtempSync(join(tmpdir(), 'search-check-'));
+  try {
+    for (const name of readdirSync(dir)) {
+      if (!name.endsWith('.js')) continue;
+      const copy = join(tmp, name.replace(/\.js$/, '.mjs'));
+      copyFileSync(join(dir, name), copy);
+      const r = spawnSync(process.execPath, ['--check', copy], { encoding: 'utf8' });
+      if (r.status !== 0) {
+        const lines = (r.stderr || '').trim().split('\n');
+        bad.push({
+          file: name,
+          error: lines.find((l) => /Error/.test(l)) ?? lines[0] ?? 'syntax error',
+        });
+      }
+    }
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+  return bad;
 }
 
 /** The default cache folder, kept between CI runs by actions/cache. */
