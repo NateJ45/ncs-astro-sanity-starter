@@ -799,6 +799,29 @@ Also outside the kit plugin; site choices in `src/sanity/studioEdges.config.ts`.
   those screens. The supported levers stay the workspace `icon`, `title` and `subtitle` (all drawn on the card)
   and the i18n words above. Revisit when `AuthConfig` gains a login component slot.
 
+## After a deploy: the open Studio reloads itself (card 179)
+
+The Studio loads most of its code lazily (a field's picker, an input, a tool), each a hashed file under `/_astro/`.
+Workers static assets keep only the current build's files, so after a deploy (every merge, every publish through the
+webhook) a tab opened earlier asks for a file that is gone. Sanity recovers at the desk level ("Import error ...
+Reloading now"), but a field's own error boundary showed a raw red "Failed to fetch dynamically imported module".
+
+- **What happens now.** The boot page calls `installStaleChunkGuard(browserGuardEnv())` from
+  `src/lib/studio-stale-chunk.ts`. It listens for Vite's `vite:preloadError` (every lazy import in the build goes
+  through Vite's preload helper) and for window `unhandledrejection` and `error`. On the first missing-file error it
+  shows "The Studio was updated. Reloading to carry on." and reloads after 2.5 s.
+- **No loops.** The reload time goes in sessionStorage (`ncs:studio:staleChunkReloadAt`). A second such error within
+  60 s does not reload: the notice says "Reload to carry on." with a Reload button, so a file genuinely missing from a
+  build cannot spin the tab.
+- **Edits are safe.** Sanity sends every change to the draft as the editor types (patches auto-commit on a 1 s throttle
+  in sanity 6.19), and the 2.5 s pause lets the last one land.
+- **Not done, on purpose:** keeping the previous build's files. `wrangler deploy` replaces the whole asset set, so it
+  would mean carrying old `/_astro/` files into each new dist from a CI cache, which grows without bound and still
+  misses a tab two deploys old.
+- **Check it by hand:** build, `npm run preview`, open `/studio/`, delete a lazy chunk from `dist/client/_astro/`
+  that the page has not loaded yet, then open the field that needs it. The notice appears and the page reloads.
+  `studio-stale-chunk.test.ts` covers the matching, the loop guard and blocked storage.
+
 ## The design language (card 128)
 
 The kit's own look, so the Studio's middle reads like the site and not like a generic app. Shared, PORTABLE primitives
