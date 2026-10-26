@@ -88,8 +88,16 @@ jobs:
         # download on the retry, and nothing can sit for the 6-hour default.
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
-          timeout 360 npx playwright install --with-deps chromium ||
+          timeout 360 npx playwright install --with-deps chromium || {
+            # The killed try's sudo apt-get keeps running and holds the dpkg lock, so the retry
+            # died at once with "Could not get lock". Stop it, let apt wait for the lock, and
+            # skip the Azure mirror (the slow one) when the mirror list has another entry.
+            sudo pkill -x apt-get || true
+            echo 'DPkg::Lock::Timeout "60";' | sudo tee /etc/apt/apt.conf.d/99-lock-timeout > /dev/null
+            sudo dpkg --configure -a || true
+            grep -qv azure /etc/apt/apt-mirrors.txt && sudo sed -i '/azure/d' /etc/apt/apt-mirrors.txt
             timeout 360 npx playwright install --with-deps chromium
+          }
 
       - name: Generate Sanity types
         run: npm run typegen

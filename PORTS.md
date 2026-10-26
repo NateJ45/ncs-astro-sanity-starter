@@ -6483,8 +6483,11 @@ plain `gh run cancel` did not land (a force-cancel did).
 
 **What it does.** Every Playwright install step (`ci.yml` and `visual.yml`) runs each attempt under coreutils
 `timeout`: 180s for `install-deps`, 360s for `install --with-deps` (a full download was 286s on fbcm's worst
-day). A killed first attempt falls through to the existing `||` retry, which gets fresh connections and resumes
-apt's partial download. Behind that, `timeout-minutes: 8` on the `install-deps` step, 15 on a browser download
+day). A killed first attempt falls through to the `||` retry, which resumes apt's partial download. The killed
+try's `sudo apt-get` outlives `timeout` and holds the dpkg lock (the first version's retry died in 1s with
+"Could not get lock", presacademy#139), so before retrying the step runs `pkill -x apt-get`, sets
+`DPkg::Lock::Timeout` to 60s, runs `dpkg --configure -a`, and drops the Azure line from
+`/etc/apt/apt-mirrors.txt` when another mirror is listed. Behind that, `timeout-minutes: 8` on the `install-deps` step, 15 on a browser download
 step, and 30 on the `e2e` (or `test`, `visual`) job. The step names, job names and the no-path-filter rule are
 unchanged, so `build` and `test` stay the required checks.
 
