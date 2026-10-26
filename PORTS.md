@@ -10992,7 +10992,7 @@ slides, a short link's code holding the short address and a page's its full addr
 and the not-found page get no button.
 
 **Switching it on.** Nothing to switch: with no short links the integration writes nothing, and with no Sanity
-project `cmsQuery` returns the empty fallback. Set `site.timeZone` to the client's IANA zone (defaults to `'UTC'`).
+project `cmsQuery` returns the empty fallback. Set `site.timeZone` to the client's IANA zone (the starter's default is `'America/New_York'`, set by card 173).
 A site that wants an expired link to stop "the next morning" adds a daily `schedule` to `deploy.yml`; otherwise it
 stops at the next publish or push. A site with hand-written launch redirects lists their old addresses in
 `LAUNCH_FORWARDS` in `shortLink.ts` so the Studio warns too (the build reads the real map regardless). A site with

@@ -143,8 +143,8 @@ not a Redirect: a Redirect keeps an OLD address working; a short link is new, of
   card 160's slashless lines.
 - **Status** in plain words: "For now" is a 302 (the default; browsers do not cache it, so it can
   be repointed next year), "For good" is a 301.
-- **Expiry**: an optional last day, read in `site.timeZone` (`src/data/site.ts`, `'UTC'` until a
-  site sets its own). The link works through that day and is dropped by the next build. Content is
+- **Expiry**: an optional last day, read in `site.timeZone` (`src/data/site.ts`, `'America/New_York'` by default; change it for a
+  site in another zone). The link works through that day and is dropped by the next build. Content is
   statically built, so a site that wants "stops the next morning" adds a daily `schedule` to
   `deploy.yml`; otherwise it stops at the next publish or push.
 - **Clashes**: a reserved route (`src/lib/reservedSlugs.ts`), a published page, a Redirect or a
