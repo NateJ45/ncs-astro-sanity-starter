@@ -278,6 +278,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 168 | Site settings logo rules and a square icon that becomes the favicon set at build    | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 172 | Embed provider registry: paste-and-go, unknown-script guard, per-build embed CSP    | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10798,3 +10799,67 @@ logo warning says "a mark with the name beside it" instead of "the cross with th
 **Who should take it.** Every site whose owner might change their logo or icon: copy the five PORTABLE files and the
 test, add `node scripts/build-brand-icons.mjs` to `npm run build` after `astro build`, add the two fields (or the
 validation and input on an existing `logo`) and a site version of `BrandImageInput.tsx`, run typegen.
+
+## Card 172: Embed provider registry, paste-and-go and a per-build embed CSP (2026-10-26)
+
+**Origin:** first-baptist-auburn #212 (2026-10-26). Editors pasted YouTube watch links, Maps share links and giving
+widgets into the Custom code or embed block (card 121) and got blank frames, wrong shapes, or a widget that only worked
+with "Runs directly on the page" on, which let any pasted script run with the site's own trust.
+
+**Canonical:** PORTABLE `src/lib/embed-providers.ts` (the registry and every decision) and its test
+`src/lib/embed-providers.test.ts`; PORTABLE `src/sanity/components/EmbedPasteInput.tsx` (`makeEmbedPasteInput()`);
+PORTABLE `tests/embed-guard.spec.ts`. Already-PORTABLE files changed: `scripts/build-csp.mjs` (reads the embed
+markers), `scripts/lib/csp.mjs` (`embedProviderIds()`) and `scripts/lib/csp.test.mjs`. Site files changed (not
+marked): `src/components/sections/EmbedSection.astro`, `src/components/SectionRenderer.astro` (`trustedCode`),
+`src/sanity/schemaTypes/sections.ts` (`EMBED_WORDS`, validations, hidden Height), `src/pages/styleguide/sections.astro`
+(`GUARD_CHECKS`), `src/data/site.ts` (`embeds.approvedScriptOrigins`), `package.json` (`build`). Docs:
+`docs/agent/custom-code.md` ("Paste-and-go"), `docs/agent/deployment.md` ("Security headers"),
+`docs/claude/build-and-scripts.md`, `docs/claude/topic-index.md`.
+
+**What it does.**
+
+- One paste box on the block. A link, or code that is only an iframe, goes into `embedUrl`; other code into
+  `embedCode`, with "Runs directly on the page" switched on only when every script is a known service's. Nothing new is
+  stored: the plan is worked out again in the Studio and on every build (rule 15).
+- Fifteen services: YouTube, Vimeo, Facebook video, Google Maps, Calendar and Forms, Spotify, Apple Podcasts, Calendly,
+  and the church family's Church Trac, Planning Center, Tithe.ly, Givelify, Subsplash, SignUpGenius. Share links become
+  embeddable ones (YouTube to `youtube-nocookie.com/embed`, Spotify to its player, a Calendar `?cid=` to `embed?src=`)
+  at the right shape (16:9 or a fixed height), and the Height choice hides. A link that cannot be framed (a Maps share
+  link, a Facebook page, a Form's edit link) is a field error saying what to paste instead.
+- The guard rail: script code from a service the registry does not know never runs on the page, even with the switch
+  on; it stays in its sandboxed box and the Studio says who must approve it. Approve for every site with a registry
+  entry here; for one site's one-off widget, add its origin to `site.embeds.approvedScriptOrigins`. Repo-written
+  styleguide probes pass `trustedCode` (never Sanity content).
+- CSP: code from a known service carries `data-embed-provider="<id>"`; `build-csp.mjs` looks each id up in the registry
+  and adds that service's script hosts and their subdomains to `script-src`, only on a build where a page uses it.
+
+**Why the CSP folds into `build-csp.mjs`.** Auburn shipped it as a second script (`build-embed-csp.mjs` plus
+`scripts/lib/embed-csp.mjs`) that re-opened the `_headers` line and spliced origins in, because the registry was
+Auburn's and `build-csp.mjs` was PORTABLE. With the registry PORTABLE too, the fold is about ten lines: the origins go
+into the same `extra` list as GA4 and `csp-origins.json`, so there is one writer, one 2,000-character check, and no
+second parser of the policy line. The registry is TypeScript, so `build-csp.mjs` imports it only when a page carries a
+marker and the file exists (a site without card 172 never touches it), and `package.json` runs it with
+`--experimental-strip-types` (needed on Node 22.12 to 22.17, harmless later). Only registry ids count, so a marker
+typed into pasted code names no origin of its own.
+
+**Switching it on.** Nothing to set: it is on for every page-builder site that takes the files. Per site: set
+`EMBED_WORDS` in `sections.ts` (who approves, which examples the empty block names). No env, no secret.
+
+**Not ported:** none of the logic; Auburn's Studio wording stays in Auburn's `sections.ts`. The church services stay
+in the generic registry because they cost a site that never pastes them nothing. Their script hosts (Givelify,
+Subsplash, SignUpGenius especially) are each service's main domain, NOT verified against real snippets: if one loads
+from elsewhere the Studio says "not known", and the fix is a registry line here.
+
+**Verified (2026-10-26):** starter `npm run check`, `npm run test:unit`, `npm run build`, and
+`tests/embed-guard.spec.ts` plus `tests/custom-code.spec.ts` (6 passed); the guard fixtures screenshotted at 375 and
+1280 in light and dark, no horizontal scroll. `build-csp.mjs` run over a page carrying a `tithely` marker and a bogus
+one: `script-src` gains the four Tithe.ly origins, the bogus id adds nothing, and with no registry file present nothing
+is imported. first-baptist-auburn branch: the same gates green, sync-check 341 SAME against this branch. The Studio
+paste box itself was not exercised signed in.
+
+**Applied:** starter (this card). first-baptist-auburn: origin (its branch `port/card-172` swaps to the PORTABLE copies
+and deletes `build-embed-csp.mjs` and `scripts/lib/embed-csp.mjs`).
+
+**Who should take it.** Every page-builder site with the Custom code or embed block (card 121): presacademy,
+reid-design-site, mas-monograms, nixoncreativestudio, stonesteps-50k. Take all the marked files together:
+`build-csp.mjs` without `embed-providers.ts` is safe (it imports only on a marker), but `EmbedSection.astro` needs both.
