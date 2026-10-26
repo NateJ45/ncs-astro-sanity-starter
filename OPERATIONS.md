@@ -408,7 +408,7 @@ dist/server/wrangler.json`, then `npm run preview`.
 - **The Studio on a phone.** Nothing to switch on: `/studio/manifest.webmanifest` and `/studio/sw.js` ship with
   every build. Check after a deploy: open `/studio/` in Chrome, DevTools, Application, Manifest (no errors, the
   maskable icon looks right in the "Show only the minimum safe area" preview) and Service workers (scope `/studio/`).
-  To make it drop everything it keeps, bump `VERSION` in `public/studio/sw.js`. A new brand mark: `npm run favicon`.
+  To make it drop everything it keeps, bump `VERSION` in `public/studio/sw.js`. A new brand mark: `npm run favicon` (or, with no code change, the editor's Site settings > Square icon, which the build turns into the whole set; card 168).
 - **Post a photo.** `kitConfig.postPhoto` in `src/sanity/kit.config.ts`. Drafts only.
 - **Earlier versions.** Needs three things already used elsewhere: the nightly backup running
   (`sanity-backup.yml`, with `BACKUP_PASSPHRASE`), the repo secret `SANITY_API_WRITE_TOKEN` and variable
