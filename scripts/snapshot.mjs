@@ -17,7 +17,10 @@
 //   serve    answer Sanity's query API (/v<ver>/data/query/<dataset>) from that
 //            file with groq-js, on 127.0.0.1
 //   run      start `serve` on a free port, set SANITY_SNAPSHOT_URL, run the
-//            command that follows `--`, stop the server, exit with its code
+//            command that follows `--`, stop the server, exit with its code.
+//            With no PUBLIC_SANITY_PROJECT_ID in the env or .env it reads the
+//            project id from the snapshot's asset URLs (card 161), because
+//            sanityFetch skips Sanity entirely without one.
 //
 //   node scripts/snapshot.mjs export
 //   node scripts/snapshot.mjs run -- npm run build
@@ -57,6 +60,31 @@ export function snapshotClientOptions(env) {
   const url = (env?.SANITY_SNAPSHOT_URL ?? '').trim();
   if (!url) return {};
   return { apiHost: url, useProjectHostname: false, useCdn: false, token: undefined };
+}
+
+/**
+ * Pure. The env `run` adds so the build actually reads the snapshot (card 161).
+ * `sanityFetch` treats a missing PUBLIC_SANITY_PROJECT_ID as "no Sanity" and
+ * returns its fallback without a request, so a CI job with no project id set
+ * built from fallbacks and never touched the snapshot (FBC Auburn, 2026-10-25:
+ * 19 pages in CI against 28 locally). When `env` (process env merged with .env)
+ * has no project id, it is read from the snapshot's own asset URLs
+ * (cdn.sanity.io/images/<project>/<dataset>/...), which also keeps image URLs
+ * right. Returns {} when a project id is already set; null when there is none
+ * and the snapshot holds no asset to read one from.
+ * @param {Array<Record<string, unknown>>} docs
+ * @param {Record<string, string | undefined>} env
+ * @returns {Record<string, string> | null}
+ */
+export function snapshotProjectEnv(docs, env) {
+  if ((env?.PUBLIC_SANITY_PROJECT_ID ?? '').trim()) return {};
+  for (const d of docs) {
+    const m = /^https:\/\/cdn\.sanity\.io\/(?:images|files)\/([a-z0-9]+)\/([\w-]+)\//.exec(
+      typeof d.url === 'string' ? d.url : '',
+    );
+    if (m) return { PUBLIC_SANITY_PROJECT_ID: m[1], PUBLIC_SANITY_DATASET: m[2] };
+  }
+  return null;
 }
 
 /** Pure. NDJSON text for a list of documents, sorted by _id so diffs are stable. */
@@ -221,12 +249,25 @@ async function main(argv) {
       return bare.on('exit', (c) => process.exit(c ?? 1));
     }
     const docs = readSnapshot();
+    const { loadEnv } = await import('./lib/loadEnv.mjs');
+    const projectEnv = snapshotProjectEnv(docs, loadEnv(ROOT));
+    if (!projectEnv) {
+      throw new Error(
+        'PUBLIC_SANITY_PROJECT_ID is not set and the snapshot has no asset URL to read it from; ' +
+          'the build would ignore the snapshot and render fallbacks. Set it in the job env.',
+      );
+    }
     const { server, url } = await listen(createSnapshotServer(docs));
     console.log(`snapshot: ${docs.length} documents, serving ${url} for: ${command.join(' ')}`);
+    if (projectEnv.PUBLIC_SANITY_PROJECT_ID) {
+      console.log(
+        `snapshot: project ${projectEnv.PUBLIC_SANITY_PROJECT_ID}/${projectEnv.PUBLIC_SANITY_DATASET} (read from the snapshot)`,
+      );
+    }
     const child = spawn(command[0], command.slice(1), {
       stdio: 'inherit',
       shell: process.platform === 'win32',
-      env: { ...process.env, SANITY_SNAPSHOT_URL: url },
+      env: { ...process.env, ...projectEnv, SANITY_SNAPSHOT_URL: url },
     });
     const code = await new Promise((ok) => {
       child.on('exit', (c, s) => ok(c ?? (s ? 1 : 0)));

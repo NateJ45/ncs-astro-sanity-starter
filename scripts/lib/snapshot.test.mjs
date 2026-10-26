@@ -9,6 +9,7 @@ import {
   listen,
   paramsFromSearch,
   snapshotClientOptions,
+  snapshotProjectEnv,
   toNdjson,
 } from '../snapshot.mjs';
 
@@ -24,6 +25,20 @@ test('snapshotClientOptions is empty unless SANITY_SNAPSHOT_URL is set', () => {
   assert.equal(o.apiHost, 'http://127.0.0.1:1');
   assert.equal(o.useProjectHostname, false);
   assert.equal(o.token, undefined);
+});
+
+test('snapshotProjectEnv reads the project from an asset URL only when none is set', () => {
+  const asset = {
+    _id: 'image-x',
+    _type: 'sanity.imageAsset',
+    url: 'https://cdn.sanity.io/images/abc123/production/x-10x10.jpg',
+  };
+  assert.deepEqual(snapshotProjectEnv([...docs, asset], {}), {
+    PUBLIC_SANITY_PROJECT_ID: 'abc123',
+    PUBLIC_SANITY_DATASET: 'production',
+  });
+  assert.deepEqual(snapshotProjectEnv([asset], { PUBLIC_SANITY_PROJECT_ID: 'set' }), {});
+  assert.equal(snapshotProjectEnv(docs, { PUBLIC_SANITY_PROJECT_ID: ' ' }), null);
 });
 
 test('ndjson round-trips and is sorted by _id', () => {
