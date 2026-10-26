@@ -108,20 +108,28 @@ jobs:
           key: search-files-${{ github.run_id }}
           restore-keys: search-files-
 
+      # The share cards (scripts/build-og-cards.mjs, PORTS.md card 169), cached by a hash of each
+      # card, and the Studio icon's download (scripts/build-brand-icons.mjs, card 168), kept between
+      # runs so a build only draws a card whose words or design changed. A miss draws the card with
+      # the runner's Chrome; with no browser the page shares og-default.png and the build still passes.
+      - uses: actions/cache@v6
+        with:
+          path: |
+            node_modules/.cache/og-cards
+            node_modules/.cache/brand-icon
+          key: og-cards-${{ github.run_id }}
+          restore-keys: og-cards-
+
       - name: Generate Sanity types
         run: npm run typegen
 
       - name: Unit tests
         run: npm run test:unit
 
-      # A PROJECT THAT GENERATES SHARE CARDS ADDS ITS FRESHNESS CHECK HERE, and
-      # adds it as a WARNING, not a failure. This workflow also fires on
-      # repository_dispatch when an editor publishes, and a stale picture must
-      # never be able to stop a content change reaching the live site. Stale
-      # cards are a much smaller problem than a site that quietly stopped
-      # updating. The same check belongs in ci.yml as a hard failure, where a
-      # human is pushing code and can act on it. The starter has no committed
-      # per-page cards yet, so there is nothing to check.
+      # NO SHARE-CARD FRESHNESS CHECK NEEDED (PORTS.md card 169): `npm run build` draws
+      # every page's card itself (scripts/build-og-cards.mjs), so a card cannot go stale.
+      # It never fails the build either: with no browser it falls back to
+      # og-default.png with a warning, so a content change always goes live.
 
       - name: Build
         env:

@@ -154,6 +154,18 @@ jobs:
           key: search-files-${{ github.run_id }}
           restore-keys: search-files-
 
+      # The share cards (scripts/build-og-cards.mjs, PORTS.md card 169), cached by a hash of each
+      # card, and the Studio icon's download (scripts/build-brand-icons.mjs, card 168), kept between
+      # runs so a build only draws a card whose words or design changed. A miss draws the card with
+      # the runner's Chrome; with no browser the page shares og-default.png and the build still passes.
+      - uses: actions/cache@v6
+        with:
+          path: |
+            node_modules/.cache/og-cards
+            node_modules/.cache/brand-icon
+          key: og-cards-${{ github.run_id }}
+          restore-keys: og-cards-
+
       # `astro build` builds the embedded Studio at /studio as part of the
       # site, so there is no separate `sanity build` step. Do NOT add one back:
       # `sanity build` writes to ./dist by default and would clobber the Astro
