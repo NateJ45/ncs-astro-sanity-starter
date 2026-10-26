@@ -30,6 +30,11 @@ export const site = {
   url: `https://${_domain}`,
   // BCP 47 language tag for the <html lang> attribute. Change if the site is not in English.
   lang: 'en',
+  // IANA time zone the site's calendar runs on: which day "today" is for a
+  // dated notice, a countdown or an event's past dates (the builder kit,
+  // PORTS.md card 173), and the times in RSVP emails. Change it for a site
+  // outside US Eastern.
+  timeZone: 'America/New_York',
 
   /** Short display name alias — same as name, kept for any consumer that
    *  accessed the old `site.studio` property. */

@@ -228,7 +228,10 @@ one would leave the site with a route and no document.
 What a WordPress block-editor handover gives a client, built on the page builder that is already here. Five parts:
 
 1. **Page templates.** `src/sanity/pageTemplates.ts` (the site's OWN file, not PORTABLE) lists the starting points
-   offered when a Custom page is made: Simple page, Landing page, Questions page, Blank page in the starter.
+   offered when a Custom page is made, in GROUPS (card 173): Basics (Simple page, Landing page, Questions page, Blank
+   page), About (About us, Meet the team), Events (Event page) and Announcements (Notice page) in the starter. The
+   new-document menu has no headings, so each shows as "Group: Title" (`templateMenuTitle()`), and the list is kept in
+   `TEMPLATE_GROUPS` order (tested). Templates are written with the builders in `src/sanity/templateBlocks.ts`.
    `sanity.config.ts` registers each as an initial value template on `page` (`value` is a function, so every new page
    gets fresh `_key`s from `freshKeys()` in `src/lib/authoring.ts`) and `newDocumentOptions` hides the stock `page`
    template, which stays registered so intents that name it keep working. Every example line starts `Example:`.
@@ -265,3 +268,37 @@ What a WordPress block-editor handover gives a client, built on the page builder
 
 The Site Guide has a guide for each: "Start a page from a template", "Reuse a section on other pages", "Keep a section
 the same on every page" (`src/sanity/guides/content.ts`).
+
+## The builder kit: the smaller blocks, grouped templates, seeded patterns (PORTS.md card 173)
+
+Ported from first-baptist-auburn and made generic, so a client can put together an event page, a notice or a
+questions page the way a Squarespace page is built.
+
+- **Twelve blocks** in `src/sanity/schemaTypes/builderSections.ts`, spread into `pageSectionSchemas`: text in columns,
+  a row of buttons or link cards, one wide photo (opens in the photo viewer), fold-out questions (native `<details>`),
+  tabs (WAI-ARIA, readable without JavaScript), a countdown, a dated notice (self-contained band; takes itself down
+  after its last day), a timeline, a letter ("a note from" a role), event details, a schedule and cards with photos.
+  Drawn by `src/components/builder-blocks/` (`BuilderBlock.astro` picks the component; `SectionRenderer` has one
+  branch for all of them, `isBuilderBlock()`), styled by `src/styles/builder-blocks.css` (tokens only, so light, dark
+  and the Feature band all work), projected by arms in `SECTION_ARMS`, typed in `src/lib/builderBlocks.types.ts`.
+  Logic (dates, times, the calendar file, Event JSON-LD, card columns) is `src/lib/builder-blocks.ts`, pinned by
+  `builder-blocks.test.ts`; `tests/builder-blocks.spec.ts` drives the tabs, fold-outs, event links and notice.
+- **Event details** needs a typed place (there is no business address to fall back on in the starter). It drops past
+  dates at build time and disappears once all have passed, hands over an `.ics` as a `data:` link (no route, no file
+  published), links Directions to a map search for the place, and writes one schema.org `Event` per date. Its main
+  button can be the page's one accent button (card 158).
+- **Dates** are calendar days in `site.timeZone` (`src/data/site.ts`, also the RSVP email zone). The notice and the
+  countdown recount in the visitor's browser, so a page built yesterday is still right today.
+- **Looks** (card 124): every new block but the notice is a content block in `CONTENT_TYPES`; most offer Standard,
+  Quiet and Feature, the wide photo and the letter Standard and Quiet. No colour fields (rule 9); `urgency`,
+  `startTime` and `endTime` are in `NON_STEGA_FIELDS` (rule 8b).
+- **Insert menu groups.** `BUILDER_INSERT_GROUPS` adds the blocks to Basics and to two new groups, "Events and notices"
+  and "Fold-outs and tabs". They are merged in by `withSiteGroups()` (`src/lib/insert-groups.ts`, tested): a fork with
+  its own block library adds its groups to `SITE_INSERT_GROUPS` in `sections.ts` and never edits the base list.
+- **Patterns as code.** `src/sanity/sectionPatterns.ts` holds the site's saved-section patterns (the starter: a
+  closure notice, event details with a schedule, common questions). `npm run seed:patterns` (dry by default; production
+  needs `--apply` and `NCS_PRODUCTION_WRITE=yes`) writes each as a DRAFT `sectionPreset` with id `pattern-<id>`, and
+  skips any id that exists as a draft or published, so an editor's changes are never overwritten. Drafts on purpose:
+  "Add a copy" works from a draft, "Add synced" needs a published one, so example text cannot go live through a
+  synced section. The authoring test checks templates and patterns alike: known block types, fresh keys, the
+  `Example:` marker, the copy rules (no em-dashes, US spelling, no prices), the schema's limits and the page rules.

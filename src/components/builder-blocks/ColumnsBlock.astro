@@ -1,0 +1,41 @@
+---
+// Safe to edit by hand
+// Text in two or three columns, each with an optional heading. Stacks on a phone.
+import BuilderBand from './BuilderBand.astro';
+import PortableText from '@/components/PortableText';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedColumnsSection } from '@/lib/builderBlocks.types';
+import type { PortableTextBlock } from '@portabletext/types';
+
+interface Props {
+  block: ProjectedColumnsSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface, headingId } = Astro.props;
+const cols = (block.textColumns ?? []).filter(
+  (c) => c?.heading || (Array.isArray(c?.body) && c.body.length > 0),
+);
+// Column headings sit one level under the block's heading.
+const Title = block.heading ? 'h3' : 'h2';
+---
+
+{cols.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Text in columns"
+  >
+    <div class:list={['bb-grid', cols.length >= 3 ? 'bb-grid--3' : 'bb-grid--2']}>
+      {cols.map((c) => (
+        <div>
+          {c.heading && <Title class="bb-title">{c.heading}</Title>}
+          <PortableText value={(c.body ?? []) as PortableTextBlock[]} className="bb-prose" />
+        </div>
+      ))}
+    </div>
+  </BuilderBand>
+)}
