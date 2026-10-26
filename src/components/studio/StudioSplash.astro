@@ -22,6 +22,10 @@
 // the Studio island's fallback and is swapped out the moment React mounts.
 // `prefers-reduced-motion: reduce` shows the path fully laid and still.
 //
+// Card 162: `studio.look.splash: 'motif'` leaves the stone path out. In loading mode the slot (the
+// site's own art, src/sanity/StudioSplashMotif.astro) then sits where the path was, above the note,
+// and does its own motion; the offline page shows its motif strip alone.
+//
 // Dark mode follows the page: html[data-studio-scheme='dark'], or the system
 // setting when the page has not picked (the same rule both pages already use).
 // =============================================================================
@@ -45,6 +49,9 @@ const stroke = connectorStroke(path.connector);
 const name = splashName(brand.name, look, display);
 const motion = mode === 'offline' ? 'none' : look.motion;
 const lastIndex = path.stones.length - 1;
+// Card 162: the site's own art stands in for the stone path.
+const showPath = look.splash !== 'motif';
+const slotFirst = !showPath && mode === 'loading';
 
 // Tokens for both schemes, AA-guarded by resolveLook (ink 7:1, muted 4.5:1,
 // focus 3:1, stones 3:1 on the paper).
@@ -88,39 +95,42 @@ const vars = [
       {name.after}
     </span>
   </p>
-  <svg
-    class="ncs-sp__path"
-    data-motion={motion}
-    viewBox={`0 0 ${path.width} ${path.height}`}
-    width={path.width}
-    height={path.height}
-    aria-hidden="true"
-    focusable="false"
-  >
-    {path.connector !== 'none' &&
-      path.links.map((d, i) => (
-        <path
-          class="ncs-sp__link"
-          d={d}
-          fill="none"
-          stroke-width={stroke.width}
-          stroke-linecap={stroke.cap}
-          stroke-dasharray={stroke.dash ?? undefined}
-          style={`--i: ${i}`}
-          data-unlaid={mode === 'offline' && i === lastIndex - 1 ? '' : undefined}
-        />
+  {showPath && (
+    <svg
+      class="ncs-sp__path"
+      data-motion={motion}
+      viewBox={`0 0 ${path.width} ${path.height}`}
+      width={path.width}
+      height={path.height}
+      aria-hidden="true"
+      focusable="false"
+    >
+      {path.connector !== 'none' &&
+        path.links.map((d, i) => (
+          <path
+            class="ncs-sp__link"
+            d={d}
+            fill="none"
+            stroke-width={stroke.width}
+            stroke-linecap={stroke.cap}
+            stroke-dasharray={stroke.dash ?? undefined}
+            style={`--i: ${i}`}
+            data-unlaid={mode === 'offline' && i === lastIndex - 1 ? '' : undefined}
+          />
+        ))}
+      {path.stones.map((s, i) => (
+        <g transform={`translate(${s.x} ${s.y})`}>
+          <path
+            class="ncs-sp__stone"
+            d={s.d}
+            style={`--i: ${i}; --l: ${s.light}; --d: ${s.dark}`}
+            data-unlaid={mode === 'offline' && i === lastIndex ? '' : undefined}
+          />
+        </g>
       ))}
-    {path.stones.map((s, i) => (
-      <g transform={`translate(${s.x} ${s.y})`}>
-        <path
-          class="ncs-sp__stone"
-          d={s.d}
-          style={`--i: ${i}; --l: ${s.light}; --d: ${s.dark}`}
-          data-unlaid={mode === 'offline' && i === lastIndex ? '' : undefined}
-        />
-      </g>
-    ))}
-  </svg>
+    </svg>
+  )}
+  {slotFirst && <slot />}
   {mode === 'offline' ? (
     <>
       <h1 class="ncs-sp__title">You're offline</h1>
@@ -131,7 +141,7 @@ const vars = [
   ) : (
     <p class="ncs-sp__note">Opening the editor</p>
   )}
-  <slot />
+  {!slotFirst && <slot />}
   {mode === 'offline' && look.motif && (
     <picture class="ncs-sp__motif" aria-hidden="true">
       {look.motifNarrow && <source media="(max-width: 520px)" srcset={look.motifNarrow} />}

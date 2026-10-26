@@ -118,17 +118,27 @@ describe('studio look: inputs', () => {
     assert.equal(l.stone, 'round');
     assert.equal(l.connector, 'line');
     assert.equal(l.motion, 'draw');
+    assert.equal(l.splash, 'path');
     assert.equal(l.texture, undefined);
   });
   it('bad values fall back with a note', () => {
     const l = resolveLook(
-      { marker: 'star' as never, stone: 'blob' as never, motif: 'http://x' },
+      {
+        marker: 'star' as never,
+        stone: 'blob' as never,
+        splash: 'wall' as never,
+        motif: 'http://x',
+      },
       base,
     );
     assert.equal(l.marker, 'dot');
     assert.equal(l.stone, 'round');
+    assert.equal(l.splash, 'path');
     assert.equal(l.motif, undefined);
-    assert.equal(l.notes.length, 2);
+    assert.equal(l.notes.length, 3);
+  });
+  it("splash 'motif' hands the splash to the site's own art (card 162)", () => {
+    assert.equal(resolveLook({ splash: 'motif' }, base).splash, 'motif');
   });
   it('marker art needs a public path and a size', () => {
     assert.deepEqual(
