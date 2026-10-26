@@ -119,6 +119,13 @@ a rename followed by a rename back leaves exactly that pair (`/a -> /b`, `/b -> 
 build drops it with a `[redirects] skipped ...` warning and leaves the document in the
 Studio (`src/lib/redirect-guard.ts`, card 22's 2026-09-29 addendum).
 
+An OLD address that looks like a file (`/index.htm`, `/about.php`) needs one more step
+(card 160). With `trailingSlash: 'always'` Astro writes it as `/index.htm/`, and the host
+only adds a trailing slash to extensionless paths, so the visitor would get a 404. The
+`fileStyleRedirects()` integration in `astro.config.mjs` puts an exact slashless rule for
+each one at the top of `dist/client/_redirects` after the build (the build log says
+`added N slashless rule(s)`). Check one with curl on `wrangler dev`, not a static server.
+
 An **archived** page is not built at all, so its URL 404s, it drops out of the menus, and
 it never reaches the sitemap.
 
