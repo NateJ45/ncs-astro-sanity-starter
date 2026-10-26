@@ -277,6 +277,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 173 | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10741,3 +10742,40 @@ build: `tests/search.spec.ts` 8 passed (the misspelling test failed before); "cn
 **Applied:** starter (this card). first-baptist-auburn: origin. Every site with search on (card 126) takes the copy.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).
+
+## Card 173: Calendar files can skip or move one date of a repeating event (2026-10-26)
+
+**Origin:** first-baptist-auburn's "A different Sunday" (its PR #212): when a weekly gathering is cancelled or meets
+at another time one week, its `.ics` files say so. Auburn first spliced EXDATE and RECURRENCE-ID lines into
+`buildIcs`'s finished string in `src/lib/gatherings.ts`; the exception fields now live in `buildIcs` itself.
+
+**Canonical:** PORTABLE `src/lib/ics.ts` (already PORTABLE since card 158; this card changes it) and
+`src/lib/ics.test.ts`. Docs: `docs/agent/components.md` ("Calendar files").
+
+**What it does.** `IcsEvent` gains two optional fields. `exdate: IcsTime[]` writes one `EXDATE` line per date
+straight after the `RRULE` (RFC 5545 3.8.5.1): the occurrence the series would have had, so calendar apps drop it.
+`recurrenceId: IcsTime` makes the event an override (3.8.4.4): same `uid` as the series, `RECURRENCE-ID` is the
+occurrence's ORIGINAL date-time (written just before `DTSTART`), and `start` is its new one, so the app moves that
+one date and keeps the series. `buildIcs` throws on what the RFC forbids: an exception written differently from
+`start` (UTC, all-day or another zone), an `exdate` with no `rrule`, an override with an `rrule` or `exdate`.
+An event without the new fields is written byte for byte as before, so existing routes do not change.
+
+**Switching it on:** nothing; pass the fields when a site has a cancelled or moved date. The header comment of
+`ics.ts` has a worked weekly example.
+
+**Not ported:** "A different Sunday" itself (the `timeChanges` list in Site settings, `dayPlan()` and
+`gatheringExceptions()` in `src/lib/church-facts.ts`, its Studio panel and the banner and This Sunday wording)
+stays in first-baptist-auburn, because it is built on the church's facts model (service times keyed by gathering,
+the `confirmed` flags, the Church Trac feed), which the starter does not have. Auburn's `/sunday.ics` is still
+hand-written in `church-facts.ts` (it predates `buildIcs`); moving it onto `buildIcs` is Auburn's own follow-up.
+
+**Verified (2026-10-26):** `node --test src/lib/ics.test.ts` (11 tests: EXDATE in a zone, all-day `VALUE=DATE`
+and UTC forms, the override's UID, `RECURRENCE-ID` and `DTSTART` order with no `RRULE`, one VTIMEZONE, the
+unchanged no-exception output, and every throw), `npm run check`, `npm run test:unit` and `npm run build` in the
+starter. In first-baptist-auburn, `gatheringIcs()` now passes `exdate` and an override event instead of
+splicing; its `sunday-changes` and `gatherings` unit tests pass unchanged and `sync-check` reports SAME.
+
+**Applied:** starter (this card). first-baptist-auburn: origin.
+
+**Who should take it.** Any site that writes `.ics` files for repeating events (today only first-baptist-auburn).
+Sites that do not use `ics.ts` take the copy with the next sync and see no change.

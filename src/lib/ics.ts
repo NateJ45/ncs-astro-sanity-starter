@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// Calendar files (.ics) for "Add to calendar" links (PORTS.md card 158)
+// Calendar files (.ics) for "Add to calendar" links (PORTS.md cards 158, 173)
 // =============================================================================
 // Builds an iCalendar (RFC 5545) file as a string: one VCALENDAR holding one or
 // more VEVENTs. Pure: no fetch and no clock (the caller passes `now` for the
@@ -21,6 +21,9 @@
 //     names, but strictly RFC 5545 wants a VTIMEZONE, so add its rules to
 //     US_TIMEZONES' pattern if a site needs one.
 //   - repeat rules (RRULE) from a small typed object, or a raw string
+//   - exceptions to a repeat (card 173): `exdate` drops occurrences (EXDATE),
+//     and an event with `recurrenceId` replaces ONE occurrence of the event
+//     with the same `uid` (a new time, place or title for that date only)
 //
 // HOW A SITE WIRES A ROUTE TO IT (the starter ships no route; it has no
 // calendar of its own). A static endpoint per event, for example
@@ -47,6 +50,35 @@
 //       }),
 //       { headers: { 'Content-Type': 'text/calendar; charset=utf-8' } },
 //     );
+//
+// SKIPPING OR MOVING ONE DATE of a weekly event (card 173). Both are the same
+// series to a calendar app, so the event stays one entry it can update:
+//
+//   const weekly = {
+//     uid: 'weekly-worship@example.com',
+//     start: { date: '2026-11-01', time: '10:00', tzid: 'America/New_York' },
+//     duration: 'PT1H',
+//     rrule: { freq: 'WEEKLY', byDay: ['SU'] },
+//     summary: 'Worship',
+//     // Not meeting on 15 November: the date AND time the series would have had.
+//     exdate: [{ date: '2026-11-15', time: '10:00', tzid: 'America/New_York' }],
+//   };
+//   const moved = {
+//     uid: weekly.uid, // the same series
+//     // Which occurrence: its ORIGINAL date and time, not the new one.
+//     recurrenceId: { date: '2026-11-22', time: '10:00', tzid: 'America/New_York' },
+//     start: { date: '2026-11-22', time: '11:00', tzid: 'America/New_York' },
+//     duration: 'PT1H',
+//     summary: 'Worship (one service at 11)',
+//   };
+//   buildIcs({ prodId, now, events: [weekly, moved] });
+//
+// RFC 5545 rules buildIcs enforces (it throws, so a bad file never ships):
+// an exdate or recurrenceId must be written the same way as the event's start
+// (all three UTC, all three in one zone, or all three all-day), an exdate
+// needs an rrule, and an event with a recurrenceId is one occurrence, so it
+// takes no rrule or exdate of its own. Overrides of a date before the series'
+// first DTSTART are allowed by the RFC but ignored by most apps; leave them out.
 //
 // The link to it is a plain <a href="/calendar/<key>.ics">; the file name ends
 // in .ics, so it is a file, not a page, and takes no trailing slash (rule 19).
@@ -89,6 +121,17 @@ export interface IcsEvent {
   location?: string;
   url?: string;
   rrule?: IcsRule | string;
+  /**
+   * Occurrences of the rrule that do not happen (EXDATE, RFC 5545 3.8.5.1). Each is the
+   * date-time the series WOULD have had, written the same way as `start`.
+   */
+  exdate?: IcsTime[];
+  /**
+   * Makes this event replace one occurrence of the series with the same `uid`
+   * (RECURRENCE-ID, RFC 5545 3.8.4.4): the ORIGINAL date-time of that occurrence,
+   * written the same way as the series' `start`. `start` is then its new time.
+   */
+  recurrenceId?: IcsTime;
 }
 
 export interface IcsCalendar {
@@ -207,6 +250,27 @@ export const US_TIMEZONES: Readonly<Record<string, readonly string[]>> = {
 
 const zoneOf = (t: IcsTime | undefined) => (t && !(t instanceof Date) ? t.tzid : undefined);
 
+/** How a time is written: UTC, all-day, or a wall time in a zone (or floating). */
+const formOf = (t: IcsTime): string =>
+  t instanceof Date ? 'UTC' : t.time === undefined ? 'all-day' : `local ${t.tzid ?? 'floating'}`;
+
+/**
+ * RFC 5545 3.8.4.4 and 3.8.5.1: RECURRENCE-ID and EXDATE take the same value type (and
+ * zone) as DTSTART, EXDATE belongs to a repeating event, and an override is one occurrence.
+ */
+function checkExceptions(e: IcsEvent): void {
+  const start = formOf(e.start);
+  for (const t of [...(e.exdate ?? []), ...(e.recurrenceId ? [e.recurrenceId] : [])]) {
+    if (formOf(t) !== start) {
+      throw new Error(`ics: ${e.uid}: exdate/recurrenceId is ${formOf(t)} but start is ${start}`);
+    }
+  }
+  if (e.exdate?.length && !e.rrule) throw new Error(`ics: ${e.uid}: exdate needs an rrule`);
+  if (e.recurrenceId && (e.rrule || e.exdate?.length)) {
+    throw new Error(`ics: ${e.uid}: an event with recurrenceId takes no rrule or exdate`);
+  }
+}
+
 /** The whole calendar file, CRLF line endings, folded, ending in CRLF. */
 export function buildIcs(cal: IcsCalendar): string {
   const lines: string[] = [
@@ -220,6 +284,7 @@ export function buildIcs(cal: IcsCalendar): string {
 
   const zones = new Set<string>();
   for (const e of cal.events) {
+    checkExceptions(e);
     for (const z of [zoneOf(e.start), zoneOf(e.end)]) if (z) zones.add(z);
   }
   for (const z of zones) {
@@ -229,15 +294,14 @@ export function buildIcs(cal: IcsCalendar): string {
 
   const stamp = utcStamp(cal.now);
   for (const e of cal.events) {
-    lines.push(
-      'BEGIN:VEVENT',
-      `UID:${e.uid}`,
-      `DTSTAMP:${stamp}`,
-      timeProperty('DTSTART', e.start),
-    );
+    lines.push('BEGIN:VEVENT', `UID:${e.uid}`, `DTSTAMP:${stamp}`);
+    if (e.recurrenceId) lines.push(timeProperty('RECURRENCE-ID', e.recurrenceId));
+    lines.push(timeProperty('DTSTART', e.start));
     if (e.end) lines.push(timeProperty('DTEND', e.end));
     else if (e.duration) lines.push(`DURATION:${e.duration}`);
     if (e.rrule) lines.push(`RRULE:${ruleValue(e.rrule)}`);
+    // One EXDATE line per date: valid, and the form every calendar app reads.
+    for (const t of e.exdate ?? []) lines.push(timeProperty('EXDATE', t));
     lines.push(`SUMMARY:${escapeText(e.summary)}`);
     if (e.description) lines.push(`DESCRIPTION:${escapeText(e.description)}`);
     if (e.location) lines.push(`LOCATION:${escapeText(e.location)}`);

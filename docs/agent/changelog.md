@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-26: calendar files can skip or move one date of a repeating event (PORTS card 173)._
+
+**Decision.** The exceptions live in `buildIcs` itself (`exdate`, `recurrenceId` on `IcsEvent`) rather than in each site splicing lines into the finished file, which is what first-baptist-auburn did first. Both are standard RFC 5545 properties, so a subscribed calendar keeps one series and changes only the date in question. Value types are checked against DTSTART and a bad combination throws at build time instead of shipping a file some apps reject. Events without exceptions are written byte for byte as before.
+
 _2026-10-25: one accent button per page, named section anchors, a 404 with search, calendar files (PORTS card 158)._
 
 **Decision.** The one-accent-button rule is the renderer's, not the editor's (rule 9): the first section that draws a primary button keeps it and the rest draw the secondary variant. Section ids come from the heading rather than a key map, so every site gets linkable sections with no data to keep; the cost is that a retitle moves the anchor, and a site that needs a fixed one pins it by block `_key`. The 404 search is a plain GET form, not the live panel, so it works without JavaScript and loads no Pagefind on an error page. The starter has no calendar, so only the `.ics` builder is ported; Auburn's gathering files are the reference wiring.
