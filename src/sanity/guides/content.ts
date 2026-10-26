@@ -41,6 +41,7 @@
 
 import type { KitGuideBlock } from '../kit/guide/GuidePage';
 import { phoneGuides } from './phoneGuides.ts';
+import { peopleGuides } from './people.ts';
 import type { FieldGuideMap } from '../../lib/studio-kit';
 
 export type DiyLevel = 'self' | 'ask' | 'mixed';
@@ -1043,6 +1044,10 @@ guides.push(
 // Shared by every site (src/sanity/guides/phoneGuides.ts, PORTABLE): keep this
 // line when rewriting the guides above.
 guides.push(...phoneGuides(SITE.contactName));
+
+// ── Adding someone to help: the People tool (PORTS.md card 176) ──────────────
+// Per site (src/sanity/guides/people.ts): reword it with kitConfig.people.roles.
+guides.push(...peopleGuides(SITE.contactName));
 
 /**
  * Which guides "Help for this page" shows for each document type (kit.config.ts

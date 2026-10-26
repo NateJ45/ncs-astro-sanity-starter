@@ -279,6 +279,23 @@ not appear at all. Once per site:
 To switch it off, `npx wrangler secret delete ANTHROPIC_API_KEY`; the buttons disappear on the next Studio load. To
 rotate the key, make a new one, `secret put` it, then delete the old one in the console.
 
+### People: inviting from the Studio (PORTS.md card 176)
+
+The `People` tool (administrators only) invites a Helper or an Administrator through `/api/studio/people/`. Until the
+Worker has its key the tool shows the sanity.io/manage steps instead; nothing fails. Once per site:
+
+1. At sanity.io/manage, open the project, then `API`, `Tokens`, `Add API token`. Name it `<site> Studio people` and
+   pick the **Access Manager (Token only)** permission: it can invite and manage members and nothing else, no content.
+2. From the site repo: `npx wrangler secret put SANITY_MEMBERS_TOKEN` and paste it at the prompt. Keep a copy in
+   1Password. Never in the repo, `.env` or the dataset.
+3. Set `kitConfig.people.plan` in `src/sanity/kit.config.ts`: `'free'` if the project stays on Sanity's Free plan
+   (helpers are invited as Administrators and given the Simple view), else leave `'auto'`.
+4. Deploy, sign in to `/studio` as an administrator, open `People` and check the members list loads. Then invite a test
+   address, check the email arrives, and `Cancel` it.
+
+To switch it off, `npx wrangler secret delete SANITY_MEMBERS_TOKEN` (the tool goes back to the manual steps), or
+`features.people: false` in `kitConfig` to hide the tool. Detail: `docs/agent/studio-people.md`.
+
 ### Studio deploy
 
 There isn't one. The Studio is **embedded at `/studio`** and built by `astro build`, so

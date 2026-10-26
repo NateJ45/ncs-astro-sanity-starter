@@ -469,5 +469,29 @@ export interface KitConfig {
      * Missing counts as on.
      */
     emptyStates?: boolean;
+    /**
+     * The People tool (card 176, src/sanity/people/): administrators invite a
+     * Helper or an Administrator from the Studio. Missing counts as on; with no
+     * SANITY_MEMBERS_TOKEN it shows the sanity.io/manage steps.
+     */
+    people?: boolean;
+  };
+
+  /**
+   * The People tool's settings (card 176). All optional.
+   */
+  people?: {
+    /**
+     * The site's Sanity plan. 'free' never offers Helper (Sanity's Editor role),
+     * even while a Growth trial still lists it, so nobody is invited into a role
+     * that turns read-only when the trial ends; helpers are invited as
+     * Administrators and given the Simple view (card 175). 'auto' (the default)
+     * trusts the project's feature list.
+     */
+    plan?: 'free' | 'auto';
+    /** The two roles in the site's words, over the defaults in studio-people.ts. */
+    roles?: Partial<Record<'helper' | 'administrator', { title?: string; description?: string }>>;
+    /** The line under the tool's heading. */
+    lead?: string;
   };
 }

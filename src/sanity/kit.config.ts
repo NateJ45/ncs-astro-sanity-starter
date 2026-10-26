@@ -368,6 +368,17 @@ export const kitConfig: KitConfig = {
     helpPanel: true,
     // Card 123: "Before you publish", the Checkup for the open document.
     publishPanel: true,
+    // Card 176: the People tool, for administrators. Shows the sanity.io/manage
+    // steps until the Worker has SANITY_MEMBERS_TOKEN (OPERATIONS.md, "People").
+    people: true,
+  },
+
+  // The People tool (card 176, docs/agent/studio-people.md). plan: 'free' if the
+  // project stays on Sanity's Free plan (no Editor role: helpers are invited as
+  // Administrators and given the Simple view); 'auto' trusts the plan's roles.
+  // Reword the roles here, e.g. roles: { helper: { title: 'Volunteer' } }.
+  people: {
+    plan: 'auto',
   },
 };
 

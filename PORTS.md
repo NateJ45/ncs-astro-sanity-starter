@@ -278,6 +278,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 175 | Staff view by role; the staff list adds to it; "Simple view" marks from the Studio  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 176 | People tool: invite a Helper or an Administrator from the Studio                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10789,3 +10790,49 @@ yet (no second account to mark).
 **Applied:** starter (this card). first-baptist-auburn: origin (branch `port/card-175`, after this merges).
 
 **Who should take it.** Every site with the Studio kit (card 106). Needed before card 176.
+
+## Card 176: The People tool, invite a helper or an administrator from the Studio (2026-10-26)
+
+**Origin:** first-baptist-auburn (#206, #214). The pastor needed to add a deacon or a secretary without a trip to
+sanity.io/manage and without asking the studio. Built on card 175 (cut from its branch): the tool's Simple view switch
+writes card 175's marks.
+
+**Canonical:** PORTABLE `src/lib/studio-people.ts` and its test, `src/pages/api/studio/people.ts`,
+`src/sanity/people/PeopleTool.tsx` and `src/sanity/people/index.tsx` (all new); PORTABLE `src/sanity/kit/types.ts`
+(`features.people`, `people` settings) and `src/lib/studio-icons.ts` (the tool's icon). Per site, not marked:
+`sanity.config.ts` (`ncsPeopleTool(kitConfig)` after the kit), `src/sanity/kit.config.ts` (`people: { plan, roles,
+lead }`), `src/sanity/guides/people.ts` and its line in `guides/content.ts`. Docs: new `docs/agent/studio-people.md`,
+`docs/claude/topic-index.md`, `docs/claude/routes.md`, OPERATIONS.md "People: inviting from the Studio".
+
+**What it does.** `People` in the top bar, for Sanity administrators only (added after the kit's staff trim, so a
+marked administrator keeps it). Name, email and Helper (Sanity `editor`) or Administrator; Send again and Cancel for
+pending invitations; the members list with a **Simple view** switch for each administrator (card 175). The route
+checks same origin, a signed-in member, the caller's real `administrator` role, then the members key, before
+Sanity's Access API is touched. Administrator invites (and resending or cancelling one) go out with the caller's own
+session, because Sanity lets only administrators invite administrators and no robot can hold that role; everything
+else uses `SANITY_MEMBERS_TOKEN`. The plan setting (`'free'` never offers Helper, even during a Growth trial;
+`'auto'` reads the project's `roleEditor` feature) and the role words come from `kitConfig.people`; the plan travels
+with each request, which is safe because only an administrator, who could pick any role at sanity.io/manage, gets
+past the route. The Simple view switch writes `kit.studioStaff` with the administrator's own Studio session
+(`setIfMissing`, `unset`, `append`), by the project user id (`resourceUserId`).
+
+**Switching it on.** Harmless off: with no secret the tool says "Inviting from here is not switched on yet" and shows
+the sanity.io/manage steps; no new required env, no build change. To switch on, OPERATIONS.md: an **Access Manager
+(Token only)** robot token, `npx wrangler secret put SANITY_MEMBERS_TOKEN`, set `kitConfig.people.plan`, deploy, try one
+invite. `features.people: false` hides the tool. The token is never logged or sent to the browser (unit-tested).
+
+**Generalized from Auburn.** The church's words (Helper "edits sermons and notices", "a deacon, a secretary") and its
+plan moved to `kitConfig.people`; the route no longer names the helper ("Ask Nathan"); the free-plan steps point to
+the Simple view switch instead of a code change; member and invite rows carry a role key that the tool words itself.
+
+**Not ported:** Auburn's guide text (church nouns) stays Auburn's; the starter ships a plain one.
+
+**Verified (2026-10-26):** `npm run check`, `npm run test:unit` (28 People tests: order of checks, token choice per
+role, plan `'free'` against a Growth feature list, the token never in an answer, role words) and `npm run build` in
+the starter and on first-baptist-auburn's `port/card-176` branch; sync-check 343 SAME. Not seen signed in: the tool
+for an administrator, a real invite email, Access Manager accepted by `POST /invites`, and the Simple view switch
+applying on the marked person's next visit.
+
+**Applied:** starter (this card). first-baptist-auburn: origin (branch `port/card-176`, after this merges).
+
+**Who should take it.** Every site with the Studio kit (card 106) whose client adds their own editors. Needs card 175.
