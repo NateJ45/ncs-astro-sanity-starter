@@ -56,6 +56,7 @@ import {
 import { withSlugRedirect } from './src/sanity/components/slugRedirect';
 import { SaveSectionPresetAction } from './src/sanity/actions/saveSectionPreset';
 import { CheckPageAction } from './src/sanity/actions/checkPage';
+import { qrCodeAction } from './src/sanity/actions/qrCode';
 import { UndoAction, RedoAction, undoRedoShortcuts } from './src/sanity/components/UndoRedo';
 import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 import { ncsStudioKit } from './src/sanity/kit';
@@ -321,6 +322,9 @@ export default defineConfig({
         archivePageAction,
         ...pageHelpers,
         shareDraftLinkAction,
+        // "QR code" (PORTS.md card 171): every short link and every document with
+        // a page of its own; returns null for the rest. src/sanity/actions/qrCode.tsx.
+        qrCodeAction,
       ];
     },
   },

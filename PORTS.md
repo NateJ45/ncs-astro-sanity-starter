@@ -277,6 +277,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 171 | Short links into `_redirects` at build time, plus a Studio QR code action           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10741,3 +10742,56 @@ build: `tests/search.spec.ts` 8 passed (the misspelling test failed before); "cn
 **Applied:** starter (this card). first-baptist-auburn: origin. Every site with search on (card 126) takes the copy.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).
+
+## Card 171: Short links written into `_redirects` at build time, and a QR code action in the Studio (2026-10-26)
+
+**Origin:** first-baptist-auburn #212. The church wanted `/vbs`-style addresses for bulletins and QR codes without
+asking a developer each season, and printable codes that keep working when a page is renamed.
+
+**Canonical:** PORTABLE `src/lib/short-links.ts` (address shape, clash rules, expiry, the `_redirects` lines) and
+`src/lib/short-links.test.ts`; PORTABLE `src/lib/qr.ts` (SVG path, PNG scale, file name) and `src/lib/qr.test.ts`
+(against the real library); PORTABLE `src/sanity/actions/qrCode.tsx` (the "QR code" document action) and
+`src/sanity/components/ShortLinkAddressInput.tsx` (the live "People type example.com/spring" line). Already-PORTABLE
+`src/lib/studio-icons.ts` gains `shortLink: 'link'` in the type icon defaults. Per site, not marked:
+`src/sanity/schemaTypes/shortLink.ts` (wording, `PAGE_TARGETS` with scaffold markers, `LAUNCH_FORWARDS`),
+`src/sanity/guides/links.ts` (two Site Guide entries), the Quick update tile in `kit.config.ts`, the
+`shortLinks()` integration in `astro.config.mjs`, `site.timeZone` in `src/data/site.ts`. New dependency
+`qrcode-generator` 2.0.4 (MIT, no dependencies), imported lazily by the action only, so it never reaches a public
+page. Docs: `docs/agent/seo.md`, "Short links" and "QR codes".
+
+**What it does.** Pages > Short links (or Quick update, "Make a short link") makes a `shortLink`: a short address,
+a page reference (follows a rename) or an outside URL, "For now" (302, the default) or "For good" (301), and an
+optional last day. The `shortLinks()` integration reads the published ones at build time and writes `/x` and `/x/`
+at the TOP of `dist/client/_redirects`, after card 160's `fileStyleRedirects()`, so either form is one hop. It
+skips, and logs, an expired link (the day after its last day, in `site.timeZone`), a clash with a reserved slug
+(`src/lib/reservedSlugs.ts`), a published page, any key of the config's `redirects` map (editor redirects, launch
+redirects and card 160's file-style sources alike), or an older short link; pages always win. It caps short links at
+200 (400 lines) and fails the build only if the whole file would pass Cloudflare's 2,000 static rules. The Studio
+shows the same clashes as errors on the address field before publishing (an archived page as a warning). Every short
+link and every document with a page of its own gets "QR code" in its document menu: SVG for print, PNG for Word or
+slides, a short link's code holding the short address and a page's its full address on `site.url`; while
+`site.domain` is a `workers.dev` address the dialog warns the codes point at the temporary address. Private pages
+and the not-found page get no button.
+
+**Switching it on.** Nothing to switch: with no short links the integration writes nothing, and with no Sanity
+project `cmsQuery` returns the empty fallback. Set `site.timeZone` to the client's IANA zone (defaults to `'UTC'`).
+A site that wants an expired link to stop "the next morning" adds a daily `schedule` to `deploy.yml`; otherwise it
+stops at the next publish or push. A site with hand-written launch redirects lists their old addresses in
+`LAUNCH_FORWARDS` in `shortLink.ts` so the Studio warns too (the build reads the real map regardless). A site with
+more routed types adds them to `PAGE_TARGETS` and `pathForDoc()`.
+
+**Not ported:** Auburn's church wording (bulletins, "the church's own address") and its daily 10:00 UTC rebuild
+(a deploy schedule is a per-site choice). `todayIn` no longer defaults to New York: the caller passes the zone
+(Auburn passes its `CHURCH_TIME_ZONE`). The example words in the address messages are now "spring" and "signup".
+
+**Verified (2026-10-26):** in the starter, `npm run check`, `npm run build` (no Sanity project: no short links, no
+change to `_redirects`), `npm run test:unit` (short-links and qr tests included). first-baptist-auburn on its
+snapshot build: the same gates, `sync-check` against this branch all SAME. The signed-in Studio dialog was not
+clicked through in this card (Auburn's #212 verified it).
+
+**Applied:** starter (this card). first-baptist-auburn: origin; its copies of the four marked files (and
+`studio-icons.ts`) become the starter's, and its `astro.config.mjs` passes `CHURCH_TIME_ZONE` to `todayIn`.
+
+**Who should take it.** Any site whose editors print flyers or want campaign addresses: presacademy, mas-monograms,
+stonesteps-50k, reid-design-site, nixoncreativestudio. Copy the marked files, the schema, guides, tile, integration
+and `site.timeZone`, add `qrcode-generator`, run typegen.

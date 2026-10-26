@@ -129,6 +129,50 @@ each one at the top of `dist/client/_redirects` after the build (the build log s
 An **archived** page is not built at all, so its URL 404s, it drops out of the menus, and
 it never reaches the sitemap.
 
+### Short links (PORTS.md card 171)
+
+A **short link** (`shortLink` document, Pages > Short links, or Quick update's "Make a short
+link") is a short address an editor makes on purpose, like `/spring`, for a flyer, a card or a
+QR code. It points at a page (a reference, so it follows a rename) or at another website. It is
+not a Redirect: a Redirect keeps an OLD address working; a short link is new, often seasonal.
+
+- **Served** by the `shortLinks()` integration in `astro.config.mjs`, which writes two lines
+  per link at the very top of `dist/client/_redirects` (`/spring` and `/spring/`, so either form
+  is one hop; Astro's own redirect lines only carry the slash, card 160). Destinations to a page
+  end in a slash (rule 19). It runs after `fileStyleRedirects()`, so short links sit above
+  card 160's slashless lines.
+- **Status** in plain words: "For now" is a 302 (the default; browsers do not cache it, so it can
+  be repointed next year), "For good" is a 301.
+- **Expiry**: an optional last day, read in `site.timeZone` (`src/data/site.ts`, `'UTC'` until a
+  site sets its own). The link works through that day and is dropped by the next build. Content is
+  statically built, so a site that wants "stops the next morning" adds a daily `schedule` to
+  `deploy.yml`; otherwise it stops at the next publish or push.
+- **Clashes**: a reserved route (`src/lib/reservedSlugs.ts`), a published page, a Redirect or a
+  launch redirect (the keys of the config's `redirects` map, so card 160's file-style sources
+  too), or an older short link. The Studio shows each as an error on the address field (an
+  archived page as a warning); the build skips the same ones and logs
+  `[short-links] skipped /x: ...`. Pages always win. A site with hand-written launch redirects
+  lists their old addresses in `LAUNCH_FORWARDS` in `shortLink.ts` so the Studio warns too.
+- **Limits**: Cloudflare allows 2,000 static rules and 1,000 characters a line in `_redirects`.
+  Short links are capped at 200 (400 lines); an over-long target is skipped; the build fails if
+  the whole file passes 2,000 rules.
+- **No Sanity project**: `cmsQuery` returns the empty fallback and nothing is written.
+- Rules and tests: `src/lib/short-links.ts` (`short-links.test.ts`), both PORTABLE. The
+  schema (`src/sanity/schemaTypes/shortLink.ts`, its `PAGE_TARGETS` list and wording) is per
+  site; a site with more routed types adds them there and to `pathForDoc()`.
+
+### QR codes (PORTS.md card 171)
+
+Every short link, and every document with a page of its own, has **QR code** in its document menu
+(`src/sanity/actions/qrCode.tsx`): an SVG (one path of whole squares, crispEdges) and a PNG
+(whole pixels per square, at least 1200px), with the four-square quiet border. A short link's code
+holds `https://<site domain>/spring`; a page's holds its full address on `site.url`
+(`src/data/site.ts`), with the trailing slash. While `site.domain` is a `workers.dev` address the
+dialog warns that codes point at the temporary address. The library is `qrcode-generator` (MIT,
+no dependencies), imported lazily by that action only, so it is never in a public page's bundle.
+File-making is `src/lib/qr.ts` (`qr.test.ts`, against the real library). Private pages and the
+not-found page get no button. The action, the address input and both libraries are PORTABLE.
+
 ### Image SEO
 
 For Sanity-uploaded images, the alt text field does double duty: accessibility (required) and image search signal. Good alt text describes the image AND uses relevant terms where natural. Descriptive alt beats empty alt; meaningful descriptive alt beats generic.

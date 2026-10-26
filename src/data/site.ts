@@ -31,6 +31,10 @@ export const site = {
   // BCP 47 language tag for the <html lang> attribute. Change if the site is not in English.
   lang: 'en',
 
+  /** IANA time zone for dates read at build time, such as a short link's last
+   *  day (PORTS.md card 171). Set it to the client's zone, e.g. 'America/New_York'. */
+  timeZone: 'UTC',
+
   /** Short display name alias — same as name, kept for any consumer that
    *  accessed the old `site.studio` property. */
   studio: _name,

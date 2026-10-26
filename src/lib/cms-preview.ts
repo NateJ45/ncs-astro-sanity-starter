@@ -102,6 +102,9 @@ const NON_STEGA_FIELDS = new Set([
   'imageSide',
   'layout',
   'linkType',
+  // A short link's "Where does it go?" and "For now, or for good?" (card 171).
+  'linkKind',
+  'lasting',
   // 2026-10-18: a content block's look (src/lib/section-looks.ts). The cadence
   // compares it to 'quiet' / 'feature'; an encoded value would render Standard.
   'look',
