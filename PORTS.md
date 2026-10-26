@@ -447,6 +447,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 177 | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 178 | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)          | n/a     | no          | yes      | no               | no            | n/a            | no                 | no                  | no             |
 | #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
 | 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
@@ -11575,3 +11576,31 @@ splicing; its `sunday-changes` and `gatherings` unit tests pass unchanged and `s
 
 **Who should take it.** Any site that writes `.ics` files for repeating events (today only first-baptist-auburn).
 Sites that do not use `ics.ts` take the copy with the next sync and see no change.
+
+## Card 178: An optional button left empty no longer blocks Publish (2026-10-26)
+
+**Origin:** first-baptist-auburn, building a Christmas page in the live Studio (its PR #224): a fresh Event details block
+stopped Publish with "Button text: Required" and "Link type: Required" on its OPTIONAL button.
+
+**Cause.** `ctaBlock`'s `openInNewTab` had `initialValue: false`. Sanity fills initial values when an object is created, so
+every new block with an optional `type: 'ctaBlock'` field got a half-made button object, and the button's `label` and
+`linkType` (both `Rule.required()`) then fired although the editor never touched the button.
+
+**Fix.** Three files, none PORTABLE.
+
+- `src/sanity/schemaTypes/ctaBlock.ts`: an `inUse(parent)` helper (any of label, linkType, internalLink, externalUrl,
+  emailAddress, phoneNumber set). `label` and `linkType` are required only when the button is in use, with plain messages;
+  `openInNewTab` has no `initialValue`.
+- `src/components/CtaLink.astro`: a cta OBJECT with no label, no linkType and no href renders nothing. `cta` undefined
+  still takes the fallbacks.
+- `src/components/SectionRenderer.astro`: a closing band whose cta object is empty no longer counts toward the page's one
+  accent button (`primaryBudget`), since it draws nothing.
+
+**Checked before changing render:** every `ctaBandSection` in `scripts/seed-core.mjs` and the styleguide fixtures carries a
+label, so none relied on an empty object drawing the fallback.
+
+**Differs from Auburn:** the starter has no `drawsRed` helper; the budget lives in the `primaryBudget` callback.
+
+**Applied:** starter (this card). first-baptist-auburn: origin. Not applied to the other family sites: **every site that uses
+`ctaBlock` has the bug** (any optional button field). Port the three files and check that no page relied on an empty
+button drawing "Get in touch".

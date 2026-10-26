@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-26: an optional button left empty no longer blocks Publish (PORTS card 178)._ `ctaBlock` had `openInNewTab` `initialValue: false`, so a new block with an optional button carried a half-made button whose required text and link type blocked Publish. Text and link type are now required only once any part of the button is filled in, `CtaLink` draws nothing for an empty button object, and an empty closing-band button no longer takes the page's accent.
+
 _2026-10-26: social links read by URL host (PORTS card 167)._
 
 **Decision.** The editor pastes a link and the platform comes from its host, so a new account is never a code change or a dropdown choice, and a wrong pick can no longer show the wrong icon. The old dropdown stays hidden because rows hold it (rule 1), and it only decides the icon for an address the host table does not know. WhatsApp is the one platform with a rule on the address, because only an invite or number link opens a chat. Ported from first-baptist-auburn.

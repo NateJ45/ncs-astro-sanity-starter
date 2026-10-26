@@ -99,6 +99,9 @@ function resolveHref(c?: CtaBlock | null): string {
   }
 }
 
+// A button object with nothing filled in (an optional button left empty) draws nothing, rather
+// than the fallback label. No cta at all still takes the fallbacks.
+const isEmpty = cta != null && !cta.label && !cta.linkType && !cta.href;
 const href = withTrailingSlash(resolveHref(cta));
 const label = cta?.label ?? fallbackLabel;
 const isExternal = cta?.linkType === 'external';
@@ -129,11 +132,13 @@ const variantClasses = (() => {
 })();
 ---
 
-<a
-  href={href}
-  class:list={[baseClasses, variantClasses, extraClass]}
-  target={newTab ? '_blank' : undefined}
-  rel={newTab ? 'noopener noreferrer' : undefined}
->
-  {label}
-</a>
+{!isEmpty && (
+  <a
+    href={href}
+    class:list={[baseClasses, variantClasses, extraClass]}
+    target={newTab ? '_blank' : undefined}
+    rel={newTab ? 'noopener noreferrer' : undefined}
+  >
+    {label}
+  </a>
+)}
