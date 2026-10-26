@@ -119,4 +119,6 @@ The shared logic lives in `src/lib/heading-accent.ts` (`splitHeadingAccent(headi
 
 ---
 
+Every start-hidden mechanism here must also be forced to its finished state in `src/styles/print.css` (print never scrolls; PORTS.md card 155), and `tests/print.spec.ts` checks it.
+
 Cross-reference: `polish-layer.md` covers the non-animation visual layer (brand stripe, card-lift, surface-warm, reading-progress, sticky-header, paper-grain, print stylesheet).

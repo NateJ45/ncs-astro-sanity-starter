@@ -177,7 +177,7 @@ const allProjects: CoreProjectCard[] = (await getAllProjects().catch(() => [])) 
 const latestProjects = allProjects.slice(0, 3);
 ---
 
-<footer class="bg-muted text-foreground">
+<footer id="site-footer" class="bg-muted text-foreground">
   {/* Brand accent stripe — matches header + mobile drawer. */}
   <div class="h-1 bg-primary" aria-hidden="true"></div>
 
