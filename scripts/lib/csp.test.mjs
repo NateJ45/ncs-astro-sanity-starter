@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { hashSource, scanHtml, scriptSrc } from './csp.mjs';
+import { embedProviderIds, hashSource, scanHtml, scriptSrc } from './csp.mjs';
 
 const sha = (t) => `'sha256-${createHash('sha256').update(t).digest('base64')}'`;
 
@@ -34,4 +34,12 @@ test('script-src: self, wasm, origins, then sorted hashes; handlers add unsafe-h
   const withHandler = scriptSrc(scanHtml('<button onclick="go()">x</button>'));
   assert.ok(withHandler.includes("'unsafe-hashes'"));
   assert.ok(withHandler.includes(hashSource('go()')));
+});
+
+test('embedProviderIds reads the embed block markers off a page (card 172)', () => {
+  const html =
+    '<div class="w-full" data-embed-provider="tithely"><script src="x"></script></div><div data-embed-provider="calendly"></div><div data-embed-provider="tithely"></div>';
+  assert.deepEqual([...embedProviderIds(html)], ['tithely', 'calendly']);
+  assert.equal(embedProviderIds('<p>hello</p>').size, 0);
+  assert.equal(embedProviderIds('<div data-embed-provider="Bad Value!"></div>').size, 0);
 });

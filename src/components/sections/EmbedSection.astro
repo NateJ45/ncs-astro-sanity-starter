@@ -14,9 +14,23 @@
 //                            directly on the page").
 // Trust model in full: docs/agent/custom-code.md.
 //
+// Paste-and-go (PORTS.md card 172, src/lib/embed-providers.ts): what was pasted
+// is read against a registry of known services. A YouTube, Spotify or Maps link
+// (or their iframe embed code) becomes the service's own player at the right
+// shape; a known service's script code may run on the page; code that runs
+// scripts from an UNKNOWN service never runs on the page, even with the switch
+// on: it is shown in its own box instead (the Studio says who must approve it;
+// a site approves a one-off origin in site.embeds.approvedScriptOrigins). The
+// registry's id is written on the wrapper as data-embed-provider, and
+// scripts/build-csp.mjs adds that service's script origins to the security
+// policy of the build that uses it.
+//
 // SELF_CONTAINED — manages its own bg-background surface (no surface prop).
 import SectionHeading from '@/components/SectionHeading.astro';
 import CustomCodeFrame from '@/components/CustomCodeFrame.astro';
+import { stegaClean } from '@sanity/client/stega';
+import { planEmbed, type EmbedPlan } from '@/lib/embed-providers';
+import { site } from '@/data/site';
 
 interface Props {
   eyebrow?: string;
@@ -28,6 +42,8 @@ interface Props {
   runsOnPage?: boolean;
   heightHint?: 'short' | 'medium' | 'tall';
   headingId?: string;
+  /** Repo-written code (the styleguide's probes): may run on the page as written. */
+  trustedCode?: boolean;
 }
 
 const {
@@ -39,11 +55,39 @@ const {
   runsOnPage = false,
   heightHint = 'medium',
   headingId = 'embed-section-heading',
+  trustedCode = false,
 } = Astro.props as Props;
 
-const hasContent = !!(embedUrl || embedCode);
+// The preview stega-encodes strings; the plan must read what was pasted.
+const planned = planEmbed(
+  {
+    embedUrl: embedUrl ? stegaClean(embedUrl) : undefined,
+    embedCode: embedCode ? stegaClean(embedCode) : undefined,
+    runsOnPage,
+  },
+  site.embeds.approvedScriptOrigins,
+);
+// Repo-written probes skip the approval guard; nothing from Sanity reaches this.
+const plan =
+  trustedCode && planned.kind === 'box' && planned.blocked
+    ? ({ kind: 'page', provider: undefined } as EmbedPlan)
+    : planned;
+// A link that cannot be framed (a Maps share link, say) shows nothing on the
+// website; the Studio explains what to paste instead.
+const hasContent = plan.kind !== 'none' && plan.kind !== 'problem';
 // Boxed custom code sizes itself, so the wrapper must not hold the min-height.
-const boxedCode = !embedUrl && !!embedCode && !runsOnPage;
+const boxedCode = plan.kind === 'box';
+// A known service's player sizes itself from the registry.
+const sized = plan.kind === 'frame' && Boolean(plan.aspect || plan.height);
+const frameStyle =
+  plan.kind === 'frame' && plan.aspect
+    ? `aspect-ratio: ${plan.aspect}`
+    : plan.kind === 'frame' && plan.height
+      ? `height: ${plan.height}px`
+      : undefined;
+// Only code runs under this page's policy (a framed page has its own), so only
+// code carries the marker build-csp.mjs reads.
+const providerId = plan.kind === 'box' || plan.kind === 'page' ? plan.provider?.id : undefined;
 const hasHeading = !!(eyebrow || headline);
 
 // Map height hint to sensible min-height values.
@@ -58,7 +102,10 @@ const initialHeight = heightHint === 'short' ? 240 : heightHint === 'tall' ? 640
 
 // Sandbox policy: allow forms + scripts for widgets like Tally, Calendly, Cal.
 // allow-same-origin is required for Calendly to post messages to parent window.
-const sandbox = 'allow-scripts allow-forms allow-same-origin allow-popups';
+// A known service (giving, booking) may open its checkout in a normal new tab.
+const sandbox =
+  'allow-scripts allow-forms allow-same-origin allow-popups' +
+  (plan.kind === 'frame' && plan.provider ? ' allow-popups-to-escape-sandbox' : '');
 const iframeTitle = headline || eyebrow || 'Embedded content';
 ---
 
@@ -80,23 +127,32 @@ const iframeTitle = headline || eyebrow || 'Embedded content';
         />
       )}
 
-      <div class:list={['w-full', !boxedCode && minHeightClass, hasHeading && 'mt-section-md']}>
-        {embedUrl ? (
-          /* URL-based embed — fully sandboxed iframe */
+      <div
+        class:list={[
+          'w-full',
+          !boxedCode && !sized && minHeightClass,
+          hasHeading && 'mt-section-md',
+        ]}
+        data-embed-provider={providerId}
+      >
+        {plan.kind === 'frame' ? (
+          /* A provider's page or player, or an unknown service: sandboxed iframe */
           <iframe
-            src={embedUrl}
+            src={plan.src}
             title={iframeTitle}
             sandbox={sandbox}
+            allow={plan.allow}
             loading="lazy"
-            class:list={['w-full border-0', minHeightClass]}
+            class:list={['w-full border-0', !sized && minHeightClass]}
+            style={frameStyle}
             allowfullscreen
           />
         ) : boxedCode ? (
           /* Pasted code in its own box (the default). */
           <CustomCodeFrame code={embedCode!} title={iframeTitle} initialHeight={initialHeight} />
-        ) : embedCode ? (
-          /* "Runs directly on the page" switched on: editor-pasted code with the
-             same trust as the site itself. Kept for trusted provider snippets. */
+        ) : plan.kind === 'page' ? (
+          /* "Runs directly on the page" switched on, and the code is from a known
+             or approved service: editor-pasted code with the same trust as the site. */
           <div
             class:list={['w-full', minHeightClass]}
             data-custom-code-on-page
