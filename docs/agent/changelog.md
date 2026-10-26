@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-26: an open Studio reloads itself after a deploy (PORTS card 179)._ A Studio tab opened before a deploy asked for a lazily loaded code file the new build no longer had and showed a raw "Failed to fetch dynamically imported module" inside a field. The boot page now catches that error, says "The Studio was updated", and reloads once after 2.5 s; a repeat within a minute offers a Reload button instead of looping. Sanity saves edits as they are typed, so nothing is lost.
+
 _2026-10-26: an optional button left empty no longer blocks Publish (PORTS card 178)._ `ctaBlock` had `openInNewTab` `initialValue: false`, so a new block with an optional button carried a half-made button whose required text and link type blocked Publish. Text and link type are now required only once any part of the button is filled in, `CtaLink` draws nothing for an empty button object, and an empty closing-band button no longer takes the page's accent.
 
 _2026-10-26: social links read by URL host (PORTS card 167)._

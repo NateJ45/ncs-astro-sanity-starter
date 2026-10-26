@@ -12059,3 +12059,35 @@ label, so none relied on an empty object drawing the fallback.
 **Applied:** starter (this card). first-baptist-auburn: origin. Not applied to the other family sites: **every site that uses
 `ctaBlock` has the bug** (any optional button field). Port the three files and check that no page relied on an empty
 button drawing "Get in touch".
+
+## Card 179: An open Studio reloads itself after a deploy (2026-10-26)
+
+**Origin:** first-baptist-auburn, signed in to the live Studio: a tab opened before a deploy showed a raw red "Unhandled
+Runtime Error: Failed to fetch dynamically imported module .../_astro/<hash>.js" inside the image field's Unsplash
+picker until the page was reloaded by hand.
+
+**Cause.** The Studio loads most of its code lazily, and Workers static assets keep only the current build's hashed
+files. Every merge and every Studio publish (the webhook) deploys, so a long-open tab often asks for a file that is
+gone. Sanity's top-level `StudioErrorBoundary` auto-reloads on an import error, but a field's own boundary does not.
+
+**Fix.** `src/lib/studio-stale-chunk.ts` (new, PORTABLE) and its test, wired in `src/pages/studio/index.astro`
+(PORTABLE). `installStaleChunkGuard()` listens for `vite:preloadError` (Vite's preload helper wraps every lazy
+import in the build and fires it when the import rejects) plus window `unhandledrejection` and `error`, matches the
+Chromium, Firefox and Safari messages and Vite's "Unable to preload CSS", shows a plain notice ("The Studio was updated.
+Reloading to carry on.") and reloads after 2.5 s. A second hit within 60 s of a reload (sessionStorage timestamp)
+prompts with a Reload button instead, so it can never loop. Drafts are safe: sanity 6.19 auto-commits patches on a
+1000 ms throttle, so the pause lets the last keystroke reach the server. Docs: `docs/agent/studio-kit.md` ("After a
+deploy").
+
+**Not done:** keeping the previous build's assets. `wrangler deploy` replaces the whole asset set; carrying old
+`/_astro/` files forward from a CI cache grows without bound and still misses a tab two deploys old.
+
+**Proved:** built, served with `wrangler dev`. In a fresh Chromium (service worker blocked, as on a first visit)
+with a lazily loaded chunk (`groq.*.js`) removed from `dist/client/_astro/`: the 404 raised the notice, the page
+reloaded itself once, and the second load showed the Reload prompt and made no further navigation in 6 s. In an
+already-open tab, a lazy import of a missing file through the build's own Vite preload helper showed the notice and
+reloaded the tab. The Studio's service worker keeps `/_astro/` files it has already fetched, so a chunk the tab saw
+before a deploy still loads from it; the guard covers the ones it never fetched.
+
+**Applied:** starter (this card), first-baptist-auburn (origin). Not applied to the other family sites: every site with
+the embedded Studio page (card 120) needs it; copy the two lib files and the boot-page script, then `sync-check`.
