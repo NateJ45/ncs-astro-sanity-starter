@@ -281,7 +281,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
-Row 70 (2026-10-26): the card gained install timeouts (see "Install timeouts" on the card). The six repos on that pass took them the same day, so their `yes` stands; nixoncreativestudio and first-baptist-auburn still run the installs without a timeout.
+Row 70 (2026-10-26): the card gained install timeouts (see "Install timeouts" on the card). Every repo with a `yes` took them the same day (first-baptist-auburn too), so the cells stand.
 
 Row 73 (2026-10-03) is a workflow plus three scripts, not a drift-checked behaviour: a site takes it by running `npm run sync-check` and copying the marked files; every cell but the starter is `no` until that site does.
 
@@ -6489,8 +6489,9 @@ step, and 30 on the `e2e` (or `test`, `visual`) job. The step names, job names a
 unchanged, so `build` and `test` stay the required checks.
 
 **Applied (2026-10-26):** starter, fbcm, presacademy, stonesteps-50k, reid-design-site, mas-monograms (its
-two-job `ci.yml`: the `test` job and its one install step). nixoncreativestudio, wcp-website and
-first-baptist-auburn were not on this pass.
+two-job `ci.yml`: the `test` job and its one install step), nixoncreativestudio#146 (same two-job shape) and
+fbc-auburn#218 (which replaces the three 5-minute tries it had put on `install-deps` that morning). wcp-website
+was not on this pass.
 
 ## Card 71: Tracked `.claude/settings.json` deny rules and one shared conventions file (2026-10-03)
 
