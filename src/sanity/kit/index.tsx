@@ -32,7 +32,7 @@ import { ActivityIcon } from '@sanity/icons/Activity';
 import { BoltIcon } from '@sanity/icons/Bolt';
 import { BookIcon } from '@sanity/icons/Book';
 import { HomeIcon } from '@sanity/icons/Home';
-import { WEEK_TYPE } from '../../lib/studio-kit';
+import { STAFF_TYPE, WEEK_TYPE } from '../../lib/studio-kit';
 import { TRASH_TYPE } from '../../lib/studio-trash';
 import { makeCheckupTool } from './CheckupTool';
 import { EMPTY_LIST_BUNDLE } from './emptyList';
@@ -45,7 +45,7 @@ import { makePublishPanel } from './PublishPanel';
 import { withPublishNote } from './publishNote';
 import { makeQuickUpdateTool } from './QuickUpdateTool';
 import { makeEarlierVersions } from './EarlierVersions';
-import { staffViewFor, useStaffView } from './shared';
+import { staffViewFor, useStaffMarks, useStaffView } from './shared';
 import { StudioTour, registerTours } from './StudioTour';
 import { allTours } from '../../lib/studio-tour';
 import {
@@ -56,6 +56,7 @@ import {
 } from './trash';
 import type { KitConfig } from './types';
 import { studioWeekType } from './weekType';
+import { studioStaffType } from './staffType';
 
 export type { KitConfig } from './types';
 export { staffViewFor } from './shared';
@@ -108,6 +109,8 @@ export function ncsStudioKit(config: KitConfig) {
 
   function KitLayout(props: LayoutProps) {
     const { staffView } = useStaffView(config);
+    // Card 175: re-read the "Simple view" marks once signed in.
+    useStaffMarks(config);
     return (
       <>
         {staffView && <style>{STAFF_CSS}</style>}
@@ -122,8 +125,11 @@ export function ncsStudioKit(config: KitConfig) {
 
     schema: {
       // The weekly tick document is always registered (card 111): Home reads it
-      // whenever a "This week" job is ticked by hand.
-      types: config.features.trash ? [trashedItemType, studioWeekType] : [studioWeekType],
+      // whenever a "This week" job is ticked by hand. So is the marks document
+      // (card 175), which the staff view reads.
+      types: config.features.trash
+        ? [trashedItemType, studioWeekType, studioStaffType]
+        : [studioWeekType, studioStaffType],
     },
 
     // Plain words in an empty desk list (card 111).
@@ -175,13 +181,18 @@ export function ncsStudioKit(config: KitConfig) {
 
     document: {
       newDocumentOptions: (prev) =>
-        prev.filter((o) => o.templateId !== TRASH_TYPE && o.templateId !== WEEK_TYPE),
+        prev.filter(
+          (o) =>
+            o.templateId !== TRASH_TYPE &&
+            o.templateId !== WEEK_TYPE &&
+            o.templateId !== STAFF_TYPE,
+        ),
 
       // "Help for this page" (card 110), "Before you publish" (card 123) and
       // "Earlier versions" (card 125) beside every document but the Trash and
       // the weekly tick.
       inspectors: (prev, { documentType }) =>
-        documentType === TRASH_TYPE || documentType === WEEK_TYPE
+        documentType === TRASH_TYPE || documentType === WEEK_TYPE || documentType === STAFF_TYPE
           ? prev
           : [
               ...prev,

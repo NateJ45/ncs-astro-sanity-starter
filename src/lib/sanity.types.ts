@@ -3012,6 +3012,15 @@ export type Testimonial = {
   reviewUrl?: string;
 };
 
+export type StudioStaff = {
+  _id: string;
+  _type: 'studioStaff';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  ids?: Array<string>;
+};
+
 export type StudioWeek = {
   _id: string;
   _type: 'studioWeek';
@@ -3267,6 +3276,7 @@ export type AllSanitySchemaTypes =
   | AboutPage
   | HomePage
   | Testimonial
+  | StudioStaff
   | StudioWeek
   | TrashedItem
   | PreviewShare

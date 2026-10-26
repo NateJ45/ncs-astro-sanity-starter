@@ -14,11 +14,24 @@
 // -----------------------------------------------------------------------------
 // The staff view
 // -----------------------------------------------------------------------------
-// Like the WordPress staff admin on the family's WordPress sites: a LISTED set of
-// accounts (Sanity user ids or emails) sees a plain Studio (fewer tools, no permanent delete), whatever
-// their Sanity role. With no list, Sanity's own non-administrator roles count
-// as staff. Anyone can switch for this browser tab: staff to "the full
-// Studio", an administrator to "the staff view" (to see what staff see).
+// Like the WordPress staff admin on the family's WordPress sites: a plain Studio
+// (fewer tools, no permanent delete). Who gets it (card 175, 2026-10-26):
+//
+//   1. By ROLE: everyone whose Sanity role is not administrator (an Editor, a
+//      Contributor, a Viewer). No setup.
+//   2. Plus the LISTED accounts in kitConfig.staff (Sanity user ids or emails),
+//      whatever their role. The list ADDS to the role rule; before card 175 a
+//      non-empty list replaced it, so listing one administrator gave every
+//      Editor the full Studio.
+//   3. Plus the MARKED accounts: user ids an administrator ticked "Simple view"
+//      for in the People tool (card 176), kept on one kit document (STAFF_TYPE,
+//      id STAFF_DOC_ID, an id path the public API never serves). This is how a
+//      helper invited as an Administrator gets the simple view on Sanity's Free
+//      plan, which has no Editor role. No deploy needed.
+//
+// Anyone can switch for this browser tab: staff to "the full Studio", an
+// administrator to "the staff view" (to see what staff see). The staff view is
+// a courtesy, not a lock: Sanity's own roles are the permissions.
 // -----------------------------------------------------------------------------
 
 /** The slice of Sanity's CurrentUser the kit reads. */
@@ -35,20 +48,35 @@ export type ViewOverride = 'staff' | 'full' | null;
 /** The sessionStorage key for the choice (per tab, gone when the tab closes). */
 export const VIEW_KEY = 'ncs-studio-kit-view';
 
+/** Does this account hold Sanity's administrator role? */
+export function isAdministrator(user: KitUser | null | undefined): boolean {
+  return (user?.roles ?? []).some((r) => r.name === 'administrator');
+}
+
+/** Is this account marked for the simple view (by its Sanity user id)? */
+export function isMarked(user: KitUser | null | undefined, marked: readonly string[]): boolean {
+  const id = user?.id?.trim();
+  return Boolean(id) && marked.includes(id as string);
+}
+
 /**
- * Is this person on the staff list (or, with no list, not an administrator)?
- * The list holds Sanity user ids (preferred: they are not personal data, so
- * they can sit in a public repo) or email addresses, case-insensitively.
+ * Is this person staff? By role (not an administrator), or on the staff list,
+ * or marked. The list holds Sanity user ids (preferred: they are not personal
+ * data, so they can sit in a public repo) or email addresses,
+ * case-insensitively. Marks are user ids, exactly as Sanity writes them.
  */
-export function isStaffUser(user: KitUser | null | undefined, staff: string[]): boolean {
+export function isStaffUser(
+  user: KitUser | null | undefined,
+  staff: string[],
+  marked: readonly string[] = [],
+): boolean {
   if (!user) return false;
-  const list = staff.map((e) => e.trim().toLowerCase()).filter(Boolean);
-  if (list.length > 0) {
-    const mine = [user.id, user.email].filter(Boolean).map((v) => String(v).trim().toLowerCase());
-    return mine.some((v) => list.includes(v));
-  }
   const roles = (user.roles ?? []).map((r) => r.name);
-  return roles.length > 0 && !roles.includes('administrator');
+  if (roles.length > 0 && !roles.includes('administrator')) return true;
+  const list = staff.map((e) => e.trim().toLowerCase()).filter(Boolean);
+  const mine = [user.id, user.email].filter(Boolean).map((v) => String(v).trim().toLowerCase());
+  if (mine.some((v) => list.includes(v))) return true;
+  return isMarked(user, marked);
 }
 
 /** Should the Studio show the staff view right now? */
@@ -56,10 +84,11 @@ export function isStaffView(
   user: KitUser | null | undefined,
   staff: string[],
   override: ViewOverride,
+  marked: readonly string[] = [],
 ): boolean {
   if (override === 'staff') return true;
   if (override === 'full') return false;
-  return isStaffUser(user, staff);
+  return isStaffUser(user, staff, marked);
 }
 
 /** Read the tab's choice; anything unexpected (or no storage) counts as none. */
@@ -70,6 +99,70 @@ export function readOverride(storage: Pick<Storage, 'getItem'> | null | undefine
   } catch {
     return null;
   }
+}
+
+// -----------------------------------------------------------------------------
+// Marks: "Simple view" for an account, set from the Studio (card 175)
+// -----------------------------------------------------------------------------
+// One small kit document holds the marked user ids. The tools and document
+// actions are decided synchronously when the Studio starts, before any fetch
+// can answer, so the browser keeps the last list it saw (localStorage,
+// MARKS_KEY) and the kit layout re-reads the document once signed in. If the
+// fresh list changes THIS person's view, the Studio reloads once (RELOADED_KEY
+// stops a loop). A new mark therefore takes effect on the marked person's next
+// visit, with one quick reload.
+// -----------------------------------------------------------------------------
+
+/** The kit's document type for marks. Bookkeeping: never content, never a change. */
+export const STAFF_TYPE = 'studioStaff';
+/** Its one id. The `kit.` id path keeps it out of the public API on a public dataset. */
+export const STAFF_DOC_ID = 'kit.studioStaff';
+/** localStorage: the last list this browser saw. */
+export const MARKS_KEY = 'ncs-studio-kit-marks';
+/** sessionStorage: this tab already reloaded for a changed list. */
+export const MARKS_RELOADED_KEY = 'ncs-studio-kit-marks-reloaded';
+
+/** Clean whatever the document or storage held into a list of distinct ids. */
+export function cleanMarks(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const ids = value
+    .filter((v): v is string => typeof v === 'string')
+    .map((v) => v.trim())
+    .filter((v) => /^[A-Za-z0-9_-]{2,64}$/.test(v));
+  return [...new Set(ids)];
+}
+
+/** The list with `id` marked (on) or unmarked (off), order kept. */
+export function setMark(marked: readonly string[], id: string, on: boolean): string[] {
+  const rest = cleanMarks(marked).filter((v) => v !== id.trim());
+  return on ? cleanMarks([...rest, id]) : rest;
+}
+
+/** The last list this browser saw; empty for anything unexpected or blocked storage. */
+export function readMarks(storage: Pick<Storage, 'getItem'> | null | undefined): string[] {
+  try {
+    const raw = storage?.getItem(MARKS_KEY);
+    return raw ? cleanMarks(JSON.parse(raw)) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Should the Studio reload to apply a fresh list? Only when it changes this
+ * person's view, no tab choice is overriding it, and the tab has not already
+ * reloaded for it.
+ */
+export function marksNeedReload(
+  user: KitUser | null | undefined,
+  staff: string[],
+  override: ViewOverride,
+  before: readonly string[],
+  after: readonly string[],
+  alreadyReloaded: boolean,
+): boolean {
+  if (alreadyReloaded || override !== null || !user) return false;
+  return isStaffUser(user, staff, before) !== isStaffUser(user, staff, after);
 }
 
 /** First name for the welcome line ("Sam Rivera" -> "Sam"). */
@@ -298,6 +391,9 @@ export function deployProblem(
 
 /** The kit's own document type for hand ticks. Excluded from Home's lists and the live check. */
 export const WEEK_TYPE = 'studioWeek';
+
+/** The kit's bookkeeping types (hand ticks, card 111; marks, card 175): never content, never a change. */
+export const KIT_BOOKKEEPING_TYPES: readonly string[] = [WEEK_TYPE, STAFF_TYPE];
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const localDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;

@@ -209,6 +209,7 @@ function documentTypesIn(source: string): { name: string; hasPreview: boolean }[
 const CONSTANTS: Record<string, string> = {
   TRASH_TYPE: 'trashedItem',
   WEEK_TYPE: 'studioWeek',
+  STAFF_TYPE: 'studioStaff',
   SHARE_RECORD_TYPE: 'previewShare',
 };
 
@@ -219,6 +220,7 @@ function allDocumentTypes() {
       .map((f) => `src/sanity/schemaTypes/${f}`),
     'src/sanity/kit/trash.tsx',
     'src/sanity/kit/weekType.ts',
+    'src/sanity/kit/staffType.ts',
     'src/sanity/workflow/previewShareType.ts',
   ];
   return files.flatMap((f) => {

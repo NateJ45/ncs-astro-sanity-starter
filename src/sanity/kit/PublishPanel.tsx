@@ -36,7 +36,7 @@ import {
   type SiteFiles,
 } from '../../lib/studio-checkup';
 import { forDocument, type DocFinding } from '../../lib/studio-prepublish';
-import { WEEK_TYPE } from '../../lib/studio-kit';
+import { KIT_BOOKKEEPING_TYPES } from '../../lib/studio-kit';
 import {
   AllClear,
   KitAction,
@@ -63,7 +63,7 @@ function useSiteDocs(config: KitConfig) {
   const load = useCallback(async () => {
     setFailed(false);
     try {
-      const ignore = new Set([...config.checkup.ignoreTypes, WEEK_TYPE]);
+      const ignore = new Set([...config.checkup.ignoreTypes, ...KIT_BOOKKEEPING_TYPES]);
       const [all, site] = await Promise.all([client.fetch<Doc[]>(CHECKUP_QUERY), readSiteFiles()]);
       setState({ docs: (all ?? []).filter((d) => !ignore.has(d._type)), site });
     } catch {
