@@ -7677,8 +7677,14 @@ stonesteps-50k named their own helper differently, so reconcile on sync), `src/l
 **Proof.** Grep the built HTML for `href="/..."` without a trailing slash and without a file extension: the count must
 be 0 (starter build: 135 of 231 before, 0 of 231 after).
 
-**Status.** Starter: merged with this PR. presacademy, reid-design-site, mas-monograms and stonesteps-50k merged 2026-10-09. 2ndpreschicago and
-nixoncreativestudio: not yet done.
+**Watch out: file endpoints.** With `trailingSlash: 'always'`, Astro exempts an endpoint from the slash only when the
+route file's name ends in an extension (`feed.xml.ts`, `[name].pdf.ts`). An extensionless dynamic route that serves
+files, such as `src/pages/files/[name].ts`, then answers `/files/<sha>.pdf` with a 404. Use one route per extension
+around a shared handler (fbcm#114). After porting, curl one real file URL, not only pages: `check:links` skips `/files/`.
+
+**Status.** Starter: merged with this PR. presacademy, reid-design-site, mas-monograms and stonesteps-50k merged 2026-10-09.
+nixoncreativestudio (#139, with a `check:slashes` CI guard) and fbcm (#112, #113, #114) merged 2026-10-25. 2ndpreschicago:
+not yet done (dormant).
 
 ## Card 90: Sanity backup: 14-day artifact, documents-only on weekdays, full export weekly (2026-10-13)
 
