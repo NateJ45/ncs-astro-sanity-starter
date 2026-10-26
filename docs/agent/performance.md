@@ -43,6 +43,10 @@ Use `<SanityImage />`'s `width` prop to drive these. **Never request larger than
 - **Script accent font** (opt-in): no script font is loaded by default. To enable the `font-script` utility, add a `@fontsource` import in `globals.css` and point `--font-script` at the family. See `animation.md` for the full opt-in steps.
 - No `<link rel="preload">` on font URLs. Vite hashes the filenames at build time, so a static preload tag would 404. The cost is one extra paint; the benefit is no broken preload (and Lighthouse stays at 100 Best Practices).
 
+### Page CSS purge (PORTS.md card 159)
+
+`npm run build` runs `scripts/purge-page-css.mjs` after `astro build`. It removes, page by page, the inline CSS rules whose classes the page cannot show (SectionRenderer imports every section, so every page otherwise carries every block's styles). On the starter's default `inlineStylesheets: 'auto'` only about 11 KB is inline, so it removes nothing; with `'always'` it took 16 pages from 2,052 KB to 1,015 KB (51%). If a script builds a class name from pieces, name the prefix in `KEEP` at the top of the script. Linked stylesheets are not touched.
+
 ### Lighthouse scorecard
 
 Target: 100 on all four categories (Performance, Accessibility, Best Practices, SEO) for all core routes on both mobile and desktop. Measure on the deployed Cloudflare URL via Chrome DevTools' bundled Lighthouse, not the dev server.
@@ -61,14 +65,14 @@ Target: 100 on all four categories (Performance, Accessibility, Best Practices, 
 
 ### Hydration strategy
 
-| Component          | Directive        | Why                                                                                                                                                                                                                                                                 |
-| ------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ThemeToggle`      | `client:idle`    | Anti-FOUC inline script in `BaseLayout` already applies the correct theme class before first paint, so the React island only needs to hydrate by the time the visitor moves to click it. Demoting from `client:load` shaves real TBT off mobile Lighthouse runs.    |
-| `MobileNav`        | `client:idle`    | The closed Radix Sheet server-renders its trigger and mounts the portal only when the drawer opens, so the hamburger is in the server HTML and React can arrive on idle. Was `client:only="react"` until 2026-09-18 on a Radix-can't-SSR claim that no longer holds |
-| `ContactForm`      | `client:visible` | Below the fold on most pages                                                                                                                                                                                                                                        |
-| `BackToTop`        | `client:idle`    | Doesn't appear until the visitor scrolls 600px, so the JS doesn't need to race first paint                                                                                                                                                                          |
-| `Toaster` (Sonner) | `client:idle`    | Region only -- toast calls fire from elsewhere, plenty of time for the region to mount                                                                                                                                                                              |
-| `FaqAccordion`     | `client:visible` | Interactive but not critical-path                                                                                                                                                                                                                                   |
+| Component          | Directive        | Why                                                                                                                                                                                                                                                              |
+| ------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ThemeToggle`      | `client:idle`    | Anti-FOUC inline script in `BaseLayout` already applies the correct theme class before first paint, so the React island only needs to hydrate by the time the visitor moves to click it. Demoting from `client:load` shaves real TBT off mobile Lighthouse runs. |
+| `MobileNav`        | none (`.astro`)  | Not an island since card 157: server markup on a native `<dialog>` plus a small inline-bundled script, so no Radix or React runtime ships for the phone menu. Its theme toggle is the same `ThemeToggle` island the header already hydrates at `client:idle`     |
+| `ContactForm`      | `client:visible` | Below the fold on most pages                                                                                                                                                                                                                                     |
+| `BackToTop`        | `client:idle`    | Doesn't appear until the visitor scrolls 600px, so the JS doesn't need to race first paint                                                                                                                                                                       |
+| `Toaster` (Sonner) | `client:idle`    | Region only -- toast calls fire from elsewhere, plenty of time for the region to mount                                                                                                                                                                           |
+| `FaqAccordion`     | `client:visible` | Interactive but not critical-path                                                                                                                                                                                                                                |
 
 Default to `client:visible` or `client:idle` for anything not immediately above the fold. Astro ships less JS up front. `client:load` is reserved for islands that genuinely must be live before first interaction -- and even then, ask twice whether `client:idle` is acceptable.
 

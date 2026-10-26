@@ -197,6 +197,14 @@ export default defineConfig({
     react(),
   ],
   vite: {
+    // Never inline an asset as a data: URI (card 159). build-csp.mjs lists a hash for every inline
+    // script on every page in ONE Content-Security-Policy line of dist/client/_headers, and
+    // Cloudflare rejects a _headers line over 2,000 characters (the deploy fails). Vite's default
+    // inlines files under 4 KB, which turned small scripts into inline ones and pushed the line
+    // past the limit. 0 serves them as hashed /_astro/ files (cached a year, covered by 'self').
+    // Gotcha: _vault/gotchas/cloudflare-headers-line-limit-breaks-hashed-csp.md. A unit test
+    // (scripts/lib/headers-line-limit.test.mjs) fails when a built line is over the limit.
+    build: { assetsInlineLimit: 0 },
     // Read by src/pages/build-info.json.ts (see BUILD_COMMIT above).
     define: { __NCS_BUILD_COMMIT__: JSON.stringify(BUILD_COMMIT) },
     // fixSanityDedupeAlias() repairs @sanity/astro's dev-only alias, which is

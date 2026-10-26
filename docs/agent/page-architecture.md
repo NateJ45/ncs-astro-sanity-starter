@@ -89,7 +89,9 @@ Custom `page` documents expose `SECTION_TYPES` (the eleven general blocks only).
 1. Classifies each block as **self-contained** (`heroSection`, `ctaBandSection`, `statSection`, `spacerSection`, `logoStripSection`, `embedSection`, `founderSection`, `servicesGridSection`, `testimonialsSection`, `valuesSection`, `processSection`, `faqSection`, `teamSection`) or **content** (the rest).
 2. Assigns alternating `surface` / `surface-muted` classes to content blocks in sequence, skipping self-contained blocks in the count.
 3. Inserts `SectionDivider.astro` between adjacent content blocks of differing surfaces automatically.
-4. Delegates rendering to individual section components in `src/components/sections/`.
+4. Gives each section heading its id (PORTS.md card 158, `src/lib/section-anchors.ts`): a section with a heading takes a unique name made from it, so `/about/#our-story` links to it; a section with none keeps `<idPrefix>-<n>`. Retitling a section changes its anchor; a site that needs a link to survive a retitle pins a name to the block's `_key` with `sectionAnchors(..., { overrides })`. Pages that draw several renderers (the styleguide fixtures) pass `anchors="numbered"` to keep ids unique.
+5. Spends the page's one accent button (PORTS.md card 158, `src/lib/cta-budget.ts`): the first section that draws a primary button (a hero with a main button, or a closing band) keeps the `primary` variant, and every later one is passed `primaryVariant="secondary"`. A Hero or FinalCta a page draws outside the renderer is not counted.
+6. Delegates rendering to individual section components in `src/components/sections/`.
 
 The cadence logic is in `src/lib/sectionCadence.ts` (unit-tested). Blocks have no color field and never call `SectionDivider` directly. Since 2026-10-18 the five content blocks carry a `look` (Standard, Quiet, Feature; `src/lib/section-looks.ts`), which the cadence resolves with the neighbours in view: Quiet is the plain surface and restarts the rhythm, Feature is the deep brand band outside the alternation and never touches another dark band (rule 9 as amended, PORTS.md card 124). This means an editor can reorder sections in Studio without ever producing a background collision or a missing divider.
 
@@ -146,7 +148,7 @@ The `<summary>` triggers carry `.nav-underline` and get `aria-current="page"` (w
 
 **Header breakpoint is `lg:` (1024 px), not `md:` (768 px).** Between md and lg the desktop nav + CTA button cram the nav items against the logo and visibly squish the wordmark. Bumping the breakpoint means tablet/narrow-laptop widths see the centered-logo + hamburger layout, and the desktop layout only appears once there is actual room for it.
 
-**The `NAV_ITEMS` definition.** Each item is `{ kind: 'flat' }` or `{ kind: 'dropdown', items: [...] }`, defined once in `Header.astro` and shared with `MobileNav.tsx` so desktop + mobile stay in sync.
+**The `NAV_ITEMS` definition.** Each item is `{ kind: 'flat' }` or `{ kind: 'dropdown', items: [...] }`, defined once in `Header.astro` and shared with `MobileNav.astro` so desktop + mobile stay in sync.
 
 **Availability indicator.** The mobile header carries an availability status pill (pulsing dot + short label, links to `/contact`). Renders only when `siteSettings.availabilityStatus` is set.
 

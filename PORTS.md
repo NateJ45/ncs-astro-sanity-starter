@@ -269,6 +269,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 152 | Church Trac pattern: form band, page reader, link boxes (church sites, no code)     | n/a     | n/a         | n/a      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 156 | Contact form no-JS post + error summary, FAQ landmark, dark-band rings              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
@@ -7677,8 +7678,14 @@ stonesteps-50k named their own helper differently, so reconcile on sync), `src/l
 **Proof.** Grep the built HTML for `href="/..."` without a trailing slash and without a file extension: the count must
 be 0 (starter build: 135 of 231 before, 0 of 231 after).
 
-**Status.** Starter: merged with this PR. presacademy, reid-design-site, mas-monograms and stonesteps-50k merged 2026-10-09. 2ndpreschicago and
-nixoncreativestudio: not yet done.
+**Watch out: file endpoints.** With `trailingSlash: 'always'`, Astro exempts an endpoint from the slash only when the
+route file's name ends in an extension (`feed.xml.ts`, `[name].pdf.ts`). An extensionless dynamic route that serves
+files, such as `src/pages/files/[name].ts`, then answers `/files/<sha>.pdf` with a 404. Use one route per extension
+around a shared handler (fbcm#114). After porting, curl one real file URL, not only pages: `check:links` skips `/files/`.
+
+**Status.** Starter: merged with this PR. presacademy, reid-design-site, mas-monograms and stonesteps-50k merged 2026-10-09.
+nixoncreativestudio (#139, with a `check:slashes` CI guard) and fbcm (#112, #113, #114) merged 2026-10-25. 2ndpreschicago:
+not yet done (dormant).
 
 ## Card 90: Sanity backup: 14-day artifact, documents-only on weekdays, full export weekly (2026-10-13)
 
@@ -10322,6 +10329,212 @@ inside the test, no binaries committed), `npm run check`. End to end on first-ba
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn). Others take it with card 126.
 
+## Card 155: Print stylesheet and the regex-backslash guard (2026-10-25)
+
+**Origin.** first-baptist-auburn, PR #170 (audit 2026-10-25, two findings).
+
+**Canonical (PORTABLE-marked).** `scripts/lib/regex-backslash.mjs`, `scripts/lib/regex-backslash.test.mjs`.
+Not marked: `src/styles/print.css` (each site lists its own start-hidden classes) and `tests/print.spec.ts` (Auburn's
+copy also pins its own `beforeprint` handler and extra routes).
+
+**What it does.**
+
+1. **Regex-backslash guard.** Git Bash heredocs on this PC strip backslashes, so `/(\s+)/` written through one becomes
+   `/(s+)/`: valid JavaScript that silently matches the letter s. The detector scans every tracked `.ts`, `.tsx`,
+   `.mjs`, `.js` and `.astro` file (frontmatter and `<script>` bodies) with the TypeScript scanner and fails the
+   `test:scripts` run on a backslash-free regex or `new RegExp('...')` that still holds `s+`, `d{2}`, `[^s]` and the
+   like. Passes on the starter as it stands (nothing to fix).
+2. **Print stylesheet.** `src/styles/print.css`, imported last in `BaseLayout.astro`, on top of the minimal print block
+   in `globals.css`. Print never scrolls, so `[data-reveal]`, `[data-stagger-grid]` children, `.hero-entry-stagger`,
+   the image curtain and the process connector stayed on their hidden starting state and a printed page went blank
+   below the first screen. Print now shows them finished, drops the hero slideshow and iframes, and prints `main`
+   black on white (background fills are not printed, so light-on-dark text vanished). `tests/print.spec.ts`
+   print-emulates every route in `tests/routes.ts` and fails when text in `<main>` would print invisible, plus one
+   test that proves a reveal really is hidden on screen and shown in print.
+
+**Not ported.** `src/lib/flow-split.ts` (the starter has no word splitter; it is Auburn's flow layer). Auburn's
+`beforeprint` handler in `motion.ts` (no equivalent script here; the CSS alone covers it). Auburn's brand-specific
+print rules (brick slabs, Sunday bar, placeholder notes, building sketch). Known gap: `StatsCounter` counts up from 0
+on scroll, so it prints 0 until scrolled into view.
+
+**Applied.** starter (this card). first-baptist-auburn: source (applied). Other sites take the two guard files
+byte-identical and write their own `print.css` from the starter's, extending layer 1 with their own reveal classes.
+
+## Card 156: contact form posts safely without JS, one-pass errors, kept drafts; FAQ landmark; focus rings on dark bands (2026-10-25)
+
+**Origin:** first-baptist-auburn's 2026-10-25 audit (Auburn PRs 170 and 173). Four findings that are not church
+specific: a contact form that sent its answers to the address bar with scripting off, a form that stopped at the first
+problem, a draft left in localStorage on shared computers, a second "Common questions" landmark inside an already
+labelled section, and a focus ring that nearly vanished on the near-black band.
+
+**Canonical:** none new. Changed, all "Safe to edit" or "Foundation" in the starter, so sites take them by hand:
+`src/components/ContactForm.tsx`, `src/components/FaqAccordion.tsx`, `src/pages/contact.astro`,
+`src/lib/surfaces.ts` (+ `surfaces.test.ts`), `src/styles/globals.css`, new `tests/contact-form.spec.ts`.
+
+**What it does.**
+
+1. **No JavaScript.** The form is `method="post" action="/api/contact/"`, so scripting off never turns the answers
+   into a GET query string. `/api/contact/` (PORTABLE, left alone) reads JSON only, so a plain post still gets a 400:
+   `contact.astro` therefore carries a `<noscript>` notice that points at the email and phone. A real no-JS send
+   needs the endpoint to accept a form-encoded body and redirect; that is a change to a PORTABLE file and is a
+   separate card.
+2. **Every problem in one pass.** `validate()` also covers the editor-written questions (required, email shape), each
+   field gets `aria-invalid` and `aria-describedby` for its own line, and an error summary (`role="alert"`,
+   `tabindex="-1"`) takes focus after a failed submit and links to each field. Every required label carries the
+   same `*` (`RequiredCue`) with a one-line key above the form.
+3. **Draft.** Kept in `sessionStorage` (this tab only, wrapped in try/catch), cleared on success; a draft an older
+   build left in `localStorage` is removed on load. Answers to editor-written questions are still not kept (the editor
+   can reword them at any time).
+4. **Prefill.** `/contact/?topic=<word>` picks the first list answer containing the word (hyphens read as spaces; the
+   project type on the built-in form, the first list question on an editor-written one) and `&about=<short text>`
+   starts the message with "About <text>: ". Control characters are stripped and the text is cut at 80 characters.
+   Nothing the visitor typed is overwritten.
+5. **FAQ landmark.** `FaqAccordion` renders a `<section aria-labelledby>` only when a category heading exists; with no
+   category the wrapper is a plain `<div>`, because the section that holds it is already the labelled region (axe
+   `landmark-unique`).
+6. **Dark-band rings.** `globals.css` sets `--ring` to the band's light ink inside `[data-dark-surface]` and the Ink band
+   (`.bg-accent-dark`); the Feature band already did. `data-light-surface` opts a light card back out.
+   `surfaces.ts` gains `ring`, and `surfaces.test.ts` holds each dark band's ring to 3:1 in both themes and checks
+   that `globals.css` really sets it. A new dark section adds `data-dark-surface`.
+
+**Not ported:** Auburn's "planning to visit" line (`?visit=sunday-11`), its `btn-auburn` button classes, the Auburn
+white and navy ring literals (the starter uses its own tokens), the heading size and `--heading-solid` edits in
+`FaqAccordion`, and the Home hero / board selectors that carried `--ring` in `auburn.css`.
+
+**Verified in the starter (2026-10-25):** see the PR for the gate output (check, build, unit, `contact-form.spec.ts`).
+
+**Applied:** starter (this card). first-baptist-auburn = source (applied).
+
+**Who should take it.** Every site with a contact form or an FAQ. Sites with their own dark bands add
+`data-dark-surface`.
+
+## Card 157: The phone menu on a native dialog, one dropdown model, transform-only header compaction (2026-10-25)
+
+**Origin:** first-baptist-auburn's 2026-10-25 UX and web-dev audits (Auburn PR #174, "chrome", and the later
+header-shake fix in its `Header.astro`). The phone menu was a shadcn Sheet (Radix Dialog) React island on every page;
+a hover-opened dropdown snapped shut when its label was clicked; and Auburn's compacting header changed height, so
+scroll anchoring moved `scrollY` back across a single 8px threshold and the bar shook near the top.
+
+**Canonical:** no new PORTABLE files. Every file here is a per-site Foundation file each site has already reskinned:
+`src/components/MobileNav.astro` (new, replaces the deleted `MobileNav.tsx`), `src/components/Header.astro`, the
+"Header compaction" and "Mobile menu" blocks in `src/styles/globals.css`, and `id="site-footer"` on the footer in
+`src/components/Footer.astro`. A site copies the behaviour, not the bytes.
+
+**What it does.**
+
+1. **Phone menu on `<dialog>`.** `MobileNav.astro` is server markup: the hamburger and every link are in the HTML, and
+   no Radix or React runtime ships for it. `showModal()` gives the focus trap, Escape, the inert page and focus back on
+   the hamburger; a small delegated script (bound once, survives View Transitions) opens it and closes it on the X,
+   the backdrop (a click whose target is the dialog itself), any link inside, and `astro:before-preparation`.
+   `html:has(.mobile-menu[open])` locks the page scroll. The panel slides in from the right with a transform; the global
+   reduced-motion reset flattens it. "Search the site" closes the menu, then fires `site-search:open`, with
+   `stopImmediatePropagation()` so the search dialog's own click listener does not shut it again. With JS off the
+   hamburger is a link to `#site-footer`. The starter's layout, nav data, groups, CTA and theme toggle (the same
+   `ThemeToggle client:idle` the eyebrow strip uses) are kept. The `site-header__menu` hook class is kept, so the
+   `minimal` header variant still shows the menu at desktop widths.
+2. **One dropdown model.** Mouse hover opens a group; clicking a label hover just opened keeps it open (a second click
+   closes); leaving starts a 300ms close cancelled on return; tap, Enter and Space toggle the native `<details>`
+   (`e.detail === 0` for the keyboard); Escape closes and returns focus to the label. Still server-rendered (rule 4).
+3. **Header compaction, transforms only.** Past 64px of scroll the header gets `data-scrolled`, cleared only at 8px or
+   less (the hysteresis that stops the shake). From lg up the bar slides up by the stripe plus eyebrow height (measured
+   into `--hdr-top`) plus `--spacing-m`, its row contents slide down by half of that, and the logo scales 48 to 40px:
+   the bar keeps its layout height, so nothing under it reflows. Below lg it only gains a shadow. The existing
+   hide-on-scroll-down (`data-state="hidden"`) still wins.
+
+**Not ported:** Auburn's church groups, This Sunday card, Live now row, Give button, brick sill and big-serif full-screen
+sheet (church-only design); the "Menu" pill and `data-nav-complete` (Auburn hides the pill when the desktop row lists
+every page; the starter's desktop never shows the hamburger except in the `minimal` variant); the Home `data-past`
+logo swap (Auburn's Home hero only). `src/components/ui/sheet.tsx` stays: nothing in the starter imports the Sheet now,
+but it is part of the shadcn set; `radix-ui` is still used by the other primitives, and nothing was uninstalled.
+
+**Applied:** starter (this card). first-baptist-auburn = source (applied).
+
+**Who should take it.** Every site still on `MobileNav.tsx`: swap in `MobileNav.astro` restyled to the site, the dropdown
+script and the compaction block. Check the site's own header CSS for height or padding transitions first.
+
+## Card 158: One accent button per page, named section anchors, a 404 with search, calendar files (2026-10-25)
+
+**Origin:** first-baptist-auburn's 2026-10-25 audit (its PRs #171, #172, #173): pages with several filled accent
+buttons where none stood out, sections nobody could link to, a 404 with no way to search, and per-gathering `.ics`
+files. Generalised here.
+
+**Canonical:** PORTABLE: `src/lib/cta-budget.ts` (+ test), `src/lib/section-anchors.ts` (+ test), `src/lib/ics.ts`
+(+ test). Per site (NOT portable): the wiring in `SectionRenderer.astro` (which blocks draw a primary button, the
+`anchors` prop), the `primaryVariant` prop on `Hero.astro` and `FinalCta.astro`, and `src/pages/404.astro`.
+
+**What it does.**
+
+1. **One accent button.** `primaryBudget(rows, drawsPrimary)` gives the first section that draws a primary button
+   (a hero with a main button, or a closing band) the `primary` variant and every later one `secondary`;
+   `SectionRenderer` passes it to `Hero` and `FinalCta` as `primaryVariant`. A renderer concern, so blocks still carry
+   no colour field (rule 9). A Hero or FinalCta drawn outside the renderer is not counted.
+2. **Named anchors.** `sectionAnchors()` gives every section with a heading (`heading`, else `headline`) a unique id
+   made from it (`/about/#our-story`), stega stripped so the preview matches the live page, cut to 48 characters at a
+   word break, prefixed `section-` before a digit, `-2`/`-3` on a repeat, never one of `RESERVED_IDS` or another
+   section's numbered id. Unnamed sections keep `<idPrefix>-<n>`. `overrides` pins a name to a block `_key` (Auburn's
+   `SECTION_ANCHORS` map plugs in there). The styleguide pages pass `anchors="numbered"`, since they draw one renderer
+   per fixture.
+3. **404 with search.** With `site.search.enabled`, a plain GET form to `/search/?q=` (works without JavaScript);
+   under it, search on or off, the site's `site.search.suggestions` as "Pages people often look for".
+4. **Calendar files.** `buildIcs()`: escaping, 75-octet folding that never splits a character, CRLF, typed or raw
+   RRULE, TZID wall times with VTIMEZONE for the four US zones, UTC instants, all-day dates. No route in the starter;
+   the file's header shows the `src/pages/calendar/[key].ics.ts` endpoint a site adds.
+
+**Not ported:** Auburn's gatherings (Church facts service times, `src/lib/gatherings.ts`, the `/calendar/<key>.ics`
+route), because the starter has no recurring gatherings. Its only event-like content is the RSVP block (`startsAt`, a
+UTC instant), a natural first consumer, not wired here. Auburn's "navy" quiet variant and its extra primary-button
+blocks (steps rail, walk) are site-specific; its 404 brick path is brand art.
+
+**Auburn can adopt the libs:** `gatheringIcs()` maps onto `buildIcs({ events: [{ start: { date, time, tzid:
+'America/New_York' }, duration: 'PT1H', rrule: { freq: 'WEEKLY', byDay: [day] }, ... }] })` and gains line folding
+(its long LOCATION lines are not folded today); `anchorFor()` becomes `sectionAnchors(..., { overrides:
+SECTION_ANCHORS })`, which also names its other sections from their headings, so check its pages' links first.
+
+**Applied:** starter (this card). first-baptist-auburn = source: it takes `src/lib/ics.ts` (+ test) byte-identical, and its `gatheringIcs()` now builds on `buildIcs()` (long LOCATION lines are folded); it keeps its own `src/lib/section-anchors.ts` (a key map with a different API, unmarked, a recorded fork) and its own button budget in `SectionRenderer.astro` (the navy variant), so it does not carry `cta-budget.ts`.
+
+## Card 159: page weight, cache and security headers, share images (2026-10-25)
+
+**Origin:** first-baptist-auburn's site audit (fbc-auburn#176 CSP, #177 performance). Every page inlined the CSS
+of every component its module graph reached, about half of it dead; the build-time CSP line from card 153 grew with
+every small component script until it passed Cloudflare's 2,000-character limit for a `_headers` line and a deploy
+failed (gotcha `cloudflare-headers-line-limit-breaks-hashed-csp`); a noindex page still named a canonical; share
+images from Sanity could be WebP.
+
+**Canonical:** PORTABLE: `scripts/purge-page-css.mjs`, `scripts/lib/css-purge.mjs` (+ `css-purge.test.mjs`). Per site
+(NOT portable): the `build` script order in `package.json`, `public/_headers`, `astro.config.mjs`, `BaseLayout.astro`.
+
+**What it does.**
+
+1. **Per-page CSS purge.** `npm run build` runs `purge-page-css.mjs` after `astro build` and before `build-csp.mjs`
+   (the CSP hashes scripts only, so the order does not change it). For each built page it drops every inline style
+   rule whose selector needs a class found nowhere in the page's HTML or its scripts (followed through imports).
+   Rules without classes, `:not()`, `@font-face`, `@keyframes` and other at-rules are never touched; a script that
+   builds class names from pieces lists a prefix in `KEEP`. **Measured on the starter (16 pages):** with the default
+   `inlineStylesheets: 'auto'` only 11 KB of CSS is inline in total, so the purge removes 0% and costs nothing; with
+   `inlineStylesheets: 'always'` (what Auburn runs) inline CSS goes from 2,052 KB to 1,015 KB, 51% removed, about
+   128 KB to 63 KB a page. The step only pays on a site that inlines; it is harmless on one that does not.
+2. **Headers** (`public/_headers`): a second `Content-Security-Policy: form-action 'self'` line (kept apart so card
+   153's `/*` line stays byte-for-byte), `Permissions-Policy` refusing camera, microphone, geolocation, usb,
+   magnetometer and gyroscope, and a day plus a week of `stale-while-revalidate` for `/og/*`, the favicons and the
+   apple touch icon. `/_astro/*` already carried the immutable year. HSTS is unchanged (`includeSubDomains` stays).
+   `docs/agent/deployment.md` says a pasted form that posts off-site needs its origin on `form-action`.
+3. **`vite.build.assetsInlineLimit: 0`** in `astro.config.mjs`: small scripts ship as hashed `/_astro/` files, not
+   inline, so the CSP hash list stays short. The starter's line is 652 bytes with 10 inline scripts. New
+   `scripts/lib/headers-line-limit.test.mjs` (part of `test:unit`) pins the config and fails if a built or source
+   `_headers` line passes 2,000 characters.
+4. **No canonical on a noindex page** (`BaseLayout.astro`), with `tests/noindex-canonical.spec.ts`.
+5. **JPEG share images:** `ogUrlFromImage` asks Sanity for `format('jpg').quality(80)` instead of `auto('format')`.
+
+**Not ported.** Fonts and textures moved to `src/assets/`: the starter has none in `public/` (its fonts come from
+`@fontsource` and are already hashed). Auburn's `og-card.mjs` change was only a font path, so the starter's
+`render-og.mjs` (PORTABLE) is untouched; the JPEG change lives in BaseLayout. `svg-path-compact` (stone icons),
+`print-icons.mjs`, the HSTS relaxation and the Toaster removal are Auburn-only: the starter's Toaster is still used
+by `CopyEmailButton.tsx`. Auburn's `page-weight.spec.ts` is Auburn-specific.
+
+**Applied:** starter (this card); first-baptist-auburn = source (applied). Other sites: copy the two PORTABLE files,
+add the purge step to `build`, and apply the `_headers`, config and BaseLayout changes by hand. Gotcha note's
+"Ported to" box for the starter can now be ticked once this merges.
+
 ## Card 161: `snapshot.mjs run` reads the project id from the snapshot (2026-10-25)
 
 **Origin:** first-baptist-auburn. Its CI `site` job built 19 pages where a local snapshot build of the same
@@ -10345,7 +10558,7 @@ The template path (no snapshot file, no project id) is unchanged.
 **Verified in the starter (2026-10-25):** `npm run test:scripts`. End to end on first-baptist-auburn: see its PR.
 
 **Applied:** starter (this card). first-baptist-auburn: origin, see its PR. fbcm and stonesteps-50k set the env
-already, so the copy is drift-only for them.
+already, so for them the copy only keeps sync-check green. Card 160 is parked (unshipped), so 161 went first.
 
 **Who should take it.** Every site with a `ci/sanity-snapshot.ndjson.gz` (card 138): today fbcm,
 first-baptist-auburn, stonesteps-50k.

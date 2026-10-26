@@ -19,7 +19,9 @@ File naming:
 
 ### Radix-based primitives server-render fine, so hydrate them at `client:idle`
 
-shadcn primitives that wrap Radix's Dialog (Sheet, Dialog, DropdownMenu with portal positioning) server-render without trouble on the versions this starter pins. A closed Dialog renders only its trigger, and the portal mounts nothing until it opens, so the trigger is in the server HTML and the island only needs the React runtime by the time a visitor reaches for it. Hydrate these at `client:idle`, the same as any other non-critical island, and let the markup ship with the page. `MobileNav.tsx` is the reference.
+shadcn primitives that wrap Radix's Dialog (Sheet, Dialog, DropdownMenu with portal positioning) server-render without trouble on the versions this starter pins. A closed Dialog renders only its trigger, and the portal mounts nothing until it opens, so the trigger is in the server HTML and the island only needs the React runtime by the time a visitor reaches for it. Hydrate these at `client:idle`, the same as any other non-critical island, and let the markup ship with the page.
+
+Before reaching for one, check whether the browser already does the job. The phone menu was a shadcn Sheet island until card 157; it is now `MobileNav.astro` on a native `<dialog>` (`showModal()` gives the focus trap, Escape, the inert page and focus return for free), with no React at all.
 
 This doc used to say the opposite: that the portal hook threw "Invalid hook call" during server render and these primitives had to be `client:only="react"`. That was measured on an older React and Radix pairing and no longer holds. `client:only` skips SSR entirely, which meant the hamburger button was missing from the server HTML until React loaded, and it pulls the runtime onto the critical path.
 
@@ -37,7 +39,7 @@ The core component set, by role. All in `src/components/` unless noted.
 
 - `Header.astro` -- two-row desktop (eyebrow strip + main nav), single-row mobile. Sticky-with-hide-on-scroll-down behavior wired via `.site-header`. The eyebrow strip carries availability status, email, and phone; on mobile the availability shows a compact pill.
 - `Footer.astro` -- a responsive link grid, brand logo, auto-year copyright, and "Site by..." credit on a thin bottom bar.
-- `MobileNav.tsx` -- shadcn Sheet drawer (`client:idle`; the closed Sheet server-renders its trigger, so the hamburger is in the server HTML). Primary CTA, tagline, nav links, email + phone + socials + theme toggle, logo at bottom.
+- `MobileNav.astro` -- the phone menu (card 157): server markup on a native `<dialog>` opened with `showModal()`. Focus trap, Escape, inert page and focus back on the hamburger are the browser's own; a small script opens it, closes it on the X, the backdrop, any link inside and `astro:before-preparation` (View Transitions), and hands "Search the site" over to the search dialog. Scroll lock and the slide-in are CSS in `globals.css` ("Mobile menu"). With JS off the hamburger is a link to `#site-footer`. Primary CTA, search row, tagline, nav links, email + phone + socials + theme toggle (`ThemeToggle client:idle`), logo at bottom.
 - `BaseLayout.astro` -- anti-FOUC theme bootstrap, View Transitions, the native-scroll press listener, scroll-reveal observer, sticky-header scroll listener.
 
 **Hero + page-top:**
@@ -93,7 +95,7 @@ The Portable Text renderer (`JournalPortableText.tsx`) detects image orientation
 
 **Contact page pieces:**
 
-- `ContactForm.tsx` -- Name / Email / Phone / Message, plus any project-specific fields. See form section in `docs/agent/sanity.md`.
+- `ContactForm.tsx` -- Name / Email / Phone / Message, plus any project-specific fields; posts as a plain form with scripting off, lists every error in a focused summary, keeps the draft in sessionStorage, reads `?topic=` and `&about=`. See form section in `docs/agent/sanity.md`.
 - `CopyEmailButton.tsx` -- mailto link + clipboard fallback.
 - `CalendlyInline.tsx` -- click-to-load Calendly iframe placeholder. Heavy widget stays off the budget until the visitor opts in.
 
@@ -121,6 +123,12 @@ The desktop nav dropdowns live directly in `Header.astro` as SSR'd `<details>` (
 
 - **Secondary variant** swaps from `border-primary text-link` (brand accent on light) to `border-white/70 text-white hover:bg-white/10` (cream on dark).
 - **Focus ring** offsets against `transparent` instead of `--background` so the ring still reads on photographic surfaces.
+
+**One accent button per page (card 158).** `Hero.astro` and `FinalCta.astro` take `primaryVariant` (`'primary'` by default). `SectionRenderer` passes `'secondary'` to every section after the first one that draws a primary button (`src/lib/cta-budget.ts`), so a page builder page never shows two filled accent buttons. A new block that draws a primary button joins the `drawsPrimary` test in `SectionRenderer.astro` and takes the same prop.
+
+### Calendar files (`src/lib/ics.ts`, card 158)
+
+A PORTABLE, tested iCalendar builder for "Add to calendar" links: `buildIcs({ prodId, now, events })` handles escaping, 75-octet line folding, CRLF, RRULE (typed or raw), TZID wall times with the US zones' VTIMEZONE, UTC instants and all-day dates. The starter ships no route (it has no calendar of its own); the header comment shows the `src/pages/calendar/[key].ics.ts` endpoint a site adds. The RSVP block (`startsAt`, a UTC instant) is the natural first consumer.
 
 Use it on any CTA over a hero image or any dark panel. `Hero.astro` (image variant) and `FinalCta.astro` set it automatically. Do NOT try to override secondary-variant colors via `class="text-bg ..."` -- Tailwind v4 generates utilities alphabetically and `text-link` beats `text-bg` in the cascade. Use the prop instead.
 

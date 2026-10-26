@@ -88,6 +88,8 @@ Journal posts open with a floated display-font drop cap on the first paragraph a
 
 A `@media print` block in `globals.css` suppresses nav, footer, CTAs, and decorative elements, and sets `color: black; background: white` on the body so journal post content prints cleanly. This is intentionally minimal -- the goal is a legible print, not a designed one.
 
+`src/styles/print.css` (imported last in `BaseLayout.astro`, PORTS.md card 155) sits on top of it and fixes the blank-page failure: print never scrolls, so anything that starts hidden and waits on a scroll observer (`[data-reveal]`, `[data-stagger-grid]` children, `.hero-entry-stagger`, the image curtain, the process connector) would print as empty paper. The sheet forces those to their finished state, drops slideshows, curtains and iframes, and prints every surface in `main` black on white (browsers leave background fills out of print, so light-on-dark text would otherwise vanish). A new start-hidden mechanism needs a line in its motion layer. `tests/print.spec.ts` print-emulates every route in `tests/routes.ts` and fails when any text in `<main>` would print invisible. Known gap: `StatsCounter` counts up from 0 on scroll, so it prints 0 until the visitor has scrolled it into view.
+
 ### View Transitions discipline
 
 Astro View Transitions are wired via `<ClientRouter />` in BaseLayout. Any client-side script that needs to re-run on every navigation must listen to `astro:page-load`:
