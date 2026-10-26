@@ -270,8 +270,8 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)   | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 156 | Contact form no-JS post + error summary, FAQ landmark, dark-band rings              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
-| 160 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)             | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | partial        |
-| 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | no             |
+| 160 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)             | n/a     | yes         | yes      | yes              | no            | n/a            | n/a                | n/a                 | yes            |
+| 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none | n/a     | yes         | yes      | yes              | n/a           | n/a            | n/a                | n/a                 | yes            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10561,7 +10561,9 @@ hook; the result is the same whichever runs first. Dynamic sources (`/[slug].htm
 (stonesteps-50k#163) can keep them; the build step will not duplicate them. Check: build, then
 `grep -n '\.htm\|\.php' dist/client/_redirects`, and curl the slashless form on `wrangler dev` or live.
 
-**Applied:** starter (this card). stonesteps-50k = source, `partial`: exact hand-written rules in
+**Applied (2026-10-26):** the build step and tests in first-baptist-auburn#189, fbcm#115, presacademy#134,
+reid-design-site#181 and stonesteps-50k#164 (which keeps its hand-written rules; the step skips them, though
+its log line counts them as "added"). Earlier: starter (this card). stonesteps-50k = source, `partial`: exact hand-written rules in
 `public/_redirects` (#163), not the build step. No other family repo has a file-style redirect source today
 (checked each `origin/main`, 2026-10-25), so the others are `no` until a client files one.
 
@@ -10587,7 +10589,10 @@ The template path (no snapshot file, no project id) is unchanged.
 
 **Verified in the starter (2026-10-25):** `npm run test:scripts`. End to end on first-baptist-auburn: see its PR.
 
-**Applied:** starter (this card). first-baptist-auburn: origin, see its PR. fbcm and stonesteps-50k set the env
+**Applied (2026-10-26):** first-baptist-auburn#180 (the workflow env) and #192 (the copy), fbcm#115,
+presacademy#134, reid-design-site#181, stonesteps-50k#164.
+
+Earlier: starter (this card). first-baptist-auburn: origin, see its PR. fbcm and stonesteps-50k set the env
 already, so for them the copy only keeps sync-check green.
 
 **Who should take it.** Every site with a `ci/sanity-snapshot.ndjson.gz` (card 138): today fbcm,
