@@ -22,6 +22,7 @@
     "llms:full": "node scripts/generate-llms-full.mjs",
     "studio:import": "node scripts/import-content.mjs",
     "seed": "node scripts/seed-core.mjs",
+    "seed:patterns": "node --experimental-strip-types scripts/seed-section-patterns.mjs",
     "parity": "node scripts/page-parity.mjs",
     "cutover": "node scripts/cutover.mjs",
     "sync-check": "node scripts/sync-check.mjs",

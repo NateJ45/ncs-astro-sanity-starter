@@ -27,7 +27,7 @@ import { visionTool } from '@sanity/vision';
 import { media } from 'sanity-plugin-media';
 import { unsplashImageAsset } from 'sanity-plugin-asset-source-unsplash';
 import { schemaTypes } from './src/sanity/schemaTypes';
-import { PAGE_TEMPLATES } from './src/sanity/pageTemplates';
+import { PAGE_TEMPLATES, templateMenuTitle } from './src/sanity/pageTemplates';
 import { deskStructure } from './src/sanity/structure';
 import { resolve } from './src/sanity/resolve';
 import { PreviewNavigator } from './src/sanity/components/PreviewNavigator';
@@ -230,7 +230,8 @@ export default defineConfig({
     types: withBrandPreviews(withEditorTypography(schemaTypes, STUDIO_FONTS)),
     // Page templates (the authoring kit, PORTS.md card 109): the starting
     // points offered when someone makes a Custom page. The list is the site's
-    // own, in src/sanity/pageTemplates.ts. `value` is a function so every new
+    // own, in src/sanity/pageTemplates.ts, shown as "<group>: <title>" because
+    // the new-document menu has no headings (card 173). `value` is a function so every new
     // page gets fresh _keys. The stock 'page' template stays registered (links
     // and intents that name it keep working); newDocumentOptions below hides it
     // from the menus, where "Blank page" stands in for it.
@@ -238,7 +239,7 @@ export default defineConfig({
       ...prev,
       ...PAGE_TEMPLATES.map((t) => ({
         id: t.id,
-        title: t.title,
+        title: templateMenuTitle(t),
         description: t.description,
         schemaType: 'page',
         icon: typeIcon('page'),

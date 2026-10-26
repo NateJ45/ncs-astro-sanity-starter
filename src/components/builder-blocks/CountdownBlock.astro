@@ -1,0 +1,110 @@
+---
+// Safe to edit by hand
+// Countdown to a date. Worked out at build time from the dates (rule 15): days
+// to go before, the "happening now" line during, the thank-you line after (or
+// nothing, when that line is empty). All three are in the page; a small script
+// recounts by the site's calendar day in the visitor's browser, so the number is
+// right between rebuilds, and the page reads fully without JavaScript. The words
+// sit on the text track of the shared split (rule 17) and the number on a card
+// in the narrow track beside them; on a phone the card goes under the words.
+import BuilderBand from './BuilderBand.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import { countdownState, isoDay, longDate, siteToday } from '@/lib/builder-blocks';
+import { site } from '@/data/site';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedCountdownSection } from '@/lib/builderBlocks.types';
+
+interface Props {
+  block: ProjectedCountdownSection;
+  surface?: CadenceSurface;
+  headingId: string;
+  /** The build moment; tests pass a fixed one. */
+  now?: Date;
+}
+const { block, surface, headingId, now = new Date() } = Astro.props;
+const state = countdownState(block.startDate, block.endDate, siteToday(now, site.timeZone));
+const afterText = block.afterText?.trim() ?? '';
+const show = state.phase !== 'none' && !(state.phase === 'after' && !afterText);
+const start = isoDay(block.startDate);
+const end = isoDay(block.endDate) || start;
+const when = end && end !== start ? `${longDate(start)} to ${longDate(end)}` : longDate(start);
+const name = block.eventName?.trim() || 'The big day';
+---
+
+{show && (
+  <BuilderBand type={block._type} headingId={headingId} surface={surface} label={name}>
+    <div
+      class="split bb-countdown"
+      data-bb-countdown
+      data-start={start}
+      data-end={end}
+      data-zone={site.timeZone}
+      data-has-after={afterText ? '1' : undefined}
+    >
+      <div>
+        <h2 class="bb-countdown__name" id={headingId}>
+          {name}
+        </h2>
+        <p class="bb-countdown__when">{when}</p>
+        {block.intro && <p class="bb-intro">{block.intro}</p>}
+        {block.link?.label && (
+          <div class="bb-actions">
+            <CtaLink cta={block.link} variant="secondary" />
+          </div>
+        )}
+      </div>
+      <div class="bb-card bb-countdown__card">
+        <p class="bb-countdown__count" data-phase="before" hidden={state.phase !== 'before'}>
+          <span class="bb-countdown__days" data-days>
+            {state.days}
+          </span>
+          <span class="bb-countdown__label" data-days-label>
+            {state.days === 1 ? 'day to go' : 'days to go'}
+          </span>
+        </p>
+        <p class="bb-countdown__now" data-phase="during" hidden={state.phase !== 'during'}>
+          {block.duringText?.trim() || 'It is happening now.'}
+        </p>
+        <p class="bb-countdown__now" data-phase="after" hidden={state.phase !== 'after'}>
+          {afterText}
+        </p>
+      </div>
+    </div>
+  </BuilderBand>
+)}
+
+<script>
+  // Recount by the site's calendar day, so the number is right between rebuilds.
+  function recount() {
+    const utc = (iso: string) =>
+      Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10));
+    for (const el of document.querySelectorAll<HTMLElement>('[data-bb-countdown]')) {
+      const start = el.dataset.start ?? '';
+      const end = el.dataset.end || start;
+      if (!start) continue;
+      const today = new Intl.DateTimeFormat('en-CA', {
+        timeZone: el.dataset.zone || undefined,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
+      const phase = today < start ? 'before' : today <= end ? 'during' : 'after';
+      if (phase === 'after' && !el.dataset.hasAfter) {
+        el.closest('section')?.setAttribute('hidden', '');
+        continue;
+      }
+      for (const p of el.querySelectorAll<HTMLElement>('[data-phase]')) {
+        p.hidden = p.dataset.phase !== phase;
+      }
+      if (phase === 'before') {
+        const days = Math.round((utc(start) - utc(today)) / 86_400_000);
+        const n = el.querySelector('[data-days]');
+        const label = el.querySelector('[data-days-label]');
+        if (n) n.textContent = String(days);
+        if (label) label.textContent = days === 1 ? 'day to go' : 'days to go';
+      }
+    }
+  }
+  recount();
+  document.addEventListener('astro:page-load', recount);
+</script>
