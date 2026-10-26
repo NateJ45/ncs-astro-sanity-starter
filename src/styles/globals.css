@@ -607,6 +607,21 @@ html.motion [data-reveal].is-visible {
   color: var(--feature-foreground);
 }
 
+/* Focus rings on dark surfaces (PORTS.md card 156). The page ring is a mid grey-blue, about 7:1
+   on Paper and about 3:1 or less on the near-black Ink band, so inside any dark band the ring
+   takes the band's light ink instead (the Feature band sets its own, above). Every ring on the
+   site reads var(--ring) (the focus outline in the base layer, Tailwind's ring-ring and
+   outline-ring through --color-ring), so setting it here once covers every link, button and
+   field inside. A new dark section joins by adding data-dark-surface. A light card sitting on
+   a dark band opts back out with data-light-surface. src/lib/surfaces.test.ts measures the
+   ring against the band at 3:1 (WCAG 1.4.11) in both themes. */
+:where([data-dark-surface], .bg-accent-dark) {
+  --ring: var(--color-bg);
+}
+:where([data-light-surface]) {
+  --ring: var(--color-primary-dark);
+}
+
 /* Tactile press on primary CTAs. Tap/click depresses ~1px so the press
    registers physically — common Apple-Material trick. */
 .press-tactile {

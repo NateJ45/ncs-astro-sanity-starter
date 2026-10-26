@@ -89,16 +89,15 @@ export default function FaqAccordion({ faqs, categoryOrder, idPrefix = 'faq' }: 
         //      below the page H1 — these category labels ARE major page
         //      sections, e.g. "Pricing & Cost", "The Process"). The audit
         //      caught the previous H1→H3 jump.
-        //   2. When there's no category (e.g. /process FAQ section) the
-        //      heading isn't rendered, so we switch from aria-labelledby
-        //      (which would point at a non-existent id) to aria-label. This
-        //      fixes the dangling reference the audit flagged on /process.
+        //   2. With no category the list is plain markup, not a landmark: the section that
+        //      holds it (FaqSection.astro, or the page's own <section>) is already the labelled
+        //      region, and a second "Common questions" landmark inside it fails axe's
+        //      landmark-unique rule (PORTS.md card 156).
+        const SectionTag = section.category ? 'section' : 'div';
         return (
-          <section
+          <SectionTag
             key={sectionId}
-            {...(section.category
-              ? { 'aria-labelledby': `${sectionId}-heading` }
-              : { 'aria-label': 'Common questions' })}
+            {...(section.category ? { 'aria-labelledby': `${sectionId}-heading` } : {})}
           >
             {section.category && (
               <h2 id={`${sectionId}-heading`} className="mb-m font-display text-h3 text-foreground">
@@ -130,7 +129,7 @@ export default function FaqAccordion({ faqs, categoryOrder, idPrefix = 'faq' }: 
                 );
               })}
             </Accordion>
-          </section>
+          </SectionTag>
         );
       })}
     </div>

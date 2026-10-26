@@ -82,6 +82,15 @@ const schemas = [
         </p>
       )}
 
+      {/* With JavaScript off the form cannot send (/api/contact/ answers JSON only); say so and
+          point at the phone and email below (PORTS.md card 156). */}
+      <noscript>
+        <p class="mb-m rounded-md border border-border p-m text-sm text-foreground">
+          This form needs JavaScript to send. Please email or call instead, using the details on
+          this page.
+        </p>
+      </noscript>
+
       <ContactForm
         client:visible
         projectTypes={page?.formProjectTypeOptions}
