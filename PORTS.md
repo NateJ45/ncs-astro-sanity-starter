@@ -958,7 +958,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 177 | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
-| 178 | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)          | n/a     | no          | yes      | no               | no            | n/a            | no                 | no                  | no             |
+| 178 | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)          | n/a     | no          | yes      | no               | no            | n/a            | no                 | no                  | yes            |
 | #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
 | 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
@@ -1298,7 +1298,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 172 | Embed provider registry: paste-and-go, unknown-script guard, per-build embed CSP        | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
-| 173 | Builder kit: twelve smaller blocks, grouped templates, patterns as code, withSiteGroups | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 173 | Builder kit: twelve smaller blocks, grouped templates, patterns as code, withSiteGroups | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | partial        |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12207,6 +12207,11 @@ logged in: make a page from each template, check the grid groups, and seed the p
 every block). fbcm and stonesteps-50k: not applied (they have the card 109 kit; applying this is a follow-up).
 presacademy, reid-design-site, mas-monograms and nixoncreativestudio: `no`. Not yet clicked through in a logged-in
 Studio: the grouped template menu and the new insert groups were type-checked, built and unit-tested.
+stonesteps-50k, 2026-10-26 (its PR #173): `partial` on purpose, eight of the twelve (columns, button row, tabs,
+timeline, letter, event details, schedule, photo cards), dressed as the race's plates. The wide photo, fold-outs,
+countdown and dated notice were skipped because its Photograph band, FAQ blocks, race clock and Race notices already do
+those jobs. No `look` (the site has none); the schedule's rows are `scheduleRow` (`scheduleItem` is a document
+type there). Race templates in four groups and three new patterns; `src/lib/ics.ts` copied (card 158's lib only).
 
 ## Card 177: Calendar files can skip or move one date of a repeating event (2026-10-26)
 
@@ -12272,6 +12277,8 @@ label, so none relied on an empty object drawing the fallback.
 **Applied:** starter (this card). first-baptist-auburn: origin. Not applied to the other family sites: **every site that uses
 `ctaBlock` has the bug** (any optional button field). Port the three files and check that no page relied on an empty
 button drawing "Get in touch".
+stonesteps-50k, 2026-10-26 (its PR #173): `yes`. No accent-button budget there, so only `ctaBlock` and `CtaLink`;
+`CtaLink` checks every link field before calling a button empty. Its CI snapshot held no label-less button.
 
 ## Card 179: An open Studio reloads itself after a deploy (2026-10-26)
 
