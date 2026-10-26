@@ -265,3 +265,30 @@ What a WordPress block-editor handover gives a client, built on the page builder
 
 The Site Guide has a guide for each: "Start a page from a template", "Reuse a section on other pages", "Keep a section
 the same on every page" (`src/sanity/guides/content.ts`).
+
+## Logo and icon from the Studio (PORTS.md card 168)
+
+Site settings > Identity & contact has two uploads, both empty by default, so the template's own files keep
+rendering and a site that never uses them changes nothing.
+
+- **`logo`** (the existing field, now with guard rails): replaces the header logo (`Header.astro`, through
+  `resolveSiteSettings().logo`). SVG is best; a raster under 400 px wide is an error, under 560 px or squarish
+  (narrower than 1.5 to 1) a warning (`checkLogo`).
+- **`siteIcon`**: must be square (2% slack) and, for a raster, at least 512 px (`checkIcon`, an error). It
+  becomes the whole favicon set: `scripts/build-brand-icons.mjs` (PORTABLE) runs in `npm run build` after
+  `astro build` and writes favicon.ico (16/32/48), favicon.svg (the SVG itself, or the PNG wrapped in one),
+  apple-touch-icon, icon-192, icon-512 and icon-maskable-512 into `dist/client` over the committed copies in
+  `public/`. The names do not change, so BaseLayout's links, `site.webmanifest`, the Studio's corner mark
+  (`StudioIdentity.tsx` reads `/favicon.svg`) and the Studio app manifest follow with no edit. The plate behind
+  the home-screen and maskable icons is `site.webmanifest`'s `background_color`.
+
+The drawing is `scripts/lib/brand-icons.mjs` (PORTABLE, `brand-icons.test.mjs`), the read is
+`scripts/lib/build-sanity-client.mjs` (PORTABLE: published content, the CI snapshot when one is set, null with no
+project id). The download is cached by URL in `node_modules/.cache/brand-icon`. No project, nothing uploaded,
+Sanity unreachable or a file sharp cannot read: one log line and the committed icons ship, never a red build.
+
+The size rules read the size from the asset id (`image-<hash>-<w>x<h>-<ext>`, `src/lib/brand-uploads.ts`, PORTABLE,
+unit tested), so they run the moment a file is chosen. `src/sanity/components/BrandImageInput.tsx` (the site's own
+file) draws a preview under each field: the logo in the header in light and dark, the icon in a browser tab and on
+a home screen; the template's files when empty. A site that puts the icon somewhere else too (a footer mark, the
+share cards) reads `siteIcon` in its own query and adds the spot to the preview. Guide: "Change the logo or the icon".

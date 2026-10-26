@@ -277,6 +277,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 168 | Site settings logo rules and a square icon that becomes the favicon set at build    | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10741,3 +10742,59 @@ build: `tests/search.spec.ts` 8 passed (the misspelling test failed before); "cn
 **Applied:** starter (this card). first-baptist-auburn: origin. Every site with search on (card 126) takes the copy.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).
+
+## Card 168: Logo and square icon uploads in Site settings, the icon becomes the favicon set (2026-10-26)
+
+**Origin:** first-baptist-auburn (#212, the Studio self-serve work). The pastor asked how he would change the logo
+or the tab icon without a developer. The starter already had an optional `logo` upload with no guard rails (a 120 px
+PNG went in and looked blurry in the header), and no way at all to change the favicon set without `npm run favicon`
+and a commit.
+
+**Canonical:** PORTABLE `scripts/build-brand-icons.mjs` (the post-build step), `scripts/lib/brand-icons.mjs` (the
+drawing: ICO, the SVG wrapper, every PNG size, the maskable plate, the cached download, and `iconDataUri` for a site
+that puts the mark on its share cards) and `scripts/lib/brand-icons.test.mjs`, `scripts/lib/build-sanity-client.mjs`
+(the read-only client post-build steps share: published content, the CI snapshot when set, null with no project
+id), `src/lib/brand-uploads.ts` and `src/lib/brand-uploads.test.ts` (the size rules). Site files:
+`src/sanity/components/BrandImageInput.tsx` (the preview under each field), the `logo` and `siteIcon` fields in
+`src/sanity/schemaTypes/siteSettings.ts`, the guide "Change the logo or the icon". Docs: `docs/agent/sanity.md`,
+"Logo and icon from the Studio".
+
+**What it does.**
+
+- **Logo** (the existing field): SVG best; a raster under 400 px wide is refused, under 560 px or squarish (narrower
+  than 1.5 to 1) gets a warning. The size comes from the asset id (`image-<hash>-<w>x<h>-<ext>`), so the check runs
+  the moment a file is chosen, with no extra request.
+- **Square icon** (`siteIcon`, new, optional): must be square (2% slack) and, for a raster, at least 512 px. At build
+  time `build-brand-icons.mjs` (in `npm run build`, after the CSS purge) writes favicon.ico (16/32/48),
+  favicon.svg (the SVG itself, or the PNG wrapped in one), apple-touch-icon, icon-192, icon-512 and
+  icon-maskable-512 into `dist/client` over the committed copies. The names do not change, so BaseLayout's links,
+  `site.webmanifest`, the Studio's corner mark and the Studio app manifest follow with no edit. The plate behind the
+  home-screen and maskable icons is the manifest's `background_color`.
+- **A preview** under each field: the logo in the header in light and dark, the icon in a browser tab and on a home
+  screen (round crop too); the template's own files while empty.
+- **Never a red build.** No project id, nothing uploaded, Sanity unreachable, or a file sharp cannot read: one log
+  line and the committed icons ship. The download is cached by URL in `node_modules/.cache/brand-icon` (Sanity asset
+  URLs are content hashes).
+
+**Switching it on.** Nothing: both fields are empty by default and the committed icons keep shipping. An editor
+uploads, publishes, and the publish webhook's rebuild carries it.
+
+**Not ported:** Auburn's other uses of `siteIcon` (its footer mark, Home's small mark, the podcast artwork) and its
+preview's footer tile, because they draw Auburn's own chrome; a site that wants them reads `siteIcon` in its own
+query. Auburn's field wording ("the brand kit's files are the recommended ones") stays in its schema. The share-card
+mark is card 169.
+
+**Verified (2026-10-26):** `npm run check`, `npm run test:unit` (new `brand-icons.test.mjs` draws the set from an SVG
+and a PNG and checks every size; `brand-uploads.test.ts`) and `npm run build` with no project (prints the "no icon"
+line, the committed icons ship) in the starter. first-baptist-auburn's branch: `sync-check` against this starter all
+SAME, `npm run check`, `npm run test:unit`, `npm run build` against its dataset. That build found a bug the origin
+had: on Windows, `process.exit(0)` after the Sanity read tripped a libuv assertion ("UV_HANDLE_CLOSING", exit 127)
+and failed `npm run build`; the script now ends without calling exit. Not verified: the preview under the fields in
+a signed-in Studio (the starter worktree has no project).
+
+**Applied:** starter (this card). first-baptist-auburn: origin (its copies now match the starter's byte for byte; the
+logo warning says "a mark with the name beside it" instead of "the cross with the name beside it").
+
+**Who should take it.** Every site whose owner might change their logo or icon: copy the five PORTABLE files and the
+test, add `node scripts/build-brand-icons.mjs` to `npm run build` after `astro build`, add the two fields (or the
+validation and input on an existing `logo`) and a site version of `BrandImageInput.tsx`, run typegen.

@@ -469,6 +469,13 @@ export type SiteSettings = {
     alt?: string;
     _type: 'image';
   };
+  siteIcon?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: 'image';
+  };
   availabilityStatus?: string;
   serviceAreas?: Array<string>;
   travelFees?: Array<{

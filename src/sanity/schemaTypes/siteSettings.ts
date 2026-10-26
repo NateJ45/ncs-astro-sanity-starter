@@ -7,6 +7,8 @@ import { ChevronDownIcon } from '@sanity/icons/ChevronDown';
 import { ListIcon } from '@sanity/icons/List';
 import { CodeTextInput } from '../components/CodeTextInput';
 import { codeWarningMessage } from '../../lib/custom-code';
+import { IconImageInput, LogoImageInput } from '../components/BrandImageInput';
+import { checkIcon, checkLogo } from '../../lib/brand-uploads';
 
 export const siteSettings = defineType({
   name: 'siteSettings',
@@ -284,14 +286,23 @@ export const siteSettings = defineType({
 
     // An uploaded logo replaces the built-in image logo at the top of every
     // page. Left blank, the template's own logo files keep rendering.
+    // PORTS.md card 168: size rules (src/lib/brand-uploads.ts, read from the
+    // asset id so they run the moment a file is chosen) and a preview under the
+    // field (BrandImageInput). The square icon below becomes the favicon set at
+    // build time (scripts/build-brand-icons.mjs).
     defineField({
       name: 'logo',
       title: 'Logo (optional)',
       type: 'image',
       group: 'identity',
       description:
-        'A logo image for the top of every page. Leave blank and the site keeps the logo files that ship with the template. When set, this image replaces them and is scaled to the header height, so upload it with any spare space already trimmed off. One image is used in both light and dark mode.',
-      options: { hotspot: true },
+        'A logo image for the top of every page. Leave blank and the site keeps the logo files that ship with the template. When set, this image replaces them and is scaled to the header height, so upload a wide logo, at least 560 pixels wide, with any spare space already trimmed off. An SVG file is best. One image is used in both light and dark mode.',
+      options: { hotspot: true, accept: 'image/svg+xml,image/png,image/webp,image/jpeg' },
+      components: { input: LogoImageInput },
+      validation: (Rule) => [
+        Rule.custom((v) => checkLogo(v as never).error ?? true),
+        Rule.custom((v) => checkLogo(v as never).warning ?? true).warning(),
+      ],
       fields: [
         defineField({
           name: 'alt',
@@ -306,6 +317,17 @@ export const siteSettings = defineType({
             ),
         }),
       ],
+    }),
+    defineField({
+      name: 'siteIcon',
+      title: 'Square icon (optional)',
+      type: 'image',
+      group: 'identity',
+      description:
+        'Leave blank and the site keeps the icon it shipped with. An upload becomes the little picture in the browser tab and the icon on a phone home screen. It must be square, at least 512 by 512 pixels (or an SVG), with its own background color rather than see-through, and simple enough to read when it is tiny. The website switches over a few minutes after you publish.',
+      options: { accept: 'image/svg+xml,image/png,image/webp,image/jpeg' },
+      components: { input: IconImageInput },
+      validation: (Rule) => Rule.custom((v) => checkIcon(v as never).error ?? true),
     }),
 
     defineField({
