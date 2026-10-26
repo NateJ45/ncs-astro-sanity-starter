@@ -43,6 +43,8 @@ export type MarkerKind = 'dot' | 'steps' | 'rule' | 'diamond';
 export type StoneShape = 'pebble' | 'round' | 'square' | 'lozenge';
 export type ConnectorKind = 'dashes' | 'dots' | 'line' | 'none';
 export type MotionVerb = 'lay' | 'draw' | 'none';
+/** What the /studio loading splash lays (card 162): the stone path, or the site's own motif. */
+export type SplashKind = 'path' | 'motif';
 
 /** brand.config.json `studio.look`. Every key optional. */
 export interface StudioLookInput {
@@ -71,6 +73,13 @@ export interface StudioLookInput {
   lettering?: { family: string; src: string; colors?: string[] };
   /** How things arrive. 'lay' sets stones down one by one, 'draw' draws the connector. Default 'draw'. */
   motion?: MotionVerb;
+  /**
+   * Card 162: what the loading splash and offline page show under the name. 'path' (the default)
+   * is the stone path above. 'motif' leaves the path out and puts the site's own art
+   * (src/sanity/StudioSplashMotif.astro, which may animate itself) in its place, for a site whose
+   * motif is not stones (a brick wall laid brick by brick, say).
+   */
+  splash?: SplashKind;
 }
 
 /** The colours the Studio theme already settled (studioTheme.ts STUDIO_COLORS). */
@@ -138,6 +147,7 @@ export interface ResolvedLook {
   stone: StoneShape;
   connector: ConnectorKind;
   motion: MotionVerb;
+  splash: SplashKind;
   motif?: string;
   motifNarrow?: string;
   texture?: string;
@@ -278,6 +288,7 @@ const MARKERS: MarkerKind[] = ['dot', 'steps', 'rule', 'diamond'];
 const STONES: StoneShape[] = ['pebble', 'round', 'square', 'lozenge'];
 const CONNECTORS: ConnectorKind[] = ['dashes', 'dots', 'line', 'none'];
 const MOTIONS: MotionVerb[] = ['lay', 'draw', 'none'];
+const SPLASHES: SplashKind[] = ['path', 'motif'];
 
 const isPublicPath = (v: unknown): v is string =>
   typeof v === 'string' && v.startsWith('/') && !v.startsWith('//');
@@ -335,6 +346,7 @@ export function resolveLook(input: StudioLookInput | undefined, base: LookBase):
     stone: pick(look.stone, STONES, 'round', 'stone', notes),
     connector: pick(look.connector?.kind, CONNECTORS, 'line', 'connector.kind', notes),
     motion: pick(look.motion, MOTIONS, 'draw', 'motion', notes),
+    splash: pick(look.splash, SPLASHES, 'path', 'splash', notes),
     motif: isPublicPath(look.motif) ? look.motif : undefined,
     motifNarrow: isPublicPath(look.motifNarrow) ? look.motifNarrow : undefined,
     texture: isPublicPath(look.texture) ? look.texture : undefined,

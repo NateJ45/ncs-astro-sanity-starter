@@ -308,7 +308,12 @@
                 "colors": { "type": "array", "items": { "$ref": "#/definitions/hex" } }
               }
             },
-            "motion": { "type": "string", "enum": ["lay", "draw", "none"] }
+            "motion": { "type": "string", "enum": ["lay", "draw", "none"] },
+            "splash": {
+              "type": "string",
+              "enum": ["path", "motif"],
+              "description": "What the /studio loading splash and offline page show under the name: the stone path (default) or the site's own art from src/sanity/StudioSplashMotif.astro in its place (PORTS.md card 162)."
+            }
           }
         },
         "icons": {
