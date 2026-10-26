@@ -142,6 +142,55 @@ describe('surface pairs clear WCAG AA', () => {
   }
 });
 
+// The focus ring inside a dark band (PORTS.md card 156). WCAG 1.4.11 wants a focus indicator at
+// 3:1 against what it sits on. The page ring is a mid grey-blue that is fine on Paper and too
+// close to the near-black Ink band, so a dark band re-points --ring at its own light ink.
+describe('the focus ring inside a dark band', () => {
+  const NON_TEXT = 3;
+  /** The declaration body of the first rule whose selector list contains `needle`. */
+  function ruleBody(needle: string): string {
+    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      if (m[1].includes(needle)) return m[2];
+    }
+    return '';
+  }
+
+  for (const s of SECTION_SURFACES.filter((x) => x.ring)) {
+    const ring = s.ring as string;
+    for (const [theme, v] of themes) {
+      it(`"${s.value}" ring clears 3:1 against the band in ${theme}`, () => {
+        const ratio = contrastRatio(v(ring), v(s.tokens.bg));
+        assert.ok(ratio >= NON_TEXT, `${ring} on ${s.tokens.bg} is ${ratio}:1`);
+      });
+    }
+    it(`globals.css really points the "${s.value}" band's --ring at ${ring}`, () => {
+      // The Feature band has its own class; the Ink band joins data-dark-surface.
+      const needle = s.className.startsWith('surface-') ? `.${s.className}` : '[data-dark-surface]';
+      assert.ok(
+        ruleBody(needle).includes(`--ring: var(${ring})`),
+        `the rule for ${needle} does not set --ring to var(${ring})`,
+      );
+    });
+  }
+
+  it('a light card on a dark band takes a ring that clears 3:1 on Paper', () => {
+    assert.ok(ruleBody('[data-light-surface]').includes('--ring: var(--color-primary-dark)'));
+    // A light card is Paper in either theme (it is a fixed light card, not --card).
+    const [, v] = themes[0];
+    const ratio = contrastRatio(v('--color-primary-dark'), v('--color-bg'));
+    assert.ok(ratio >= NON_TEXT, `--color-primary-dark on --color-bg is ${ratio}:1`);
+  });
+
+  it('the page ring itself clears 3:1 on Paper and on Soft paper in both themes', () => {
+    for (const [, v] of themes) {
+      for (const bg of ['--background', '--muted']) {
+        const ratio = contrastRatio(v('--ring'), v(bg));
+        assert.ok(ratio >= NON_TEXT, `--ring on ${bg} is ${ratio}:1`);
+      }
+    }
+  });
+});
+
 describe('the heading accent word', () => {
   it('its literals still match the token it reads', () => {
     assert.equal(norm(HEADING_ACCENT.light), norm(themes[0][1](HEADING_ACCENT.token)));

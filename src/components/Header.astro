@@ -7,9 +7,10 @@
 //   ├─────────────────────────────────────── main row
 //   │   [logo]                  [nav]  │  [Book a consultation CTA]
 //   └───────────────────────────────────────
-// On mobile the eyebrow strip is hidden (its info lives in the redesigned
-// MobileNav drawer) and the main row centers the logo with the hamburger
-// pinned absolute to the right.
+// On mobile the eyebrow strip is hidden (its info lives in the MobileNav.astro
+// drawer, a native <dialog>) and the main row centers the logo with the
+// hamburger pinned absolute to the right. Once the page scrolls past 64px the
+// bar compacts with transforms only (data-scrolled, script at the bottom).
 //
 // siteSettings is optional. Defaults render cleanly so the header works
 // even before Sanity content is wired up.
@@ -19,7 +20,7 @@ import { site } from '@/data/site';
 import { Mail, Phone } from 'lucide-react';
 import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
 import ThemeToggle from './ThemeToggle';
-import MobileNav from './MobileNav';
+import MobileNav from './MobileNav.astro';
 import { ChevronDown } from 'lucide-react';
 import logoLightAsset from '@/assets/logo-light.svg';
 import logoDarkAsset from '@/assets/logo-dark.svg';
@@ -36,10 +37,6 @@ const logoLightImg = await getImage({ src: logoLightAsset });
 const logoDarkImg = await getImage({ src: logoDarkAsset });
 const logoLightSrcset = logoLightImg.src;
 const logoDarkSrcset = logoDarkImg.src;
-
-// Mobile drawer logos — same SVG URLs, passed as plain strings into MobileNav.
-const logoLightWebpMobile = logoLightImg;
-const logoDarkWebpMobile = logoDarkImg;
 
 interface Props {
   siteSettings?:
@@ -87,8 +84,7 @@ const phone = siteSettings?.phone ?? '';
 const ig = chrome.showSocials ? (siteSettings?.socialInstagram ?? '') : '';
 const fb = chrome.showSocials ? (siteSettings?.socialFacebook ?? '') : '';
 
-// Subset of siteSettings the mobile menu needs. Pass as a plain object so the
-// React island doesn't try to serialize the whole Sanity document graph.
+// Subset of siteSettings the mobile menu needs.
 const mobileNavSettings = siteSettings
   ? {
       tagline: siteSettings.tagline,
@@ -98,14 +94,6 @@ const mobileNavSettings = siteSettings
       socialFacebook: chrome.showSocials ? siteSettings.socialFacebook : undefined,
     }
   : null;
-
-// The drawer's CTA prop is only passed when it DIFFERS from the drawer's own
-// built-in button. An island's props are serialized into the page, so passing
-// the default every time would rewrite the markup of every page for no change.
-const mobileCtaProps =
-  headerCta.show && headerCta.label === 'Book a consultation' && headerCta.href === '/contact/'
-    ? {}
-    : { cta: headerCta };
 
 // Core nav structure. Flat items render as plain anchor links; dropdown
 // items render as native <details>/<summary> disclosure groups on desktop
@@ -135,9 +123,7 @@ const mobileCtaProps =
 // built-in menu, so a fresh clone is byte-identical to the old behavior.
 const NAV_ITEMS = chrome.headerNav;
 
-// Flatten NAV_ITEMS into the shape MobileNav expects (a list of NavLink[]
-// with optional sub-items for the groups). MobileNav already handles both
-// shapes via its updated interface.
+// MobileNav takes the same NavItem[] shape (flat links and dropdown groups).
 const NAV_LINKS = NAV_ITEMS;
 
 const pathname = Astro.url.pathname;
@@ -283,7 +269,7 @@ function isGroupActive(items: { href: string }[]) {
 
     <a
       href="/"
-      class="inline-flex items-center transition-opacity hover:opacity-80"
+      class="site-header__logo inline-flex items-center transition-opacity hover:opacity-80"
       aria-label={`${brandName} home`}
     >
       {/*
@@ -449,23 +435,20 @@ function isGroupActive(items: { href: string }[]) {
       )}
     </div>
 
-    {/* The drawer hydrates on idle, not client:only. The shadcn Sheet (Radix
-        Dialog) server-renders its trigger button fine, and the portal mounts
-        nothing until the drawer opens, so the hamburger is in the server HTML
-        and React arrives behind requestIdleCallback rather than on the
-        critical path. An Astro comment, not an HTML one, so it does not ship
-        on every page. See docs/agent/components.md. */}
+    {/* The phone menu is server markup on a native <dialog> (MobileNav.astro,
+        card 157): no React island, the hamburger and every link are in the
+        server HTML. See docs/agent/components.md. */}
     {/* Mobile search button, just left of the hamburger (card 126). */}
     <SearchButton class="absolute top-1/2 right-[calc(var(--spacing-m)+2.75rem)] inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent lg:hidden" />
 
     <MobileNav
-      client:idle
-      search={site.search.enabled || undefined}
+      search={site.search.enabled}
       links={NAV_LINKS}
       siteSettings={mobileNavSettings}
-      logoLightUrl={logoLightWebpMobile.src}
-      logoDarkUrl={logoDarkWebpMobile.src}
-      {...mobileCtaProps}
+      logoLightUrl={logoLightImg.src}
+      logoDarkUrl={logoDarkImg.src}
+      brandName={brandName}
+      cta={headerCta}
     />
   </div>
   {site.search.enabled && <SiteSearch />}
@@ -510,8 +493,10 @@ function isGroupActive(items: { href: string }[]) {
 
 {/* Progressive enhancement for the desktop dropdown nav. Everything still
     works without this (native <details> toggles on click/Enter/Space, links
-    are real <a> tags). This adds: open-on-hover with a small close delay,
-    close-on-outside-click, close-on-Escape, and close-when-a-link-is-followed.
+    are real <a> tags). This adds one dropdown model (card 157): open-on-hover
+    for a mouse with a 300ms close delay (a click on a label hover has opened
+    keeps it open), close-on-outside-click, close-on-Escape with focus back on
+    the label, and close-when-a-link-is-followed.
     Re-binds on astro:page-load so it survives View Transitions navigations. */}
 <script>
   // Query groups fresh each call — the nav DOM is replaced on every View
@@ -543,25 +528,41 @@ function isGroupActive(items: { href: string }[]) {
         }
       };
 
-      // Hover intent: open immediately on enter, close after a short delay on
-      // leave so a diagonal mouse path to the menu doesn't snap it shut. Only
-      // engages on pointers that can actually hover (skips touch).
+      // One model, so hover and click never fight (card 157). A mouse opens a
+      // group by hovering, and it stays open while the pointer is over the
+      // label or the panel. Clicking the label of a group hover has just opened
+      // keeps it open (it used to toggle the <details> shut under the cursor);
+      // a second click closes it. Leaving starts a 300ms close, long enough for
+      // a diagonal path from the label to a link, cancelled the moment the
+      // pointer comes back. Touch and keyboard skip all of this: a tap, Enter
+      // or Space toggles the native <details>.
+      let openedByHover = false;
       group.addEventListener('pointerenter', (e) => {
         if (e.pointerType === 'touch') return;
         cancelClose();
+        if (group.open) return;
         closeAll(group);
         group.open = true;
+        openedByHover = true;
       });
       group.addEventListener('pointerleave', (e) => {
         if (e.pointerType === 'touch') return;
         cancelClose();
         closeTimer = window.setTimeout(() => {
           group.open = false;
-        }, 140);
+          openedByHover = false;
+        }, 300);
       });
 
-      // When opened via keyboard/click, make sure the others close.
-      summary?.addEventListener('click', () => {
+      summary?.addEventListener('click', (e) => {
+        // A mouse click on a label hover has already opened: keep it open, once.
+        // (e.detail is 0 for Enter or Space, so the keyboard always toggles.)
+        if (group.open && openedByHover && e.detail > 0) {
+          e.preventDefault();
+          openedByHover = false;
+          return;
+        }
+        openedByHover = false;
         // <details> toggles AFTER this handler, so the post-toggle state is the
         // inverse of the current one. If it's about to open, close the rest.
         if (!group.open) closeAll(group);
@@ -603,4 +604,67 @@ function isGroupActive(items: { href: string }[]) {
 
   initHeaderNav();
   document.addEventListener('astro:page-load', initHeaderNav);
+</script>
+
+{/* Header compaction (card 157). data-scrolled: the page has moved, so the bar
+    compacts. From lg up the accent stripe and eyebrow strip slide up out of
+    view and the main row tightens, all with transforms (globals.css, "Header
+    compaction"), so the bar keeps its layout height and nothing under it
+    reflows. Two thresholds, not one: it compacts past 64px and opens again only
+    at 8px or less, so a small scroll jitter near the top (or the browser's
+    scroll anchoring) cannot flip it every few frames and shake the bar. The
+    global reduced-motion reset makes the change instant. */}
+<script>
+  const COMPACT_AT = 64;
+  const OPEN_AT = 8;
+
+  // How far the bar slides up when compact: the stripe plus the eyebrow strip
+  // (0 below lg, where the strip is display:none). Measured, not hard-coded,
+  // so a taller eyebrow (a long tagline, a phone number) still clears fully.
+  const measureHeader = () => {
+    const header = document.querySelector<HTMLElement>('.site-header');
+    const row = header?.querySelector<HTMLElement>('.site-header__row');
+    if (!header || !row) return;
+    header.style.setProperty('--hdr-top', `${row.offsetTop}px`);
+  };
+
+  const updateHeaderState = () => {
+    const header = document.querySelector<HTMLElement>('.site-header');
+    if (!header) return;
+    const y = window.scrollY;
+    if (y > COMPACT_AT) header.setAttribute('data-scrolled', '');
+    else if (y <= OPEN_AT) header.removeAttribute('data-scrolled');
+  };
+
+  const hw = window as typeof window & { __headerStateBound?: boolean };
+  if (!hw.__headerStateBound) {
+    hw.__headerStateBound = true;
+    let queued = false;
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          updateHeaderState();
+        });
+      },
+      { passive: true },
+    );
+    window.addEventListener(
+      'resize',
+      () => {
+        measureHeader();
+        updateHeaderState();
+      },
+      { passive: true },
+    );
+    document.addEventListener('astro:page-load', () => {
+      measureHeader();
+      updateHeaderState();
+    });
+  }
+  measureHeader();
+  updateHeaderState();
 </script>

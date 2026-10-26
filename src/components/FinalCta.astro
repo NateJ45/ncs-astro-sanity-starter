@@ -65,6 +65,11 @@ interface Props {
    * exactly as before. The shape matches what SanityImage accepts.
    */
   backgroundImage?: SanityImageObject | null;
+  /**
+   * The main button's variant. SectionRenderer passes 'secondary' when an earlier
+   * section on the page already drew the one accent button (cta-budget.ts, card 158).
+   */
+  primaryVariant?: 'primary' | 'secondary';
 }
 
 const {
@@ -79,6 +84,7 @@ const {
   headingAccent,
   subheadRich,
   backgroundImage,
+  primaryVariant = 'primary',
 } = Astro.props as Props;
 
 // Only treat the background as present when a real asset is attached, so an
@@ -168,7 +174,7 @@ const richSubhead = hasInlineRich(subheadRich);
     <div class="mt-l flex flex-wrap justify-center gap-s">
       <CtaLink
         cta={cta}
-        variant="primary"
+        variant={primaryVariant}
         onDark
         fallbackHref="/contact/"
         fallbackLabel={fallbackCtaLabel}

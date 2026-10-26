@@ -36,6 +36,8 @@ import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
 import RsvpSection from '@/components/sections/RsvpSection.astro';
 import { classifySections } from '@/lib/sectionCadence';
+import { sectionAnchors, sectionHeadingText } from '@/lib/section-anchors';
+import { primaryBudget } from '@/lib/cta-budget';
 import { expandSyncedSections } from '@/lib/authoring';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
 import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
@@ -57,9 +59,16 @@ interface Props {
    * `npm run parity compare` is the standing gate on that promise.
    */
   editDoc?: EditDoc;
+  /**
+   * 'named' (the default): a section with a heading takes an id made from it,
+   * so /about/#our-story links to it (src/lib/section-anchors.ts, card 158).
+   * 'numbered': every section keeps `<idPrefix>-<n>`. Pages that draw several
+   * renderers (the styleguide fixtures) pass 'numbered' so their ids stay unique.
+   */
+  anchors?: 'named' | 'numbered';
 }
 
-const { sections = [], idPrefix = 'section', editDoc } = Astro.props as Props;
+const { sections = [], idPrefix = 'section', editDoc, anchors = 'named' } = Astro.props as Props;
 // Synced sections (the authoring kit, PORTS.md card 109) are swapped for the
 // sections their saved copy holds BEFORE the cadence runs, so a synced band
 // takes its place in the alternating rhythm like any typed-in band (rule 9).
@@ -68,9 +77,31 @@ const { sections = [], idPrefix = 'section', editDoc } = Astro.props as Props;
 const lightSurface = (s: string | null): 'background' | 'muted' =>
   s === 'muted' ? 'muted' : 'background';
 
-const rows = classifySections<PageBuilderBlock>(
+const classified = classifySections<PageBuilderBlock>(
   expandSyncedSections(sections as PageBuilderBlock[]),
   idPrefix,
+);
+// Named anchors (card 158): a section with a heading takes a unique id made
+// from it, the rest keep the numbered one. Stega is stripped inside, so the
+// draft preview gets the live page's ids.
+const anchorIds =
+  anchors === 'named'
+    ? sectionAnchors(
+        classified.map(({ block, headingId }) => ({
+          key: (block as { _key?: string })._key,
+          heading: sectionHeadingText(block),
+          fallback: headingId,
+        })),
+      )
+    : classified.map(({ headingId }) => headingId);
+const rows = classified.map((row, i) => ({ ...row, headingId: anchorIds[i] }));
+
+// One accent button per page (src/lib/cta-budget.ts, card 158): the first
+// section that draws a primary button keeps it; every later one draws the
+// secondary variant. A closing band always draws one (CtaLink has a fallback).
+// A Hero or FinalCta a page draws OUTSIDE this renderer is not counted.
+const ctaVariant = primaryBudget(rows, ({ block }) =>
+  block._type === 'ctaBandSection' ? true : block._type === 'heroSection' && !!block.primaryCta,
 );
 
 // A real element in preview, nothing at all on the live site. The wrapper must
@@ -88,7 +119,7 @@ const editKeyOf = (block: unknown) => {
 };
 ---
 
-{rows.map(({ block: s, surface, insertDividerBefore, headingId }) => (
+{rows.map(({ block: s, surface, insertDividerBefore, headingId }, rowIndex) => (
   <>
     {insertDividerBefore && <SectionDivider />}
 
@@ -104,6 +135,7 @@ const editKeyOf = (block: unknown) => {
           scriptAccent={s.scriptAccent}
           size={s.size ?? 'short'}
           headingId={headingId}
+          primaryVariant={ctaVariant(rowIndex)}
         />
       ) : s._type === 'ctaBandSection' ? (
         <FinalCta
@@ -116,6 +148,7 @@ const editKeyOf = (block: unknown) => {
           headingAccent={s.headingAccent}
           backgroundImage={s.backgroundImage}
           headingId={headingId}
+          primaryVariant={ctaVariant(rowIndex)}
         />
       ) : s._type === 'statSection' ? (
         <StatsRow
