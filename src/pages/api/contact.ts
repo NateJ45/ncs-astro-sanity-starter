@@ -17,6 +17,10 @@
 //
 // See PORTS.md card 45 for the setup, and why this exists rather than a form
 // service.
+//
+// WHERE THE EMAIL GOES (card 174): the address an administrator set and confirmed in
+// the Studio (Site settings > Forms, kept in CONTACT_DB, never the public dataset),
+// else CONTACT_TO. No table or no row means CONTACT_TO, exactly as before.
 
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
@@ -28,25 +32,22 @@ import {
 } from '@/lib/contact-submission';
 import { site } from '@/data/site';
 import { workerMailer, type MailWorkerEnv } from '@/lib/mail-env';
+import type { D1Database } from '@/lib/mail-db';
+import { contactRecipient } from '@/lib/form-recipients';
 
 export const prerender = false;
 
-/**
- * The slice of D1 this endpoint uses, declared structurally rather than by
- * pulling in @cloudflare/workers-types. The dependency set here is a matched
- * pin (CLAUDE.md rule 8) and adding a package for one type is a poor trade;
- * this also documents exactly how much of D1 the route depends on.
- */
-interface D1Lite {
-  prepare(sql: string): {
-    bind(...values: unknown[]): { run(): Promise<{ meta?: { last_row_id?: number } }> };
-  };
-}
-
 interface ContactEnv extends Omit<MailWorkerEnv, 'CONTACT_DB'> {
-  /** D1 database holding contact_submissions. */
-  CONTACT_DB?: D1Lite;
-  /** Where notifications go. Must be a verified destination on the free path. */
+  /**
+   * D1 database holding contact_submissions (and form_recipient_addresses). The
+   * slice of D1 the routes use is declared structurally in mail-db.ts rather than
+   * by pulling in @cloudflare/workers-types (rule 8: a matched pin).
+   */
+  CONTACT_DB?: D1Database;
+  /**
+   * Where notifications go unless the Studio has a confirmed address for the
+   * Contact form. Must be a verified destination on the free path.
+   */
   CONTACT_TO?: string;
   /**
    * Who they come from (MAIL_FROM wins when both are set). Must belong to a domain the
@@ -103,12 +104,13 @@ async function passesTurnstile(
  */
 async function notifyByEmail(e: ContactEnv, s: CleanSubmission): Promise<string | null> {
   const { mailer, reason } = workerMailer(e);
-  if (!mailer || !e.CONTACT_TO) return reason ?? 'no CONTACT_TO';
+  const to = await contactRecipient(e.CONTACT_DB, e.CONTACT_TO);
+  if (!mailer || !to) return reason ?? 'no CONTACT_TO and no confirmed Studio address';
   const note = buildNotification(s, site.name);
   // Reply-To is the difference between hitting reply and copying an address
   // out of the body.
   const r = await mailer.send({
-    to: e.CONTACT_TO,
+    to,
     fromName: `${site.name} contact form`,
     subject: note.subject,
     text: note.text,

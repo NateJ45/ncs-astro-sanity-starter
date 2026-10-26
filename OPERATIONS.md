@@ -373,6 +373,22 @@ with `--local -c dist/server/wrangler.json`, `npm run preview`. The local bindin
 event's replies with `npx wrangler d1 execute <db> --remote --command "DELETE FROM rsvps WHERE event_key = '<key>'"`
 once the organiser has downloaded them (the key is in the RSVPs tool's download name and the `rsvps` table).
 
+### Where form messages go, set in the Studio (PORTS.md card 174)
+
+An administrator can set the Contact form's address from **Site settings > Forms** instead of asking for
+`CONTACT_TO` to change. The address is kept in `CONTACT_DB` (table `form_recipient_addresses`), never in the public
+dataset, and is used only once someone presses the link it was emailed. Until then, and with no row at all, the form
+sends to `CONTACT_TO` exactly as before. To switch it on (after steps 1 to 3 above, so the link can be sent):
+
+```powershell
+npx wrangler d1 migrations apply <site>-contact --remote   # adds the table; safe to run again
+```
+
+Without `MAIL_SECRET` and a sender the panel still saves an address, marked unconfirmed, and nothing goes to it. A site
+that already made the table under another migration number is fine: the SQL is `CREATE TABLE IF NOT EXISTS`. To see
+what is on file:
+`npx wrangler d1 execute <site>-contact --remote --command "SELECT recipient_key, email, pending_email, pending_status FROM form_recipient_addresses"`.
+
 ## Studio workflow tools (PORTS.md card 117)
 
 Switching each one on, per site:
