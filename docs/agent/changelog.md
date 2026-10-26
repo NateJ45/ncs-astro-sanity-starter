@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-25: one accent button per page, named section anchors, a 404 with search, calendar files (PORTS card 158)._
+
+**Decision.** The one-accent-button rule is the renderer's, not the editor's (rule 9): the first section that draws a primary button keeps it and the rest draw the secondary variant. Section ids come from the heading rather than a key map, so every site gets linkable sections with no data to keep; the cost is that a retitle moves the anchor, and a site that needs a fixed one pins it by block `_key`. The 404 search is a plain GET form, not the live panel, so it works without JavaScript and loads no Pagefind on an error page. The starter has no calendar, so only the `.ics` builder is ported; Auburn's gathering files are the reference wiring.
+
 _2026-10-25: the phone menu on a native dialog, one dropdown model, header compaction (PORTS card 157)._
 
 **Decision.** `MobileNav.tsx` (a shadcn Sheet island) is replaced by `MobileNav.astro` on a native `<dialog>`: the browser gives the focus trap, Escape, the inert page and focus return, so no Radix or React ships for the menu. Desktop dropdowns follow one model, so hover and click no longer fight. The header compacts past 64px and reopens only at 8px or less, with transforms only, so the page under it never reflows and the bar cannot shake near the top. Ported from first-baptist-auburn.

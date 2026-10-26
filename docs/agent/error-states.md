@@ -10,7 +10,7 @@ Patterns for the moments when things go sideways or content hasn't landed yet.
 
 `src/pages/404.astro` uses BaseLayout, sets a clear "That page wandered off." headline, and gives the visitor a few paths back (home, contact, or another useful destination). Eyebrow, headline, body, and CTA labels + hrefs are all Sanity-editable via the `notFoundPage` singleton -- every field has a hardcoded fallback that matches the prior look so the page works even before the doc exists in Sanity.
 
-Don't link "Search" (there isn't one). Don't dump a list of random pages.
+With site search on (`site.search.enabled`, card 126), the page carries a search box: a plain GET form to `/search/?q=...`, so it works without JavaScript (card 158). Under it, search on or off, are the site's suggested pages from `site.search.suggestions` (two or three, hand-picked). Don't dump a list of random pages.
 
 ### Form submission failure
 

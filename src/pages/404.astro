@@ -1,7 +1,12 @@
 ---
 import { withTrailingSlash } from '@/lib/href';
 // Safe to edit by hand
-// Custom 404. Warm, on-brand, two clear paths back. No search (there isn't one).
+// Custom 404. Warm, on-brand, clear paths back.
+//
+// With site search on (site.search.enabled, card 126), a search box comes
+// first: a plain GET form to /search/?q=..., so it works without JavaScript.
+// Under it, always, the site's suggested pages (site.search.suggestions), so a
+// site with search off still offers somewhere useful to go (card 158).
 //
 // Layout: two-column on desktop (text + photograph), stacked on mobile. The
 // photo is sourced from Sanity and can be replaced with any studio photo.
@@ -11,6 +16,7 @@ import { withTrailingSlash } from '@/lib/href';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getNotFoundPage, getSiteSettings } from '@/lib/queries';
 import SanityImage from '@/components/SanityImage.astro';
+import { site } from '@/data/site';
 
 const [notFoundPage, siteSettings] = await Promise.all([getNotFoundPage(), getSiteSettings()]);
 
@@ -43,6 +49,9 @@ const secondaryHref = withTrailingSlash(notFoundPage?.secondaryCtaHref) ?? '/';
 const tertiaryLabel = notFoundPage?.tertiaryCtaLabel ?? 'Get in touch';
 const tertiaryHref = withTrailingSlash(notFoundPage?.tertiaryCtaHref) ?? '/contact/';
 
+// Hand-written in src/data/site.ts, so they already end in a slash (rule 19).
+const suggestions = site.search.suggestions ?? [];
+
 const photo = notFoundPage?.heroImage ?? fallbackPhoto;
 const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
 ---
@@ -55,7 +64,8 @@ const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
     class="split mx-auto max-w-content items-center px-m py-section-lg"
     aria-labelledby="not-found-heading"
   >
-    {/* Text column. Two clear paths back — no search (there isn't one).
+    {/* Text column. Search (when the site has it), suggested pages, then the
+        buttons back.
         Centered on mobile so the lone-element page reads as a sympathetic
         "you're off-path" moment; left-aligned on desktop where the
         two-column layout needs the text anchored beside the photo column. */}
@@ -68,6 +78,59 @@ const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
         {headline}
       </h1>
       <p class="mx-auto mt-m max-w-xl text-lg leading-relaxed text-foreground/80 lg:mx-0">{body}</p>
+
+      {site.search.enabled && (
+        <form
+          class="mx-auto mt-l max-w-xl text-left lg:mx-0"
+          role="search"
+          action="/search/"
+          method="get"
+        >
+          <label for="not-found-search" class="mb-xs block text-sm font-semibold text-foreground">
+            Search the site
+          </label>
+          <div class="flex gap-s">
+            <input
+              id="not-found-search"
+              class="min-h-[44px] min-w-0 flex-1 rounded-sm border border-border-soft bg-background px-m text-base text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+              type="search"
+              name="q"
+              autocomplete="off"
+              enterkeyhint="search"
+              placeholder={site.search.placeholder}
+            />
+            <button
+              type="submit"
+              class="press-tactile inline-flex min-h-[44px] items-center rounded-sm border border-primary px-m text-xs font-semibold tracking-eyebrow text-link uppercase hover:bg-accent"
+            >
+              Search
+            </button>
+          </div>
+        </form>
+      )}
+
+      {suggestions.length > 0 && (
+        <nav
+          class="mx-auto mt-l max-w-xl text-center lg:mx-0 lg:text-left"
+          aria-labelledby="not-found-suggestions"
+        >
+          <p id="not-found-suggestions" class="mb-xs text-sm font-semibold text-foreground">
+            Pages people often look for
+          </p>
+          <ul class="flex flex-wrap justify-center gap-x-m gap-y-xs lg:justify-start" role="list">
+            {suggestions.map((l) => (
+              <li>
+                <a
+                  href={l.href}
+                  class="inline-flex min-h-[44px] items-center text-link underline underline-offset-4 hover:text-primary-dark"
+                >
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
 
       <div class="mt-l flex flex-wrap justify-center gap-m lg:justify-start">
         <a

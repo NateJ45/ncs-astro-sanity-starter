@@ -124,6 +124,12 @@ The desktop nav dropdowns live directly in `Header.astro` as SSR'd `<details>` (
 - **Secondary variant** swaps from `border-primary text-link` (brand accent on light) to `border-white/70 text-white hover:bg-white/10` (cream on dark).
 - **Focus ring** offsets against `transparent` instead of `--background` so the ring still reads on photographic surfaces.
 
+**One accent button per page (card 158).** `Hero.astro` and `FinalCta.astro` take `primaryVariant` (`'primary'` by default). `SectionRenderer` passes `'secondary'` to every section after the first one that draws a primary button (`src/lib/cta-budget.ts`), so a page builder page never shows two filled accent buttons. A new block that draws a primary button joins the `drawsPrimary` test in `SectionRenderer.astro` and takes the same prop.
+
+### Calendar files (`src/lib/ics.ts`, card 158)
+
+A PORTABLE, tested iCalendar builder for "Add to calendar" links: `buildIcs({ prodId, now, events })` handles escaping, 75-octet line folding, CRLF, RRULE (typed or raw), TZID wall times with the US zones' VTIMEZONE, UTC instants and all-day dates. The starter ships no route (it has no calendar of its own); the header comment shows the `src/pages/calendar/[key].ics.ts` endpoint a site adds. The RSVP block (`startsAt`, a UTC instant) is the natural first consumer.
+
 Use it on any CTA over a hero image or any dark panel. `Hero.astro` (image variant) and `FinalCta.astro` set it automatically. Do NOT try to override secondary-variant colors via `class="text-bg ..."` -- Tailwind v4 generates utilities alphabetically and `text-link` beats `text-bg` in the cascade. Use the prop instead.
 
 ### Mobile-only alignment pattern
