@@ -30,7 +30,7 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 
 **Settings and globals:**
 
-- `siteSettings` (singleton) -- email, phone, footer tagline, newsletter settings, section visibility flags, `businessType` (schema.org LocalBusiness subtype; drives the JSON-LD `@type` field -- defaults to `LocalBusiness` if unset), and `socialLinks` (structured array of platform + URL pairs, supersedes legacy flat social-URL fields). Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
+- `siteSettings` (singleton) -- email, phone, footer tagline, newsletter settings, section visibility flags, `businessType` (schema.org LocalBusiness subtype; drives the JSON-LD `@type` field -- defaults to `LocalBusiness` if unset), and `socialLinks` (rows of a pasted link and an optional label; the platform and icon are read from the link, see "Social links" below; supersedes legacy flat social-URL fields). Most user-visible identity text comes from here. Phone surfaces site-wide as a tap-to-call link and feeds the LocalBusiness JSON-LD schema.
 - `businessInfo` (singleton) -- service areas, travel fee tiers, availability status, studio city/state, geo coordinates, `businessModel` (`'in-person'` or `'remote'`; controls which location/travel fields show in the Studio), and `additionalLocations` (array for multi-location businesses). Split from `siteSettings` so identity fields stay in one place and operational business facts in another. `getSiteSettings()` merges both documents and returns them under a single flat interface -- no component changes needed.
 
 **Page builder schemas:**
@@ -197,6 +197,29 @@ The `purpose` strings carry compressed voice guidance for each field. These are 
 **Deploying Canvas annotation changes:** deploy the site. Canvas reads the deployed Studio schema, and the Studio ships with the site build, so `npm run deploy` is the whole step.
 
 **Activating Canvas** for the project (one-time): the toggle lives in [manage.sanity.io](https://manage.sanity.io) under the project's Canvas section.
+
+## Social links read by URL host (PORTS.md card 167)
+
+Site settings > Social links is a list of rows, each a pasted link and an optional label. There is no
+platform to pick: `platformFromUrl()` in PORTABLE `src/lib/social-links.ts` reads it from the link's host
+(16 named: Facebook, Instagram, YouTube, TikTok, WhatsApp, X, Threads, Spotify, Apple Podcasts, Vimeo, LinkedIn,
+Pinterest, Nextdoor, Flickr, Linktree, Houzz), and PORTABLE `src/lib/social-icons.ts` maps it to a Tabler icon.
+Any other address gets the plain link icon and is named by the editor's label, or its domain.
+
+- **Older data keeps working.** The old Platform dropdown is hidden, not removed (rule 1). The address wins when
+  it is known; a stored platform only stands in for an address the file does not know (a vanity domain). An empty
+  list falls back to the legacy `socialInstagram` / `socialFacebook` fields. The URL field still accepts
+  `http` so rows saved earlier validate.
+- **WhatsApp** shows only as an https group invite (`chat.whatsapp.com/...`) or number link (`wa.me/...`);
+  any other WhatsApp address is left out, on the page and in the JSON-LD `sameAs`.
+- **Studio:** each row's preview shows the name the button will read (or "Will not show"), and odd addresses
+  (a platform's home page, a search results page, a bad WhatsApp link) get a warning, never an error. More than
+  `MAX_SOCIAL_LINKS` (10) rows warns; only the first 10 draw.
+- **Callers:** `resolveSocialLinks(settings, pinnedFacebook?)` gives the ordered list; `socialLabel(link)`
+  gives the accessible name; `socialIcon(platform)` the icon. The starter draws them in `Footer.astro`. A
+  site that keeps a Facebook address elsewhere (first-baptist-auburn's Church facts) passes it as
+  `pinnedFacebook`, and it joins the front when the list has no Facebook row.
+- **Add a platform:** a row in `PLATFORMS` and a case in `socialIcon()`, in the starter, then sync out.
 
 ## Pages as first-class objects (PORTS.md cards 21 and 22)
 

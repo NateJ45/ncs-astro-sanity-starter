@@ -1,5 +1,8 @@
 # Change history
 
+_2026-10-26: social links read by URL host (PORTS card 167)._
+
+**Decision.** The editor pastes a link and the platform comes from its host, so a new account is never a code change or a dropdown choice, and a wrong pick can no longer show the wrong icon. The old dropdown stays hidden because rows hold it (rule 1), and it only decides the icon for an address the host table does not know. WhatsApp is the one platform with a rule on the address, because only an invite or number link opens a chat. Ported from first-baptist-auburn.
 _2026-10-26: calendar files can skip or move one date of a repeating event (PORTS card 177)._
 
 **Decision.** The exceptions live in `buildIcs` itself (`exdate`, `recurrenceId` on `IcsEvent`) rather than in each site splicing lines into the finished file, which is what first-baptist-auburn did first. Both are standard RFC 5545 properties, so a subscribed calendar keeps one series and changes only the date in question. Value types are checked against DTSTART and a bad combination throws at build time instead of shipping a file some apps reject. Events without exceptions are written byte for byte as before.
