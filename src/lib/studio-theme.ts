@@ -232,7 +232,7 @@ export function studioColors(input: StudioColorInput, stock: StockColors): Studi
   } else {
     white = mix(stock.white, WARM_PAPER, PAPER_WARMTH);
     notes.push(
-      `Light background: ${white}, Sanity's white warmed (the brand's ${String(input.lightBackground ?? 'none')} is not a light hex colour).`,
+      `Light background: ${white}, Sanity's white warmed (the brand's ${String(input.lightBackground ?? 'none')} is not a light hex color).`,
     );
   }
 
@@ -242,7 +242,7 @@ export function studioColors(input: StudioColorInput, stock: StockColors): Studi
     notes.push(`Dark background: ${black} (the site's own).`);
   } else {
     notes.push(
-      `Dark background: Sanity's own ${stock.black} (the brand's ${String(input.darkBackground ?? 'none')} is not a dark hex colour).`,
+      `Dark background: Sanity's own ${stock.black} (the brand's ${String(input.darkBackground ?? 'none')} is not a dark hex color).`,
     );
   }
 
@@ -260,7 +260,7 @@ export function studioColors(input: StudioColorInput, stock: StockColors): Studi
   } else {
     accent = { ...stock.blue };
     notes.push(
-      `Accent: Sanity's own blue (the brand's ${String(input.accent ?? 'none')} is not a hex colour).`,
+      `Accent: Sanity's own blue (the brand's ${String(input.accent ?? 'none')} is not a hex color).`,
     );
   }
 
@@ -352,7 +352,7 @@ export function chromeColors(
   } else {
     bg = stock.gray['900'];
     notes.push(
-      `Navbar: Sanity's own ${bg} (the brand's ${String(input.chrome ?? 'none')} is not a hex colour).`,
+      `Navbar: Sanity's own ${bg} (the brand's ${String(input.chrome ?? 'none')} is not a hex color).`,
     );
   }
   const fromBg = stock.darkBg ?? stock.gray['950'];

@@ -52,13 +52,13 @@ export const SECTION_LOOKS: LookOption[] = [
   {
     value: 'quiet',
     title: 'Quiet',
-    hint: 'Always the plain page colour, with no band. Good after a busy section.',
+    hint: 'Always the plain page color, with no band. Good after a busy section.',
     surface: 'background',
   },
   {
     value: 'feature',
     title: 'Feature',
-    hint: 'The deep brand colour with light text. Use it once or twice a page, for the part that matters most.',
+    hint: 'The deep brand color with light text. Use it once or twice a page, for the part that matters most.',
     surface: 'feature',
   },
 ];

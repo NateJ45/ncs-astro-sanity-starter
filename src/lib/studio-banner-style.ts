@@ -284,8 +284,7 @@ export function resolveBannerStyle(
         ground = color;
         root['data-hb-bg'] = '';
         rootVars.push(`--hb-bg:${color}`);
-      } else
-        notes.push('background.color: needs a hex colour white text reads on at 7:1; ignored.');
+      } else notes.push('background.color: needs a hex color white text reads on at 7:1; ignored.');
     }
     const tex = publicPath(bg.texture);
     if (bg.texture !== undefined) {
@@ -299,7 +298,7 @@ export function resolveBannerStyle(
       if (line) {
         root['data-hb-rule'] = '';
         rootVars.push(`--hb-rule:${line}`);
-      } else notes.push('background.rule: needs a hex colour; ignored.');
+      } else notes.push('background.rule: needs a hex color; ignored.');
     }
   }
 
@@ -307,7 +306,7 @@ export function resolveBannerStyle(
     const h = hex(c);
     if (c === undefined) return null;
     if (!h) {
-      notes.push(`${what}: not a hex colour; ignored.`);
+      notes.push(`${what}: not a hex color; ignored.`);
       return null;
     }
     if (contrastRatio(h, ground) < min) {
@@ -386,7 +385,7 @@ export function resolveBannerStyle(
       const ec = hex(ti.echo.color);
       const off = ti.echo.offset === undefined ? '0.055em' : cleanLength(ti.echo.offset);
       if (ec && off) shadow = `${off} ${off} 0 ${ec}`;
-      else notes.push('title.echo: needs a hex colour and a length; ignored.');
+      else notes.push('title.echo: needs a hex color and a length; ignored.');
     }
     out.push(
       rule(P('title'), [
@@ -444,7 +443,7 @@ export function resolveBannerStyle(
         );
       else if (!cbg || !cfg)
         notes.push(
-          'chip: a shape needs both bg and fg as hex colours; chip left as Sanity draws it.',
+          'chip: a shape needs both bg and fg as hex colors; chip left as Sanity draws it.',
         );
       else if (contrastRatio(cfg, cbg) < BODY_CONTRAST)
         notes.push('chip: fg on bg is under 4.5:1; chip left as Sanity draws it.');
@@ -452,7 +451,7 @@ export function resolveBannerStyle(
         const hbg = hex(ch.hoverBg) ?? mix(cbg, '#ffffff', 0.18);
         let hfg = hex(ch.hoverFg) ?? cfg;
         if (contrastRatio(hfg, hbg) < BODY_CONTRAST) {
-          notes.push('chip.hoverFg: under 4.5:1 on the hover fill; the text colour is kept.');
+          notes.push('chip.hoverFg: under 4.5:1 on the hover fill; the text color is kept.');
           hfg = cfg;
         }
         const edge = hex(ch.edge) ?? cfg;
@@ -471,7 +470,7 @@ export function resolveBannerStyle(
           if (halo && (shape === 'square' || shape === 'pill')) {
             chipAttrs['data-hb-halo'] = '';
             rootVars.push(`--hb-chip-halo:${halo}`);
-          } else notes.push('chip.halo: a hex colour, on the square or pill shape; ignored.');
+          } else notes.push('chip.halo: a hex color, on the square or pill shape; ignored.');
         }
       }
     }
@@ -497,7 +496,7 @@ export function resolveBannerStyle(
       chipAttrs['data-hb-stamp'] = '';
       rootVars.push(`--hb-stamp-color:${sc}`);
       out.push(rule(P('stamp'), [['font-family', sf]]));
-    } else notes.push('stamp: needs words (under 60 characters) and a readable colour; ignored.');
+    } else notes.push('stamp: needs words (under 60 characters) and a readable color; ignored.');
   }
 
   if (rootVars.length) out.unshift(`.ncs-hb{${rootVars.join(';')}}`);

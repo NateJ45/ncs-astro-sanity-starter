@@ -155,7 +155,7 @@ export default function HeadingAccentPicker(props: OverlayComponentProps): React
             <p style={{ margin: '10px 0 0', color: TOOL.muted, fontSize: '12px' }}>
               {loaded.accent
                 ? 'Click the accented word again to make the heading plain.'
-                : 'One word per heading. It takes the brand accent colour.'}
+                : 'One word per heading. It takes the brand accent color.'}
             </p>
           </div>
         </PointerEvents>

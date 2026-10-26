@@ -97,7 +97,7 @@ export function headingAccentField() {
     title: 'Accent word in the heading',
     type: 'string',
     description:
-      'Optional. Type a word or short phrase from the heading above and it is set in the brand accent colour. Leave it blank for a plain heading, and leave it blank if you are already using the script accent.',
+      'Optional. Type a word or short phrase from the heading above and it is set in the brand accent color. Leave it blank for a plain heading, and leave it blank if you are already using the script accent.',
   });
 }
 

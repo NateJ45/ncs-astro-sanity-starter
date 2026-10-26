@@ -248,7 +248,7 @@
         },
         "look": {
           "type": "object",
-          "description": "Optional. The site's own devices inside the Studio (PORTS.md card 128, src/lib/studio-look.ts): every family site should differ in form, not only colour. Unset keys take neutral defaults (a dot marker, round stones, a plain line, no texture, no lettering). Colours are guarded for contrast; an unusable value is ignored with a note.",
+          "description": "Optional. The site's own devices inside the Studio (PORTS.md card 128, src/lib/studio-look.ts): every family site should differ in form, not only color. Unset keys take neutral defaults (a dot marker, round stones, a plain line, no texture, no lettering). Colors are guarded for contrast; an unusable value is ignored with a note.",
           "properties": {
             "marker": {
               "description": "The section marker: \"dot\", \"steps\", \"rule\" or \"diamond\", or the site's own art { src (a path in public/), width, height }.",
@@ -269,7 +269,7 @@
             "headingColor": { "$ref": "#/definitions/hex" },
             "markColors": {
               "type": "array",
-              "description": "The numbered stones' colours, in order.",
+              "description": "The numbered stones' colors, in order.",
               "items": { "$ref": "#/definitions/hex" }
             },
             "stone": { "type": "string", "enum": ["pebble", "round", "square", "lozenge"] },

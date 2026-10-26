@@ -274,6 +274,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
 | 162 | `studio.look.splash: motif`: the site's own art replaces the splash's stone path    | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
 | 163 | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10654,3 +10655,35 @@ see its PR.
 sync-check green.
 
 **Who should take it.** Any site whose email list is kept outside the website.
+
+## Card 164: American spelling everywhere a visitor or editor reads, and a CSP line-length guard (2026-10-26)
+
+**Origin:** first-baptist-auburn's 2026-10-25 audit asked for American spelling. Nathan's call (2026-10-26): every
+site in the family is American English. The starter still had British spellings in strings people read: Studio
+labels and help, block descriptions, the editor guide, the Writing helper's prompt, contact email subjects and
+build warnings. Drafted as a card 160 branch (`port/card-160`), parked, renumbered here when 160 went to
+file-style redirects.
+
+**Canonical:** PORTABLE `src/lib/contact-submission.ts` (+ test), `src/lib/page-checks.ts`,
+`src/sanity/components/UndoRedo.tsx`, `scripts/build-csp.mjs`, `src/lib/section-looks.ts`,
+`src/lib/studio-ai.ts`, `src/lib/studio-banner-style.ts`, `src/lib/studio-look.ts`, `src/lib/studio-theme.ts`,
+`src/lib/contrast.ts`, `src/sanity/guides/content.ts`, `src/sanity/components/BrandKit.tsx`,
+`src/components/preview/overlay/HeadingAccentPicker.tsx`, `src/sanity/schemaTypes/_appearanceFields.ts`,
+`contactPage.ts`, `newsletter.ts`, `src/pages/styleguide/looks.astro`, `sections.astro`,
+`brand/brand.config.schema.json`.
+
+**What it does.**
+
+1. **Spelling.** Text people read now says color, neighbor, neighborhoods, recognize, organizer, gray, labeled,
+   inquiry ("Website inquiry" is the contact email's default subject), judgment. Only strings changed: no
+   identifier, CSS class, Sanity field name or stored value was renamed (a renamed field would orphan stored
+   content). Code comments are left as they are. Check with a sweep of quoted strings for British spellings.
+2. **CSP guard.** `build-csp.mjs` fails the build when the `Content-Security-Policy` line in `_headers` passes
+   Cloudflare's 2,000 characters, and warns within 100 of it (the limit failed a first-baptist-auburn deploy,
+   card 159).
+
+**Verified in the starter (2026-10-26):** `npm run test:unit` (1425 + 147 pass), `npm run check` (0 errors).
+
+**Applied:** starter (this card). Sites take the copies; each site's own strings get the same pass in the same PR.
+
+**Who should take it.** Every site (they are all American English).

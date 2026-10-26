@@ -134,7 +134,7 @@ export default function BrandKit() {
       <Stack gap={5} style={{ maxWidth: 720, margin: '0 auto' }}>
         <Stack gap={3}>
           <Text size={3} weight="semibold">
-            Brand colours and type
+            Brand colors and type
           </Text>
           <Text size={2} muted style={{ lineHeight: 1.6 }}>
             For anything made away from the website: a flyer, a social post, a printed sign. These

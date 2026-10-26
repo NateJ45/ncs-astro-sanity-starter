@@ -26,7 +26,7 @@ export interface Rgb {
 export function hexToRgb(hex: string): Rgb {
   const h = hex.trim().replace(/^#/, '');
   const full = h.length === 3 ? h.replace(/./g, (c) => c + c) : h;
-  if (!/^[0-9a-fA-F]{6}$/.test(full)) throw new Error(`Not a hex colour: "${hex}"`);
+  if (!/^[0-9a-fA-F]{6}$/.test(full)) throw new Error(`Not a hex color: "${hex}"`);
   return {
     r: parseInt(full.slice(0, 2), 16),
     g: parseInt(full.slice(2, 4), 16),
