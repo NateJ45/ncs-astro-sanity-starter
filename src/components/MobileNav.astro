@@ -1,0 +1,342 @@
+---
+// Foundation, edit with care
+// The phone menu: the hamburger button and the drawer it opens (PORTS.md card 157).
+//
+// Server markup on a native <dialog>, not a React island. It used to be a shadcn Sheet (Radix
+// Dialog) hydrated at client:idle; now the browser does the work:
+//   - showModal() gives the focus trap, Escape to close, the inert page behind, and focus back on
+//     the hamburger when it closes. The small script below only opens and closes it.
+//   - A click on the dim backdrop (the dialog element itself, outside the panel) closes it, as
+//     does the X button and following any link inside it.
+//   - The page behind does not scroll while it is open (html:has(...) rule in globals.css).
+//   - It closes as an Astro View Transitions navigation starts (astro:before-preparation), so the
+//     next page is never left inert under a stale modal.
+//   - With JavaScript off the hamburger is a real link to the footer (#site-footer), so a phone
+//     whose scripts failed still reaches every page.
+// Rule 4 is untouched: the desktop nav is still the server-rendered row in Header.astro.
+//
+// Layout (top to bottom inside the panel):
+//   1. Brand accent stripe + "Menu" eyebrow, close button on the right
+//   2. Primary CTA (the header's button from Site Settings)
+//   3. "Search the site" row (only when site search is on, card 126)
+//   4. Tagline in the display serif
+//   5. Nav links: flat items are single rows; dropdown groups are a heading with indented
+//      sub-items underneath (always expanded, the drawer scrolls)
+//   6. Email, phone, social icons and the theme toggle, pushed to the bottom
+//   7. The logo at the foot of the panel
+// Motion: the panel slides in from the right with a transform (globals.css, "Mobile menu"); the
+// global reduced-motion reset turns it off.
+//
+// Data: tagline, email, phone and socials come from Sanity siteSettings via Header.astro, with
+// defaults so the menu renders cleanly before content is wired up.
+
+import { Menu, Mail, Phone, ChevronRight, Search, X } from 'lucide-react';
+import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
+import ThemeToggle from './ThemeToggle';
+import { telHref } from '@/lib/phone';
+import type { NavItem } from '@/lib/siteSettings';
+
+interface Props {
+  links: NavItem[];
+  siteSettings?: {
+    tagline?: string;
+    email?: string;
+    phone?: string;
+    socialInstagram?: string;
+    socialFacebook?: string;
+  } | null;
+  /** Logo URLs from Astro's getImage() in Header.astro (same files as the header logo). */
+  logoLightUrl?: string;
+  logoDarkUrl?: string;
+  /** Alt text for the logo at the foot of the panel. */
+  brandName?: string;
+  /** The drawer's primary button: the header's own button (Site Settings). */
+  cta?: { show: boolean; label: string; href: string };
+  /** Visitor search is on (src/data/site.ts search.enabled, PORTS.md card 126). */
+  search?: boolean;
+}
+
+const {
+  links,
+  siteSettings,
+  logoLightUrl,
+  logoDarkUrl,
+  brandName = 'Studio Starter',
+  cta = { show: true, label: 'Book a consultation', href: '/contact/' },
+  search = false,
+} = Astro.props;
+
+const tagline = siteSettings?.tagline ?? 'Your tagline goes here.';
+const email = siteSettings?.email;
+const phone = siteSettings?.phone;
+const ig = siteSettings?.socialInstagram;
+const fb = siteSettings?.socialFacebook;
+---
+
+<div class="site-header__menu absolute top-1/2 right-m -translate-y-1/2 lg:hidden">
+  {/* A link until the script below takes it over: with JavaScript off it jumps to the footer. */}
+  <a
+    href="#site-footer"
+    aria-label="Open menu"
+    aria-controls="site-menu"
+    data-menu-open
+    class="inline-flex h-11 w-11 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+  >
+    <Menu size={22} aria-hidden="true" />
+  </a>
+
+  <dialog id="site-menu" class="mobile-menu" aria-labelledby="site-menu-title" data-menu>
+    <div class="mobile-menu__panel flex flex-col overflow-y-auto border-t-4 border-t-primary bg-background text-foreground">
+      <div class="flex items-center justify-between pt-l pr-m pb-m pl-l">
+        <p
+          id="site-menu-title"
+          class="font-body text-xs font-normal tracking-eyebrow text-foreground/80 uppercase"
+        >
+          Menu
+        </p>
+        <button
+          type="button"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          data-menu-close
+        >
+          <X size={20} aria-hidden="true" />
+          <span class="sr-only">Close menu</span>
+        </button>
+      </div>
+
+      {/* Primary CTA, the main conversion action, before the nav list. */}
+      {cta.show && (
+        <div class="px-l pb-l">
+          <a
+            href={cta.href}
+            class="block w-full rounded-md bg-primary-dark px-m py-m text-center text-xs font-semibold tracking-eyebrow text-white uppercase transition-colors hover:bg-accent-dark"
+          >
+            {cta.label}
+          </a>
+        </div>
+      )}
+
+      {/* Visitor search (card 126). A real link to /search/, so it works without the script. */}
+      {search && (
+        <div class="px-l pb-l">
+          <a
+            href="/search/"
+            data-menu-search
+            class="flex min-h-11 w-full items-center gap-s rounded-md border border-border px-m py-s text-left text-base text-foreground/80 transition-colors hover:border-primary hover:text-link"
+          >
+            <Search size={18} aria-hidden="true" />
+            Search the site
+          </a>
+        </div>
+      )}
+
+      <p class="px-l pb-l font-display text-h4 leading-snug text-foreground/85 italic">{tagline}</p>
+
+      <nav class="border-t border-border-soft py-s" aria-label="Primary mobile">
+        {links.map((item) =>
+          item.kind === 'flat' ? (
+            <a
+              href={item.href}
+              class="flex items-center px-l py-s font-display text-lg text-foreground transition-colors hover:bg-muted hover:text-link"
+            >
+              {item.label}
+            </a>
+          ) : (
+            <div>
+              {/* Group heading: not a link; the sub-items carry the real hrefs. */}
+              <p class="px-l pt-m pb-xs text-xs tracking-eyebrow text-foreground/80 uppercase">
+                {item.label}
+              </p>
+              {item.items.map((sub) => (
+                <a
+                  href={sub.href}
+                  class="flex items-center gap-xs py-xs pr-l pl-[calc(theme(spacing.l)+0.5rem)] font-body text-base text-foreground transition-colors hover:bg-muted hover:text-link"
+                >
+                  <ChevronRight
+                    size={12}
+                    className="shrink-0 text-foreground/40"
+                    aria-hidden="true"
+                  />
+                  {sub.label}
+                </a>
+              ))}
+            </div>
+          ),
+        )}
+      </nav>
+
+      {/* Spacer pushes the contact block and logo to the bottom. */}
+      <div class="flex-1"></div>
+
+      <div class="border-t border-border-soft px-l pt-m pb-s">
+        <p class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">Get in touch</p>
+        {email && (
+          <a
+            href={`mailto:${email}`}
+            class="inline-flex items-center gap-s text-sm text-link hover:underline"
+          >
+            <Mail size={16} aria-hidden="true" />
+            {email}
+          </a>
+        )}
+        {phone && (
+          <a
+            href={telHref(phone)}
+            class="mt-s flex items-center gap-s text-sm text-link hover:underline"
+          >
+            <Phone size={16} aria-hidden="true" />
+            {phone}
+          </a>
+        )}
+
+        <div class="mt-m flex items-center gap-s">
+          {ig && (
+            <a
+              href={ig}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border-soft text-foreground transition-colors hover:border-primary-dark hover:bg-primary-dark hover:text-white"
+            >
+              <IconBrandInstagram size={20} stroke={1.5} />
+            </a>
+          )}
+          {fb && (
+            <a
+              href={fb}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border-soft text-foreground transition-colors hover:border-primary-dark hover:bg-primary-dark hover:text-white"
+            >
+              <IconBrandFacebook size={20} stroke={1.5} />
+            </a>
+          )}
+          <div class="ml-auto">
+            {/* The same React toggle the desktop eyebrow strip hydrates, so the
+                theme behaviour is identical on every width. */}
+            <ThemeToggle client:idle />
+          </div>
+        </div>
+      </div>
+
+      {/* Logo at the foot: the same SVG URL as the header logo (a free cache hit). */}
+      {logoLightUrl && (
+        <div class="flex justify-center border-t border-border-soft px-l py-l">
+          <img
+            src={logoLightUrl}
+            alt={brandName}
+            width={280}
+            height={60}
+            class="block h-10 w-auto dark:hidden"
+            loading="lazy"
+            decoding="async"
+          />
+          {logoDarkUrl && (
+            <img
+              src={logoDarkUrl}
+              alt=""
+              aria-hidden="true"
+              width={280}
+              height={60}
+              class="hidden h-10 w-auto dark:block"
+              loading="lazy"
+              decoding="async"
+            />
+          )}
+        </div>
+      )}
+    </div>
+  </dialog>
+</div>
+
+<script>
+  // Open and close the menu. The focus trap, Escape, the inert page behind and focus back on the
+  // hamburger are the native <dialog>'s own. The header is swapped on every View Transitions
+  // navigation, so the listeners are delegated from the document and bound once.
+  const menu = () => document.querySelector<HTMLDialogElement>('dialog[data-menu]');
+  const trigger = () => document.querySelector<HTMLAnchorElement>('[data-menu-open]');
+
+  // The hamburger is a link to the footer until now: make it the button it acts as.
+  function upgrade() {
+    const t = trigger();
+    if (!t || t.dataset.menuReady !== undefined) return;
+    t.dataset.menuReady = '';
+    t.setAttribute('role', 'button');
+    t.setAttribute('aria-haspopup', 'dialog');
+    t.setAttribute('aria-expanded', 'false');
+  }
+
+  function open() {
+    const d = menu();
+    if (!d || d.open) return;
+    d.showModal();
+    trigger()?.setAttribute('aria-expanded', 'true');
+  }
+
+  function close() {
+    const d = menu();
+    if (d?.open) d.close();
+  }
+
+  const w = window as typeof window & { __menuBound?: boolean };
+  if (!w.__menuBound) {
+    w.__menuBound = true;
+
+    // Capture phase: the hamburger is a same-page #link, which Astro's router would otherwise take.
+    document.addEventListener(
+      'click',
+      (e) => {
+        if (e.button !== 0) return;
+        const target = e.target as Element | null;
+        if (!target?.closest) return;
+        if (target.closest('[data-menu-open]')) {
+          e.preventDefault();
+          e.stopPropagation();
+          open();
+          return;
+        }
+        const d = menu();
+        if (!d?.open || !d.contains(target)) return;
+        // The backdrop: a click outside the panel lands on the dialog element itself.
+        if (target === d || target.closest('[data-menu-close]')) {
+          close();
+          return;
+        }
+        // "Search the site": the menu closes first, then the search dialog opens, so the two
+        // modals never hold focus at once. A modified click still opens /search/ in a new tab.
+        if (target.closest('[data-menu-search]')) {
+          const me = e as MouseEvent;
+          if (me.ctrlKey || me.metaKey || me.shiftKey) return;
+          e.preventDefault();
+          // The search dialog's own click listener would read this click as "a link inside the
+          // open dialog" and shut it again the moment it opened.
+          e.stopImmediatePropagation();
+          close();
+          window.dispatchEvent(new CustomEvent('site-search:open'));
+          return;
+        }
+        // Any other link closes the menu as it is followed.
+        if (target.closest('a')) close();
+      },
+      true,
+    );
+
+    // Keep the trigger's state right whichever way the menu closed (X, Escape, backdrop, a link).
+    document.addEventListener(
+      'close',
+      (e) => {
+        if ((e.target as Element)?.matches?.('dialog[data-menu]')) {
+          trigger()?.setAttribute('aria-expanded', 'false');
+        }
+      },
+      true,
+    );
+
+    // Close as a View Transitions navigation starts (Back or Forward too), so the page behind is
+    // not left inert under the swap.
+    document.addEventListener('astro:before-preparation', close);
+    document.addEventListener('astro:page-load', upgrade);
+  }
+  upgrade();
+</script>

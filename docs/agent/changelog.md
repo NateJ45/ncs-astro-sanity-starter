@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-25: the phone menu on a native dialog, one dropdown model, header compaction (PORTS card 157)._
+
+**Decision.** `MobileNav.tsx` (a shadcn Sheet island) is replaced by `MobileNav.astro` on a native `<dialog>`: the browser gives the focus trap, Escape, the inert page and focus return, so no Radix or React ships for the menu. Desktop dropdowns follow one model, so hover and click no longer fight. The header compacts past 64px and reopens only at 8px or less, with transforms only, so the page under it never reflows and the bar cannot shake near the top. Ported from first-baptist-auburn.
+
 _2026-10-19: the Studio teaches itself: tours, clips, Quick update jobs as data (PORTS card 137)._
 
 **Decision.** The card 106 tour becomes a spotlight engine whose steps are plain data in each site's `src/sanity/studio-tours.ts`, anchored to the kit's own `data-tour` hooks and to a short, documented list of Sanity selectors; a missing anchor centres the popover rather than failing, so a Sanity rename degrades a tour instead of breaking it. A welcome and a dated What's new open once per person from localStorage and open nothing when storage is blocked. Quick update gains six job kinds declared as data, so a site covers its weekly jobs without writing save code; edits write the published copy and any open draft together so they never drift. Guides play the site's own clips from a registry by key, poster first. The recorder and the screenshot script drive the local kit harness with writes refused and the avatar and names covered. Background music is optional, mixed at a quiet bed, and never committed: the repos are public and the track's licence is not theirs.

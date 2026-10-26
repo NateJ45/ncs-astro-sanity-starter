@@ -145,7 +145,7 @@ function onUnlessOff(value?: boolean | null): boolean {
 
 /**
  * Map the editor-managed top menu into the {kind} shape the header render and
- * MobileNav both consume. navGroup -> dropdown, navLink -> flat. Entries with
+ * MobileNav.astro both consume. navGroup -> dropdown, navLink -> flat. Entries with
  * no label, or whose destination resolves to nothing, are dropped so a
  * half-filled row can't put a dead link in the menu. Returns null when nothing
  * usable is set, so the caller falls back to the built-in menu.

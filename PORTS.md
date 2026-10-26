@@ -10400,3 +10400,47 @@ white and navy ring literals (the starter uses its own tokens), the heading size
 
 **Who should take it.** Every site with a contact form or an FAQ. Sites with their own dark bands add
 `data-dark-surface`.
+
+## Card 157: The phone menu on a native dialog, one dropdown model, transform-only header compaction (2026-10-25)
+
+**Origin:** first-baptist-auburn's 2026-10-25 UX and web-dev audits (Auburn PR #174, "chrome", and the later
+header-shake fix in its `Header.astro`). The phone menu was a shadcn Sheet (Radix Dialog) React island on every page;
+a hover-opened dropdown snapped shut when its label was clicked; and Auburn's compacting header changed height, so
+scroll anchoring moved `scrollY` back across a single 8px threshold and the bar shook near the top.
+
+**Canonical:** no new PORTABLE files. Every file here is a per-site Foundation file each site has already reskinned:
+`src/components/MobileNav.astro` (new, replaces the deleted `MobileNav.tsx`), `src/components/Header.astro`, the
+"Header compaction" and "Mobile menu" blocks in `src/styles/globals.css`, and `id="site-footer"` on the footer in
+`src/components/Footer.astro`. A site copies the behaviour, not the bytes.
+
+**What it does.**
+
+1. **Phone menu on `<dialog>`.** `MobileNav.astro` is server markup: the hamburger and every link are in the HTML, and
+   no Radix or React runtime ships for it. `showModal()` gives the focus trap, Escape, the inert page and focus back on
+   the hamburger; a small delegated script (bound once, survives View Transitions) opens it and closes it on the X,
+   the backdrop (a click whose target is the dialog itself), any link inside, and `astro:before-preparation`.
+   `html:has(.mobile-menu[open])` locks the page scroll. The panel slides in from the right with a transform; the global
+   reduced-motion reset flattens it. "Search the site" closes the menu, then fires `site-search:open`, with
+   `stopImmediatePropagation()` so the search dialog's own click listener does not shut it again. With JS off the
+   hamburger is a link to `#site-footer`. The starter's layout, nav data, groups, CTA and theme toggle (the same
+   `ThemeToggle client:idle` the eyebrow strip uses) are kept. The `site-header__menu` hook class is kept, so the
+   `minimal` header variant still shows the menu at desktop widths.
+2. **One dropdown model.** Mouse hover opens a group; clicking a label hover just opened keeps it open (a second click
+   closes); leaving starts a 300ms close cancelled on return; tap, Enter and Space toggle the native `<details>`
+   (`e.detail === 0` for the keyboard); Escape closes and returns focus to the label. Still server-rendered (rule 4).
+3. **Header compaction, transforms only.** Past 64px of scroll the header gets `data-scrolled`, cleared only at 8px or
+   less (the hysteresis that stops the shake). From lg up the bar slides up by the stripe plus eyebrow height (measured
+   into `--hdr-top`) plus `--spacing-m`, its row contents slide down by half of that, and the logo scales 48 to 40px:
+   the bar keeps its layout height, so nothing under it reflows. Below lg it only gains a shadow. The existing
+   hide-on-scroll-down (`data-state="hidden"`) still wins.
+
+**Not ported:** Auburn's church groups, This Sunday card, Live now row, Give button, brick sill and big-serif full-screen
+sheet (church-only design); the "Menu" pill and `data-nav-complete` (Auburn hides the pill when the desktop row lists
+every page; the starter's desktop never shows the hamburger except in the `minimal` variant); the Home `data-past`
+logo swap (Auburn's Home hero only). `src/components/ui/sheet.tsx` stays: nothing in the starter imports the Sheet now,
+but it is part of the shadcn set; `radix-ui` is still used by the other primitives, and nothing was uninstalled.
+
+**Applied:** starter (this card). first-baptist-auburn = source (applied).
+
+**Who should take it.** Every site still on `MobileNav.tsx`: swap in `MobileNav.astro` restyled to the site, the dropdown
+script and the compaction block. Check the site's own header CSS for height or padding transitions first.
