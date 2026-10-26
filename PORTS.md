@@ -277,7 +277,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
-| 173 | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 177 | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10743,7 +10743,7 @@ build: `tests/search.spec.ts` 8 passed (the misspelling test failed before); "cn
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).
 
-## Card 173: Calendar files can skip or move one date of a repeating event (2026-10-26)
+## Card 177: Calendar files can skip or move one date of a repeating event (2026-10-26)
 
 **Origin:** first-baptist-auburn's "A different Sunday" (its PR #212): when a weekly gathering is cancelled or meets
 at another time one week, its `.ics` files say so. Auburn first spliced EXDATE and RECURRENCE-ID lines into

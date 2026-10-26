@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 // Foundation, edit with care
 // =============================================================================
-// Calendar files (.ics) for "Add to calendar" links (PORTS.md cards 158, 173)
+// Calendar files (.ics) for "Add to calendar" links (PORTS.md cards 158, 177)
 // =============================================================================
 // Builds an iCalendar (RFC 5545) file as a string: one VCALENDAR holding one or
 // more VEVENTs. Pure: no fetch and no clock (the caller passes `now` for the
@@ -21,7 +21,7 @@
 //     names, but strictly RFC 5545 wants a VTIMEZONE, so add its rules to
 //     US_TIMEZONES' pattern if a site needs one.
 //   - repeat rules (RRULE) from a small typed object, or a raw string
-//   - exceptions to a repeat (card 173): `exdate` drops occurrences (EXDATE),
+//   - exceptions to a repeat (card 177): `exdate` drops occurrences (EXDATE),
 //     and an event with `recurrenceId` replaces ONE occurrence of the event
 //     with the same `uid` (a new time, place or title for that date only)
 //
@@ -51,7 +51,7 @@
 //       { headers: { 'Content-Type': 'text/calendar; charset=utf-8' } },
 //     );
 //
-// SKIPPING OR MOVING ONE DATE of a weekly event (card 173). Both are the same
+// SKIPPING OR MOVING ONE DATE of a weekly event (card 177). Both are the same
 // series to a calendar app, so the event stays one entry it can update:
 //
 //   const weekly = {

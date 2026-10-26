@@ -101,7 +101,7 @@ test('a UTC event needs no VTIMEZONE', () => {
   assert.ok(ics.includes('DTSTART:20261101T150000Z\r\n'));
 });
 
-// Card 173: exceptions to a repeat (RFC 5545 3.8.4.4 RECURRENCE-ID, 3.8.5.1 EXDATE).
+// Card 177: exceptions to a repeat (RFC 5545 3.8.4.4 RECURRENCE-ID, 3.8.5.1 EXDATE).
 const NY = 'America/New_York';
 const series: IcsEvent = {
   uid: 'weekly-worship@example.com',
