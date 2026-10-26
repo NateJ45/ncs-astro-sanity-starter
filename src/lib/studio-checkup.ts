@@ -449,7 +449,7 @@ export function unconfirmedRule(
       return {
         severity,
         label: `${plural(hits.length, 'page')} with facts still to confirm`,
-        detail: `${listNames(hits.map(nameOf))}. Some words on these are marked "to be confirmed" or not yet ticked as confirmed. Check them, correct them if needed, and remove the marker.`,
+        detail: `${listNames(hits.map(nameOf))}. Some words on these are marked "to be confirmed" or not yet checked as confirmed. Check them, correct them if needed, and remove the marker.`,
         ...openFirst(hits),
         items: itemsOf(hits, nameOf),
         itemLabel: 'Facts to confirm',

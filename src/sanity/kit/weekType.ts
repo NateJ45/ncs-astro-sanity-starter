@@ -34,7 +34,7 @@ export const studioWeekType = defineType({
     }),
     defineField({
       name: 'ticked',
-      title: 'Jobs ticked by hand',
+      title: 'Jobs checked by hand',
       type: 'array',
       of: [{ type: 'string' }],
     }),
@@ -43,7 +43,7 @@ export const studioWeekType = defineType({
     select: { weekOf: 'weekOf', ticked: 'ticked' },
     prepare: ({ weekOf, ticked }: { weekOf?: string; ticked?: string[] }) => ({
       title: `Week starting ${weekOf ?? '?'}`,
-      subtitle: `${ticked?.length ?? 0} ticked by hand`,
+      subtitle: `${ticked?.length ?? 0} checked by hand`,
     }),
   },
 });

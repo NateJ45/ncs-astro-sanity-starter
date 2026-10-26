@@ -23,7 +23,7 @@ describe('validateSubmission', () => {
       name: 'Ada Lovelace',
       email: 'ada@example.com',
       message: 'Hello',
-      subject: 'Website enquiry',
+      subject: 'Website inquiry',
       turnstileToken: null,
     });
   });

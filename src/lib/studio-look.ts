@@ -322,7 +322,7 @@ export function resolveLook(input: StudioLookInput | undefined, base: LookBase):
 
   const given = (look.markColors ?? []).map(hex).filter((c): c is string => !!c);
   if (look.markColors && given.length !== look.markColors.length)
-    notes.push('look.markColors: some entries are not hex colours and were left out.');
+    notes.push('look.markColors: some entries are not hex colors and were left out.');
   const marks = given.length ? given : [base.accent];
 
   const lettering =
@@ -804,7 +804,7 @@ export function neutralLookWarnings(input: StudioLookInput | undefined): string[
       'studio.look.stone is the neutral round stone: pick pebble, square, lozenge or a shape of its own.',
     );
   if (!look.markColors || look.markColors.length < 2)
-    out.push('studio.look.markColors names fewer than two colours, so every stone is the accent.');
+    out.push('studio.look.markColors names fewer than two colors, so every stone is the accent.');
   if (!look.connector?.kind || look.connector.kind === 'line')
     out.push(
       "studio.look.connector is the plain line: dashes, dots or none make the path the site's own.",

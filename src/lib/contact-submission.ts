@@ -66,7 +66,7 @@ export function validateSubmission(raw: RawSubmission): ValidationResult {
   const name = str(raw.name, MAX.name);
   const email = str(raw.email, MAX.email);
   const message = str(raw.message, MAX.message);
-  const subject = str(raw.subject, MAX.subject) || 'Website enquiry';
+  const subject = str(raw.subject, MAX.subject) || 'Website inquiry';
 
   const errors: Record<string, string> = {};
   if (!name) errors.name = 'Please tell us your name.';
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS contact_submissions (
   subject TEXT NOT NULL,
   message TEXT NOT NULL,
   -- Whether the notification email was accepted by the transport. A row with
-  -- notified = 0 is the whole reason this table exists: the enquiry survives an
+  -- notified = 0 is the whole reason this table exists: the inquiry survives an
   -- email that never arrived.
   notified INTEGER NOT NULL DEFAULT 0,
   notify_error TEXT,

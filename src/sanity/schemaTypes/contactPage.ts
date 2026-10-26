@@ -131,7 +131,7 @@ export const contactPage = defineType({
       type: 'array',
       group: 'form',
       description:
-        'Budget brackets shown on the form. The wording matters — keep the "Not sure yet" option so the form stays approachable. Leave blank and the form falls back to labelled placeholders, which is a prompt to fill this in rather than a usable default.',
+        'Budget brackets shown on the form. The wording matters — keep the "Not sure yet" option so the form stays approachable. Leave blank and the form falls back to labeled placeholders, which is a prompt to fill this in rather than a usable default.',
       of: [defineArrayMember({ type: 'string' })],
     }),
     defineField({

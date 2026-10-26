@@ -48,7 +48,7 @@ export const newsletter = defineType({
       name: 'preheader',
       title: 'Preview line (optional)',
       type: 'string',
-      description: 'The grey line many inboxes show after the subject.',
+      description: 'The gray line many inboxes show after the subject.',
       validation: (R) => R.max(140),
     }),
     defineField({

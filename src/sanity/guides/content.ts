@@ -142,7 +142,7 @@ export const guides: Guide[] = [
       { kind: 'h', text: 'How a page is built' },
       {
         kind: 'p',
-        text: 'A page is a stack of **sections**, one on top of the other. You edit what is inside a section. You do not have to think about colours or spacing: the design decides those from where the section sits on the page, which is why the site stays consistent no matter who edits it.',
+        text: 'A page is a stack of **sections**, one on top of the other. You edit what is inside a section. You do not have to think about colors or spacing: the design decides those from where the section sits on the page, which is why the site stays consistent no matter who edits it.',
       },
       { kind: 'h', text: 'Seeing it as you type' },
       {
@@ -256,7 +256,7 @@ export const guides: Guide[] = [
         items: [
           'Open the page that has the section you like.',
           'Open the menu next to `Publish` and choose `Save a section as preset...`.',
-          'Pick the section, give it a name you will recognise, and save.',
+          'Pick the section, give it a name you will recognize, and save.',
           'To keep several sections together, open the saved section under `Saved sections` and add more sections to it with `+ Add item`. Then publish it.',
         ],
       },
@@ -329,7 +329,7 @@ export const guides: Guide[] = [
     category: 'Pages and words',
     title: 'Change how a section looks',
     icon: '◐',
-    lead: 'Make one section stand out, or keep one plain, without picking colours.',
+    lead: 'Make one section stand out, or keep one plain, without picking colors.',
     diy: 'self',
     body: [
       {
@@ -340,8 +340,8 @@ export const guides: Guide[] = [
         kind: 'bullets',
         items: [
           '**Standard** follows that rhythm. Every section starts here.',
-          '**Quiet** always sits on the plain page colour, with no band. Good after a busy section, or to let two short sections read as one.',
-          '**Feature** puts the section on the deep brand colour with light text. Use it once or twice a page, for the part that matters most.',
+          '**Quiet** always sits on the plain page color, with no band. Good after a busy section, or to let two short sections read as one.',
+          '**Feature** puts the section on the deep brand color with light text. Use it once or twice a page, for the part that matters most.',
         ],
       },
       { kind: 'h', text: 'Change one' },
@@ -361,7 +361,7 @@ export const guides: Guide[] = [
       },
       {
         kind: 'p',
-        text: '_There is no colour picker on purpose. The looks are the colours the design was made with, and they are checked for easy reading._',
+        text: '_There is no color picker on purpose. The looks are the colors the design was made with, and they are checked for easy reading._',
       },
     ],
   },
@@ -611,7 +611,7 @@ export const guides: Guide[] = [
           'Fill in the event name and when it starts. Add how many places there are if there is a limit, and whether to keep a waiting list.',
           'Add any questions you need, like allergies or an age group. Ask only for what you will use.',
           'Publish the page. People who reply get a confirmation email with the details.',
-          'Click `RSVPs` in the top bar to see who is coming. `Download for a spreadsheet` gives the organiser a list that opens in Excel or Google Sheets.',
+          'Click `RSVPs` in the top bar to see who is coming. `Download for a spreadsheet` gives the organizer a list that opens in Excel or Google Sheets.',
         ],
       },
       {
@@ -842,7 +842,7 @@ guides.push({
       tone: 'primary',
       title: 'It cannot restyle the rest of the site.',
       text:
-        'Colours and fonts inside the box start out matching the website, but the code only ever styles itself. To change how the whole website looks, ask ' +
+        'Colors and fonts inside the box start out matching the website, but the code only ever styles itself. To change how the whole website looks, ask ' +
         SITE.contactName +
         ': design changes go through the theme.',
     },

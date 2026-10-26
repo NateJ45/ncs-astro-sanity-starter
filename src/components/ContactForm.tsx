@@ -384,7 +384,7 @@ export default function ContactForm({
             f.kind === 'select'
               ? 'Please pick one.'
               : f.kind === 'checkbox'
-                ? 'Please tick this box.'
+                ? 'Please check this box.'
                 : 'Please fill this in.';
         } else if (f.kind === 'email' && !empty && !/.+@.+\..+/.test(String(v))) {
           errs[key] = 'That email address looks off.';

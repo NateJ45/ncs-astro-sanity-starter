@@ -83,6 +83,24 @@ if (at === -1) {
   process.exit(1);
 }
 lines[at] = `  Content-Security-Policy: ${policy}`;
+// Cloudflare rejects a _headers line over 2,000 characters, and the deploy then
+// fails (card 159). Every inline script adds a 54-byte hash, so the usual cause is
+// Vite inlining small processed scripts: vite.build.assetsInlineLimit: 0 in
+// astro.config.mjs ships them as files. Fail here, not at deploy; warn near it.
+const LINE_LIMIT = 2000;
+const lineLength = lines[at].length;
+if (lineLength > LINE_LIMIT) {
+  console.error(
+    `[csp] The Content-Security-Policy line is ${lineLength} characters; Cloudflare's _headers limit is ${LINE_LIMIT}. ` +
+      `Check vite.build.assetsInlineLimit is 0 and look for new inline scripts.`,
+  );
+  process.exit(1);
+}
+if (lineLength > LINE_LIMIT - 100) {
+  console.warn(
+    `[csp] The Content-Security-Policy line is ${lineLength} of ${LINE_LIMIT} characters.`,
+  );
+}
 fs.writeFileSync(HEADERS, lines.join('\n'));
 console.log(
   `[csp] script-src written: ${pages.length} pages, ${all.inline.size} inline scripts, ` +

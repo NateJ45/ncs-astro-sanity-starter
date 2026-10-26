@@ -302,7 +302,7 @@ function checkAltText(units: PageUnit[]): CheckGroup {
   return {
     id: 'alt',
     title: 'Photos without a description',
-    note: 'Alt text is the sentence a screen reader says, and what shows if the photo fails to load. Some photos are decoration and genuinely need none, so use your judgement.',
+    note: 'Alt text is the sentence a screen reader says, and what shows if the photo fails to load. Some photos are decoration and genuinely need none, so use your judgment.',
     findings,
   };
 }

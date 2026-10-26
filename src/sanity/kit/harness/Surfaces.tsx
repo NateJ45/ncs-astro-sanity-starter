@@ -115,7 +115,7 @@ const WEEK: CheckItem[] = [
     title: "Add last Sunday's sermon",
     detail: 'The recording and the reading.',
     done: true,
-    note: 'Ticked for you.',
+    note: 'Checked for you.',
   },
   {
     id: 'times',
@@ -128,7 +128,7 @@ const WEEK: CheckItem[] = [
   {
     id: 'fix',
     title: 'Nothing needs doing in the Checkup',
-    detail: 'The Checkup ticks this for you.',
+    detail: 'The Checkup does this for you.',
     done: false,
     action: <KitAction href="#">Open the Checkup</KitAction>,
   },
