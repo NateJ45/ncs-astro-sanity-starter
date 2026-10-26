@@ -1,0 +1,62 @@
+---
+// Safe to edit by hand
+// Schedule: times and what happens at each, grouped by day if the editor likes.
+// Hairline rows, the time in its own column in the display font, what happens
+// beside it and a short note under that. A day's name is a heading over its rows.
+// Two or three days sit side by side from 64rem; more than three, or a phone,
+// stack. Not the timeline (timelineSection): no rail, no years.
+import BuilderBand from './BuilderBand.astro';
+import { timeOf } from '@/lib/builder-blocks';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedScheduleSection } from '@/lib/builderBlocks.types';
+
+interface Props {
+  block: ProjectedScheduleSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface = 'background', headingId } = Astro.props;
+
+const days = (block.days ?? [])
+  .map((d) => ({
+    key: d._key,
+    title: d.title?.trim() ?? '',
+    items: (d.items ?? []).filter((i) => i?.title?.trim()),
+  }))
+  .filter((d) => d.items.length > 0);
+// Headings step down one level at a time: block heading, a day's name, then what happens.
+const DayTitle = block.heading ? 'h3' : 'h2';
+const depth = (block.heading ? 1 : 0) + (days.some((d) => d.title) ? 1 : 0);
+const ItemTitle = depth === 2 ? 'h4' : depth === 1 ? 'h3' : 'h2';
+const across = days.length >= 2 && days.length <= 3 ? days.length : 1;
+---
+
+{days.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Schedule"
+  >
+    <div class:list={['bb-sched', `bb-sched--${across}`]}>
+      {days.map((d) => (
+        <div>
+          {d.title && <DayTitle class="bb-title">{d.title}</DayTitle>}
+          <ol class="bb-sched__rows" role="list">
+            {d.items.map((i) => (
+              <li class="bb-sched__row">
+                <span class="bb-sched__time">{timeOf(i.startTime)}</span>
+                <div>
+                  <ItemTitle class="bb-sched__what">{i.title}</ItemTitle>
+                  {i.note && <p class="bb-sched__note">{i.note}</p>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+    </div>
+  </BuilderBand>
+)}

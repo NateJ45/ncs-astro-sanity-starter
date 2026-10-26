@@ -89,7 +89,7 @@ export function seoFields(opts: SeoFieldsOptions): FieldDefinition[] {
       group,
       options: { hotspot: true },
       description:
-        'Optional. Shown when this page is shared. Use a wide image, about 1200 by 630 pixels. Leave blank to use the site default.',
+        'Optional. Shown when this page is shared. Use a wide image, about 1200 by 630 pixels. Leave blank and the site makes a share picture for this page with its title on it.',
       fields: [defineField({ name: 'alt', title: 'Alt text', type: 'string' })],
     });
 

@@ -304,6 +304,16 @@ export const kitConfig: KitConfig = {
       job: { kind: 'edit', doc: 'siteSettings' },
       fields: [{ name: 'phone', title: 'Phone number', kind: 'string', max: 40 }],
     },
+    // "Make a short link" (card 171) opens a new short link rather than a short
+    // form: the full form has the page picker, the clash warnings while typing
+    // and the QR code button, none of which a Quick update form can offer.
+    {
+      id: 'short-link',
+      title: 'Make a short link',
+      detail: 'A short address like /spring for a flyer, a card or a QR code.',
+      meaning: 'link',
+      job: { kind: 'link', target: { create: 'shortLink' } },
+    },
   ],
 
   // "Post a photo" on Quick update (card 125): a photo from the phone into a

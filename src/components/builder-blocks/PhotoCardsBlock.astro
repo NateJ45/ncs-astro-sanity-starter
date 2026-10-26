@@ -1,0 +1,75 @@
+---
+// Safe to edit by hand
+// Cards with photos: two to six cards, each a photo (4:3), a title and a few
+// words, with an optional link. With a link, the card's outline button covers
+// the whole card (.bb-stretch), so the card is one big tap target with one link
+// in it. Columns come from the count (photoCardColumns in builder-blocks.ts):
+// two or four make pairs, three, five or six rows of three; one a row on a
+// phone, two from 40rem.
+import BuilderBand from './BuilderBand.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import { photoCardColumns } from '@/lib/builder-blocks';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedPhotoCardsSection } from '@/lib/builderBlocks.types';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+interface Props {
+  block: ProjectedPhotoCardsSection;
+  surface?: CadenceSurface;
+  headingId: string;
+  isFirst?: boolean;
+}
+const { block, surface = 'background', headingId, isFirst = false } = Astro.props;
+
+const cards = (block.cards ?? []).filter((c) => c?.title?.trim());
+const cols = photoCardColumns(cards.length);
+const CardTitle = block.heading ? 'h3' : 'h2';
+const sizes =
+  cols === 2
+    ? '(min-width: 40rem) 45vw, 100vw'
+    : '(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw';
+---
+
+{cards.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Cards"
+  >
+    <ul class:list={['bb-grid', `bb-grid--${cols}`]} role="list">
+      {cards.map((c, i) => {
+        const link = c.link?.label ? c.link : null;
+        return (
+          <li class:list={['bb-pcard', link && 'bb-stretch']}>
+            <div class="bb-pcard__pic">
+              {c.image?.asset ? (
+                <SanityImage
+                  source={c.image as SanityImageObject}
+                  width={720}
+                  height={540}
+                  sizes={sizes}
+                  quality={70}
+                  loading={isFirst && i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={isFirst && i === 0 ? 'high' : undefined}
+                />
+              ) : (
+                <div class="bb-pcard__blank" aria-hidden="true" />
+              )}
+            </div>
+            <CardTitle class="bb-title">{c.title}</CardTitle>
+            {c.body && <p class="bb-pcard__body">{c.body}</p>}
+            {link && (
+              <div class="bb-pcard__more">
+                <CtaLink cta={link} variant="secondary" />
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  </BuilderBand>
+)}

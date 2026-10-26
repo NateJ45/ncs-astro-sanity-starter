@@ -1,7 +1,15 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildIcs, escapeText, foldLine, ruleValue, timeProperty, utcStamp } from './ics.ts';
+import {
+  buildIcs,
+  escapeText,
+  foldLine,
+  ruleValue,
+  timeProperty,
+  utcStamp,
+  type IcsEvent,
+} from './ics.ts';
 
 const NOW = new Date('2026-10-25T12:34:56Z');
 const bytes = (s: string) => new TextEncoder().encode(s).length;
@@ -91,4 +99,122 @@ test('a UTC event needs no VTIMEZONE', () => {
   });
   assert.ok(!ics.includes('VTIMEZONE'));
   assert.ok(ics.includes('DTSTART:20261101T150000Z\r\n'));
+});
+
+// Card 177: exceptions to a repeat (RFC 5545 3.8.4.4 RECURRENCE-ID, 3.8.5.1 EXDATE).
+const NY = 'America/New_York';
+const series: IcsEvent = {
+  uid: 'weekly-worship@example.com',
+  start: { date: '2026-11-01', time: '10:00', tzid: NY },
+  duration: 'PT1H',
+  rrule: { freq: 'WEEKLY', byDay: ['SU'] },
+  summary: 'Worship',
+};
+
+test('exdate: one EXDATE per skipped date, same zone as DTSTART, right after the RRULE', () => {
+  const ics = buildIcs({
+    prodId: '-//example//events//EN',
+    now: NOW,
+    events: [
+      {
+        ...series,
+        exdate: [
+          { date: '2026-11-15', time: '10:00', tzid: NY },
+          { date: '2026-11-29', time: '10:00', tzid: NY },
+        ],
+      },
+    ],
+  });
+  const lines = ics.split('\r\n');
+  const rrule = lines.indexOf('RRULE:FREQ=WEEKLY;BYDAY=SU');
+  assert.equal(lines[rrule + 1], 'EXDATE;TZID=America/New_York:20261115T100000');
+  assert.equal(lines[rrule + 2], 'EXDATE;TZID=America/New_York:20261129T100000');
+  assert.equal(lines.filter((l) => l === 'BEGIN:VTIMEZONE').length, 1);
+});
+
+test('exdate on an all-day series is VALUE=DATE; on a UTC series it ends in Z', () => {
+  const allDay = buildIcs({
+    prodId: '-//example//events//EN',
+    now: NOW,
+    events: [
+      {
+        uid: 'market@example.com',
+        start: { date: '2026-11-07' },
+        rrule: { freq: 'WEEKLY', byDay: ['SA'] },
+        summary: 'Market',
+        exdate: [{ date: '2026-11-28' }],
+      },
+    ],
+  });
+  assert.ok(allDay.includes('\r\nEXDATE;VALUE=DATE:20261128\r\n'));
+  const utc = buildIcs({
+    prodId: '-//example//events//EN',
+    now: NOW,
+    events: [
+      {
+        uid: 'call@example.com',
+        start: new Date('2026-11-02T15:00:00Z'),
+        rrule: { freq: 'WEEKLY' },
+        summary: 'Call',
+        exdate: [new Date('2026-11-09T15:00:00Z')],
+      },
+    ],
+  });
+  assert.ok(utc.includes('\r\nEXDATE:20261109T150000Z\r\n'));
+});
+
+test('recurrenceId: an override VEVENT with the same UID, original time, new start, no RRULE', () => {
+  const ics = buildIcs({
+    prodId: '-//example//events//EN',
+    now: NOW,
+    events: [
+      series,
+      {
+        uid: series.uid,
+        recurrenceId: { date: '2026-11-22', time: '10:00', tzid: NY },
+        start: { date: '2026-11-22', time: '11:00', tzid: NY },
+        duration: 'PT1H',
+        summary: 'Worship (one service at 11)',
+      },
+    ],
+  });
+  const events = ics.split('BEGIN:VEVENT\r\n').slice(1);
+  assert.equal(events.length, 2);
+  const override = events[1].split('\r\n');
+  assert.equal(override[0], 'UID:weekly-worship@example.com');
+  assert.equal(override[1], 'DTSTAMP:20261025T123456Z');
+  assert.equal(override[2], 'RECURRENCE-ID;TZID=America/New_York:20261122T100000');
+  assert.equal(override[3], 'DTSTART;TZID=America/New_York:20261122T110000');
+  assert.ok(!override.some((l) => l.startsWith('RRULE:') || l.startsWith('EXDATE')));
+  assert.ok(events[0].includes('RRULE:FREQ=WEEKLY;BYDAY=SU'));
+  assert.equal(ics.split('\r\n').filter((l) => l === 'BEGIN:VTIMEZONE').length, 1);
+});
+
+test('an event without exceptions is written exactly as before', () => {
+  const ics = buildIcs({ prodId: '-//example//events//EN', now: NOW, events: [series] });
+  assert.ok(!ics.includes('EXDATE') && !ics.includes('RECURRENCE-ID'));
+  assert.ok(ics.includes('\r\nDTSTAMP:20261025T123456Z\r\nDTSTART;TZID=America/New_York:'));
+});
+
+test('exceptions that break RFC 5545 throw instead of writing a bad file', () => {
+  const build = (e: Record<string, unknown>) =>
+    buildIcs({ prodId: '-//x//y//EN', now: NOW, events: [{ ...series, ...e }] });
+  // EXDATE must match DTSTART's value type and zone.
+  assert.throws(() => build({ exdate: [{ date: '2026-11-15' }] }), /all-day but start is local/);
+  assert.throws(() => build({ exdate: [new Date('2026-11-15T15:00:00Z')] }), /UTC/);
+  assert.throws(() =>
+    build({ exdate: [{ date: '2026-11-15', time: '10:00', tzid: 'America/Chicago' }] }),
+  );
+  // EXDATE needs a repeat to except from.
+  assert.throws(
+    () => build({ rrule: undefined, exdate: [{ date: '2026-11-15', time: '10:00', tzid: NY }] }),
+    /needs an rrule/,
+  );
+  // An override is one occurrence: no rrule, and the same form as its start.
+  const at10 = { date: '2026-11-22', time: '10:00', tzid: NY };
+  assert.throws(() => build({ recurrenceId: at10 }), /takes no rrule/);
+  assert.throws(
+    () => build({ rrule: undefined, recurrenceId: { date: '2026-11-22' } }),
+    /all-day but start is local/,
+  );
 });

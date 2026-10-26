@@ -20,6 +20,16 @@ import { dropRedirectsOverLivePages } from './src/lib/redirect-guard.ts';
 import { fixSanityDedupeAlias } from './src/lib/sanity-dedupe-alias.ts';
 import { studioConfigModule } from './src/lib/studio-route.ts';
 import { isSitemapPage } from './src/lib/sitemap-filter.ts';
+import {
+  STATIC_REDIRECT_LIMIT,
+  countRedirectRules,
+  planShortLinks,
+  renderShortLinkLines,
+  todayIn,
+} from './src/lib/short-links.ts';
+import { RESERVED_SLUGS } from './src/lib/reservedSlugs.ts';
+import { pathForDoc } from './src/sanity/urls.ts';
+import { site } from './src/data/site.ts';
 
 // The Sanity project id is PUBLIC by design: it ships in every client bundle.
 // A fresh clone with no .env still builds; the Studio then shows a project-not-
@@ -141,6 +151,81 @@ function fileStyleRedirects() {
   };
 }
 
+// SHORT LINKS (PORTS.md card 171, src/lib/short-links.ts). Addresses like /spring
+// that an editor makes under Pages > Short links. Read here with every page's
+// address, then written by the integration below at the TOP of
+// dist/client/_redirects, as "/spring" and "/spring/" (one hop either way), with
+// a 302 for a temporary link or a 301 for a permanent one. Expired links (the day
+// after "Last day", in site.timeZone), clashes with a page, a reserved route
+// (src/lib/reservedSlugs.ts), a redirect (editor or launch, including card 160's
+// file-style sources) or an older short link, and anything past the cap are
+// skipped and logged. Pages always win. The Studio warns about the same clashes
+// before publishing (src/sanity/schemaTypes/shortLink.ts). With no Sanity project
+// cmsQuery returns the empty fallback and the integration writes nothing.
+const shortLinkRead = await cmsQuery(
+  `{
+    "links": *[_type == "shortLink" && defined(address) && !(_id in path("drafts.**"))]{
+      _id, _createdAt, address, linkKind, url, lasting, expires,
+      "page": page->{_type, slug, archived}
+    },
+    "pages": *[_type == "page" && defined(slug.current) && !(_id in path("drafts.**"))]{
+      "slug": slug.current, archived
+    }
+  }`,
+  { links: [], pages: [] },
+);
+const shortLinkDocs = (Array.isArray(shortLinkRead?.links) ? shortLinkRead.links : []).map(
+  (/** @type {any} */ doc) => ({
+    ...doc,
+    pagePath: doc.page && doc.page.archived !== true ? pathForDoc(doc.page._type, doc.page) : null,
+  }),
+);
+/** @type {{ slug: string; archived?: boolean }[]} */
+const shortLinkPages = Array.isArray(shortLinkRead?.pages) ? shortLinkRead.pages : [];
+
+/** @returns {import('astro').AstroIntegration} */
+function shortLinks() {
+  /** @type {import('astro').AstroConfig | undefined} */
+  let resolved;
+  return {
+    name: 'short-links',
+    hooks: {
+      'astro:config:done': ({ config }) => {
+        resolved = config;
+      },
+      'astro:build:done': async ({ logger }) => {
+        if (!resolved) return;
+        const plan = planShortLinks(
+          shortLinkDocs,
+          {
+            reserved: RESERVED_SLUGS,
+            pages: shortLinkPages.filter((p) => p.archived !== true).map((p) => p.slug),
+            archivedPages: shortLinkPages.filter((p) => p.archived === true).map((p) => p.slug),
+            // Launch redirects and the Studio's Redirects, as the config holds them.
+            redirects: Object.keys(resolved.redirects ?? {}),
+          },
+          todayIn(new Date(), site.timeZone),
+        );
+        for (const s of plan.skipped) logger.warn(`skipped /${s.address}: ${s.reason}`);
+        if (plan.rules.length === 0 && shortLinkDocs.length === 0) return;
+        const file = new URL('./_redirects', resolved.build.client);
+        const existing = await readFile(file, 'utf8').catch(() => '');
+        const next = plan.rules.length
+          ? prependRedirectLines(existing, renderShortLinkLines(plan.rules))
+          : existing;
+        const total = countRedirectRules(next);
+        if (total > STATIC_REDIRECT_LIMIT) {
+          throw new Error(
+            `[short-links] _redirects would hold ${total} rules; Cloudflare allows ${STATIC_REDIRECT_LIMIT}.`,
+          );
+        }
+        if (next !== existing) await writeFile(file, next);
+        logger.info(`${plan.rules.length} short link(s) written (${total} redirect rules in all)`);
+      },
+    },
+  };
+}
+
 // Pages the editor keeps out of search. "Keep this page out of Google"
 // (page.hideFromSearch) has to do two things: put a robots tag on the page
 // (src/pages/[slug].astro does that) and drop the page from the sitemap, which
@@ -231,6 +316,8 @@ export default defineConfig({
     }),
     react(),
     fileStyleRedirects(),
+    // After fileStyleRedirects, so the short links sit at the very top of _redirects.
+    shortLinks(),
   ],
   vite: {
     // Never inline an asset as a data: URI (card 159). build-csp.mjs lists a hash for every inline

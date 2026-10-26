@@ -33,6 +33,19 @@ export const CTA_PROJECTION = `{
 const SECTION_ARMS = `
     // The RSVP form names its event "<document id>:<block key>" (card 127).
     _type == "rsvpSection" => { "pageId": ^._id },
+    // The builder kit (builderSections.ts, PORTS.md card 173). Columns, fold-outs,
+    // tabs and the schedule carry no image or button, so they need no arm.
+    _type == "buttonRowSection" => { ..., links[]{ ..., link${CTA_PROJECTION} } },
+    _type == "photoSection" => { ..., image${IMAGE_PROJECTION} },
+    _type == "countdownSection" => { ..., link${CTA_PROJECTION} },
+    _type == "noticeSection" => { ..., link${CTA_PROJECTION} },
+    _type == "timelineSection" => { ..., entries[]{ ..., image${IMAGE_PROJECTION} } },
+    _type == "letterSection" => { ..., signature${IMAGE_PROJECTION}, link${CTA_PROJECTION} },
+    _type == "eventDetailsSection" => { ..., image${IMAGE_PROJECTION}, button${CTA_PROJECTION} },
+    _type == "photoCardsSection" => {
+      ...,
+      cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} }
+    },
     _type == "heroSection" => {
       ...,
       backgroundImage${IMAGE_PROJECTION},

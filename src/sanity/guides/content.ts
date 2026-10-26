@@ -41,6 +41,7 @@
 
 import type { KitGuideBlock } from '../kit/guide/GuidePage';
 import { phoneGuides } from './phoneGuides.ts';
+import { linkGuides } from './links.ts';
 import type { FieldGuideMap } from '../../lib/studio-kit';
 
 export type DiyLevel = 'self' | 'ask' | 'mixed';
@@ -423,6 +424,33 @@ export const guides: Guide[] = [
         tone: 'positive',
         title: 'Do not shrink pictures before uploading.',
         text: 'Upload the biggest version you have. The site resizes every image itself and sends each visitor the size that suits their screen, so a large original gives a better result than one you shrank first.',
+      },
+    ],
+  },
+
+  // PORTS.md card 168: the logo and square icon uploads in Site settings.
+  {
+    slug: 'logo-and-icon',
+    category: 'Pictures',
+    title: 'Change the logo or the icon',
+    icon: 'image',
+    lead: 'Only if the logo changes. The site already has its own.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'steps',
+        items: [
+          'Open `Site settings`, then the `Identity & contact` tab.',
+          'For the logo at the top of every page, upload it to `Logo`. An SVG file is best, or a PNG at least 560 pixels wide, with the spare space trimmed off.',
+          'For the little picture in the browser tab and on phone home screens, upload a square picture to `Square icon`, at least 512 by 512 pixels.',
+          'Check the preview under each box, then publish. The website switches over in a few minutes.',
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'To go back, remove the picture.',
+        text: 'Empty the box and publish, and the website returns to the logo and icon it shipped with. Browsers keep the old tab icon for a day or so, so give it time before deciding it did not work.',
       },
     ],
   },
@@ -1081,6 +1109,9 @@ guides.push({
 
 guides.push(...phoneGuides(SITE.contactName));
 
+// Short links and QR codes (PORTS.md card 171, guides/links.ts).
+guides.push(...linkGuides);
+
 /**
  * Which guides "Help for this page" shows for each document type (kit.config.ts
  * guide.forType, PORTS.md card 110). '*' is the fallback for anything unlisted.
@@ -1105,6 +1136,7 @@ export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   businessInfo: ['menus-and-footer'],
   redirect: ['rename-a-page'],
   popup: ['put-up-a-popup'],
+  shortLink: ['short-links', 'qr-codes'],
 };
 
 /**

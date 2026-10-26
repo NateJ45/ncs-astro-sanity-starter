@@ -856,26 +856,6 @@ function rewriteOgTheme(config) {
   });
 }
 
-// ---- Rewrite: scripts/generate-og-pages.mjs ----------------------------
-
-function rewriteOgPages(config) {
-  rewriteFile(resolve(root, 'scripts/generate-og-pages.mjs'), function (text, filePath) {
-    const name = config.name;
-    const subs = [
-      {
-        label: 'WORDMARK fallback',
-        // Matches: const WORDMARK = env.SITE_NAME ?? 'Studio Starter';
-        // Captures the fallback string literal only
-        pattern: /(const WORDMARK = env\.SITE_NAME \?\? ')((?:[^'\\]|\\.)*)(')/,
-        replacer: function (_, g1, _quote, g3) {
-          return g1 + name + g3;
-        },
-      },
-    ];
-    return applySubstitutions(text, subs, filePath);
-  });
-}
-
 // ---- Rewrite: wrangler.jsonc + astro.config.mjs (domain-aware) ----------
 
 function rewriteWranglerJsonc(config) {
@@ -1007,12 +987,6 @@ async function main() {
       'og-theme.mjs',
       function () {
         rewriteOgTheme(config);
-      },
-    ],
-    [
-      'generate-og-pages.mjs',
-      function () {
-        rewriteOgPages(config);
       },
     ],
     [
