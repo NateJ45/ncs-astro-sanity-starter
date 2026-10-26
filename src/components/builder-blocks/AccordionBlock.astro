@@ -1,0 +1,43 @@
+---
+// Safe to edit by hand
+// Fold-out questions typed right on the page (not the FAQ collection). Native
+// <details>: opens with a tap or the keyboard, works without JavaScript, and a
+// browser's find-in-page opens the right answer.
+import BuilderBand from './BuilderBand.astro';
+import PortableText from '@/components/PortableText';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedAccordionSection } from '@/lib/builderBlocks.types';
+import type { PortableTextBlock } from '@portabletext/types';
+
+interface Props {
+  block: ProjectedAccordionSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface, headingId } = Astro.props;
+const items = (block.items ?? []).filter((i) => i?.question);
+---
+
+{items.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Questions and answers"
+  >
+    <ul class="bb-accordion" role="list">
+      {items.map((i) => (
+        <li>
+          <details>
+            <summary>{i.question}</summary>
+            <div class="bb-accordion__answer">
+              <PortableText value={(i.answer ?? []) as PortableTextBlock[]} className="bb-prose" />
+            </div>
+          </details>
+        </li>
+      ))}
+    </ul>
+  </BuilderBand>
+)}

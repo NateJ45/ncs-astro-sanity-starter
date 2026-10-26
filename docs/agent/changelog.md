@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-26: the builder kit: twelve smaller blocks, grouped templates, patterns as code (PORTS card 173)._
+
+**Decision.** Ported from first-baptist-auburn and made generic: columns, a button row, a wide photo, fold-outs, tabs, a countdown, a dated notice, a timeline, a letter, event details, a schedule and photo cards, each a content block with a look (the notice draws its own band), no colour fields. Event details requires a typed place because the starter has no business address to fall back on; its calendar file is a `data:` link, so no route or file is published. Dates run on the new `site.timeZone`. Templates gain groups shown as "Group: Title"; patterns live in code and are seeded as drafts that are never overwritten. `withSiteGroups()` lets a fork add insert-menu groups without editing the base list. Auburn's hero "Photo behind the words" style was not ported: the starter's hero already draws its photo behind the words.
+
 _2026-10-25: one accent button per page, named section anchors, a 404 with search, calendar files (PORTS card 158)._
 
 **Decision.** The one-accent-button rule is the renderer's, not the editor's (rule 9): the first section that draws a primary button keeps it and the rest draw the secondary variant. Section ids come from the heading rather than a key map, so every site gets linkable sections with no data to keep; the cost is that a retitle moves the anchor, and a site that needs a fixed one pins it by block `_key`. The 404 search is a plain GET form, not the live panel, so it works without JavaScript and loads no Pagefind on an error page. The starter has no calendar, so only the `.ics` builder is ported; Auburn's gathering files are the reference wiring.

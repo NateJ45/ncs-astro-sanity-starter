@@ -1,0 +1,69 @@
+---
+// Safe to edit by hand
+// Picks the component for one builder-kit block (builderSections.ts, PORTS.md
+// card 173). SectionRenderer hands every builder block here in one branch, so
+// the kit grows without touching the shared renderer again. Every component is
+// empty-safe: a block with nothing to show (a notice outside its dates, an event
+// whose dates have all passed, a schedule with nothing in it) renders nothing.
+import '@/styles/builder-blocks.css';
+import type { BuilderPageBlock } from '@/lib/builderBlocks.types';
+import type { CadenceSurface } from '@/lib/surfaces';
+import ColumnsBlock from './ColumnsBlock.astro';
+import ButtonRowBlock from './ButtonRowBlock.astro';
+import PhotoBlock from './PhotoBlock.astro';
+import AccordionBlock from './AccordionBlock.astro';
+import TabsBlock from './TabsBlock.astro';
+import CountdownBlock from './CountdownBlock.astro';
+import NoticeBlock from './NoticeBlock.astro';
+import TimelineBlock from './TimelineBlock.astro';
+import LetterBlock from './LetterBlock.astro';
+import EventDetailsBlock from './EventDetailsBlock.astro';
+import ScheduleBlock from './ScheduleBlock.astro';
+import PhotoCardsBlock from './PhotoCardsBlock.astro';
+
+interface Props {
+  block: BuilderPageBlock;
+  /** The cadence's surface, including the band a look asked for. */
+  surface?: CadenceSurface;
+  headingId: string;
+  /** The page's one accent button (card 158), when SectionRenderer hands it to this block. */
+  primaryVariant?: 'primary' | 'secondary';
+  /** True for the first section on the page: its photo loads first. */
+  isFirst?: boolean;
+}
+
+const {
+  block: b,
+  surface = 'background',
+  headingId,
+  primaryVariant = 'secondary',
+  isFirst = false,
+} = Astro.props;
+const common = { surface, headingId };
+---
+
+{b._type === 'columnsSection' ? (
+  <ColumnsBlock block={b} {...common} />
+) : b._type === 'buttonRowSection' ? (
+  <ButtonRowBlock block={b} {...common} />
+) : b._type === 'photoSection' ? (
+  <PhotoBlock block={b} {...common} isFirst={isFirst} />
+) : b._type === 'accordionSection' ? (
+  <AccordionBlock block={b} {...common} />
+) : b._type === 'tabsSection' ? (
+  <TabsBlock block={b} {...common} />
+) : b._type === 'countdownSection' ? (
+  <CountdownBlock block={b} {...common} />
+) : b._type === 'noticeSection' ? (
+  <NoticeBlock block={b} />
+) : b._type === 'timelineSection' ? (
+  <TimelineBlock block={b} {...common} />
+) : b._type === 'letterSection' ? (
+  <LetterBlock block={b} {...common} />
+) : b._type === 'eventDetailsSection' ? (
+  <EventDetailsBlock block={b} {...common} primaryVariant={primaryVariant} isFirst={isFirst} />
+) : b._type === 'scheduleSection' ? (
+  <ScheduleBlock block={b} {...common} />
+) : b._type === 'photoCardsSection' ? (
+  <PhotoCardsBlock block={b} {...common} isFirst={isFirst} />
+) : null}

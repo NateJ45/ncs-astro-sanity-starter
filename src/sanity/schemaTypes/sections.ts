@@ -45,6 +45,10 @@ import {
 } from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
 import { rsvpSection } from './rsvpSection';
+// The builder kit (PORTS.md card 173): columns, buttons, a wide photo, fold-outs,
+// tabs, a countdown, a dated notice, a timeline, a letter and the event blocks.
+import { BUILDER_INSERT_GROUPS, builderSectionSchemas } from './builderSections';
+import { withSiteGroups, type InsertGroup } from '../../lib/insert-groups';
 
 // Shared image field with required alt text (accessibility + SEO).
 const imageWithAlt = (name = 'image', title = 'Image') =>
@@ -705,6 +709,8 @@ export const pageSectionSchemas = [
   embedSection,
   // The email backbone (card 127): replies kept in D1, never in Sanity.
   rsvpSection,
+  // The builder kit (builderSections.ts, PORTS.md card 173).
+  ...builderSectionSchemas,
 ];
 
 // The general blocks on their own. A saved section accepts these (plus the rich
@@ -741,62 +747,73 @@ export const sectionThumbnailUrl = (type: string): string | undefined =>
 // types are all absent from a given array simply does not appear, which is what
 // lets one config serve the curated per-page lists in richSections.ts. Any type
 // not named in a group falls under "All".
+//
+// SITE_INSERT_GROUPS (PORTS.md card 173): the groups a library file adds, merged
+// into the base list by withSiteGroups() (src/lib/insert-groups.ts). A fork that adds its own block library
+// (say, a church's service times and giving blocks) appends ITS groups here, or
+// spreads them in, and never edits the base list below: a group with a name that
+// already exists gains the types, a new name becomes a new group at the end.
+const SITE_INSERT_GROUPS: InsertGroup[] = [...BUILDER_INSERT_GROUPS];
+
 export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
   filter: true,
   // Grid first, so the picker opens on pictures; the list view stays one click
   // away and keeps the search box (the authoring kit, card 109).
   views: [{ name: 'grid', previewImageUrl: sectionThumbnailUrl }, { name: 'list' }],
-  groups: [
-    {
-      name: 'basics',
-      title: 'Basics',
-      of: ['heroSection', 'richTextSection', 'imageTextSection', 'spacerSection'],
-    },
-    {
-      name: 'proof',
-      title: 'Proof and trust',
-      of: [
-        'quoteSection',
-        'testimonialsSection', // scaffold: testimonials
-        'statSection',
-        'logoStripSection',
-        'guaranteeSection',
-        'faqSection', // scaffold: faq
-      ],
-    },
-    {
-      // The authoring kit (card 109). A saved section can also be dropped in as
-      // a COPY from the "Insert a saved section" button under the sections list.
-      name: 'saved',
-      title: 'Saved and synced',
-      of: ['syncedSection'],
-    },
-    {
-      name: 'media',
-      title: 'Media',
-      of: ['gallerySection', 'videoSection', 'embedSection'],
-    },
-    {
-      name: 'signups',
-      title: 'Sign-ups',
-      of: ['rsvpSection'],
-    },
-    {
-      name: 'business',
-      title: 'About the business',
-      of: [
-        'servicesGridSection', // scaffold: services
-        'processSection', // scaffold: process
-        'storySection', // scaffold: about
-        'valuesSection', // scaffold: philosophy
-        'founderSection', // scaffold: about
-        'teamSection',
-        'serviceAreaSection',
-        'dynamicListSection',
-        'ctaBandSection',
-      ],
-    },
-  ],
+  groups: withSiteGroups(
+    [
+      {
+        name: 'basics',
+        title: 'Basics',
+        of: ['heroSection', 'richTextSection', 'imageTextSection', 'spacerSection'],
+      },
+      {
+        name: 'proof',
+        title: 'Proof and trust',
+        of: [
+          'quoteSection',
+          'testimonialsSection', // scaffold: testimonials
+          'statSection',
+          'logoStripSection',
+          'guaranteeSection',
+          'faqSection', // scaffold: faq
+        ],
+      },
+      {
+        // The authoring kit (card 109). A saved section can also be dropped in as
+        // a COPY from the "Insert a saved section" button under the sections list.
+        name: 'saved',
+        title: 'Saved and synced',
+        of: ['syncedSection'],
+      },
+      {
+        name: 'media',
+        title: 'Media',
+        of: ['gallerySection', 'videoSection', 'embedSection'],
+      },
+      {
+        name: 'signups',
+        title: 'Sign-ups',
+        of: ['rsvpSection'],
+      },
+      {
+        name: 'business',
+        title: 'About the business',
+        of: [
+          'servicesGridSection', // scaffold: services
+          'processSection', // scaffold: process
+          'storySection', // scaffold: about
+          'valuesSection', // scaffold: philosophy
+          'founderSection', // scaffold: about
+          'teamSection',
+          'serviceAreaSection',
+          'dynamicListSection',
+          'ctaBandSection',
+        ],
+      },
+    ],
+    SITE_INSERT_GROUPS,
+  ),
 };
 
 /** The `options` block every pageBuilder array should carry. */

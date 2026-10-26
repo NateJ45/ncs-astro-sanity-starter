@@ -1,0 +1,47 @@
+---
+// Safe to edit by hand
+// One wide photo across the content column, with its caption under it. It opens
+// full screen in the photo viewer (LightboxLink + Lightbox, card 124); with
+// JavaScript off it is a link to the full-size photo. Two or more photos side by
+// side is the gallery block.
+import BuilderBand from './BuilderBand.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import Lightbox from '@/components/Lightbox.astro';
+import LightboxLink from '@/components/LightboxLink.astro';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedPhotoSection } from '@/lib/builderBlocks.types';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+interface Props {
+  block: ProjectedPhotoSection;
+  surface?: CadenceSurface;
+  headingId: string;
+  isFirst?: boolean;
+}
+const { block, surface, headingId, isFirst = false } = Astro.props;
+const image = block.image?.asset ? (block.image as SanityImageObject) : null;
+---
+
+{image && (
+  <BuilderBand
+    type={block._type}
+    headingId={headingId}
+    surface={surface}
+    label={block.caption || image.alt || 'Photo'}
+  >
+    <figure class="bb-photo" data-lightbox-group>
+      <LightboxLink source={image} caption={block.caption}>
+        <SanityImage
+          source={image}
+          width={1600}
+          sizes="(min-width: 82.5rem) 80rem, 95vw"
+          quality={72}
+          loading={isFirst ? 'eager' : 'lazy'}
+          fetchpriority={isFirst ? 'high' : undefined}
+        />
+      </LightboxLink>
+      {block.caption && <figcaption>{block.caption}</figcaption>}
+    </figure>
+    <Lightbox />
+  </BuilderBand>
+)}

@@ -1,0 +1,55 @@
+---
+// Safe to edit by hand
+// Timeline: moments in order down a thin rail, each marked by a dot. On a wide
+// screen the year sits in its own column left of the rail and a moment's photo
+// sits beside its words; on a phone the year moves above the title and the photo
+// under the words.
+import BuilderBand from './BuilderBand.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedTimelineSection } from '@/lib/builderBlocks.types';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+interface Props {
+  block: ProjectedTimelineSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface, headingId } = Astro.props;
+const entries = (block.entries ?? []).filter((e) => e?.title || e?.year);
+const Title = block.heading ? 'h3' : 'h2';
+---
+
+{entries.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Timeline"
+  >
+    <ol class="bb-timeline" role="list">
+      {entries.map((e) => (
+        <li class:list={['bb-moment', e.image?.asset && 'bb-moment--photo']}>
+          <span class="bb-moment__year">{e.year}</span>
+          <span class="bb-moment__dot" aria-hidden="true" />
+          <div class="bb-moment__body">
+            {e.title && <Title class="bb-title">{e.title}</Title>}
+            {e.text && <p>{e.text}</p>}
+          </div>
+          {e.image?.asset && (
+            <div class="bb-moment__photo">
+              <SanityImage
+                source={e.image as SanityImageObject}
+                width={720}
+                sizes="(min-width: 64rem) 28rem, 90vw"
+                quality={72}
+              />
+            </div>
+          )}
+        </li>
+      ))}
+    </ol>
+  </BuilderBand>
+)}
