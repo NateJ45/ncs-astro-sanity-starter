@@ -20,6 +20,8 @@ import {
   topWords,
   countWords,
   words,
+  brokenScripts,
+  waitForStableDir,
 } from './search-files.mjs';
 
 // ---- fixtures ---------------------------------------------------------------
@@ -342,4 +344,29 @@ test('mapLimit keeps order and caps concurrency', async () => {
   });
   assert.deepEqual(out, [2, 4, 6, 8, 10]);
   assert.equal(peak, 2);
+});
+
+// Card 165: a pagefind.js cut short at a buffer boundary is caught before it ships.
+test('brokenScripts flags a module that was cut short and passes a whole one', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pf-'));
+  const whole =
+    'export async function search(term) {\n  return { results: [term] };\n}\nexport const version = "1";\n';
+  writeFileSync(join(dir, 'pagefind.js'), whole);
+  writeFileSync(join(dir, 'pagefind-entry.json'), '{}');
+  assert.deepEqual(brokenScripts(dir), []);
+  writeFileSync(join(dir, 'pagefind.js'), whole.slice(0, 40));
+  const bad = brokenScripts(dir);
+  assert.equal(bad.length, 1);
+  assert.equal(bad[0].file, 'pagefind.js');
+  assert.match(bad[0].error, /Error/);
+});
+
+test('waitForStableDir returns once the folder stops changing', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pf-'));
+  let n = 0;
+  const writer = setInterval(() => writeFileSync(join(dir, `f${n++}.txt`), 'x'), 30);
+  setTimeout(() => clearInterval(writer), 200);
+  const waited = await waitForStableDir(dir, { quietMs: 150, maxMs: 3000, stepMs: 20 });
+  assert.ok(waited >= 200, `waited ${waited}ms, the writer ran for 200ms`);
+  assert.ok(waited < 3000);
 });
