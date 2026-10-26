@@ -7,6 +7,7 @@
 // Run `npm run typegen` after schema changes to regenerate src/lib/sanity.types.ts.
 
 import { sanityFetch } from './sanity';
+import type { PopupDoc } from './popup';
 
 // Common Portable Text + image projection shorthand
 export const IMAGE_PROJECTION = `{
@@ -375,6 +376,24 @@ export async function getActiveAnnouncement() {
     { now },
     null,
   );
+}
+
+// ---- Popup (PORTS.md card 170) ---------------------------------------------
+// Every popup switched on and not yet ended; src/lib/popup.ts picks the one to show (pickPopup)
+// and the pages it shows on. Read once per build (BaseLayout runs on every page, so the promise
+// is shared). Null-safe: no popup documents, no markup and no script.
+let _popupsPromise: Promise<PopupDoc[]> | null = null;
+export function getPopups(): Promise<PopupDoc[]> {
+  _popupsPromise ??= sanityFetch(
+    `*[_type == "popup" && enabled == true && (!defined(endDate) || endDate >= $now)]{
+      _id, _updatedAt, title, text, button{ label, link }, image${IMAGE_PROJECTION},
+      startDate, endDate, where, frequency,
+      "pages": pages[]->{ _type, "slug": slug.current }
+    }`,
+    { now: new Date().toISOString() },
+    [],
+  ).then((v) => (Array.isArray(v) ? (v as PopupDoc[]) : []));
+  return _popupsPromise;
 }
 
 // ---- Home page ------------------------------------------------------------

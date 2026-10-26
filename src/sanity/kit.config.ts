@@ -83,6 +83,7 @@ export const kitConfig: KitConfig = {
   // Archive (pageActions.tsx); singletons cannot be deleted at all.
   trashTypes: {
     announcement: 'Announcement',
+    popup: 'Popup',
     testimonial: 'Testimonial', // scaffold: testimonials
     faqItem: 'Question and answer', // scaffold: faq
     faqCategory: 'Question group', // scaffold: faq
@@ -173,6 +174,7 @@ export const kitConfig: KitConfig = {
       title: 'Lists',
       links: [
         { title: 'Announcements', target: { pane: 'content;announcement' } },
+        { title: 'Popups', target: { pane: 'content;popup' } },
         { title: 'Journal posts', target: { pane: 'journal;journalEntry' } }, // scaffold: journal
         { title: 'Questions and answers', target: { pane: 'content;faqItem' } }, // scaffold: faq
         { title: 'Testimonials', target: { pane: 'content;testimonial' } }, // scaffold: testimonials

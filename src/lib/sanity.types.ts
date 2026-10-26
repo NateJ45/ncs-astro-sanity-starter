@@ -14,6 +14,12 @@
 
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
+type ArrayOf<T> = Array<
+  T & {
+    _key: string;
+  }
+>;
+
 // Source: schema.json
 export type SanityImageAssetReference = {
   _ref: string;
@@ -429,6 +435,44 @@ export type FaqCategory = {
   title?: string;
   slug?: Slug;
   displayOrder?: number;
+};
+
+export type Popup = {
+  _id: string;
+  _type: 'popup';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  text?: string;
+  button?: {
+    label?: string;
+    link?: string;
+  };
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: 'image';
+  };
+  startDate?: string;
+  endDate?: string;
+  where?: 'all' | 'home' | 'chosen';
+  pages?: ArrayOf<
+    | PageReference
+    | HomePageReference
+    | AboutPageReference
+    | ServicesPageReference
+    | ProcessPageReference
+    | FaqPageReference
+    | ContactPageReference
+    | JournalPageReference
+    | PrivacyPageReference
+  >;
+  frequency?: 'visitor' | 'visit';
+  enabled?: boolean;
 };
 
 export type Announcement = {
@@ -3161,6 +3205,7 @@ export type AllSanitySchemaTypes =
   | FaqCategoryReference
   | FaqItem
   | FaqCategory
+  | Popup
   | Announcement
   | StudioNotes
   | StudioGuide

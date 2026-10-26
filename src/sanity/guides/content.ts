@@ -1070,6 +1070,43 @@ guides.push(
 // ── The Studio app and earlier versions (PORTS.md card 125) ──────────────────
 // Shared by every site (src/sanity/guides/phoneGuides.ts, PORTABLE): keep this
 // line when rewriting the guides above.
+// ── Popups (PORTS.md card 170) ───────────────────────────────────────────────
+guides.push({
+  slug: 'put-up-a-popup',
+  category: 'Pages and words',
+  title: 'Put up a popup',
+  icon: 'info',
+  lead: 'A box over the page with a short message and one button, for something big like holiday hours.',
+  diy: 'self',
+  body: [
+    {
+      kind: 'steps',
+      items: [
+        'In `Content`, open `Popups` and press the pencil to start a new one.',
+        'Type a short `Heading` and a `Message` of a sentence or two.',
+        'Add a `Button` if there is a page with the details, like /contact/. Add a `Picture` if you like.',
+        'Set `Show until` to the day after the event. Set `Show from` if it should wait.',
+        'Under `Which pages`, pick every page, the home page only, or the pages you choose.',
+        'Under `How often`, pick once per visitor (most popups) or once per visit, then publish.',
+      ],
+    },
+    {
+      kind: 'bullets',
+      items: [
+        'Only one popup shows at a time. If two are switched on for the same days, the Studio warns you, and the newer one wins.',
+        'It never jumps out straight away. It waits until someone has been on the page a few seconds and has started scrolling, so they have seen what they came for first.',
+        'People can close it with the X, the Escape key or a tap outside it, and it remembers. Changing the popup shows it again to everyone.',
+      ],
+    },
+    {
+      kind: 'callout',
+      tone: 'primary',
+      title: 'Use it rarely.',
+      text: 'A popup interrupts. For everyday news, an announcement (the line across the top of every page) is kinder. Save popups for the few big things each year.',
+    },
+  ],
+});
+
 guides.push(...phoneGuides(SITE.contactName));
 
 // Short links and QR codes (PORTS.md card 171, guides/links.ts).
@@ -1098,6 +1135,7 @@ export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   siteSettings: ['menus-and-footer', 'website-status', 'add-a-widget'],
   businessInfo: ['menus-and-footer'],
   redirect: ['rename-a-page'],
+  popup: ['put-up-a-popup'],
   shortLink: ['short-links', 'qr-codes'],
 };
 

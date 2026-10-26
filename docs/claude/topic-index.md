@@ -31,6 +31,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Social links read by URL host (platform and icon from the pasted link; card 167)                         | `docs/agent/sanity.md`                                               |
 | Custom code: the trust model (pasted widgets, the box, the opt-outs, the embed provider registry)        | `docs/agent/custom-code.md`                                          |
 | Studio kit (Home, Site Guide, Checkup, staff view, Trash; `kit.config.ts`)                               | `docs/agent/studio-kit.md`                                           |
+| Popups (one at a time, date-windowed, the guard rails; card 170)                                         | `docs/agent/popups.md`                                               |
 | Visitor site search (Pagefind, opt-in) + share buttons                                                   | `docs/agent/site-search.md`                                          |
 | Hidden pages, password pages (security note), Checkup link and heading checks                            | `docs/agent/private-pages.md`                                        |
 | Deployment + env vars + rebuild model                                                                    | `docs/agent/deployment.md`                                           |
