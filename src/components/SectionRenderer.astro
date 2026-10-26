@@ -35,6 +35,8 @@ import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
 import RsvpSection from '@/components/sections/RsvpSection.astro';
+import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
+import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
 import { sectionAnchors, sectionHeadingText } from '@/lib/section-anchors';
 import { primaryBudget } from '@/lib/cta-budget';
@@ -113,8 +115,13 @@ const rows = classified.map((row, i) => ({ ...row, headingId: anchorIds[i] }));
 // section that draws a primary button keeps it; every later one draws the
 // secondary variant. A closing band always draws one (CtaLink has a fallback).
 // A Hero or FinalCta a page draws OUTSIDE this renderer is not counted.
+// An event's main button (the builder kit, card 173) counts too.
 const ctaVariant = primaryBudget(rows, ({ block }) =>
-  block._type === 'ctaBandSection' ? true : block._type === 'heroSection' && !!block.primaryCta,
+  block._type === 'ctaBandSection'
+    ? true
+    : block._type === 'heroSection'
+      ? !!block.primaryCta
+      : block._type === 'eventDetailsSection' && !!block.button?.label,
 );
 
 // A real element in preview, nothing at all on the live site. The wrapper must
@@ -137,7 +144,16 @@ const editKeyOf = (block: unknown) => {
     {insertDividerBefore && <SectionDivider />}
 
     <Wrap {...wrapAttrs(editKeyOf(s))}>
-      {s._type === 'heroSection' ? (
+      {isBuilderBlock(s) ? (
+        // The builder kit (PORTS.md card 173): one branch, BuilderBlock picks the component.
+        <BuilderBlock
+          block={s}
+          surface={surface ?? 'background'}
+          headingId={headingId}
+          primaryVariant={ctaVariant(rowIndex)}
+          isFirst={rowIndex === 0}
+        />
+      ) : s._type === 'heroSection' ? (
         <Hero
           eyebrow={s.eyebrow}
           headline={s.headline ?? ''}

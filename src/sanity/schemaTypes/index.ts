@@ -27,6 +27,7 @@ import { processPage } from './processPage'; // scaffold: process
 import { processStep } from './processStep'; // scaffold: process
 import { redirect } from './redirect';
 import { sectionPreset } from './sectionPreset';
+import { shortLink } from './shortLink';
 import { service } from './service'; // scaffold: services
 import { servicesPage } from './servicesPage'; // scaffold: services
 import { siteSettings } from './siteSettings';
@@ -86,4 +87,6 @@ export const schemaTypes = [
   // Old address -> new address forwards, filed by hand or automatically on a
   // web-address change (see components/slugRedirect.tsx).
   redirect,
+  // Short addresses like /spring for flyers and QR codes (PORTS.md card 171).
+  shortLink,
 ];

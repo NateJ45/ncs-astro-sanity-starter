@@ -214,6 +214,7 @@ jobs:
     name: e2e (shard ${{ matrix.shard }}/3)
     needs: [site]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -254,19 +255,41 @@ jobs:
       # report a "Hash Sum mismatch" (that killed a WCP deploy 2026-09-09).
       # Playwright's system libraries come from Ubuntu's own archive, so drop
       # those sources first, then retry once for transient network failures.
+      # Each attempt is capped by `timeout` and the step by timeout-minutes. On
+      # 2026-10-26 a throttled Azure Ubuntu mirror fed a normal 30s install at
+      # 29 kB/s for 57 minutes and held required checks; apt resumes the partial
+      # download on the retry, and nothing can sit for the 6-hour default.
       - name: Install Playwright browsers
+        timeout-minutes: 15
         if: steps.pw-cache.outputs.cache-hit != 'true'
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
-          npx playwright install --with-deps chromium webkit ||
-            npx playwright install --with-deps chromium webkit
+          timeout 360 npx playwright install --with-deps chromium webkit || {
+            # The killed try's sudo apt-get keeps running and holds the dpkg lock, so the retry
+            # died at once with "Could not get lock". Stop it, let apt wait for the lock, and
+            # skip the Azure mirror (the slow one) when the mirror list has another entry.
+            sudo pkill -x apt-get || true
+            echo 'DPkg::Lock::Timeout "60";' | sudo tee /etc/apt/apt.conf.d/99-lock-timeout > /dev/null
+            sudo dpkg --configure -a || true
+            grep -qv azure /etc/apt/apt-mirrors.txt && sudo sed -i '/azure/d' /etc/apt/apt-mirrors.txt
+            timeout 360 npx playwright install --with-deps chromium webkit
+          }
 
       - name: Install Playwright system libraries (browsers cached)
+        timeout-minutes: 8
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
-          npx playwright install-deps chromium webkit ||
-            npx playwright install-deps chromium webkit
+          timeout 180 npx playwright install-deps chromium webkit || {
+            # The killed try's sudo apt-get keeps running and holds the dpkg lock, so the retry
+            # died at once with "Could not get lock". Stop it, let apt wait for the lock, and
+            # skip the Azure mirror (the slow one) when the mirror list has another entry.
+            sudo pkill -x apt-get || true
+            echo 'DPkg::Lock::Timeout "60";' | sudo tee /etc/apt/apt.conf.d/99-lock-timeout > /dev/null
+            sudo dpkg --configure -a || true
+            grep -qv azure /etc/apt/apt-mirrors.txt && sudo sed -i '/azure/d' /etc/apt/apt-mirrors.txt
+            timeout 180 npx playwright install-deps chromium webkit
+          }
 
       # smoke (every route 200s and carries the site name in its title), axe in
       # light, axe in dark as a separate sweep plus a focus-indicator check, and

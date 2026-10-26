@@ -8,6 +8,7 @@
 // https://search.google.com/test/rich-results
 
 import { site } from '@/data/site';
+import { resolveSocialLink } from '@/lib/social-links';
 
 // ---------- Types (loose — Sanity provides the actual document shapes) ----
 
@@ -71,12 +72,16 @@ export function localBusinessSchema(settings: SiteSettings | null | undefined): 
     url: site.url,
     image: `${site.url}${site.assets.ogDefault}`,
     email: s.email ?? undefined,
-    // Merge legacy fields + socialLinks urls, deduplicating by url string.
+    // Merge legacy fields + socialLinks urls, deduplicating by url string. Only links the site
+    // would draw (src/lib/social-links.ts, card 167), so an unusable WhatsApp address is never
+    // sent to Google either.
     sameAs: Array.from(
       new Set(
-        [s.socialInstagram, s.socialFacebook, ...(s.socialLinks ?? []).map((l) => l.url)].filter(
-          (u): u is string => Boolean(u),
-        ),
+        [
+          s.socialInstagram,
+          s.socialFacebook,
+          ...(s.socialLinks ?? []).map((l) => resolveSocialLink(l)?.url),
+        ].filter((u): u is string => Boolean(u)),
       ),
     ),
   };

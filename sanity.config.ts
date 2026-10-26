@@ -27,7 +27,7 @@ import { visionTool } from '@sanity/vision';
 import { media } from 'sanity-plugin-media';
 import { unsplashImageAsset } from 'sanity-plugin-asset-source-unsplash';
 import { schemaTypes } from './src/sanity/schemaTypes';
-import { PAGE_TEMPLATES } from './src/sanity/pageTemplates';
+import { PAGE_TEMPLATES, templateMenuTitle } from './src/sanity/pageTemplates';
 import { deskStructure } from './src/sanity/structure';
 import { resolve } from './src/sanity/resolve';
 import { PreviewNavigator } from './src/sanity/components/PreviewNavigator';
@@ -56,6 +56,7 @@ import {
 import { withSlugRedirect } from './src/sanity/components/slugRedirect';
 import { SaveSectionPresetAction } from './src/sanity/actions/saveSectionPreset';
 import { CheckPageAction } from './src/sanity/actions/checkPage';
+import { qrCodeAction } from './src/sanity/actions/qrCode';
 import { UndoAction, RedoAction, undoRedoShortcuts } from './src/sanity/components/UndoRedo';
 import { PAGE_BUILDER_TYPES } from './src/sanity/pageBuilderConfig';
 import { ncsStudioKit } from './src/sanity/kit';
@@ -229,7 +230,8 @@ export default defineConfig({
     types: withBrandPreviews(withEditorTypography(schemaTypes, STUDIO_FONTS)),
     // Page templates (the authoring kit, PORTS.md card 109): the starting
     // points offered when someone makes a Custom page. The list is the site's
-    // own, in src/sanity/pageTemplates.ts. `value` is a function so every new
+    // own, in src/sanity/pageTemplates.ts, shown as "<group>: <title>" because
+    // the new-document menu has no headings (card 173). `value` is a function so every new
     // page gets fresh _keys. The stock 'page' template stays registered (links
     // and intents that name it keep working); newDocumentOptions below hides it
     // from the menus, where "Blank page" stands in for it.
@@ -237,7 +239,7 @@ export default defineConfig({
       ...prev,
       ...PAGE_TEMPLATES.map((t) => ({
         id: t.id,
-        title: t.title,
+        title: templateMenuTitle(t),
         description: t.description,
         schemaType: 'page',
         icon: typeIcon('page'),
@@ -321,6 +323,9 @@ export default defineConfig({
         archivePageAction,
         ...pageHelpers,
         shareDraftLinkAction,
+        // "QR code" (PORTS.md card 171): every short link and every document with
+        // a page of its own; returns null for the rest. src/sanity/actions/qrCode.tsx.
+        qrCodeAction,
       ];
     },
   },

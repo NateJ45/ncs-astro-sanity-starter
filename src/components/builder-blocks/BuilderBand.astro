@@ -1,0 +1,40 @@
+---
+// Safe to edit by hand
+// The frame most builder-kit blocks share (builderSections.ts, PORTS.md card 173):
+// the surface the cadence gave it (rule 9, including the band a look asks for),
+// the content column, and the optional heading and intro line on the page's one
+// left edge (rule 17). A block with no heading is named by `label`, so its
+// region still has a name for screen readers.
+import SectionHeading from '@/components/SectionHeading.astro';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
+
+interface Props {
+  heading?: string | null;
+  intro?: string | null;
+  headingId: string;
+  surface?: CadenceSurface;
+  /** The region's name when there is no heading. */
+  label?: string;
+  /** The block's _type, for tests and the thumbnail script. */
+  type: string;
+}
+
+const { heading, intro, headingId, surface = 'background', label, type } = Astro.props;
+---
+
+<section
+  class:list={[surfaceClass(surface), 'bb']}
+  data-builder-block={type}
+  aria-labelledby={heading ? headingId : undefined}
+  aria-label={!heading ? label : undefined}
+>
+  <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+    {(heading || intro) && (
+      <div class="bb-head">
+        {heading && <SectionHeading headline={heading} headingId={headingId} />}
+        {intro && <p class="bb-intro">{intro}</p>}
+      </div>
+    )}
+    <slot />
+  </div>
+</section>
