@@ -271,8 +271,8 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 156 | Contact form no-JS post + error summary, FAQ landmark, dark-band rings              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | 160 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)             | n/a     | yes         | yes      | yes              | no            | n/a            | n/a                | n/a                 | yes            |
-| 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none | n/a     | yes         | yes      | yes              | n/a           | n/a            | n/a                | n/a                 | yes            |
-| 162 | `studio.look.splash: motif`: the site's own art replaces the splash's stone path    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 162 | `studio.look.splash: motif`: the site's own art replaces the splash's stone path    | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10591,7 +10591,7 @@ The template path (no snapshot file, no project id) is unchanged.
 **Verified in the starter (2026-10-25):** `npm run test:scripts`. End to end on first-baptist-auburn: see its PR.
 
 **Applied (2026-10-25):** first-baptist-auburn#180 (the workflow env) and #192 (the copy), fbcm#115,
-presacademy#134, reid-design-site#181, stonesteps-50k#164.
+presacademy#134, reid-design-site#181, stonesteps-50k#164, mas-monograms#148.
 
 Earlier: starter (this card). first-baptist-auburn: origin, see its PR. fbcm and stonesteps-50k set the env
 already, so for them the copy only keeps sync-check green.
@@ -10624,6 +10624,8 @@ looping motion and a `prefers-reduced-motion: reduce` rule that shows it still. 
 (no look block) renders unchanged. End to end on first-baptist-auburn: see its PR.
 
 **Applied:** starter (this card). first-baptist-auburn: origin, sets `splash: "motif"` and lays its brick strip.
+Copies (2026-10-25, default `path`, splash unchanged): fbcm#116, presacademy#135, stonesteps-50k#165,
+reid-design-site#182, mas-monograms#148.
 Every other site keeps the default, so the copy only keeps sync-check green.
 
 **Who should take it.** Any site whose own motif is not stones and wants the splash to match it.
