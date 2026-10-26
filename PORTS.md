@@ -277,6 +277,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 164 | American spelling in every string a visitor or editor reads; CSP line-length guard  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script  | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 175 | Staff view by role; the staff list adds to it; "Simple view" marks from the Studio  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -10741,3 +10742,50 @@ build: `tests/search.spec.ts` 8 passed (the misspelling test failed before); "cn
 **Applied:** starter (this card). first-baptist-auburn: origin. Every site with search on (card 126) takes the copy.
 
 **Who should take it.** Any site with `search.enabled` (today only first-baptist-auburn).
+
+## Card 175: Staff view by role, the list adds to it, and "Simple view" marks (2026-10-26)
+
+**Origin:** first-baptist-auburn (PENDING 1zs). The People tool (card 176) invites a helper as a Sanity Editor, and the
+kit's staff view already applied to every non-administrator while `kitConfig.staff` was empty. But `isStaffUser` let a
+NON-EMPTY list replace the role rule: listing one administrator (the client who wants the simple view too) would have
+given every Editor the full Studio and its permanent Delete. And on Sanity's Free plan, which has only Administrator and
+Viewer, every helper must be invited as an Administrator, so the role rule never reaches them; the only way to give one
+the simple view was an id in `kit.config.ts` and a deploy. Auburn's first patch was lost; this is the rebuild.
+
+**Canonical:** PORTABLE `src/lib/studio-kit.ts` (`isStaffUser`, `isStaffView`, new `isAdministrator`, `isMarked`,
+`cleanMarks`, `setMark`, `readMarks`, `marksNeedReload`, `STAFF_TYPE`, `STAFF_DOC_ID`, `KIT_BOOKKEEPING_TYPES`) and
+its test; new PORTABLE `src/sanity/kit/staffType.ts`; PORTABLE `src/sanity/kit/shared.tsx` (`useStaffMarks`, marks fed
+to `staffViewFor` and `useStaffView`), `kit/index.tsx` (registers the type, mounts the hook, hides the type from New
+document and the inspectors), `kit/HomeTool.tsx` and `kit/PublishPanel.tsx` (skip the type), `kit/types.ts` (comment),
+`src/lib/studio-icons.ts` and its test (an icon for the type), `scripts/lib/change-summary.mjs` (never a "change"),
+`docs/agent/studio-kit.md` ("The staff view"). Per site, not marked: `src/sanity/structure.ts` (`STAFF_TYPE` in the
+default-list hidden set), `src/sanity/kit.config.ts` (the `staff` comment), `src/lib/sanity.types.ts` (typegen).
+
+**What it does.** Staff are now three groups that add up: (1) by role, everyone who is not a Sanity administrator;
+(2) the ids or emails in `kitConfig.staff`, whatever their role; (3) the user ids marked "Simple view" on the kit's one
+`studioStaff` document, id `kit.studioStaff` (an id path, so a public dataset never serves it). Tools and document
+actions are decided synchronously when the Studio starts, so the browser keeps the last list it saw in `localStorage`;
+the kit layout re-reads the document once signed in, and if the fresh list changes this person's view (and no tab
+choice overrides it) the Studio reloads once (a `sessionStorage` flag stops a loop). A new mark therefore applies on the
+marked person's next visit. The type is bookkeeping like `studioWeek`: `KIT_BOOKKEEPING_TYPES` keeps it out of Home's
+lists, the Checkup, "Before you publish" and "is it live?". The staff view stays a courtesy; Sanity's roles are the
+permissions, and a marked administrator can still switch to the full Studio for a tab.
+
+**Switching it on.** Nothing for the role rule. Marks are written by the People tool (card 176); without it a developer
+can write the document (`{ _id: 'kit.studioStaff', _type: 'studioStaff', ids: ['p...'] }`). Add `"studioStaff"` to the
+Sanity publish webhook's filter next to `"studioWeek"`, or a mark rebuilds the site for nothing. After syncing: add
+`STAFF_TYPE` to `structure.ts`'s hidden set, run `npm run typegen`.
+
+**Behavior change.** A site with a non-empty `staff` list would now also give its unlisted non-administrators the staff
+view. Every family site has `staff: []` today (checked 2026-10-26), so nobody moves.
+
+**Not ported:** nothing; the feature is generic.
+
+**Verified (2026-10-26):** `npm run check`, `npm run build`, `npm run test:unit` in the starter and in
+first-baptist-auburn's branch; `studio-kit.test.ts` covers the three groups, the list adding to the role rule, exact-id
+marks, cleaning, toggling, storage and the once-only reload rule. The reload against a real signed-in Studio is not seen
+yet (no second account to mark).
+
+**Applied:** starter (this card). first-baptist-auburn: origin (branch `port/card-175`, after this merges).
+
+**Who should take it.** Every site with the Studio kit (card 106). Needed before card 176.
