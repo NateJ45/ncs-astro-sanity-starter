@@ -440,6 +440,12 @@ export interface KitConfig {
      * "Coming up". Needs ncsMailTools registered. Missing counts as off.
      */
     mail?: boolean;
+    /**
+     * Card 163: Home's Newsletter card alone, for a site whose email list lives
+     * somewhere else (a church management system, say) while RSVPs stay on.
+     * Missing counts as on, so it follows `mail`.
+     */
+    newsletter?: boolean;
     /** The status line under the top bar (card 110). Missing counts as on. */
     navbarStatus?: boolean;
     /** The "Help for this page" document panel (card 110). Missing counts as on. */
