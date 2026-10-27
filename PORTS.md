@@ -12041,7 +12041,14 @@ later), its town line, the "Stand-in photograph" label and the "Photo needed" he
 (card 195's shot list covers pictures; a hero shot can be added per site), its name line, and its fixed 0.85/0.70
 navy shade (now the tokens). Auburn draws the hero on Home only through its board; the starter offers it on any page.
 
-**Proved:** PROVED_PLACEHOLDER
+**Proved:** `npm run typegen`, `npm run check` (0 errors), `npm run test:unit` (1781 + 166 pass, including the new
+`hero-video` and `photo-hero` tests), `npm run build` (CSP: 11 inline scripts, 706 bytes, unchanged; the clip's
+script is a bundled module from 'self'). Parity against card 188's build: 18 of 19 pages PASS, inline CSS checksums
+included (the purge drops every `.ph-` rule where unused); the one DIFF is `styleguide/sections`' build-time ICS
+timestamp, not this card. Full Playwright suite: 181 pass, the 9 new `photo-hero.spec.ts` among them. Screenshots at
+375 and 1280: the standard hero (unchanged), the tall photo hero with its card (still, the clip's poster), the same
+with the clip playing under the shade and the Pause button, and the short inner-page shape; no horizontal overflow.
+No new block type, so the heroSection thumbnail stays as shot.
 
 **Applied:** starter (this card). Sites take the PORTABLE files plus the schema, query and `Hero.astro` branch. A
 site that never picks the style renders as before. fbcm is the natural first user (a home photo hero with service
