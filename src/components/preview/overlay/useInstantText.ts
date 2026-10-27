@@ -101,9 +101,14 @@ import {
   type DraftSource,
   type PendingSwap,
 } from '../../../lib/preview-live-draft.ts';
+import { INLINE_EDIT_ATTRIBUTE } from '../../../lib/preview-inline-edit.ts';
 import { CLONE_ATTRIBUTE, createInstantStructure } from './instantStructure.ts';
 import { startTiming } from './timing.ts';
 import { useDraftDocument } from './useDraftDocument.ts';
+
+/** True while the node sits in an element being typed into (card 185). */
+const underCaret = (node: Text): boolean =>
+  !!node.parentElement?.closest(`[${INLINE_EDIT_ATTRIBUTE}]`);
 
 /**
  * The event this listens for after `<main>` has been replaced. Dispatched by the
@@ -250,6 +255,8 @@ export function useInstantText(pageId: string, onDocument?: () => void): void {
       for (const change of changes) {
         const key = sourceKey(pageId, change.path);
         for (const node of nodes.get(key) ?? []) {
+          // Card 185: never write under the caret of a field typed on the page.
+          if (underCaret(node)) continue;
           if (applyTextChange(node, change.previous, change.next)) swapped += 1;
         }
         // Remembered whether or not a node matched: a field that is not on
@@ -342,6 +349,7 @@ export function useInstantText(pageId: string, onDocument?: () => void): void {
         }
         let reapplied = false;
         for (const node of bucket) {
+          if (underCaret(node)) continue;
           // Any value this field has passed through counts as "stale render of
           // this field", not just the one the burst started from: an accepted
           // render that began mid-burst carries an INTERMEDIATE value, which

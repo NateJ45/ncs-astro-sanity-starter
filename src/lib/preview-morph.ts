@@ -202,6 +202,17 @@ export interface MorphLimits {
  * this file should be trying to reconcile, and the caller's `replaceWith` is the
  * right answer for it.
  */
+/**
+ * The attribute an element carries while an editor is TYPING INTO IT on the
+ * page (card 185, `src/components/preview/overlay/InlineText.tsx`). The morph
+ * leaves such an element exactly as it is, attributes and children alike: the
+ * live node holds the caret, the selection and words the server has not seen
+ * yet, so the server's copy is by definition older. Only the LIVE side is
+ * checked, because the server's HTML never carries it. The editor asks for one
+ * refresh when it lets go, so nothing kept here stays stale.
+ */
+export const INLINE_EDIT_ATTRIBUTE = 'data-inline-editing';
+
 export const DEFAULT_MORPH_LIMITS: MorphLimits = { maxDepth: 60, maxNodes: 20000 };
 
 /** Thrown internally when a cap is hit; never escapes `morph`. */
@@ -242,6 +253,11 @@ function morphElement(
   context: MorphContext,
 ): void {
   if (depth > context.limits.maxDepth) throw new MorphAbort('too deep');
+  // UNDER THE CARET (card 185): an element being typed into is kept whole,
+  // attributes included (its `contenteditable` is not in the server's copy).
+  if (from.getAttribute(INLINE_EDIT_ATTRIBUTE) !== null) {
+    return;
+  }
   // KEEP-AS-IS SUBTREES (2026-08-30, from wcp). An element marked
   // data-morph-keep holds client-completed content the server's HTML does not:
   // a server island (server:defer) streams its real body via inline scripts
