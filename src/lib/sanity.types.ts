@@ -21,6 +21,12 @@ type ArrayOf<T> = Array<
 >;
 
 // Source: schema.json
+export type Glance = {
+  title?: string;
+  lines?: Array<string>;
+  link?: CtaBlock;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: 'reference';
@@ -1860,6 +1866,13 @@ export type RichTextSection = {
   look?: 'standard' | 'quiet' | 'feature';
 };
 
+export type SanityFileAssetReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset';
+};
+
 export type HeroSection = {
   _type: 'heroSection';
   eyebrow?: string;
@@ -1873,6 +1886,18 @@ export type HeroSection = {
     crop?: SanityImageCrop;
     alt?: string;
     _type: 'image';
+  };
+  heroStyle?: 'standard' | 'photo';
+  glance?: Glance;
+  backgroundVideo?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
+  };
+  backgroundVideoPhone?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
   };
   primaryCta?: CtaBlock;
   secondaryCta?: CtaBlock;
@@ -3271,6 +3296,7 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | Glance
   | SanityImageAssetReference
   | TimelineEntryImage
   | PhotoCardImage
@@ -3349,6 +3375,7 @@ export type AllSanitySchemaTypes =
   | GallerySection
   | ImageTextSection
   | RichTextSection
+  | SanityFileAssetReference
   | HeroSection
   | FormTickQuestion
   | FormDateQuestion

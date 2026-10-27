@@ -115,11 +115,24 @@ export interface ProjectedCtaBlock {
 
 export type ProjectedHeroSection = { _key: string } & Omit<
   _HeroSection,
-  'backgroundImage' | 'primaryCta' | 'secondaryCta'
+  | 'backgroundImage'
+  | 'primaryCta'
+  | 'secondaryCta'
+  | 'backgroundVideo'
+  | 'backgroundVideoPhone'
+  | 'glance'
 > & {
     backgroundImage?: ProjectedImage | null;
     primaryCta?: ProjectedCtaBlock | null;
     secondaryCta?: ProjectedCtaBlock | null;
+    // The photo hero (card 189): the clips as URL and type, the short-facts card's link resolved.
+    backgroundVideo?: { url?: string | null; mimeType?: string | null } | null;
+    backgroundVideoPhone?: { url?: string | null; mimeType?: string | null } | null;
+    glance?: {
+      title?: string | null;
+      lines?: (string | null)[] | null;
+      link?: ProjectedCtaBlock | null;
+    } | null;
   };
 
 export type ProjectedRichTextSection = { _key: string } & _RichTextSection & {
