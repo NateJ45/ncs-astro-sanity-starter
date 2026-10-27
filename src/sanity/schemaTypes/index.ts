@@ -17,6 +17,8 @@ import { homePage } from './homePage';
 import { journalCategory } from './journalCategory'; // scaffold: journal
 import { journalEntry } from './journalEntry'; // scaffold: journal
 import { journalPage } from './journalPage'; // scaffold: journal
+import { journalPostsSection } from './journalPostsSection'; // scaffold: journal
+import { mainPageSectionSchemas } from './mainPageSections';
 import { navLink } from './navLink';
 import { newsletter } from './newsletter';
 import { page } from './page';
@@ -53,6 +55,9 @@ export const schemaTypes = [
   ...pageSectionSchemas,
   syncedSection, // authoring kit, card 109: shows a saved section, edit once everywhere
   ...richSectionSchemas,
+  // Every main page a page builder (card 190): blocks offered on their own page only.
+  ...mainPageSectionSchemas,
+  journalPostsSection, // scaffold: journal
 
   // Singletons
   siteSettings,
