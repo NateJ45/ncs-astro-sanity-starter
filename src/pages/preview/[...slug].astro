@@ -101,6 +101,13 @@ const BUILDER_SINGLETONS = new Set([
   'processPage', // scaffold: process
 ]);
 
+// Pages that are a page builder only while their Page layout is filled (card 190).
+const HYBRID_SINGLETONS = new Set([
+  'contactPage',
+  'privacyPage',
+  'journalPage', // scaffold: journal
+]);
+
 // The heading-id prefix each live page passes to SectionRenderer. Matching it
 // here keeps generated ids identical to the live page, so an in-page anchor an
 // editor is checking behaves the same in the preview.
@@ -109,6 +116,9 @@ const ID_PREFIX: Record<string, string> = {
   aboutPage: 'about',
   servicesPage: 'services', // scaffold: services
   processPage: 'process', // scaffold: process
+  contactPage: 'contact', // card 190
+  privacyPage: 'privacy', // card 190
+  journalPage: 'journal', // card 190, scaffold: journal
 };
 
 // Every hero / builder / CTA field any of the page types may carry. Absent
@@ -222,8 +232,14 @@ const pageId = doc._id.replace(/^drafts\./, '');
 // `pageBuilder`, so unlike presacademy there is only one field name.
 const editDoc = { id: pageId, type: doc._type, field: 'pageBuilder' as const };
 
-const isBuilderPage = !singletonType || BUILDER_SINGLETONS.has(singletonType);
 const sections = doc.pageBuilder ?? [];
+// Contact, Privacy and the Journal index are page builders too (card 190), but only once their
+// Page layout has sections: with it empty the live page draws its classic layout (the hero
+// fields and the piece it is built around, held in code), so the preview shows that surface.
+const isBuilderPage =
+  !singletonType ||
+  BUILDER_SINGLETONS.has(singletonType) ||
+  (HYBRID_SINGLETONS.has(singletonType) && sections.length > 0);
 const idPrefix = singletonType ? (ID_PREFIX[singletonType] ?? 'section') : 'page';
 
 // The bespoke pages carry hero fields; the 404 page names them differently.

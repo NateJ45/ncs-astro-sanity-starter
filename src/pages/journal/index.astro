@@ -1,37 +1,31 @@
 ---
 // scaffold-file: journal
 // Safe to edit by hand for copy + structure changes.
-// Journal index page. Hero, category chips (display-only for now), responsive
-// post grid, final CTA. Sanity-driven via getJournalPage() + getAllJournalEntries()
-// + getAllJournalCategories().
+// Journal index page. A page builder since card 190 (ported from FBC Auburn): when the
+// document's Page layout has sections, they render through SectionRenderer, and the posts are
+// the "Journal posts" block (src/components/sections/JournalPosts.astro: category chips, the post
+// grid and the newsletter sign-up). With an EMPTY Page layout the page draws exactly what it
+// always did: hero, that same block, then the final CTA, all from the document's own fields.
+// scripts/main-pages-builder.mjs seeds the Page layout when the editor should be able to
+// rearrange the page. Sanity-driven via getJournalPage() plus the block's own reads of the
+// posts and categories.
 //
 // First post gets the `featured` card treatment (spans 2 columns at lg, larger
 // type). If editors flag multiple posts as featured, the first by date wins
 // the big slot; others get normal cards.
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import {
-  getJournalPage,
-  getAllJournalEntries,
-  getAllJournalCategories,
-  getSiteSettings,
-} from '@/lib/queries';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import { getJournalPage, getSiteSettings } from '@/lib/queries';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { site } from '@/data/site';
 
 import Hero from '@/components/Hero.astro';
-import JournalCard from '@/components/JournalCard.astro';
-import JournalCategoryChip from '@/components/JournalCategoryChip.astro';
+import JournalPosts from '@/components/sections/JournalPosts.astro';
 import FinalCta from '@/components/FinalCta.astro';
-import NewsletterSignup from '@/components/NewsletterSignup';
 
-const [page, entries, categories, siteSettings] = await Promise.all([
-  getJournalPage(),
-  getAllJournalEntries(),
-  getAllJournalCategories(),
-  getSiteSettings(),
-]);
+const [page, siteSettings] = await Promise.all([getJournalPage(), getSiteSettings()]);
 
 // Section visibility guard.
 const visible = getSectionVisibility(siteSettings?.sectionVisibility);
@@ -48,11 +42,8 @@ const heroSubhead =
   page?.heroSubhead ??
   'Project walkthroughs, design thinking, and the occasional opinion. Written between projects.';
 
-// Categories with at least one post (filters out empty taxonomies).
-const usedCategories = (categories ?? []).filter((c: any) => (c.postCount ?? 0) > 0);
-
-// Posts have already come back sorted "featured desc, publishedAt desc" via the query.
-const list = entries ?? [];
+// The Page layout, when the editor has built one. Empty means the classic layout below.
+const sections = page?.pageBuilder?.length ? page.pageBuilder : null;
 
 const schemas = [
   breadcrumbSchema([
@@ -70,101 +61,32 @@ const schemas = [
   seoImage={page?.seoImage}
   ogCard={{ kicker: heroEyebrow }}
 >
-  {/* ------- 1. Hero --------------------------------------------------------- */}
-  <Hero
-    eyebrow={heroEyebrow}
-    headline={heroHeadline}
-    subhead={heroSubhead}
-    backgroundImage={page?.heroImage}
-    headingId="journal-hero-heading"
-    size="short"
-    scriptAccent={page?.heroScriptAccent ?? 'studio'}
-  />
+  {sections ? (
+    <SectionRenderer {sections} idPrefix="journal" />
+  ) : (
+    <>
+      {/* ------- 1. Hero ------------------------------------------------------- */}
+      <Hero
+        eyebrow={heroEyebrow}
+        headline={heroHeadline}
+        subhead={heroSubhead}
+        backgroundImage={page?.heroImage}
+        headingId="journal-hero-heading"
+        size="short"
+        scriptAccent={page?.heroScriptAccent ?? 'studio'}
+      />
 
-  {/* ------- 2. Category chips (display-only for now) ----------------------- */}
-  {usedCategories.length > 0 && (
-    <section class="bg-background" aria-label="Journal categories">
-      <div class="mx-auto max-w-content px-m pt-l">
-        <ul class="flex list-none flex-wrap gap-xs p-0">
-          {usedCategories.map((cat: any) => (
-            <li>
-              <JournalCategoryChip
-                title={cat.title}
-                tooltip={
-                  cat.description ?? `${cat.postCount} ${cat.postCount === 1 ? 'post' : 'posts'}`
-                }
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
+      {/* ------- 2. Category chips, post grid and newsletter signup ------------ */}
+      <JournalPosts headingId="journal-posts-heading" />
+
+      {/* ------- 3. Final CTA -------------------------------------------------- */}
+      <FinalCta
+        headline={page?.finalCtaHeadline}
+        subhead={page?.finalCtaSubhead}
+        cta={page?.finalCta}
+        scriptAccent={page?.finalCtaScriptAccent}
+        backgroundImage={page?.finalCtaBackgroundImage}
+      />
+    </>
   )}
-
-  {/* ------- 3. Post grid --------------------------------------------------- */}
-  <section class="bg-background" aria-labelledby="journal-posts-heading">
-    <div class="mx-auto max-w-content px-m py-section-md">
-      {/* Visually-hidden H2 — same reason as the portfolio grid: keeps the
-          heading hierarchy from skipping H1 directly to each card's H3. */}
-      <h2 id="journal-posts-heading" class="sr-only">
-        Recent posts
-      </h2>
-
-      {list.length > 0 ? (
-        <div class="grid grid-cols-1 gap-l md:grid-cols-2 lg:grid-cols-3" data-stagger-grid>
-          {list.map((entry: any, i: number) => (
-            <JournalCard entry={entry} featured={i === 0 && entry.featured} />
-          ))}
-        </div>
-      ) : (
-        <div class="py-section-lg text-center">
-          <p class="mx-auto max-w-prose text-lg text-foreground/80">
-            The first journal entries are on their way.
-          </p>
-          <p class="mt-s text-muted-foreground">
-            In the meantime,{' '}
-            <Fragment>
-              {/* scaffold: services */}
-              <a href="/services/" class="text-link underline underline-offset-2">
-                see what we do
-              </a>{' '}
-              or
-              {/* scaffold:end */}
-            </Fragment>
-            <a href="/contact/" class="text-link underline underline-offset-2">
-              {' '}
-              start a conversation
-            </a>
-            .
-          </p>
-        </div>
-      )}
-    </div>
-  </section>
-
-  {/* ------- 4. Newsletter signup — between post grid and Final CTA.
-         Renders only when newsletter is enabled and configured in siteSettings.
-         Island hydrates when scrolled into view. */}
-  {siteSettings?.newsletter?.enabled && (
-    <section class="bg-muted" aria-label="Newsletter signup">
-      <div class="mx-auto max-w-content px-m py-section-md">
-        <div class="mx-auto max-w-lg">
-          <NewsletterSignup
-            client:visible
-            newsletter={siteSettings.newsletter}
-            source="journal-index"
-          />
-        </div>
-      </div>
-    </section>
-  )}
-
-  {/* ------- 5. Final CTA ---------------------------------------------------- */}
-  <FinalCta
-    headline={page?.finalCtaHeadline}
-    subhead={page?.finalCtaSubhead}
-    cta={page?.finalCta}
-    scriptAccent={page?.finalCtaScriptAccent}
-    backgroundImage={page?.finalCtaBackgroundImage}
-  />
 </BaseLayout>

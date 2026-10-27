@@ -2,6 +2,9 @@
 // Form field options (project types) are wired in the Astro component, not Sanity.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
+import { sectionArrayOptions } from './sections';
+import { CONTACT_SECTION_TYPES } from './richSections';
+import { pageBuilderAuthoring } from '../pageBuilderAuthoring';
 
 export const contactPage = defineType({
   name: 'contactPage',
@@ -14,6 +17,7 @@ export const contactPage = defineType({
     { name: 'hero', title: 'Hero' },
     { name: 'form', title: 'Form intro + expectations' },
     { name: 'scheduling', title: 'Scheduling' },
+    { name: 'pageBuilder', title: 'Page layout' },
   ],
   fields: [
     defineField({
@@ -268,6 +272,24 @@ export const contactPage = defineType({
       type: 'string',
       group: 'scheduling',
       description: 'Optional override of siteSettings.availabilityStatus. Usually leave blank.',
+    }),
+
+    // Every main page a page builder (card 190, ported from FBC Auburn). LEAVE THIS EMPTY and the
+    // page draws exactly as it always has, from the Hero and form fields on the other tabs. Add
+    // sections and the page is drawn from them instead: the contact form is a block you can move,
+    // and you can put anything from the library above or below it.
+    // scripts/main-pages-builder.mjs fills it from the old fields. Those fields are never
+    // deleted (rule 16).
+    defineField({
+      name: 'pageBuilder',
+      title: 'Page layout',
+      type: 'array',
+      group: 'pageBuilder',
+      description:
+        'Optional. Leave empty and this page keeps its usual layout (the Hero tab and the rest). Add sections to build the page yourself: drag to reorder, remove one to hide it, or add one from the library. Once this has sections it replaces the usual layout.',
+      of: CONTACT_SECTION_TYPES,
+      options: sectionArrayOptions,
+      ...pageBuilderAuthoring,
     }),
 
     defineField({

@@ -782,6 +782,41 @@ export type NavLink = {
   href?: string;
 };
 
+export type JournalPostsSection = {
+  _type: 'journalPostsSection';
+  showCategories?: boolean;
+  showNewsletter?: boolean;
+};
+
+export type PrivacyPolicySection = {
+  _type: 'privacyPolicySection';
+  lastUpdated?: string;
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal' | 'h2' | 'h3';
+    listItem?: 'bullet' | 'number';
+    markDefs?: Array<{
+      href?: string;
+      openInNewTab?: boolean;
+      _type: 'link';
+      _key: string;
+    }>;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
+};
+
+export type ContactFormSection = {
+  _type: 'contactFormSection';
+  sidebar?: boolean;
+};
+
 export type DynamicListSection = {
   _type: 'dynamicListSection';
   eyebrow?: string;
@@ -1974,6 +2009,104 @@ export type PrivacyPage = {
     _type: 'block';
     _key: string;
   }>;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & LogoStripSection)
+    | ({
+        _key: string;
+      } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
+    | ({
+        _key: string;
+      } & StorySection)
+    | ({
+        _key: string;
+      } & ValuesSection)
+    | ({
+        _key: string;
+      } & FaqSection)
+    | ({
+        _key: string;
+      } & TeamSection)
+    | ({
+        _key: string;
+      } & DynamicListSection)
+    | ({
+        _key: string;
+      } & PrivacyPolicySection)
+  >;
 };
 
 export type CtaBlock = {
@@ -2322,6 +2455,104 @@ export type JournalPage = {
     crop?: SanityImageCrop;
     _type: 'image';
   };
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & LogoStripSection)
+    | ({
+        _key: string;
+      } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
+    | ({
+        _key: string;
+      } & StorySection)
+    | ({
+        _key: string;
+      } & ValuesSection)
+    | ({
+        _key: string;
+      } & FaqSection)
+    | ({
+        _key: string;
+      } & TeamSection)
+    | ({
+        _key: string;
+      } & DynamicListSection)
+    | ({
+        _key: string;
+      } & JournalPostsSection)
+  >;
 };
 
 export type ContactPage = {
@@ -2389,6 +2620,104 @@ export type ContactPage = {
   schedulingLink?: string;
   schedulingLinkLabel?: string;
   availabilityNote?: string;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & LogoStripSection)
+    | ({
+        _key: string;
+      } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
+    | ({
+        _key: string;
+      } & StorySection)
+    | ({
+        _key: string;
+      } & ValuesSection)
+    | ({
+        _key: string;
+      } & FaqSection)
+    | ({
+        _key: string;
+      } & TeamSection)
+    | ({
+        _key: string;
+      } & DynamicListSection)
+    | ({
+        _key: string;
+      } & ContactFormSection)
+  >;
   note?: string;
 };
 
@@ -3333,6 +3662,9 @@ export type AllSanitySchemaTypes =
   | BusinessInfo
   | SiteSettings
   | NavLink
+  | JournalPostsSection
+  | PrivacyPolicySection
+  | ContactFormSection
   | DynamicListSection
   | TeamSection
   | FaqItemReference

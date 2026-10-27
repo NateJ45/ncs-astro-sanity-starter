@@ -521,6 +521,12 @@ const SECTIONS: Record<string, unknown>[] = [
       link: cta('Read more'),
     })),
   },
+  // ── Every main page a page builder (card 190) ──────────────────────────────
+  // These read what they show themselves (the Contact page's form settings, the posts), so
+  // what they draw here follows the dataset; the policy shows the built-in text.
+  { _type: 'contactFormSection', _key: 'contact-form', sidebar: true },
+  { _type: 'privacyPolicySection', _key: 'privacy-policy', lastUpdated: '2026-01-15' },
+  { _type: 'journalPostsSection', _key: 'journal-posts', showCategories: true }, // scaffold: journal
 ];
 ---
 
