@@ -1,0 +1,130 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Safe to edit by hand
+// The client review layer's notes pill (PORTS.md card 195, ported from First Baptist Auburn's
+// "For Jacob" pill). While CLIENT_NOTES_ACTIVE is true (src/data/client-notes.ts: the switch is
+// on AND the site is on a pre-launch address), every page shows a small pill in the corner that
+// opens a list of what the client needs to give for that page, and every placeholder written in
+// square brackets in the page's words ("[Client: ...]", "[Placeholder: ...]") is highlighted
+// yellow, so nothing unfinished can be mistaken for the real thing. With the layer off this
+// component renders nothing at all: no markup, no script.
+//
+// A <details> element, so it opens without JavaScript; the highlighter is a few lines that wrap
+// the bracketed text in <mark>. Neither is indexed by site search (data-pagefind-ignore, and the
+// highlight is added in the browser, after the search index is built), and neither prints.
+import { CLIENT_NOTES_ACTIVE, CLIENT_NAME, MARKERS, notesFor } from '@/data/client-notes';
+import { shotsForPage } from '@/data/shot-list';
+import { markerPattern } from '@/lib/client-notes';
+// The layer's styles (pill, highlight, "Photo needed" boxes), written into the page only while the
+// layer is active, so a site with it off ships none of them.
+import layerCss from '@/styles/client-notes.css?raw';
+
+// The page's own notes, then one per photo on its shot list (src/data/shot-list.ts), in the order
+// the "Photo needed" boxes appear on the page.
+const notes = CLIENT_NOTES_ACTIVE
+  ? [
+      ...notesFor(Astro.url.pathname),
+      ...shotsForPage(Astro.url.pathname).map((s) => ({
+        title: `Photo: ${s.title}.`,
+        detail: `${s.detail} (${s.orientation === 'portrait' ? 'Hold the phone upright.' : s.orientation === 'square' ? 'Square.' : 'Hold the phone sideways.'})`,
+      })),
+    ]
+  : [];
+const pattern = markerPattern(MARKERS);
+---
+
+{CLIENT_NOTES_ACTIVE && <style is:inline set:html={layerCss} />}
+
+{CLIENT_NOTES_ACTIVE && (
+  <details class="cn" data-pagefind-ignore="all" data-markers={pattern}>
+    <summary class="cn__pill">
+      {`For ${CLIENT_NAME}`}
+      {notes.length > 0 && `: ${notes.length} thing${notes.length === 1 ? '' : 's'} needed`}
+    </summary>
+    <div class="cn__panel">
+      <p class="cn__lede">
+        This is a preview. Anything <mark class="cn-mark">in yellow brackets</mark> is placeholder
+        wording written to show the idea, and each "Photo needed" box names a photo that is still to
+        come. Here is what is needed for this page:
+      </p>
+      {notes.length > 0 ? (
+        <ol class="cn__list">
+          {notes.map((n) => (
+            <li>
+              <strong>{n.title}</strong>
+              {n.detail && <span> {n.detail}</span>}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p class="cn__none">Nothing for this page yet. If anything here looks wrong, say so.</p>
+      )}
+    </div>
+  </details>
+)}
+
+{CLIENT_NOTES_ACTIVE && <script>
+  // Highlight placeholder wording: any marker from MARKERS in src/data/client-notes.ts, such as
+  // "[Client: ...]" or "[Placeholder: ...]", in the page's text, wherever it came from (Studio
+  // content or a component), as a <mark>. The pattern arrives on the pill's data-markers.
+  const source = document.querySelector<HTMLElement>('.cn')?.dataset.markers;
+  const RE = source ? new RegExp(source, 'g') : null;
+  const OPEN = source ? new RegExp(source.replace(/\\b.*$/, '\\b')) : null;
+  const mark = () => {
+    if (!RE || !OPEN) return;
+    const root = document.querySelector('main') ?? document.body;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const hits: Text[] = [];
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const t = n as Text;
+      // An island not yet hydrated (astro-island[ssr]) is left alone: changing its text before
+      // React hydrates makes it throw error #418 and render twice. It is marked once it has
+      // hydrated (the observer below watches the ssr attribute go).
+      if (t.parentElement?.closest('mark, script, style, .cn, astro-island[ssr]')) continue;
+      RE.lastIndex = 0;
+      if (RE.test(t.data)) hits.push(t);
+    }
+    for (const t of hits) {
+      const frag = document.createDocumentFragment();
+      let last = 0;
+      RE.lastIndex = 0;
+      for (let m = RE.exec(t.data); m; m = RE.exec(t.data)) {
+        frag.append(t.data.slice(last, m.index));
+        const el = document.createElement('mark');
+        el.className = 'cn-mark';
+        el.textContent = m[0];
+        frag.append(el);
+        last = m.index + m[0].length;
+      }
+      frag.append(t.data.slice(last));
+      t.replaceWith(frag);
+    }
+    // A placeholder that runs across a link or a line break is split over several text nodes, so
+    // the pass above cannot see both brackets: highlight the whole paragraph, item or heading.
+    root.querySelectorAll<HTMLElement>('p, li, dd, h1, h2, h3, h4, blockquote').forEach((el) => {
+      if (el.closest('.cn, astro-island[ssr]') || el.classList.contains('cn-block')) return;
+      if (!OPEN.test(el.textContent ?? '')) return;
+      if (el.querySelector('.cn-mark')) return;
+      el.classList.add('cn-block');
+    });
+  };
+  mark();
+  document.addEventListener('astro:page-load', mark);
+  // Text that arrives later (an accordion answer drawn when it opens, an island that hydrates)
+  // is marked too, once per animation frame after a change. Our own marks are skipped, so it settles.
+  let queued = false;
+  new MutationObserver(() => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      mark();
+    });
+  }).observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ['ssr'],
+  });
+</script>}

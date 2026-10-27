@@ -1,0 +1,283 @@
+/* PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+   (No apostrophes in the comments: scripts/lib/css-purge.mjs reads one as the start of a string.)
+   The client review layer styles (PORTS.md card 195): the notes pill and the yellow highlight
+   (ClientNotes.astro) and the "Photo needed" boxes (ShotRequest.astro). ClientNotes imports this
+   file as text and writes it into the page only while the layer is active, so a site with the
+   layer off ships none of it. Fixed colours throughout: the layer is yellow on any brand, in
+   any theme. */
+
+.cn-mark {
+  padding: 0 0.15em;
+  border-radius: 3px;
+  background: #ffe46b;
+  color: #1d2330;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.cn-block {
+  background: #ffe46b;
+  color: #1d2330;
+  box-shadow: 0 0 0 4px #ffe46b;
+  border-radius: 3px;
+}
+.cn {
+  /* Bottom right and compact: at the bottom left it sat over the left-edge text of a page. Fixed
+     colours throughout: the layer is yellow on any brand, in any theme. */
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 60;
+  max-width: min(420px, calc(100vw - 24px));
+  font-family: var(--font-body, system-ui, sans-serif);
+  color: #1d2330;
+}
+/* Out of the way while the phone menu or the search dialog is open: it sat on top of the
+   the links of the menu. */
+body:has([role='dialog'][data-state='open'], dialog[open]) .cn {
+  display: none;
+}
+.cn__pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 2px solid #1d2330;
+  border-radius: 999px;
+  background: #ffe46b;
+  box-shadow: 0 8px 24px -10px rgb(29 35 48 / 0.5);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+.cn__pill::-webkit-details-marker {
+  display: none;
+}
+.cn__pill:focus-visible {
+  outline: 3px solid #1d2330;
+  outline-offset: 3px;
+}
+.cn__panel {
+  max-height: min(60vh, 520px);
+  overflow: auto;
+  margin-top: 10px;
+  padding: 18px 20px;
+  border: 2px solid #1d2330;
+  border-radius: 12px;
+  background: #fffbe6;
+  box-shadow: 0 18px 40px -18px rgb(29 35 48 / 0.55);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.cn__lede {
+  margin: 0 0 12px;
+}
+.cn__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 1.2em;
+}
+.cn__none {
+  margin: 0;
+}
+/* Room under the last line of the footer while the pill is shown, so it never sits over the
+   bottom links of the footer at the very end of the page. */
+body:has(.cn) #site-footer {
+  padding-bottom: 64px;
+}
+/* Not on paper: no pill, and the highlight drops back to plain text (the brackets still show,
+   so an unfinished placeholder is still visible in a printout). */
+@media print {
+  .cn {
+    display: none;
+  }
+  .cn-mark,
+  .cn-block {
+    background: none;
+    box-shadow: none;
+  }
+}
+
+.shot {
+  --shot-ink: #1d2330;
+  --shot-paper: #fffbe6;
+  --shot-yellow: #ffe46b;
+  /* Fixed, not the theme heading colour: the paper is always light, so its ink must not follow the
+     stored dark tokens (contrast.spec.ts runs them). */
+  --shot-heading: #1d2330;
+  color: var(--shot-ink);
+  font-family: var(--font-body, system-ui, sans-serif);
+}
+.shot p {
+  margin: 0;
+}
+.shot__tag {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--shot-yellow);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.shot__title {
+  font-family: var(--font-display, var(--font-body, system-ui, sans-serif));
+  font-size: 20px;
+  line-height: 1.2;
+  color: var(--shot-heading);
+}
+.shot__detail {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.shot__hold {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.shot__phone {
+  flex: none;
+}
+
+/* ---- frame: fills a picture slot ---- */
+.shot--frame {
+  position: relative;
+  display: grid;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--shot-paper);
+  container-type: inline-size;
+}
+.shot--frame:not(.shot--fill) {
+  aspect-ratio: 4 / 3;
+}
+.shot--frame.shot--tall:not(.shot--fill) {
+  aspect-ratio: 4 / 5;
+}
+.shot--fill {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+/* Camera-frame corners, 22px arms inset 14px, drawn with four gradients. */
+.shot__corners {
+  position: absolute;
+  inset: 14px;
+  pointer-events: none;
+  --c: var(--shot-heading);
+  background:
+    linear-gradient(var(--c), var(--c)) top left / 22px 2px,
+    linear-gradient(var(--c), var(--c)) top left / 2px 22px,
+    linear-gradient(var(--c), var(--c)) top right / 22px 2px,
+    linear-gradient(var(--c), var(--c)) top right / 2px 22px,
+    linear-gradient(var(--c), var(--c)) bottom left / 22px 2px,
+    linear-gradient(var(--c), var(--c)) bottom left / 2px 22px,
+    linear-gradient(var(--c), var(--c)) bottom right / 22px 2px,
+    linear-gradient(var(--c), var(--c)) bottom right / 2px 22px;
+  background-repeat: no-repeat;
+  opacity: 0.55;
+}
+.shot--frame .shot__body {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  max-width: 34rem;
+  padding: 32px 36px;
+}
+/* A small tile (a narrow mosaic cell on a phone): the tag and the request only. */
+@container (max-width: 240px) {
+  .shot--frame .shot__body {
+    gap: 8px;
+    padding: 20px 16px;
+  }
+  .shot--frame .shot__title {
+    font-size: 16px;
+  }
+  .shot--frame .shot__detail,
+  .shot--frame .shot__hold {
+    display: none;
+  }
+}
+
+/* ---- frame with an example: the stock photo fills the slot, the note pins to a corner ---- */
+.shot--example {
+  align-items: end;
+  background: #1d2330;
+}
+.shot__example {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.shot__note {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  max-width: min(22rem, calc(100% - 24px));
+  margin: 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--shot-ink);
+  border-radius: 12px;
+  background: var(--shot-paper);
+  box-shadow: 0 12px 30px -14px rgb(29 35 48 / 0.6);
+}
+.shot__note--end {
+  justify-self: end;
+}
+.shot__note .shot__title {
+  font-size: 17px;
+}
+.shot__how summary {
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.shot__how[open] {
+  display: grid;
+  gap: 8px;
+}
+.shot__credit {
+  font-size: 11px;
+  opacity: 0.75;
+}
+/* A small tile: the tag only, the photo does the talking. */
+@container (max-width: 240px) {
+  .shot__note {
+    margin: 8px;
+    padding: 6px 8px;
+  }
+  .shot__note .shot__title,
+  .shot__note .shot__how {
+    display: none;
+  }
+}
+
+/* ---- tag: a pinned note over a dark picture slot ---- */
+.shot--tag {
+  max-width: 320px;
+  padding: 14px 16px;
+  border: 2px solid var(--shot-ink);
+  border-radius: 12px;
+  background: var(--shot-paper);
+  box-shadow: 0 12px 30px -14px rgb(29 35 48 / 0.6);
+}
+.shot--tag .shot__body {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+.shot--tag .shot__title {
+  font-size: 17px;
+}
