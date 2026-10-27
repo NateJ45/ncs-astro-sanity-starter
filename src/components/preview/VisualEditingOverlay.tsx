@@ -13,7 +13,8 @@ import {
   onStart,
   shouldStart,
 } from '../../lib/preview-refresh.ts';
-import { isRedundantRender, morph } from '../../lib/preview-morph.ts';
+import { INLINE_EDIT_ATTRIBUTE, isRedundantRender, morph } from '../../lib/preview-morph.ts';
+import { INLINE_EDIT_DONE_EVENT } from '../../lib/preview-inline-edit.ts';
 import {
   POSTED_DRAFT_HEADER,
   localChannelCovers,
@@ -146,6 +147,13 @@ export default function VisualEditingOverlay({ pageId }: Props) {
    */
   const lastMarkup = useRef<string | null>(null);
   /**
+   * Card 185: a render was applied while an editor was typing on the page, so
+   * the morph kept the edited element as it was. When they let go, that
+   * element needs the server's copy, so one more refresh is asked for. Only
+   * then: an edit with no render in the middle gets its render from the write.
+   */
+  const heldForEdit = useRef(false);
+  /**
    * The newest draft of THIS page the Studio's local channel has posted, or
    * null when it has none (never spoke, or said "no draft"). Card 184: the soft
    * refresh POSTs it, so the server renders the Studio's own copy instead of
@@ -273,6 +281,7 @@ export default function VisualEditingOverlay({ pageId }: Props) {
         stop('unchanged (skipped)');
       } else if (morph(current, next)) {
         lastMarkup.current = markup;
+        if (current.querySelector(`[${INLINE_EDIT_ATTRIBUTE}]`)) heldForEdit.current = true;
         // The instant-text path indexes the old text nodes and may be holding
         // swaps this HTML predates. Tell it to rebuild and re-apply. Belt and
         // braces now that every instant-text document bumps the sequence too: a
@@ -331,6 +340,20 @@ export default function VisualEditingOverlay({ pageId }: Props) {
 
   // Never leave a timer behind on unmount.
   useEffect(() => () => clearTimeout(timer.current), []);
+
+  // An editor stopped typing on the page (card 185, overlay/InlineText.tsx).
+  // Re-render once if a render was held back from the edited element, or if
+  // the element could not get its click-to-edit markers back on its own.
+  useEffect(() => {
+    const onDone = (event: Event) => {
+      const rerender = (event as CustomEvent<{ rerender?: boolean }>).detail?.rerender === true;
+      if (!heldForEdit.current && !rerender) return;
+      heldForEdit.current = false;
+      void softRefresh();
+    };
+    window.addEventListener(INLINE_EDIT_DONE_EVENT, onDone);
+    return () => window.removeEventListener(INLINE_EDIT_DONE_EVENT, onDone);
+  }, [softRefresh]);
 
   // THE LOCAL CHANNEL STARTS THE RENDER (2026-10-26, card 184). The Studio posts
   // its own copy of the draft (src/sanity/components/LiveDraftBridge.tsx), and

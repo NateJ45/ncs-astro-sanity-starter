@@ -13049,3 +13049,81 @@ files plus the four per-repo edits above (`cms-preview.ts`, the preview route's 
 overlay's listener, POST and two `localChannelCovers` checks). A site whose preview route fetches more than one
 document by path needs the posted draft applied to the page document only. Site PRs wait for the starter merge
 (sync-check).
+
+## Card 185: Type straight onto the page in the preview (2026-10-26)
+
+**Origin:** first-baptist-auburn, the "as close to Squarespace as possible, without more Sanity quota" goal for the
+Presentation preview. Card 28 gave an "Edit here" card for two hero strings and the rich twins; everything else still
+meant clicking the words, finding the box in the form panel and typing there while looking away from the page.
+
+**Research (Sanity docs and the installed `@sanity/visual-editing` 6.1.3).** There is no built-in inline or
+in-place text editing in Presentation. What exists is the custom overlay layer (marked experimental): overlay plugins
+(`defineOverlayPlugin`, `hud` and `exclusive` types) and the `components` resolver, whose components render INSIDE the
+overlay over the element, plus `useDocuments().getDocument(id).patch()` for writes over the comlink (the logged-in
+editor's own session, always the draft). Read in the source: (1) custom components are rendered for every element that
+is in view or focused (`activated || focused`), with `focused` but no `hovered` in their props; (2) the controller's
+capture `mousedown` handler only calls `preventDefault` when a drag can start (array items), "Do not cancel every
+mousedown, that also blocked focus and caret placement", so a text element that is `contenteditable` before the click
+gets a native caret; (3) the capture `click` handler still prevents a link from navigating and still sends
+`element/click`, so the form panel opens on the field as before; (4) an element whose stega disappears stays
+registered (only disconnected elements are unregistered), so stripping the markers while typing keeps the overlay; (5)
+`patch(..., { commit: { debounce } })` builds a NEW debounce per call, so it does not coalesce anything: throttling has
+to be ours.
+
+**Fix.**
+
+- `src/lib/preview-inline-edit.ts` (PORTABLE, new, with tests): `classifyInlinePath` (a `string` or `text` field is a
+  plain target; `...children[_key=="s"].text` is a span whose whole block is the target; anything else keeps the
+  panel), `editableBlockRuns` (a block that is not a list item, has no `markDefs`, and whose children are spans marked
+  only `strong`/`em`; links, lists, other decorators and inline objects keep the panel), `sameRuns`, `stegaRanges`,
+  `withoutStega`, `typedPlainValue` (U+00A0 from the contenteditable becomes a space unless the stored value used
+  them; a `string` never stores a line break), `blockChildrenFromRuns` (reuses span keys in order, so typing in one
+  run changes one span's `text`, the same patch the panel makes), and `createTrailingWriter` (leading plus trailing
+  throttle, 250 ms, never the same value twice, an `initial` value counts as sent).
+- `src/lib/preview-morph.ts` (PORTABLE): `INLINE_EDIT_ATTRIBUTE` (`data-inline-editing`); an element carrying it on
+  the LIVE side is left exactly as it is, attributes and children.
+- `src/components/preview/overlay/InlineText.tsx` (per repo, new): mounted by the resolver on every text field, renders
+  nothing. On `pointerenter` it reads the draft (`readNow`, local, no request) and arms the element with
+  `contenteditable` (`plaintext-only` for a plain field where the browser has it) ONLY when the element shows exactly
+  the stored value: nothing but text equal to the string, or a paragraph of text/strong/em/b/i whose runs equal the
+  stored block. On focus it removes the stega runs with `deleteData` after the caret (the caret stays put), sets
+  `data-inline-editing`, and writes through `useDraftDocument` on `input` via the throttle. Enter, Escape, Tab and a
+  click elsewhere let go; the last value is flushed; a plain field gets its stega payload back on the end; an
+  untouched paragraph gets each span's back; nothing is written unless the editor typed. Paste is plain text (a
+  paragraph keeps bold and italic through the allow-list parser of card 28); drop, Enter's new paragraph and any
+  formatting but bold/italic in a paragraph are blocked; keystrokes do not reach page shortcuts. Not armed inside
+  `button`, `summary`, `select`, `option`, `label`, form controls, or a `data-preview-clone`.
+- `src/components/preview/overlay/index.ts` (per repo): the resolver adds `InlineText` whenever
+  `classifyInlinePath(path, context.type)` returns a target, beside the card 28 controls.
+- `src/components/preview/overlay/useInstantText.ts` (per repo): both write loops skip a text node inside
+  `[data-inline-editing]`.
+- `src/components/preview/VisualEditingOverlay.tsx` (per repo): after a morph, if an element is being typed into,
+  `heldForEdit` is set; on `INLINE_EDIT_DONE_EVENT` the overlay asks for ONE soft refresh if a render was held back or
+  the paragraph could not get its markers back (`detail.rerender`), and none otherwise.
+
+**Safety choices.** The page never shows an editing surface that is not the stored value (the exact-match check), so
+what is typed is what is stored. Escape KEEPS the typed words (they are already in the draft and the Studio's undo
+takes them back); the alternative, Escape cancels like card 28's popover, would throw typing away on a stray key. An
+empty plain field is never written mid-burst and is unset when let go empty (card 28's rule). If the element is
+removed while typed into (a fallback full swap), the session flushes what was typed. Alternatives for later: line
+breaks in `text` fields (Shift+Enter) and lists or links in place, which need a real portable text editor rather than
+a contenteditable round trip.
+
+**Quota.** Reads are the optimistic store's local snapshot (no request). Writes go over the comlink like typing in the
+panel and are fewer than keystrokes (250 ms throttle), and the Studio batches them into its autosave as it does for the
+panel. Renders are unchanged per edit (card 184's local channel); at most one extra soft refresh per editing session,
+only when a render landed while the editor was typing.
+
+**Proved:** unit tests (path classification for plain, span and rejected paths; editable and refused blocks; run
+equality; stega ranges and removal; typed values; key reuse, fresh keys, emptied paragraph; the throttle's leading,
+trailing, flush, cancel, custom equality and initial value; the morph keeps a `data-inline-editing` element whole while
+the rest of the page morphs, and morphs it normally once the attribute is gone). `npm ci`, `npm run check`,
+`npm run test:unit`, `npm run build` and `npm run parity compare` (render-neutral: the live site is byte-identical)
+green in the starter and first-baptist-auburn. Not provable locally: the island inside the real Presentation frame (the
+SSR preview needs the token); to be checked on the deployed Auburn Studio.
+
+**Applied:** starter (this card), first-baptist-auburn (branch `port/card-185`). Every site with the card 28 overlay
+and the card 184 overlay (fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k) needs the two
+PORTABLE files plus the four per-repo edits above (`InlineText.tsx`, the resolver line, the two `underCaret` skips in
+`useInstantText.ts`, and the overlay's `heldForEdit` plus done listener). A site whose resolver is shaped differently
+only needs `InlineText` added to whatever it returns. Site PRs wait for the starter merge (sync-check).

@@ -458,3 +458,34 @@ test('an empty render is never redundant, even against an empty memory', () => {
   assert.equal(isRedundantRender('', '', ''), false);
   assert.equal(isRedundantRender('', null, null), false);
 });
+
+// ---------------------------------------------------------------------------
+// Card 185: an element an editor is typing into is never touched
+// ---------------------------------------------------------------------------
+
+test('leaves an element being typed into alone, attributes and words alike', () => {
+  const typed = text('Welcome ho');
+  const editing = el('H1', { 'data-inline-editing': '', contenteditable: 'plaintext-only' }, [
+    typed,
+  ]);
+  const blurb = text('Old blurb');
+  const from = el('DIV', {}, [editing, el('P', {}, [blurb])]);
+  const to = el('DIV', {}, [el('H1', {}, [text('Welcome')]), el('P', {}, [text('New blurb')])]);
+
+  assert.equal(morph(from, to), true);
+  assert.equal(from.childNodes[0], editing, 'the element under the caret is the same object');
+  assert.equal(typed.data, 'Welcome ho', 'the server copy is older; the typed words stay');
+  assert.equal(typed.writes, 0);
+  assert.equal(editing.getAttribute('contenteditable'), 'plaintext-only');
+  assert.deepEqual(editing.removals, []);
+  assert.equal(blurb.data, 'New blurb', 'the rest of the page still morphs');
+});
+
+test('once the attribute is gone the same element morphs normally again', () => {
+  const words = text('Welcome ho');
+  const from = el('DIV', {}, [el('H1', {}, [words])]);
+  const to = el('DIV', {}, [el('H1', {}, [text('Welcome home')])]);
+
+  assert.equal(morph(from, to), true);
+  assert.equal(words.data, 'Welcome home');
+});
