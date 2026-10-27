@@ -135,6 +135,14 @@ const NON_STEGA_FIELDS = new Set([
   'urgency',
   'startTime',
   'endTime',
+  // The business facts (card 196, src/lib/business-hours.ts): an hours row's
+  // `days` and its `opens` / `closes` times, and an hours change's `kind`, are
+  // read as weekday keys, "HH:MM" and closed | hours. (The resolver also strips
+  // markers with plain(), belt and braces.) `layout` above covers the hours block.
+  'days',
+  'opens',
+  'closes',
+  'kind',
   // Card 193: the progress bar's unit picks dollars or a plain number (builder-blocks.ts compares it).
   // `icon` (the icon picker) is listed below.
   'unit',

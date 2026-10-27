@@ -65,6 +65,26 @@ export const siteSettings = defineType({
       type: 'string',
       description: 'Public phone number, if you want one shown. Leave blank to hide.',
     }),
+    // Card 196: a fact's confirmed flag (src/lib/business-facts.ts). Untick while
+    // it is still a guess: the site shows a small "To confirm" tag beside it and
+    // keeps it out of the data search engines read. Unset counts as confirmed.
+    defineField({
+      name: 'phoneConfirmed',
+      title: 'The phone number is confirmed',
+      type: 'boolean',
+      description:
+        'Untick while the number is still a guess: the site shows a small "To confirm" tag beside it and keeps it out of search results until you tick it again.',
+      initialValue: true,
+      hidden: ({ document }) => !document?.phone,
+    }),
+    defineField({
+      name: 'emailConfirmed',
+      title: 'The email address is confirmed',
+      type: 'boolean',
+      description:
+        'Untick while the address is still a guess: the site shows a small "To confirm" tag beside it until you tick it again.',
+      initialValue: true,
+    }),
     // ── Navigation ────────────────────────────────────────────────────────────
     // Optional editor-managed nav menus. When empty the header and footer render
     // their built-in defaults (see Header.astro and Footer.astro). As soon as

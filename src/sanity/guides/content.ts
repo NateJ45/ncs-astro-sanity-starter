@@ -483,6 +483,43 @@ export const guides: Guide[] = [
     ],
   },
 
+  // Card 196: the business facts and opening hours (docs/agent/business-facts.md).
+  {
+    slug: 'hours-and-address',
+    category: 'Housekeeping',
+    title: 'Change your hours or address',
+    icon: 'clock',
+    lead: 'Typed once, shown everywhere: the footer, Contact, the hours and map blocks, and Google.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'path',
+        items: ['Business info'],
+        link: { doc: 'businessInfo' },
+      },
+      {
+        kind: 'p',
+        text: 'Your street address and your usual week of opening hours live in **Business info**. Change them there and every place on the website that shows them changes too. The phone number and email are in Site settings.',
+      },
+      { kind: 'h', text: 'A holiday or a closure' },
+      {
+        kind: 'p',
+        text: 'Add a row under **Hours changes**: the day (and the last day, for more than one), closed all day or different hours, and why. The website shows it on those days, lists it under "Changes coming up" beforehand, and goes back to your usual hours by itself afterward. You never need to touch your usual hours. Quick update has a shortcut: **Change the hours for a day**.',
+      },
+      { kind: 'h', text: 'Not sure yet?' },
+      {
+        kind: 'p',
+        text: 'Untick a fact\'s **confirmed** box while it is still a guess. The website shows a small "To confirm" tag beside it and keeps it out of search results, and Checkup reminds you about it, until you tick the box again.',
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Open now works out the time for you.',
+        text: 'The "Open now" line is worked out in each visitor\'s browser from your hours, on your own time zone, so it is right at any time of day without you doing anything.',
+      },
+    ],
+  },
+
   {
     slug: 'seo-fields',
     category: 'Housekeeping',
@@ -1146,7 +1183,7 @@ export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   homePage: ['edit-a-page', 'images-and-alt', 'seo-fields'],
   ...(OWN_NEWSLETTER ? { newsletter: [OWN_NEWSLETTER_GUIDE] } : {}),
   siteSettings: ['menus-and-footer', 'website-status', 'add-a-widget'],
-  businessInfo: ['menus-and-footer'],
+  businessInfo: ['hours-and-address', 'menus-and-footer'],
   redirect: ['rename-a-page'],
   popup: ['put-up-a-popup'],
   shortLink: ['short-links', 'qr-codes'],

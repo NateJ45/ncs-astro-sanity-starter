@@ -65,6 +65,10 @@ import { publicPath } from '@/lib/page-path';
 import { footerStyle, pickActionBar, whereNextRows } from '@/lib/wayfinding';
 import WhereNext from '@/components/WhereNext.astro';
 import ActionBar from '@/components/ActionBar.astro';
+import { resolveBusinessFacts, type RawBusinessFacts } from '@/lib/business-facts';
+import ToConfirm from '@/components/business/ToConfirm.astro';
+import OpenStatus from '@/components/business/OpenStatus.astro';
+import BusinessAddress from '@/components/business/BusinessAddress.astro';
 
 // One themed pair, passed through Astro's pipeline for a cache-busted URL. No
 // width variants and no webp conversion: these are SVGs, so one file is sharp
@@ -118,6 +122,9 @@ const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 const brandName = siteSettings?.title ?? site.name;
 const email = siteSettings?.email ?? '';
 const phone = siteSettings?.phone ?? '';
+// The business facts (card 196): the street address and today's hours join Get in
+// touch only when Business info has them, and a fact still to confirm wears the tag.
+const facts = resolveBusinessFacts(siteSettings as RawBusinessFacts | null | undefined);
 
 // Social links: the one shared list (src/lib/social-links.ts, PORTS.md card 167). The editor
 // pastes a link in Site settings > Social links and the icon and button name are read from its
@@ -485,6 +492,7 @@ const actionBar = pickActionBar(siteSettings?.actionBars, here);
         {email && (
           <p>
             <CopyEmailButton email={email} variant="link" />
+            <ToConfirm confirmed={facts.email?.confirmed} />
           </p>
         )}
         {phone && (
@@ -496,8 +504,13 @@ const actionBar = pickActionBar(siteSettings?.actionBars, here);
               <Phone size={14} aria-hidden="true" />
               {phone}
             </a>
+            <ToConfirm confirmed={facts.phone?.confirmed} />
           </p>
         )}
+        {facts.address && (
+          <BusinessAddress address={facts.address} findUs={false} class="biz-center-sm pt-xs" />
+        )}
+        <OpenStatus facts={facts} class="biz-center-sm pt-xs" />
       </div>
       <p class="mt-s text-sm text-foreground/75">{site.name}</p>
       {socialLinksToRender.length > 0 && (
