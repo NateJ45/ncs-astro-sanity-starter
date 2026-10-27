@@ -61,8 +61,12 @@ table) and its hhea ascent, descent and line gap, and writes `src/styles/font-fa
 `"<Family> Fallback Times"` over Times New Roman, each with `size-adjust`, `ascent-override`,
 `descent-override` and `line-gap-override`. The faces are named second in the display stack
 (`brand.config.json` `fonts.display.familyValue`, which `apply-brand` writes into `--font-display`).
-Once the real font has loaded nothing changes; Android has none of these local fonts and falls through
-to plain `serif`, as before. The unit test reproduces Auburn's Young Serif numbers (114.71% over Georgia)
+Once the real font has loaded nothing changes. Linux and ChromeOS have no Times or Arial, so the Times
+and Arial faces also name their metric twins (Liberation Serif and Tinos, Liberation Sans and Arimo:
+the same advance widths, and the vertical metrics are overridden anyway). Without them a first-screen
+title on Linux drew in plain `serif` and moved 3px when the web font arrived, which the flow layer's CLS
+test caught on CI (card 192). Android has none of these local fonts and falls through to plain `serif`,
+as before. The unit test reproduces Auburn's Young Serif numbers (114.71% over Georgia)
 within 0.1%.
 
 Rerun it after any display-font change. A variable `@fontsource` package ships woff2 only, which

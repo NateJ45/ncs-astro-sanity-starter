@@ -84,9 +84,12 @@ test.describe('flow layer with motion on', () => {
     expect(anim).toBe('flow-fade');
   });
 
-  for (const rep of Array.from({ length: 16 }, (_, i) => i)) test(`no layout shift in main, and nothing moves once settled #${rep}`, async ({ page }) => {
+  test('no layout shift in main, and nothing moves once settled', async ({ page }) => {
     // Shifts whose moved nodes are inside <main>, where the layer works. The header's own
     // font-swap shift (about 0.0004, the same under reduced motion) is not the layer's.
+    // The first-screen h1 once moved 3px on CI only: Linux has no Times, so the display font's
+    // fallback was plain serif, unscaled; the Times face now names Liberation Serif too
+    // (scripts/lib/font-fallback.mjs).
     // Each counted shift is also described (moved node, its rect before and after, the scroll
     // position), so a failure names what moved instead of only how much.
     type Shift = {

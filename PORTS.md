@@ -12220,6 +12220,14 @@ Home, Playwright, 3 loads each, walking the whole page (LCP ms; CLS): default 12
 too); shift caused inside `<main>` by the layer: 0 on the wall. Settled screenshots at 375 and 1280 of `/`, `/about/`
 and the wall: no horizontal overflow, no unit left armed.
 
+**Found on CI, fixed with this card (card 188's fallback fonts).** The CLS test failed on Linux runners only: the
+wall's first-screen h1 moved up 3px (CLS 0.0002 to 0.0016) about 100ms in, before the layer does anything. Linux has
+no Georgia or Times, so the display font fell back to plain serif, unscaled, and jumped when Libre Baskerville
+arrived. Reproduced on Windows with reduced motion (no layer) by blocking the Georgia face and drawing the h1 in
+unscaled Times: the same 229.8 to 226.8 move. `scripts/lib/font-fallback.mjs` now lists the metric twins after
+Times (`Liberation Serif`, `Tinos`) and Arial (`Liberation Sans`, `Arimo`), so Linux and ChromeOS get the scaled
+face too. The spec now prints each counted shift's node and rects when it fails.
+
 **Applied:** starter (this card). Sites take the PORTABLE files and `site-layout.ts` after the starter merges and
 pick a motion in their own character (`reveal` stays the safe default). first-baptist-auburn's sync PR moves onto the
 PORTABLE files and keeps its bricks, verse, sketch and hero drift as `addFlowExtension` / CSS hooks.

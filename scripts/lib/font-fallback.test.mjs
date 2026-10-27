@@ -52,6 +52,14 @@ test('family names and CSS', () => {
   assert.deepEqual(fallbackFamilies('Inter Variable', 'sans-serif'), ['Inter Variable Fallback']);
   const css = fallbackCss('Young Serif', 'serif', youngSerif);
   assert.match(css, /font-family: 'Young Serif Fallback';\n {2}src: local\('Georgia'\);/);
-  assert.match(css, /src: local\('Times New Roman'\), local\('Times'\);/);
+  assert.match(
+    css,
+    /src: local\('Times New Roman'\), local\('Times'\), local\('Liberation Serif'\), local\('Tinos'\);/,
+  );
+  // Linux and ChromeOS have no Arial either; its metric twins follow it.
+  assert.match(
+    fallbackCss('Inter Variable', 'sans-serif', youngSerif),
+    /src: local\('Arial'\), local\('Liberation Sans'\), local\('Arimo'\);/,
+  );
   assert.equal((css.match(/@font-face/g) || []).length, 2);
 });

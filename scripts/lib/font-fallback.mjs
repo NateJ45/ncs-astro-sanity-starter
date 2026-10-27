@@ -108,8 +108,13 @@ export const LATIN_WEIGHTS = {
  * The local fonts a fallback can point at, measured once from the Windows
  * copies (hhea ascent / descent / lineGap, unitsPerEm, and the weighted average
  * width from LATIN_WEIGHTS). macOS and iOS ship the same Georgia, Times and Arial
- * metrics. Android ships none of them, so it falls through to plain serif or
- * sans-serif, as it did before.
+ * metrics. Linux and ChromeOS have no Times or Arial, but they ship Liberation
+ * Serif / Sans (Linux) and Tinos / Arimo (ChromeOS), drawn to the same advance
+ * widths, so those are listed after them: without them a Linux visitor got plain
+ * serif, unscaled, and a title moved 3px when the web font arrived (PORTS.md card
+ * 192, found by tests/flow-motion.spec.ts on CI). The ascent, descent and line gap
+ * are overridden, so only the widths have to match. Georgia has no metric twin;
+ * Android ships none of these and falls through to plain serif or sans-serif.
  */
 export const LOCAL_FONTS = {
   georgia: {
@@ -121,7 +126,12 @@ export const LOCAL_FONTS = {
     xWidthAvg: 913,
   },
   times: {
-    local: ["local('Times New Roman')", "local('Times')"],
+    local: [
+      "local('Times New Roman')",
+      "local('Times')",
+      "local('Liberation Serif')",
+      "local('Tinos')",
+    ],
     upm: 2048,
     ascent: 1825,
     descent: -443,
@@ -129,7 +139,7 @@ export const LOCAL_FONTS = {
     xWidthAvg: 832,
   },
   arial: {
-    local: ["local('Arial')"],
+    local: ["local('Arial')", "local('Liberation Sans')", "local('Arimo')"],
     upm: 2048,
     ascent: 1854,
     descent: -434,
