@@ -54,8 +54,9 @@
 // WHAT IT DOES NOT DO, on purpose: portable text and the rich twins, anything
 // whose rendering transforms the value (an accented heading, a truncated card
 // blurb, a joined list), and anything that changes the SHAPE of the page - a new
-// section, a reorder, a toggled block. All of those are left to the soft
-// refresh, which renders them correctly a moment later. A missed instant update
+// section, a toggled block. (Moves, removals, copies and picture swaps are the
+// one shape change that IS instant, through ./instantStructure.ts, card 183.)
+// All of those are left to the soft refresh, which renders them correctly a moment later. A missed instant update
 // is invisible. A wrong one would be the preview lying about the page.
 //
 // THE ONE ORDERING HAZARD, and the TWO things that handle it. The soft refresh
@@ -100,6 +101,7 @@ import {
   type DraftSource,
   type PendingSwap,
 } from '../../../lib/preview-live-draft.ts';
+import { CLONE_ATTRIBUTE, createInstantStructure } from './instantStructure.ts';
 import { startTiming } from './timing.ts';
 import { useDraftDocument } from './useDraftDocument.ts';
 
@@ -157,6 +159,17 @@ export function useInstantText(pageId: string, onDocument?: () => void): void {
   const queued = useRef(false);
   /** When the Studio's local channel last spoke, or null if it never has. */
   const lastLocalAt = useRef<number | null>(null);
+  /** Section moves and picture swaps (card 183), for this page's document. */
+  const structure = useRef<{
+    pageId: string;
+    api: ReturnType<typeof createInstantStructure>;
+  } | null>(null);
+  const instantStructure = useCallback(() => {
+    if (structure.current?.pageId !== pageId) {
+      structure.current = { pageId, api: createInstantStructure(pageId) };
+    }
+    return structure.current.api;
+  }, [pageId]);
 
   const nodeIndex = useCallback((): Map<string, Text[]> => {
     if (index.current) return index.current;
@@ -165,6 +178,10 @@ export function useInstantText(pageId: string, onDocument?: () => void): void {
     if (main) {
       const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        // A section copied on the client (card 183) still carries the ORIGINAL's
+        // stega until the refresh lands: typing into the original must not
+        // write into the copy too.
+        if (node.parentElement?.closest(`[${CLONE_ATTRIBUTE}]`)) continue;
         nodes.push(node as Text);
       }
     }
@@ -219,6 +236,12 @@ export function useInstantText(pageId: string, onDocument?: () => void): void {
       // 1200ms no matter how many bumps arrive between them.
       notify.current?.();
 
+      // Section moves, removals, copies and picture swaps (card 183), from the
+      // same two snapshots. Before the text pass, so a node moved here is found
+      // where it now sits (moving keeps the node, so the index stays valid).
+      const moved = instantStructure().apply(previous, next);
+      if (moved > 0) stop(`${source} structure ${moved} element${moved === 1 ? '' : 's'}`);
+
       const changes = diffStringFields(previous, next);
       if (changes.length === 0) return;
 
@@ -235,7 +258,7 @@ export function useInstantText(pageId: string, onDocument?: () => void): void {
       }
       if (swapped > 0) stop(`${source} ${swapped} node${swapped === 1 ? '' : 's'}`);
     },
-    [nodeIndex, pageId],
+    [instantStructure, nodeIndex, pageId],
   );
 
   /** Read the actor's copy of the draft and apply it. */
@@ -304,6 +327,9 @@ export function useInstantText(pageId: string, onDocument?: () => void): void {
   // with is re-applied so the page does not flicker back a version.
   useEffect(() => {
     const onRefresh = () => {
+      // Put back any section move or picture the fresh HTML predates (card 183),
+      // before the index is rebuilt, so it indexes the page as it will stay.
+      instantStructure().afterRefresh(lastSeen.current);
       index.current = null;
       if (pending.current.size === 0) return;
       const nodes = nodeIndex();
@@ -331,5 +357,5 @@ export function useInstantText(pageId: string, onDocument?: () => void): void {
     };
     window.addEventListener(SOFT_REFRESH_EVENT, onRefresh);
     return () => window.removeEventListener(SOFT_REFRESH_EVENT, onRefresh);
-  }, [nodeIndex]);
+  }, [instantStructure, nodeIndex]);
 }
