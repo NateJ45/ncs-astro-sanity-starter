@@ -216,6 +216,9 @@ export type PrivatePage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & FormSection)
+    | ({
+        _key: string;
       } & ColumnsSection)
     | ({
         _key: string;
@@ -746,6 +749,12 @@ export type SiteSettings = {
   satisfactionGuarantee?: string;
   headCode?: string;
   bodyEndCode?: string;
+  formRecipients?: Array<{
+    name?: string;
+    key?: string;
+    _type: 'formRecipient';
+    _key: string;
+  }>;
   formRecipientAddresses?: string;
 };
 
@@ -1079,6 +1088,9 @@ export type SectionPreset = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -1617,6 +1629,45 @@ export type ColumnsSection = {
   look?: 'standard' | 'quiet' | 'feature';
 };
 
+export type FormReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'form';
+};
+
+export type FormSection = {
+  _type: 'formSection';
+  form?: FormReference;
+};
+
+export type Form = {
+  _id: string;
+  _type: 'form';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  mode?: 'standard' | 'private';
+  intro?: string;
+  recipient?: string;
+  askForContact?: boolean;
+  allowAnonymous?: boolean;
+  questions?: Array<
+    | ({
+        _key: string;
+      } & FormQuestion)
+    | ({
+        _key: string;
+      } & FormDateQuestion)
+    | ({
+        _key: string;
+      } & FormTickQuestion)
+  >;
+  submitLabel?: string;
+  successMessage?: string;
+};
+
 export type RsvpSection = {
   _type: 'rsvpSection';
   heading?: string;
@@ -1828,6 +1879,20 @@ export type HeroSection = {
   size?: 'tall' | 'short';
 };
 
+export type FormTickQuestion = {
+  _type: 'formTickQuestion';
+  label?: string;
+  options?: Array<string>;
+  required?: boolean;
+};
+
+export type FormDateQuestion = {
+  _type: 'formDateQuestion';
+  label?: string;
+  notPast?: boolean;
+  required?: boolean;
+};
+
 export type FormQuestion = {
   _type: 'formQuestion';
   label?: string;
@@ -1951,6 +2016,9 @@ export type Page = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -2389,6 +2457,9 @@ export type ProcessPage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & FormSection)
+    | ({
+        _key: string;
       } & ColumnsSection)
     | ({
         _key: string;
@@ -2488,6 +2559,9 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -2629,6 +2703,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -2829,6 +2906,9 @@ export type HomePage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -3255,6 +3335,9 @@ export type AllSanitySchemaTypes =
   | PhotoSection
   | ButtonRowSection
   | ColumnsSection
+  | FormReference
+  | FormSection
+  | Form
   | RsvpSection
   | EmbedSection
   | LogoStripSection
@@ -3267,6 +3350,8 @@ export type AllSanitySchemaTypes =
   | ImageTextSection
   | RichTextSection
   | HeroSection
+  | FormTickQuestion
+  | FormDateQuestion
   | FormQuestion
   | PrivacyPage
   | CtaBlock

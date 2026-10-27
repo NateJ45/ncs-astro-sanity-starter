@@ -7,6 +7,7 @@ import { ChevronDownIcon } from '@sanity/icons/ChevronDown';
 import { ListIcon } from '@sanity/icons/List';
 import { CodeTextInput } from '../components/CodeTextInput';
 import { FormRecipientAddressesInput } from '../components/FormRecipientAddresses';
+import { formRecipientsField } from './form';
 import { codeWarningMessage } from '../../lib/custom-code';
 import { IconImageInput, LogoImageInput } from '../components/BrandImageInput';
 import { checkIcon, checkLogo } from '../../lib/brand-uploads';
@@ -815,7 +816,10 @@ export const siteSettings = defineType({
       validation: (Rule) => Rule.custom((value) => codeWarningMessage(value, true)).warning(),
     }),
 
-    // ── Forms (PORTS.md card 174) ─────────────────────────────────────────────
+    // ── Forms (PORTS.md cards 174 and 194) ────────────────────────────────────
+    // The names a built form can go to (card 194). Keys and names only; the
+    // address panel below lists each one beside the Contact form.
+    formRecipientsField,
     // A panel, not data: the input never writes, so this field stays empty in the
     // public dataset. The addresses live in the Worker's D1 database, set through
     // /api/studio/form-recipients/ by an administrator (src/lib/form-recipients.ts).

@@ -1,0 +1,474 @@
+---
+// Safe to edit by hand
+// =============================================================================
+// Form section (the form builder, PORTS.md card 194)
+// =============================================================================
+// Draws one editor-written form (a `form` document, src/sanity/schemaTypes/form.ts) and posts it
+// to the site's own /api/form/ (src/pages/api/form.ts), which checks the answers against the
+// form's own questions, stores them in the Worker's D1 database and emails the form's recipient.
+// Nothing a visitor types ever goes to Sanity. CONTENT type: SectionRenderer hands it the page's
+// alternating surface.
+//
+// Before showing the form, the script asks /api/form/ whether forms can be delivered yet. Until
+// email is connected (OPERATIONS.md, "Forms"), or with no Worker at all, it shows a friendly
+// "please use the contact page" note instead, so nobody types into a form that cannot send.
+//
+// Prefill (the Contact form's link convention, card 156): ?topic=<word> picks the first list
+// answer containing that word, and &about=<short text> starts the first paragraph box.
+//
+// Spam: a hidden honeypot box and a timing check (shared with the Contact form), and Cloudflare
+// Turnstile when PUBLIC_TURNSTILE_SITE_KEY is set at build and TURNSTILE_SECRET in the Worker.
+//
+// Classes are the shared design tokens (the same as RsvpForm's defaults), so the form takes each
+// site's colours. A site restyles it here, never in the schema (brand-lock).
+// =============================================================================
+import SectionHeading from '@/components/SectionHeading.astro';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
+import { normalizeForm } from '@/lib/site-form';
+import type { ProjectedFormSection } from '@/lib/pageBuilder.types';
+
+interface Props {
+  block: ProjectedFormSection;
+  surface?: CadenceSurface | null;
+  headingId: string;
+}
+
+const { block, surface = 'background', headingId } = Astro.props as Props;
+const form = normalizeForm(block.form);
+const bg = surfaceClass(surface ?? 'background');
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined;
+const fid = (s: string) => `${headingId}-${s}`;
+const who = form?.recipientName || 'the office';
+// What the prefill script needs: each question's kind and choices, in order.
+const shape = JSON.stringify(form?.questions.map((q) => ({ kind: q.kind, options: q.options })));
+
+const c = {
+  form: 'space-y-m rounded-md border border-border bg-card p-l',
+  label: 'mb-1 block text-sm font-semibold text-foreground',
+  input:
+    'min-h-[44px] w-full rounded-md border border-input bg-background px-s py-s text-foreground focus:ring-2 focus:ring-ring focus:outline-none data-[invalid]:border-destructive',
+  check: 'flex min-h-[44px] items-center gap-s text-foreground',
+  checkbox: 'size-5 shrink-0',
+  error: 'mt-xs text-sm text-destructive',
+  alert: 'rounded-md border border-destructive bg-destructive/10 p-s text-sm text-foreground',
+  note: 'text-sm text-foreground/80',
+  panel: 'rounded-md border border-border bg-card p-l text-foreground',
+  done: 'rounded-md border border-primary bg-muted p-l font-display text-h4 text-foreground focus:outline-none',
+  button:
+    'press-tactile inline-flex min-h-[44px] items-center justify-center rounded-sm bg-primary-dark px-l py-s text-sm font-semibold text-white transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60',
+  optional: 'font-normal text-foreground/70',
+};
+---
+
+{form && (
+  <section class={bg} aria-labelledby={headingId} data-site-form-section>
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      <div class="split">
+        <div>
+          <SectionHeading headline={form.title} subhead={form.intro} headingId={headingId} />
+          {form.mode === 'private' && (
+            <p class={`mt-m max-w-prose ${c.note}`} data-form-private-note>
+              Your message goes to {who} by email. It is never shown on the website, and the website
+              keeps no copy once it has been sent.
+            </p>
+          )}
+        </div>
+        <div data-form-wrap>
+          <form
+            class={c.form}
+            action="/api/form/"
+            method="post"
+            novalidate
+            data-site-form
+            data-form-id={form.id}
+            data-questions={shape}
+          >
+            <div class="sr-only" aria-hidden="true">
+              <label>
+                Company (leave this empty)
+                <input type="text" name="company" tabindex="-1" autocomplete="off" />
+              </label>
+            </div>
+            {form.askForContact && form.allowAnonymous && (
+              <label class={c.check}>
+                <input type="checkbox" name="anonymous" class={c.checkbox} data-form-anonymous />
+                Send this without my name (we will not be able to reply)
+              </label>
+            )}
+            {form.askForContact && (
+              <>
+                <div data-form-field data-form-contact>
+                  <label for={fid('name')} class={c.label}>
+                    Your name
+                  </label>
+                  <input
+                    id={fid('name')}
+                    class={c.input}
+                    type="text"
+                    name="name"
+                    autocomplete="name"
+                    maxlength={120}
+                    required
+                    aria-describedby={fid('name-error')}
+                  />
+                  <p class={c.error} id={fid('name-error')} data-error-for="name" hidden />
+                </div>
+                <div data-form-field data-form-contact>
+                  <label for={fid('email')} class={c.label}>
+                    Your email
+                  </label>
+                  <input
+                    id={fid('email')}
+                    class={c.input}
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    maxlength={254}
+                    required
+                    aria-describedby={fid('email-error')}
+                  />
+                  <p class={c.error} id={fid('email-error')} data-error-for="email" hidden />
+                </div>
+              </>
+            )}
+            {form.questions.map((q, i) => {
+              const id = fid(`q${i}`);
+              const err = `${id}-error`;
+              const optional = !q.required && !/optional/i.test(q.label);
+              // Tick any that apply: a fieldset whose legend is the question, one box per
+              // choice. "Must tick one" is checked by the script and the server, not by
+              // `required` on each box (that would demand every box).
+              if (q.kind === 'multi') {
+                return (
+                  <fieldset
+                    data-form-field
+                    data-q={i}
+                    data-q-multi
+                    data-required={q.required ? '' : undefined}
+                    aria-describedby={`${id}-hint ${err}`}
+                  >
+                    <legend class={c.label}>
+                      {q.label}
+                      {optional && <span class={c.optional}> (optional)</span>}
+                    </legend>
+                    <p class={c.note} id={`${id}-hint`}>
+                      Tick any that apply.
+                    </p>
+                    {q.options.map((o) => (
+                      <label class={c.check}>
+                        <input type="checkbox" class={c.checkbox} name={`q${i}`} value={o} />
+                        {o}
+                      </label>
+                    ))}
+                    <p class={c.error} id={err} data-error-for={`q${i}`} hidden />
+                  </fieldset>
+                );
+              }
+              if (q.kind === 'checkbox') {
+                return (
+                  <div data-form-field data-q={i}>
+                    <label class={c.check}>
+                      <input
+                        type="checkbox"
+                        class={c.checkbox}
+                        name={`q${i}`}
+                        required={q.required}
+                        aria-describedby={err}
+                      />
+                      {q.label}
+                    </label>
+                    <p class={c.error} id={err} data-error-for={`q${i}`} hidden />
+                  </div>
+                );
+              }
+              return (
+                <div data-form-field data-q={i}>
+                  <label for={id} class={c.label}>
+                    {q.label}
+                    {optional && <span class={c.optional}> (optional)</span>}
+                  </label>
+                  {q.kind === 'date' ? (
+                    // "Only from today on" sets `min` from the visitor's clock in the script
+                    // below (a build-time date would go stale); the server checks again.
+                    <input
+                      id={id}
+                      class={c.input}
+                      name={`q${i}`}
+                      type="date"
+                      required={q.required}
+                      data-not-past={q.notPast ? '' : undefined}
+                      aria-describedby={err}
+                    />
+                  ) : q.kind === 'textarea' ? (
+                    <textarea
+                      id={id}
+                      class={c.input}
+                      name={`q${i}`}
+                      rows={5}
+                      maxlength={2000}
+                      required={q.required}
+                      aria-describedby={err}
+                    />
+                  ) : q.kind === 'select' ? (
+                    <select
+                      id={id}
+                      class={c.input}
+                      name={`q${i}`}
+                      required={q.required}
+                      aria-describedby={err}
+                    >
+                      <option value="">Choose one</option>
+                      {q.options.map((o) => (
+                        <option value={o}>{o}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      id={id}
+                      class={c.input}
+                      name={`q${i}`}
+                      type={q.kind === 'email' ? 'email' : q.kind === 'phone' ? 'tel' : 'text'}
+                      autocomplete={
+                        q.kind === 'email' ? 'email' : q.kind === 'phone' ? 'tel' : 'off'
+                      }
+                      maxlength={2000}
+                      required={q.required}
+                      aria-describedby={err}
+                    />
+                  )}
+                  <p class={c.error} id={err} data-error-for={`q${i}`} hidden />
+                </div>
+              );
+            })}
+            {siteKey && <div class="cf-turnstile" data-sitekey={siteKey} />}
+            <p class={c.alert} role="alert" tabindex="-1" data-form-error hidden />
+            <button type="submit" class={c.button}>
+              {form.submitLabel}
+            </button>
+          </form>
+          <p class={c.done} role="status" tabindex="-1" data-form-done hidden>
+            {form.successMessage}
+          </p>
+          <div class={c.panel} role="status" data-form-unavailable hidden>
+            <p>
+              This form is not switched on yet. Please use the{' '}
+              <a class="underline underline-offset-2 hover:text-link" href="/contact/">
+                contact page
+              </a>{' '}
+              instead.
+            </p>
+          </div>
+          <noscript>
+            <p class={`mt-m ${c.note}`}>
+              This form needs JavaScript to send. You can also{' '}
+              <a class="underline underline-offset-2" href="/contact/">
+                contact us
+              </a>{' '}
+              directly.
+            </p>
+          </noscript>
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+
+{siteKey && form && (
+  <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+)}
+
+<script>
+  import { prefillAnswers, readFormPrefill } from '@/lib/site-form';
+
+  type Answer = string | boolean | string[];
+
+  const show = (el: Element | null, on: boolean) => {
+    if (el instanceof HTMLElement) el.hidden = !on;
+  };
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('form[data-site-form]')) {
+    const wrap = form.closest<HTMLElement>('[data-form-wrap]');
+    const section = form.closest<HTMLElement>('[data-site-form-section]');
+    const done = wrap?.querySelector<HTMLElement>('[data-form-done]') ?? null;
+    const unavailable = wrap?.querySelector<HTMLElement>('[data-form-unavailable]') ?? null;
+    const formError = form.querySelector<HTMLElement>('[data-form-error]');
+    const id = form.dataset.formId ?? '';
+    const renderedAt = Date.now();
+
+    const switchToFallback = () => {
+      show(form, false);
+      show(unavailable, true);
+      // One note at a time: with the form off, the privacy note describes a form that is not there.
+      show(section?.querySelector('[data-form-private-note]') ?? null, false);
+    };
+
+    // Can forms be delivered yet? No Worker, no email and no recipient all mean "not yet".
+    // The /styleguide/ wall (and the Studio thumbnail shot from it) always shows the form itself.
+    if (!window.location.pathname.startsWith('/styleguide/'))
+      fetch(`/api/form/?id=${encodeURIComponent(id)}`, { headers: { Accept: 'application/json' } })
+        .then((r) => (r.ok ? r.json() : { ready: false }))
+        .then((s: { ready?: boolean }) => {
+          if (!s.ready) switchToFallback();
+        })
+        .catch(switchToFallback);
+
+    // ?topic= and ?about= (card 156's convention). Only fills what is still empty, on first load.
+    try {
+      const shape = JSON.parse(form.dataset.questions ?? '[]') as {
+        kind: string;
+        options: string[];
+      }[];
+      const fill = prefillAnswers(
+        shape as Parameters<typeof prefillAnswers>[0],
+        readFormPrefill(window.location.search),
+      );
+      for (const [i, value] of Object.entries(fill)) {
+        const q = form.querySelector<HTMLElement>(`[data-q="${i}"]`);
+        if (q?.hasAttribute('data-q-multi')) {
+          for (const box of q.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')) {
+            if (box.value === value) box.checked = true;
+          }
+          continue;
+        }
+        const el = q?.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
+          'select, textarea',
+        );
+        if (el && !el.value) el.value = value;
+      }
+    } catch {
+      /* a malformed address prefills nothing */
+    }
+
+    // "Only from today on": the earliest date is today on the visitor's own clock (the server
+    // checks again on the site's).
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const d = new Date();
+    const today = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    for (const input of form.querySelectorAll<HTMLInputElement>('input[data-not-past]')) {
+      input.min = today;
+    }
+
+    // "Send without my name" hides the name and email boxes.
+    const anon = form.querySelector<HTMLInputElement>('[data-form-anonymous]');
+    anon?.addEventListener('change', () => {
+      for (const box of form.querySelectorAll<HTMLElement>('[data-form-contact]')) {
+        box.hidden = anon.checked;
+        const input = box.querySelector('input');
+        if (input) input.required = !anon.checked;
+      }
+    });
+
+    const clearErrors = () => {
+      for (const p of form.querySelectorAll<HTMLElement>('[data-error-for]')) {
+        p.hidden = true;
+        p.textContent = '';
+        const field = p.closest('[data-form-field]');
+        for (const el of field?.querySelectorAll('input, select, textarea') ?? []) {
+          el.removeAttribute('aria-invalid');
+          el.removeAttribute('data-invalid');
+        }
+      }
+      show(formError, false);
+    };
+
+    const showErrors = (errors: Record<string, string>) => {
+      let first: HTMLElement | null = null;
+      for (const [key, message] of Object.entries(errors)) {
+        const p = form.querySelector<HTMLElement>(`[data-error-for="${key}"]`);
+        if (!p) {
+          if (formError) {
+            formError.textContent = message;
+            formError.hidden = false;
+          }
+          continue;
+        }
+        p.textContent = message;
+        p.hidden = false;
+        const field = p.closest<HTMLElement>('[data-form-field]');
+        for (const el of field?.querySelectorAll('input, select, textarea') ?? []) {
+          el.setAttribute('aria-invalid', 'true');
+          el.setAttribute('data-invalid', '');
+        }
+        first ??= field?.querySelector<HTMLElement>('input, select, textarea') ?? null;
+      }
+      (first ?? formError)?.focus();
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+      const data = new FormData(form);
+      const questions = [...form.querySelectorAll<HTMLElement>('[data-q]')];
+      const answers: Answer[] = questions.map((q) => {
+        const i = q.dataset.q;
+        // Tick any that apply: the ticked choices, as a list.
+        if (q.hasAttribute('data-q-multi')) return data.getAll(`q${i}`).map(String);
+        const box = q.querySelector<HTMLInputElement>('input[type="checkbox"]');
+        return box ? box.checked : String(data.get(`q${i}`) ?? '');
+      });
+
+      // The browser's own check first, worded the way the server words it.
+      const local: Record<string, string> = {};
+      for (const q of questions) {
+        if (!q.hasAttribute('data-q-multi') || !q.hasAttribute('data-required')) continue;
+        if (!q.querySelector('input:checked'))
+          local[`q${q.dataset.q}`] = 'Please tick at least one.';
+      }
+      for (const el of form.querySelectorAll<HTMLInputElement>('input, select, textarea')) {
+        if (el.closest('[hidden]') || el.name === 'company' || el.checkValidity()) continue;
+        const key = el.name;
+        if (el.type === 'date' && el.validity.rangeUnderflow)
+          local[key] = 'Please pick today or a day after.';
+        else if (el.type === 'date' && el.validity.badInput)
+          local[key] = 'That date does not look right.';
+        else if (el.type === 'date') local[key] = 'Please pick a date.';
+        else if (el.type === 'checkbox') local[key] = 'Please check this box to go on.';
+        else if (el.validity.typeMismatch && el.type === 'email')
+          local[key] = 'That email address does not look right.';
+        else if (key === 'name') local[key] = 'Please tell us your name.';
+        else if (key === 'email') local[key] = 'Please give us an email address so we can reply.';
+        else local[key] = 'Please answer this question.';
+      }
+      if (Object.keys(local).length) return showErrors(local);
+
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (button) button.disabled = true;
+      try {
+        const res = await fetch('/api/form/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            formId: id,
+            name: data.get('name') ?? '',
+            email: data.get('email') ?? '',
+            anonymous: anon?.checked === true,
+            answers,
+            company: data.get('company') ?? '',
+            renderedAt,
+            turnstileToken: data.get('cf-turnstile-response') ?? null,
+          }),
+        });
+        const body = (await res.json().catch(() => ({}))) as {
+          ok?: boolean;
+          unavailable?: boolean;
+          error?: string;
+          errors?: Record<string, string>;
+        };
+        if (res.ok && body.ok) {
+          form.reset();
+          show(form, false);
+          show(done, true);
+          done?.focus();
+          return;
+        }
+        if (body.unavailable || res.status === 404 || res.status === 405) return switchToFallback();
+        if (body.errors) return showErrors(body.errors);
+        showErrors({ form: body.error ?? 'Sorry, that did not send. Please try again.' });
+      } catch {
+        switchToFallback();
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+  }
+</script>
