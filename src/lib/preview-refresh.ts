@@ -47,7 +47,10 @@
 //      an edit, LAND after it, and still be judged current: the morph then wrote
 //      the server's half-typed sentence over the finished one, and the editor
 //      watched half their text vanish for a second. So every document instant
-//      text applies now calls `onChange` too (wired in VisualEditingOverlay).
+//      text applies now bumps the sequence too (wired in VisualEditingOverlay;
+//      `onKnownChange` since 2026-10-26, which marks a render stale without
+//      starting one, because a render started before the SSE `change` reads
+//      data that does not have the edit yet).
 //      Staleness is a property of the newest KNOWN document, not of the slowest
 //      channel that could have told us about it.
 //
@@ -131,6 +134,24 @@ export function onChange(state: RefreshState, now: number): RefreshState {
     dirty: true,
     dirtySince: state.dirty && state.dirtySince !== null ? state.dirtySince : now,
   };
+}
+
+/**
+ * A newer document is KNOWN, but no render is owed for it yet (2026-10-26, card 182).
+ *
+ * What the instant-text channels report: the Studio's local draft and the
+ * optimistic actor, both of which hear about an edit long before Sanity can
+ * serve it to a query. Starting a render on them read the OLD data - measured on
+ * the deployed Studio, one keystroke cost three renders 1.2s apart and only the
+ * third, at about 3.4s, was accepted. So this bumps the sequence (a render in
+ * flight becomes stale, and `onSettled` re-arms the follow-up) but schedules
+ * nothing when idle. The render that shows the edit is started by the SSE
+ * `change`, which fires at query visibility: the first moment a render CAN
+ * carry it. One render per edit instead of three, sooner, and a third of the
+ * Sanity reads.
+ */
+export function onKnownChange(state: RefreshState): RefreshState {
+  return { ...state, changeSeq: state.changeSeq + 1 };
 }
 
 /** What the caller should do right now. */

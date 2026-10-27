@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { diffStringFields, DEFAULT_DIFF_LIMITS } from './preview-text-diff.ts';
+import { diffStringFields, DEFAULT_DIFF_LIMITS, sameContent } from './preview-text-diff.ts';
 
 const doc = (over: Record<string, unknown> = {}) => ({
   _id: 'drafts.homePage',
@@ -68,18 +68,83 @@ test('uses index segments for a keyless array', () => {
   ]);
 });
 
-test('steps over portable text entirely — the rich twins are the refresh’s job', () => {
-  const block = (text: string) => [
+// Portable text (card 182): span text is reported only while the block keeps its shape.
+const span = (key: string, text: string, marks: string[] = []) => ({
+  _key: key,
+  _type: 'span',
+  text,
+  marks,
+});
+const block = (children: unknown[], over: Record<string, unknown> = {}) => ({
+  _key: 'blk',
+  _type: 'block',
+  style: 'normal',
+  markDefs: [],
+  children,
+  ...over,
+});
+
+test('reports plain typing inside a portable text span at its full path', () => {
+  const before = doc({ introRich: [block([span('sp', 'Since 1959')])] });
+  const after = doc({ introRich: [block([span('sp', 'Since 1958')])] });
+  assert.deepEqual(diffStringFields(before, after), [
     {
-      _key: 'blk',
-      _type: 'block',
-      style: 'normal',
-      children: [{ _key: 'sp', _type: 'span', text, marks: [] }],
+      path: 'introRich[_key=="blk"].children[_key=="sp"].text',
+      previous: 'Since 1959',
+      next: 'Since 1958',
     },
-  ];
-  const before = doc({ introRich: block('Since 1959') });
-  const after = doc({ introRich: block('Since 1958') });
-  assert.deepEqual(diffStringFields(before, after), []);
+  ]);
+});
+
+test('reports each changed span of a block whose marks did not move', () => {
+  const before = doc({ body: [block([span('a', 'Hello '), span('b', 'world', ['strong'])])] });
+  const after = doc({ body: [block([span('a', 'Hi '), span('b', 'there', ['strong'])])] });
+  assert.deepEqual(
+    diffStringFields(before, after).map((c) => c.path),
+    ['body[_key=="blk"].children[_key=="a"].text', 'body[_key=="blk"].children[_key=="b"].text'],
+  );
+});
+
+test('skips a block whose spans split, merged or changed marks', () => {
+  const before = doc({ body: [block([span('a', 'Hello world')])] });
+  // Bolding "world" splits the span: the text moved, so nothing is safe to patch.
+  const split = doc({ body: [block([span('a', 'Hello '), span('b', 'world', ['strong'])])] });
+  assert.deepEqual(diffStringFields(before, split), []);
+  const marked = doc({ body: [block([span('a', 'Hello there', ['em'])])] });
+  assert.deepEqual(diffStringFields(before, marked), []);
+});
+
+test('skips a block whose style, list or links changed along with its words', () => {
+  const before = doc({ body: [block([span('a', 'One')])] });
+  const styled = doc({ body: [block([span('a', 'Two')], { style: 'h2' })] });
+  assert.deepEqual(diffStringFields(before, styled), []);
+  const linked = doc({
+    body: [block([span('a', 'Two')], { markDefs: [{ _key: 'l', _type: 'link', href: '/x' }] })],
+  });
+  assert.deepEqual(diffStringFields(before, linked), []);
+});
+
+test('leaves new blocks and non-block items in portable text to the refresh', () => {
+  const before = doc({ body: [block([span('a', 'One')])] });
+  const added = doc({
+    body: [block([span('a', 'One')]), block([span('c', 'New')], { _key: 'blk2' })],
+  });
+  assert.deepEqual(diffStringFields(before, added), []);
+  const image = { _key: 'img', _type: 'image', alt: 'A' };
+  const imageAfter = { _key: 'img', _type: 'image', alt: 'B' };
+  assert.deepEqual(
+    diffStringFields(doc({ body: [image] }), doc({ body: [imageAfter] })).map((c) => c.path),
+    ['body[_key=="img"].alt'],
+    'an array with no blocks is walked as before',
+  );
+  assert.deepEqual(
+    diffStringFields(
+      doc({ body: [block([span('a', 'One')]), image] }),
+      doc({ body: [block([span('a', 'One')]), imageAfter] }),
+    ),
+    [],
+    'a non-block item inside portable text is skipped',
+  );
 });
 
 test('ignores values that are not text on the page', () => {
@@ -122,4 +187,13 @@ test('skips a string longer than the cap', () => {
 test('survives a document that is not an object at all', () => {
   assert.deepEqual(diffStringFields(null, doc()), []);
   assert.deepEqual(diffStringFields(undefined, undefined), []);
+});
+
+test('sameContent ignores an autosave that only moved the revision', () => {
+  assert.equal(sameContent(doc(), doc({ _rev: 'r2', _updatedAt: 'later' })), true);
+  assert.equal(sameContent(doc(), doc({ heroHeadline: 'Welcome home' })), false);
+  assert.equal(
+    sameContent(doc({ body: [{ _key: 'a', x: 1 }] }), doc({ body: [{ _key: 'b', x: 1 }] })),
+    false,
+  );
 });

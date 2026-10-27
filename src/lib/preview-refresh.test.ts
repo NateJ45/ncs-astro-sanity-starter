@@ -16,6 +16,7 @@ import {
   createRefreshState,
   isSettled,
   onChange,
+  onKnownChange,
   onSettled,
   onStart,
   shouldStart,
@@ -334,6 +335,40 @@ test('a burst of instant-text documents converges without a discard loop', () =>
   assert.equal(isSettled(state), true);
   assert.equal(settles.filter((s) => s.accepted).length, 1, 'exactly one accepted render');
   assert.equal(settles.at(-1)?.accepted, true);
+});
+
+// --- known changes (card 182) ------------------------------------------------
+
+test('a known change starts nothing on its own', () => {
+  const state = onKnownChange(createRefreshState());
+  assert.equal(state.changeSeq, 1);
+  assert.deepEqual(shouldStart(state, T0), { start: false, waitMs: 0 });
+  assert.equal(isSettled(state), true);
+});
+
+test('one keystroke costs one render, started by the SSE change', () => {
+  // Measured 2026-10-26: the local channel knows at ~150ms, the actor again at
+  // ~600ms, the autosave's SSE change lands at ~1140ms (query visibility).
+  let state = onKnownChange(createRefreshState());
+  state = onKnownChange(state);
+  assert.equal(shouldStart(state, T0 + 600).start, false, 'no render on stale data');
+  state = onChange(state, T0 + 1140);
+  const wait = shouldStart(state, T0 + 1140).waitMs;
+  assert.equal(wait, REFRESH_DEBOUNCE_MS);
+  state = onStart(state, T0 + 1140 + wait);
+  const settled = onSettled(state, T0 + 1140 + wait + 400);
+  assert.equal(settled.accepted, true, 'the one render carries the edit');
+  assert.equal(isSettled(settled.state), true);
+});
+
+test('a known change still makes an in-flight render stale, and its follow-up runs', () => {
+  let state = onChange(createRefreshState(), T0);
+  state = onStart(state, T0);
+  state = onKnownChange(state);
+  const settled = onSettled(state, T0 + RENDER_MS);
+  assert.equal(settled.accepted, false);
+  assert.equal(settled.state.dirty, true, 'the follow-up is owed');
+  assert.equal(shouldStart(settled.state, T0 + REFRESH_MIN_INTERVAL_MS).start, true);
 });
 
 // --- awaiting callers --------------------------------------------------------
