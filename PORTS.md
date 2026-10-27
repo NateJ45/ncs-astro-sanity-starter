@@ -13118,8 +13118,11 @@ only when a render landed while the editor was typing.
 equality; stega ranges and removal; typed values; key reuse, fresh keys, emptied paragraph; the throttle's leading,
 trailing, flush, cancel, custom equality and initial value; the morph keeps a `data-inline-editing` element whole while
 the rest of the page morphs, and morphs it normally once the attribute is gone). `npm ci`, `npm run check`,
-`npm run test:unit`, `npm run build` and `npm run parity compare` (render-neutral: the live site is byte-identical)
-green in the starter and first-baptist-auburn. Not provable locally: the island inside the real Presentation frame (the
+`npm run test:unit` and `npm run build` green in the starter and first-baptist-auburn. `npm run parity compare`
+against a baseline built from the parent commit: every page identical except `styleguide/sections`, whose only
+differences are build-varying values (the calendar link's `DTSTAMP` in the starter, generated `clipPath` ids in
+Auburn), so the live site is unchanged. A blank-page Chromium check confirmed the DOM facts the island leans on:
+`plaintext-only` is accepted, a click places a native caret, and `deleteData` after the caret leaves it in place. Not provable locally: the island inside the real Presentation frame (the
 SSR preview needs the token); to be checked on the deployed Auburn Studio.
 
 **Applied:** starter (this card), first-baptist-auburn (branch `port/card-185`). Every site with the card 28 overlay
