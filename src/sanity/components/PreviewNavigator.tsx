@@ -297,7 +297,13 @@ export function PreviewNavigator() {
   // not merely stripped of its query: on a deployed Studio the host stores it
   // as an absolute url, and every comparison below (the bounce machine and the
   // row highlight) is against a root-relative row href. See toPreviewPath.
-  const current = toPreviewPath(params.preview);
+  //
+  // The trailing slash comes off too (2026-10-26). With trailingSlash 'always'
+  // the frame reports "/preview/" and "/preview/about/" while the row hrefs are
+  // "/preview" and "/preview/about", so nothing ever matched: no row lit up,
+  // and `currentRow` stayed null, which meant LiveDraftBridge never mounted and
+  // instant text fell back to the slower listen path (3 to 5 seconds per edit).
+  const current = toPreviewPath(params.preview).replace(/(.)\/+$/, '$1');
 
   // BOUNCE-AWARE navigation (ported from presacademy 2026-08-28, editor
   // feedback). Clicking a page took two clicks every time: the panel changed,
