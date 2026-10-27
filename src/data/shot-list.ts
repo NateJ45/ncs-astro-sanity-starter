@@ -24,7 +24,7 @@
 // no examples. Examples never ship at launch: they go with the layer.
 
 import { CLIENT_NOTES_ACTIVE } from './client-notes.ts';
-import { livePagePath } from '../lib/client-notes.ts';
+import { publicPath } from '../lib/page-path.ts';
 import { splitStega } from '../lib/preview-stega.ts';
 
 export interface Shot {
@@ -95,7 +95,7 @@ export function isStandInPhoto(img: unknown): boolean {
 // The path is the LIVE one and the heading is cleaned of stega, so the draft preview
 // (`/preview/...`, every heading carrying click-to-edit markers) finds the same shots.
 const keyOf = (path: string, heading: string) =>
-  `${livePagePath(path)}|${splitStega(heading).cleaned.trim()}`;
+  `${publicPath(path)}|${splitStega(heading).cleaned.trim()}`;
 
 /** Every shot asked for on one page, in slot order. */
 export function shotsForPage(path: string, shots: Record<string, Shot[]> = SHOTS): Shot[] {

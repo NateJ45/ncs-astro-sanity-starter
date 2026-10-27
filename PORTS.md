@@ -11943,8 +11943,7 @@ Tests: `src/lib/client-notes.test.ts`, `src/lib/shot-list.test.ts`.
 **Differences from Auburn.** Auburn keeps its own names (`PRE_LAUNCH_NOTES`, `ForJacob.astro`, `[Jacob: ...]`) and its
 Facebook stand-in rule until its sync PR renames them to this shape (add `'Jacob'` to `MARKERS`, widen
 `STAND_IN_FILE`). The starter drops the example video and the hero-specific helpers (Auburn's card 189 owns those) and
-ships no stock photos. `livePagePath()` in `client-notes.ts` is the same function as Auburn's `publicPath()`; when card
-187 lands `lib/page-path.ts`, point it there.
+ships no stock photos. Page lookups use `publicPath()` from card 187 (`lib/page-path.ts`).
 
 **Proved:** unit tests for the guard, paths, markers and shot rules; build with the switch off (no layer markup in the
 output) and with it on (pill, highlight and boxes), screenshots at 375 and 1280.

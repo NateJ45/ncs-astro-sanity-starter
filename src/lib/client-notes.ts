@@ -48,17 +48,6 @@ export function clientNotesProblem(on: boolean, siteUrl: string): string | null 
 }
 
 /**
- * The live-site path for a rendered path: the `/preview` prefix of the draft preview removed and
- * a trailing slash ensured. `/preview` and `/preview/` are Home (`/`). Notes and shots are
- * looked up by this, so the preview finds the same ones as the live page.
- */
-export function livePagePath(pathname: string): string {
-  let path = pathname.replace(/^\/preview(?=\/|$)/, '');
-  if (!path.startsWith('/')) path = `/${path}`;
-  return path.endsWith('/') ? path : `${path}/`;
-}
-
-/**
  * The regular expression source for placeholder markers: "[Client: ...]" for the name "Client".
  * Names are plain words; anything else is dropped so a typo cannot break the pattern.
  */

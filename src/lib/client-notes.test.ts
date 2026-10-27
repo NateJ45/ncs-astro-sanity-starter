@@ -5,9 +5,9 @@ import {
   clientNotesActive,
   clientNotesProblem,
   isPreLaunchUrl,
-  livePagePath,
   markerPattern,
 } from './client-notes.ts';
+import { publicPath } from './page-path.ts';
 import { CLIENT_NOTES_ON, MARKERS, notesFor } from '../data/client-notes.ts';
 import { site } from '../data/site.ts';
 
@@ -56,11 +56,11 @@ test('the starter ships with the switch off', () => {
 });
 
 test('page paths: the draft preview finds the live page', () => {
-  assert.equal(livePagePath('/preview/'), '/');
-  assert.equal(livePagePath('/preview'), '/');
-  assert.equal(livePagePath('/preview/about'), '/about/');
-  assert.equal(livePagePath('/about'), '/about/');
-  assert.equal(livePagePath('/'), '/');
+  assert.equal(publicPath('/preview/'), '/');
+  assert.equal(publicPath('/preview'), '/');
+  assert.equal(publicPath('/preview/about'), '/about/');
+  assert.equal(publicPath('/about'), '/about/');
+  assert.equal(publicPath('/'), '/');
   assert.deepEqual(notesFor('/preview/'), notesFor('/'));
 });
 

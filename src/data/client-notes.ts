@@ -10,7 +10,8 @@
 // src/data/site.ts holds a real domain, and src/lib/client-notes.test.ts fails if the switch is
 // still on then, so it cannot reach production by accident (see src/lib/client-notes.ts).
 
-import { clientNotesActive, livePagePath } from '../lib/client-notes.ts';
+import { clientNotesActive } from '../lib/client-notes.ts';
+import { publicPath } from '../lib/page-path.ts';
 import { site } from './site.ts';
 
 /** THE SWITCH. false in the starter; true while the client is reviewing a pre-launch site. */
@@ -46,7 +47,7 @@ const NOTES: Record<string, ClientNote[]> = {};
 
 /** The notes for a page path (with or without a trailing slash, live or draft preview). */
 export function notesFor(pathname: string): ClientNote[] {
-  return NOTES[livePagePath(pathname)] ?? [];
+  return NOTES[publicPath(pathname)] ?? [];
 }
 
 /** Every page with notes, for a one-page list to send the client. */
