@@ -12921,6 +12921,61 @@ return `false`, which tells the library nothing was done; `manual` (the refresh 
 (first-baptist-auburn, fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k). No PORTABLE file
 changes, so no sync-check ordering.
 
+## Card 183: Section moves, removals, copies and picture swaps show in the preview at once (2026-10-26)
+
+**Origin:** first-baptist-auburn, after card 182: typed text showed in about 0.2 s, but a structural edit (drag a
+section, remove one, duplicate one, pick a different picture) still waited for the Studio autosave (~1 s), Sanity's
+query visibility and a ~0.4 s `/preview` render before anything moved. First of three cards (184 renders from the
+Studio draft, 185 types directly on the page).
+
+**Why not Sanity's own mechanism.** Sanity's Astro guide reloads the page on every edit, and `useOptimistic` in
+`@sanity/visual-editing` re-renders a React tree from the optimistic document. This site's sections are server-rendered
+Astro, so there is no tree to re-render. The in-canvas drag still goes through Sanity: its optimistic patch reaches the
+frame through the actor, the same as any other edit, and this card moves the DOM to match.
+
+**Fix.** The frame already holds both snapshots of the draft (the local `pa:live-draft` channel and the optimistic
+actor, `useInstantText`), so the structural diff runs beside the text diff and costs no request.
+`src/lib/preview-structure.ts` (PORTABLE, with its test) decides what to do; `src/components/preview/overlay/instantStructure.ts`
+does it:
+
+- **Sections**, by the `_key` in each wrapper's `data-sanity` (`sectionEditAttr`): moved with `insertBefore` (the node
+  keeps its revealed classes and decoded images), hidden when removed, deep-cloned for a copy. A copy gets the NEW
+  item's `data-sanity`, so the morph matches it to the server's real section by key and only patches it, plus
+  `data-preview-clone`, which the morph's attribute sync drops once the server's copy lands. Its text still carries the
+  original's stega until then, so instant text skips every text node inside a clone.
+- **Pictures**: when an image field's `asset._ref` changes, every `<img>` (and `<picture>` source) inside that
+  section's wrapper that shows the old asset is pointed at the new one. The CDN file name comes from the ref
+  (`image-<id>-<w>x<h>-<ext>` is `<id>-<w>x<h>.<ext>`), the query (`w`, `q`, `auto`, `fit`) is kept, and a free height
+  is rescaled to the new aspect.
+
+**Safety, the instant-text contract.** A plan is made only when the array changed by moves, removals and copies of a
+section already on the page (deep-equal ignoring `_key`); one new item of any other kind, a key on the page twice (a
+synced section's group), or a keyless item, and nothing is touched. A copy is not made of a section holding an island,
+script, iframe, video or form. A picture is swapped only when the old asset appears once in that section and the
+section references no other document, and never onto a URL with a `rect` (a crop worked out for the old picture).
+Crop, hotspot, the surface cadence, dividers and heading ids wait for the refresh. A render that read the query index
+a version behind can still be accepted, so after each soft refresh the newest draft is re-planned against the page for
+up to three refreshes, and dropped as soon as the page agrees (the same idea as instant text's pending swaps). The
+scheduler is untouched: only the SSE `change` starts a render (card 182).
+
+**Proved:** unit tests (attribute parse and re-key; reorder, removal, duplicate with new nested keys, unknown insert,
+no-op, skipped section, synced group, keyless item, stale-render re-plan; image ref diff by `_key`, appear/disappear
+ignored; one-occurrence and no-reference guard; URL swap keeps the query, refuses `rect` and foreign hosts; srcset all
+or nothing; aspect height). Local `wrangler dev` of first-baptist-auburn `/preview/christmas/` (8 sections), drafts
+posted through the `pa:live-draft` channel, Playwright: reorder 103 ms, picture 6 ms, duplicate 112 ms, remove 11 ms
+after the message; before this card none of the four showed within 1.5 s. Requests during the four edits: 0 `/preview`
+renders, 0 Sanity API calls (1 CDN fetch, the new picture), the same as before. Then one real soft refresh (server HTML
+still in the OLD order, no copy, old picture): one `/preview` render, morphed in, and the order, the copy and the
+picture all held. Deployed check recorded on the Auburn site PR.
+
+**Applied:** starter (this card). Every site carrying instant text needs `preview-structure.ts` (+ test) and
+`overlay/instantStructure.ts` (first-baptist-auburn, fbcm, mas-monograms-rebuild, presacademy, reid-design-site,
+stonesteps-50k), plus three per-repo edits in `useInstantText.ts`: call `instantStructure().apply(previous, next)`
+after `notify` in `applyDocument`, call `instantStructure().afterRefresh(lastSeen.current)` first in the
+`SOFT_REFRESH_EVENT` handler, and skip text nodes inside `[data-preview-clone]` in `nodeIndex`. A site whose sections
+live in another array, or whose wrappers are not `sectionEditAttr` divs, passes its field name to
+`createInstantStructure` or gets no instant structure (missed, never wrong).
+
 ## Card 184: The preview renders the Studio's own copy of the draft (2026-10-26)
 
 **Origin:** first-baptist-auburn, the deployed Studio after cards 181 to 183: typing showed in 0.34 s, moves, copies
