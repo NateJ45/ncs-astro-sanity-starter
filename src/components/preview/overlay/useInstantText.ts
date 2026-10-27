@@ -85,7 +85,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useOptimisticActor } from '@sanity/visual-editing/react';
 import { isEmptyActor } from '@sanity/visual-editing/optimistic';
-import { diffStringFields } from '../../../lib/preview-text-diff.ts';
+import { diffStringFields, sameContent } from '../../../lib/preview-text-diff.ts';
 import { sourceKey } from '../../../lib/preview-stega.ts';
 import {
   applyKnownChange,
@@ -199,6 +199,9 @@ export function useInstantText(pageId: string, onDocument?: () => void): void {
       // Nothing to compare against on the first read: the page was just
       // server-rendered from this very document.
       if (!previous) return;
+      // An autosave re-sends the same words under a new `_rev`. Not an edit, so
+      // not a reason to call an in-flight render stale (card 182).
+      if (sameContent(previous, next)) return;
 
       // THE NEWEST DOCUMENT WE KNOW OF IS NOW THIS ONE, and that is a fact the
       // refresh scheduler has to hear about - before the diff, because it is

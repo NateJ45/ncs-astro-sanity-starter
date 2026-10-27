@@ -1301,7 +1301,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 177 | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 178 | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)          | n/a     | no          | yes      | no               | no            | n/a            | no                 | no                  | yes            |
-| 181 | Preview navigator drops the trailing slash, so instant text's bridge mounts             | n/a     | no          | yes      | no               | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 181 | Preview navigator drops the trailing slash, so instant text's bridge mounts             | n/a     | yes         | yes      | yes              | n/a           | n/a            | n/a                | n/a                 | yes            |
 | #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
 | 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
@@ -12843,6 +12843,43 @@ and a 4px band along the bottom, both clipped inside; an outlined (waiting) ston
 `print-flecks.svg` copied to `public/studio-banner/`). fbcm and stonesteps-50k: the marked copies only, no look
 change.
 
+## Card 182: Instant text in rich text boxes, and one render per edit (2026-10-26)
+
+**Origin:** first-baptist-auburn, the deployed Studio: typing in a section's rich text box (Home, "Meet Pastor Jacob",
+Text) took 3 to 5 seconds to show in the preview, while a heading in the same section showed in about 0.2 s.
+
+**Cause.** `diffStringFields` stepped over every portable text array, so rich text only ever reached the page through
+the soft refresh (Sanity's query-visibility signal, the 1200 ms refresh floor and a ~0.9 s server render). The skip was
+there because marks, splits and merges move text between spans, and patching one span after that can show a sentence
+that never existed.
+
+**Fix.** `src/lib/preview-text-diff.ts` (PORTABLE) and its test. A block is diffed span by span when, with each span's
+`text` blanked, it is identical to its old self (style, list, level, markDefs, and the same spans in the same order with
+the same marks). Plain typing changes nothing else, so every span change is reported at its full path
+(`body[_key=="b"].children[_key=="s"].text`), which is exactly the path stega puts on that span's text node, and
+`applyTextChange` still writes only where the node reads exactly the old value. A split, merge, new mark, new link, style
+change, new block or any non-block item skips the block and is left to the refresh. No new request of any kind: it
+reuses the draft the frame already receives.
+
+**One render per edit.** Measured on the same Studio: one keystroke started three `/preview` renders 1.2 s apart (the
+refresh floor) and only the third, at about 3.4 s, was accepted. The first started on the instant-text bump, a second
+before Sanity could serve the edit to a query, so it read old data; the second was discarded because the autosave
+re-sent the same draft under a new `_rev` and that counted as an edit. `preview-refresh.ts` (PORTABLE) gains
+`onKnownChange` (bump the sequence, schedule nothing), which `VisualEditingOverlay.tsx` now uses for instant-text
+documents, so only the SSE `change` (query visibility) starts a render; `preview-text-diff.ts` gains `sameContent`,
+which `useInstantText.ts` uses to ignore a snapshot whose content did not change. A structural edit (a picture, a
+section added or moved) now shows one render after the SSE signal, and each edit costs one set of Sanity reads
+instead of three.
+
+**Proved:** unit tests (span change reported at its path; two changed spans; split, mark, style and link changes
+skipped; new blocks and non-block items skipped; a known change starts nothing, one keystroke costs one render started
+by the SSE change, a known change still discards an in-flight render; `sameContent` ignores `_rev`). Deployed check on first-baptist-auburn recorded on its site PR.
+
+**Applied:** starter (this card). Every site carrying `preview-text-diff.ts` and `preview-refresh.ts` needs the new
+copies (first-baptist-auburn, fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k), plus the
+two per-repo edits: `onKnownChange` in `VisualEditingOverlay.tsx` and the `sameContent` early return in
+`useInstantText.ts`.
+
 ## Card 181: The preview navigator drops the trailing slash, so instant text works (2026-10-26)
 
 **Origin:** first-baptist-auburn (NateJ45/fbc-auburn#235). Measured on the deployed Auburn Studio: zero
@@ -12860,5 +12897,6 @@ keeps a bare `/` intact. One line added to `.claude/rules/preview-stack.md` unde
 set `'always'` and have the bug too (presacademy's navigator is older and splits the query by hand; port the
 same strip there).
 
-**Applied:** first-baptist-auburn (origin), starter (this card), stonesteps-50k (`.claude/rules/live-preview.md`
-carries the note). fbcm optional. presacademy, reid-design-site: not yet.
+**Applied:** first-baptist-auburn (origin, #235), starter (this card), stonesteps-50k (#175;
+`.claude/rules/live-preview.md` carries the note), presacademy (#141, on its older `split('?')` line), reid-design-site
+(#186), fbcm (#126, harmless there; `docs/agent/preview.md` carries the note).
