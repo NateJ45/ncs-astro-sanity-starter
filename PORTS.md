@@ -11845,6 +11845,7 @@ drift instead of a false all-clear.
 **Applied:** starter (this card). `sync-check.mjs` is PORTABLE: every site copies the new version (a byte-identical
 copy; the site PRs in the Auburn port run do this). Until a site resyncs, its own old copy keeps the old fallback
 and should be run with `NCS_STARTER_DIR` set or from the starter (`node <starter>/scripts/sync-check.mjs <site>`).
+
 ## Card 187: Eleven small generic fixes from first-baptist-auburn (2026-10-27)
 
 **Origin:** first-baptist-auburn, the second of the Auburn-to-family port runs (inventory rows A8, A10, A38, A33, A18,
