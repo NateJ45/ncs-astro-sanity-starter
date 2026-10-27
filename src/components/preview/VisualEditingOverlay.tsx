@@ -8,6 +8,7 @@ import { inCanvasControls } from './overlay/index.ts';
 import {
   createRefreshState,
   onChange as onRefreshChange,
+  onKnownChange,
   onSettled,
   onStart,
   shouldStart,
@@ -148,19 +149,18 @@ export default function VisualEditingOverlay({ pageId }: Props) {
   // the editor's "half my text disappears, then comes back".
   //
   // Bumping here makes staleness a property of the newest DOCUMENT rather than
-  // of the slowest channel. It marks the state dirty as well, on purpose: the
-  // server still has to render the newest text eventually, and a discard that
-  // scheduled nothing would leave the page correct only by instant text's grace,
-  // with structural edits unrendered. The extra bumps cost no extra renders -
-  // single flight plus the rate limit cap STARTS at one per
-  // REFRESH_MIN_INTERVAL_MS however many changes arrive between them - they only
-  // move renders from "accepted with stale words" to "discarded, retried".
+  // of the slowest channel. It does NOT start a render (2026-10-26, card 182):
+  // this channel is a second ahead of what Sanity can serve to a query, so a
+  // render started now reads the old data and is thrown away. Measured: one
+  // keystroke cost three renders 1.2s apart, the edit showing at about 3.4s.
+  // The SSE `change` below fires at query visibility and starts the one render
+  // that carries the edit; a render already in flight is discarded and
+  // `onSettled` re-arms its follow-up, so nothing is ever left unrendered.
   //
   // No resolver is registered: nobody is awaiting a promise for this, unlike
   // `softRefresh`, which serves the comlink's refresh button.
   const noteInstantChange = useCallback(() => {
-    schedule.current = onRefreshChange(schedule.current, Date.now());
-    tickRef.current();
+    schedule.current = onKnownChange(schedule.current);
   }, []);
 
   // Job 3: swap changed plain strings in as the edit arrives, without waiting

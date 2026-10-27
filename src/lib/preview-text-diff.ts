@@ -179,3 +179,21 @@ export function diffStringFields(
   walk(previous, next, '', 0);
   return changes;
 }
+
+/**
+ * True when two snapshots of a document say the same thing, ignoring Sanity's
+ * top-level bookkeeping (`_rev`, `_updatedAt`, `_id` and the rest).
+ *
+ * The Studio re-sends the draft when an autosave commits: same words, new
+ * `_rev`. Treated as an edit, that re-send discarded the render the real edit
+ * had just started (card 182). Key order comes from one document store, so
+ * equal content serializes equally; a false "different" only costs the old
+ * behaviour, never a missed edit.
+ */
+export function sameContent(a: unknown, b: unknown): boolean {
+  const body = (doc: unknown) =>
+    isPlainObject(doc)
+      ? JSON.stringify(Object.fromEntries(Object.entries(doc).filter(([k]) => !k.startsWith('_'))))
+      : JSON.stringify(doc);
+  return body(a) === body(b);
+}

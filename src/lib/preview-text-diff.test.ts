@@ -1,7 +1,7 @@
 // PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { diffStringFields, DEFAULT_DIFF_LIMITS } from './preview-text-diff.ts';
+import { diffStringFields, DEFAULT_DIFF_LIMITS, sameContent } from './preview-text-diff.ts';
 
 const doc = (over: Record<string, unknown> = {}) => ({
   _id: 'drafts.homePage',
@@ -187,4 +187,13 @@ test('skips a string longer than the cap', () => {
 test('survives a document that is not an object at all', () => {
   assert.deepEqual(diffStringFields(null, doc()), []);
   assert.deepEqual(diffStringFields(undefined, undefined), []);
+});
+
+test('sameContent ignores an autosave that only moved the revision', () => {
+  assert.equal(sameContent(doc(), doc({ _rev: 'r2', _updatedAt: 'later' })), true);
+  assert.equal(sameContent(doc(), doc({ heroHeadline: 'Welcome home' })), false);
+  assert.equal(
+    sameContent(doc({ body: [{ _key: 'a', x: 1 }] }), doc({ body: [{ _key: 'b', x: 1 }] })),
+    false,
+  );
 });

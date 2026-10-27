@@ -12842,7 +12842,7 @@ and a 4px band along the bottom, both clipped inside; an outlined (waiting) ston
 `print-flecks.svg` copied to `public/studio-banner/`). fbcm and stonesteps-50k: the marked copies only, no look
 change.
 
-## Card 182: Instant text in rich text boxes (2026-10-26)
+## Card 182: Instant text in rich text boxes, and one render per edit (2026-10-26)
 
 **Origin:** first-baptist-auburn, the deployed Studio: typing in a section's rich text box (Home, "Meet Pastor Jacob",
 Text) took 3 to 5 seconds to show in the preview, while a heading in the same section showed in about 0.2 s.
@@ -12860,8 +12860,21 @@ the same marks). Plain typing changes nothing else, so every span change is repo
 change, new block or any non-block item skips the block and is left to the refresh. No new request of any kind: it
 reuses the draft the frame already receives.
 
-**Proved:** unit tests (span change reported at its path; two changed spans; split, mark, style and link changes
-skipped; new blocks and non-block items skipped). Deployed check on first-baptist-auburn recorded on its site PR.
+**One render per edit.** Measured on the same Studio: one keystroke started three `/preview` renders 1.2 s apart (the
+refresh floor) and only the third, at about 3.4 s, was accepted. The first started on the instant-text bump, a second
+before Sanity could serve the edit to a query, so it read old data; the second was discarded because the autosave
+re-sent the same draft under a new `_rev` and that counted as an edit. `preview-refresh.ts` (PORTABLE) gains
+`onKnownChange` (bump the sequence, schedule nothing), which `VisualEditingOverlay.tsx` now uses for instant-text
+documents, so only the SSE `change` (query visibility) starts a render; `preview-text-diff.ts` gains `sameContent`,
+which `useInstantText.ts` uses to ignore a snapshot whose content did not change. A structural edit (a picture, a
+section added or moved) now shows one render after the SSE signal, and each edit costs one set of Sanity reads
+instead of three.
 
-**Applied:** starter (this card). Every site carrying `preview-text-diff.ts` needs the new copy: first-baptist-auburn,
-fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k.
+**Proved:** unit tests (span change reported at its path; two changed spans; split, mark, style and link changes
+skipped; new blocks and non-block items skipped; a known change starts nothing, one keystroke costs one render started
+by the SSE change, a known change still discards an in-flight render; `sameContent` ignores `_rev`). Deployed check on first-baptist-auburn recorded on its site PR.
+
+**Applied:** starter (this card). Every site carrying `preview-text-diff.ts` and `preview-refresh.ts` needs the new
+copies (first-baptist-auburn, fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k), plus the
+two per-repo edits: `onKnownChange` in `VisualEditingOverlay.tsx` and the `sameContent` early return in
+`useInstantText.ts`.
