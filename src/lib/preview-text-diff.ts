@@ -18,11 +18,19 @@
 //     was not rendered before, so there is no text node to swap; a field that
 //     disappears cannot be un-rendered by editing characters. Both are the soft
 //     refresh's job.
-//  3. PORTABLE TEXT IS SKIPPED WHOLE. The rich twins are arrays of blocks, and
-//     their `children[].text` spans are real strings that would match — but a
-//     block's marks, splits and merges move text between spans as you type, so
-//     patching one span's characters can show a sentence that never existed.
-//     Any array whose items are `_type: "block"` is stepped over entirely.
+//  3. PORTABLE TEXT ONLY WHEN THE BLOCK KEPT ITS SHAPE. A block's marks, splits
+//     and merges move text between spans as you type, so patching one span's
+//     characters after a bold or a link was added can show a sentence that never
+//     existed. But plain typing inside a paragraph changes NOTHING except span
+//     text, and each span renders as its own stega-tagged text node. So a block
+//     is diffed when, apart from its spans' `text`, it is identical to its old
+//     self: same style, list, markDefs, and the same spans (keys, order, marks).
+//     Then every span change is reported at its full path
+//     (`body[_key=="b"].children[_key=="s"].text`) and the page reads exactly as
+//     the new block would render. Any other difference skips the block, and so
+//     does any non-block item (an image in the body): the soft refresh's job.
+//     (2026-10-26, PORTS.md card 182: before this, every keystroke in a rich
+//     text box waited the full 3 to 5 second refresh.)
 //
 // Paths come out as STUDIO PATH STRINGS (`flexibleSections[_key=="a1"].heading`)
 // because that is the form the stega payload carries, so the caller can compare
@@ -69,6 +77,18 @@ function isPortableText(value: unknown[]): boolean {
   return value.some((item) => isPlainObject(item) && item._type === 'block');
 }
 
+/**
+ * A block with its spans' text blanked, as a string: two blocks with the same
+ * shape give the same string whatever their words say. Key order is the
+ * document store's own, which is stable between snapshots of one document.
+ */
+function blockShape(block: Record<string, unknown>): string {
+  const children = Array.isArray(block.children)
+    ? block.children.map((child) => (isPlainObject(child) ? { ...child, text: '' } : child))
+    : block.children;
+  return JSON.stringify({ ...block, children });
+}
+
 /** Append a segment to a studio path string. */
 function step(base: string, segment: string): string {
   return base === '' ? segment : `${base}.${segment}`;
@@ -110,7 +130,28 @@ export function diffStringFields(
     }
 
     if (Array.isArray(before) && Array.isArray(after)) {
-      if (isPortableText(before) || isPortableText(after)) return;
+      if (isPortableText(before) || isPortableText(after)) {
+        // Rule 3: only blocks whose shape is unchanged, matched by `_key`.
+        for (const block of after) {
+          const key = keyOf(block);
+          if (key === undefined || !isPlainObject(block) || block._type !== 'block') continue;
+          if (!Array.isArray(block.children)) continue;
+          const old = before.find((candidate) => keyOf(candidate) === key);
+          if (!isPlainObject(old) || blockShape(old) !== blockShape(block)) continue;
+          const oldChildren = old.children as unknown[];
+          (block.children as unknown[]).forEach((child, index) => {
+            const span = keyOf(child);
+            if (span === undefined) return;
+            walk(
+              (oldChildren[index] as Record<string, unknown>).text,
+              (child as Record<string, unknown>).text,
+              `${path}[_key=="${key}"].children[_key=="${span}"].text`,
+              depth + 1,
+            );
+          });
+        }
+        return;
+      }
       // Items are matched by `_key`, never by position, so reordering a section
       // reports nothing rather than reporting every string in the array as
       // changed. Keyless arrays (rare in this schema, and never text) are

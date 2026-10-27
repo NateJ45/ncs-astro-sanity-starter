@@ -12841,3 +12841,27 @@ and a 4px band along the bottom, both clipped inside; an outlined (waiting) ston
 **Applied:** starter (this card), first-baptist-auburn (origin: `stone: brick`, navy `markColors`, its
 `print-flecks.svg` copied to `public/studio-banner/`). fbcm and stonesteps-50k: the marked copies only, no look
 change.
+
+## Card 182: Instant text in rich text boxes (2026-10-26)
+
+**Origin:** first-baptist-auburn, the deployed Studio: typing in a section's rich text box (Home, "Meet Pastor Jacob",
+Text) took 3 to 5 seconds to show in the preview, while a heading in the same section showed in about 0.2 s.
+
+**Cause.** `diffStringFields` stepped over every portable text array, so rich text only ever reached the page through
+the soft refresh (Sanity's query-visibility signal, the 1200 ms refresh floor and a ~0.9 s server render). The skip was
+there because marks, splits and merges move text between spans, and patching one span after that can show a sentence
+that never existed.
+
+**Fix.** `src/lib/preview-text-diff.ts` (PORTABLE) and its test. A block is diffed span by span when, with each span's
+`text` blanked, it is identical to its old self (style, list, level, markDefs, and the same spans in the same order with
+the same marks). Plain typing changes nothing else, so every span change is reported at its full path
+(`body[_key=="b"].children[_key=="s"].text`), which is exactly the path stega puts on that span's text node, and
+`applyTextChange` still writes only where the node reads exactly the old value. A split, merge, new mark, new link, style
+change, new block or any non-block item skips the block and is left to the refresh. No new request of any kind: it
+reuses the draft the frame already receives.
+
+**Proved:** unit tests (span change reported at its path; two changed spans; split, mark, style and link changes
+skipped; new blocks and non-block items skipped). Deployed check on first-baptist-auburn recorded on its site PR.
+
+**Applied:** starter (this card). Every site carrying `preview-text-diff.ts` needs the new copy: first-baptist-auburn,
+fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k.
