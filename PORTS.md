@@ -12900,3 +12900,23 @@ same strip there).
 **Applied:** first-baptist-auburn (origin, #235), starter (this card), stonesteps-50k (#175;
 `.claude/rules/live-preview.md` carries the note), presacademy (#141, on its older `split('?')` line), reid-design-site
 (#186), fbcm (#126, harmless there; `docs/agent/preview.md` carries the note).
+
+## Card 182a: Presentation's mutation refreshes no longer start renders (2026-10-26)
+
+**Origin:** first-baptist-auburn, deployed Studio, checking card 182: one keystroke in a rich text box still started three
+`/preview` renders 1.2 s apart (at about 1.0, 2.2 and 3.4 s); the text itself showed in 0.34 s.
+
+**Cause.** `@sanity/visual-editing` calls the overlay's `refresh` handler with `source: 'mutation'` for every autosave,
+once at once and again 1000 ms later (its `Refresh` component), and `VisualEditingOverlay.tsx` answered each with
+`softRefresh()`. Both calls arrive before the edit is visible to a query, so each started a render of old data that the
+SSE `change` then made stale.
+
+**Fix.** `VisualEditingOverlay.tsx` (per repo): for `mutation`, call `onKnownChange` (marks a running render stale) and
+return `false`, which tells the library nothing was done; `manual` (the refresh button) still renders. The SSE
+`change` is the one trigger. Docs: `.claude/rules/preview-stack.md`.
+
+**Proved:** deployed check recorded on the first-baptist-auburn PR (renders per keystroke before and after).
+
+**Applied:** starter (this card). Every site with the preview overlay needs the same edit in `VisualEditingOverlay.tsx`
+(first-baptist-auburn, fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k). No PORTABLE file
+changes, so no sync-check ordering.
