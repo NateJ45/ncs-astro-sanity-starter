@@ -85,6 +85,14 @@ export const CONTENT_TYPES = new Set([
   'eventDetailsSection',
   'scheduleSection',
   'photoCardsSection',
+  // Card 193
+  'contactCardSection',
+  'progressSection',
+  'newsletterSection',
+  'calendarSubscribeSection',
+  'iconCardsSection',
+  'stepsRailSection',
+  'hubSection',
 ]);
 
 /**

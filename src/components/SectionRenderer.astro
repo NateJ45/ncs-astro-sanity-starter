@@ -135,9 +135,12 @@ const ctaVariant = primaryBudget(rows, ({ block }) =>
       own(ctaHref(block.cta))
     : block._type === 'heroSection'
       ? !!block.primaryCta && own(ctaHref(block.primaryCta))
-      : block._type === 'eventDetailsSection' &&
-        !!block.button?.label &&
-        own(ctaHref(block.button)),
+      : block._type === 'eventDetailsSection'
+        ? !!block.button?.label && own(ctaHref(block.button))
+        : // Card 193: the contact card's big Call button, and the steps rail's closing button.
+          block._type === 'contactCardSection'
+          ? block.callButtons === true
+          : block._type === 'stepsRailSection' && !!block.link?.label && own(ctaHref(block.link)),
 );
 
 // The board grammar (brand.config.json layout.hero = 'board', card 188): every section opens with

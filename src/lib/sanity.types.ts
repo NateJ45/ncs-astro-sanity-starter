@@ -46,6 +46,24 @@ export type PhotoCardImage = {
   _type: 'image';
 };
 
+export type IconCardImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "iconCard.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
+};
+
+export type HubCardImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "hubCard.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
+};
+
 export type Photo = {
   asset?: SanityImageAssetReference;
   media?: unknown; // Unable to locate the referenced type "photo.media" in schema
@@ -253,6 +271,27 @@ export type PrivatePage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -1129,6 +1168,27 @@ export type SectionPreset = {
       } & PhotoCardsSection)
     | ({
         _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
       } & FounderSection)
     | ({
         _key: string;
@@ -1162,6 +1222,157 @@ export type SectionPreset = {
       } & DynamicListSection)
   >;
   note?: string;
+};
+
+export type HubSection = {
+  _type: 'hubSection';
+  heading?: string;
+  intro?: string;
+  groups?: Array<{
+    title?: string;
+    line?: string;
+    cards?: Array<{
+      image?: HubCardImage;
+      icon?:
+        | 'home'
+        | 'heart'
+        | 'star'
+        | 'calendar'
+        | 'clock'
+        | 'map-pin'
+        | 'phone'
+        | 'mail'
+        | 'chat'
+        | 'users'
+        | 'book'
+        | 'coffee'
+        | 'gift'
+        | 'leaf'
+        | 'tool'
+        | 'door'
+        | 'check';
+      title?: string;
+      label?: string;
+      when?: string;
+      place?: string;
+      body?: string;
+      link?: CtaBlock;
+      _type: 'hubCard';
+      _key: string;
+    }>;
+    _type: 'hubGroup';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet';
+};
+
+export type StepsRailSection = {
+  _type: 'stepsRailSection';
+  heading?: string;
+  intro?: string;
+  steps?: Array<{
+    icon?:
+      | 'home'
+      | 'heart'
+      | 'star'
+      | 'calendar'
+      | 'clock'
+      | 'map-pin'
+      | 'phone'
+      | 'mail'
+      | 'chat'
+      | 'users'
+      | 'book'
+      | 'coffee'
+      | 'gift'
+      | 'leaf'
+      | 'tool'
+      | 'door'
+      | 'check';
+    title?: string;
+    body?: string;
+    link?: CtaBlock;
+    _type: 'railStep';
+    _key: string;
+  }>;
+  firstStepCard?: boolean;
+  endHeading?: string;
+  link?: CtaBlock;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type IconCardsSection = {
+  _type: 'iconCardsSection';
+  heading?: string;
+  intro?: string;
+  cards?: Array<{
+    icon?:
+      | 'home'
+      | 'heart'
+      | 'star'
+      | 'calendar'
+      | 'clock'
+      | 'map-pin'
+      | 'phone'
+      | 'mail'
+      | 'chat'
+      | 'users'
+      | 'book'
+      | 'coffee'
+      | 'gift'
+      | 'leaf'
+      | 'tool'
+      | 'door'
+      | 'check';
+    image?: IconCardImage;
+    title?: string;
+    body?: string;
+    note?: string;
+    link?: CtaBlock;
+    _type: 'iconCard';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type CalendarSubscribeSection = {
+  _type: 'calendarSubscribeSection';
+  heading?: string;
+  intro?: string;
+  feed?: string;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type NewsletterSection = {
+  _type: 'newsletterSection';
+  heading?: string;
+  intro?: string;
+  signupUrl?: string;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type ProgressSection = {
+  _type: 'progressSection';
+  heading?: string;
+  intro?: string;
+  unit?: 'dollars' | 'number';
+  goal?: number;
+  raised?: number;
+  asOf?: string;
+  link?: CtaBlock;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type ContactCardSection = {
+  _type: 'contactCardSection';
+  heading?: string;
+  intro?: string;
+  callButtons?: boolean;
+  phone?: string;
+  email?: string;
+  address?: string;
+  hours?: string;
+  look?: 'standard' | 'quiet' | 'feature';
 };
 
 export type PhotoCardsSection = {
@@ -2057,6 +2268,27 @@ export type Page = {
       } & PhotoCardsSection)
     | ({
         _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
       } & SyncedSection)
   >;
   addToMainNav?: boolean;
@@ -2496,6 +2728,27 @@ export type ProcessPage = {
       } & PhotoCardsSection)
     | ({
         _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
       } & SyncedSection)
     | ({
         _key: string;
@@ -2598,6 +2851,27 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2742,6 +3016,27 @@ export type AboutPage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2945,6 +3240,27 @@ export type HomePage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -3274,6 +3590,8 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | TimelineEntryImage
   | PhotoCardImage
+  | IconCardImage
+  | HubCardImage
   | Photo
   | PageReference
   | HomePageReference
@@ -3323,6 +3641,13 @@ export type AllSanitySchemaTypes =
   | SectionPresetReference
   | SyncedSection
   | SectionPreset
+  | HubSection
+  | StepsRailSection
+  | IconCardsSection
+  | CalendarSubscribeSection
+  | NewsletterSection
+  | ProgressSection
+  | ContactCardSection
   | PhotoCardsSection
   | ScheduleSection
   | EventDetailsSection
