@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-27: wayfinding from first-baptist-auburn (PORTS card 191)._ Four opt-in Site settings pieces resolved by `src/lib/wayfinding.ts`: where-next rows at the top of the footer (`WhereNext.astro`, published-only via `published-links.ts`, current page via `page-path.ts`), phone menu groups with big display rows in `MobileNav.astro`, a compact footer style, and a sticky phone action bar (`ActionBar.astro`). Empty settings render byte-identical pages (parity 19/19).
+
 _2026-10-27: every main page a page builder: Contact, Privacy and Journal (PORTS card 190)._
 
 **Decision.** Ported from first-baptist-auburn. Each page's fixed piece (the form, the policy, the post list) became a block, and each singleton gained a `pageBuilder` so the editor can put sections around it and gets "Insert a saved section". Unlike About, an empty layout does not render a default section array: it draws the page exactly as before (same hero, same block component fed by the document), which is what lets a site take the card with no migration. Proved with `npm run parity`: contact, privacy and journal differ only in stylesheet link names (and four spaces of indentation in a text node). `scripts/main-pages-builder.mjs` fills a layout from the old fields when the editor should be able to rearrange. Old fields stay (rule 16). Privacy's required hero headline, date and body are required only while the layout is empty.

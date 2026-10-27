@@ -1139,6 +1139,32 @@ export type SiteSettings = {
     label?: string;
     link?: NavLink;
   };
+  phoneMenuGroups?: Array<{
+    title?: string;
+    links?: Array<
+      {
+        _key: string;
+      } & NavLink
+    >;
+    _type: 'phoneMenuGroup';
+    _key: string;
+  }>;
+  actionBars?: Array<{
+    everyPage?: boolean;
+    page?:
+      | HomePageReference
+      | AboutPageReference
+      | ServicesPageReference
+      | ProcessPageReference
+      | FaqPageReference
+      | ContactPageReference
+      | JournalPageReference
+      | PageReference;
+    text?: string;
+    action?: NavLink;
+    _type: 'actionBar';
+    _key: string;
+  }>;
   showEmail?: boolean;
   showSocials?: boolean;
   showFooterSocials?: boolean;
@@ -1147,6 +1173,13 @@ export type SiteSettings = {
       _key: string;
     } & NavLink
   >;
+  whereNext?: Array<{
+    link?: NavLink;
+    note?: string;
+    _type: 'whereNextRow';
+    _key: string;
+  }>;
+  footerStyle?: 'columns' | 'compact';
   logo?: {
     asset?: SanityImageAssetReference;
     media?: unknown;

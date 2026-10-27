@@ -18,6 +18,16 @@
 //   5. Thin bottom bar: auto-year copyright, privacy link, optional "Site
 //      by..." credit, all on one line.
 //
+// Wayfinding (PORTS.md card 191, from FBC Auburn), all opt-in from Site
+// settings and drawing nothing until filled in:
+//   - Where next rows (WhereNext.astro) above everything else.
+//   - Footer style "compact": the logo, tagline and second header button in
+//     one brand row on top, the link groups 2 by 2 on phones with Get in
+//     touch across the width, and no logo block at the foot. CSS in
+//     globals.css ("Compact footer").
+//   - The phone action bar (ActionBar.astro), docked to the bottom of the
+//     screen, rendered here so it sits in the footer landmark.
+//
 // Tailwind v4 gotcha: max-w-xs/s/m/l are shadowed by this project's custom
 // --spacing-* tokens (they resolve to a few px, not the container scale). Use
 // max-w-md / max-w-2xl / arbitrary values like max-w-[28rem] for text widths.
@@ -50,6 +60,11 @@ import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { mergePageSwitches } from '@/lib/page-switches';
 import { telHref } from '@/lib/phone';
+import { getAllPageSlugs } from '@/lib/queries';
+import { publicPath } from '@/lib/page-path';
+import { footerStyle, pickActionBar, whereNextRows } from '@/lib/wayfinding';
+import WhereNext from '@/components/WhereNext.astro';
+import ActionBar from '@/components/ActionBar.astro';
 import { resolveBusinessFacts, type RawBusinessFacts } from '@/lib/business-facts';
 import ToConfirm from '@/components/business/ToConfirm.astro';
 import OpenStatus from '@/components/business/OpenStatus.astro';
@@ -147,11 +162,27 @@ const LEGAL_LINKS = chrome.legalNav;
 // Falls back to an empty array when Sanity isn't reachable (build won't fail).
 const allProjects: CoreProjectCard[] = (await getAllProjects().catch(() => [])) ?? [];
 const latestProjects = allProjects.slice(0, 3);
+
+// Wayfinding (card 191). The live path, so the draft preview draws the footer of the page it
+// previews. The published-page list is only fetched when there are rows to check against it.
+const here = publicPath(Astro.url.pathname);
+const whereNext = siteSettings?.whereNext?.length
+  ? whereNextRows(siteSettings.whereNext, here, await getAllPageSlugs())
+  : [];
+const compact = footerStyle(siteSettings?.footerStyle) === 'compact';
+const secondary = chrome.headerSecondary;
+const actionBar = pickActionBar(siteSettings?.actionBars, here);
 ---
 
-<footer id="site-footer" class="bg-muted text-foreground">
+<footer
+  id="site-footer"
+  class={compact ? 'site-footer--compact bg-muted text-foreground' : 'bg-muted text-foreground'}
+>
   {/* Brand accent stripe — matches header + mobile drawer. */}
   <div class="h-1 bg-primary" aria-hidden="true"></div>
+
+  {/* Where next (card 191): nothing unless Site settings > Where next rows is filled in. */}
+  {whereNext.length > 0 && <WhereNext rows={whereNext} />}
 
   {/* Newsletter signup — renders only when siteSettings.newsletter.enabled is
        true. Island hydrates when scrolled into view. */}
@@ -168,7 +199,50 @@ const latestProjects = allProjects.slice(0, 3);
        When siteSettings.footerColumns is non-empty, the custom Sanity columns
        replace the built-in Studio / Work / Free tools columns. The Latest
        Projects column and Get in touch column always render. */}
-  <div class="mx-auto grid max-w-content grid-cols-1 gap-l px-m pt-l pb-m text-center sm:grid-cols-2 md:grid-cols-3 md:text-left lg:grid-cols-5">
+  {/* Compact (card 191): the brand row on top; the logo block at the foot is left out. */}
+  {compact && (
+    <div class="site-footer__brand mx-auto max-w-content px-m pt-l">
+      <a
+        href="/"
+        aria-label={`${brandName} home`}
+        class="site-footer__brand-logo inline-block transition-opacity hover:opacity-80"
+      >
+        <img
+          alt={brandName}
+          width={280}
+          height={60}
+          class="h-10 w-auto"
+          loading="lazy"
+          decoding="async"
+          data-theme-logo
+          src={footerLogoLight.src}
+          data-logo-light-src={footerLogoLight.src}
+          data-logo-light-srcset={footerLogoLight.src}
+          data-logo-dark-src={footerLogoDark.src}
+          data-logo-dark-srcset={footerLogoDark.src}
+        />
+      </a>
+      {siteSettings?.tagline && (
+        <p class="site-footer__tagline text-sm text-foreground/80 italic">{siteSettings.tagline}</p>
+      )}
+      {secondary && (
+        <a
+          href={secondary.href}
+          class="site-footer__brand-action inline-flex min-h-11 items-center rounded-md border border-primary px-m text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:bg-accent"
+        >
+          {secondary.label}
+        </a>
+      )}
+    </div>
+  )}
+
+  <div
+    class={
+      compact
+        ? 'site-footer__links mx-auto grid max-w-content gap-l px-m pt-l pb-m text-left'
+        : 'mx-auto grid max-w-content grid-cols-1 gap-l px-m pt-l pb-m text-center sm:grid-cols-2 md:grid-cols-3 md:text-left lg:grid-cols-5'
+    }
+  >
     {/* --- Editor-managed columns (from Sanity siteSettings.footerColumns) --- */}
     {useCustomFooterColumns ? (
       sanityFooterColumns.map((col, colIdx) => (
@@ -463,37 +537,40 @@ const latestProjects = allProjects.slice(0, 3);
     </div>
   </div>
 
-  {/* Logo + tagline — sits below the nav grid as a centered brand signature. */}
-  <div class="mx-auto flex max-w-content flex-col items-center gap-s px-m pb-l text-center">
-    <a
-      href="/"
-      aria-label={`${brandName} home`}
-      class="inline-block transition-opacity hover:opacity-80"
-    >
-      {/* Sized by WIDTH: the placeholder mark is a wide lockup (280x60), not
+  {/* Logo + tagline — sits below the nav grid as a centered brand signature.
+      The compact footer has them in its brand row on top instead. */}
+  {!compact && (
+    <div class="mx-auto flex max-w-content flex-col items-center gap-s px-m pb-l text-center">
+      <a
+        href="/"
+        aria-label={`${brandName} home`}
+        class="inline-block transition-opacity hover:opacity-80"
+      >
+        {/* Sized by WIDTH: the placeholder mark is a wide lockup (280x60), not
           the square badge the old PNG was. An unloaded lazy image with
           width:auto shrink-wraps to 0x0, never intersects the viewport and so
           never loads, which is a real bug this family has hit more than once.
           Give it real dimensions. */}
-      <img
-        alt={brandName}
-        width={280}
-        height={60}
-        class="h-14 w-auto"
-        loading="lazy"
-        decoding="async"
-        data-theme-logo
-        src={footerLogoLight.src}
-        data-logo-light-src={footerLogoLight.src}
-        data-logo-light-srcset={footerLogoLight.src}
-        data-logo-dark-src={footerLogoDark.src}
-        data-logo-dark-srcset={footerLogoDark.src}
-      />
-    </a>
-    {siteSettings?.tagline && (
-      <p class="max-w-[28rem] text-sm text-foreground/80 italic">{siteSettings.tagline}</p>
-    )}
-  </div>
+        <img
+          alt={brandName}
+          width={280}
+          height={60}
+          class="h-14 w-auto"
+          loading="lazy"
+          decoding="async"
+          data-theme-logo
+          src={footerLogoLight.src}
+          data-logo-light-src={footerLogoLight.src}
+          data-logo-light-srcset={footerLogoLight.src}
+          data-logo-dark-src={footerLogoDark.src}
+          data-logo-dark-srcset={footerLogoDark.src}
+        />
+      </a>
+      {siteSettings?.tagline && (
+        <p class="max-w-[28rem] text-sm text-foreground/80 italic">{siteSettings.tagline}</p>
+      )}
+    </div>
+  )}
 
   {/* Thin bottom bar — copyright, privacy, optional "Site by..." credit on one
        line so they don't add a tall block to a footer column. */}
@@ -536,4 +613,8 @@ const latestProjects = allProjects.slice(0, 3);
       </div>
     </div>
   </div>
+
+  {/* The phone action bar (card 191): nothing unless this page has a bar in Site settings. Only
+      rendered when there is a bar, so a page without one carries none of its script. */}
+  {actionBar && <ActionBar bar={actionBar} />}
 </footer>

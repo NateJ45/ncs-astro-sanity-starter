@@ -1,0 +1,84 @@
+---
+// Safe to edit by hand
+//
+// THE WAYFINDING FIXTURE (PORTS.md card 191): the page chrome with all four wayfinding pieces
+// switched on from fixed Site settings, so tests/wayfinding.spec.ts can check them without a
+// dataset and their look can be checked at any width:
+//   - Phone menu groups: the full-screen menu in labelled groups of big rows.
+//   - Where next rows: three rows at the top of the footer (About drops out on /about/).
+//   - Footer style "compact": the brand row on top, the groups two by two on phones.
+//   - A phone action bar for every page.
+// A long page, so the bar's "past the heading" rule can be met. noindex, out of the sitemap
+// (astro.config.mjs filters '/styleguide') and under a reserved slug.
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { site } from '@/data/site';
+
+const settings = {
+  title: site.name,
+  tagline: 'A short line about the business.',
+  email: 'hello@example.com',
+  phone: '(555) 010-0100',
+  footerStyle: 'compact',
+  headerSecondary: { label: 'Book online', link: { label: 'Book online', href: '/contact/' } },
+  phoneMenuGroups: [
+    {
+      title: 'New here',
+      links: [
+        { label: 'About', href: '/about/' },
+        { label: 'Questions', href: '/faq/' },
+      ],
+    },
+    {
+      title: 'Our work',
+      links: [
+        { label: 'Services', href: '/services/' },
+        { label: 'How we work', href: '/process/' },
+        { label: 'Journal', href: '/journal/' },
+      ],
+    },
+    {
+      title: 'Get in touch',
+      links: [
+        { label: 'Contact', href: '/contact/' },
+        { label: 'Wayfinding fixture', href: '/styleguide/wayfinding/' },
+      ],
+    },
+  ],
+  whereNext: [
+    { link: { label: 'Contact', href: '/contact/' }, note: 'Say hello' },
+    { link: { label: 'Services', href: '/services/' }, note: 'What we do' },
+    // A Studio page that is not published: never drawn.
+    { link: { label: 'Not published', href: '/not-a-real-page/' }, note: 'Never shown' },
+    { link: { label: 'About', href: '/about/' }, note: 'Who we are' },
+  ],
+  actionBars: [
+    {
+      everyPage: true,
+      text: 'Open today until 5',
+      action: { label: 'Book a visit', href: '/contact/' },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={`Wayfinding | ${site.name}`}
+  description="The wayfinding pieces with fixed settings, for checking. Not for visitors."
+  siteSettings={settings}
+  noindex
+>
+  <div class="mx-auto max-w-3xl space-y-8 px-4 py-12 sm:px-6" style="min-height: 250vh">
+    <h1 class="text-3xl">Wayfinding fixture</h1>
+    <p>
+      Open the phone menu for the groups. Scroll past this heading on a phone for the action bar; it
+      hides again once the footer is on screen. The footer is the compact style, opened by the where
+      next rows.
+    </p>
+    <p>
+      <a href="#below" id="focus-link">
+        A link to focus
+      </a>
+    </p>
+    <p id="below">The rest of the page.</p>
+  </div>
+</BaseLayout>

@@ -320,6 +320,10 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 188  | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`        | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 191  | Wayfinding: where-next rows, phone menu groups, compact footer, phone action bar         | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 189  | Photo hero: "Photo behind the words" style, short-facts card, silent background video    | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
@@ -12168,6 +12172,59 @@ output) and with it on (pill, highlight and boxes), screenshots at 375 and 1280.
 
 **Applied:** starter (this card). Sites: turn it on only while a client is reviewing; Auburn's sync PR adopts the
 renamed files.
+
+## Card 191: Wayfinding: where-next rows, phone menu groups, a compact footer and a phone action bar (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A11 to A14): `WhereNext.astro`, the grouped `MobileNav.astro`, the
+compact `Footer.astro` and `church/SundayBar.astro`, generalised in the Auburn-to-family port run.
+
+**Problem.** Pages ended at a dead end, the phone menu was one long list once a site passed eight pages, the footer
+was two screens tall on a phone, and the one thing a phone visitor came to do (book, visit, call) scrolled away with
+the page heading. Auburn fixed all four, but with its own routes typed into the component, church facts in the bar
+and its brand colours in the CSS.
+
+**What it is.** Four Site settings pieces (Navigation group), resolved by one pure file, `src/lib/wayfinding.ts`:
+
+- **Where next rows** (`whereNext`, `WhereNext.astro`): up to five links with a small note; the footer opens with the
+  first three that are not the page you are on (`page-path.ts`), and a row that names a Studio page (a picked page,
+  or a typed one-segment address no site route serves, per `reservedSlugs.ts`) shows only while that page is
+  published (`published-links.ts`, card 187). Big display-font rows, a fill sweep in `--primary`, hidden on a page
+  whose `<main>` holds a `[data-final-cta]` (one closing device per page).
+- **Phone menu groups** (`phoneMenuGroups`, `MobileNav.astro`): named groups of links; the drawer goes full width and
+  the links become big display-font rows under each group's name. Still the card 157 `<dialog>` (focus trap, Escape,
+  focus return); each group name is an `h2` that labels its `ul`; the current page is `aria-current="page"`; the
+  header button's page is not listed again. Desktop nav is untouched (rule 4).
+- **Footer style** (`footerStyle`: Columns or Compact, in `NON_STEGA_FIELDS`): compact puts the logo, tagline and the
+  second header button (card 187) in one brand row on top, packs the link groups two by two on phones with Get in
+  touch across the width, hides empty groups and drops the logo block at the foot.
+- **Phone action bar** (`actionBars`, `ActionBar.astro`): one short line and one button, picked for a page or for
+  every page (a page's own bar wins; a bar whose button points at the page you are on is not drawn). Phones only;
+  shows once `main [data-action-bar-anchor]` (else the `h1`) has scrolled away, hides while the footer is on screen,
+  pads for the safe-area inset, sets `html[data-action-bar-on]` so `scroll-padding-bottom` keeps focus clear of it and
+  lifts BackToTop and the journal's CTA chip above it. Inside `<footer>`, so it is in the contentinfo landmark.
+
+**Safe by default.** Every field is empty or unset on an untouched site, and Footer renders `WhereNext` and
+`ActionBar` only when they have something to draw (a rendered-but-empty `ActionBar` still shipped its script; caught by
+parity). Parity: 19/19 pages unchanged against the `origin/main` build (`styleguide/sections` differs only by its ICS
+`DTSTAMP` when the two builds straddle a minute).
+
+**Files.** PORTABLE: `src/lib/wayfinding.ts`, `src/lib/wayfinding.test.ts`. Per site, restyle freely:
+`src/components/WhereNext.astro`, `src/components/ActionBar.astro`. Edited: `MobileNav.astro`, `Header.astro`,
+`Footer.astro`, `globals.css` ("Phone menu groups", "Compact footer"), `siteSettings.ts` schema, `queries.ts`
+projection, `siteSettings.ts` types, `cms-preview.ts`. Fixture `/styleguide/wayfinding/`, spec
+`tests/wayfinding.spec.ts`.
+
+**Differences from Auburn.** Auburn's rows and bars are hard-coded tables (`ROWS`, `BARS`) and its bar line is the
+Sunday times from Church facts; here both are Site settings, and the bar's line is plain text until card 196 (business
+facts) gives it a derived one. Auburn's groups are its header dropdowns; here they are a separate phone-only list, so
+the desktop menu can stay flat. Auburn's sync PR can keep its church bar and move its rows into Site settings.
+
+**Proved:** 7 unit tests; `tests/wayfinding.spec.ts` (7, chromium: groups and axe in the open dialog, published-only
+rows, 2x2 phone footer, bar timing, bottom edge, 44px button and axe, never on desktop, 320px, a real route carries
+none of it); full Playwright suite green; screenshots at 375 (menu, footer, bar), 768 (menu) and 1280 (footer).
+
+**Applied:** starter (this card). Sites: opt in per site in the rollout; fbcm takes the church shape (groups, Sunday
+bar), the others a bar where there is one clear action (book, shop, register).
 
 ## Card 193: Seven more builder blocks: contact card, progress bar, newsletter, calendar buttons, icon cards, steps on a path and a hub (2026-10-27)
 
