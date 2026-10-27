@@ -26,6 +26,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import SectionRenderer from '@/components/SectionRenderer.astro';
 import { site } from '@/data/site';
 import { FIXTURE_RSVP_BLOCK } from '@/lib/mail-fixtures';
+import { FIXTURE_FORM_BLOCK } from '@/lib/site-form-fixtures';
 
 const image = (alt = 'Fixture image') => ({
   _type: 'image',
@@ -256,6 +257,8 @@ const SECTIONS: Record<string, unknown>[] = [
   },
   // The email backbone (card 127): the made-up event in mail-fixtures.ts.
   { ...FIXTURE_RSVP_BLOCK, _type: 'rsvpSection' },
+  // The form builder (card 194): the made-up sign-up form in site-form-fixtures.ts.
+  { ...FIXTURE_FORM_BLOCK, _type: 'formSection' },
   // scaffold: about
   {
     _type: 'founderSection',
@@ -534,6 +537,12 @@ const SECTIONS: Record<string, unknown>[] = [
       link: cta('Read more'),
     })),
   },
+  // ── Every main page a page builder (card 190) ──────────────────────────────
+  // These read what they show themselves (the Contact page's form settings, the posts), so
+  // what they draw here follows the dataset; the policy shows the built-in text.
+  { _type: 'contactFormSection', _key: 'contact-form', sidebar: true },
+  { _type: 'privacyPolicySection', _key: 'privacy-policy', lastUpdated: '2026-01-15' },
+  { _type: 'journalPostsSection', _key: 'journal-posts', showCategories: true }, // scaffold: journal
   // ── Hours and location (card 196) ──────────────────────────────────────────
   // These two fill themselves from Business info; on the wall they carry the
   // made-up facts below instead (the `facts` key exists only for fixtures).

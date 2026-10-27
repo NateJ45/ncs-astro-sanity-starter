@@ -1,0 +1,152 @@
+/* Safe to edit by hand.
+   The board grammar (PORTS.md card 188, from FBC Auburn's board E, 2026-10-17 to 2026-10-25).
+   Opt in with brand.config.json "layout": { "hero": "board" } and `npm run apply-brand`.
+   Imported by the components in src/components/board/, so it ships with them; every rule is
+   keyed on a board class or on html[data-hero='board'] (BaseLayout emits it only for that hero),
+   so a site on another hero renders exactly as before.
+
+   - The page head (BoardPageHead): a short head on the page ground, the eyebrow with the brand
+     marker, the title, the subhead and the buttons on the content column's left edge, the page
+     photo beside them in the brand's standalone shape on the shared split's tracks (card 91).
+   - One eyebrow (BoardLabel): small caps led by the marker, the only place the marker appears.
+   - One ground: the content cadence's tinted bands draw on the page ground, and each section is
+     opened by a rule (BoardRule, drawn by SectionRenderer) instead of a change of colour. A band
+     with a designed look (Feature, Stone) keeps its own surface, and so does the closing band.
+
+   Everything reads the theme and the one scale (globals.css), so it follows the brand and both
+   themes. The per-brand knobs are the custom properties in the first block; FBC Auburn sets its
+   brick marker, no rule line, and an 88px title cap. Docs: docs/agent/design-tokens.md. */
+
+:where(:root) {
+  /* The marker before an eyebrow: a short bar in the primary colour. A brand may point
+     --board-marker at an image (url(...) center / contain no-repeat) and size it. */
+  --board-marker: var(--primary);
+  --board-marker-width: 1.75rem;
+  --board-marker-height: 2px;
+  /* The section rule: a hairline in the border colour. none = whitespace only (Auburn). */
+  --board-rule: var(--border);
+  --board-rule-height: 1px;
+  /* The title: the theme's H1, and the accent word's colour. */
+  --board-title-size: var(--text-h1);
+  --board-accent: var(--primary);
+}
+
+/* ---- The one eyebrow ----------------------------------------------------------------------- */
+.board-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 var(--gap-heading);
+  font-family: var(--font-body);
+  font-size: var(--fs-tag);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.board-marker {
+  flex: none;
+  width: var(--board-marker-width);
+  height: var(--board-marker-height);
+  background: var(--board-marker);
+}
+
+/* ---- Page head ------------------------------------------------------------------------------ */
+.board-head {
+  background: var(--background);
+  color: var(--foreground);
+}
+/* The content column and its gutter, the same as every section's `max-w-content px-m`, so the
+   head, the sections and the header share one left edge. */
+.board-head__inner {
+  max-width: var(--container-content);
+  margin-inline: auto;
+  padding: var(--spacing-section-md) var(--spacing-m);
+}
+.board-head__inner > * {
+  min-width: 0;
+}
+@media (width >= 64rem) {
+  .board-head__inner--side {
+    display: grid;
+    grid-template-columns: minmax(0, var(--split-text)) minmax(0, var(--split-media));
+    column-gap: var(--split-gutter);
+    align-items: end;
+  }
+}
+.board-head__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--board-title-size);
+  line-height: var(--lh-heading);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  /* A word longer than the column (a long placeholder) breaks instead of pushing the page
+     sideways. */
+  overflow-wrap: anywhere;
+}
+.board-head__accent {
+  color: var(--board-accent);
+}
+.board-head__sub {
+  max-width: 36rem;
+  margin: var(--gap-heading) 0 0;
+  font-size: var(--fs-lead);
+  line-height: 1.55;
+  color: var(--muted-foreground);
+  text-wrap: pretty;
+}
+.board-head__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-s);
+  margin-top: var(--spacing-l);
+}
+/* The page photo: the standalone shape (shapes.css .shape-gable) in a 5:4.4 box, a little taller
+   than 4:3 so a cut across the top leaves room above the subject. */
+.board-head__photo {
+  position: relative;
+  aspect-ratio: 5 / 4.4;
+  max-height: 26rem;
+}
+.board-head__photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (width < 64rem) {
+  .board-head__inner {
+    padding-block: var(--spacing-l);
+  }
+  .board-head__photo {
+    margin-top: var(--spacing-l);
+  }
+}
+
+/* ---- Section rule (BoardRule) ----------------------------------------------------------------- */
+.board-rule-wrap {
+  max-width: var(--container-content);
+  margin-inline: auto;
+  padding-inline: var(--spacing-m);
+}
+.board-rule-wrap::before {
+  content: '';
+  display: block;
+  height: var(--board-rule-height);
+  background: var(--board-rule);
+}
+/* A rule opens a section, so one with nothing after it goes, and two in a row are one (a block
+   that renders nothing until its data exists left its rule behind). */
+.board-rule-wrap:has(+ .board-rule-wrap),
+.board-rule-wrap:last-child {
+  display: none;
+}
+
+/* ---- One ground: the cadence's tinted bands draw on the page ground ---------------------------- */
+html[data-hero='board'] main section.bg-muted {
+  background-color: var(--background);
+}

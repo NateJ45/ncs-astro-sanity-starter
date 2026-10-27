@@ -1,10 +1,90 @@
 # Typography and spacing
 
-> Font families, typographic micro-rules, fluid spacing tokens, and the Tailwind v4 collision trap.
+> The one scale, font families, lining figures, metric-matched fallback fonts, the board grammar, fluid spacing tokens, and the Tailwind v4 collision trap.
+
+## The one scale (read this first)
+
+Since card 188 (from FBC Auburn's standardising pass, 2026-10-24) every size, corner, gap, shadow and
+button measure a component or the brand layer asks for comes from one `:root` block in
+`src/styles/globals.css`, headed "The one scale". A value that is not on the scale is a bug: add a token
+before adding a one-off. The block sits AFTER the palette's `:root` and `.dark` blocks on purpose,
+because `apply-brand` rewrites the first of each; keep it there.
+
+The starter's values are the ones it already drew, so naming them moved nothing (parity and
+screenshots unchanged). A brand retunes the site by changing these, never by hunting utilities.
+
+| Token                                                         | Starter value                           | What it is                                                                                              |
+| ------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `--fs-tag` / `--fs-small` / `--fs-body` / `--fs-lead`         | 12 / 14 / 16 / 18px                     | Eyebrows and buttons; meta lines; reading text; an intro. Tailwind's `text-xs` to `text-lg` read these. |
+| `--fs-button`                                                 | `var(--fs-tag)`                         | Every button.                                                                                           |
+| `--fs-title` / `--fs-title-sm` / `--fs-numeral`               | `--text-h4` / `--text-h5` / `--text-h3` | A card title; a row or accordion title; big figures (times, dates, stats).                              |
+| `--lh-body` / `--lh-title` / `--lh-heading`                   | 1.5 / 1.2 / 1.1                         | Reading text; titles; headings (the base `h1`-`h6` rule reads `--lh-heading`).                          |
+| `--figures`                                                   | `normal`                                | `font-variant-numeric` on `<html>`; see "Lining figures" below.                                         |
+| `--radius-control` / `--radius-card` / `--radius-inner`       | `--radius` x 0.6 / x 0.8 / = control    | Buttons, fields, tabs (`rounded-sm`); cards and panels (`rounded-md`); a picture inside a card.         |
+| `--radius-tag` / `--radius-pill`                              | = control / 9999px                      | Small tags; chips.                                                                                      |
+| `--pad-card` / `--pad-panel` / `--gap-grid` / `--gap-heading` | `--spacing-l` / `-l` / `-m` / `-l`      | Inside a card; a feature panel; between cards; a section heading to its content.                        |
+| `--shadow-card` / `--shadow-raised`                           | the `.card-lift` hover / `shadow-lg`    | A card lifted on hover (`.dark` has its own); a panel over another layer.                               |
+| `--btn-height` / `--btn-tracking` / `--tracking-label`        | 44px / 0.18em / 0.18em                  | The button measure (also the tap-target floor); uppercase labels and eyebrows.                          |
+| `--focus-ring-width` / `--focus-ring-offset`                  | 2px / 2px                               | The one focus ring.                                                                                     |
+
+The band rhythm stays `--spacing-section-md` / `--spacing-section-lg` (the `density` layout slot moves
+them). FBC Auburn's brand layer holds its own values in the same names (13 / 15 / 18px text, a 20px card
+corner, three navy-tinted shadows); that is the model for a site that wants a firmer system.
+
+## Lining figures
+
+`html { font-variant-numeric: var(--figures) }`, `normal` by default. A display face whose default
+figures are old-style makes a time read wrong ("11:00" reads "II:00" in Young Serif), so such a brand
+sets `--figures: lining-nums tabular-nums` in the scale: one rule on the root, inherited by every time,
+date and phone number, and tabular so times line up in a column. Auburn does.
+
+## Metric-matched fallback fonts
+
+While the display font loads, the browser draws titles in a local font; if that font is wider, a title
+breaks onto a different number of lines and the page jumps when the real font arrives. Auburn measured
+load CLS of about 0.05 on five inner pages from titles alone, and 0.002 or less after this fix.
+
+`npm run font-fallback` (`scripts/font-fallback.mjs`, maths in `scripts/lib/font-fallback.mjs`, both
+PORTABLE) opens the display font's Latin regular `.woff` from its `@fontsource` package with
+`opentype.js`, takes its average letter width weighted by English letter frequency (capsize's method and
+table) and its hhea ascent, descent and line gap, and writes `src/styles/font-fallbacks.css`:
+`"<Family> Fallback"` over local Georgia (Arial for a sans) and, for a serif,
+`"<Family> Fallback Times"` over Times New Roman, each with `size-adjust`, `ascent-override`,
+`descent-override` and `line-gap-override`. The faces are named second in the display stack
+(`brand.config.json` `fonts.display.familyValue`, which `apply-brand` writes into `--font-display`).
+Once the real font has loaded nothing changes; Android has none of these local fonts and falls through
+to plain `serif`, as before. The unit test reproduces Auburn's Young Serif numbers (114.71% over Georgia)
+within 0.1%.
+
+Rerun it after any display-font change. A variable `@fontsource` package ships woff2 only, which
+opentype.js cannot read: pass `-- --file <a .ttf or .woff of the face>`.
+
+## The board grammar (layout `hero: board`)
+
+FBC Auburn's inner-page grammar as an opt-in layout value (card 188; rule 18: the default emits nothing).
+Set `"layout": { "hero": "board" }` in `brand/brand.config.json` and run `npm run apply-brand`.
+
+- **The page head** (`src/components/board/BoardPageHead.astro`, drawn by `Hero.astro` for any non-tall
+  hero): a short head on the page ground, the eyebrow, the title (the hero's script accent words in
+  `--board-accent`), the subhead and the buttons on the content column's left edge; the page photo beside
+  them in the brand's standalone shape (`.shape-gable`), on the shared split's tracks (card 91), so its
+  seam lines up with the text-and-picture bands below. A tall (home) hero keeps the bleed shape.
+- **One eyebrow** (`BoardLabel.astro`): small caps led by the brand marker.
+- **One ground, a rule per section**: `BaseLayout` puts `data-hero="board"` on `<html>`, the cadence's
+  tinted bands draw on the page ground, and `SectionRenderer` opens every section after the first with a
+  `BoardRule` (not straight after a hero, not before a spacer) in place of the cadence's divider. A band
+  with a designed look (Feature) and the closing band keep their own surfaces.
+
+The per-brand knobs are tokens at the top of `src/styles/board.css`, set in the brand layer:
+`--board-marker` (a short primary bar by default; Auburn points it at its three stepped bricks),
+`--board-marker-width` / `-height`, `--board-rule` (a hairline in `--border`; `none` for whitespace only,
+as Auburn has it), `--board-rule-height`, `--board-title-size` (the theme's H1; Auburn caps it at 88px)
+and `--board-accent`. Fixture: the board head at the end of `/styleguide/layouts/`, shot by the visual
+suite as `hero-board`.
 
 ## Typography
 
-- Headings (h1 through h6): **Libre Baskerville**. Self-hosted via `@fontsource/libre-baskerville`. Editorial serif that reads as premium without narrowing the brand voice to any specific style.
+- Headings (h1 through h6): **Libre Baskerville**, with its metric-matched fallbacks second in the stack (above). Self-hosted via `@fontsource/libre-baskerville`. Editorial serif that reads as premium without narrowing the brand voice to any specific style.
 - Body, UI, buttons: **Inter** (variable). Self-hosted via `@fontsource-variable/inter`. Single file covers all weights.
 - Script accent (opt-in): no script font is loaded by default. The `@utility font-script` declaration and `--font-script` token exist in `globals.css`, but the font file is only fetched when you add a `@fontsource` import for a script typeface and point `--font-script` at it. See `animation.md` for the full opt-in steps and usage discipline.
 - Labels, eyebrows, monospace numerals: `ui-monospace, 'SF Mono', monospace` (system, no file).

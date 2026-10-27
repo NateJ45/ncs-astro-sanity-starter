@@ -1,0 +1,22 @@
+/* Safe to edit by hand, but WRITTEN BY `npm run font-fallback` (scripts/font-fallback.mjs,
+   PORTS.md card 188). Metric-matched stand-ins for Libre Baskerville while it loads: a local font
+   scaled to its average letter width and given its ascent and descent, so a title drawn in the
+   fallback breaks where the real one will and the page does not jump when the font arrives.
+   Named second in the display stack (brand.config.json fonts.display.familyValue).
+   Source: node_modules/@fontsource/libre-baskerville/files/libre-baskerville-latin-400-normal.woff (upm 1000, hhea 970 / -270, weighted width 517). */
+@font-face {
+  font-family: 'Libre Baskerville Fallback';
+  src: local('Georgia');
+  size-adjust: 115.97%;
+  ascent-override: 83.64%;
+  descent-override: 23.28%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Libre Baskerville Fallback Times';
+  src: local('Times New Roman'), local('Times');
+  size-adjust: 127.26%;
+  ascent-override: 76.22%;
+  descent-override: 21.22%;
+  line-gap-override: 0%;
+}

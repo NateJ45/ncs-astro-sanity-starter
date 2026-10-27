@@ -56,6 +56,10 @@ export const SELF_CONTAINED_TYPES = new Set([
   'dynamicListSection',
   // The builder kit (card 173): the dated notice draws its own slim band.
   'noticeSection',
+  // Every main page a page builder (card 190): each draws the band its page drew.
+  'contactFormSection',
+  'privacyPolicySection',
+  'journalPostsSection', // scaffold: journal
 ]);
 
 /** _type strings for blocks that receive alternating surface assignment. */
@@ -71,6 +75,8 @@ export const CONTENT_TYPES = new Set([
   'guaranteeSection',
   // The email backbone (card 127)
   'rsvpSection',
+  // The form builder (card 194)
+  'formSection',
   // The builder kit (builderSections.ts, PORTS.md card 173)
   'columnsSection',
   'buttonRowSection',

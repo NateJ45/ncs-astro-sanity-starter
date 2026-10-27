@@ -11,10 +11,14 @@ import { faqCategory } from './faqCategory'; // scaffold: faq
 import { faqItem } from './faqItem'; // scaffold: faq
 import { faqPage } from './faqPage'; // scaffold: faq
 import { formQuestion } from './formQuestion';
+import { form } from './form';
+import { formDateQuestion, formTickQuestion } from './formQuestionMore';
 import { homePage } from './homePage';
 import { journalCategory } from './journalCategory'; // scaffold: journal
 import { journalEntry } from './journalEntry'; // scaffold: journal
 import { journalPage } from './journalPage'; // scaffold: journal
+import { journalPostsSection } from './journalPostsSection'; // scaffold: journal
+import { mainPageSectionSchemas } from './mainPageSections';
 import { navLink } from './navLink';
 import { newsletter } from './newsletter';
 import { page } from './page';
@@ -43,11 +47,17 @@ export const schemaTypes = [
   navLink,
   // One editor-written form question (contactPage.formFields).
   formQuestion,
+  // The form builder's two extra question kinds (card 194): a date, tick any that apply.
+  formDateQuestion,
+  formTickQuestion,
   // Page-builder section blocks (objects). Registered before the documents
   // whose pageBuilder arrays reference them.
   ...pageSectionSchemas,
   syncedSection, // authoring kit, card 109: shows a saved section, edit once everywhere
   ...richSectionSchemas,
+  // Every main page a page builder (card 190): blocks offered on their own page only.
+  ...mainPageSectionSchemas,
+  journalPostsSection, // scaffold: journal
 
   // Singletons
   siteSettings,
@@ -91,4 +101,6 @@ export const schemaTypes = [
   redirect,
   // Short addresses like /spring for flyers and QR codes (PORTS.md card 171).
   shortLink,
+  // Forms an editor writes (card 194), shown by the Form block; answers go to D1.
+  form,
 ];

@@ -317,6 +317,17 @@ const LIBRARY = [
   ...declaredTypes('richSections.ts'),
 ].filter((t) => t !== 'syncedSection');
 
+// The blocks a main page is built around (card 190). They are offered on their own page only, so
+// they are not in LIBRARY (a custom page or a saved section never takes them), but each still needs
+// a fixture on the wall and a thumbnail in the + Add menu. journalPostsSection.ts is deleted by
+// `npm run scaffold -- --remove journal`, so it is read only when it is there.
+const PAGE_BLOCKS = [
+  ...declaredTypes('mainPageSections.ts'),
+  ...(existsSync(new URL('../sanity/schemaTypes/journalPostsSection.ts', import.meta.url))
+    ? declaredTypes('journalPostsSection.ts')
+    : []),
+];
+
 describe('page templates (src/sanity/pageTemplates.ts)', () => {
   const allowed = new Set(LIBRARY);
 
@@ -430,7 +441,7 @@ describe('section patterns (src/sanity/sectionPatterns.ts)', () => {
 });
 
 describe('section thumbnails (the grid view of the + Add menu)', () => {
-  const types = LIBRARY;
+  const types = [...LIBRARY, ...PAGE_BLOCKS];
   const wall = readFileSync(new URL('../pages/styleguide/sections.astro', import.meta.url), 'utf8');
 
   for (const type of types) {

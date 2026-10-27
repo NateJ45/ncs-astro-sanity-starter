@@ -216,6 +216,9 @@ export type PrivatePage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & FormSection)
+    | ({
+        _key: string;
       } & ColumnsSection)
     | ({
         _key: string;
@@ -1162,6 +1165,12 @@ export type SiteSettings = {
   satisfactionGuarantee?: string;
   headCode?: string;
   bodyEndCode?: string;
+  formRecipients?: Array<{
+    name?: string;
+    key?: string;
+    _type: 'formRecipient';
+    _key: string;
+  }>;
   formRecipientAddresses?: string;
 };
 
@@ -1181,6 +1190,41 @@ export type NavLink = {
     | PageReference;
   externalUrl?: string;
   href?: string;
+};
+
+export type JournalPostsSection = {
+  _type: 'journalPostsSection';
+  showCategories?: boolean;
+  showNewsletter?: boolean;
+};
+
+export type PrivacyPolicySection = {
+  _type: 'privacyPolicySection';
+  lastUpdated?: string;
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: 'span';
+      _key: string;
+    }>;
+    style?: 'normal' | 'h2' | 'h3';
+    listItem?: 'bullet' | 'number';
+    markDefs?: Array<{
+      href?: string;
+      openInNewTab?: boolean;
+      _type: 'link';
+      _key: string;
+    }>;
+    level?: number;
+    _type: 'block';
+    _key: string;
+  }>;
+};
+
+export type ContactFormSection = {
+  _type: 'contactFormSection';
+  sidebar?: boolean;
 };
 
 export type DynamicListSection = {
@@ -1495,6 +1539,9 @@ export type SectionPreset = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -2057,6 +2104,45 @@ export type ColumnsSection = {
   look?: 'standard' | 'quiet' | 'feature';
 };
 
+export type FormReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'form';
+};
+
+export type FormSection = {
+  _type: 'formSection';
+  form?: FormReference;
+};
+
+export type Form = {
+  _id: string;
+  _type: 'form';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  mode?: 'standard' | 'private';
+  intro?: string;
+  recipient?: string;
+  askForContact?: boolean;
+  allowAnonymous?: boolean;
+  questions?: Array<
+    | ({
+        _key: string;
+      } & FormQuestion)
+    | ({
+        _key: string;
+      } & FormDateQuestion)
+    | ({
+        _key: string;
+      } & FormTickQuestion)
+  >;
+  submitLabel?: string;
+  successMessage?: string;
+};
+
 export type RsvpSection = {
   _type: 'rsvpSection';
   heading?: string;
@@ -2268,6 +2354,20 @@ export type HeroSection = {
   size?: 'tall' | 'short';
 };
 
+export type FormTickQuestion = {
+  _type: 'formTickQuestion';
+  label?: string;
+  options?: Array<string>;
+  required?: boolean;
+};
+
+export type FormDateQuestion = {
+  _type: 'formDateQuestion';
+  label?: string;
+  notPast?: boolean;
+  required?: boolean;
+};
+
 export type FormQuestion = {
   _type: 'formQuestion';
   label?: string;
@@ -2324,6 +2424,110 @@ export type PrivacyPage = {
     _type: 'block';
     _key: string;
   }>;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & LogoStripSection)
+    | ({
+        _key: string;
+      } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
+    | ({
+        _key: string;
+      } & StorySection)
+    | ({
+        _key: string;
+      } & ValuesSection)
+    | ({
+        _key: string;
+      } & FaqSection)
+    | ({
+        _key: string;
+      } & TeamSection)
+    | ({
+        _key: string;
+      } & DynamicListSection)
+    | ({
+        _key: string;
+      } & PrivacyPolicySection)
+  >;
 };
 
 export type CtaBlock = {
@@ -2391,6 +2595,9 @@ export type Page = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -2675,6 +2882,110 @@ export type JournalPage = {
     crop?: SanityImageCrop;
     _type: 'image';
   };
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & LogoStripSection)
+    | ({
+        _key: string;
+      } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
+    | ({
+        _key: string;
+      } & StorySection)
+    | ({
+        _key: string;
+      } & ValuesSection)
+    | ({
+        _key: string;
+      } & FaqSection)
+    | ({
+        _key: string;
+      } & TeamSection)
+    | ({
+        _key: string;
+      } & DynamicListSection)
+    | ({
+        _key: string;
+      } & JournalPostsSection)
+  >;
 };
 
 export type ContactPage = {
@@ -2742,6 +3053,110 @@ export type ContactPage = {
   schedulingLink?: string;
   schedulingLinkLabel?: string;
   availabilityNote?: string;
+  pageBuilder?: Array<
+    | ({
+        _key: string;
+      } & HeroSection)
+    | ({
+        _key: string;
+      } & RichTextSection)
+    | ({
+        _key: string;
+      } & ImageTextSection)
+    | ({
+        _key: string;
+      } & GallerySection)
+    | ({
+        _key: string;
+      } & QuoteSection)
+    | ({
+        _key: string;
+      } & StatSection)
+    | ({
+        _key: string;
+      } & CtaBandSection)
+    | ({
+        _key: string;
+      } & VideoSection)
+    | ({
+        _key: string;
+      } & SpacerSection)
+    | ({
+        _key: string;
+      } & LogoStripSection)
+    | ({
+        _key: string;
+      } & EmbedSection)
+    | ({
+        _key: string;
+      } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
+    | ({
+        _key: string;
+      } & ColumnsSection)
+    | ({
+        _key: string;
+      } & ButtonRowSection)
+    | ({
+        _key: string;
+      } & PhotoSection)
+    | ({
+        _key: string;
+      } & AccordionSection)
+    | ({
+        _key: string;
+      } & TabsSection)
+    | ({
+        _key: string;
+      } & CountdownSection)
+    | ({
+        _key: string;
+      } & NoticeSection)
+    | ({
+        _key: string;
+      } & TimelineSection)
+    | ({
+        _key: string;
+      } & LetterSection)
+    | ({
+        _key: string;
+      } & EventDetailsSection)
+    | ({
+        _key: string;
+      } & ScheduleSection)
+    | ({
+        _key: string;
+      } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & HoursSection)
+    | ({
+        _key: string;
+      } & MapSection)
+    | ({
+        _key: string;
+      } & SyncedSection)
+    | ({
+        _key: string;
+      } & StorySection)
+    | ({
+        _key: string;
+      } & ValuesSection)
+    | ({
+        _key: string;
+      } & FaqSection)
+    | ({
+        _key: string;
+      } & TeamSection)
+    | ({
+        _key: string;
+      } & DynamicListSection)
+    | ({
+        _key: string;
+      } & ContactFormSection)
+  >;
   note?: string;
 };
 
@@ -2833,6 +3248,9 @@ export type ProcessPage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -2940,6 +3358,9 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -3087,6 +3508,9 @@ export type AboutPage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -3293,6 +3717,9 @@ export type HomePage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & FormSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -3697,6 +4124,9 @@ export type AllSanitySchemaTypes =
   | BusinessInfo
   | SiteSettings
   | NavLink
+  | JournalPostsSection
+  | PrivacyPolicySection
+  | ContactFormSection
   | DynamicListSection
   | TeamSection
   | FaqItemReference
@@ -3727,6 +4157,9 @@ export type AllSanitySchemaTypes =
   | PhotoSection
   | ButtonRowSection
   | ColumnsSection
+  | FormReference
+  | FormSection
+  | Form
   | RsvpSection
   | EmbedSection
   | LogoStripSection
@@ -3739,6 +4172,8 @@ export type AllSanitySchemaTypes =
   | ImageTextSection
   | RichTextSection
   | HeroSection
+  | FormTickQuestion
+  | FormDateQuestion
   | FormQuestion
   | PrivacyPage
   | CtaBlock

@@ -80,17 +80,17 @@ dated changes in search results should turn on a daily scheduled deploy.
 
 ## Where it shows
 
-| Piece                                   | Draws                                                                                  |
-| --------------------------------------- | -------------------------------------------------------------------------------------- |
-| `business/OpenStatus.astro`             | The open-now line (`size="lead"` for the big one)                                      |
-| `business/HoursTable.astro`             | The week, Monday first, equal days run together, plus "Changes coming up"              |
-| `business/BusinessAddress.astro`        | `<address>`, the tag, "how to find us", Directions (Google Maps) and Apple Maps links  |
-| `business/ToConfirm.astro`              | The tag                                                                                |
-| Opening hours block (`hoursSection`)    | "Today beside the week" (status card on the narrow track) or "One slim band"           |
-| Map and directions block (`mapSection`) | A drawn map card (no map service loads), the address, today's hours, two buttons       |
-| Footer, Get in touch                    | The address and the open-now line, only when set; tags beside phone and email          |
-| Contact, the side column                | Visit (address and links) and Hours, only when set                                     |
-| LocalBusiness JSON-LD                   | `streetAddress`, `postalCode`, `telephone` when confirmed; `openingHoursSpecification` |
+| Piece                                     | Draws                                                                                  |
+| ----------------------------------------- | -------------------------------------------------------------------------------------- |
+| `business/OpenStatus.astro`               | The open-now line (`size="lead"` for the big one)                                      |
+| `business/HoursTable.astro`               | The week, Monday first, equal days run together, plus "Changes coming up"              |
+| `business/BusinessAddress.astro`          | `<address>`, the tag, "how to find us", Directions (Google Maps) and Apple Maps links  |
+| `business/ToConfirm.astro`                | The tag                                                                                |
+| Opening hours block (`hoursSection`)      | "Today beside the week" (status card on the narrow track) or "One slim band"           |
+| Map and directions block (`mapSection`)   | A drawn map card (no map service loads), the address, today's hours, two buttons       |
+| Footer, Get in touch                      | The address and the open-now line, only when set; tags beside phone and email          |
+| Contact form block (`ContactFormSection`) | Visit (address and links) and Hours in its side column, only when set                  |
+| LocalBusiness JSON-LD                     | `streetAddress`, `postalCode`, `telephone` when confirmed; `openingHoursSpecification` |
 
 Both blocks are self-filling (`SELF_FILLING_SECTIONS`) and sit in the "Hours and location" insert group.
 On `/styleguide/sections/` they carry made-up facts through a fixture-only `facts` key, so the thumbnail

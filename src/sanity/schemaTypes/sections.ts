@@ -46,6 +46,7 @@ import {
 } from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
 import { rsvpSection } from './rsvpSection';
+import { ClipboardIcon } from '@sanity/icons/Clipboard';
 // The builder kit (PORTS.md card 173): columns, buttons, a wide photo, fold-outs,
 // tabs, a countdown, a dated notice, a timeline, a letter and the event blocks.
 import { BUILDER_INSERT_GROUPS, builderSectionSchemas } from './builderSections';
@@ -683,6 +684,36 @@ export const syncedSection = defineType({
   },
 });
 
+// ── Form (the form builder, PORTS.md card 194) ────────────────────────────────
+// Shows one `form` document (schemaTypes/form.ts). The block holds only the
+// reference: the words live on the form, so one form can sit on several pages.
+// What visitors send goes to /api/form/ and the site's D1 database, never here.
+// CONTENT type: SectionRenderer hands it the page's alternating surface.
+export const formSection = defineType({
+  name: 'formSection',
+  title: 'Form',
+  type: 'object',
+  icon: ClipboardIcon,
+  description:
+    'Shows one of your forms. Make the form first under Content > Forms, then pick it here. Answers are emailed to the person the form names and listed under Messages; they are never saved in this editor.',
+  fields: [
+    defineField({
+      name: 'form',
+      title: 'Which form',
+      type: 'reference',
+      to: [{ type: 'form' }],
+      validation: (R) => R.required(),
+    }),
+  ],
+  preview: {
+    select: { title: 'form.title', mode: 'form.mode' },
+    prepare: ({ title, mode }) => ({
+      title: title || 'Form: none picked yet',
+      subtitle: mode === 'private' ? 'Private form' : 'Form',
+    }),
+  },
+});
+
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 // All section schema objects, to register in the schema index.
@@ -700,6 +731,8 @@ export const pageSectionSchemas = [
   embedSection,
   // The email backbone (card 127): replies kept in D1, never in Sanity.
   rsvpSection,
+  // The form builder (card 194): answers kept in D1, never in Sanity.
+  formSection,
   // The builder kit (builderSections.ts, PORTS.md card 173).
   ...builderSectionSchemas,
 ];
@@ -744,7 +777,20 @@ export const sectionThumbnailUrl = (type: string): string | undefined =>
 // (say, a church's service times and giving blocks) appends ITS groups here, or
 // spreads them in, and never edits the base list below: a group with a name that
 // already exists gains the types, a new name becomes a new group at the end.
-const SITE_INSERT_GROUPS: InsertGroup[] = [...BUILDER_INSERT_GROUPS];
+const SITE_INSERT_GROUPS: InsertGroup[] = [
+  ...BUILDER_INSERT_GROUPS,
+  {
+    // Every main page a page builder (card 190): the piece a page is built around. Each shows
+    // only on its own page (richSections.ts); a group whose types are absent does not appear.
+    name: 'thispage',
+    title: 'This page',
+    of: [
+      'contactFormSection',
+      'privacyPolicySection',
+      'journalPostsSection', // scaffold: journal
+    ],
+  },
+];
 
 export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
   filter: true,
@@ -785,7 +831,7 @@ export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
       {
         name: 'signups',
         title: 'Sign-ups',
-        of: ['rsvpSection'],
+        of: ['rsvpSection', 'formSection'],
       },
       {
         name: 'business',
