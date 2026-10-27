@@ -392,7 +392,7 @@ export const siteSettings = defineType({
               title: 'Short line',
               type: 'string',
               description:
-                'One short line beside the button, like "Open today until 5". Leave empty to show today's hours from Business info (when it has them). Keep it under about 30 characters so it fits a phone.',
+                'One short line beside the button, like "Open today until 5". Leave empty to show the hours for today from Business info (when it has them). Keep it under about 30 characters so it fits a phone.',
               validation: (Rule) => Rule.max(48),
             }),
             defineField({
