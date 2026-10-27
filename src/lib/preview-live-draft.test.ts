@@ -20,7 +20,10 @@ import {
   LOCAL_LEAD_MS,
   MAX_PENDING,
   MAX_SEEN,
+  LOCAL_COVER_MS,
   acceptsSource,
+  localChannelCovers,
+  parseChangeSignal,
   parseLiveDraft,
   rememberSwap,
   type PendingSwap,
@@ -263,4 +266,26 @@ test('a field that returns to where the server left it forgets its history too',
   rememberSwap(pending, 'k', 'a', 'ab');
   rememberSwap(pending, 'k', 'ab', 'a');
   assert.equal(pending.has('k'), false, 'nothing left to correct, nothing left to remember');
+});
+
+// Card 184: the local channel starts the render, so the SSE and Presentation's
+// mutation calls about THIS page are old news while that channel is live.
+test('parseChangeSignal reads the id a change event names, or nothing', () => {
+  assert.equal(parseChangeSignal('{"id":"drafts.homePage"}'), 'drafts.homePage');
+  assert.equal(parseChangeSignal('{}'), null);
+  assert.equal(parseChangeSignal('nope'), null);
+  assert.equal(parseChangeSignal('{"id":"a b"}'), null);
+  assert.equal(parseChangeSignal(undefined), null);
+});
+
+test('localChannelCovers only this page, only while the channel is live', () => {
+  const now = 10_000;
+  assert.equal(localChannelCovers('homePage', 'homePage', now - 100, now), true);
+  assert.equal(localChannelCovers('drafts.homePage', 'homePage', now - 100, now), true);
+  // Another document (site settings, a synced section) always renders.
+  assert.equal(localChannelCovers('siteSettings', 'homePage', now - 100, now), false);
+  // Unknown id, or a channel that never spoke or went quiet: render.
+  assert.equal(localChannelCovers(null, 'homePage', now - 100, now), false);
+  assert.equal(localChannelCovers('homePage', 'homePage', null, now), false);
+  assert.equal(localChannelCovers('homePage', 'homePage', now - LOCAL_COVER_MS, now), false);
 });

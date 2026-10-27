@@ -38,7 +38,13 @@ import PreviewLayout from '@/layouts/PreviewLayout.astro';
 import Hero from '@/components/Hero.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import SectionRenderer from '@/components/SectionRenderer.astro';
-import { previewFetch, previewConfig, previewUnconfiguredResponse } from '@/lib/cms-preview';
+import {
+  previewFetch,
+  previewFetchPostedDraft,
+  previewConfig,
+  previewUnconfiguredResponse,
+} from '@/lib/cms-preview';
+import { readPostedDraft } from '@/lib/preview-posted-draft';
 import { IMAGE_PROJECTION, CTA_PROJECTION, sectionsProjection } from '@/lib/queries';
 
 // Fresh clone with no project id / no runtime token: say so, do not 500.
@@ -143,11 +149,29 @@ interface PreviewDoc {
 
 const singletonType = SINGLETON_BY_PATH[slug];
 
-const docQuery = singletonType
-  ? `*[_type == $type][0]${PREVIEW_FIELDS}`
-  : `*[_type == "page" && slug.current == $slug][0]${PREVIEW_FIELDS}`;
+const pageFilter = singletonType
+  ? '*[_type == $type]'
+  : '*[_type == "page" && slug.current == $slug]';
+const docQuery = `${pageFilter}[0]${PREVIEW_FIELDS}`;
 const docParams = singletonType ? { type: singletonType } : { slug };
-let fetched = share
+// THE STUDIO'S OWN COPY OF THE DRAFT (2026-10-26, PORTS.md card 184). The
+// soft refresh POSTs the newest draft the Studio holds, so a structural edit
+// (a new section, a toggle) renders without waiting for the autosave and the
+// query index. Same cookie gate (draftMode), same one request: the projection
+// runs over the posted draft and resolves references from the dataset. Used
+// only when it is THIS path's document; anything else reads the stored draft
+// as before. src/lib/preview-posted-draft.ts has the checks and the stega.
+const posted = draftMode ? await readPostedDraft(Astro.request, Astro.url.origin) : null;
+let fetched: PreviewDoc | null = posted
+  ? await previewFetchPostedDraft<PreviewDoc>(
+      pageFilter,
+      PREVIEW_FIELDS,
+      docParams,
+      posted,
+      singletonType ?? 'page',
+    ).catch(() => null)
+  : null;
+fetched ??= share
   ? await sharedPreviewFetch<PreviewDoc | null>(docQuery, docParams)
   : await previewFetch<PreviewDoc | null>(draftMode, docQuery, docParams);
 // A share link shows ONE document's draft. If this path resolves to another

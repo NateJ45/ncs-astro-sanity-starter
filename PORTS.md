@@ -12920,3 +12920,77 @@ return `false`, which tells the library nothing was done; `manual` (the refresh 
 **Applied:** starter (this card). Every site with the preview overlay needs the same edit in `VisualEditingOverlay.tsx`
 (first-baptist-auburn, fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k). No PORTABLE file
 changes, so no sync-check ordering.
+
+## Card 184: The preview renders the Studio's own copy of the draft (2026-10-26)
+
+**Origin:** first-baptist-auburn, the deployed Studio after cards 181 to 183: typing showed in 0.34 s, moves, copies
+and picture swaps were instant (card 183), but any other structural edit (a new section, a toggle, a changed list, a
+new link) waited for the one server render, and that render could not start until Sanity could serve the edit: the
+Studio autosave (about 1 s of throttle), then the query index (the `/preview/live` SSE fires 0.9 to 1.5 s after the
+keystroke), then the render (done at about 1.4 s after the SSE).
+
+**Research (Sanity docs and the installed packages).** Presentation's loader live mode (`@sanity/core-loader`
+`enableLiveMode`, `@sanity/react-loader` `useLiveMode`, the `loader/query-listen` comlink messages) runs the frontend's
+registered query in the Studio. Read in sanity 6's `LiveQueries.js`: it FETCHES the query from the API on Live Content
+API events (`lastLiveEventId`, `tag: presentation-loader`) and "turbo-charges" the result with
+`applySourceDocuments`, rewriting leaf values from the Studio's local copy through the Content Source Map. So Sanity's
+own fast path is leaf values only (what our instant text already does) plus an API refetch for anything structural, and
+it hands JSON to a client-rendered frontend, which a server-rendered Astro preview does not have. `useOptimistic` is the
+same idea for app-side mutations. `defineLive` and sync tags are a cache-invalidation signal, not faster data. None of
+it removes the wait; rendering the Studio's own draft on the server does.
+
+**Fix.**
+
+- `src/lib/preview-posted-draft.ts` (PORTABLE, new, with tests): the request gate (`postedDraftRequestAllowed`: POST,
+  `x-preview-posted-draft: 1`, `application/json`, `Origin` equal to the site, `Sec-Fetch-Site` same-origin when sent,
+  `MAX_POSTED_DRAFT_BYTES` 512 KB), `parsePostedDraft` (exactly `{ document }`, a `drafts.` id), `readPostedDraft`,
+  `postedDraftMatchesPage` (the path's own `_id` and `_type`), and `withPostedDraftMappings`.
+- `src/lib/preview-live-draft.ts` (PORTABLE): `POSTED_DRAFT_HEADER`, `LOCAL_COVER_MS` (5 s), `parseChangeSignal`,
+  `localChannelCovers`.
+- `src/lib/cms-preview.ts` (per repo): `previewFetchPostedDraft(pageFilter, fields, params, draft, type)` runs
+  `{"id": <filter>[0]._id, "doc": $postedDraft<fields>}`: ONE request, the same count as before. GROQ dereferences
+  `_ref`s inside a parameter object like inside a stored document (checked against the live API), so pictures, synced
+  sections and picked pages resolve from the dataset as before; only the page's own fields come from the post.
+- Stega: the API's source map covers the dereferenced documents and leaves parameter values unmapped (checked:
+  `$['d']['title']` absent, `$['d']['s']['title']` mapped to `siteSettings`). `withPostedDraftMappings` walks the
+  result beside the draft (object keys, array items by `_key`) and maps a string only where the draft holds the same
+  string at that path, which is the mapping the API writes for a stored draft
+  (`$['pageBuilder'][?(@._key=='k')]['heading']`), then `stegaEncodeSourceMap` runs with the client's own filter
+  (`NON_STEGA_FIELDS` included). A renamed or computed value gets no stega rather than a guessed one; API mappings are
+  never overwritten. Click-to-edit and instant text keep working on a render from a posted draft.
+- `src/pages/preview/[...slug].astro` (per repo): `pageFilter` split out of `docQuery`; with `draftMode`,
+  `readPostedDraft` then `previewFetchPostedDraft`, falling back to the old `previewFetch` on null or an error.
+  `Cache-Control: no-store` unchanged.
+- `src/pages/preview/live.ts` (per repo): the `change` event's data is `{"id": "<documentId>"}` (id-shaped strings
+  only, else `{}`). Still `visibility: 'query'`, still signal-only.
+- `src/components/preview/VisualEditingOverlay.tsx` (per repo): a `message` listener keeps the newest local draft of
+  THIS page (`drafts.<pageId>`, `sameContent` ignores an autosave's new `_rev`) and calls the scheduler's `onChange`,
+  so the local channel starts the render (same 80 ms debounce, 1200 ms floor, single flight, stale discard; the tick is
+  deferred a task so instant text's `onKnownChange` bump for the same message can never land after the start). The
+  soft refresh POSTs that draft. While a local draft arrived within `LOCAL_COVER_MS`, the SSE `change` and the
+  `mutation` refresh about this page are ignored outright: even `onKnownChange` would discard the render that HAS the
+  edit. Other documents, an id-less event, a quiet channel and `document: null` go back to the SSE path.
+
+**Safety choices.** The posted body is the editor's own draft rendered back to the editor behind the same
+`isStudioPreview` cookie; the header plus JSON content type means no cross-site form can send it without a CORS
+preflight that is never answered (the page can render a Custom code block, so this matters). Only the page's own
+fields are trusted from it; everything referenced is read from the dataset. Alternative considered and rejected:
+evaluating the projection in the Worker with `groq-js` over the draft plus fetched references (no source map at all,
+and transitive references cost extra round trips). Alternative for later: a dedicated short `LOCAL_COVER_MS` if a slow
+autosave ever lets a redundant SSE render through (harmless, it renders the same words).
+
+**Proved:** unit tests (gate accepts only the same-origin JSON post and rejects form content types, a foreign Origin,
+cross-site, oversize; envelope and `drafts.` id; page match by id and type; identity mappings give the stored-draft
+stega for strings, keyed items moved by the projection, list items and portable text spans, skip computed and
+underscore values, never override an API mapping, do not mutate the input; `parseChangeSignal`; `localChannelCovers`
+for this page only and only while live). `npm run check`, `npm run test:unit` and `npm run build` green in the starter
+and first-baptist-auburn. Request count per edit: unchanged by construction (one page read per render, one render per
+edit, the SSE render for the same edit skipped). Timing from edit to structural change: to be recorded on the deployed
+Auburn Studio (the local `wrangler dev` run needs the token in `.dev.vars`, which a deny rule keeps out of worktrees).
+
+**Applied:** starter (this card), first-baptist-auburn (branch `port/card-184`). Every site with the preview stack and
+LiveDraftBridge (fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k) needs the two PORTABLE
+files plus the four per-repo edits above (`cms-preview.ts`, the preview route's fetch, `live.ts`'s `changeData`, the
+overlay's listener, POST and two `localChannelCovers` checks). A site whose preview route fetches more than one
+document by path needs the posted draft applied to the page document only. Site PRs wait for the starter merge
+(sync-check).
