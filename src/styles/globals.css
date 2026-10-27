@@ -671,6 +671,148 @@ html:has(.mobile-menu[open]) {
   }
 }
 
+/* Phone menu groups (PORTS.md card 191, from FBC Auburn): with Site settings > Phone menu groups
+   filled in, the drawer takes the whole screen and the links are labelled groups of big
+   display-font rows with a long arrow and hairlines between. Class-only selectors, so a site
+   without groups ships none of it in a page's own CSS. */
+.mobile-menu--groups {
+  width: 100vw;
+}
+.mobile-menu--groups .mobile-menu__panel {
+  box-shadow: none;
+}
+.mobile-menu__groups {
+  padding-block: var(--spacing-m, 1rem) var(--spacing-l, 1.5rem);
+}
+.mobile-menu__group + .mobile-menu__group {
+  margin-top: 1.5rem;
+}
+.mobile-menu__group-label {
+  margin: 0;
+  padding: 0 var(--spacing-l, 1.5rem) 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--link);
+}
+.mobile-menu__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+.mobile-menu__rows > li {
+  border-bottom: 1px solid var(--border);
+}
+.mobile-menu__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  min-height: 4rem;
+  padding: 0.5rem var(--spacing-l, 1.5rem);
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.5rem + 1.2vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: background-color 200ms ease;
+}
+.mobile-menu__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.mobile-menu__arrow {
+  flex: none;
+  width: clamp(40px, 8vw, 56px);
+  height: auto;
+  color: var(--link);
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.mobile-menu__row:hover {
+  background: var(--muted);
+}
+.mobile-menu__row:hover .mobile-menu__label {
+  transform: translateX(0.25rem);
+}
+.mobile-menu__row:hover .mobile-menu__arrow {
+  transform: translateX(6px);
+}
+.mobile-menu__row:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: -3px;
+}
+/* The page you are on: a short bar in the primary colour after its name. */
+.mobile-menu__row[aria-current='page'] .mobile-menu__label::after {
+  content: '';
+  display: inline-block;
+  width: 0.6em;
+  height: 0.28em;
+  margin-left: 0.4em;
+  vertical-align: 0.14em;
+  border-radius: 2px;
+  background: var(--primary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu__label,
+  .mobile-menu__arrow {
+    transition: none;
+  }
+}
+
+/* Compact footer (card 191, Site settings > Footer style "Compact"): the brand row on top, short
+   link columns side by side, and on phones the groups two by two with Get in touch across the
+   width. Footer.astro adds .site-footer--compact only when the style is chosen. */
+.site-footer__brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+.site-footer__tagline {
+  flex: 1 1 14rem;
+  margin: 0;
+}
+.site-footer__brand-action {
+  margin-left: auto;
+}
+.site-footer--compact .site-footer__links {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1.5rem 1.75rem;
+}
+.site-footer--compact .site-footer__links > div[aria-hidden='true']:empty,
+.site-footer--compact .site-footer__links > nav:not(:has(li)) {
+  display: none;
+}
+.site-footer--compact .site-footer__links .justify-center {
+  justify-content: flex-start;
+}
+@media (max-width: 767px) {
+  /* The logo and the button share the first row; the tagline runs under them. */
+  .site-footer__tagline {
+    order: 3;
+    flex-basis: 100%;
+  }
+  /* A smaller lockup so it and the button fit one row at 375px. */
+  .site-footer__brand-logo img {
+    height: 2rem;
+  }
+  .site-footer--compact .site-footer__links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding-top: var(--spacing-m, 1rem);
+  }
+  .site-footer--compact .site-footer__links > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Card lift on hover. Marketing cards (project, journal, service) opt in via
    .card-lift; pairs with the existing border + image scale transitions. */
 .card-lift {

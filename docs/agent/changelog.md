@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-27: wayfinding from first-baptist-auburn (PORTS card 191)._ Four opt-in Site settings pieces resolved by `src/lib/wayfinding.ts`: where-next rows at the top of the footer (`WhereNext.astro`, published-only via `published-links.ts`, current page via `page-path.ts`), phone menu groups with big display rows in `MobileNav.astro`, a compact footer style, and a sticky phone action bar (`ActionBar.astro`). Empty settings render byte-identical pages (parity 19/19).
+
 _2026-10-27: eleven small fixes from first-baptist-auburn (PORTS card 187)._ A body button that repeats the header button draws secondary (`cta-budget.ts`); an optional second header button (Site settings > Navigation); a custom page's menu and footer switches now add the page (`page-switches.ts`); `ctaHref()`, `publicPath()` and `linkableRows()` as shared helpers; the copy-email button is Astro and the Sonner toast region is gone; one accent box and one subhead box per block in the Studio (hidden, never removed); word breaks for site search between side-by-side buttons; and `OWN_NEWSLETTER` hides every newsletter screen for a site whose list lives elsewhere. No stored value moves; an untouched site only changes where a hero or band button repeats the header button.
 
 _2026-10-26: popups, one at a time, with guard rails (PORTS card 170)._

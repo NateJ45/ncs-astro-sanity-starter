@@ -32,6 +32,7 @@
 // document. Porting those is a separate change (see PORTS.md card 18).
 
 import { navHref, resolveNavLinks, type RawNavLink, type ResolvedNavLink } from '@/lib/nav-href';
+import type { RawActionBar, RawPhoneMenuGroup, RawWhereNextRow } from '@/lib/wayfinding';
 import { getSectionVisibility, type SectionVisibility } from '@/lib/sectionVisibility';
 
 /** One header menu entry: a plain link, or a dropdown group of links. */
@@ -84,6 +85,11 @@ export interface RawChromeSettings {
   showSocials?: boolean | null;
   showFooterSocials?: boolean | null;
   sectionVisibility?: Parameters<typeof getSectionVisibility>[0];
+  /** Card 191, wayfinding (src/lib/wayfinding.ts): all empty on an untouched site. */
+  phoneMenuGroups?: RawPhoneMenuGroup[] | null;
+  whereNext?: RawWhereNextRow[] | null;
+  footerStyle?: string | null;
+  actionBars?: RawActionBar[] | null;
 }
 
 export interface ResolvedChromeSettings {

@@ -1,0 +1,167 @@
+---
+// Foundation, edit with care
+// The phone action bar (PORTS.md card 191, from FBC Auburn's Sunday bar, 2026-10-17 to 10-26): a
+// slim bar docked to the bottom of a phone screen with one short line of information and one
+// button. Which bar a page gets is chosen in Site settings > Phone action bar (a bar per page, or
+// one for every page) and picked by pickActionBar() in src/lib/wayfinding.ts. A page with no bar
+// renders nothing at all, so a site that never fills the box is unchanged.
+//
+// Behaviour:
+//   - Phones only (below 768px). It appears once the page's anchor has scrolled up out of view: an
+//     element marked [data-action-bar-anchor] inside <main>, else the page's h1. It hides again
+//     while the footer is on screen, so it never covers the footer (which carries the same links).
+//   - It respects the safe-area inset (the iPhone home bar) and, while it shows, html gets
+//     data-action-bar-on and --action-bar-h: scroll-padding-bottom keeps a focused field or link from
+//     sliding under it, and the back-to-top button and the journal's CTA chip move up above it.
+//   - Rendered inside <footer>, so its content sits in the contentinfo landmark. The button is a
+//     plain link, 44px tall.
+// Brand it per site by restyling this file; Auburn's draws the Sunday times as its line.
+
+import type { ActionBar } from '@/lib/wayfinding';
+
+interface Props {
+  bar: ActionBar | null;
+}
+const { bar } = Astro.props;
+---
+
+{bar && (
+  <div class="action-bar" data-action-bar hidden>
+    {bar.text && <p class="action-bar__text">{bar.text}</p>}
+    <a class="action-bar__button" href={bar.href}>
+      {bar.label}
+    </a>
+  </div>
+)}
+
+<script>
+  // Shown once the anchor has scrolled up out of view, hidden while the footer is on screen. Two
+  // IntersectionObservers, no scroll listener. Re-run after every View Transitions navigation; the
+  // old observers go with the old page.
+  let observers: IntersectionObserver[] = [];
+  let resize: ResizeObserver | null = null;
+  function initActionBar() {
+    observers.forEach((o) => o.disconnect());
+    observers = [];
+    resize?.disconnect();
+    const root = document.documentElement;
+    root.removeAttribute('data-action-bar-on');
+    const bar = document.querySelector<HTMLElement>('[data-action-bar]');
+    const anchor =
+      document.querySelector<HTMLElement>('main [data-action-bar-anchor]') ??
+      document.querySelector<HTMLElement>('main h1');
+    const footer = document.querySelector<HTMLElement>('#site-footer');
+    if (!bar || !anchor || !('IntersectionObserver' in window)) return;
+    let pastAnchor = false;
+    let footerIn = false;
+    const sync = () => {
+      const show = pastAnchor && !footerIn;
+      bar.hidden = !show;
+      root.toggleAttribute('data-action-bar-on', show);
+      if (show) root.style.setProperty('--action-bar-h', `${bar.offsetHeight}px`);
+    };
+    // The root runs on far below the screen, so the only change it reports is the anchor crossing
+    // the top edge. With a plain root, a jump from below the screen to above it (a long swipe, an
+    // in-page link) crossed nothing and the bar never showed.
+    const a = new IntersectionObserver(
+      ([e]) => {
+        pastAnchor = !e.isIntersecting && e.boundingClientRect.top < 0;
+        sync();
+      },
+      { rootMargin: '0px 0px 100000px 0px' },
+    );
+    a.observe(anchor);
+    observers.push(a);
+    if (footer) {
+      const f = new IntersectionObserver(([e]) => {
+        footerIn = e.isIntersecting;
+        sync();
+      });
+      f.observe(footer);
+      observers.push(f);
+    }
+    if ('ResizeObserver' in window) {
+      resize = new ResizeObserver(() => {
+        if (!bar.hidden) root.style.setProperty('--action-bar-h', `${bar.offsetHeight}px`);
+      });
+      resize.observe(bar);
+    }
+  }
+  initActionBar();
+  document.addEventListener('astro:page-load', initActionBar);
+</script>
+
+<style>
+  .action-bar {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    .action-bar:not([hidden]) {
+      position: fixed;
+      inset: auto 0 0;
+      z-index: 45;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px max(16px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+      border-top: 3px solid var(--primary);
+      background: var(--background);
+      color: var(--foreground);
+      box-shadow: 0 -12px 30px -24px rgb(0 0 0 / 0.45);
+    }
+    .action-bar__text {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 700;
+      line-height: 1.25;
+      font-variant-numeric: lining-nums;
+      overflow-wrap: anywhere;
+    }
+    .action-bar__button {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      max-width: 100%;
+      margin-left: auto;
+      padding: 8px 16px;
+      border-radius: var(--radius-md, 0.375rem);
+      background: var(--primary-dark, var(--primary));
+      color: #fff;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 160ms ease;
+    }
+    .action-bar__button:hover {
+      background: var(--accent-dark, var(--primary));
+    }
+    .action-bar__button:focus-visible {
+      outline: 3px solid var(--ring);
+      outline-offset: 2px;
+    }
+    /* While the bar shows: a focused element is never hidden under it, and the floating buttons
+       (BackToTop.tsx, StickyCTAChip.tsx) ride above it. */
+    :global(html[data-action-bar-on]) {
+      scroll-padding-bottom: calc(var(--action-bar-h, 4.5rem) + 12px);
+    }
+    :global(html[data-action-bar-on] .fixed.bottom-6),
+    :global(html[data-action-bar-on] .fixed.bottom-\[5\.5rem\]) {
+      translate: 0 calc(-1 * var(--action-bar-h, 4.5rem));
+    }
+  }
+  /* The narrowest phones: the line gives way to the button rather than wrapping to four lines. */
+  @media (max-width: 359px) {
+    .action-bar__text {
+      font-size: 0.75rem;
+    }
+    .action-bar__button {
+      padding-inline: 12px;
+    }
+  }
+</style>

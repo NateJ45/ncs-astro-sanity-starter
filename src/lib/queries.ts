@@ -299,6 +299,17 @@ export const SITE_SETTINGS_PROJECTION = `{
     showEmail,
     showSocials,
     showFooterSocials,
+    // Wayfinding (card 191, src/lib/wayfinding.ts). All empty on an untouched site.
+    phoneMenuGroups[]{ _key, title, links[]${NAV_LINK_PROJECTION} },
+    whereNext[]{ _key, note, link${NAV_LINK_PROJECTION} },
+    footerStyle,
+    actionBars[]{
+      _key,
+      everyPage,
+      text,
+      "page": page->{ "docType": _type, "slug": slug.current, archived },
+      action${NAV_LINK_PROJECTION}
+    },
     sectionVisibility{
       showPortfolio,
       showJournal,

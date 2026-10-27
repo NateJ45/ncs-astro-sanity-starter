@@ -1,0 +1,159 @@
+---
+// Foundation, edit with care
+// "Where next" (PORTS.md card 191, from FBC Auburn 2026-10-24): full-width rows at the top of the
+// footer, each a big display-font link with a long hairline arrow, so no page ends at a dead end.
+// The rows come from Site settings > Where next rows, resolved by whereNextRows() in
+// src/lib/wayfinding.ts: the first three that are not the page you are on (the next one moves up),
+// and a row that points at a Studio page only while that page is published. No rows = nothing at
+// all, so a site that never fills the box is unchanged.
+//
+// Hover (or keyboard focus) fills the row with the primary colour from the left and draws the arrow
+// out. One closing device per page: a page that ends on its own closing band (FinalCta.astro,
+// marked data-final-cta) does not also get these rows; the CSS below hides them there.
+// Brand it per site by restyling this file; the data contract is the resolver's.
+
+import type { WhereNextRow } from '@/lib/wayfinding';
+
+interface Props {
+  rows: WhereNextRow[];
+}
+const { rows } = Astro.props;
+---
+
+{rows.length > 0 && (
+  <nav class="where-next" aria-label="Where next">
+    <ul role="list" class="where-next__list mx-auto max-w-content">
+      {rows.map((r) => (
+        <li>
+          <a href={r.href} class="where-next__row">
+            <span class="where-next__label">{r.label}</span>
+            {r.note && <span class="where-next__note">{r.note}</span>}
+            <svg
+              class="where-next__arrow"
+              viewBox="0 0 120 16"
+              width="120"
+              height="16"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M0 8 H118 M110 1 L118 8 L110 15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  /* The page's own closing band already ends it: one closing device per page. */
+  :global(body:has(main [data-final-cta])) .where-next {
+    display: none;
+  }
+  .where-next {
+    padding-inline: var(--spacing-m, 1rem);
+    padding-block: clamp(1.25rem, 3vw, 2.25rem) clamp(0.25rem, 1vw, 0.75rem);
+  }
+  .where-next__list {
+    list-style: none;
+    margin-block: 0;
+    padding: 0;
+  }
+  .where-next__list > li + li .where-next__row {
+    border-top: 1px solid var(--border);
+  }
+  .where-next__row {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'label arrow' 'note arrow';
+    align-items: center;
+    column-gap: 1.5rem;
+    min-height: 44px;
+    padding: clamp(0.8rem, 1.6vw, 1.15rem) clamp(0.75rem, 2vw, 1.5rem);
+    color: var(--foreground);
+    text-decoration: none;
+    transition: color 300ms ease;
+  }
+  /* The fill that sweeps in from the left. */
+  .where-next__row::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--primary);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .where-next__row:hover,
+  .where-next__row:focus-visible {
+    color: var(--primary-foreground);
+  }
+  .where-next__row:hover::before,
+  .where-next__row:focus-visible::before {
+    transform: scaleX(1);
+  }
+  .where-next__row:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .where-next__label {
+    grid-area: label;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-family: var(--font-display);
+    font-size: clamp(1.625rem, 1.2rem + 1.4vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+  .where-next__note {
+    grid-area: note;
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    transition: color 300ms ease;
+  }
+  .where-next__row:hover .where-next__note,
+  .where-next__row:focus-visible .where-next__note {
+    color: var(--primary-foreground);
+  }
+  .where-next__arrow {
+    grid-area: arrow;
+    width: clamp(48px, 9vw, 120px);
+    height: auto;
+    transform: translateX(-10px);
+    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .where-next__row:hover .where-next__arrow,
+  .where-next__row:focus-visible .where-next__arrow {
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .where-next__row,
+    .where-next__row::before,
+    .where-next__note,
+    .where-next__arrow {
+      transition: none;
+    }
+  }
+  /* Phones: the words sit on the footer's own gutter. */
+  @media (max-width: 767px) {
+    .where-next__row {
+      padding-inline: 0;
+      padding-block: 0.7rem;
+    }
+    .where-next__note {
+      margin-top: 0.2rem;
+    }
+  }
+</style>
