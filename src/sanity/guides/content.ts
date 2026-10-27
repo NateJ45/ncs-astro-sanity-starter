@@ -41,6 +41,7 @@
 
 import type { KitGuideBlock } from '../kit/guide/GuidePage';
 import { phoneGuides } from './phoneGuides.ts';
+import { peopleGuides } from './people.ts';
 import { linkGuides } from './links.ts';
 import type { FieldGuideMap } from '../../lib/studio-kit';
 
@@ -1109,6 +1110,9 @@ guides.push({
 
 guides.push(...phoneGuides(SITE.contactName));
 
+// ── Adding someone to help: the People tool (PORTS.md card 176) ──────────────
+// Per site (src/sanity/guides/people.ts): reword it with kitConfig.people.roles.
+guides.push(...peopleGuides(SITE.contactName));
 // Short links and QR codes (PORTS.md card 171, guides/links.ts).
 guides.push(...linkGuides);
 

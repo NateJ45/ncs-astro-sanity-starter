@@ -156,6 +156,8 @@ export const TOOL_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   'quick-update': 'quickUpdate',
   messages: 'message',
   rsvps: 'people',
+  // The People tool (card 176).
+  people: 'people',
   media: 'image',
   vision: 'code',
 };
