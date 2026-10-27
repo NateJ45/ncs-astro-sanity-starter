@@ -27,7 +27,6 @@ import SitePopup from '@/components/SitePopup.astro';
 import ClientNotes from '@/components/ClientNotes.astro';
 import BackToTop from '@/components/BackToTop';
 import Analytics from '@/components/Analytics.astro';
-import { Toaster } from '@/components/ui/sonner';
 import '@/styles/globals.css';
 // Starwind UI CSS — accordion keyframes + @theme inline for new semantic tokens.
 // Imported AFTER globals.css so the brand :root declarations in globals.css win
@@ -365,11 +364,10 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     <ClientNotes />
 
     {/*
-      Both islands were previously `client:load` which forced the JS to
-      execute before the first paint completed. Neither is interactive
-      until later in the page lifecycle (BackToTop only appears after the
-      visitor scrolls 600px; Toaster only mounts a region, the toast call
-      sites import it on demand). Hydrating with `client:idle` lets the
+      BackToTop was previously `client:load` which forced the JS to
+      execute before the first paint completed. It is not interactive
+      until later in the page lifecycle (it only appears after the
+      visitor scrolls 600px). Hydrating with `client:idle` lets the
       browser settle the main thread first and shifts ~10–20ms of TBT off
       the critical path on mobile.
     */}
@@ -378,8 +376,8 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     {/* The popup, when one is live for this page (SitePopup.astro has the rules). */}
     {showPopup && popup && <SitePopup popup={popup} />}
 
-    {/* Sonner toast region. Used by CopyEmailButton and ContactForm. Position bottom-right by default. */}
-    <Toaster client:idle position="bottom-right" />
+    {/* No toast region (card 187): the copy-email button confirms in a live region of its own,
+        so React and the toast library no longer load on every page for one "copied" message. */}
 
     {/* No Lenis (removed 2026-10-17, PORTS.md card 102, ported from fbcm's
         2026-09-24 removal). It added only a wheel glide, at a few KB of

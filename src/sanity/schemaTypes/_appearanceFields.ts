@@ -68,13 +68,46 @@ const inlineRichBody = {
   ],
 };
 
-/** The rich twin of a plain string field. Title matches the field it twins. */
+/**
+ * The rich twin of a plain string field. Title matches the field it twins.
+ *
+ * It HIDES while it is empty (PORTS.md card 187, from FBC Auburn), so the Studio
+ * shows exactly one "Subhead" box at a time. Both boxes used to show side by side
+ * with the same title and nothing to say which one counted. The plain field is
+ * the one an editor types into; the twin appears only once it holds text (the
+ * in-canvas editor fills it the first time someone bolds or italicizes a word),
+ * and at that point hideWhenRich() hides the plain field, so the two never show
+ * together. The stored value is never touched.
+ */
 export function richTwin(name: string, title: string) {
   return defineField({
     name,
     title,
     ...inlineRichBody,
-    description: 'You can bold or italicize here.',
+    description:
+      'This version of the line has bold or italic in it, so it shows on the page instead of the plain line. Empty this box to go back to the plain line.',
+    hidden: ({ value }: { value?: unknown }) => !hasInlineRich(value),
+  });
+}
+
+/**
+ * The older script accent ("Handwritten accent word"), kept for its data only.
+ *
+ * (PORTS.md card 187, from FBC Auburn.) Blocks that also offer "Accent word in
+ * the heading" showed two accent boxes, and an editor cannot tell them apart.
+ * This one now shows only on a block that already holds a word, with a note to
+ * move it, so no page loses an accent it has. A block with no word stored shows
+ * just the accent word box. Never delete the field (rule 1). Use it only where
+ * headingAccentField() sits right after it; the hero has no twin, so its
+ * script accent stays a plain visible field.
+ */
+export function scriptAccentField(heading: 'heading' | 'headline') {
+  return defineField({
+    name: 'scriptAccent',
+    title: 'Handwritten accent word (older, please move)',
+    type: 'string',
+    description: `An older way to style one word of the ${heading}. Please type the word into "Accent word in the heading" instead and clear this box.`,
+    hidden: ({ value }: { value?: unknown }) => !value,
   });
 }
 
