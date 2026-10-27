@@ -87,6 +87,7 @@ export const kitConfig: KitConfig = {
     announcement: 'Announcement',
     popup: 'Popup',
     testimonial: 'Testimonial', // scaffold: testimonials
+    libraryDocument: 'Document', // scaffold: documents
     faqItem: 'Question and answer', // scaffold: faq
     faqCategory: 'Question group', // scaffold: faq
     journalEntry: 'Journal post', // scaffold: journal
@@ -180,6 +181,7 @@ export const kitConfig: KitConfig = {
         { title: 'Journal posts', target: { pane: 'journal;journalEntry' } }, // scaffold: journal
         { title: 'Questions and answers', target: { pane: 'content;faqItem' } }, // scaffold: faq
         { title: 'Testimonials', target: { pane: 'content;testimonial' } }, // scaffold: testimonials
+        { title: 'Documents', target: { pane: 'content;libraryDocument' } }, // scaffold: documents
       ],
     },
     {

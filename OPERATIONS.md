@@ -80,7 +80,7 @@ The four core pages (home, about, services, process) and any custom `page` docum
 
 **Once a Sanity project is connected:** seed the pages with `npm run seed`, then edit sections in Studio → the relevant page singleton → the "Sections" tab.
 
-**Available block types:** the twelve general blocks (heroSection, richTextSection, imageTextSection, gallerySection, quoteSection, statSection, ctaBandSection, videoSection, spacerSection, logoStripSection, embedSection ("Custom code or embed", card 121), rsvpSection (card 127)) plus the page-specific rich blocks (founderSection, servicesGridSection, testimonialsSection, processSection, faqSection, teamSection on Home; storySection, valuesSection, faqSection, teamSection on About; servicesGridSection, serviceAreaSection, guaranteeSection, faqSection on Services; processSection, faqSection on Process).
+**Available block types:** the fourteen general blocks (heroSection, richTextSection, imageTextSection, gallerySection, quoteSection, statSection, ctaBandSection, videoSection, spacerSection, logoStripSection, embedSection ("Custom code or embed", card 121), rsvpSection (card 127), latestVideoSection ("Latest video", card 197), documentsSection ("Documents", card 197)) plus the page-specific rich blocks (founderSection, servicesGridSection, testimonialsSection, processSection, faqSection, teamSection on Home; storySection, valuesSection, faqSection, teamSection on About; servicesGridSection, serviceAreaSection, guaranteeSection, faqSection on Services; processSection, faqSection on Process).
 
 Blocks carry no background color field. `SectionRenderer` owns the alternating surface cadence automatically.
 

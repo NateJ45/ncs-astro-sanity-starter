@@ -321,9 +321,11 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 188  | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`        | no          | yes      | no               | no            | no                  | no             | partial    | no      |
 | 189  | Photo hero: "Photo behind the words" style, short-facts card, silent background video    | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
-| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 193  | Seven builder blocks: contact, progress, newsletter, calendar, icons, steps, hub         | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor           | no          | yes      | no               | no            | partial             | no             | partial    | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12166,6 +12168,73 @@ output) and with it on (pill, highlight and boxes), screenshots at 375 and 1280.
 **Applied:** starter (this card). Sites: turn it on only while a client is reviewing; Auburn's sync PR adopts the
 renamed files.
 
+## Card 193: Seven more builder blocks: contact card, progress bar, newsletter, calendar buttons, icon cards, steps on a path and a hub (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A20, A21, A22, A25, A27, A28, A29). Card 173 ported the generic half of
+Auburn's block library; these seven were left because they leaned on Auburn's church facts, its stone icons and its
+brick art. They are the same blocks with the church nouns taken out, the pictures on card 188's shape classes and
+the numbers and links derived (rule 15).
+
+**Fix.** Seven blocks in `src/sanity/schemaTypes/builderSections.ts`, drawn by `src/components/builder-blocks/`
+(`BuilderBlock.astro` picks one) with `src/styles/builder-blocks-more.css`, types in `builderBlocks.types.ts`, and the
+logic in `src/lib/builder-blocks.ts` (tested in `builder-blocks.test.ts`). No colour field (rule 9); every block has
+`look` (the hub offers Standard and Quiet only), a fixture on `/styleguide/sections/`, a thumbnail and a place in the
+"+ Add item" menu (Basics, a new "Contact and updates" group, "Events and notices").
+
+- **Contact details** (`contactCardSection`, A25). Phone, email, address with a directions link, opening hours, a
+  column each. The phone and email default to Site settings and can be overridden on the block; "Lead with big Call and
+  Email buttons" puts two 56px buttons (`tel:` and `mailto:` through `CtaLink`) above the details, and Call is the
+  page's one accent button when the renderer hands it that (the accent predicate in `SectionRenderer.astro`). Self-
+  filling (in `SELF_FILLING_SECTIONS`). Auburn's version read the church facts and offered Text; the starter has no
+  facts store yet (card 196), so address and hours are typed on the block.
+- **Progress toward a goal** (`progressSection`, A27). Goal and so-far typed; percent, "to go", the as-of line and
+  the 20-step bar are derived (`progressState`, `asOfLabel`). Dollars or a plain count (`unit`, a NON_STEGA field).
+  One `role="progressbar"` with a spoken value. Auburn's stepping stones are plain steps here.
+- **Newsletter sign-up** (`newsletterSection`, A29). The card 127 backbone: the same `NewsletterSignup` island as the
+  footer, reading Site settings > Newsletter signup once. If the box is off, a typed sign-up page shows as a button, which
+  is also the route for a site whose list lives elsewhere (`OWN_NEWSLETTER = false`, cards 163 and 187: the Studio's own
+  newsletter screens hide, the block still works). Neither: it draws nothing.
+- **Add our calendar** (`calendarSubscribeSection` and `SubscribeButtons.astro`, A28). One typed feed (https, webcal,
+  or a path on this site such as a card 158 calendar file) becomes Google, Apple and Outlook subscribe links
+  (`subscribeLinks`, `feedAddress`; an `http` or `javascript:` address is refused). The starter publishes no site-wide
+  feed; a site with one (Auburn's Church Trac feed) points the block at it. `lib/ics.ts` supplies the files a `/`
+  path points to.
+- **Cards with icons** (`iconCardsSection`, A20). Open cards, three across, the icon the hero; a card can show a photo
+  instead (in `.shape-step`). **The icon set is per site:** `src/lib/block-icons.ts` ships 17 neutral line icons
+  (24px grid, `currentColor`), `BlockIcon.astro` draws them, the field is always named `icon`. A site with its own art
+  (Auburn's stones) replaces the list and, if the art is image files, the one component: `docs/agent/block-icons.md`.
+- **Steps on a path** (`stepsRailSection`, A21). Numbered steps joined by a dashed connector, an icon each, the first
+  step optionally on a card, a closing line and button. Kept SEPARATE from `processSection` on purpose: that block draws
+  the shared Process steps from their own collection (one list for the whole site, with illustrations); this one holds
+  its steps in the block, so any page can show a short path with nothing to maintain elsewhere. Extending
+  `processSection` with a rail style could not have held per-page steps.
+- **Groups of cards with an index** (`hubSection`, A22; Auburn's "Find your place"). Every group shows at once, a sticky
+  index jumps to one and a tiny script marks the group in view (`aria-current`); chips on a phone. Cards take
+  `.shape-step` or `.shape-tile` (card 188), the whole card is its link, every group and card has an anchor
+  (`hubIds`). "When" and "Where" are typed text here (Auburn derived them from church facts), and Auburn's forced "Ask
+  about" action is dropped: a card with no link is not a link.
+
+**Rules kept.** Rule 8b: `unit` joins `NON_STEGA_FIELDS` (`icon` was already there). Rule 15: percent, remaining,
+links, anchors, directions and the call and mail links are derived. Self-filling: contact card and newsletter. Setting
+keys: `unit`, `callButtons`, `firstStepCard`. Titles sit one heading level under the block's heading and move up when
+there is none.
+
+**Proved:** `npm run typegen`, `npm run check`, `npm run test:unit` (new tests: `telHref`, progress, feed addresses,
+subscribe links, hub ids; the authoring test now covers seven more fixtures and thumbnails), build, screenshots of the
+sections wall at 375 and 1280, axe and a 320px reflow sweep on the seven blocks.
+
+**Adopting it in a site.** Copy `src/components/builder-blocks/{ContactCard,Progress,Newsletter,CalendarSubscribe,
+IconCards,StepsRail,Hub}Block.astro`, `SubscribeButtons.astro`, `BlockIcon.astro`, `src/styles/builder-blocks-more.css`,
+`src/lib/block-icons.ts`, the additions to `builder-blocks.ts` (+ test), and `docs/agent/block-icons.md`. Hand-merge:
+the seven schemas and the insert groups in `builderSections.ts`; the types and the `BUILDER_BLOCK_TYPES` entries; the
+arms in `queries.ts`; `LOOKS_BY_TYPE`; `CONTENT_TYPES`; `NON_STEGA_FIELDS` (`unit`); the accent predicate in
+`SectionRenderer.astro`; `SELF_FILLING_SECTIONS` and `extraSettingKeys`; the `import` of the new stylesheet and the
+branches in `BuilderBlock.astro`; the fixtures. Swap the icon list for the site's own. A church site (fbcm, Auburn)
+keeps its church versions where they read the church facts, and takes `hubSection` and `stepsRailSection` only if it
+wants the generic ones.
+
+**Status, 2026-10-27.** Starter `yes`. Sites not applied yet (the per-site rollout follows the last starter card).
+
 ## Card 190: Every main page a page builder: Contact, Privacy and Journal (2026-10-27)
 
 **Origin:** first-baptist-auburn, "Every main page a page builder" (2026-10-26; inventory row A17). Auburn's Contact,
@@ -12227,3 +12296,49 @@ classic layout and of a seeded layout (banner, block, extra band).
 
 **Applied:** starter (this card). Sites take it in the Auburn port run's per-site phase; Auburn's own copies are the
 origin and differ only by church words, the hidden fossils and its `DEFAULT_*_SECTIONS` fallback.
+
+## Card 197: Latest video block, Documents library, page-weight budget, SVG path compactor (2026-10-27)
+
+**Origin:** first-baptist-auburn, the last starter card of the Auburn-to-family port run (inventory rows C7, C10, B6,
+M4). Card 159 had filed three of these as Auburn-only; each has a generic core, ported here without the church words.
+
+**What changed.**
+
+- **C7 `latestVideoSection` ("Latest video").** `src/lib/youtube-feed.ts` (PORTABLE, with a test and an invented feed
+  fixture) reads a YouTube channel's public Atom feed at build time: no key, newest 15 uploads, one fetch per channel
+  per build, two tries with a timeout. `LatestVideo.astro` draws a thumbnail link that swaps to the `youtube-nocookie`
+  player on a press (no YouTube script on load, 16:9 reserved). The schema (`latestVideoSection.ts`, PORTABLE) takes a
+  channel ID or a pasted `/channel/UC...` link. **It shows nothing, not an empty box**, with no channel, a bad id, a
+  failing feed or a channel with nothing public, and the build never fails on a feed error (the card's build proof ran a
+  deliberately bad channel: two 404s logged, block absent, exit 0). Auburn's church parts (the "Last Sunday" label, the
+  upcoming-stream card, Church facts) stay in that repo.
+- **C10 `libraryDocument` + `documentsSection` ("Documents").** A Studio collection of downloadable files (title, a
+  free-text group, date, file, note, "take it down after" date, `publishAt`) and a block listing the newest current ones,
+  all groups or one. `src/lib/documents.ts` holds the rules (current, newest first, file label "PDF, 240 KB"); the GROQ
+  arm fetches the newest 60 inside the page query, so there is no new build-time read and the CI snapshot answers it.
+  **It is the eighth scaffold capability, `documents`** (rule 14): every registration site is marked, and
+  `npm run scaffold -- --remove documents --write` was run, then typegen, check, build and the unit tests (see Proved).
+  Auburn's fixed categories, "this week's bulletin" and search tags are not ported.
+- **B6 `tests/page-weight.spec.ts` (PORTABLE) + `tests/page-weight.config.json` (per site).** For every route in
+  `tests/routes.ts`: HTML, inline CSS, scripts, images, the LCP image, preloaded fonts (count, woff2, size) and JSON-LD
+  validity against budgets read from the config. Auburn's version pinned Auburn's own fonts and pages; this one pins
+  numbers.
+- **M4 `scripts/lib/svg-path-compact.mjs` (PORTABLE, with its test).** Shortest relative path data, rounded to a tenth of
+  a unit; arcs returned unchanged. The test proves every point of every SVG the repo ships stays put. Generic on its own
+  (card 159 listed it Auburn-only).
+- Both blocks have a `/styleguide/sections/` fixture (the video one a sample with no network) and a picker thumbnail;
+  `authoring.test.ts` now reads their schema files too. `docs/agent/video-documents-weight.md` is the reference.
+
+**Adapt per site.** Documents: the Studio label ("Document") and the heading default are plain words; rename for the
+trade ("Brochures", "Price lists") in `libraryDocument.ts` and `documentsSection.ts`. Video: a site with a full CSP
+needs `img-src https://i.ytimg.com` and `frame-src https://www.youtube-nocookie.com`. Page weight: set the budgets from the
+site's own numbers (+25 percent), and the `jsonLd` types per route. A site without Sanity (nixoncreativestudio) takes only
+the page-weight spec and the path compactor.
+
+**Proved:** `npm run typegen`, `check`, `test:unit` (youtube-feed, documents, svg-path-compact), `build`, the page-weight
+spec, `scaffold --remove documents --write` followed by typegen, check, build and unit tests on a throwaway copy of
+the branch, screenshots of both blocks at 375 and 1280 (no horizontal scroll), and a build with a bad channel.
+
+**Applied:** starter (this card). first-baptist-auburn runs its own church versions (`church-video.ts`, `downloads`,
+`page-weight.spec.ts`); its sync PR takes the PORTABLE copies only. Other sites in the Phase 2 rollout, in their own
+character: blocks and the documents capability where the site has Sanity; the spec and compactor everywhere.

@@ -1,0 +1,38 @@
+---
+// Safe to edit by hand
+// One icon from the block icon set (src/lib/block-icons.ts, PORTS.md card 193), drawn as inline SVG
+// in the text colour of whatever it sits in. Decorative: the words beside it carry the meaning, so
+// it is hidden from screen readers. An unknown name draws nothing. A site with its own icon art
+// replaces THIS component (docs/agent/block-icons.md); the cards and the rail only call it.
+import { blockIcon } from '@/lib/block-icons';
+
+interface Props {
+  name?: string | null;
+  /** Rendered box in CSS pixels. */
+  size?: number;
+  class?: string;
+}
+const { name, size = 48, class: cls } = Astro.props;
+const icon = blockIcon(name);
+---
+
+{icon && (
+  <svg
+    class:list={['bb-icon', cls]}
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+    focusable="false"
+    data-icon={icon.value}
+  >
+    {icon.paths.map((d) => (
+      <path d={d} />
+    ))}
+  </svg>
+)}

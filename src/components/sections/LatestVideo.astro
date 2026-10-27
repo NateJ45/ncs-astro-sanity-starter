@@ -1,0 +1,199 @@
+---
+// Safe to edit by hand
+// Page-builder block (PORTS.md card 197): "Latest video". The newest upload from a YouTube
+// channel, read at build time from the public channel feed (src/lib/youtube-feed.ts): no key,
+// and the site's rebuilds keep it current.
+//
+// NOTHING, NOT AN EMPTY BOX. No channel set, a feed that failed, or a channel with nothing
+// public yet: the whole section is left out, so the page never shows a frame with no video in
+// it. The build never fails on YouTube.
+//
+// LIGHT ON PURPOSE (Lighthouse). No YouTube script or iframe loads with the page: it is a
+// thumbnail link to the video. A press swaps in the privacy-enhanced (youtube-nocookie) player,
+// autoplaying; without JavaScript the link simply opens YouTube. The thumbnail is lazy, sized and
+// decoded off the main thread, and the frame reserves its 16:9 space, so nothing shifts.
+//
+// `block._fixture` (the /styleguide/sections/ wall only) draws a sample with no picture and no
+// network, so the Studio's block picker has something to show and CI never calls YouTube.
+import SectionHeading from '@/components/SectionHeading.astro';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
+import { formatDate } from '@/lib/format-date';
+import { channelIdFrom, channelUrl, loadLatestVideo, type LatestVideo } from '@/lib/youtube-feed';
+import type { ProjectedLatestVideoSection } from '@/lib/pageBuilder.types';
+
+interface Props {
+  block: ProjectedLatestVideoSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface = 'background', headingId } = Astro.props;
+
+const SAMPLE: LatestVideo = {
+  videoId: 'sampleVideo',
+  title: 'The title of your newest video appears here',
+  published: '2026-01-15T12:00:00Z',
+  watchUrl: '#',
+  embedUrl: '',
+  thumbnailUrl: '',
+};
+const video = block._fixture ? SAMPLE : await loadLatestVideo(block.channelId);
+const channelId = channelIdFrom(block.channelId);
+const sample = !!block._fixture;
+---
+
+{video && (
+  <section class={surfaceClass(surface)} aria-labelledby={headingId}>
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      <SectionHeading headline={block.heading} subhead={block.intro} headingId={headingId} />
+      <figure class="latest-video mt-section-md max-w-3xl" data-latest-video>
+        <div class="latest-video__frame">
+          <a
+            class="latest-video__play"
+            href={video.watchUrl}
+            data-embed={video.embedUrl || undefined}
+            data-title={video.title}
+            aria-label={`Play: ${video.title}`}
+            target={sample ? undefined : '_blank'}
+            rel={sample ? undefined : 'noopener'}
+          >
+            {video.thumbnailUrl && (
+              <img
+                src={video.thumbnailUrl}
+                alt=""
+                width="480"
+                height="360"
+                loading="lazy"
+                decoding="async"
+                referrerpolicy="no-referrer"
+              />
+            )}
+            <span class="latest-video__button" aria-hidden="true" />
+          </a>
+        </div>
+        <figcaption class="latest-video__caption">
+          <span class="latest-video__title">{video.title}</span>
+          <time class="latest-video__date" datetime={video.published}>
+            {formatDate(video.published)}
+          </time>
+          {block.showChannelLink !== false && channelId && (
+            <a class="latest-video__channel" href={channelUrl(channelId)} rel="noopener">
+              All videos on YouTube
+              <span class="sr-only"> (opens YouTube)</span>
+            </a>
+          )}
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+)}
+
+<script>
+  // One delegated listener for every video block on the page, surviving view transitions. A plain
+  // press becomes the embedded player; a modified click (new tab, new window) keeps the browser's
+  // own behaviour, and so does a link with no embed address.
+  document.addEventListener('click', (event) => {
+    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>(
+      'a.latest-video__play[data-embed]',
+    );
+    if (!link || event.defaultPrevented || event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const frame = document.createElement('iframe');
+    frame.src = link.dataset.embed ?? '';
+    frame.title = link.dataset.title ?? 'Video';
+    frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    frame.allowFullscreen = true;
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.className = 'latest-video__iframe';
+    link.replaceWith(frame);
+    frame.focus();
+  });
+</script>
+
+<style>
+  .latest-video {
+    margin-inline: 0;
+  }
+  .latest-video__frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--foreground);
+  }
+  .latest-video__play {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  .latest-video__play:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: -3px;
+  }
+  .latest-video__play img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .latest-video__button {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.92);
+    display: grid;
+    place-items: center;
+    transition: transform 0.2s ease;
+  }
+  .latest-video__button::before {
+    content: '';
+    margin-left: 6px;
+    border-left: 22px solid #1a1a1a;
+    border-top: 13px solid transparent;
+    border-bottom: 13px solid transparent;
+  }
+  .latest-video__play:hover .latest-video__button {
+    transform: scale(1.06);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .latest-video__button {
+      transition: none;
+    }
+  }
+  :global(.latest-video__iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .latest-video__caption {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.9rem;
+  }
+  .latest-video__title {
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--foreground);
+  }
+  .latest-video__date {
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
+  }
+  .latest-video__channel {
+    justify-self: start;
+    margin-top: 0.35rem;
+    font-weight: 600;
+    color: var(--foreground);
+    text-decoration: none;
+    border-bottom: 2px solid currentColor;
+    padding-bottom: 2px;
+  }
+  .latest-video__channel:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 3px;
+  }
+</style>

@@ -38,6 +38,8 @@ import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
 import RsvpSection from '@/components/sections/RsvpSection.astro';
+import LatestVideo from '@/components/sections/LatestVideo.astro';
+import DocumentsList from '@/components/sections/DocumentsList.astro'; // scaffold: documents
 // Every main page a page builder (card 190): the pieces Contact, Privacy and Journal drew in code.
 import ContactFormSection from '@/components/sections/ContactFormSection.astro';
 import PrivacyPolicy from '@/components/sections/PrivacyPolicy.astro';
@@ -139,9 +141,12 @@ const ctaVariant = primaryBudget(rows, ({ block }) =>
       own(ctaHref(block.cta))
     : block._type === 'heroSection'
       ? !!block.primaryCta && own(ctaHref(block.primaryCta))
-      : block._type === 'eventDetailsSection' &&
-        !!block.button?.label &&
-        own(ctaHref(block.button)),
+      : block._type === 'eventDetailsSection'
+        ? !!block.button?.label && own(ctaHref(block.button))
+        : // Card 193: the contact card's big Call button, and the steps rail's closing button.
+          block._type === 'contactCardSection'
+          ? block.callButtons === true
+          : block._type === 'stepsRailSection' && !!block.link?.label && own(ctaHref(block.link)),
 );
 
 // The board grammar (brand.config.json layout.hero = 'board', card 188): every section opens with
@@ -396,6 +401,20 @@ const editKeyOf = (block: unknown) => {
         />
       ) : s._type === 'rsvpSection' ? (
         <RsvpSection block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : s._type === 'latestVideoSection' ? (
+        <LatestVideo block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : // scaffold-branch: documents
+      s._type === 'documentsSection' ? (
+        <DocumentsList
+          heading={s.heading}
+          intro={s.intro}
+          category={s.category}
+          limit={s.limit}
+          showDates={s.showDates}
+          items={s.items ?? []}
+          surface={surface ?? 'background'}
+          headingId={headingId}
+        />
       ) : s._type === 'formSection' ? (
         <FormSection block={s} surface={surface ?? 'background'} headingId={headingId} />
       ) : s._type === 'embedSection' ? (

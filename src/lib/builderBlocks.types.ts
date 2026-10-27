@@ -135,6 +135,83 @@ export interface ProjectedPhotoCardsSection extends Base {
   }[];
 }
 
+// ── Card 193 ────────────────────────────────────────────────────────────────
+
+export interface ProjectedContactCardSection extends Base {
+  _type: 'contactCardSection';
+  callButtons?: boolean;
+  phone?: string;
+  email?: string;
+  address?: string;
+  hours?: string;
+}
+
+export interface ProjectedProgressSection extends Base {
+  _type: 'progressSection';
+  unit?: string;
+  goal?: number;
+  raised?: number;
+  asOf?: string;
+  link?: ProjectedCtaBlock | null;
+}
+
+export interface ProjectedNewsletterSection extends Base {
+  _type: 'newsletterSection';
+  signupUrl?: string;
+}
+
+export interface ProjectedCalendarSubscribeSection extends Base {
+  _type: 'calendarSubscribeSection';
+  feed?: string;
+}
+
+export interface ProjectedIconCardsSection extends Base {
+  _type: 'iconCardsSection';
+  cards?: {
+    _key: string;
+    icon?: string;
+    image?: ProjectedImage | null;
+    title?: string;
+    body?: string;
+    note?: string;
+    link?: ProjectedCtaBlock | null;
+  }[];
+}
+
+export interface ProjectedStepsRailSection extends Base {
+  _type: 'stepsRailSection';
+  steps?: {
+    _key: string;
+    icon?: string;
+    title?: string;
+    body?: string;
+    link?: ProjectedCtaBlock | null;
+  }[];
+  firstStepCard?: boolean;
+  endHeading?: string;
+  link?: ProjectedCtaBlock | null;
+}
+
+export interface ProjectedHubSection extends Base {
+  _type: 'hubSection';
+  groups?: {
+    _key: string;
+    title?: string;
+    line?: string;
+    cards?: {
+      _key: string;
+      image?: ProjectedImage | null;
+      icon?: string;
+      title?: string;
+      label?: string;
+      when?: string;
+      place?: string;
+      body?: string;
+      link?: ProjectedCtaBlock | null;
+    }[];
+  }[];
+}
+
 /** Every builder-kit block, as BuilderBlock.astro receives it. */
 export type BuilderPageBlock =
   | ProjectedColumnsSection
@@ -148,7 +225,14 @@ export type BuilderPageBlock =
   | ProjectedLetterSection
   | ProjectedEventDetailsSection
   | ProjectedScheduleSection
-  | ProjectedPhotoCardsSection;
+  | ProjectedPhotoCardsSection
+  | ProjectedContactCardSection
+  | ProjectedProgressSection
+  | ProjectedNewsletterSection
+  | ProjectedCalendarSubscribeSection
+  | ProjectedIconCardsSection
+  | ProjectedStepsRailSection
+  | ProjectedHubSection;
 
 /** The `_type` of every builder-kit block, for SectionRenderer's one branch. */
 export const BUILDER_BLOCK_TYPES: ReadonlySet<string> = new Set<BuilderPageBlock['_type']>([
@@ -164,6 +248,13 @@ export const BUILDER_BLOCK_TYPES: ReadonlySet<string> = new Set<BuilderPageBlock
   'eventDetailsSection',
   'scheduleSection',
   'photoCardsSection',
+  'contactCardSection',
+  'progressSection',
+  'newsletterSection',
+  'calendarSubscribeSection',
+  'iconCardsSection',
+  'stepsRailSection',
+  'hubSection',
 ]);
 
 export const isBuilderBlock = (b: { _type: string }): b is BuilderPageBlock =>
