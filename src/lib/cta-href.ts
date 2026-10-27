@@ -13,7 +13,9 @@
 // the same table the menus use, so a page type has ONE route in the whole
 // site. Only the two slug-based types are handled here.
 //
-// Imports are relative with `.ts`, so node --test can run the unit test.
+// Imports are relative with `.ts`, so node --test can run the unit test. No scaffold markers: a
+// PORTABLE file carries none, so the journal branch stays even when the journal module is removed
+// (its document type goes with it and the branch is never taken).
 // =============================================================================
 import { withTrailingSlash } from './href.ts';
 import { SINGLETON_LIVE_PATHS } from './nav-href.ts';
@@ -36,11 +38,9 @@ function resolveHref(c: CtaTarget | null | undefined, fallbackHref: string): str
       const t = c.internalLink?._type;
       if (!t) return fallbackHref;
       // Slug-based types need the slug appended. Singletons use a fixed path.
-      // scaffold: journal
       if (t === 'journalEntry' && c.internalLink?.slug) {
         return `/journal/${c.internalLink.slug}`;
       }
-      // scaffold:end
       // Custom pages (type 'page') route via /[slug].astro.
       if (t === 'page' && c.internalLink?.slug) {
         return `/${c.internalLink.slug}`;
