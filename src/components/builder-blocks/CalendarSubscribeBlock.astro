@@ -1,0 +1,35 @@
+---
+// Safe to edit by hand
+// "Add our calendar to your phone" (PORTS.md card 193): the subscribe buttons on their own, with a
+// heading and a line. The feed is typed once on the block (an https:// or webcal:// address, or a
+// path on this site such as a calendar file from card 158); with no usable feed the block draws
+// nothing. The links are derived from it in src/lib/builder-blocks.ts (subscribeLinks).
+import BuilderBand from './BuilderBand.astro';
+import SubscribeButtons from './SubscribeButtons.astro';
+import { subscribeLinks } from '@/lib/builder-blocks';
+import { site } from '@/data/site';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedCalendarSubscribeSection } from '@/lib/builderBlocks.types';
+
+interface Props {
+  block: ProjectedCalendarSubscribeSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface, headingId } = Astro.props;
+const usable = subscribeLinks(block.feed, site.name, site.url) !== null;
+---
+
+{usable && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Add our calendar"
+  >
+    <SubscribeButtons feed={block.feed} />
+    <p class="bb-small">New dates then show up on your phone by themselves.</p>
+  </BuilderBand>
+)}

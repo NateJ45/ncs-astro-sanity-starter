@@ -38,6 +38,7 @@ import type {
   // sanity.types yet; their projected types are fully defined below.
 } from './sanity.types';
 import type { BuilderPageBlock } from './builderBlocks.types';
+import type { LibraryDocument } from './documents'; // scaffold: documents
 import type { PortableTextBlock } from '@portabletext/types';
 
 // ---------------------------------------------------------------------------
@@ -116,11 +117,24 @@ export interface ProjectedCtaBlock {
 
 export type ProjectedHeroSection = { _key: string } & Omit<
   _HeroSection,
-  'backgroundImage' | 'primaryCta' | 'secondaryCta'
+  | 'backgroundImage'
+  | 'primaryCta'
+  | 'secondaryCta'
+  | 'backgroundVideo'
+  | 'backgroundVideoPhone'
+  | 'glance'
 > & {
     backgroundImage?: ProjectedImage | null;
     primaryCta?: ProjectedCtaBlock | null;
     secondaryCta?: ProjectedCtaBlock | null;
+    // The photo hero (card 189): the clips as URL and type, the short-facts card's link resolved.
+    backgroundVideo?: { url?: string | null; mimeType?: string | null } | null;
+    backgroundVideoPhone?: { url?: string | null; mimeType?: string | null } | null;
+    glance?: {
+      title?: string | null;
+      lines?: (string | null)[] | null;
+      link?: ProjectedCtaBlock | null;
+    } | null;
   };
 
 export type ProjectedRichTextSection = { _key: string } & _RichTextSection & {
@@ -357,6 +371,38 @@ export interface ProjectedEmbedSection {
 }
 
 /**
+ * latestVideoSection - the newest video from a YouTube channel (card 197). CONTENT type.
+ * The video itself is read at build time from the channel feed, not projected from Sanity.
+ */
+export interface ProjectedLatestVideoSection {
+  _type: 'latestVideoSection';
+  _key: string;
+  heading?: string;
+  intro?: string;
+  channelId?: string;
+  showChannelLink?: boolean;
+  /** The /styleguide/sections/ wall only: draw a sample, touch no network. */
+  _fixture?: boolean;
+}
+
+// scaffold: documents
+/**
+ * documentsSection - a list of downloadable files (card 197). CONTENT type.
+ * `items` is the newest libraryDocuments, projected by the GROQ arm in queries.ts.
+ */
+export interface ProjectedDocumentsSection {
+  _type: 'documentsSection';
+  _key: string;
+  heading?: string;
+  intro?: string;
+  category?: string;
+  limit?: number;
+  showDates?: boolean;
+  items?: LibraryDocument[];
+}
+// scaffold:end
+
+/**
  * rsvpSection - an RSVP form for one event (card 127). CONTENT type.
  * `pageId` is projected (^._id) so the form can name its event.
  */
@@ -514,6 +560,8 @@ export type PageBuilderBlock =
   | ProjectedTeamSection
   | ProjectedEmbedSection
   | ProjectedRsvpSection
+  | ProjectedLatestVideoSection
+  | ProjectedDocumentsSection // scaffold: documents
   | ProjectedFormSection
   // Church-reverse-port
   | ProjectedDynamicListSection

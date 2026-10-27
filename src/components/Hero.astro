@@ -1,17 +1,22 @@
 ---
 // Safe to edit by hand
-// Page hero. Two shapes:
+// Page hero. Two shapes, plus the opt-in photo hero:
 //   1) "image" hero (home, optionally Process/Services if a hero photo is added)
 //      — full-bleed Sanity background image with a dark scrim, h1 + subhead + CTAs overlay.
 //   2) "text" hero (About, Contact, FAQ, Process by default)
 //      — clean editorial heading on Soft Linen with eyebrow + headline + subhead, and the
 //      CTAs when the block has them.
 //
+//   3) "photo" hero (card 189): the block's Style set to "Photo behind the words" and a photo.
+//      PhotoHero.astro draws it (white words over the photo, an optional short-facts card and
+//      silent clip). Checked first; without the style or the photo nothing below changes.
+//
 // The image hero is the LCP element on the homepage. SanityImage is set to loading="eager"
 // in that case and the headline uses font-display (Cormorant Garamond), which BaseLayout
 // preloads inline. Don't add layout-shift animations to this section.
 
 import HeroBackground from '@/components/HeroBackground.astro';
+import PhotoHero, { type PhotoHeroGlance, type PhotoHeroVideo } from '@/components/PhotoHero.astro';
 import BoardPageHead from '@/components/board/BoardPageHead.astro';
 import CtaLink from '@/components/CtaLink.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
@@ -76,6 +81,15 @@ interface Props {
    * section on the page already drew the one accent button (cta-budget.ts, card 158).
    */
   primaryVariant?: 'primary' | 'secondary';
+  /**
+   * The block's Style (card 189). 'photo' ("Photo behind the words") draws PhotoHero.astro when
+   * there is a background photo; anything else, or no photo, leaves this hero exactly as it was.
+   */
+  heroStyle?: string | null;
+  /** The photo hero's short-facts card and silent clips (card 189); ignored by every other style. */
+  glance?: PhotoHeroGlance | null;
+  backgroundVideo?: PhotoHeroVideo | null;
+  backgroundVideoPhone?: PhotoHeroVideo | null;
 }
 
 const {
@@ -92,6 +106,10 @@ const {
   scriptAccent,
   variant,
   primaryVariant = 'primary',
+  heroStyle,
+  glance,
+  backgroundVideo,
+  backgroundVideoPhone,
 } = Astro.props as Props;
 
 // The board head is for inner pages; a tall (home) hero on a board site keeps the bleed shape.
@@ -253,7 +271,22 @@ const wrapperHeight =
   </script>
 )}
 
-{boardHead ? (
+{heroStyle === 'photo' && effectiveImages[0] ? (
+  <PhotoHero
+    eyebrow={eyebrow}
+    headline={headline}
+    subhead={subhead}
+    image={effectiveImages[0]}
+    primaryCta={primaryCta}
+    secondaryCta={secondaryCta}
+    headingId={headingId}
+    size={size}
+    primaryVariant={primaryVariant}
+    glance={glance}
+    video={backgroundVideo}
+    videoPhone={backgroundVideoPhone}
+  />
+) : boardHead ? (
   <BoardPageHead
     eyebrow={eyebrow}
     headline={headline}

@@ -1,0 +1,153 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// PhotoHero: the opening banner's "Photo behind the words" style (PORTS.md card 189)
+// =============================================================================
+// From FBC Auburn's Home hero (2026-10-23) and its inner-page variant (2026-10-26). The background
+// photo fills the band; the small line, the heading (the page's h1), the line under it and up to
+// two buttons sit over it in white, under a shade that keeps them readable on any picture (the
+// contrast promise, src/lib/photo-hero.ts and its test). Optional, both set in the hero block:
+//   - a short-facts card beside the words (`glance`: a title, up to four lines, a link). Wide
+//     screens put it at the right; phones put it under the words;
+//   - a silent background clip over the photo (HeroVideo.astro), with a phone-sized copy.
+//
+// Hero.astro picks this only when the block's Style is "photo" AND it has a background photo, so
+// every site and page that does not choose it renders exactly as before. Styles:
+// src/styles/photo-hero.css. The photo is the LCP element (eager, high priority); the clip is
+// added by script after the load event, with the photo as its poster, so it never competes.
+import '@/styles/photo-hero.css';
+import SanityImage from '@/components/SanityImage.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import HeroVideo from '@/components/HeroVideo.astro';
+import { heroVideoSource } from '@/lib/hero-video';
+import { splitStega } from '@/lib/preview-stega';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+type Cta = NonNullable<Parameters<typeof CtaLink>[0]['cta']>;
+
+export interface PhotoHeroVideo {
+  url?: string | null;
+  mimeType?: string | null;
+}
+
+export interface PhotoHeroGlance {
+  title?: string | null;
+  lines?: (string | null)[] | null;
+  link?: Cta | null;
+}
+
+interface Props {
+  eyebrow?: string;
+  headline: string;
+  subhead?: string;
+  image: SanityImageObject;
+  primaryCta?: Cta | null;
+  secondaryCta?: Cta | null;
+  headingId: string;
+  /** "tall" for a home page (most of the first screen), "short" for any other page. */
+  size?: 'tall' | 'short';
+  /** The main button's variant, from the page's accent budget (cta-budget.ts). */
+  primaryVariant?: 'primary' | 'secondary';
+  glance?: PhotoHeroGlance | null;
+  video?: PhotoHeroVideo | null;
+  videoPhone?: PhotoHeroVideo | null;
+}
+
+const {
+  eyebrow,
+  headline,
+  subhead,
+  image,
+  primaryCta,
+  secondaryCta,
+  headingId,
+  size = 'short',
+  primaryVariant = 'primary',
+  glance,
+  video,
+  videoPhone,
+} = Astro.props;
+
+// The clips' URLs and types, cleaned of preview markers so the src is a real address in the draft
+// preview too (stega can encode any string, the mime type included).
+const clean = (s?: string | null) => splitStega(s ?? '').cleaned;
+const clip = heroVideoSource({ url: clean(video?.url), mimeType: clean(video?.mimeType) });
+const phoneClip = heroVideoSource({
+  url: clean(videoPhone?.url),
+  mimeType: clean(videoPhone?.mimeType),
+});
+const hasClip = !!(clip || phoneClip);
+
+const lines = (glance?.lines ?? []).filter((l): l is string => !!l?.trim()).slice(0, 4);
+const hasCard = !!(glance?.title?.trim() || lines.length || glance?.link?.label);
+---
+
+<section
+  class:list={['ph-hero', size === 'tall' && 'ph-hero--tall']}
+  aria-labelledby={headingId}
+  data-hero="photo"
+  data-hero-video={(clip ?? phoneClip)?.url}
+  data-hero-video-type={(clip ?? phoneClip)?.type}
+  data-hero-video-phone={phoneClip?.url}
+  data-hero-video-phone-type={phoneClip?.type}
+>
+  <div class="ph-photo">
+    <SanityImage
+      source={image}
+      width={2000}
+      sizes="100vw"
+      quality={65}
+      loading="eager"
+      fetchpriority="high"
+    />
+    <div class="ph-photo__shade" aria-hidden="true"></div>
+  </div>
+  {hasClip && (
+    <button
+      type="button"
+      class="ph-video-toggle"
+      data-hero-video-toggle
+      aria-pressed="false"
+      hidden
+    >
+      <span class="ph-video-toggle__icon" aria-hidden="true" />
+      <span class="ph-video-toggle__label">Pause video</span>
+    </button>
+  )}
+
+  <div class="ph-wrap ph-inner">
+    <div class="ph-copy">
+      {eyebrow && <p class="ph-eyebrow">{eyebrow}</p>}
+      <h1 class="ph-h1" id={headingId}>
+        {headline}
+      </h1>
+      {subhead && <p class="ph-intro">{subhead}</p>}
+      {(primaryCta?.label || secondaryCta?.label) && (
+        <div class="ph-actions">
+          {primaryCta?.label && <CtaLink cta={primaryCta} variant={primaryVariant} onDark />}
+          {/* A space between the buttons so site search reads two words (card 187). */}{' '}
+          {secondaryCta?.label && <CtaLink cta={secondaryCta} variant="secondary" onDark />}
+        </div>
+      )}
+    </div>
+    {hasCard && (
+      <aside class="ph-card" aria-label={glance?.title?.trim() || 'At a glance'}>
+        {glance?.title && <h2 class="ph-card__title">{glance.title}</h2>}
+        {lines.length > 0 && (
+          <ul class="ph-card__lines">
+            {lines.map((line) => (
+              <li>{line}</li>
+            ))}
+          </ul>
+        )}
+        {glance?.link?.label && (
+          <div class="ph-card__link">
+            <CtaLink cta={glance.link} variant="secondary" />
+          </div>
+        )}
+      </aside>
+    )}
+  </div>
+  {hasClip && <HeroVideo />}
+</section>

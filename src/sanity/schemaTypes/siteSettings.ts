@@ -616,7 +616,8 @@ export const siteSettings = defineType({
           name: 'enabled',
           title: 'Enable newsletter signup',
           type: 'boolean',
-          description: 'When off, the newsletter block does not render anywhere on the site.',
+          description:
+            'When off, the sign-up boxes (footer, journal) do not render. A Newsletter sign-up block can still show a button to a sign-up page typed on the block.',
           initialValue: false,
         }),
         defineField({

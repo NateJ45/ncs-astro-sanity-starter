@@ -257,6 +257,38 @@ const SECTIONS: Record<string, unknown>[] = [
   },
   // The email backbone (card 127): the made-up event in mail-fixtures.ts.
   { ...FIXTURE_RSVP_BLOCK, _type: 'rsvpSection' },
+  // The latest video (card 197): a sample with no picture and no network call.
+  {
+    _type: 'latestVideoSection',
+    _key: 'latest-video',
+    heading: 'Latest video',
+    intro: 'The newest upload from your YouTube channel, kept up to date for you.',
+    channelId: 'UCsampleSampleSampleSample',
+    showChannelLink: true,
+    _fixture: true,
+  },
+  // scaffold: documents
+  {
+    _type: 'documentsSection',
+    _key: 'documents',
+    heading: 'Documents',
+    intro: 'Forms, price lists and reports people can download.',
+    limit: 4,
+    showDates: true,
+    items: [
+      ['Price list 2027', 'The newest version, in force from January.', '2026-10-01'],
+      ['Order form', 'Print it, fill it in, send it back.', '2026-08-15'],
+      ['Terms of service', '', '2026-03-02'],
+    ].map(([title, note, date], i) => ({
+      _id: `doc${i}`,
+      title,
+      note,
+      date,
+      category: 'Forms',
+      file: { url: '#', size: 245760, extension: 'pdf' },
+    })),
+  },
+  // scaffold:end
   // The form builder (card 194): the made-up sign-up form in site-form-fixtures.ts.
   { ...FIXTURE_FORM_BLOCK, _type: 'formSection' },
   // scaffold: about
@@ -537,6 +569,109 @@ const SECTIONS: Record<string, unknown>[] = [
       link: cta('Read more'),
     })),
   },
+  // ── Card 193: contact card, progress, newsletter, calendar buttons, icon cards, steps, hub ──
+  // The contact card and the newsletter take their values from Site settings on a real page; the
+  // wall has no settings, so these fixtures type their own (a block's own phone, email and
+  // sign-up page win over the settings).
+  {
+    _type: 'contactCardSection',
+    _key: 'contact',
+    heading: 'Get in touch',
+    callButtons: true,
+    phone: '(555) 555-0100',
+    email: 'hello@example.com',
+    address: 'The community hall\n123 Main Street, Springfield',
+    hours: 'Monday to Friday, 9 am to 5 pm\nSaturday, 10 am to 2 pm',
+  },
+  {
+    _type: 'progressSection',
+    _key: 'progress',
+    heading: 'Our spring fundraiser',
+    intro: 'Every gift goes straight to the new roof.',
+    unit: 'dollars',
+    goal: 50000,
+    raised: 32500,
+    asOf: inDays(0),
+    link: cta('Give to the fund'),
+  },
+  {
+    _type: 'newsletterSection',
+    _key: 'newsletter',
+    heading: 'Stay in touch',
+    intro: 'One short email a month. No spam, and you can leave any time.',
+    signupUrl: 'https://example.com/subscribe',
+  },
+  {
+    _type: 'calendarSubscribeSection',
+    _key: 'subscribe',
+    heading: 'Never miss a date',
+    intro: 'Add our calendar once and new dates arrive on their own.',
+    feed: 'https://example.com/calendar/events.ics',
+  },
+  {
+    _type: 'iconCardsSection',
+    _key: 'iconcards',
+    heading: 'What we do',
+    intro: 'Three things we do well, in plain words.',
+    cards: [
+      [
+        'home',
+        'Make you welcome',
+        'Someone meets you at the door and shows you around.',
+        'Every day',
+      ],
+      ['calendar', 'Keep it simple', 'Pick a time that suits you. We handle the rest.', ''],
+      ['users', 'Do it together', 'Bring a friend, or meet someone new.', 'Saturdays'],
+    ].map(([icon, title, body, note], i) => ({
+      _key: `ic${i}`,
+      icon,
+      title,
+      body,
+      note,
+      link: i === 0 ? cta('Read more') : undefined,
+    })),
+  },
+  {
+    _type: 'stepsRailSection',
+    _key: 'steps',
+    heading: 'How it works',
+    intro: 'Three steps, start to finish.',
+    firstStepCard: true,
+    steps: [
+      ['chat', 'Say hello', 'Tell us what you are after. A sentence is plenty.'],
+      ['calendar', 'Pick a time', 'We offer a few that suit you, and you choose one.'],
+      ['check', 'Come along', 'We will have everything ready when you arrive.'],
+    ].map(([icon, title, body], i) => ({ _key: `st${i}`, icon, title, body })),
+    endHeading: 'Ready when you are.',
+    link: cta('Get started'),
+  },
+  {
+    _type: 'hubSection',
+    _key: 'hub',
+    heading: 'Find the right fit',
+    intro: 'Everything we offer, by who it is for.',
+    groups: [
+      ['For families', ['Weekend workshops', 'After-school club']],
+      ['For schools', ['Class visits', 'Teacher training']],
+      ['For groups', ['Team days', 'Private events']],
+    ].map(([title, cards], gi) => ({
+      _key: `hg${gi}`,
+      title,
+      line: 'A short line about this group.',
+      cards: (cards as string[]).map((card, ci) => ({
+        _key: `hc${gi}${ci}`,
+        title: card,
+        label: gi === 0 ? 'Everyone' : 'By arrangement',
+        when: ci === 0 ? 'Saturdays, 10 am' : undefined,
+        place: ci === 0 ? 'The main hall' : undefined,
+        body: 'A sentence or two about what happens and who it suits.',
+        icon: ['users', 'book', 'home', 'tool', 'heart', 'star'][gi * 2 + ci],
+        image: gi === 0 && ci === 0 ? image(card) : undefined,
+        link: ci === 0 ? cta('Find out more') : undefined,
+      })),
+    })),
+  },
+
   // ── Every main page a page builder (card 190) ──────────────────────────────
   // These read what they show themselves (the Contact page's form settings, the posts), so
   // what they draw here follows the dataset; the policy shows the built-in text.

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+  <title>Example channel</title>
+  <entry>
+    <id>yt:video:scheduledAA</id>
+    <yt:videoId>scheduledAA</yt:videoId>
+    <title>Next week&apos;s stream (scheduled)</title>
+    <published>2026-10-22T09:00:00+00:00</published>
+    <media:group>
+      <media:community><media:statistics views="0"/></media:community>
+    </media:group>
+  </entry>
+  <entry>
+    <id>yt:video:latestBBBBB</id>
+    <yt:videoId>latestBBBBB</yt:videoId>
+    <title>Tools &amp; Tips &#8211; the full talk</title>
+    <published>2026-10-19T04:10:00+00:00</published>
+    <media:group>
+      <media:community><media:statistics views="214"/></media:community>
+    </media:group>
+  </entry>
+  <entry>
+    <id>yt:video:olderCCCCCC</id>
+    <yt:videoId>olderCCCCCC</yt:videoId>
+    <title>An older video</title>
+    <published>2026-10-05T04:10:00+00:00</published>
+    <media:group>
+      <media:community><media:statistics views="530"/></media:community>
+    </media:group>
+  </entry>
+  <entry>
+    <id>yt:video:bad</id>
+    <yt:videoId>nope</yt:videoId>
+    <title>Dropped: the id is not 11 characters</title>
+    <published>2026-10-01T04:10:00+00:00</published>
+  </entry>
+</feed>

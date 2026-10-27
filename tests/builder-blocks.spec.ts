@@ -72,4 +72,64 @@ test.describe('Builder kit blocks', () => {
       'tel:+15555550100',
     );
   });
+
+  // ── Card 193 ──────────────────────────────────────────────────────────────
+
+  test('contact card: big Call and Email buttons, details and directions', async ({ page }) => {
+    const card = page.locator(box('contactCardSection'));
+    const buttons = card.locator('[data-call-buttons] a');
+    await expect(buttons).toHaveCount(2);
+    await expect(buttons.first()).toHaveAttribute('href', 'tel:5555550100');
+    await expect(buttons.nth(1)).toHaveAttribute('href', 'mailto:hello@example.com');
+    expect((await buttons.first().boundingBox())?.height).toBeGreaterThanOrEqual(44);
+    await expect(card.getByRole('link', { name: /Get directions/ })).toHaveAttribute(
+      'href',
+      /^https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=/,
+    );
+  });
+
+  test('progress: one progressbar with a spoken value and twenty steps', async ({ page }) => {
+    const bar = page.locator(`${box('progressSection')} [role="progressbar"]`);
+    await expect(bar).toHaveAttribute('aria-valuenow', '65');
+    await expect(bar).toHaveAttribute('aria-valuetext', '$32,500 of $50,000, 65 percent');
+    await expect(bar.locator('.bb-progress__step')).toHaveCount(20);
+  });
+
+  test('newsletter and calendar blocks link out safely', async ({ page }) => {
+    await expect(
+      page
+        .locator(box('newsletterSection'))
+        .getByRole('link', { name: /Sign up for the newsletter/ }),
+    ).toHaveAttribute('href', 'https://example.com/subscribe');
+    const subscribe = page.locator(`${box('calendarSubscribeSection')} [data-bb-subscribe] a`);
+    await expect(subscribe).toHaveCount(3);
+    await expect(subscribe.nth(1)).toHaveAttribute(
+      'href',
+      'webcal://example.com/calendar/events.ics',
+    );
+    await expect(subscribe.first()).toHaveAttribute('rel', /noopener/);
+  });
+
+  test('icon cards and the steps rail: icons, numbered steps, one list each', async ({ page }) => {
+    const cards = page.locator(`${box('iconCardsSection')} .bb-icard`);
+    await expect(cards).toHaveCount(3);
+    await expect(cards.first().locator('svg.bb-icon')).toHaveCount(1);
+    const steps = page.locator(`${box('stepsRailSection')} ol > li`);
+    await expect(steps).toHaveCount(3);
+    await expect(steps.nth(2).locator('.bb-rail__n')).toHaveText('Step 3');
+    await expect(steps.nth(2).locator('.bb-rail__trail')).toHaveCount(0);
+  });
+
+  test('hub: the index jumps to a group and follows the scroll', async ({ page }) => {
+    const hub = page.locator(box('hubSection'));
+    const jumps = hub.locator('[data-hub-jump]');
+    await expect(jumps).toHaveCount(3);
+    await expect(jumps.first()).toHaveAttribute('aria-current', 'true');
+    const target = (await jumps.nth(2).getAttribute('href')) ?? '';
+    await jumps.nth(2).click();
+    await expect(page.locator(target)).toBeInViewport();
+    await expect(jumps.nth(2)).toHaveAttribute('aria-current', 'true');
+    // The card with a link is one big tap target: its link covers the card.
+    await expect(hub.locator('.bb-hcard.bb-stretch').first().locator('a')).toHaveCount(1);
+  });
 });

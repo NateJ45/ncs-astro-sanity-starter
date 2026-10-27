@@ -1,0 +1,72 @@
+---
+// Safe to edit by hand
+// Cards with icons (PORTS.md card 193, from FBC Auburn's icon cards): open cards, no box, the big
+// icon the hero of each one: three across on a wide screen, two on a tablet, one on a phone (where
+// the icon shrinks to sit beside the title). A card with a photo shows the photo in place of the
+// icon, in the brand's card-picture shape (.shape-step, card 188). An optional small note and link.
+// Titles sit one level under the block's heading; with no heading they are the h2s, so the outline
+// never skips a level. The icons come from src/lib/block-icons.ts; a site with its own art swaps
+// BlockIcon.astro (docs/agent/block-icons.md). A content block: the surface comes from the cadence.
+import '@/styles/shapes.css';
+import BuilderBand from './BuilderBand.astro';
+import BlockIcon from './BlockIcon.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedIconCardsSection } from '@/lib/builderBlocks.types';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+interface Props {
+  block: ProjectedIconCardsSection;
+  surface?: CadenceSurface;
+  headingId: string;
+  isFirst?: boolean;
+}
+const { block, surface, headingId, isFirst = false } = Astro.props;
+
+const cards = (block.cards ?? []).filter((c) => c?.title?.trim());
+const CardTitle = block.heading ? 'h3' : 'h2';
+---
+
+{cards.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Cards"
+  >
+    <ul class="bb-icards" role="list">
+      {cards.map((c, i) => {
+        const photo = c.image?.asset ? (c.image as SanityImageObject) : null;
+        return (
+          <li class:list={['bb-icard', photo && 'bb-icard--photo']}>
+            {photo ? (
+              <div class="bb-icard__photo shape-step">
+                <SanityImage
+                  source={photo}
+                  width={640}
+                  height={440}
+                  sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 100vw"
+                  quality={70}
+                  loading={isFirst && i < 3 ? 'eager' : 'lazy'}
+                />
+              </div>
+            ) : (
+              <BlockIcon name={c.icon} size={64} class="bb-icard__icon" />
+            )}
+            <CardTitle class="bb-title bb-icard__title">{c.title}</CardTitle>
+            {c.body && <p class="bb-icard__body">{c.body}</p>}
+            {c.note && <p class="bb-small">{c.note}</p>}
+            {c.link?.label && (
+              <p class="bb-icard__link">
+                <CtaLink cta={c.link} variant="secondary" />
+              </p>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  </BuilderBand>
+)}

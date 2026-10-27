@@ -57,6 +57,7 @@ export const PAGE_BUILDER_TYPES = new Set<string>(Object.keys(SECTION_HOST_TYPES
  * authoring.test.ts checks a fresh one of each listed block raises no warning.
  */
 const SELF_FILLING_SECTIONS = [
+  'documentsSection', // scaffold: documents
   // Every main page a page builder (card 190): their words come from the Contact tab, the
   // policy built into the site, and the Journal list.
   'contactFormSection',
@@ -65,8 +66,14 @@ const SELF_FILLING_SECTIONS = [
   'dynamicListSection',
   'faqSection', // scaffold: faq
   'guaranteeSection',
+  // Its words are the channel's newest video, read at build time (card 197).
+  'latestVideoSection',
   'logoStripSection',
   'processSection', // scaffold: process
+  // Card 193: filled from Site settings (the phone, the email, the newsletter box), so a fresh one
+  // is already complete.
+  'contactCardSection',
+  'newsletterSection',
   'serviceAreaSection',
   'servicesGridSection', // scaffold: services
   'spacerSection',
@@ -103,6 +110,10 @@ export const PAGE_CHECK_CONFIG: PageCheckConfig = {
     'afterText',
     'greeting',
     'signOff',
+    // Card 193: the progress bar's unit and the two switches arrive set.
+    'unit',
+    'callButtons',
+    'firstStepCard',
   ],
   // Every built-in route, plus the folders the build writes into. RESERVED_SLUGS
   // is the same list the slug validation uses, so a new route is added once.

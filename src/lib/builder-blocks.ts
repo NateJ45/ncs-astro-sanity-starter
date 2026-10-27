@@ -22,6 +22,7 @@
 // =============================================================================
 
 import { buildIcs } from './ics.ts';
+import { slugify } from './slugify.ts';
 
 // ── Text ────────────────────────────────────────────────────────────────────
 
@@ -440,4 +441,119 @@ export function eventJsonLd(opts: {
  */
 export function photoCardColumns(count: number): 2 | 3 {
   return count === 2 || count === 4 ? 2 : 3;
+}
+
+// ── Contact card (PORTS.md card 193) ────────────────────────────────────────
+
+/** A typed phone number as a tel: link: digits and a leading +, nothing else. '' when it has none. */
+export function telHref(value?: string | null): string {
+  const kept = plain(value).replace(/(?!^\+)\D/g, '');
+  return kept.replace(/\D/g, '').length >= 7 ? `tel:${kept}` : '';
+}
+
+// ── Progress toward a goal ──────────────────────────────────────────────────
+
+const WHOLE = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+
+/** 12500 -> "$12,500" (dollars) or "12,500" (a plain count). Whole numbers only. */
+export function figure(value: number, unit: string | null | undefined = 'dollars'): string {
+  const n = WHOLE.format(Math.round(value));
+  return plain(unit) === 'number' ? n : `$${n}`;
+}
+
+export interface ProgressState {
+  /** False without a positive goal: the block then draws nothing. */
+  valid: boolean;
+  /** 0 to 100, whole: the bar's width and aria-valuenow. */
+  percent: number;
+  raised: string;
+  goal: string;
+  /** "$7,500 to go", or "Goal reached" at or past the goal. */
+  remaining: string;
+}
+
+/** The two typed numbers as the bar and its words (rule 15: percent and "to go" are derived). */
+export function progressState(
+  goal: number | null | undefined,
+  raised: number | null | undefined,
+  unit: string | null | undefined = 'dollars',
+): ProgressState {
+  const g = typeof goal === 'number' && Number.isFinite(goal) ? goal : 0;
+  const r = typeof raised === 'number' && Number.isFinite(raised) ? Math.max(0, raised) : 0;
+  if (g <= 0) return { valid: false, percent: 0, raised: figure(r, unit), goal: '', remaining: '' };
+  return {
+    valid: true,
+    percent: Math.max(0, Math.min(100, Math.floor((r / g) * 100))),
+    raised: figure(r, unit),
+    goal: figure(g, unit),
+    remaining: r >= g ? 'Goal reached' : `${figure(g - r, unit)} to go`,
+  };
+}
+
+/** "As of October 18, 2026" for a date, or '' when there is none. */
+export function asOfLabel(value?: string | null): string {
+  const label = longDate(value);
+  return label ? `As of ${label}` : '';
+}
+
+// ── Calendar subscribe ──────────────────────────────────────────────────────
+
+export interface SubscribeLinks {
+  /** webcal:// for Apple Calendar and desktop Outlook. */
+  apple: string;
+  /** Google Calendar's "add by URL". */
+  google: string;
+  /** Outlook on the web's "subscribe from web". */
+  outlook: string;
+}
+
+/**
+ * The address of a calendar feed as a full https address: a typed https:// or
+ * webcal:// address, or a path on this site ("/calendar/events.ics", the files
+ * card 158 writes) joined to the site's own address. '' for anything else.
+ */
+export function feedAddress(value?: string | null, siteUrl?: string | null): string {
+  const raw = plain(value);
+  if (/^(https|webcal):\/\//i.test(raw)) return raw.replace(/^webcal:/i, 'https:');
+  if (raw.startsWith('/') && !raw.startsWith('//') && /^https:\/\//i.test(plain(siteUrl))) {
+    return `${plain(siteUrl).replace(/\/+$/, '')}${raw}`;
+  }
+  return '';
+}
+
+/**
+ * Subscribe links for a calendar feed. A subscription keeps itself up to date on
+ * the visitor's phone; a download would not. null when there is no usable feed.
+ */
+export function subscribeLinks(
+  value?: string | null,
+  name = 'Calendar',
+  siteUrl?: string | null,
+): SubscribeLinks | null {
+  const https = feedAddress(value, siteUrl);
+  if (!https) return null;
+  const webcal = https.replace(/^https:/i, 'webcal:');
+  return {
+    apple: webcal,
+    google: `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}`,
+    outlook: `https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(https)}&name=${encodeURIComponent(name)}`,
+  };
+}
+
+// ── Hub (groups of cards with a sticky index) ───────────────────────────────
+
+/**
+ * One anchor id per group, from its name ("Kids and youth" -> "kids-and-youth"),
+ * a repeated name taking a number, so an index link and a deep link
+ * ("/services/#kids-and-youth") always land on the right group. `prefix` keeps
+ * two hubs on one page apart.
+ */
+export function hubIds(titles: (string | null | undefined)[], prefix = 'hub'): string[] {
+  const seen = new Map<string, number>();
+  return titles.map((t) => {
+    const base = slugify(plain(t)) || 'group';
+    const n = (seen.get(base) ?? 0) + 1;
+    seen.set(base, n);
+    return `${prefix}-${n === 1 ? base : `${base}-${n}`}`;
+  });
 }
