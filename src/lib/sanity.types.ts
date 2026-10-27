@@ -2273,6 +2273,27 @@ export type PrivacyPage = {
       } & PhotoCardsSection)
     | ({
         _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
       } & SyncedSection)
     | ({
         _key: string;
@@ -2740,6 +2761,27 @@ export type JournalPage = {
       } & PhotoCardsSection)
     | ({
         _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
       } & SyncedSection)
     | ({
         _key: string;
@@ -2903,6 +2945,27 @@ export type ContactPage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
