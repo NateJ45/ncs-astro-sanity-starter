@@ -10,6 +10,8 @@
 import SanityImage from '@/components/SanityImage.astro';
 import JournalCategoryChip from '@/components/JournalCategoryChip.astro';
 import { formatDate } from '@/lib/format-date';
+import ShotRequest from '@/components/ShotRequest.astro';
+import { journalCoverShot } from '@/data/shot-list';
 
 interface Props {
   entry: {
@@ -27,6 +29,9 @@ interface Props {
 const { entry, featured = false } = Astro.props as Props;
 const href = entry.slug?.current ? `/journal/${entry.slug.current}/` : '#';
 const primaryCategory = entry.categories?.[0];
+
+// With the client review layer on, a stand-in cover shows a "Photo needed" box (src/data/shot-list.ts).
+const coverShot = journalCoverShot(entry.coverImage);
 
 const dateLabel = formatDate(entry.publishedAt);
 
@@ -47,7 +52,9 @@ const titleClass = featured
   <div class="h-0.5 bg-primary" aria-hidden="true"></div>
 
   <div class:list={[aspectClass, 'img-zoom relative overflow-hidden bg-muted']}>
-    {entry.coverImage?.asset ? (
+    {coverShot ? (
+      <ShotRequest shot={coverShot} class="shot--fill" inLink />
+    ) : entry.coverImage?.asset ? (
       <SanityImage
         source={entry.coverImage}
         width={featured ? 1400 : 800}

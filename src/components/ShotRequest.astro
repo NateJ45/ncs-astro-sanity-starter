@@ -1,0 +1,134 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Safe to edit by hand
+// A "Photo needed" box (PORTS.md card 195, ported from First Baptist Auburn): stands in a picture
+// slot while the client review layer is on and names the photo that is wanted there, so the
+// preview doubles as the client's shot list. The shot comes from src/data/shot-list.ts, which also
+// decides when a slot shows this instead of its photo.
+//
+// Two looks, both in the review layer's yellow (ClientNotes.astro) so nobody mistakes them for
+// the finished site:
+//   frame (default)  fills a picture slot. With an example, a stock photo of the same kind of shot
+//                    fills the slot and a yellow note pins to its lower corner: the request, and a
+//                    "How to take yours" toggle that opens the detail, the way to hold the phone
+//                    and the credit. Without one: paper yellow, camera-frame corners, the request.
+//                    Give it `shot--fill` to cover a slot that already has a size, or `shot--tall`
+//                    for a 4:5 slot; by default it is 4:3.
+//   tag              a pinned note for a picture that sits behind words (a hero). The slot itself
+//                    draws the picture behind it.
+// `inLink` drops the toggle for a slot inside a link (a journal card): a <details> inside an
+// <a> is not allowed, so the note keeps the request only.
+// Never indexed by site search.
+import type { Shot } from '@/data/shot-list';
+import { exampleSrc, exampleSrcset } from '@/data/shot-list';
+
+interface Props {
+  shot: Shot;
+  variant?: 'frame' | 'tag';
+  inLink?: boolean;
+  class?: string;
+  /** The page's first photo, in the phone's first screen: load the example eagerly, at high priority. */
+  priority?: boolean;
+}
+const { shot, variant = 'frame', inLink = false, class: className, priority = false } = Astro.props;
+const hold =
+  shot.orientation === 'portrait'
+    ? 'Hold the phone upright'
+    : shot.orientation === 'square'
+      ? 'Square crop'
+      : 'Hold the phone sideways';
+// The little phone: 14 by 22 upright, turned on its side for landscape.
+const [pw, ph] = shot.orientation === 'landscape' ? [22, 14] : [14, 22];
+const example = variant === 'frame' ? shot.example : undefined;
+const tag = shot.video ? 'Example video' : shot.example ? 'Example photo' : 'Photo needed';
+---
+
+<div
+  class:list={['shot', `shot--${variant}`, example && 'shot--example', className]}
+  data-shot={shot.orientation}
+  data-pagefind-ignore="all"
+>
+  {example ? (
+    <>
+      {/* sizes="auto": a lazy image is sized by its slot's real width where the browser can (Chrome);
+          the list after it is the fallback elsewhere. */}
+      <img
+        class="shot__example"
+        src={exampleSrc(example.file)}
+        srcset={exampleSrcset(example.file)}
+        sizes="auto, (min-width: 768px) 40vw, 100vw"
+        alt={`Example: ${shot.title}`}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : undefined}
+        decoding="async"
+      />
+      <div class:list={['shot__note', example.note === 'end' && 'shot__note--end']}>
+        <p class="shot__tag">Example photo · yours goes here</p>
+        <p class="shot__title">{shot.title}</p>
+        {!inLink && (
+          <details class="shot__how">
+            <summary>How to take yours</summary>
+            <p class="shot__detail">{shot.detail}</p>
+            <p class="shot__hold">
+              <svg
+                width={pw}
+                height={ph}
+                viewBox={`0 0 ${pw} ${ph}`}
+                aria-hidden="true"
+                focusable="false"
+                class="shot__phone"
+              >
+                <rect
+                  x="1"
+                  y="1"
+                  width={pw - 2}
+                  height={ph - 2}
+                  rx="3"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+              </svg>
+              {hold}
+            </p>
+            <p class="shot__credit">Example by {example.credit}</p>
+          </details>
+        )}
+      </div>
+    </>
+  ) : (
+    <>
+      {variant === 'frame' && <span class="shot__corners" aria-hidden="true" />}
+      <div class="shot__body">
+        <p class="shot__tag">
+          {tag}
+          {variant === 'tag' && shot.example && ' · yours goes here'}
+        </p>
+        <p class="shot__title">{shot.title}</p>
+        <p class="shot__detail">{shot.detail}</p>
+        <p class="shot__hold">
+          <svg
+            width={pw}
+            height={ph}
+            viewBox={`0 0 ${pw} ${ph}`}
+            aria-hidden="true"
+            focusable="false"
+            class="shot__phone"
+          >
+            <rect
+              x="1"
+              y="1"
+              width={pw - 2}
+              height={ph - 2}
+              rx="3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+          </svg>
+          {hold}
+        </p>
+      </div>
+    </>
+  )}
+</div>

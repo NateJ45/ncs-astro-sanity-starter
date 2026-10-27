@@ -5,6 +5,9 @@ import SanityImage from '@/components/SanityImage.astro';
 import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
 import PortableText from '@/components/PortableText';
 import CtaLink from '@/components/CtaLink.astro';
+import ShotRequest from '@/components/ShotRequest.astro';
+import { shotFor } from '@/data/shot-list';
+import { splitStega } from '@/lib/preview-stega';
 
 interface Props {
   image?: any;
@@ -33,6 +36,9 @@ const {
 // strings as the ternary that was here for 'background' and 'muted'.
 const bg = surfaceClass(surface);
 const imageFirst = imageSide === 'left';
+// While the client review layer is on, an empty or stand-in picture shows a "Photo needed" box
+// naming the shot (src/data/shot-list.ts, keyed by page and heading). With it off: null.
+const shot = shotFor(Astro.url.pathname, splitStega(heading ?? '').cleaned, 0, image);
 const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebrow ? 'mt-m' : ''}`;
 ---
 
@@ -50,7 +56,9 @@ const bodyClass = `text-foreground/85 text-lg leading-relaxed ${heading || eyebr
     data-reveal
   >
     <div class:list={[imageFirst ? 'lg:order-1' : 'lg:order-2']}>
-      {image?.asset ? (
+      {shot ? (
+        <ShotRequest shot={shot} class="shot--tall" />
+      ) : image?.asset ? (
         <SanityImage
           source={image}
           width={800}
