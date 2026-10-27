@@ -18,7 +18,7 @@ import { telHref } from '@/lib/phone';
 import { normalizeCustomFields } from '@/lib/custom-form-fields';
 import PortableTextStatic from '@/components/PortableTextStatic.astro';
 import ContactForm from '@/components/ContactForm';
-import CopyEmailButton from '@/components/CopyEmailButton';
+import CopyEmailButton from '@/components/CopyEmailButton.astro';
 import CalendlyInline from '@/components/CalendlyInline';
 import ServiceAreaMap from '@/components/ServiceAreaMap.astro';
 import { Mail, Phone } from 'lucide-react';
@@ -103,7 +103,7 @@ const hasRoadmap = roadmapSteps.length > 0;
       <p class="mt-m flex flex-wrap items-center gap-xs text-sm text-foreground/75">
         <Mail size={14} aria-hidden="true" className="text-secondary" />
         <span>Prefer email? Reach us directly at</span>
-        <CopyEmailButton client:visible email={email} variant="link" />
+        <CopyEmailButton email={email} variant="link" />
       </p>
     )}
     {phone && (
@@ -170,7 +170,7 @@ const hasRoadmap = roadmapSteps.length > 0;
       {email && (
         <div>
           <p class="mb-xs text-xs tracking-widest text-foreground/80 uppercase">Email</p>
-          <CopyEmailButton client:visible email={email} variant="link" />
+          <CopyEmailButton email={email} variant="link" />
         </div>
       )}
 

@@ -30,9 +30,9 @@ import { site } from '@/data/site';
 import { resolveSocialLinks, socialLabel, type SocialLink } from '@/lib/social-links';
 import { socialIcon } from '@/lib/social-icons';
 import { Mail, Phone } from 'lucide-react';
-import CopyEmailButton from '@/components/CopyEmailButton';
+import CopyEmailButton from '@/components/CopyEmailButton.astro';
 import NewsletterSignup from '@/components/NewsletterSignup';
-import { getAllProjects, type CoreProjectCard } from '@/lib/queries';
+import { getAllProjects, getNavPages, type CoreProjectCard } from '@/lib/queries';
 // THE SVG, NOT A PNG, and the same files the header uses.
 //
 // Until 2026-09-08 this imported logo-{light,dark}.png, which were a REAL
@@ -48,6 +48,7 @@ import logoLightAsset from '@/assets/logo-light.svg';
 import logoDarkAsset from '@/assets/logo-dark.svg';
 import { getSectionVisibility } from '@/lib/sectionVisibility';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
+import { mergePageSwitches } from '@/lib/page-switches';
 import { telHref } from '@/lib/phone';
 
 // One themed pair, passed through Astro's pipeline for a cache-busted URL. No
@@ -123,8 +124,13 @@ const siteCreditUrl = siteSettings?.footerCreditUrl;
 // Optional editor-managed footer columns. When non-empty, these replace the
 // built-in Studio / Work / Free tools columns. "Get in touch" always renders
 // as the last column regardless. Additive: empty = built-in defaults.
-const sanityFooterColumns = chrome.footerColumns;
-const useCustomFooterColumns = sanityFooterColumns.length > 0;
+// Pages whose "Show in the footer" switch is on join the LAST custom column (card 187). With
+// the built-in footer there is no column list to add to, so they are not merged: that would
+// swap the bespoke built-in columns for one "More" column.
+const useCustomFooterColumns = chrome.footerColumns.length > 0;
+const sanityFooterColumns = useCustomFooterColumns
+  ? mergePageSwitches([], chrome.footerColumns, await getNavPages()).footer
+  : chrome.footerColumns;
 
 // The small-print row at the very bottom. EMPTY means "keep the built-in
 // privacy link", which is rendered as its own markup below.
@@ -404,7 +410,7 @@ const latestProjects = allProjects.slice(0, 3);
       <div class="space-y-1 text-sm">
         {email && (
           <p>
-            <CopyEmailButton client:visible email={email} variant="link" />
+            <CopyEmailButton email={email} variant="link" />
           </p>
         )}
         {phone && (

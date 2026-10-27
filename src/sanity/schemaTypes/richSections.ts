@@ -27,7 +27,13 @@ import { UsersIcon } from '@sanity/icons/Users';
 import { HelpCircleIcon } from '@sanity/icons/HelpCircle';
 import { SyncIcon } from '@sanity/icons/Sync';
 import { SECTION_TYPES } from './sections';
-import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
+import {
+  columnsField,
+  headingAccentField,
+  hideWhenRich,
+  richTwin,
+  scriptAccentField,
+} from './_appearanceFields';
 
 // ── Shared helpers (mirrors sections.ts helpers — keep in sync if you change
 //    the main helpers, or extract to a shared file in a future refactor) ──────
@@ -143,13 +149,7 @@ export const servicesGridSection = defineType({
       type: 'string',
       validation: (R) => R.required(),
     }),
-    defineField({
-      name: 'scriptAccent',
-      title: 'Handwritten accent word (optional)',
-      type: 'string',
-      description:
-        'One word from the headline to render in the script font. Must match exactly. Leave blank to skip.',
-    }),
+    scriptAccentField('headline'),
     headingAccentField(),
     defineField({
       name: 'subhead',
@@ -206,12 +206,7 @@ export const testimonialsSection = defineType({
       type: 'string',
       validation: (R) => R.required(),
     }),
-    defineField({
-      name: 'scriptAccent',
-      title: 'Handwritten accent word (optional)',
-      type: 'string',
-      description: 'One word from the headline to render in the script font. Must match exactly.',
-    }),
+    scriptAccentField('headline'),
     headingAccentField(),
     defineField({
       name: 'subhead',

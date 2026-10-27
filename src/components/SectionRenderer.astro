@@ -43,7 +43,10 @@ import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
 import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
 import { sectionAnchors, sectionHeadingText } from '@/lib/section-anchors';
-import { primaryBudget } from '@/lib/cta-budget';
+import { primaryBudget, repeatsHeaderCta } from '@/lib/cta-budget';
+import { ctaHref } from '@/lib/cta-href';
+import { getSiteSettings } from '@/lib/queries';
+import { resolveSiteSettings } from '@/lib/siteSettings';
 import { expandSyncedSections } from '@/lib/authoring';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
 import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
@@ -120,13 +123,21 @@ const rows = classified.map((row, i) => ({ ...row, headingId: anchorIds[i] }));
 // secondary variant. A closing band always draws one (CtaLink has a fallback).
 // A Hero or FinalCta a page draws OUTSIDE this renderer is not counted.
 // An event's main button (the builder kit, card 173) counts too.
+// The header's button keeps the accent on every page (card 187), so a body
+// button that goes where the header button goes repeats it and draws secondary
+// without spending the budget: the accent passes to the page's own next step.
+const headerCta = resolveSiteSettings(await getSiteSettings()).headerCta;
+const own = (href: string) => !repeatsHeaderCta(href, headerCta);
 const ctaVariant = primaryBudget(rows, ({ block }) =>
   block._type === 'ctaBandSection'
     ? // A button left empty draws nothing (CtaLink), so it cannot hold the accent either.
-      !(block.cta && !block.cta.label && !block.cta.linkType && !block.cta.href)
+      !(block.cta && !block.cta.label && !block.cta.linkType && !block.cta.href) &&
+      own(ctaHref(block.cta))
     : block._type === 'heroSection'
-      ? !!block.primaryCta
-      : block._type === 'eventDetailsSection' && !!block.button?.label,
+      ? !!block.primaryCta && own(ctaHref(block.primaryCta))
+      : block._type === 'eventDetailsSection' &&
+        !!block.button?.label &&
+        own(ctaHref(block.button)),
 );
 
 // A real element in preview, nothing at all on the live site. The wrapper must

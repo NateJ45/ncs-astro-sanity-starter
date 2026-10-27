@@ -19,6 +19,7 @@ import {
 import { PAGE_TEMPLATES, TEMPLATE_GROUPS, templateMenuTitle } from '../sanity/pageTemplates.ts';
 import { SECTION_PATTERNS } from '../sanity/sectionPatterns.ts';
 import { pageWarnings, type PageRules } from './page-guardrails.ts';
+import { checkPage, type PageCheckConfig } from './page-checks.ts';
 
 const counter = () => {
   let n = 0;
@@ -448,6 +449,23 @@ describe('section thumbnails (the grid view of the + Add menu)', () => {
       assert.ok(wall.includes(`_type: '${type}'`), `add a ${type} fixture to the sections wall`);
       const file = new URL(`../../public/section-thumbnails/${type}.jpg`, import.meta.url);
       assert.ok(existsSync(file), `run npm run thumbnails to shoot ${type}`);
+    });
+  }
+});
+
+// A block that fills itself from a collection or another tab must not be told it is empty
+// (PORTS.md card 187). A fresh one of each listed block, nothing typed, raises no "empty" finding.
+describe('self-filling blocks (pageBuilderConfig.ts SELF_FILLING_SECTIONS)', () => {
+  const config: PageCheckConfig = {
+    sectionArrays: ['pageBuilder'],
+    selfFillingSections: CHECKS.selfFillingSections,
+    codeOwnedPaths: [],
+  };
+  for (const type of CHECKS.selfFillingSections) {
+    it(`${type}: a fresh one raises no empty-section finding`, () => {
+      const doc = { pageBuilder: [{ _type: type, _key: 'k1' }] };
+      const empty = checkPage(doc, config).find((g) => g.id === 'empty')!;
+      assert.deepEqual(empty.findings, []);
     });
   }
 });

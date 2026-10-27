@@ -52,6 +52,8 @@ interface Props {
   brandName?: string;
   /** The drawer's primary button: the header's own button (Site Settings). */
   cta?: { show: boolean; label: string; href: string };
+  /** The optional second header button (card 187); null or absent draws nothing. */
+  secondary?: { label: string; href: string } | null;
   /** Visitor search is on (src/data/site.ts search.enabled, PORTS.md card 126). */
   search?: boolean;
 }
@@ -63,6 +65,7 @@ const {
   logoDarkUrl,
   brandName = 'Studio Starter',
   cta = { show: true, label: 'Book a consultation', href: '/contact/' },
+  secondary = null,
   search = false,
 } = Astro.props;
 
@@ -112,6 +115,17 @@ const fb = siteSettings?.socialFacebook;
             class="block w-full rounded-md bg-primary-dark px-m py-m text-center text-xs font-semibold tracking-eyebrow text-white uppercase transition-colors hover:bg-accent-dark"
           >
             {cta.label}
+          </a>
+        </div>
+      )}
+
+      {secondary && (
+        <div class="px-l pb-l">
+          <a
+            href={secondary.href}
+            class="block w-full rounded-md border border-primary px-m py-m text-center text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:bg-accent"
+          >
+            {secondary.label}
           </a>
         </div>
       )}

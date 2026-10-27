@@ -318,6 +318,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 184  | The preview renders the Studio's own copy of the draft                                   | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 185  | Type straight onto the page in the preview                                               | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -11844,3 +11845,67 @@ drift instead of a false all-clear.
 **Applied:** starter (this card). `sync-check.mjs` is PORTABLE: every site copies the new version (a byte-identical
 copy; the site PRs in the Auburn port run do this). Until a site resyncs, its own old copy keeps the old fallback
 and should be run with `NCS_STARTER_DIR` set or from the starter (`node <starter>/scripts/sync-check.mjs <site>`).
+
+## Card 187: Eleven small generic fixes from first-baptist-auburn (2026-10-27)
+
+**Origin:** first-baptist-auburn, the second of the Auburn-to-family port runs (inventory rows A8, A10, A38, A33, A18,
+A19, P2, S4, S5, G2, S12). Each is small and generic; none draws anything new on a site that does not opt in, except
+the header rule (A8), noted below.
+
+**What changed.**
+
+- **A38 `src/lib/cta-href.ts` (PORTABLE, new, with tests).** `ctaHref(cta, fallback)` resolves a `ctaBlock` to a path.
+  It used to live inside `CtaLink.astro`, so nothing else could ask where a button goes. It reads page routes from
+  `SINGLETON_LIVE_PATHS` (`nav-href.ts`), the same table the menus use, so a page type has one route. `CtaLink` now
+  calls it.
+- **A8 `cta-budget.ts` (PORTABLE).** `repeatsHeaderCta(href, header)`: a body button that goes to the page the header
+  button opens (while the header shows it) repeats it, so it draws secondary and does not spend the page's one accent
+  button; the accent passes to the next real step, or to nothing. `SectionRenderer` folds it into `drawsPrimary`.
+  This is the one visible change: a hero or closing band whose button goes where the header button goes (by default
+  both go to Contact) now draws outlined. A site that wants the old look points the header button elsewhere.
+- **A10 optional second header button.** Site settings > Navigation > "Second header button (optional)":
+  a label and a link (`headerSecondary`). `resolveSiteSettings` returns it as `null` until both halves are filled and
+  the link resolves, so the header and the phone menu draw it with one `&&` and an untouched site is byte-identical.
+  Drawn outlined (the secondary style), left of the header button on desktop and under it in the phone menu.
+- **A18 `src/lib/page-switches.ts` (PORTABLE, new, with tests).** "Show in the top menu" and "Show in the footer" on a
+  custom page were fetched (`getNavPages`) but never read. `mergePageSwitches` now appends a ticked page to the menu
+  (honoring "Where in the top menu": its own item, or under a Services or Resources dropdown when the menu has one)
+  and to the last footer column, never twice. `Header.astro` merges the menu. `Footer.astro` merges only when custom
+  footer columns are set; the built-in footer is bespoke markup with no column list to add to.
+- **A19 `src/lib/published-links.ts` (PORTABLE, new, with tests).** Rule plus helper: a hard-coded link to a page the
+  editor makes in the Studio carries `studio: '<slug>'` and is filtered through `linkableRows(rows, here, slugs, max)`
+  with `getAllPageSlugs()`, so a renamed, archived or unpublished page (or a CI build with no dataset) never leaves a
+  broken link, and the row after it takes its place. The starter has no such row yet; the where-next footer (card 191)
+  is the first consumer.
+- **P2 `src/lib/page-path.ts` (PORTABLE, new, with tests).** `publicPath()` strips `/preview` so anything that looks a
+  page up by its address behaves the same in the draft preview. `Header.astro` uses it, so Home's "active" state works
+  at `/preview/`.
+- **A33 `CopyEmailButton.astro`.** The React island and the Sonner `Toaster` are gone: one delegated click handler,
+  the icon turns into a tick, and a visually hidden live region says "Email address copied". React, the toast library
+  and its region no longer load on every page for one message. `ui/sonner.tsx` is left in place, unused.
+- **S4 one accent box and one subhead box per block.** `scriptAccentField()` (the older "Handwritten accent word")
+  now shows only on a block that already holds a word, on the four blocks that also have "Accent word in the heading"
+  (the hero has no twin, so it stays visible). `richTwin()` hides while empty, so only one "Subhead" box shows until
+  the in-canvas editor bolds a word. Hidden, never removed (rule 1): no stored value moves.
+- **S5 self-filling blocks.** The starter's `SELF_FILLING_SECTIONS` already listed its blocks; the rule is now written
+  at the list (add a block in the commit that adds it) and `authoring.test.ts` checks a fresh one of each raises no
+  "empty" finding.
+- **G2 search word breaks.** `{' '}` between the hero's two buttons and the closing band's two buttons (Pagefind read
+  "BookCall"), and the rule in `docs/agent/site-search.md`: decorative fact lines get `data-pagefind-ignore="all"`.
+  Flex rows, so nothing moves on screen.
+- **S12 `src/sanity/ownNewsletter.ts`.** One switch (`OWN_NEWSLETTER`, default true) hides every screen about the
+  website's own newsletter for a site whose list lives elsewhere: Home's card (`features.newsletter`), the Quick update
+  jobs, Content > Newsletter, the "+" menu, the Site Guide page and its field link. The schema type stays registered.
+  Extends card 163, which hid Home's card only.
+
+**Not done, and why.** Auburn's `give.ts` (the second header button repointed by one Church Trac field) is church
+wiring; the generic half is A10. Auburn's `OWN_NEWSLETTER_TOUR` has no starter tour, so only the constant exists.
+
+**Proved:** unit tests for each pure piece (`cta-budget`, `cta-href`, `page-switches`, `page-path`,
+`published-links`, `authoring`); `npm run typegen`, `npm run check`, `npm run test:unit` and `npm run build`;
+screenshots of the header at 375 and 1280 with and without the second button.
+
+**Applied:** starter (this card). first-baptist-auburn already runs the same ideas in its own files
+(`red-budget.ts`, `give.ts`, `ownNewsletter.ts`); its sync PR takes the PORTABLE copies. Other sites: the six PORTABLE
+files plus the per-site edits (`CtaLink`, `SectionRenderer`, `Header`, `Footer`, `MobileNav`, `CopyEmailButton`,
+`BaseLayout`, the schema fields and `siteSettings.ts`/`queries.ts`), in the Phase 2 rollout.

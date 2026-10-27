@@ -29,6 +29,14 @@ exits without importing pagefind.
 - Never the Studio or `/preview/**`: they are SSR and use their own layouts.
 - To hide one block inside an indexed page, add `data-pagefind-ignore` to it (for example a long list repeated on every
   page).
+- **Keep decorative fact lines out of the index** (card 187). A line that only repeats facts the page already says
+  properly (a "Open Tue to Sat, 12 Main Street" strip that mirrors the header note and the hours card) gets
+  `data-pagefind-ignore="all"`, or search shows the same fact twice per page.
+- **Real spaces between inline pieces** (card 187). Pagefind reads the text of the HTML, and two elements that sit
+  side by side with no whitespace between them read as one word: two buttons became "BookCall", a `<dt>` and `<dd>`
+  became "9:45Sunday". A `{' '}` between sibling spans, buttons and `dt`/`dd` pairs gives search its word breaks and
+  changes nothing on screen when the parent is flex or grid (the hero and closing-band button rows now carry one).
+  Copy-paste and reader modes are tidier for it too.
 
 ## Uploaded files (card 154)
 

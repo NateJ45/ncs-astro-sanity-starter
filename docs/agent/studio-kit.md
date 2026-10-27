@@ -1090,7 +1090,7 @@ and staff view place `messages`. PORTS.md card 117 has the full file list.
 - **Mail** (`src/sanity/mail/`, `ncsMailTools()` before the kit, card 127): "Send a test to me" and "Send to
   everyone" on the `newsletter` type (`/api/studio/newsletter/`, batches until done, never twice), the **RSVPs** tool
   (`/api/studio/rsvps/`, counts, replies, CSV), Home's Newsletter card and RSVP rows in Coming up
-  (`features.mail`; `features.newsletter: false` drops the Newsletter card alone, card 163, for a list kept
+  (`features.mail`; `features.newsletter: false` drops the Newsletter card alone, card 163; `OWN_NEWSLETTER = false` in `src/sanity/ownNewsletter.ts` drops every newsletter screen at once, card 187: the card, the Quick update jobs, Content > Newsletter, the "+" menu and the Site Guide page, for a list kept
   elsewhere), and one RSVP line on top of Messages. Same auth order as Messages. The tested halves are
   `src/lib/mail-*.ts`; setup is OPERATIONS.md "Email".
 - **Morning change note**: not Studio code. `.github/workflows/change-note.yml` + `scripts/change-note.mjs`.
