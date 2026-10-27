@@ -43,6 +43,7 @@ import type { KitGuideBlock } from '../kit/guide/GuidePage';
 import { phoneGuides } from './phoneGuides.ts';
 import { peopleGuides } from './people.ts';
 import { linkGuides } from './links.ts';
+import { OWN_NEWSLETTER, OWN_NEWSLETTER_GUIDE } from '../ownNewsletter.ts';
 import type { FieldGuideMap } from '../../lib/studio-kit';
 
 export type DiyLevel = 'self' | 'ask' | 'mixed';
@@ -1116,6 +1117,14 @@ guides.push(...peopleGuides(SITE.contactName));
 // Short links and QR codes (PORTS.md card 171, guides/links.ts).
 guides.push(...linkGuides);
 
+// The newsletter guide goes while the list lives elsewhere (ownNewsletter.ts, card 187). Removed in
+// place, after every push above, because other files import `guides` as one array.
+if (!OWN_NEWSLETTER) {
+  for (let i = guides.length - 1; i >= 0; i--) {
+    if (guides[i].slug === OWN_NEWSLETTER_GUIDE) guides.splice(i, 1);
+  }
+}
+
 /**
  * Which guides "Help for this page" shows for each document type (kit.config.ts
  * guide.forType, PORTS.md card 110). '*' is the fallback for anything unlisted.
@@ -1135,7 +1144,7 @@ export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   ],
   privatePage: ['make-a-page-private', 'edit-a-page'],
   homePage: ['edit-a-page', 'images-and-alt', 'seo-fields'],
-  newsletter: ['send-the-newsletter'],
+  ...(OWN_NEWSLETTER ? { newsletter: [OWN_NEWSLETTER_GUIDE] } : {}),
   siteSettings: ['menus-and-footer', 'website-status', 'add-a-widget'],
   businessInfo: ['menus-and-footer'],
   redirect: ['rename-a-page'],

@@ -326,6 +326,8 @@ const wrapperHeight =
         {(primaryCta || secondaryCta) && (
           <div class="mt-l flex flex-wrap gap-s">
             {primaryCta && <CtaLink cta={primaryCta} variant={primaryVariant} onDark />}
+            {/* A space between the buttons so site search reads two words, not "BookCall" (card 187);
+                the row is flex, so it changes nothing on screen. */}{' '}
             {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" onDark />}
           </div>
         )}
@@ -367,6 +369,8 @@ const wrapperHeight =
         {(primaryCta || secondaryCta) && (
           <div class="mt-l flex flex-wrap gap-s">
             {primaryCta && <CtaLink cta={primaryCta} variant={primaryVariant} />}
+            {/* A space between the buttons so site search reads two words, not "BookCall" (card 187);
+                the row is flex, so it changes nothing on screen. */}{' '}
             {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" />}
           </div>
         )}

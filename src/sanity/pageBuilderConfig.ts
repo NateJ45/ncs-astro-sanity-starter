@@ -45,6 +45,12 @@ export const PAGE_BUILDER_TYPES = new Set<string>(Object.keys(SECTION_HOST_TYPES
  * Keep roughly in step with src/sanity/schemaTypes/sections.ts and
  * richSections.ts. A name that drifts off the list only costs a false "worth a
  * look", never a wrong page.
+ *
+ * RULE (card 187): a block whose content comes from another tab, a collection
+ * or Business info is added here in the SAME commit that adds the block. Without
+ * it a freshly added one is told "This section is empty... fill it in or remove
+ * it" when it is already full (FBC Auburn's Contact form and News list were).
+ * authoring.test.ts checks a fresh one of each listed block raises no warning.
  */
 const SELF_FILLING_SECTIONS = [
   'dynamicListSection',
