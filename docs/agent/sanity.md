@@ -42,7 +42,8 @@ All publicly-visible content lives in Sanity, not in code or markdown files. San
 **Core page singletons (section-driven):**
 
 - `homePage`, `aboutPage`, `servicesPage`, `processPage` — each has a `pageBuilder` array field using its page-specific section type list, plus SEO fields. Renders from `src/data/defaultSections.ts` when `pageBuilder` is empty.
-- `faqPage`, `contactPage`, `journalPage` + `journalEntry` + `journalCategory`, `privacyPage`, `notFoundPage` — these pages keep their own structured fields (they are not fully section-driven).
+- `contactPage`, `journalPage` + `journalEntry` + `journalCategory`, `privacyPage` — hybrid page builders (card 190): they keep their structured fields AND carry a `pageBuilder` ("Page layout" tab, last). Empty draws the classic page from the fields; filled draws the sections, the page's own piece being a block (`contactFormSection`, `journalPostsSection`, `privacyPolicySection`). See `docs/agent/page-architecture.md`.
+- `faqPage`, `notFoundPage` — these pages keep their own structured fields (they are not section-driven).
 - `studioGuide`, `studioNotes` — in-Studio editor handbook singletons (protected, Canvas-excluded, plain text throughout). The prose handbook itself lives in `src/sanity/guides/content.ts` as repo data, not as documents.
 
 **Reusable collections:**
