@@ -29,6 +29,10 @@ export const SECTION_HOST_TYPES: Readonly<Record<string, string>> = {
   // Private pages (card 122) are built from the same library.
   privatePage: 'pageBuilder',
   homePage: 'pageBuilder',
+  // Every main page a page builder (card 190).
+  contactPage: 'pageBuilder',
+  privacyPage: 'pageBuilder',
+  journalPage: 'pageBuilder', // scaffold: journal
   aboutPage: 'pageBuilder', // scaffold: about
   servicesPage: 'pageBuilder', // scaffold: services
   processPage: 'pageBuilder', // scaffold: process
@@ -53,6 +57,11 @@ export const PAGE_BUILDER_TYPES = new Set<string>(Object.keys(SECTION_HOST_TYPES
  * authoring.test.ts checks a fresh one of each listed block raises no warning.
  */
 const SELF_FILLING_SECTIONS = [
+  // Every main page a page builder (card 190): their words come from the Contact tab, the
+  // policy built into the site, and the Journal list.
+  'contactFormSection',
+  'privacyPolicySection',
+  'journalPostsSection', // scaffold: journal
   'dynamicListSection',
   'faqSection', // scaffold: faq
   'guaranteeSection',

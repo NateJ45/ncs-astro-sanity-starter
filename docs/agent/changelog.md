@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-27: every main page a page builder: Contact, Privacy and Journal (PORTS card 190)._
+
+**Decision.** Ported from first-baptist-auburn. Each page's fixed piece (the form, the policy, the post list) became a block, and each singleton gained a `pageBuilder` so the editor can put sections around it and gets "Insert a saved section". Unlike About, an empty layout does not render a default section array: it draws the page exactly as before (same hero, same block component fed by the document), which is what lets a site take the card with no migration. Proved with `npm run parity`: contact, privacy and journal differ only in stylesheet link names (and four spaces of indentation in a text node). `scripts/main-pages-builder.mjs` fills a layout from the old fields when the editor should be able to rearrange. Old fields stay (rule 16). Privacy's required hero headline, date and body are required only while the layout is empty.
+
 _2026-10-27: eleven small fixes from first-baptist-auburn (PORTS card 187)._ A body button that repeats the header button draws secondary (`cta-budget.ts`); an optional second header button (Site settings > Navigation); a custom page's menu and footer switches now add the page (`page-switches.ts`); `ctaHref()`, `publicPath()` and `linkableRows()` as shared helpers; the copy-email button is Astro and the Sonner toast region is gone; one accent box and one subhead box per block in the Studio (hidden, never removed); word breaks for site search between side-by-side buttons; and `OWN_NEWSLETTER` hides every newsletter screen for a site whose list lives elsewhere. No stored value moves; an untouched site only changes where a hero or band button repeats the header button.
 
 _2026-10-26: popups, one at a time, with guard rails (PORTS card 170)._
