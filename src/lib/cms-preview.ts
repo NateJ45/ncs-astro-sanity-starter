@@ -167,6 +167,10 @@ const NON_STEGA_FIELDS = new Set([
   // leaves booleans alone today, listed so the rule 8b audit finds it.
   'embedCode',
   'runsOnPage',
+  // The form builder (card 194): a form's kind picks the private branch and its
+  // recipient key is matched to a name and an address (src/lib/site-form.ts).
+  'mode',
+  'recipient',
 ]);
 
 export function getPreviewClient(draftMode: boolean): SanityClient {

@@ -35,6 +35,7 @@ import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
 import RsvpSection from '@/components/sections/RsvpSection.astro';
+import FormSection from '@/components/sections/FormSection.astro';
 import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
 import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
@@ -372,6 +373,8 @@ const editKeyOf = (block: unknown) => {
         />
       ) : s._type === 'rsvpSection' ? (
         <RsvpSection block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : s._type === 'formSection' ? (
+        <FormSection block={s} surface={surface ?? 'background'} headingId={headingId} />
       ) : s._type === 'embedSection' ? (
         <EmbedSection
           eyebrow={s.eyebrow}

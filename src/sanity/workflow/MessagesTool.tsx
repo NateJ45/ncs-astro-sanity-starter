@@ -150,7 +150,8 @@ function Detail({
               // Card 131: a prayer request is a gentle sky callout, never a caution.
               <KitScope>
                 {message.prayer ? (
-                  <KitNotice tone="note" title="Prayer request">
+                  // A prayer request or a private form (card 194): `from` names which.
+                  <KitNotice tone="note" title={message.from}>
                     {message.note}
                   </KitNotice>
                 ) : (

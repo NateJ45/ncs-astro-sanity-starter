@@ -127,7 +127,8 @@ export function statusFor(stored: string | undefined, emailed: boolean): Message
   return emailed ? 'new' : 'needs-person';
 }
 
-const isPrayer = (row: FormRow) => row.mode === 'prayer';
+// 'private' is the form builder's name (card 194); 'prayer' is FBC Auburn's original one.
+const isPrayer = (row: FormRow) => row.mode === 'prayer' || row.mode === 'private';
 
 export function contactItem(row: ContactRow, stored?: string): MessageListItem {
   const emailed = row.notified === 1;
@@ -151,7 +152,11 @@ export function formItem(row: FormRow, stored?: string): MessageListItem {
     key: keyOf('form', row.id),
     source: 'form',
     id: row.id,
-    from: prayer ? 'Prayer request' : row.name || 'No name given',
+    from: prayer
+      ? row.mode === 'prayer'
+        ? 'Prayer request'
+        : 'Private message'
+      : row.name || 'No name given',
     form: row.form_title || 'A form',
     receivedAt: row.received_at,
     status: statusFor(stored, emailed),
@@ -194,10 +199,12 @@ export function formDetail(row: FormRow, stored?: string): MessageDetail {
       subject: null,
       answers: [],
       sentTo: null,
-      note:
-        row.notified === 1
-          ? 'A prayer request arrived and was emailed. Its words are not kept or shown here.'
-          : 'A prayer request arrived but the email did not go out. Its words are held privately and are not shown here. Ask for help to have it sent again.',
+      note: (() => {
+        const what = row.mode === 'prayer' ? 'A prayer request' : 'A private message';
+        return row.notified === 1
+          ? `${what} arrived and was emailed. Its words are not kept or shown here.`
+          : `${what} arrived but the email did not go out. Its words are held privately and are not shown here. Ask for help to have it sent again.`;
+      })(),
     };
   }
   return {
@@ -251,15 +258,15 @@ const TABLE: Record<MessageSource, string> = {
 // formDetail never returns it, and the list never reads it at all.
 const LIST_COLUMNS: Record<MessageSource, string> = {
   contact: 'id, received_at, name, subject, notified',
-  form: "id, received_at, form_id, form_title, mode, CASE WHEN mode = 'prayer' THEN NULL ELSE name END AS name, notified",
+  form: "id, received_at, form_id, form_title, mode, CASE WHEN mode IN ('prayer', 'private') THEN NULL ELSE name END AS name, notified",
 };
 const DETAIL_COLUMNS: Record<MessageSource, string> = {
   contact: 'id, received_at, name, email, subject, message, notified, notify_error',
   form:
     'id, received_at, form_id, form_title, recipient, mode, ' +
-    "CASE WHEN mode = 'prayer' THEN NULL ELSE name END AS name, " +
-    "CASE WHEN mode = 'prayer' THEN NULL ELSE email END AS email, " +
-    "CASE WHEN mode = 'prayer' THEN NULL ELSE answers END AS answers, " +
+    "CASE WHEN mode IN ('prayer', 'private') THEN NULL ELSE name END AS name, " +
+    "CASE WHEN mode IN ('prayer', 'private') THEN NULL ELSE email END AS email, " +
+    "CASE WHEN mode IN ('prayer', 'private') THEN NULL ELSE answers END AS answers, " +
     'notified, notify_error, cleared',
 };
 
