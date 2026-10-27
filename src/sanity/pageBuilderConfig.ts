@@ -53,9 +53,12 @@ export const PAGE_BUILDER_TYPES = new Set<string>(Object.keys(SECTION_HOST_TYPES
  * authoring.test.ts checks a fresh one of each listed block raises no warning.
  */
 const SELF_FILLING_SECTIONS = [
+  'documentsSection', // scaffold: documents
   'dynamicListSection',
   'faqSection', // scaffold: faq
   'guaranteeSection',
+  // Its words are the channel's newest video, read at build time (card 197).
+  'latestVideoSection',
   'logoStripSection',
   'processSection', // scaffold: process
   'serviceAreaSection',

@@ -112,6 +112,7 @@ export const TYPE_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   announcement: 'notice',
   popup: 'notice',
   testimonial: 'testimonial',
+  libraryDocument: 'download',
   faqCategory: 'questionGroup',
   faqItem: 'question',
   philosophyPoint: 'value',

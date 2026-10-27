@@ -240,6 +240,38 @@ const SECTIONS: Record<string, unknown>[] = [
   },
   // The email backbone (card 127): the made-up event in mail-fixtures.ts.
   { ...FIXTURE_RSVP_BLOCK, _type: 'rsvpSection' },
+  // The latest video (card 197): a sample with no picture and no network call.
+  {
+    _type: 'latestVideoSection',
+    _key: 'latest-video',
+    heading: 'Latest video',
+    intro: 'The newest upload from your YouTube channel, kept up to date for you.',
+    channelId: 'UCsampleSampleSampleSample',
+    showChannelLink: true,
+    _fixture: true,
+  },
+  // scaffold: documents
+  {
+    _type: 'documentsSection',
+    _key: 'documents',
+    heading: 'Documents',
+    intro: 'Forms, price lists and reports people can download.',
+    limit: 4,
+    showDates: true,
+    items: [
+      ['Price list 2027', 'The newest version, in force from January.', '2026-10-01'],
+      ['Order form', 'Print it, fill it in, send it back.', '2026-08-15'],
+      ['Terms of service', '', '2026-03-02'],
+    ].map(([title, note, date], i) => ({
+      _id: `doc${i}`,
+      title,
+      note,
+      date,
+      category: 'Forms',
+      file: { url: '#', size: 245760, extension: 'pdf' },
+    })),
+  },
+  // scaffold:end
   // scaffold: about
   {
     _type: 'founderSection',

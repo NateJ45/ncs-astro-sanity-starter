@@ -1,0 +1,47 @@
+---
+// scaffold-file: documents
+// Safe to edit by hand
+// One file on the documents shelf (PORTS.md card 197): a document mark, the title as the link
+// (it opens the file), the note, and the date with the kind and size of file ("PDF, 240 KB"), so
+// nobody is surprised by a large download on a phone. Rendered inside a <ul role="list">.
+import { fileLabel, type LibraryDocument } from '@/lib/documents';
+import { formatDate } from '@/lib/format-date';
+
+interface Props {
+  item: LibraryDocument;
+  showDate?: boolean;
+}
+const { item: d, showDate = true } = Astro.props;
+const label = fileLabel(d.file);
+const meta = [showDate ? formatDate(d.date) : '', label].filter(Boolean).join(' · ');
+---
+
+<li class="document-row flex items-start gap-s border-b border-border py-s last:border-b-0">
+  <svg
+    class="mt-1 h-6 w-6 shrink-0 text-muted-foreground"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linejoin="round"
+    ></path>
+  </svg>
+  <div class="min-w-0">
+    <a
+      class="font-medium text-foreground underline underline-offset-4 decoration-1 hover:decoration-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      href={d.file?.url ?? undefined}
+      target="_blank"
+      rel="noopener"
+    >
+      {d.title}
+      <span class="sr-only"> (opens the file{label ? `, ${label}` : ''})</span>
+    </a>
+    {d.note && <p class="mt-1 text-sm text-muted-foreground">{d.note}</p>}
+    {meta && <p class="mt-1 text-sm text-muted-foreground">{meta}</p>}
+  </div>
+</li>

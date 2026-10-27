@@ -216,6 +216,12 @@ export type PrivatePage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & ColumnsSection)
     | ({
         _key: string;
@@ -435,6 +441,32 @@ export type FaqCategory = {
   title?: string;
   slug?: Slug;
   displayOrder?: number;
+};
+
+export type SanityFileAssetReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset';
+};
+
+export type LibraryDocument = {
+  _id: string;
+  _type: 'libraryDocument';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  category?: string;
+  date?: string;
+  file?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
+  };
+  note?: string;
+  expires?: string;
+  publishAt?: string;
 };
 
 export type Popup = {
@@ -1081,6 +1113,12 @@ export type SectionPreset = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & ColumnsSection)
     | ({
         _key: string;
@@ -1617,6 +1655,23 @@ export type ColumnsSection = {
   look?: 'standard' | 'quiet' | 'feature';
 };
 
+export type DocumentsSection = {
+  _type: 'documentsSection';
+  heading?: string;
+  intro?: string;
+  category?: string;
+  limit?: number;
+  showDates?: boolean;
+};
+
+export type LatestVideoSection = {
+  _type: 'latestVideoSection';
+  heading?: string;
+  intro?: string;
+  channelId?: string;
+  showChannelLink?: boolean;
+};
+
 export type RsvpSection = {
   _type: 'rsvpSection';
   heading?: string;
@@ -1951,6 +2006,12 @@ export type Page = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -2389,6 +2450,12 @@ export type ProcessPage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & ColumnsSection)
     | ({
         _key: string;
@@ -2488,6 +2555,12 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -2629,6 +2702,12 @@ export type AboutPage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -2829,6 +2908,12 @@ export type HomePage = {
     | ({
         _key: string;
       } & RsvpSection)
+    | ({
+        _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
     | ({
         _key: string;
       } & ColumnsSection)
@@ -3219,6 +3304,8 @@ export type AllSanitySchemaTypes =
   | FaqCategoryReference
   | FaqItem
   | FaqCategory
+  | SanityFileAssetReference
+  | LibraryDocument
   | Popup
   | Announcement
   | StudioNotes
@@ -3255,6 +3342,8 @@ export type AllSanitySchemaTypes =
   | PhotoSection
   | ButtonRowSection
   | ColumnsSection
+  | DocumentsSection
+  | LatestVideoSection
   | RsvpSection
   | EmbedSection
   | LogoStripSection

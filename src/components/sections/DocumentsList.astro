@@ -1,0 +1,52 @@
+---
+// scaffold-file: documents
+// Safe to edit by hand
+// Page-builder block (PORTS.md card 197): "Documents". The newest current files of one group (or
+// every group), as a list of download rows. Which are current is worked out at build time
+// (src/lib/documents.ts): a file past its "take it down after" date drops off on the next
+// morning's rebuild. A content block: the surface comes from the cadence.
+//
+// With nothing to show (no documents yet, or none in that group) the block draws nothing, not an
+// empty frame. The items arrive in `items` from the GROQ arm in queries.ts.
+import DocumentRow from '@/components/DocumentRow.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import { surfaceClass, type CadenceSurface } from '@/lib/surfaces';
+import { currentDocuments, type LibraryDocument } from '@/lib/documents';
+
+interface Props {
+  heading?: string;
+  intro?: string;
+  category?: string;
+  limit?: number;
+  showDates?: boolean;
+  items?: LibraryDocument[] | null;
+  surface?: CadenceSurface;
+  headingId: string;
+  now?: Date;
+}
+const {
+  heading = 'Documents',
+  intro,
+  category,
+  limit = 6,
+  showDates = true,
+  items = [],
+  surface = 'background',
+  headingId,
+  now = new Date(),
+} = Astro.props;
+const list = currentDocuments(items ?? [], now, category, Math.max(1, Math.min(24, limit ?? 6)));
+---
+
+{list.length > 0 && (
+  <section class={surfaceClass(surface)} aria-labelledby={headingId}>
+    <div class="mx-auto max-w-content px-m py-section-lg" data-reveal>
+      <SectionHeading headline={heading} subhead={intro} headingId={headingId} />
+      <ul class="mt-section-md max-w-3xl" role="list">
+        {list.map((d) => (
+          <DocumentRow item={d} showDate={showDates} />
+        ))}
+      </ul>
+    </div>
+  </section>
+)}

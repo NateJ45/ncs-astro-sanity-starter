@@ -51,9 +51,11 @@ function arrayMembers(value: unknown, out: Record<string, unknown>[] = []) {
   return out;
 }
 
-/** Block type names declared in a schema library file. */
+/** Block type names declared in a schema library file ([] when a scaffold removed the file). */
 function declaredTypes(file: string): string[] {
-  const src = readFileSync(new URL(`../sanity/schemaTypes/${file}`, import.meta.url), 'utf8');
+  const url = new URL(`../sanity/schemaTypes/${file}`, import.meta.url);
+  if (!existsSync(url)) return [];
+  const src = readFileSync(url, 'utf8');
   return [...src.matchAll(/defineType\(\{\s*name:\s*'([A-Za-z]+)'/g)].map((m) => m[1]);
 }
 
@@ -315,6 +317,9 @@ const LIBRARY = [
   ...declaredTypes('sections.ts'),
   ...declaredTypes('builderSections.ts'),
   ...declaredTypes('richSections.ts'),
+  // Each in a file of its own (card 197); the documents one goes with its scaffold capability.
+  ...declaredTypes('latestVideoSection.ts'),
+  ...declaredTypes('documentsSection.ts'),
 ].filter((t) => t !== 'syncedSection');
 
 describe('page templates (src/sanity/pageTemplates.ts)', () => {

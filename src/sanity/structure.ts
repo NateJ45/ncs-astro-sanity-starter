@@ -65,6 +65,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'announcement', // placed explicitly under Content → Announcements
   'popup', // placed explicitly under Content → Popups, after Announcements
   'testimonial', // scaffold: testimonials
+  'libraryDocument', // scaffold: documents
   'faqItem', // scaffold: faq
   'faqCategory', // scaffold: faq
   'journalEntry', // scaffold: journal
@@ -360,6 +361,11 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
                 .title('FAQ Categories')
                 .icon(typeIcon('faqCategory')), // scaffold: faq
               S.documentTypeListItem('faqItem').title('FAQ Items').icon(typeIcon('faqItem')), // scaffold: faq
+              // scaffold: documents
+              S.documentTypeListItem('libraryDocument')
+                .title('Documents')
+                .icon(typeIcon('libraryDocument')),
+              // scaffold:end
 
               S.divider(),
 

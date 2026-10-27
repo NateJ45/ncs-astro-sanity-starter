@@ -46,6 +46,8 @@ import {
 } from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
 import { rsvpSection } from './rsvpSection';
+import { latestVideoSection } from './latestVideoSection';
+import { documentsSection } from './documentsSection'; // scaffold: documents
 // The builder kit (PORTS.md card 173): columns, buttons, a wide photo, fold-outs,
 // tabs, a countdown, a dated notice, a timeline, a letter and the event blocks.
 import { BUILDER_INSERT_GROUPS, builderSectionSchemas } from './builderSections';
@@ -700,6 +702,9 @@ export const pageSectionSchemas = [
   embedSection,
   // The email backbone (card 127): replies kept in D1, never in Sanity.
   rsvpSection,
+  // The latest video from a YouTube channel, read at build time (card 197).
+  latestVideoSection,
+  documentsSection, // scaffold: documents
   // The builder kit (builderSections.ts, PORTS.md card 173).
   ...builderSectionSchemas,
 ];
@@ -744,7 +749,11 @@ export const sectionThumbnailUrl = (type: string): string | undefined =>
 // (say, a church's service times and giving blocks) appends ITS groups here, or
 // spreads them in, and never edits the base list below: a group with a name that
 // already exists gains the types, a new name becomes a new group at the end.
-const SITE_INSERT_GROUPS: InsertGroup[] = [...BUILDER_INSERT_GROUPS];
+const SITE_INSERT_GROUPS: InsertGroup[] = [
+  ...BUILDER_INSERT_GROUPS,
+  { name: 'media', title: 'Media', of: ['latestVideoSection'] },
+  { name: 'files', title: 'Files to download', of: ['documentsSection'] }, // scaffold: documents
+];
 
 export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
   filter: true,

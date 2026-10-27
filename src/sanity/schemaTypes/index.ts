@@ -35,6 +35,7 @@ import { siteSettings } from './siteSettings';
 import { studioGuide } from './studioGuide';
 import { studioNotes } from './studioNotes';
 import { testimonial } from './testimonial'; // scaffold: testimonials
+import { libraryDocument } from './libraryDocument'; // scaffold: documents
 
 export const schemaTypes = [
   // Object types (embedded) first so they're defined before docs that reference them
@@ -69,6 +70,7 @@ export const schemaTypes = [
   announcement, // site-wide banner collection (enabled + date-windowed)
   popup, // popups (card 170): one at a time, date-windowed, src/lib/popup.ts
   testimonial, // scaffold: testimonials
+  libraryDocument, // scaffold: documents
   faqCategory, // scaffold: faq
   faqItem, // scaffold: faq
   philosophyPoint, // scaffold: philosophy

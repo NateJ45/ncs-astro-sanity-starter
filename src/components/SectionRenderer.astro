@@ -35,6 +35,8 @@ import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
 import RsvpSection from '@/components/sections/RsvpSection.astro';
+import LatestVideo from '@/components/sections/LatestVideo.astro';
+import DocumentsList from '@/components/sections/DocumentsList.astro'; // scaffold: documents
 import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
 import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
@@ -372,6 +374,20 @@ const editKeyOf = (block: unknown) => {
         />
       ) : s._type === 'rsvpSection' ? (
         <RsvpSection block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : s._type === 'latestVideoSection' ? (
+        <LatestVideo block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : // scaffold-branch: documents
+      s._type === 'documentsSection' ? (
+        <DocumentsList
+          heading={s.heading}
+          intro={s.intro}
+          category={s.category}
+          limit={s.limit}
+          showDates={s.showDates}
+          items={s.items ?? []}
+          surface={surface ?? 'background'}
+          headingId={headingId}
+        />
       ) : s._type === 'embedSection' ? (
         <EmbedSection
           eyebrow={s.eyebrow}
