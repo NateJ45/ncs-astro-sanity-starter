@@ -843,20 +843,21 @@ the first surfaces drawn in it; card 131 (below) moves the other kit surfaces ov
 **The site's devices** are named in `brand/brand.config.json` `studio.look` (schema in `brand.config.schema.json`).
 Every family site should differ in FORM, not only colour. Unset keys take the starter's neutral defaults.
 
-| Key                    | What it is                                                                               | Starter default        |
-| ---------------------- | ---------------------------------------------------------------------------------------- | ---------------------- |
-| `marker`               | The section marker: `dot`, `steps`, `rule`, `diamond`, or art `{ src, width, height }`   | `dot`                  |
-| `markerColor`          | Colour for a built-in marker                                                             | the accent             |
-| `markColors`           | The numbered stones' colours, in order                                                   | the accent             |
-| `stone`                | Stone shape: `pebble` (seeded, hand-laid), `round`, `square`, `lozenge`                  | `round`                |
-| `connector`            | What joins numbered steps: `{ kind: dashes / dots / line / none, color }`                | a plain line           |
-| `tones`                | Callout hues `{ note, tip, careful }`; grounds and title colours are worked out          | accent, amber, rust    |
-| `motif`, `motifNarrow` | The strip along a banner's foot (and its phone version), SVGs in `public/`               | none: the colour edge  |
-| `texture`              | A repeating tile for featured panels                                                     | none                   |
-| `edgeColors`           | The ColourEdge's colours, left to right                                                  | `markColors`           |
-| `lettering`            | Banner titles in the site's display lettering `{ family, src, colors }`                  | none: the heading font |
-| `motion`               | How things arrive: `lay` (stones set down in turn), `draw` (the connector draws), `none` | `draw`                 |
-| `splash`               | Under the splash's name: `path` (the stones) or `motif` (the site's own art, card 162)   | `path`                 |
+| Key                    | What it is                                                                                                                      | Starter default        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `marker`               | The section marker: `dot`, `steps`, `rule`, `diamond`, or art `{ src, width, height }`                                          | `dot`                  |
+| `markerColor`          | Colour for a built-in marker                                                                                                    | the accent             |
+| `markColors`           | The numbered stones' colours, in order                                                                                          | the accent             |
+| `stone`                | Stone shape: `pebble` (seeded, hand-laid), `round`, `square`, `lozenge`, `brick` (a printed course with a darker rim, card 180) | `round`                |
+| `stoneFlecks`          | A print texture over every filled stone, an SVG in `public/` (card 180)                                                         | none                   |
+| `connector`            | What joins numbered steps: `{ kind: dashes / dots / line / none, color }`                                                       | a plain line           |
+| `tones`                | Callout hues `{ note, tip, careful }`; grounds and title colours are worked out                                                 | accent, amber, rust    |
+| `motif`, `motifNarrow` | The strip along a banner's foot (and its phone version), SVGs in `public/`                                                      | none: the colour edge  |
+| `texture`              | A repeating tile for featured panels                                                                                            | none                   |
+| `edgeColors`           | The ColourEdge's colours, left to right                                                                                         | `markColors`           |
+| `lettering`            | Banner titles in the site's display lettering `{ family, src, colors }`                                                         | none: the heading font |
+| `motion`               | How things arrive: `lay` (stones set down in turn), `draw` (the connector draws), `none`                                        | `draw`                 |
+| `splash`               | Under the splash's name: `path` (the stones) or `motif` (the site's own art, card 162)                                          | `path`                 |
 
 Every colour is guarded: text at AA (4.5:1), markers, stones and focus rings at 3:1, banner lettering at 3:1 on the
 chrome. A failing colour is nudged until it passes; an unusable value is ignored with a note (`resolveLook().notes`).
