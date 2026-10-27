@@ -24,6 +24,7 @@ import { resolveShareImage, type CardRequest } from '@/lib/og-card-marker';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import SitePopup from '@/components/SitePopup.astro';
+import ClientNotes from '@/components/ClientNotes.astro';
 import BackToTop from '@/components/BackToTop';
 import Analytics from '@/components/Analytics.astro';
 import '@/styles/globals.css';
@@ -357,6 +358,10 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     </main>
 
     <Footer siteSettings={siteSettings} />
+
+    {/* The client review layer (card 195): renders nothing unless CLIENT_NOTES_ON is true in
+        src/data/client-notes.ts AND the site is on a pre-launch address. */}
+    <ClientNotes />
 
     {/*
       BackToTop was previously `client:load` which forced the JS to
