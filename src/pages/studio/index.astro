@@ -36,6 +36,12 @@
 // worker, scope /studio/, in a production build only. Both stay on this page:
 // the public website never registers a worker and never installs as an app.
 // Shapes and reasons: src/lib/studio-app.ts and public/studio/sw.js.
+//
+// AFTER A DEPLOY (card 179). A tab opened before a deploy asks for lazily
+// loaded code files the new build no longer has. The script below installs
+// installStaleChunkGuard() (src/lib/studio-stale-chunk.ts): it shows "The
+// Studio was updated" and reloads once, or offers a Reload button if it
+// already reloaded a moment ago.
 // =============================================================================
 import { StudioComponentHash } from '@sanity/astro/studio/studio-component.tsx';
 import brand from '../../../brand/brand.config.json';
@@ -175,6 +181,11 @@ const splashVars = [
     </style>
   </head>
   <body>
+    <script>
+      // Card 179: recover from a code file the last deploy removed.
+      import { browserGuardEnv, installStaleChunkGuard } from '../../lib/studio-stale-chunk';
+      installStaleChunkGuard(browserGuardEnv());
+    </script>
     <StudioComponentHash client:only="react">
       <div slot="fallback" class="ncs-splash" data-studio-splash role="status">
         <StudioSplash mode="loading">

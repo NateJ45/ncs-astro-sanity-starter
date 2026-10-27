@@ -15,11 +15,17 @@ import {
 import { useClient, useCurrentUser, useSchema, useWorkspace } from 'sanity';
 import { useRouter } from 'sanity/router';
 import {
+  cleanMarks,
   isStaffView,
+  MARKS_KEY,
+  MARKS_RELOADED_KEY,
+  marksNeedReload,
+  readMarks,
   readOverride,
+  STAFF_DOC_ID,
   studioTargetPath,
   VIEW_KEY,
-  WEEK_TYPE,
+  KIT_BOOKKEEPING_TYPES,
   type DeployAnswer,
   type StudioTarget,
   type ViewOverride,
@@ -81,19 +87,81 @@ export function tabStorage(): Storage | null {
   }
 }
 
+/** localStorage, or null where the browser blocks it. */
+function siteStorage(): Storage | null {
+  try {
+    return typeof window === 'undefined' ? null : window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+// Card 175: the marked ids as this browser last saw them, read once when the
+// Studio starts. The tools and document actions are decided synchronously from
+// this; useStaffMarks() re-reads the document and reloads if it changed.
+const bootMarks: string[] = readMarks(siteStorage());
+
 /** Is the staff view on for this person in this tab? (Non-hook: config reducers use it.) */
 export function staffViewFor(
   user: Parameters<typeof isStaffView>[0],
   config: Pick<KitConfig, 'staff'>,
 ): boolean {
-  return isStaffView(user, config.staff, readOverride(tabStorage()));
+  return isStaffView(user, config.staff, readOverride(tabStorage()), bootMarks);
+}
+
+/**
+ * Card 175: re-read the "Simple view" marks once signed in, remember them for
+ * the next visit, and reload once if they change this person's view. Mounted
+ * by the kit layout. Any failure (no read access, offline) keeps the old list.
+ */
+export function useStaffMarks(config: Pick<KitConfig, 'staff'>) {
+  const user = useCurrentUser();
+  const client = useClient({ apiVersion: API_VERSION });
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    client
+      .fetch<unknown>(`*[_id == $id][0].ids`, { id: STAFF_DOC_ID })
+      .then((ids) => {
+        if (cancelled) return;
+        const fresh = cleanMarks(ids);
+        try {
+          siteStorage()?.setItem(MARKS_KEY, JSON.stringify(fresh));
+        } catch {
+          /* storage blocked: the list is simply re-read next time */
+        }
+        const tab = tabStorage();
+        let reloaded = false;
+        try {
+          reloaded = tab?.getItem(MARKS_RELOADED_KEY) === '1';
+        } catch {
+          reloaded = true; // no way to remember a reload, so never risk a loop
+        }
+        const override = readOverride(tab);
+        if (marksNeedReload(user, config.staff, override, bootMarks, fresh, reloaded)) {
+          try {
+            tab?.setItem(MARKS_RELOADED_KEY, '1');
+          } catch {
+            return;
+          }
+          window.location.reload();
+        }
+      })
+      .catch(() => {
+        /* keep the list this browser already had */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [client, user, userId, config.staff]);
 }
 
 export function useStaffView(config: Pick<KitConfig, 'staff'>) {
   const user = useCurrentUser();
   const override = readOverride(tabStorage());
   return {
-    staffView: isStaffView(user, config.staff, override),
+    staffView: isStaffView(user, config.staff, override, bootMarks),
     overridden: override !== null,
     /** Switch for this tab and reload, so tools and menus are rebuilt. */
     switchTo: (view: Exclude<ViewOverride, null>) => {
@@ -237,8 +305,8 @@ export function useCheckup(config: KitConfig) {
     setBusy(true);
     setFailed(false);
     try {
-      // The kit's weekly tick documents (card 111) are bookkeeping, never content.
-      const ignore = new Set([...config.checkup.ignoreTypes, WEEK_TYPE]);
+      // The kit's weekly tick documents (card 111) and marks (card 175) are bookkeeping, never content.
+      const ignore = new Set([...config.checkup.ignoreTypes, ...KIT_BOOKKEEPING_TYPES]);
       const [all, site] = await Promise.all([client.fetch<Doc[]>(CHECKUP_QUERY), readSiteFiles()]);
       const docs = (all ?? []).filter((d) => !ignore.has(d._type));
       setResults(runCheckup(docs, config.checkup.rules, { nameOf, typeTitle, site }));
@@ -272,10 +340,10 @@ export const TOUR_OPEN_EVENT = 'ncs-studio-kit-tour-open';
 /** Fired once a Publish has landed (publishNote, Home's Publish), so the live line re-checks. */
 export const PUBLISHED_EVENT = 'ncs-studio-kit-published';
 
-// The kit's weekly tick documents (card 111) are written straight to the
-// dataset; they are bookkeeping, not a change to the website, so they never
+// The kit's weekly tick documents (card 111) and its marks (card 175) are
+// written straight to the dataset; they are bookkeeping, not a change to the website, so they never
 // count as "the newest publish".
-const NOT_SYSTEM_DOCS = `!(_type match "sanity.*") && !(_type match "system.*") && !(_type match "media.*") && !(_id in path("versions.**")) && !(_id match "_.**") && _type != "${WEEK_TYPE}"`;
+const NOT_SYSTEM_DOCS = `!(_type match "sanity.*") && !(_type match "system.*") && !(_type match "media.*") && !(_id in path("versions.**")) && !(_id match "_.**") && !(_type in ${JSON.stringify(KIT_BOOKKEEPING_TYPES)})`;
 
 /** Where the kit asks whether the last deploy went through (card 111). */
 export const DEPLOY_STATUS_PATH = '/api/studio/deploy-status/';

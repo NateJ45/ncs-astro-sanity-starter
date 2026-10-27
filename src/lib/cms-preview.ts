@@ -117,6 +117,10 @@ const NON_STEGA_FIELDS = new Set([
   'tone',
   'variant',
   'width',
+  // Card 170: a popup's "Which pages" and "How often" (src/lib/popup.ts compares both;
+  // an encoded value would fall back to every page / once per visitor in the preview).
+  'where',
+  'frequency',
   // The builder kit (builderSections.ts, PORTS.md card 173): the notice's
   // urgency picks its look, and the event and schedule times are read as
   // "HH:MM" by src/lib/builder-blocks.ts. (`layout` above covers the button row.)

@@ -62,9 +62,19 @@ person or a document type; everything site-specific comes in through `kitConfig`
 
 ## The staff view
 
-- Staff are a **listed** set of accounts in `kitConfig.staff`: Sanity user ids (preferred; they are not personal data,
-  so they can sit in a public repo) or email addresses. With an empty list, anyone who is not a Sanity administrator
-  gets the staff view. List an editor who is an administrator by id, and then the list decides, not the role.
+- Who is staff (card 175, 2026-10-26), three ways that add up:
+  1. **By role**: anyone whose Sanity role is not administrator (Editor, Contributor, Viewer). No setup.
+  2. **Listed** in `kitConfig.staff`: Sanity user ids (preferred; they are not personal data, so they can sit in a
+     public repo) or email addresses, whatever the role. The list ADDS to the role rule. Before card 175 a non-empty
+     list replaced it, so listing one administrator gave every Editor the full Studio.
+  3. **Marked** "Simple view" from the Studio (the People tool, card 176): the user ids on the kit's one
+     `studioStaff` document, id `kit.studioStaff` (an id path, so a public dataset never serves it). This is how a
+     helper invited as an Administrator gets the simple Studio on Sanity's Free plan, which has only Administrator
+     and Viewer. No deploy: the tools are decided when the Studio starts, from the list this browser last saw
+     (`localStorage`), and the kit layout re-reads the document once signed in and reloads once if it changes this
+     person's view. So a new mark applies on the marked person's next visit.
+- The staff view is a courtesy, not a lock. Sanity's roles are the permissions; a marked administrator can still
+  switch to the full Studio for a tab.
 - Staff see only `staffTools` (Home, Content, Live preview, Site Guide, Checkup), the desk without `staffHiddenPanes`,
   no Delete anywhere (everyday lists get Move to Trash; pages keep their Archive), only "Bring it back" in the Trash,
   and no perspective ("Drafts") menu or Releases link (hidden by CSS; see `STAFF_CSS`).
@@ -79,7 +89,8 @@ person or a document type; everything site-specific comes in through `kitConfig`
   Hand ticks live on one `studioWeek` document per week (id `studioWeek-<first day>`), written straight to the dataset,
   so the list starts fresh each week with nothing to reset. Home's lists, the Checkup and the "is it live?" check skip
   the type. **A site's publish webhook filter must skip it too**, or a tick rebuilds the site: add `"studioWeek"` to
-  the deny-list. `thisWeekTitle` renames the card ("Sunday checklist").
+  the deny-list (and `"studioStaff"`, the marks document, card 175). `KIT_BOOKKEEPING_TYPES` in `studio-kit.ts` lists
+  both for the kit's own queries. `thisWeekTitle` renames the card ("Sunday checklist").
 - **Is it live?**: `/build-info.json` against the newest published `_updatedAt`. Up to date, Updating, or (after
   `liveSlowAfterMinutes`) "taking longer than usual". Re-checks every minute. Until the Sanity publish webhook is set
   up, a publish waits for the next deploy, and the card says so after `liveSlowAfterMinutes`. Card 111: when the
@@ -799,6 +810,29 @@ Also outside the kit plugin; site choices in `src/sanity/studioEdges.config.ts`.
   those screens. The supported levers stay the workspace `icon`, `title` and `subtitle` (all drawn on the card)
   and the i18n words above. Revisit when `AuthConfig` gains a login component slot.
 
+## After a deploy: the open Studio reloads itself (card 179)
+
+The Studio loads most of its code lazily (a field's picker, an input, a tool), each a hashed file under `/_astro/`.
+Workers static assets keep only the current build's files, so after a deploy (every merge, every publish through the
+webhook) a tab opened earlier asks for a file that is gone. Sanity recovers at the desk level ("Import error ...
+Reloading now"), but a field's own error boundary showed a raw red "Failed to fetch dynamically imported module".
+
+- **What happens now.** The boot page calls `installStaleChunkGuard(browserGuardEnv())` from
+  `src/lib/studio-stale-chunk.ts`. It listens for Vite's `vite:preloadError` (every lazy import in the build goes
+  through Vite's preload helper) and for window `unhandledrejection` and `error`. On the first missing-file error it
+  shows "The Studio was updated. Reloading to carry on." and reloads after 2.5 s.
+- **No loops.** The reload time goes in sessionStorage (`ncs:studio:staleChunkReloadAt`). A second such error within
+  60 s does not reload: the notice says "Reload to carry on." with a Reload button, so a file genuinely missing from a
+  build cannot spin the tab.
+- **Edits are safe.** Sanity sends every change to the draft as the editor types (patches auto-commit on a 1 s throttle
+  in sanity 6.19), and the 2.5 s pause lets the last one land.
+- **Not done, on purpose:** keeping the previous build's files. `wrangler deploy` replaces the whole asset set, so it
+  would mean carrying old `/_astro/` files into each new dist from a CI cache, which grows without bound and still
+  misses a tab two deploys old.
+- **Check it by hand:** build, `npm run preview`, open `/studio/`, delete a lazy chunk from `dist/client/_astro/`
+  that the page has not loaded yet, then open the field that needs it. The notice appears and the page reloads.
+  `studio-stale-chunk.test.ts` covers the matching, the loop guard and blocked storage.
+
 ## The design language (card 128)
 
 The kit's own look, so the Studio's middle reads like the site and not like a generic app. Shared, PORTABLE primitives
@@ -1104,4 +1138,5 @@ Copy the PORTABLE files listed above, write the site's `kit.config.ts` (start fr
 is new), then open `/studio` and check Home opens first. PORTS.md card 106 has the full list; card 111 adds the deploy
 route's Worker settings, the two workflow changes (`deploy.yml` tells someone; `publish-due.yml` rebuilds after a
 publish), `"studioWeek"` in the publish webhook's filter, and `WEEK_TYPE` in `structure.ts`'s default-list hidden set
-(else the safety net lists "Weekly checklist" in the desk).
+(else the safety net lists "Weekly checklist" in the desk). Card 175 adds `studioStaff` the same way: `STAFF_TYPE` in
+that hidden set, `"studioStaff"` in the webhook filter, then `npm run typegen`.

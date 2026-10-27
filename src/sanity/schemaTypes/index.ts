@@ -3,6 +3,7 @@
 
 import { aboutPage } from './aboutPage'; // scaffold: about
 import { announcement } from './announcement';
+import { popup } from './popup';
 import { businessInfo } from './businessInfo';
 import { contactPage } from './contactPage';
 import { ctaBlock } from './ctaBlock';
@@ -66,6 +67,7 @@ export const schemaTypes = [
 
   // Reusable content collections
   announcement, // site-wide banner collection (enabled + date-windowed)
+  popup, // popups (card 170): one at a time, date-windowed, src/lib/popup.ts
   testimonial, // scaffold: testimonials
   faqCategory, // scaffold: faq
   faqItem, // scaffold: faq

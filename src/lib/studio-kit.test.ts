@@ -6,6 +6,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   checklist,
+  cleanMarks,
   comingSunday,
   deployProblem,
   drawsOwnHeader,
@@ -13,14 +14,21 @@ import {
   firstName,
   guideSectionId,
   greeting,
+  isAdministrator,
   isDone,
+  isMarked,
   isStaffUser,
   isStaffView,
   lastSunday,
   liveStatus,
+  MARKS_KEY,
+  marksNeedReload,
   navbarStatus,
   quickFormErrors,
+  readMarks,
   readOverride,
+  setMark,
+  STAFF_DOC_ID,
   studioTargetPath,
   timeAgo,
   VIEW_KEY,
@@ -36,8 +44,28 @@ const editor = { email: 'editor@example.org', roles: [{ name: 'editor' }] };
 describe('staff view', () => {
   it('a listed address is staff whatever the role, case-insensitively', () => {
     assert.equal(isStaffUser(admin, ['admin@example.org']), true);
-    assert.equal(isStaffUser(editor, ['admin@example.org']), false);
-    assert.equal(isStaffUser({ ...editor, id: 'pAbc123' }, ['pabc123']), true);
+    assert.equal(isStaffUser({ ...admin, id: 'pAbc123' }, ['pabc123']), true);
+    assert.equal(
+      isStaffUser({ ...admin, email: 'other@example.org' }, ['admin@example.org']),
+      false,
+    );
+  });
+
+  it('the list ADDS to the role rule (card 175): an unlisted editor stays staff', () => {
+    assert.equal(isStaffUser(editor, ['admin@example.org']), true);
+    assert.equal(isStaffUser({ email: 'v@example.org', roles: [{ name: 'viewer' }] }, ['x']), true);
+  });
+
+  it('a marked administrator is staff; marks match the user id exactly', () => {
+    const helper = { ...admin, id: 'pHelper1' };
+    assert.equal(isStaffUser(helper, [], ['pHelper1']), true);
+    assert.equal(isStaffUser(helper, [], ['phelper1']), false);
+    assert.equal(isStaffUser(helper, [], []), false);
+    assert.equal(isStaffUser({ ...admin, id: undefined }, [], ['']), false);
+    assert.equal(isMarked(helper, ['pHelper1']), true);
+    assert.equal(isAdministrator(helper), true);
+    assert.equal(isAdministrator(editor), false);
+    assert.equal(isAdministrator(null), false);
   });
 
   it('with no list, non-administrators are staff', () => {
@@ -51,6 +79,33 @@ describe('staff view', () => {
     assert.equal(isStaffView(admin, [], 'staff'), true);
     assert.equal(isStaffView(editor, [], 'full'), false);
     assert.equal(isStaffView(editor, [], null), true);
+    const helper = { ...admin, id: 'pHelper1' };
+    assert.equal(isStaffView(helper, [], null, ['pHelper1']), true);
+    assert.equal(isStaffView(helper, [], 'full', ['pHelper1']), false);
+  });
+
+  it('marks: cleaned, toggled, read back from storage', () => {
+    assert.deepEqual(cleanMarks(['pA1', ' pA1 ', 'pB2', 7, '', 'no spaces', null]), ['pA1', 'pB2']);
+    assert.deepEqual(cleanMarks('pA1'), []);
+    assert.deepEqual(setMark(['pA1'], 'pB2', true), ['pA1', 'pB2']);
+    assert.deepEqual(setMark(['pA1', 'pB2'], 'pA1', false), ['pB2']);
+    assert.deepEqual(setMark(['pA1'], 'pA1', true), ['pA1']);
+    const store = (v: string | null) => ({ getItem: (k: string) => (k === MARKS_KEY ? v : null) });
+    assert.deepEqual(readMarks(store('["pA1","pA1"]')), ['pA1']);
+    assert.deepEqual(readMarks(store('not json')), []);
+    assert.deepEqual(readMarks(null), []);
+    assert.ok(STAFF_DOC_ID.includes('.'), 'an id path, never served by the public API');
+  });
+
+  it('reloads only when a fresh list changes this person, once, with no tab choice', () => {
+    const helper = { ...admin, id: 'pHelper1' };
+    assert.equal(marksNeedReload(helper, [], null, [], ['pHelper1'], false), true);
+    assert.equal(marksNeedReload(helper, [], null, ['pHelper1'], [], false), true);
+    assert.equal(marksNeedReload(helper, [], null, [], ['pOther'], false), false);
+    assert.equal(marksNeedReload(helper, [], null, [], ['pHelper1'], true), false);
+    assert.equal(marksNeedReload(helper, [], 'full', [], ['pHelper1'], false), false);
+    assert.equal(marksNeedReload({ ...editor, id: 'pE' }, [], null, [], ['pE'], false), false);
+    assert.equal(marksNeedReload(null, [], null, [], ['pHelper1'], false), false);
   });
 
   it('reads only the two known choices, and survives blocked storage', () => {

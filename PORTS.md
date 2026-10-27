@@ -279,6 +279,348 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 172 | Embed provider registry: paste-and-go, unknown-script guard, per-build embed CSP        | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 174 | Form recipient addresses set in the Studio, kept in D1, confirmed by email              | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | no             |
+| 175 | Staff view by role; the staff list adds to it; "Simple view" marks from the Studio      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 176 | People tool: invite a Helper or an Administrator from the Studio                        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
+| --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
+| 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 2   | free-dist prebuild unlock                                                               | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 3   | page-parity harness                                                                     | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 4   | sanity-lib seed/patch plumbing                                                          | partial | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 | yes            |
+| 5   | stale-types CI guard                                                                    | yes     | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 | yes            |
+| 6   | Nightly Sanity backup workflow                                                          | yes     | yes         | template | yes              | yes           | yes            | template           | n/a                 | template       |
+| 7   | Uptime workflow                                                                         | yes     | yes         | template | yes              | yes           | yes            | template           | yes                 | template       |
+| 8   | Playwright + axe + reflow suite                                                         | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 | yes            |
+| 9   | contrast.ts + theme-token gate                                                          | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 10  | Embedded-studio live-preview stack                                                      | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 11  | Preview click interceptor                                                               | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 12  | Parity-gated page-builder conversion                                                    | partial | yes         | partial  | partial          | no            | no             | no                 | no                  | partial        |
+| 13  | react/react-dom exact pin                                                               | no      | yes         | yes      | yes              | yes           | no             | yes                | yes                 | yes            |
+| 14  | wrangler legacy_env pin                                                                 | no      | yes         | yes      | yes              | staged        | no             | yes                | no                  | yes            |
+| 15  | PENDING.md / TESTING.md docs registry                                                   | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 16  | Quarterly slop sweep                                                                    | no      | no          | no       | no               | no            | no             | no                 | no                  | no             |
+| 17  | In-canvas section controls (overlay insert/drag/duplicate/remove)                       | partial | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 18  | Chrome options (editable header/footer content)                                         | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 19  | Shareable draft links                                                                   | no      | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
+| 20  | publishAt scheduled publishing (free-tier)                                              | no      | no          | template | no               | no            | no             | template           | n/a                 | template       |
+| 21  | Pages as first-class objects (duplicate / archive / SEO panel)                          | partial | no          | yes      | partial          | no            | no             | yes                | n/a                 | yes            |
+| 22  | Redirects on rename                                                                     | yes     | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
+| 23  | Editor-defined forms                                                                    | yes     | no          | yes      | no               | no            | no             | yes                | no                  | yes            |
+| 24  | Saved sections (section presets)                                                        | partial | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
+| 25  | Pre-publish page checks                                                                 | partial | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
+| 26  | Appearance controls (surfaces, accents, rich twins, layout)                             | partial | yes         | partial  | partial          | no            | no             | yes                | no                  | partial        |
+| 27  | Undo & redo                                                                             | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 28  | Floating in-canvas controls (accent word, "Edit here")                                  | yes     | yes         | partial  | partial          | no            | no             | no                 | n/a                 | partial        |
+| 29  | Instant preview text                                                                    | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29a | Local edit-state channel (LiveDraftBridge)                                              | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29b | Refresh scheduler (single-flight / stale discard / floor)                               | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29c | Preview morph (in-place reconcile)                                                      | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29d | Staleness counts every channel                                                          | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 30  | One branch vocabulary (main only; staging abandoned 2026-10-03)                         | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | no             |
+| 31  | Studio welcome tour (StudioTour)                                                        | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
+| 32  | Branded tool headings (ToolHeading)                                                     | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
+| 33  | Year-scoped lists for accumulating types                                                | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | no             |
+| 34  | Studio search weights (__experimental_search)                                           | yes     | yes         | no       | yes              | no            | no             | no                 | n/a                 | no             |
+| 35  | The family test standard (gates, suites, budgets)                                       | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 | yes            |
+| 36  | sync-check as a CI gate                                                                 | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
+| 37a | Drift opens its own PR (propose-drift in CI)                                            | yes     | yes         | n/a      | yes              | yes           | yes            | no                 | yes                 | no             |
+| 39a | Restore drill + off-site backup copy                                                    | yes     | yes         | yes      | yes              | yes           | yes            | no                 | n/a                 | yes            |
+| 40a | Public-data audit in CI                                                                 | yes     | yes         | yes      | yes              | yes           | yes            | no                 | n/a                 | yes            |
+| 37  | Visual regression on a fixed-data styleguide                                            | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 38  | Studio Checkup (what needs attention)                                                   | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 39  | Year-rollover wizard                                                                    | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 40  | Studio Welcome pane (task cards)                                                        | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 41  | Guide handbook held as repo data                                                        | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 42  | External link health, on its own schedule                                               | yes     | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
+| 43  | Contrast for what axe declines to judge                                                 | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 44  | Fork residue audit                                                                      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 45  | The site's own contact endpoint                                                         | yes     | staged      | yes      | no               | no            | no             | no                 | no                  | yes            |
+| 46  | Share cards in the brand's real typeface                                                | no      | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
+| 47  | The icon set, from one drawing                                                          | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
+| 48  | Domain cutover script + zone audit                                                      | no      | no          | yes      | no               | no            | no             | n/a                | no                  | partial        |
+| 49  | Automation patterns (import-and-deploy, record-and-bake)                                | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 50  | Production deploy workflow                                                              | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 51  | Compressed static server for Lighthouse                                                 | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 52  | Radix islands hydrate at client:idle, not client:only                                   | n/a     | partial     | yes      | yes              | no            | no             | n/a                | yes                 | partial        |
+| 53  | One accent splitter (heading-accent absorbs scriptAccent)                               | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 54  | Analytics component (GA4 + Cloudflare beacon, canonical)                                | no      | no          | yes      | yes              | no            | no             | n/a                | yes                 | yes            |
+| 55  | Build reads always use the Sanity CDN; a PROD fetch error throws                        | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 56  | No page-level `.catch()` swallows the PROD throw                                        | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | partial        |
+| 57  | Preview cookie's value is checked, not its presence                                     | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | no             |
+| 58  | GA4 fires only on the production hostname                                               | n/a     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | no                  | no             |
+| 59  | `_headers`: one rule per path; /_astro/* owns its cache                                 | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
+| 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias                             | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | n/a                 | yes            |
+| 61  | Reduced motion zeroes transitions; a spec holds it                                      | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
+| 62  | Dependabot config: grouped, pinned stack ignored                                        | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | no             |
+| 63  | `astro dev`: pre-bundle what the first render discovers                                 | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 64  | Tailwind `@source not` for baselines and docs                                           | n/a     | no          | yes      | yes              | no            | n/a            | n/a                | no                  | yes            |
+| 65  | dynamicList slices at a literal max, trims in the component                             | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 66  | `confirmed` flag + Provisional badge for unsourced content                              | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 67  | Tinted-chip variant-matrix contrast gate                                                | yes     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 68  | Never regenerate package-lock.json; `npm ci`                                            | yes     | no          | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
+| 69  | No `--` inside an SVG/XML comment                                                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 70  | CI: parallel gates, sharded Playwright, scheduled Lighthouse                            | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 71  | Tracked `.claude/settings.json` deny rules + shared conventions import                  | no      | yes         | yes      | yes              | partial       | no             | n/a                | no                  | yes            |
+| 72  | Layout variants: structure as a brand.config axis                                       | no      | no          | yes      | no               | no            | no             | no                 | no                  | no             |
+| 73  | Design directions before reskin (brief, references, mockups)                            | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 74  | page-parity `--exclude` (parity-glob helper + test)                                     | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 75  | Playwright fixture: Sanity images from a disk cache                                     | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | yes            |
+| 76  | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`                   | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 77  | Preview morph keeps client-state classes (reveal state)                                 | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
+| 78  | `preview-stega.ts` exports `RUN_SOURCE`                                                 | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
+| 79  | Redirect destinations keep `?query` and `#fragment`                                     | no      | yes         | yes      | yes              | n/a           | no             | n/a                | n/a                 | yes            |
+| 80  | `sync-check` skips `_worktrees/` folders                                                | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 81  | llms-full identity from brand config; audit shared field consts                         | no      | yes         | yes      | no               | no            | no             | n/a                | n/a                 | yes            |
+| 82  | Invisible 44px hit area for small links                                                 | no      | yes         | yes      | yes              | yes           | no             | n/a                | yes                 | yes            |
+| 83  | `measure-tap-targets.mjs` 390px tap-target scan                                         | no      | yes         | yes      | no               | yes           | no             | n/a                | yes                 | no             |
+| 84  | Linux-runner font-swap layout-shift check (fallback faces, preload)                     | no      | no          | no       | yes              | no            | no             | n/a                | no                  | no             |
+| 85  | MapLibre 6.x: `setMissingStyleImageResolver` for generated icons                        | n/a     | n/a         | n/a      | n/a              | n/a           | no             | n/a                | n/a                 | yes            |
+| 86  | Production-write second factor (NCS_PRODUCTION_WRITE) for data scripts                  | n/a     | partial     | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 87  | Dead-weight scan: unused kits and packages inflate every page's CSS                     | n/a     | yes         | no       | no               | no            | yes            | n/a                | staged              | no             |
+| 88  | Cloudflare beacon starts after load and idle, not deferred in head                      | n/a     | no          | no       | no               | no            | no             | n/a                | staged              | no             |
+| 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`)          | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | no                  | yes            |
+| 90  | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                         | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 91  | One text/picture column split (`.split`) and `measure-columns.mjs`                      | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
+| 92  | Dependabot pins `astro` with its adapter; formatters in their own group                 | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | yes                 | yes            |
+| 93  | SanityImage srcset ladder starts at 160w; `sizes` trims dead steps                      | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | n/a                 | staged         |
+| 94  | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)                 | n/a     | staged      | yes      | staged           | staged        | no             | n/a                | staged              | staged         |
+| 95  | `audit:data`: live data vs compiled schema; `_type` backfill                            | n/a     | no          | yes      | no               | fork          | no             | n/a                | n/a                 | no             |
+| 96  | GA4 skips automated browsers (WebDriver, Lighthouse, PageSpeed, GTmetrix)               | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | staged              | staged         |
+| 97  | astro 7.4 with adapter 14.4.0 (wrangler stays 4.129)                                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 98  | Date labels independent of build-machine timezone (`formatDate`)                        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 99  | Scaffold markers stay out of PORTABLE files; styleguide wall marked                     | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 100 | Scaffold prunes the Lighthouse, smoke and uptime route lists                            | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 101 | Preview renders "no document" inside the layout, so Presentation connects               | n/a     | open        | yes      | open             | open          | n/a            | n/a                | n/a                 | open           |
+| 102 | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)           | n/a     | yes         | yes      | yes              | n/a           | no             | n/a                | staged              | n/a            |
+| 103 | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)                       | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
+| 104 | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file                 | n/a     | no          | yes      | n/a              | no            | no             | n/a                | n/a                 | no             |
+| 105 | A text hero (no photo, or editorial) still renders its buttons                          | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
+| 107 | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page           | n/a     | yes         | yes      | yes              | partial       | n/a            | n/a                | partial             | yes            |
+| 108 | The header logo renders with JS off (`<noscript>` light variant)                        | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 109 | Authoring kit: page templates, picture picker, patterns, synced sections                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
+| 110 | Studio looks like the site: name, mark, colours, status line, help panel                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
+| 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc           | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 112 | React 19.3.1, one copy in the tree                                                      | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it            | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | no                  | no             |
+| 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)                       | n/a     | yes         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 115 | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos              | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 116 | Studio as the site's admin: paper, navy chrome, fonts, text in site type                | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 117 | Studio workflow: change note, expiring preview links, Messages, table panes             | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering                     | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | yes            |
+| 119 | Studio icons by meaning, a picture on every list row                                    | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 120 | Studio edges: own /studio page and splash, site words, navbar wordmark                  | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | yes            |
+| 121 | Custom code in its own box; opt-in on-page and site-wide code                           | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | no                  | no             |
+| 122 | Hidden and password pages; Checkup link, heading and orphan checks                      | n/a     | no          | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 123 | Studio writing help (Claude API), Before you publish panel, AI visitors                 | n/a     | no          | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 124 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | yes            |
+| 125 | Studio on a phone (PWA), Post a photo, Earlier versions from backups                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | yes            |
+| 126 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | yes            |
+| 127 | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | yes            |
+| 128 | Studio design language (studio.look), shared UI pieces, Site Guide redesign             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 129 | Studio signs in by token (kit routes need it); recentIgnoreTypes                        | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 130 | Real screenshots in the Site Guide: per-site shot registry                              | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 131 | Every Studio surface in the design language (first pass)                                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 132 | Studio design pass two: Home, Post a photo, tour, splash, offline page                  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 133 | Studio polish from a signed-in review: Home's ways-in tiles                             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 134 | Field "How to" chip to the Site Guide; icons on every field group                       | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 135 | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS           | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 136 | Visitors card reads GA4 via studio-status; Search Console card on Home                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 137 | Spotlight tours, welcome, What's new, own clips, Quick update jobs as data              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 138 | CI builds from a pinned content snapshot; scheduled live-watch (non-blocking)           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 139 | Warn when a site's `studio.look` is still the neutral marker and stone                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 140 | Success toasts carry the Is-it-live stones (KitToastBody)                               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 141 | Quick update's yes/no field is a drawn switch, not a native checkbox                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 142 | How-to chip on date and datetime fields (they draw their own header)                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 146 | The Trash desk item shows a page of its own when empty (trashListItem)                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 145 | Home is a full-width dashboard: status rail at the right, main column, mobile-first     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 147 | Checkup in columns by level, with a count strip (LevelSummary)                          | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 148 | Quick update uses a wide pane: tile grid, and the form with a path rail beside it       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 149 | AI suggestion and the private-page password status are the kit's callouts               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 151 | Component type fixes: FAQ size through cn, 12px labels, safe-centred logo row           | n/a     | n/a         | yes      | no               | no            | n/a            | no                 | no                  | no             |
+| 152 | Church Trac pattern: form band, page reader, link boxes (church sites, no code)         | n/a     | n/a         | n/a      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 156 | Contact form no-JS post + error summary, FAQ landmark, dark-band rings                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 160 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)                 | n/a     | yes         | yes      | yes              | no            | n/a            | n/a                | n/a                 | yes            |
+| 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none     | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 162 | `studio.look.splash: motif`: the site's own art replaces the splash's stone path        | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
+| 163 | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept                   | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 164 | American spelling in every string a visitor or editor reads; CSP line-length guard      | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 172 | Embed provider registry: paste-and-go, unknown-script guard, per-build embed CSP        | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 175 | Staff view by role; the staff list adds to it; "Simple view" marks from the Studio      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
+| --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
+| 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 2   | free-dist prebuild unlock                                                               | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 3   | page-parity harness                                                                     | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 4   | sanity-lib seed/patch plumbing                                                          | partial | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 | yes            |
+| 5   | stale-types CI guard                                                                    | yes     | yes         | yes      | yes              | yes           | yes            | yes                | n/a                 | yes            |
+| 6   | Nightly Sanity backup workflow                                                          | yes     | yes         | template | yes              | yes           | yes            | template           | n/a                 | template       |
+| 7   | Uptime workflow                                                                         | yes     | yes         | template | yes              | yes           | yes            | template           | yes                 | template       |
+| 8   | Playwright + axe + reflow suite                                                         | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 | yes            |
+| 9   | contrast.ts + theme-token gate                                                          | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 10  | Embedded-studio live-preview stack                                                      | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 11  | Preview click interceptor                                                               | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 12  | Parity-gated page-builder conversion                                                    | partial | yes         | partial  | partial          | no            | no             | no                 | no                  | partial        |
+| 13  | react/react-dom exact pin                                                               | no      | yes         | yes      | yes              | yes           | no             | yes                | yes                 | yes            |
+| 14  | wrangler legacy_env pin                                                                 | no      | yes         | yes      | yes              | staged        | no             | yes                | no                  | yes            |
+| 15  | PENDING.md / TESTING.md docs registry                                                   | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
+| 16  | Quarterly slop sweep                                                                    | no      | no          | no       | no               | no            | no             | no                 | no                  | no             |
+| 17  | In-canvas section controls (overlay insert/drag/duplicate/remove)                       | partial | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 18  | Chrome options (editable header/footer content)                                         | yes     | yes         | yes      | yes              | staged        | no             | yes                | n/a                 | yes            |
+| 19  | Shareable draft links                                                                   | no      | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
+| 20  | publishAt scheduled publishing (free-tier)                                              | no      | no          | template | no               | no            | no             | template           | n/a                 | template       |
+| 21  | Pages as first-class objects (duplicate / archive / SEO panel)                          | partial | no          | yes      | partial          | no            | no             | yes                | n/a                 | yes            |
+| 22  | Redirects on rename                                                                     | yes     | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
+| 23  | Editor-defined forms                                                                    | yes     | no          | yes      | no               | no            | no             | yes                | no                  | yes            |
+| 24  | Saved sections (section presets)                                                        | partial | no          | yes      | no               | no            | no             | yes                | n/a                 | yes            |
+| 25  | Pre-publish page checks                                                                 | partial | no          | yes      | yes              | no            | no             | yes                | n/a                 | yes            |
+| 26  | Appearance controls (surfaces, accents, rich twins, layout)                             | partial | yes         | partial  | partial          | no            | no             | yes                | no                  | partial        |
+| 27  | Undo & redo                                                                             | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 28  | Floating in-canvas controls (accent word, "Edit here")                                  | yes     | yes         | partial  | partial          | no            | no             | no                 | n/a                 | partial        |
+| 29  | Instant preview text                                                                    | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29a | Local edit-state channel (LiveDraftBridge)                                              | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29b | Refresh scheduler (single-flight / stale discard / floor)                               | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29c | Preview morph (in-place reconcile)                                                      | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 29d | Staleness counts every channel                                                          | no      | yes         | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 30  | One branch vocabulary (main only; staging abandoned 2026-10-03)                         | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | no             |
+| 31  | Studio welcome tour (StudioTour)                                                        | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
+| 32  | Branded tool headings (ToolHeading)                                                     | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | yes            |
+| 33  | Year-scoped lists for accumulating types                                                | yes     | yes         | no       | no               | no            | no             | no                 | n/a                 | no             |
+| 34  | Studio search weights (__experimental_search)                                           | yes     | yes         | no       | yes              | no            | no             | no                 | n/a                 | no             |
+| 35  | The family test standard (gates, suites, budgets)                                       | yes     | yes         | yes      | yes              | yes           | yes            | no                 | yes                 | yes            |
+| 36  | sync-check as a CI gate                                                                 | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
+| 37a | Drift opens its own PR (propose-drift in CI)                                            | yes     | yes         | n/a      | yes              | yes           | yes            | no                 | yes                 | no             |
+| 39a | Restore drill + off-site backup copy                                                    | yes     | yes         | yes      | yes              | yes           | yes            | no                 | n/a                 | yes            |
+| 40a | Public-data audit in CI                                                                 | yes     | yes         | yes      | yes              | yes           | yes            | no                 | n/a                 | yes            |
+| 37  | Visual regression on a fixed-data styleguide                                            | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 38  | Studio Checkup (what needs attention)                                                   | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 39  | Year-rollover wizard                                                                    | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 40  | Studio Welcome pane (task cards)                                                        | yes     | no          | no       | no               | no            | no             | n/a                | no                  | yes            |
+| 41  | Guide handbook held as repo data                                                        | yes     | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 42  | External link health, on its own schedule                                               | yes     | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
+| 43  | Contrast for what axe declines to judge                                                 | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 44  | Fork residue audit                                                                      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 45  | The site's own contact endpoint                                                         | yes     | staged      | yes      | no               | no            | no             | no                 | no                  | yes            |
+| 46  | Share cards in the brand's real typeface                                                | no      | no          | yes      | fork             | no            | no             | n/a                | no                  | yes            |
+| 47  | The icon set, from one drawing                                                          | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
+| 48  | Domain cutover script + zone audit                                                      | no      | no          | yes      | no               | no            | no             | n/a                | no                  | partial        |
+| 49  | Automation patterns (import-and-deploy, record-and-bake)                                | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 50  | Production deploy workflow                                                              | partial | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 51  | Compressed static server for Lighthouse                                                 | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 52  | Radix islands hydrate at client:idle, not client:only                                   | n/a     | partial     | yes      | yes              | no            | no             | n/a                | yes                 | partial        |
+| 53  | One accent splitter (heading-accent absorbs scriptAccent)                               | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 54  | Analytics component (GA4 + Cloudflare beacon, canonical)                                | no      | no          | yes      | yes              | no            | no             | n/a                | yes                 | yes            |
+| 55  | Build reads always use the Sanity CDN; a PROD fetch error throws                        | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | yes            |
+| 56  | No page-level `.catch()` swallows the PROD throw                                        | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | partial        |
+| 57  | Preview cookie's value is checked, not its presence                                     | no      | no          | yes      | yes              | no            | no             | no                 | n/a                 | no             |
+| 58  | GA4 fires only on the production hostname                                               | n/a     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | no                  | no             |
+| 59  | `_headers`: one rule per path; /_astro/* owns its cache                                 | yes     | n/a         | yes      | yes              | n/a           | n/a            | n/a                | yes                 | n/a            |
+| 60  | `astro dev` on Windows: repair @sanity/astro's dedupe alias                             | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | n/a                 | yes            |
+| 61  | Reduced motion zeroes transitions; a spec holds it                                      | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | yes            |
+| 62  | Dependabot config: grouped, pinned stack ignored                                        | yes     | yes         | yes      | yes              | yes           | yes            | n/a                | yes                 | no             |
+| 63  | `astro dev`: pre-bundle what the first render discovers                                 | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 64  | Tailwind `@source not` for baselines and docs                                           | n/a     | no          | yes      | yes              | no            | n/a            | n/a                | no                  | yes            |
+| 65  | dynamicList slices at a literal max, trims in the component                             | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 66  | `confirmed` flag + Provisional badge for unsourced content                              | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 67  | Tinted-chip variant-matrix contrast gate                                                | yes     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 68  | Never regenerate package-lock.json; `npm ci`                                            | yes     | no          | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
+| 69  | No `--` inside an SVG/XML comment                                                       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 70  | CI: parallel gates, sharded Playwright, scheduled Lighthouse                            | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 71  | Tracked `.claude/settings.json` deny rules + shared conventions import                  | no      | yes         | yes      | yes              | partial       | no             | n/a                | no                  | yes            |
+| 72  | Layout variants: structure as a brand.config axis                                       | no      | no          | yes      | no               | no            | no             | no                 | no                  | no             |
+| 73  | Design directions before reskin (brief, references, mockups)                            | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 74  | page-parity `--exclude` (parity-glob helper + test)                                     | no      | no          | yes      | no               | no            | no             | n/a                | no                  | yes            |
+| 75  | Playwright fixture: Sanity images from a disk cache                                     | no      | no          | yes      | no               | no            | no             | n/a                | n/a                 | yes            |
+| 76  | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`                   | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 77  | Preview morph keeps client-state classes (reveal state)                                 | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
+| 78  | `preview-stega.ts` exports `RUN_SOURCE`                                                 | no      | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
+| 79  | Redirect destinations keep `?query` and `#fragment`                                     | no      | yes         | yes      | yes              | n/a           | no             | n/a                | n/a                 | yes            |
+| 80  | `sync-check` skips `_worktrees/` folders                                                | no      | no          | yes      | no               | no            | no             | n/a                | no                  | no             |
+| 81  | llms-full identity from brand config; audit shared field consts                         | no      | yes         | yes      | no               | no            | no             | n/a                | n/a                 | yes            |
+| 82  | Invisible 44px hit area for small links                                                 | no      | yes         | yes      | yes              | yes           | no             | n/a                | yes                 | yes            |
+| 83  | `measure-tap-targets.mjs` 390px tap-target scan                                         | no      | yes         | yes      | no               | yes           | no             | n/a                | yes                 | no             |
+| 84  | Linux-runner font-swap layout-shift check (fallback faces, preload)                     | no      | no          | no       | yes              | no            | no             | n/a                | no                  | no             |
+| 85  | MapLibre 6.x: `setMissingStyleImageResolver` for generated icons                        | n/a     | n/a         | n/a      | n/a              | n/a           | no             | n/a                | n/a                 | yes            |
+| 86  | Production-write second factor (NCS_PRODUCTION_WRITE) for data scripts                  | n/a     | partial     | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 87  | Dead-weight scan: unused kits and packages inflate every page's CSS                     | n/a     | yes         | no       | no               | no            | yes            | n/a                | staged              | no             |
+| 88  | Cloudflare beacon starts after load and idle, not deferred in head                      | n/a     | no          | no       | no               | no            | no             | n/a                | staged              | no             |
+| 89  | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`)          | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | no                  | yes            |
+| 90  | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                         | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 91  | One text/picture column split (`.split`) and `measure-columns.mjs`                      | no      | no          | yes      | yes              | no            | no             | n/a                | no                  | yes            |
+| 92  | Dependabot pins `astro` with its adapter; formatters in their own group                 | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | yes                 | yes            |
+| 93  | SanityImage srcset ladder starts at 160w; `sizes` trims dead steps                      | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | n/a                 | staged         |
+| 94  | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)                 | n/a     | staged      | yes      | staged           | staged        | no             | n/a                | staged              | staged         |
+| 95  | `audit:data`: live data vs compiled schema; `_type` backfill                            | n/a     | no          | yes      | no               | fork          | no             | n/a                | n/a                 | no             |
+| 96  | GA4 skips automated browsers (WebDriver, Lighthouse, PageSpeed, GTmetrix)               | n/a     | staged      | yes      | staged           | staged        | n/a            | n/a                | staged              | staged         |
+| 97  | astro 7.4 with adapter 14.4.0 (wrangler stays 4.129)                                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 98  | Date labels independent of build-machine timezone (`formatDate`)                        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 99  | Scaffold markers stay out of PORTABLE files; styleguide wall marked                     | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 100 | Scaffold prunes the Lighthouse, smoke and uptime route lists                            | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 101 | Preview renders "no document" inside the layout, so Presentation connects               | n/a     | open        | yes      | open             | open          | n/a            | n/a                | n/a                 | open           |
+| 102 | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)           | n/a     | yes         | yes      | yes              | n/a           | no             | n/a                | staged              | n/a            |
+| 103 | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)                       | n/a     | yes         | yes      | yes              | yes           | no             | n/a                | n/a                 | yes            |
+| 104 | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file                 | n/a     | no          | yes      | n/a              | no            | no             | n/a                | n/a                 | no             |
+| 105 | A text hero (no photo, or editorial) still renders its buttons                          | n/a     | no          | yes      | no               | no            | no             | n/a                | n/a                 | no             |
+| 106 | Studio kit: Home, Site Guide, Checkup, staff view, Trash                                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
+| 107 | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page           | n/a     | yes         | yes      | yes              | partial       | n/a            | n/a                | partial             | yes            |
+| 108 | The header logo renders with JS off (`<noscript>` light variant)                        | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 109 | Authoring kit: page templates, picture picker, patterns, synced sections                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
+| 110 | Studio looks like the site: name, mark, colours, status line, help panel                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | no             |
+| 111 | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc           | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 112 | React 19.3.1, one copy in the tree                                                      | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 113 | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it            | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | no                  | no             |
+| 114 | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)                       | n/a     | yes         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | yes            |
+| 115 | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos              | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 116 | Studio as the site's admin: paper, navy chrome, fonts, text in site type                | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 117 | Studio workflow: change note, expiring preview links, Messages, table panes             | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 118 | Studio Home banner: navy welcome, mark, motif, the site's lettering                     | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | yes            |
+| 119 | Studio icons by meaning, a picture on every list row                                    | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 120 | Studio edges: own /studio page and splash, site words, navbar wordmark                  | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | n/a                 | yes            |
+| 121 | Custom code in its own box; opt-in on-page and site-wide code                           | n/a     | yes         | yes      | no               | yes           | n/a            | n/a                | no                  | no             |
+| 122 | Hidden and password pages; Checkup link, heading and orphan checks                      | n/a     | no          | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 123 | Studio writing help (Claude API), Before you publish panel, AI visitors                 | n/a     | no          | yes      | no               | yes           | n/a            | n/a                | n/a                 | no             |
+| 124 | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | yes            |
+| 125 | Studio on a phone (PWA), Post a photo, Earlier versions from backups                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | yes            |
+| 126 | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | yes            |
+| 127 | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | yes            |
+| 128 | Studio design language (studio.look), shared UI pieces, Site Guide redesign             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 129 | Studio signs in by token (kit routes need it); recentIgnoreTypes                        | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 130 | Real screenshots in the Site Guide: per-site shot registry                              | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 131 | Every Studio surface in the design language (first pass)                                | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 132 | Studio design pass two: Home, Post a photo, tour, splash, offline page                  | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 133 | Studio polish from a signed-in review: Home's ways-in tiles                             | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 134 | Field "How to" chip to the Site Guide; icons on every field group                       | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 135 | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS           | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 136 | Visitors card reads GA4 via studio-status; Search Console card on Home                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 137 | Spotlight tours, welcome, What's new, own clips, Quick update jobs as data              | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 138 | CI builds from a pinned content snapshot; scheduled live-watch (non-blocking)           | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 139 | Warn when a site's `studio.look` is still the neutral marker and stone                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 140 | Success toasts carry the Is-it-live stones (KitToastBody)                               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 141 | Quick update's yes/no field is a drawn switch, not a native checkbox                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 142 | How-to chip on date and datetime fields (they draw their own header)                    | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 146 | The Trash desk item shows a page of its own when empty (trashListItem)                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 145 | Home is a full-width dashboard: status rail at the right, main column, mobile-first     | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 147 | Checkup in columns by level, with a count strip (LevelSummary)                          | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 148 | Quick update uses a wide pane: tile grid, and the form with a path rail beside it       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 149 | AI suggestion and the private-page password status are the kit's callouts               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 151 | Component type fixes: FAQ size through cn, 12px labels, safe-centred logo row           | n/a     | n/a         | yes      | no               | no            | n/a            | no                 | no                  | no             |
+| 152 | Church Trac pattern: form band, page reader, link boxes (church sites, no code)         | n/a     | n/a         | n/a      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 153 | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 154 | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms               | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 156 | Contact form no-JS post + error summary, FAQ landmark, dark-band rings                  | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 160 | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)                 | n/a     | yes         | yes      | yes              | no            | n/a            | n/a                | n/a                 | yes            |
+| 161 | `snapshot.mjs run` reads the project id from the snapshot when the job env has none     | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | n/a                 | yes            |
+| 162 | `studio.look.splash: motif`: the site's own art replaces the splash's stone path        | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | no                  | yes            |
+| 163 | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept                   | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 164 | American spelling in every string a visitor or editor reads; CSP line-length guard      | n/a     | yes         | yes      | yes              | yes           | n/a            | n/a                | yes                 | yes            |
+| 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 170 | Popups: one at a time, date-windowed, after 4 s and some scroll (`popup.ts`)            | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 172 | Embed provider registry: paste-and-go, unknown-script guard, per-build embed CSP        | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
 | 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
@@ -958,7 +1300,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 177 | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
-| 178 | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)          | n/a     | no          | yes      | no               | no            | n/a            | no                 | no                  | no             |
+| 178 | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)          | n/a     | no          | yes      | no               | no            | n/a            | no                 | no                  | yes            |
 | #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
 | 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
@@ -1298,7 +1640,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 172 | Embed provider registry: paste-and-go, unknown-script guard, per-build embed CSP        | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
-| 173 | Builder kit: twelve smaller blocks, grouped templates, patterns as code, withSiteGroups | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
+| 173 | Builder kit: twelve smaller blocks, grouped templates, patterns as code, withSiteGroups | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | partial        |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12023,6 +12365,49 @@ origin's code, unchanged; not re-run here.
 card 168's `build-sanity-client.mjs` and `brand-icons.mjs`. Sites whose `render-og.mjs` copy is checked by
 sync-check in CI take the new copy after this merges.
 
+## Card 170: Popups, one at a time, with guard rails (2026-10-26)
+
+**Origin:** first-baptist-auburn (#212, 2026-10-26): Content > Popups, so the editor can put a box with a short
+message and one button over the site for the few big things a year.
+
+**Canonical:** PORTABLE `src/lib/popup.ts` (which popup is live, where it shows, the overlap check, the dismissal key)
+and PORTABLE `src/lib/popup.test.ts`. Not marked, per site: `src/sanity/schemaTypes/popup.ts` (fields, wording,
+validation), `src/components/SitePopup.astro` (the dialog, its script and its look), `getPopups()` in
+`src/lib/queries.ts`, the BaseLayout hook, `/styleguide/popup/` and `tests/popup.spec.ts`. Already-PORTABLE file
+changed: `src/lib/studio-icons.ts` (`popup: 'notice'` in `TYPE_ICON_DEFAULTS`). Docs: `docs/agent/popups.md`.
+
+**What it does.** A `popup` document has a heading (60), message (200), one optional button (both halves or
+neither; a link starts with `/` or `https://`), an optional picture with alt text, Show from, a required Show
+until, which pages (every page, Home only, chosen pages from the site's singletons and Studio pages), how often (once
+per visitor or once per visit) and an on/off switch. The Studio warns when two switched-on popups overlap.
+BaseLayout reads the popups once per build, `pickPopup` keeps one (the newest started, else the soonest upcoming)
+and `popupShowsOn` renders `SitePopup` only where it belongs, never on `/studio`, `/preview`, `/api` or
+`/private`. The dialog opens after 4 seconds AND a quarter screen of scroll (8 seconds on a short page), waits while
+the phone menu is open, rechecks its dates in the browser, traps Tab, closes on Escape, Close or the backdrop, gives
+focus back, animates only under `no-preference`, hides in print, and uses the theme tokens so it follows light and
+dark. The dismissal is stored under `site-popup:<id>:<last edit>`, so an edited popup shows again. The chosen-page
+addresses come from the site's own `SINGLETON_LIVE_PATHS` (`nav-href.ts`, entries that end in a slash and carry no
+`#`), so `popup.ts` is the same file on every site.
+
+**Switching it on.** Nothing: with no popup documents nothing renders and no script ships. The editor adds one under
+Content > Popups; guide "Put up a popup".
+
+**Not ported:** Auburn's `publishAt` field on the popup (the starter has the field only on page singletons, with a
+tab group a popup does not have; Show from covers scheduling). Auburn's church copy and `btn-auburn` button stay in
+Auburn's own `SitePopup.astro` and schema; the starter uses `CtaLink`.
+
+**Verified (2026-10-26):** starter `npm run check`, `npm run build`, `npm run test:unit`, `npx playwright test
+tests/popup.spec.ts` (timing, focus trap and Shift+Tab, Escape and focus return, remembered on reload, axe in light
+and dark, 320px fit, print, reduced motion, no markup on Home or the Studio); screenshots at 375 and 1280 in light and
+dark. first-baptist-auburn on branch `port/card-170`: sync-check all SAME, check, snapshot build, unit tests, its
+`tests/popup.spec.ts`. The Studio overlap warning was not exercised in a signed-in Studio.
+
+**Applied:** starter (this card). first-baptist-auburn: origin (it takes the marked copies on `port/card-170`; the
+only visible change is the storage key name, so a popup closed before shows once more).
+
+**Who should take it.** Any site whose editor wants an occasional popup. A site taking it copies the two marked files,
+the schema, the component, the query, the BaseLayout hook and the structure entry, then runs `npm run typegen`.
+
 ## Card 172: Embed provider registry, paste-and-go and a per-build embed CSP (2026-10-26)
 
 **Origin:** first-baptist-auburn #212 (2026-10-26). Editors pasted YouTube watch links, Maps share links and giving
@@ -12164,6 +12549,19 @@ logged in: make a page from each template, check the grid groups, and seed the p
 every block). fbcm and stonesteps-50k: not applied (they have the card 109 kit; applying this is a follow-up).
 presacademy, reid-design-site, mas-monograms and nixoncreativestudio: `no`. Not yet clicked through in a logged-in
 Studio: the grouped template menu and the new insert groups were type-checked, built and unit-tested.
+stonesteps-50k, 2026-10-26 (its PR #173): `partial` on purpose, eight of the twelve (columns, button row, tabs,
+timeline, letter, event details, schedule, photo cards), dressed as the race's plates. The wide photo, fold-outs,
+countdown and dated notice were skipped because its Photograph band, FAQ blocks, race clock and Race notices already do
+those jobs. No `look` (the site has none); the schedule's rows are `scheduleRow` (`scheduleItem` is a document
+type there). Race templates in four groups and three new patterns; `src/lib/ics.ts` copied (card 158's lib only).
+fbcm, 2026-10-26 (its PR #123): `partial` on purpose, eight of the twelve (columns, button row, wide photo, tabs,
+countdown, dated notice, event details, schedule) in the church's grammar (Titling h2, gold rule over a hairline, no
+boxes, square photos, no photo caption per its DESIGN.md). Skipped as duplicates of its church blocks: fold-outs
+(`faqSection`), timeline, letter and photo cards (`linkCardsSection`); the button row is buttons only. No `look`.
+Event details defaults its place to the church's address in Site settings (`churchPlace()`) and writes the calendar
+file through the site's own `ics.ts`, which gained an `allDay` flag. Grouped templates and patterns-as-code were
+already there (card 109); the Event template was rebuilt on the kit, a Weekend or retreat template and two patterns
+added (not seeded: that site seeds only with Nathan's OK).
 
 ## Card 177: Calendar files can skip or move one date of a repeating event (2026-10-26)
 
@@ -12294,3 +12692,133 @@ does.
 **Who should take it.** Any site with the email backbone (card 127) whose client would rather change the Contact
 address themselves. Taking it: copy the two marked files and `contact.ts`, add the migration under the site's next
 number, the two routes, the panel and the Site settings field, then `npm run typegen`.
+stonesteps-50k, 2026-10-26 (its PR #173): `yes`. No accent-button budget there, so only `ctaBlock` and `CtaLink`;
+`CtaLink` checks every link field before calling a button empty. Its CI snapshot held no label-less button.
+fbcm, 2026-10-26 (its PR #123): `yes`. No accent-button budget there, so only `ctaBlock` and `CtaLink`; with no
+`openInNewTab` default, an unset switch keeps a same-site path typed as a web address in the same tab. Its CI snapshot
+held no empty or affected button.
+
+## Card 179: An open Studio reloads itself after a deploy (2026-10-26)
+
+**Origin:** first-baptist-auburn, signed in to the live Studio: a tab opened before a deploy showed a raw red "Unhandled
+Runtime Error: Failed to fetch dynamically imported module .../_astro/<hash>.js" inside the image field's Unsplash
+picker until the page was reloaded by hand.
+
+**Cause.** The Studio loads most of its code lazily, and Workers static assets keep only the current build's hashed
+files. Every merge and every Studio publish (the webhook) deploys, so a long-open tab often asks for a file that is
+gone. Sanity's top-level `StudioErrorBoundary` auto-reloads on an import error, but a field's own boundary does not.
+
+**Fix.** `src/lib/studio-stale-chunk.ts` (new, PORTABLE) and its test, wired in `src/pages/studio/index.astro`
+(PORTABLE). `installStaleChunkGuard()` listens for `vite:preloadError` (Vite's preload helper wraps every lazy
+import in the build and fires it when the import rejects) plus window `unhandledrejection` and `error`, matches the
+Chromium, Firefox and Safari messages and Vite's "Unable to preload CSS", shows a plain notice ("The Studio was updated.
+Reloading to carry on.") and reloads after 2.5 s. A second hit within 60 s of a reload (sessionStorage timestamp)
+prompts with a Reload button instead, so it can never loop. Drafts are safe: sanity 6.19 auto-commits patches on a
+1000 ms throttle, so the pause lets the last keystroke reach the server. Docs: `docs/agent/studio-kit.md` ("After a
+deploy").
+
+**Not done:** keeping the previous build's assets. `wrangler deploy` replaces the whole asset set; carrying old
+`/_astro/` files forward from a CI cache grows without bound and still misses a tab two deploys old.
+
+**Proved:** built, served with `wrangler dev`. In a fresh Chromium (service worker blocked, as on a first visit)
+with a lazily loaded chunk (`groq.*.js`) removed from `dist/client/_astro/`: the 404 raised the notice, the page
+reloaded itself once, and the second load showed the Reload prompt and made no further navigation in 6 s. In an
+already-open tab, a lazy import of a missing file through the build's own Vite preload helper showed the notice and
+reloaded the tab. The Studio's service worker keeps `/_astro/` files it has already fetched, so a chunk the tab saw
+before a deploy still loads from it; the guard covers the ones it never fetched.
+
+**Applied:** starter (this card), first-baptist-auburn (origin). Not applied to the other family sites: every site with
+the embedded Studio page (card 120) needs it; copy the two lib files and the boot-page script, then `sync-check`.
+
+## Card 175: Staff view by role, the list adds to it, and "Simple view" marks (2026-10-26)
+
+**Origin:** first-baptist-auburn (PENDING 1zs). The People tool (card 176) invites a helper as a Sanity Editor, and the
+kit's staff view already applied to every non-administrator while `kitConfig.staff` was empty. But `isStaffUser` let a
+NON-EMPTY list replace the role rule: listing one administrator (the client who wants the simple view too) would have
+given every Editor the full Studio and its permanent Delete. And on Sanity's Free plan, which has only Administrator and
+Viewer, every helper must be invited as an Administrator, so the role rule never reaches them; the only way to give one
+the simple view was an id in `kit.config.ts` and a deploy. Auburn's first patch was lost; this is the rebuild.
+
+**Canonical:** PORTABLE `src/lib/studio-kit.ts` (`isStaffUser`, `isStaffView`, new `isAdministrator`, `isMarked`,
+`cleanMarks`, `setMark`, `readMarks`, `marksNeedReload`, `STAFF_TYPE`, `STAFF_DOC_ID`, `KIT_BOOKKEEPING_TYPES`) and
+its test; new PORTABLE `src/sanity/kit/staffType.ts`; PORTABLE `src/sanity/kit/shared.tsx` (`useStaffMarks`, marks fed
+to `staffViewFor` and `useStaffView`), `kit/index.tsx` (registers the type, mounts the hook, hides the type from New
+document and the inspectors), `kit/HomeTool.tsx` and `kit/PublishPanel.tsx` (skip the type), `kit/types.ts` (comment),
+`src/lib/studio-icons.ts` and its test (an icon for the type), `scripts/lib/change-summary.mjs` (never a "change"),
+`docs/agent/studio-kit.md` ("The staff view"). Per site, not marked: `src/sanity/structure.ts` (`STAFF_TYPE` in the
+default-list hidden set), `src/sanity/kit.config.ts` (the `staff` comment), `src/lib/sanity.types.ts` (typegen).
+
+**What it does.** Staff are now three groups that add up: (1) by role, everyone who is not a Sanity administrator;
+(2) the ids or emails in `kitConfig.staff`, whatever their role; (3) the user ids marked "Simple view" on the kit's one
+`studioStaff` document, id `kit.studioStaff` (an id path, so a public dataset never serves it). Tools and document
+actions are decided synchronously when the Studio starts, so the browser keeps the last list it saw in `localStorage`;
+the kit layout re-reads the document once signed in, and if the fresh list changes this person's view (and no tab
+choice overrides it) the Studio reloads once (a `sessionStorage` flag stops a loop). A new mark therefore applies on the
+marked person's next visit. The type is bookkeeping like `studioWeek`: `KIT_BOOKKEEPING_TYPES` keeps it out of Home's
+lists, the Checkup, "Before you publish" and "is it live?". The staff view stays a courtesy; Sanity's roles are the
+permissions, and a marked administrator can still switch to the full Studio for a tab.
+
+**Switching it on.** Nothing for the role rule. Marks are written by the People tool (card 176); without it a developer
+can write the document (`{ _id: 'kit.studioStaff', _type: 'studioStaff', ids: ['p...'] }`). Add `"studioStaff"` to the
+Sanity publish webhook's filter next to `"studioWeek"`, or a mark rebuilds the site for nothing. After syncing: add
+`STAFF_TYPE` to `structure.ts`'s hidden set, run `npm run typegen`.
+
+**Behavior change.** A site with a non-empty `staff` list would now also give its unlisted non-administrators the staff
+view. Every family site has `staff: []` today (checked 2026-10-26), so nobody moves.
+
+**Not ported:** nothing; the feature is generic.
+
+**Verified (2026-10-26):** `npm run check`, `npm run build`, `npm run test:unit` in the starter and in
+first-baptist-auburn's branch; `studio-kit.test.ts` covers the three groups, the list adding to the role rule, exact-id
+marks, cleaning, toggling, storage and the once-only reload rule. The reload against a real signed-in Studio is not seen
+yet (no second account to mark).
+
+**Applied:** starter (this card). first-baptist-auburn: origin (branch `port/card-175`, after this merges).
+
+**Who should take it.** Every site with the Studio kit (card 106). Needed before card 176.
+
+## Card 176: The People tool, invite a helper or an administrator from the Studio (2026-10-26)
+
+**Origin:** first-baptist-auburn (#206, #214). The pastor needed to add a deacon or a secretary without a trip to
+sanity.io/manage and without asking the studio. Built on card 175 (cut from its branch): the tool's Simple view switch
+writes card 175's marks.
+
+**Canonical:** PORTABLE `src/lib/studio-people.ts` and its test, `src/pages/api/studio/people.ts`,
+`src/sanity/people/PeopleTool.tsx` and `src/sanity/people/index.tsx` (all new); PORTABLE `src/sanity/kit/types.ts`
+(`features.people`, `people` settings) and `src/lib/studio-icons.ts` (the tool's icon). Per site, not marked:
+`sanity.config.ts` (`ncsPeopleTool(kitConfig)` after the kit), `src/sanity/kit.config.ts` (`people: { plan, roles,
+lead }`), `src/sanity/guides/people.ts` and its line in `guides/content.ts`. Docs: new `docs/agent/studio-people.md`,
+`docs/claude/topic-index.md`, `docs/claude/routes.md`, OPERATIONS.md "People: inviting from the Studio".
+
+**What it does.** `People` in the top bar, for Sanity administrators only (added after the kit's staff trim, so a
+marked administrator keeps it). Name, email and Helper (Sanity `editor`) or Administrator; Send again and Cancel for
+pending invitations; the members list with a **Simple view** switch for each administrator (card 175). The route
+checks same origin, a signed-in member, the caller's real `administrator` role, then the members key, before
+Sanity's Access API is touched. Administrator invites (and resending or cancelling one) go out with the caller's own
+session, because Sanity lets only administrators invite administrators and no robot can hold that role; everything
+else uses `SANITY_MEMBERS_TOKEN`. The plan setting (`'free'` never offers Helper, even during a Growth trial;
+`'auto'` reads the project's `roleEditor` feature) and the role words come from `kitConfig.people`; the plan travels
+with each request, which is safe because only an administrator, who could pick any role at sanity.io/manage, gets
+past the route. The Simple view switch writes `kit.studioStaff` with the administrator's own Studio session
+(`setIfMissing`, `unset`, `append`), by the project user id (`resourceUserId`).
+
+**Switching it on.** Harmless off: with no secret the tool says "Inviting from here is not switched on yet" and shows
+the sanity.io/manage steps; no new required env, no build change. To switch on, OPERATIONS.md: an **Access Manager
+(Token only)** robot token, `npx wrangler secret put SANITY_MEMBERS_TOKEN`, set `kitConfig.people.plan`, deploy, try one
+invite. `features.people: false` hides the tool. The token is never logged or sent to the browser (unit-tested).
+
+**Generalized from Auburn.** The church's words (Helper "edits sermons and notices", "a deacon, a secretary") and its
+plan moved to `kitConfig.people`; the route no longer names the helper ("Ask Nathan"); the free-plan steps point to
+the Simple view switch instead of a code change; member and invite rows carry a role key that the tool words itself.
+
+**Not ported:** Auburn's guide text (church nouns) stays Auburn's; the starter ships a plain one.
+
+**Verified (2026-10-26):** `npm run check`, `npm run test:unit` (28 People tests: order of checks, token choice per
+role, plan `'free'` against a Growth feature list, the token never in an answer, role words) and `npm run build` in
+the starter and on first-baptist-auburn's `port/card-176` branch; sync-check 343 SAME. Not seen signed in: the tool
+for an administrator, a real invite email, Access Manager accepted by `POST /invites`, and the Simple view switch
+applying on the marked person's next visit.
+
+**Applied:** starter (this card). first-baptist-auburn: origin (branch `port/card-176`, after this merges).
+
+**Who should take it.** Every site with the Studio kit (card 106) whose client adds their own editors. Needs card 175.

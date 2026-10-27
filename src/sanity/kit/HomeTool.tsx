@@ -59,6 +59,7 @@ import {
   deployProblem,
   firstName,
   greeting,
+  KIT_BOOKKEEPING_TYPES,
   liveStatus,
   timeAgo,
   weekDocId,
@@ -532,9 +533,14 @@ export function makeHomeTool(config: KitConfig) {
   return function HomeTool() {
     const { staffView, switchTo, reset, overridden } = useStaffView(config);
     const quick = config.quickActions ?? [];
-    // The kit's weekly tick documents (card 111) are bookkeeping, never an edit.
+    // The kit's weekly tick documents (card 111) and marks (card 175) are bookkeeping, never an edit.
     const ignore = useMemo(
-      () => recentEditsIgnore(config.checkup.ignoreTypes, config.recentIgnoreTypes, WEEK_TYPE),
+      () =>
+        recentEditsIgnore(
+          config.checkup.ignoreTypes,
+          config.recentIgnoreTypes,
+          ...KIT_BOOKKEEPING_TYPES,
+        ),
       [],
     ); // config is fixed for the Studio's life
     const linkTo = useStudioLink();

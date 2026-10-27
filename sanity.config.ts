@@ -64,6 +64,7 @@ import { ncsStudioKit } from './src/sanity/kit';
 import { ncsWritingHelp } from './src/sanity/ai';
 import { kitConfig } from './src/sanity/kit.config';
 import { ncsWorkflowTools } from './src/sanity/workflow';
+import { ncsPeopleTool } from './src/sanity/people';
 import { ncsMailTools } from './src/sanity/mail';
 import { brandIcons, typeIcon, withBrandPreviews } from './src/sanity/brandIcons';
 
@@ -218,6 +219,11 @@ export default defineConfig({
     // KEEP IT LAST: its tools reducer has to see every other plugin's tools.
     // See docs/agent/studio-kit.md and PORTS.md card 106.
     ncsStudioKit(kitConfig),
+    // People (card 176, src/sanity/people/): invite a Helper or an Administrator,
+    // and the Simple view switch (card 175). AFTER the kit on purpose: it adds
+    // the tool for administrators only, in either view, so the kit's staff
+    // trim cannot remove it. Settings: kitConfig.people.
+    ncsPeopleTool(kitConfig),
     // Icons by meaning on every tool, and on plugin-registered types (card 119,
     // src/sanity/brandIcons.tsx). After the kit so its tools get icons too; it
     // only swaps icons, so the kit still decides what shows and in what order.

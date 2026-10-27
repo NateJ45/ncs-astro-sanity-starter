@@ -110,6 +110,7 @@ export const TYPE_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   studioGuide: 'guide',
   studioNotes: 'overview',
   announcement: 'notice',
+  popup: 'notice',
   testimonial: 'testimonial',
   faqCategory: 'questionGroup',
   faqItem: 'question',
@@ -123,9 +124,10 @@ export const TYPE_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   sectionPreset: 'savedSection',
   redirect: 'redirect',
   shortLink: 'link', // card 171
-  // Plugin types (the kit's Trash and weekly tick, the workflow's share links).
+  // Plugin types (the kit's Trash, weekly tick and marks, the workflow's share links).
   trashedItem: 'trash',
   studioWeek: 'times',
+  studioStaff: 'person',
   previewShare: 'link',
   // The email backbone (card 127).
   newsletter: 'message',
@@ -154,6 +156,8 @@ export const TOOL_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   'quick-update': 'quickUpdate',
   messages: 'message',
   rsvps: 'people',
+  // The People tool (card 176).
+  people: 'people',
   media: 'image',
   vision: 'code',
 };

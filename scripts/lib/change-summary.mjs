@@ -29,6 +29,8 @@
 export const IGNORED_TYPES = new Set([
   'trashedItem',
   'studioWeek',
+  // The kit's "Simple view" marks (card 175): bookkeeping, not a change.
+  'studioStaff',
   'previewShare',
   'sectionPreset',
   // The weekly link check's report (card 122): bookkeeping, not a change.

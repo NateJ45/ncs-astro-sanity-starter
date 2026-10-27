@@ -31,7 +31,7 @@ import { guideMeaning } from '../lib/studio-look';
 import { kitConfig } from './kit.config';
 import { TRASH_TYPE } from '../lib/studio-trash';
 import { privateDocId } from '../lib/private-pages';
-import { WEEK_TYPE } from '../lib/studio-kit';
+import { STAFF_TYPE, WEEK_TYPE } from '../lib/studio-kit';
 import { tableListItem } from './workflow';
 import { TABLES } from './tables.config';
 
@@ -62,6 +62,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...SINGLETON_TYPES,
   ...ORDERABLE_TYPES,
   'announcement', // placed explicitly under Content → Announcements
+  'popup', // placed explicitly under Content → Popups, after Announcements
   'testimonial', // scaffold: testimonials
   'faqItem', // scaffold: faq
   'faqCategory', // scaffold: faq
@@ -78,6 +79,8 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'media.tag',
   // The Studio kit's weekly tick document (card 111): Home's bookkeeping, never edited here.
   WEEK_TYPE,
+  // The kit's "Simple view" marks (card 175): written by the People tool only.
+  STAFF_TYPE,
   // Private preview link records (card 117): managed from "Share a preview" only.
   'previewShare',
   // processStep is placed explicitly under Content → Process Steps
@@ -364,6 +367,9 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               S.documentTypeListItem('announcement')
                 .title('Announcements')
                 .icon(typeIcon('announcement')),
+              // Popups (card 170, schemaTypes/popup.ts): a box over the page, one at a time,
+              // with dates. Also built into the site at build time.
+              S.documentTypeListItem('popup').title('Popups').icon(typeIcon('popup')),
             ]),
         ),
 
