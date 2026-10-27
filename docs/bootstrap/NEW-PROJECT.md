@@ -445,6 +445,11 @@ npm run parity compare
 Then Lighthouse on the key pages. The target is 100/100/100/100 on desktop. When
 a score drops, find out why before merging rather than after.
 
+If the client has things to give you (wording, facts, photos), turn on the client notes first: `CLIENT_NOTES_ON` in
+`src/data/client-notes.ts` (off by default; `docs/agent/client-notes.md`). It shows a notes pill per page, highlights
+`[Client: ...]` and `[Placeholder: ...]` wording and puts a "Photo needed" box over stand-in pictures. Turn it off at
+launch, and search the content for leftover `[Client:` and `[Placeholder:` text before you do.
+
 Then work through `docs/bootstrap/setup-checklist.md` end to end. It exists so
 that the things with no gate behind them (a real favicon, a tested contact form,
 no placeholder text anywhere, the editor actually able to sign in) get checked by
