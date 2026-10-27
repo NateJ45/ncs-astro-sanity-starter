@@ -1,0 +1,107 @@
+---
+// Foundation, edit with care
+//
+// THE PHOTO HERO WALL (PORTS.md card 189): the opening banner in its "Photo behind the words"
+// style, rendered through the real SectionRenderer with FIXED data, one page per variant because a
+// page has one h1:
+//   /styleguide/photo-hero/home/  a tall hero with the short-facts card and a silent clip (and a
+//                                 phone copy), the home-page shape;
+//   /styleguide/photo-hero/page/  a short hero with no card and no clip, the inner-page shape.
+// Each is followed by a text block so the hero is seen against the page under it.
+//
+// It is the fixture tests/photo-hero.spec.ts drives. The image is a fake Sanity reference and the
+// clips fake Sanity file URLs: the spec answers the CDN with tests/visual/fixtures/layout-hero.jpg
+// and hero-clip.mp4, so no network is needed. noindex, out of the sitemap ('/styleguide' is
+// filtered in astro.config.mjs) and under a reserved slug, like the other walls.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SectionRenderer from '@/components/SectionRenderer.astro';
+import { site } from '@/data/site';
+
+export function getStaticPaths() {
+  return [{ params: { variant: 'home' } }, { params: { variant: 'page' } }];
+}
+
+const { variant } = Astro.params;
+
+const image = {
+  _type: 'image',
+  alt: 'People talking around a long table',
+  asset: {
+    _type: 'reference',
+    _ref: 'image-0123456789abcdef0123456789abcdef01234567-1600x900-jpg',
+  },
+};
+const cta = (label: string) => ({
+  _type: 'ctaBlock',
+  label,
+  linkType: 'external',
+  externalUrl: '#',
+});
+const FILES = 'https://cdn.sanity.io/files/fixture/production';
+
+const HOME = {
+  _type: 'heroSection',
+  _key: 'hero',
+  heroStyle: 'photo',
+  size: 'tall',
+  eyebrow: 'Welcome',
+  headline: 'A clear promise in a few words',
+  subhead: 'Who this is for and what they get, in one sentence over the photo.',
+  backgroundImage: image,
+  primaryCta: cta('Get in touch'),
+  secondaryCta: cta('See what we do'),
+  glance: {
+    title: 'At a glance',
+    lines: ['Open Monday to Friday, 9 to 5', 'Saturday by appointment', 'Free parking at the door'],
+    link: cta('Plan a visit'),
+  },
+  backgroundVideo: { url: `${FILES}/hero-clip.mp4`, mimeType: 'video/mp4' },
+  backgroundVideoPhone: { url: `${FILES}/hero-clip-640.mp4`, mimeType: 'video/mp4' },
+};
+
+const PAGE = {
+  _type: 'heroSection',
+  _key: 'hero',
+  heroStyle: 'photo',
+  size: 'short',
+  eyebrow: 'Events',
+  headline: 'An event page opening',
+  subhead: 'The same photo treatment, a little shorter, with no card.',
+  backgroundImage: image,
+  primaryCta: cta('Reserve a place'),
+};
+
+const SECTIONS: Record<string, unknown>[] = [
+  variant === 'home' ? HOME : PAGE,
+  {
+    _type: 'richTextSection',
+    _key: 'after',
+    heading: 'The page carries on',
+    body: [
+      {
+        _type: 'block',
+        _key: 'p1',
+        style: 'normal',
+        markDefs: [],
+        children: [
+          {
+            _type: 'span',
+            _key: 'p1-s',
+            marks: [],
+            text: 'A plain block under the hero, so the band is seen against the page.',
+          },
+        ],
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={`Photo hero wall | ${site.name}`}
+  description="Fixed-data wall of the photo hero. Not for visitors."
+  noindex
+>
+  <SectionRenderer sections={SECTIONS} idPrefix="photo-hero" />
+</BaseLayout>

@@ -324,6 +324,12 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 191  | Wayfinding: where-next rows, phone menu groups, compact footer, phone action bar         | no          | yes      | no               | no            | no                  | no             | partial    | no      |
 | 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 189  | Photo hero: "Photo behind the words" style, short-facts card, silent background video    | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 193  | Seven builder blocks: contact, progress, newsletter, calendar, icons, steps, hub         | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor           | no          | yes      | no               | no            | partial             | no             | partial    | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -11986,6 +11992,77 @@ the font-fallback scripts (PORTABLE), `npm run font-fallback` for its display fo
 schema change (PORTABLE, so site PRs wait for the starter merge). `hero: board` is offered per site; fbcm is the
 closest fit. first-baptist-auburn moves its gable, slab, tile and marker values into tokens over the PORTABLE files.
 
+## Card 189: "Photo behind the words": the photo hero, a short-facts card and a silent background video (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A1, A2, A3). Auburn's Home opens on a full-width photograph with the
+welcome over it in white and its This Sunday card beside it (2026-10-23, `home/HomeHero.astro`); since 2026-10-26
+any page's opening banner can take the same treatment (`heroSection.heroStyle`, `PageHeroPhoto.astro`); and the
+hero can play a short silent clip over the photo, with a phone-sized copy (2026-10-25/26, `lib/hero-video.ts`).
+
+**Problem.** The starter's bleed hero already lays a photo under a scrim, but only as the site-wide hero shape, with no
+card beside the words, no clip, and no per-page choice: an event page could not open on a photo on a site whose hero
+is split, editorial or board. And nothing promised the white words stay readable on whatever photo an editor uploads.
+
+**Fix.**
+
+- **The style (A2).** `heroSection.heroStyle`: Standard (the default, `initialValue: 'standard'`) or "Photo behind
+  the words" (`'photo'`), in `NON_STEGA_FIELDS`. `Hero.astro` checks it first: `'photo'` with a background photo
+  draws `src/components/PhotoHero.astro`; anything else, or no photo, falls through to the hero exactly as before
+  (bleed, split, editorial, board), so no site moves until an editor picks it. Size Tall is the home shape (most of the
+  first screen), Short the inner-page shape. Buttons are the site's own `CtaLink` pair `onDark`, and the page's
+  accent budget (cards 158, 187) still decides the main one.
+- **The short-facts card (A1).** Auburn's This Sunday card made generic: `heroSection.glance` (shown only with the
+  photo style) holds a title, up to four short lines and a link, drawn as `.ph-card` on the site's card surface,
+  beside the words from 961px and under them on a phone. Empty means no card. Opening hours, the next date, a price
+  from: whatever the site's first screen should answer.
+- **The phone band (A1).** Under 961px the hero is a photo band (`--ph-band`, 44svh clamped 220 to 380px) with the
+  words starting on its darkened foot and the card after them; the two buttons stack full width under 521px.
+- **The contrast promise.** The shade is four tokens on `.ph-hero` (`--photo-scrim` = the brand's
+  `--color-accent-dark`, `--photo-scrim-text` 72%, `-deep` 88%, `-clear` 20%). The wide-screen shade holds the
+  text strength across the left 60% (the words keep the left 7/12 of the grid, card or not); the phone shade reaches
+  it 20px above where the words start. `src/lib/photo-hero.ts` + test (a unit gate) resolve the scrim to the brand's
+  hex in `globals.css` and fail unless white over a PURE WHITE photo under the text strength is 4.5:1 or better
+  (the starter: 6.48:1; the least passing strength is 62%), and check the shade uses the tokens only. axe cannot
+  judge text over an image (`contrast.spec.ts` counts and skips it), so the promise is held arithmetically.
+- **The background video (A3).** `backgroundVideo` and `backgroundVideoPhone` (files, .mp4 or .webm, photo style
+  only). `src/lib/hero-video.ts` (PORTABLE, tested): type and size checks (3 MB, 1 MB for the phone copy), the
+  fast-start check (reads the first 64 KB with one range request; warns when `mdat` comes before `moov`), the phone
+  pick (under 768px), and `heroVideoAllowed()` (no clip with reduced motion, Save-Data, 2G/3G, a measured downlink
+  under 1 Mbps, or print). `src/components/HeroVideo.astro` is rendered only when there is a clip, so other pages
+  carry no script: after `load` it builds a muted, looping, `preload="none"` video with the photo's `currentSrc` as
+  poster, under the shade at 0.99 opacity (the Windows overlay-plane trap), with a remembered Pause button (WCAG
+  2.2.2), off-screen pause and background-tab resume. The photo stays the LCP; the clip never blocks it.
+- **Wall and tests.** `/styleguide/photo-hero/home/` (tall, card, clip and phone copy) and `/styleguide/photo-hero/page/`
+  (short, no card): fixed data, noindex. `tests/photo-hero.spec.ts` (PORTABLE) answers the CDN with
+  `tests/visual/fixtures/layout-hero.jpg` and `hero-clip.mp4` (17 KB, made with ffmpeg, fast start) and checks the
+  frame, the card, reduced motion, poster, Pause, phone copy, slow link, 320px reflow and axe.
+
+**Files.** PORTABLE: `src/components/PhotoHero.astro`, `src/components/HeroVideo.astro`, `src/styles/photo-hero.css`,
+`src/lib/hero-video.ts` (+ test), `src/lib/photo-hero.ts` (+ test), `tests/photo-hero.spec.ts`. Starter-owned
+(merge by hand): `Hero.astro`, `SectionRenderer.astro`, `sections.ts` (`heroStyle`, `glance`, the two video fields,
+`heroVideoCheck`), `queries.ts` (the clips as url and mimeType, the card's link), `cms-preview.ts`, the wall page.
+Docs: `docs/agent/animation.md` "Photo hero video", `docs/agent/design-tokens.md` "The photo hero's shade".
+
+**Not ported, on purpose.** Auburn's This Sunday card (church facts; card 196's business facts can fill a glance card
+later), its town line, the "Stand-in photograph" label and the "Photo needed" hero note with a stock church clip
+(card 195's shot list covers pictures; a hero shot can be added per site), its name line, and its fixed 0.85/0.70
+navy shade (now the tokens). Auburn draws the hero on Home only through its board; the starter offers it on any page.
+
+**Proved:** `npm run typegen`, `npm run check` (0 errors), `npm run test:unit` (1781 + 166 pass, including the new
+`hero-video` and `photo-hero` tests), `npm run build` (CSP: 11 inline scripts, 706 bytes, unchanged; the clip's
+script is a bundled module from 'self'). Parity against card 188's build: 18 of 19 pages PASS, inline CSS checksums
+included (the purge drops every `.ph-` rule where unused); the one DIFF is `styleguide/sections`' build-time ICS
+timestamp, not this card. Full Playwright suite: 181 pass, the 9 new `photo-hero.spec.ts` among them. Screenshots at
+375 and 1280: the standard hero (unchanged), the tall photo hero with its card (still, the clip's poster), the same
+with the clip playing under the shade and the Pause button, and the short inner-page shape; no horizontal overflow.
+No new block type, so the heroSection thumbnail stays as shot.
+
+**Applied:** starter (this card). Sites take the PORTABLE files plus the schema, query and `Hero.astro` branch. A
+site that never picks the style renders as before. fbcm is the natural first user (a home photo hero with service
+times in the card); stonesteps-50k (race-day card: date, distance, entry link) and presacademy (open-house card) next.
+first-baptist-auburn's sync PR moves Home and `PageHeroPhoto` onto `PhotoHero.astro` with its This Sunday card as
+the glance slot's church filling, and renames its `hb-` hero classes to `ph-`.
+
 ## Card 194: The form builder: forms an editor writes, a Form block, `/api/form/` and D1 submissions (2026-10-27)
 
 **Origin:** first-baptist-auburn (its form builder, 2026-10-18, and the date and "tick any that apply" questions,
@@ -12148,6 +12225,73 @@ none of it); full Playwright suite green; screenshots at 375 (menu, footer, bar)
 **Applied:** starter (this card). Sites: opt in per site in the rollout; fbcm takes the church shape (groups, Sunday
 bar), the others a bar where there is one clear action (book, shop, register).
 
+## Card 193: Seven more builder blocks: contact card, progress bar, newsletter, calendar buttons, icon cards, steps on a path and a hub (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A20, A21, A22, A25, A27, A28, A29). Card 173 ported the generic half of
+Auburn's block library; these seven were left because they leaned on Auburn's church facts, its stone icons and its
+brick art. They are the same blocks with the church nouns taken out, the pictures on card 188's shape classes and
+the numbers and links derived (rule 15).
+
+**Fix.** Seven blocks in `src/sanity/schemaTypes/builderSections.ts`, drawn by `src/components/builder-blocks/`
+(`BuilderBlock.astro` picks one) with `src/styles/builder-blocks-more.css`, types in `builderBlocks.types.ts`, and the
+logic in `src/lib/builder-blocks.ts` (tested in `builder-blocks.test.ts`). No colour field (rule 9); every block has
+`look` (the hub offers Standard and Quiet only), a fixture on `/styleguide/sections/`, a thumbnail and a place in the
+"+ Add item" menu (Basics, a new "Contact and updates" group, "Events and notices").
+
+- **Contact details** (`contactCardSection`, A25). Phone, email, address with a directions link, opening hours, a
+  column each. The phone and email default to Site settings and can be overridden on the block; "Lead with big Call and
+  Email buttons" puts two 56px buttons (`tel:` and `mailto:` through `CtaLink`) above the details, and Call is the
+  page's one accent button when the renderer hands it that (the accent predicate in `SectionRenderer.astro`). Self-
+  filling (in `SELF_FILLING_SECTIONS`). Auburn's version read the church facts and offered Text; the starter has no
+  facts store yet (card 196), so address and hours are typed on the block.
+- **Progress toward a goal** (`progressSection`, A27). Goal and so-far typed; percent, "to go", the as-of line and
+  the 20-step bar are derived (`progressState`, `asOfLabel`). Dollars or a plain count (`unit`, a NON_STEGA field).
+  One `role="progressbar"` with a spoken value. Auburn's stepping stones are plain steps here.
+- **Newsletter sign-up** (`newsletterSection`, A29). The card 127 backbone: the same `NewsletterSignup` island as the
+  footer, reading Site settings > Newsletter signup once. If the box is off, a typed sign-up page shows as a button, which
+  is also the route for a site whose list lives elsewhere (`OWN_NEWSLETTER = false`, cards 163 and 187: the Studio's own
+  newsletter screens hide, the block still works). Neither: it draws nothing.
+- **Add our calendar** (`calendarSubscribeSection` and `SubscribeButtons.astro`, A28). One typed feed (https, webcal,
+  or a path on this site such as a card 158 calendar file) becomes Google, Apple and Outlook subscribe links
+  (`subscribeLinks`, `feedAddress`; an `http` or `javascript:` address is refused). The starter publishes no site-wide
+  feed; a site with one (Auburn's Church Trac feed) points the block at it. `lib/ics.ts` supplies the files a `/`
+  path points to.
+- **Cards with icons** (`iconCardsSection`, A20). Open cards, three across, the icon the hero; a card can show a photo
+  instead (in `.shape-step`). **The icon set is per site:** `src/lib/block-icons.ts` ships 17 neutral line icons
+  (24px grid, `currentColor`), `BlockIcon.astro` draws them, the field is always named `icon`. A site with its own art
+  (Auburn's stones) replaces the list and, if the art is image files, the one component: `docs/agent/block-icons.md`.
+- **Steps on a path** (`stepsRailSection`, A21). Numbered steps joined by a dashed connector, an icon each, the first
+  step optionally on a card, a closing line and button. Kept SEPARATE from `processSection` on purpose: that block draws
+  the shared Process steps from their own collection (one list for the whole site, with illustrations); this one holds
+  its steps in the block, so any page can show a short path with nothing to maintain elsewhere. Extending
+  `processSection` with a rail style could not have held per-page steps.
+- **Groups of cards with an index** (`hubSection`, A22; Auburn's "Find your place"). Every group shows at once, a sticky
+  index jumps to one and a tiny script marks the group in view (`aria-current`); chips on a phone. Cards take
+  `.shape-step` or `.shape-tile` (card 188), the whole card is its link, every group and card has an anchor
+  (`hubIds`). "When" and "Where" are typed text here (Auburn derived them from church facts), and Auburn's forced "Ask
+  about" action is dropped: a card with no link is not a link.
+
+**Rules kept.** Rule 8b: `unit` joins `NON_STEGA_FIELDS` (`icon` was already there). Rule 15: percent, remaining,
+links, anchors, directions and the call and mail links are derived. Self-filling: contact card and newsletter. Setting
+keys: `unit`, `callButtons`, `firstStepCard`. Titles sit one heading level under the block's heading and move up when
+there is none.
+
+**Proved:** `npm run typegen`, `npm run check`, `npm run test:unit` (new tests: `telHref`, progress, feed addresses,
+subscribe links, hub ids; the authoring test now covers seven more fixtures and thumbnails), build, screenshots of the
+sections wall at 375 and 1280, axe and a 320px reflow sweep on the seven blocks.
+
+**Adopting it in a site.** Copy `src/components/builder-blocks/{ContactCard,Progress,Newsletter,CalendarSubscribe,
+IconCards,StepsRail,Hub}Block.astro`, `SubscribeButtons.astro`, `BlockIcon.astro`, `src/styles/builder-blocks-more.css`,
+`src/lib/block-icons.ts`, the additions to `builder-blocks.ts` (+ test), and `docs/agent/block-icons.md`. Hand-merge:
+the seven schemas and the insert groups in `builderSections.ts`; the types and the `BUILDER_BLOCK_TYPES` entries; the
+arms in `queries.ts`; `LOOKS_BY_TYPE`; `CONTENT_TYPES`; `NON_STEGA_FIELDS` (`unit`); the accent predicate in
+`SectionRenderer.astro`; `SELF_FILLING_SECTIONS` and `extraSettingKeys`; the `import` of the new stylesheet and the
+branches in `BuilderBlock.astro`; the fixtures. Swap the icon list for the site's own. A church site (fbcm, Auburn)
+keeps its church versions where they read the church facts, and takes `hubSection` and `stepsRailSection` only if it
+wants the generic ones.
+
+**Status, 2026-10-27.** Starter `yes`. Sites not applied yet (the per-site rollout follows the last starter card).
+
 ## Card 190: Every main page a page builder: Contact, Privacy and Journal (2026-10-27)
 
 **Origin:** first-baptist-auburn, "Every main page a page builder" (2026-10-26; inventory row A17). Auburn's Contact,
@@ -12209,3 +12353,49 @@ classic layout and of a seeded layout (banner, block, extra band).
 
 **Applied:** starter (this card). Sites take it in the Auburn port run's per-site phase; Auburn's own copies are the
 origin and differ only by church words, the hidden fossils and its `DEFAULT_*_SECTIONS` fallback.
+
+## Card 197: Latest video block, Documents library, page-weight budget, SVG path compactor (2026-10-27)
+
+**Origin:** first-baptist-auburn, the last starter card of the Auburn-to-family port run (inventory rows C7, C10, B6,
+M4). Card 159 had filed three of these as Auburn-only; each has a generic core, ported here without the church words.
+
+**What changed.**
+
+- **C7 `latestVideoSection` ("Latest video").** `src/lib/youtube-feed.ts` (PORTABLE, with a test and an invented feed
+  fixture) reads a YouTube channel's public Atom feed at build time: no key, newest 15 uploads, one fetch per channel
+  per build, two tries with a timeout. `LatestVideo.astro` draws a thumbnail link that swaps to the `youtube-nocookie`
+  player on a press (no YouTube script on load, 16:9 reserved). The schema (`latestVideoSection.ts`, PORTABLE) takes a
+  channel ID or a pasted `/channel/UC...` link. **It shows nothing, not an empty box**, with no channel, a bad id, a
+  failing feed or a channel with nothing public, and the build never fails on a feed error (the card's build proof ran a
+  deliberately bad channel: two 404s logged, block absent, exit 0). Auburn's church parts (the "Last Sunday" label, the
+  upcoming-stream card, Church facts) stay in that repo.
+- **C10 `libraryDocument` + `documentsSection` ("Documents").** A Studio collection of downloadable files (title, a
+  free-text group, date, file, note, "take it down after" date, `publishAt`) and a block listing the newest current ones,
+  all groups or one. `src/lib/documents.ts` holds the rules (current, newest first, file label "PDF, 240 KB"); the GROQ
+  arm fetches the newest 60 inside the page query, so there is no new build-time read and the CI snapshot answers it.
+  **It is the eighth scaffold capability, `documents`** (rule 14): every registration site is marked, and
+  `npm run scaffold -- --remove documents --write` was run, then typegen, check, build and the unit tests (see Proved).
+  Auburn's fixed categories, "this week's bulletin" and search tags are not ported.
+- **B6 `tests/page-weight.spec.ts` (PORTABLE) + `tests/page-weight.config.json` (per site).** For every route in
+  `tests/routes.ts`: HTML, inline CSS, scripts, images, the LCP image, preloaded fonts (count, woff2, size) and JSON-LD
+  validity against budgets read from the config. Auburn's version pinned Auburn's own fonts and pages; this one pins
+  numbers.
+- **M4 `scripts/lib/svg-path-compact.mjs` (PORTABLE, with its test).** Shortest relative path data, rounded to a tenth of
+  a unit; arcs returned unchanged. The test proves every point of every SVG the repo ships stays put. Generic on its own
+  (card 159 listed it Auburn-only).
+- Both blocks have a `/styleguide/sections/` fixture (the video one a sample with no network) and a picker thumbnail;
+  `authoring.test.ts` now reads their schema files too. `docs/agent/video-documents-weight.md` is the reference.
+
+**Adapt per site.** Documents: the Studio label ("Document") and the heading default are plain words; rename for the
+trade ("Brochures", "Price lists") in `libraryDocument.ts` and `documentsSection.ts`. Video: a site with a full CSP
+needs `img-src https://i.ytimg.com` and `frame-src https://www.youtube-nocookie.com`. Page weight: set the budgets from the
+site's own numbers (+25 percent), and the `jsonLd` types per route. A site without Sanity (nixoncreativestudio) takes only
+the page-weight spec and the path compactor.
+
+**Proved:** `npm run typegen`, `check`, `test:unit` (youtube-feed, documents, svg-path-compact), `build`, the page-weight
+spec, `scaffold --remove documents --write` followed by typegen, check, build and unit tests on a throwaway copy of
+the branch, screenshots of both blocks at 375 and 1280 (no horizontal scroll), and a build with a bad channel.
+
+**Applied:** starter (this card). first-baptist-auburn runs its own church versions (`church-video.ts`, `downloads`,
+`page-weight.spec.ts`); its sync PR takes the PORTABLE copies only. Other sites in the Phase 2 rollout, in their own
+character: blocks and the documents capability where the site has Sanity; the spec and compactor everywhere.

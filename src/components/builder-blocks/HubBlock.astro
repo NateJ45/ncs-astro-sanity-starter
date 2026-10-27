@@ -1,0 +1,212 @@
+---
+// Safe to edit by hand
+// A hub: groups of cards with a sticky index (PORTS.md card 193, from FBC Auburn's "Find your
+// place"). Every group shows at once, stacked, each with a name, an optional line and its cards. The
+// index down the left names the groups; the one in view is marked, the rest are quiet. It is a list
+// of plain jump links (the page's /services/#for-families deep-links, Back and Forward just work),
+// and a small script marks the group in view with aria-current. On a phone and a tablet the index
+// is a sticky row of chips that scrolls sideways.
+//
+// Each card: a photo in the brand's card-picture shape (.shape-step), or its icon on the brand's
+// tile (.shape-tile) when there is no photo (shapes.css, card 188); a small "who it is for" line;
+// the title; when and where on one line; a few sentences; and, when the card has a link, the whole
+// card is that link. Each group and card has an anchor (hubIds in builder-blocks.ts) another page can
+// link to. Headings: under a block heading the groups are h3 and the cards h4; with no heading
+// (straight under the page title) they are h2 and h3.
+import '@/styles/shapes.css';
+import BuilderBand from './BuilderBand.astro';
+import BlockIcon from './BlockIcon.astro';
+import SanityImage from '@/components/SanityImage.astro';
+import { ctaHref } from '@/lib/cta-href';
+import { hubIds, plain } from '@/lib/builder-blocks';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedHubSection } from '@/lib/builderBlocks.types';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+
+interface Props {
+  block: ProjectedHubSection;
+  surface?: CadenceSurface;
+  headingId: string;
+  isFirst?: boolean;
+}
+const { block, surface, headingId, isFirst = false } = Astro.props;
+
+const groups = (block.groups ?? [])
+  .map((g) => ({ ...g, cards: (g.cards ?? []).filter((c) => c?.title?.trim()) }))
+  .filter((g) => g.title?.trim() && g.cards.length > 0);
+// One anchor per group, from its name, and one per card, namespaced by the block's own id so two
+// hubs on a page never share one.
+const groupIds = hubIds(
+  groups.map((g) => g.title),
+  headingId,
+);
+const shown = groups.map((g, i) => ({
+  ...g,
+  id: groupIds[i],
+  cardIds: hubIds(
+    g.cards.map((c) => c.title),
+    groupIds[i],
+  ),
+}));
+const GroupTitle = block.heading ? 'h3' : 'h2';
+const CardTitle = block.heading ? 'h4' : 'h3';
+const whenWhere = (when?: string, place?: string) =>
+  [plain(when), plain(place)].filter(Boolean).join(' · ');
+---
+
+{shown.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Groups"
+  >
+    <div class="bb-hub shape-slab-host" data-hub>
+      {shown.length > 1 && (
+        <nav class="bb-hub__index" aria-label="Groups on this page" data-hub-index>
+          <ol role="list">
+            {shown.map((g, i) => (
+              <li>
+                <a
+                  href={`#${g.id}`}
+                  class="bb-hub__jump"
+                  data-hub-jump={g.id}
+                  aria-current={i === 0 ? 'true' : undefined}
+                >
+                  {g.title}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
+      <div class="bb-hub__groups">
+        {shown.map((g, gi) => (
+          <section id={g.id} class="bb-hub__group" aria-labelledby={`${g.id}-h`} data-hub-group>
+            <div class="bb-hub__group-head">
+              <GroupTitle id={`${g.id}-h`} class="bb-hub__group-title">
+                {g.title}
+              </GroupTitle>
+              {g.line && <p class="bb-hub__group-line">{g.line}</p>}
+            </div>
+            <ul class="bb-hub__cards" role="list">
+              {g.cards.map((c, ci) => {
+                const photo = c.image?.asset ? (c.image as SanityImageObject) : null;
+                const link = c.link?.label ? c.link : null;
+                const ww = whenWhere(c.when, c.place);
+                const lead = isFirst && gi === 0 && ci === 0;
+                return (
+                  <li id={g.cardIds[ci]} class:list={['bb-hcard shape-card', link && 'bb-stretch']}>
+                    <div class="bb-hcard__pic shape-step">
+                      {photo ? (
+                        <div class="shape-zoom">
+                          <SanityImage
+                            source={photo}
+                            width={720}
+                            height={600}
+                            sizes="(min-width: 80rem) 22rem, (min-width: 40rem) 45vw, 100vw"
+                            quality={70}
+                            loading={lead ? 'eager' : 'lazy'}
+                            fetchpriority={lead ? 'high' : undefined}
+                          />
+                        </div>
+                      ) : (
+                        <div class="shape-zoom shape-tile">
+                          <BlockIcon name={c.icon} size={64} />
+                        </div>
+                      )}
+                    </div>
+                    <div class="bb-hcard__text">
+                      {c.label && <p class="bb-hcard__for">{c.label}</p>}
+                      <CardTitle class="bb-title">{c.title}</CardTitle>
+                      {ww && <p class="bb-hcard__when">{ww}</p>}
+                      {c.body && <p class="bb-hcard__body">{c.body}</p>}
+                      {link && (
+                        <p class="bb-hcard__more">
+                          <a href={ctaHref(link)}>
+                            {link.label}
+                            <span class="bb-hcard__arrow" aria-hidden="true">
+                              →
+                            </span>
+                          </a>
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
+  </BuilderBand>
+)}
+
+<script>
+  // Marks the group in view in the index (aria-current), so the index follows the scroll. The links
+  // are plain anchors and work without this. Runs again after every View Transitions swap. On a
+  // phone the active chip is scrolled into its row without moving the page.
+  function initHub() {
+    document.querySelectorAll<HTMLElement>('[data-hub]').forEach((root) => {
+      if (root.dataset.hubReady) return;
+      root.dataset.hubReady = '1';
+      const links = [...root.querySelectorAll<HTMLAnchorElement>('[data-hub-jump]')];
+      const groups = [...root.querySelectorAll<HTMLElement>('[data-hub-group]')];
+      if (links.length < 2) return;
+      const index = root.querySelector<HTMLElement>('[data-hub-index]');
+      // The header's height (not its moved position) places the index under it.
+      const header = document.querySelector<HTMLElement>('.site-header');
+      const measure = () => {
+        if (header) root.style.setProperty('--hub-header', `${header.offsetHeight}px`);
+      };
+      const setActive = (id: string) => {
+        for (const a of links) {
+          const on = a.dataset.hubJump === id;
+          if (on) a.setAttribute('aria-current', 'true');
+          else a.removeAttribute('aria-current');
+          if (on && index && index.scrollWidth > index.clientWidth) {
+            index.scrollTo({
+              left: a.offsetLeft - (index.clientWidth - a.offsetWidth) / 2,
+              behavior: 'instant',
+            });
+          }
+        }
+      };
+      // The group whose top has passed a line a third of the way down the window is current; at the
+      // very bottom the last group wins, even when it is short.
+      const pick = () => {
+        const line = window.innerHeight / 3;
+        let current = groups[0];
+        for (const g of groups) if (g.getBoundingClientRect().top <= line) current = g;
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+          current = groups[groups.length - 1];
+        }
+        if (current) setActive(current.id);
+      };
+      let ticking = false;
+      const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          measure();
+          pick();
+        });
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+      document.addEventListener('astro:before-swap', () => {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+      });
+      measure();
+      pick();
+    });
+  }
+  initHub();
+  document.addEventListener('astro:page-load', initHub);
+</script>

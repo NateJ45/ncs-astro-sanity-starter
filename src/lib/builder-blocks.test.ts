@@ -225,3 +225,92 @@ describe('photo cards', () => {
     assert.deepEqual([2, 3, 4, 5, 6].map(photoCardColumns), [2, 3, 2, 3, 3]);
   });
 });
+
+// ── Card 193: contact card, progress, calendar subscribe, hub ───────────────
+import {
+  asOfLabel,
+  feedAddress,
+  figure,
+  hubIds,
+  progressState,
+  subscribeLinks,
+  telHref,
+} from './builder-blocks.ts';
+
+describe('telHref', () => {
+  it('keeps digits and a leading plus, drops the rest', () => {
+    assert.equal(telHref('(555) 555-0100'), 'tel:5555550100');
+    assert.equal(telHref('+1 555 555 0100'), 'tel:+15555550100');
+  });
+  it('is empty for something that is not a number', () => {
+    assert.equal(telHref(''), '');
+    assert.equal(telHref('call us'), '');
+    assert.equal(telHref(undefined), '');
+  });
+});
+
+describe('progress', () => {
+  it('works out percent, words and what is left', () => {
+    assert.deepEqual(progressState(50000, 12500), {
+      valid: true,
+      percent: 25,
+      raised: '$12,500',
+      goal: '$50,000',
+      remaining: '$37,500 to go',
+    });
+  });
+  it('clamps, and says when the goal is reached', () => {
+    assert.equal(progressState(100, 250).percent, 100);
+    assert.equal(progressState(100, 250).remaining, 'Goal reached');
+    assert.equal(progressState(100, -5).percent, 0);
+  });
+  it('draws nothing without a positive goal', () => {
+    assert.equal(progressState(0, 10).valid, false);
+    assert.equal(progressState(null, 10).valid, false);
+  });
+  it('can count things that are not dollars', () => {
+    assert.equal(figure(1200, 'number'), '1,200');
+    assert.equal(progressState(2000, 500, 'number').remaining, '1,500 to go');
+  });
+  it('words the as-of date', () => {
+    assert.equal(asOfLabel('2026-10-18'), 'As of October 18, 2026');
+    assert.equal(asOfLabel(''), '');
+  });
+});
+
+describe('calendar subscribe', () => {
+  it('accepts https and webcal feeds', () => {
+    assert.equal(feedAddress('webcal://example.com/a.ics'), 'https://example.com/a.ics');
+    assert.equal(feedAddress('https://example.com/a.ics'), 'https://example.com/a.ics');
+  });
+  it('joins a path on this site to the site address', () => {
+    assert.equal(
+      feedAddress('/calendar/events.ics', 'https://example.com/'),
+      'https://example.com/calendar/events.ics',
+    );
+    assert.equal(feedAddress('/calendar/events.ics', ''), '');
+    assert.equal(feedAddress('//evil.example/x.ics', 'https://example.com'), '');
+  });
+  it('rejects anything else', () => {
+    assert.equal(subscribeLinks('javascript:alert(1)'), null);
+    assert.equal(subscribeLinks('http://example.com/a.ics'), null);
+    assert.equal(subscribeLinks(''), null);
+  });
+  it('builds the three links', () => {
+    const l = subscribeLinks('https://example.com/a.ics', 'Our events')!;
+    assert.equal(l.apple, 'webcal://example.com/a.ics');
+    assert.ok(l.google.startsWith('https://calendar.google.com/calendar/r?cid=webcal'));
+    assert.ok(l.outlook.includes('name=Our%20events'));
+  });
+});
+
+describe('hubIds', () => {
+  it('makes one anchor per group, numbering repeats', () => {
+    assert.deepEqual(hubIds(['Kids and youth', 'Adults', 'Adults', ''], 'h'), [
+      'h-kids-and-youth',
+      'h-adults',
+      'h-adults-2',
+      'h-group',
+    ]);
+  });
+});

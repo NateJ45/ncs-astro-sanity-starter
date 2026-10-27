@@ -1,0 +1,69 @@
+---
+// Safe to edit by hand
+// Progress toward a goal (PORTS.md card 193, from FBC Auburn's building-fund bar): the amount so far
+// over the goal, a segmented bar of twenty steps filled as the number grows (the last one part
+// filled), what is left and an "as of" date. All of it is worked out from the two typed numbers
+// (progressState, rule 15) and read to screen readers as one progressbar. Dollars or a plain
+// count. Draws nothing without a positive goal.
+import BuilderBand from './BuilderBand.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import { asOfLabel, progressState } from '@/lib/builder-blocks';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedProgressSection } from '@/lib/builderBlocks.types';
+
+interface Props {
+  block: ProjectedProgressSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface, headingId } = Astro.props;
+const p = progressState(block.goal, block.raised, block.unit);
+const asOf = asOfLabel(block.asOf);
+const name = block.heading || 'Progress toward our goal';
+const money = block.unit !== 'number';
+// Twenty steps, each 5%: the filled ones in the brand color, the last one part filled.
+const STEPS = 20;
+const filled = (i: number) => Math.max(0, Math.min(1, (p.percent / 100) * STEPS - i));
+---
+
+{p.valid && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label={name}
+  >
+    <div class="bb-card bb-progress">
+      <p class="bb-progress__numbers">
+        <span>
+          <span class="bb-progress__raised">{p.raised}</span> {money ? 'raised' : 'so far'}
+        </span>
+        <span>of {p.goal}</span>
+      </p>
+      <div
+        class="bb-progress__track"
+        role="progressbar"
+        aria-label={name}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow={p.percent}
+        aria-valuetext={`${p.raised} of ${p.goal}, ${p.percent} percent`}
+      >
+        {Array.from({ length: STEPS }, (_, i) => (
+          <span class="bb-progress__step" style={`--filled: ${filled(i)}`} />
+        ))}
+      </div>
+      <p class="bb-progress__foot">
+        <span>{p.remaining}</span>
+        {asOf && <span>{asOf}</span>}
+      </p>
+      {block.link?.label && (
+        <div class="bb-actions">
+          <CtaLink cta={block.link} variant="secondary" />
+        </div>
+      )}
+    </div>
+  </BuilderBand>
+)}
