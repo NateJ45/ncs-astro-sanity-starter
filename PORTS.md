@@ -317,23 +317,20 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 183  | Section moves, removals, copies and picture swaps show in the preview at once             | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 184  | The preview renders the Studio's own copy of the draft                                    | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 185  | Type straight onto the page in the preview                                                | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table  | no          | yes      | no               | no            | no                  | no             | no         | no      |
-| 187  | Small fixes: header rule, second header button, page switches, newsletter switch          | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
-| 188  | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`         | no          | yes      | no               | no            | no                  | no             | partial    | no      |
-| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                       | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
-| 191  | Wayfinding: where-next rows, phone menu groups, compact footer, phone action bar          | no          | yes      | no               | no            | no                  | no             | partial    | no      |
-| 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds  | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
-| 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch             | no          | yes      | no               | no            | no                  | no             | no         | no      |
-| 189  | Photo hero: "Photo behind the words" style, short-facts card, silent background video     | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
-| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                       | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
-| 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds  | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
-| 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch             | no          | yes      | no               | no            | no                  | no             | no         | no      |
-| 193  | Seven builder blocks: contact, progress, newsletter, calendar, icons, steps, hub          | no          | yes      | no               | no            | no                  | no             | partial    | no      |
-| 196  | Business facts once, confirmed flags, open now, hours changes, hours and map blocks       | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
-| 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor            | no          | yes      | no               | no            | partial             | no             | partial    | no      |
-| 198  | Contact card fills from business facts; regex-backslash test skips scaffold-removed files | no          | yes      | no               | no            | partial             | no             | partial    | no      |
-| 199  | Portable tests run in a site: starter-itself case skips, compactor never writes -0        | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 192  | Flow layer: lines rise, the rest fades up, photos drift, page lift (`layout.motion`)      | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table  | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 187  | Small fixes: header rule, second header button, page switches, newsletter switch          | partial     | yes      | partial          | partial       | n/a                 | partial        | yes        | partial |
+| 188  | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`         | no          | yes      | partial          | partial       | partial             | partial        | partial    | yes     |
+| 189  | Photo hero: "Photo behind the words" style, short-facts card, silent background video     | no          | yes      | yes              | no            | n/a                 | yes            | partial    | yes     |
+| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                       | no          | yes      | no               | no            | n/a                 | no             | n/a        | no      |
+| 191  | Wayfinding: where-next rows, phone menu groups, compact footer, phone action bar          | partial     | yes      | partial          | partial       | n/a                 | partial        | partial    | partial |
+| 192  | Flow layer: lines rise, the rest fades up, photos drift, page lift (`layout.motion`)      | no          | yes      | no               | no            | no                  | no             | fork       | yes     |
+| 193  | Seven builder blocks: contact, progress, newsletter, calendar, icons, steps, hub          | no          | yes      | no               | no            | n/a                 | partial        | n/a        | partial |
+| 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds  | partial     | yes      | partial          | partial       | n/a                 | no             | partial    | no      |
+| 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch             | no          | yes      | no               | no            | n/a                 | yes            | fork       | no      |
+| 196  | Business facts once, confirmed flags, open now, hours changes, hours and map blocks       | no          | yes      | partial          | no            | n/a                 | yes            | partial    | partial |
+| 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor            | partial     | yes      | partial          | partial       | partial             | yes            | partial    | partial |
+| 198  | Contact card fills from business facts; regex-backslash test skips scaffold-removed files | partial     | yes      | partial          | partial       | n/a                 | yes            | yes        | yes     |
+| 199  | Portable tests run in a site: starter-itself case skips, compactor never writes -0        | staged      | yes      | staged           | staged        | staged              | staged         | staged     | staged  |
 | 200  | Heading accent matches whole words only ("test" no longer inside "TESTING")               | no          | yes      | no               | no            | n/a                 | staged         | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
@@ -11867,6 +11864,8 @@ drift instead of a false all-clear.
 copy; the site PRs in the Auburn port run do this). Until a site resyncs, its own old copy keeps the old fallback
 and should be run with `NCS_STARTER_DIR` set or from the starter (`node <starter>/scripts/sync-check.mjs <site>`).
 
+**Rollout (2026-10-27):** presacademy, reid-design-site, mas-monograms, nixoncreativestudio, stonesteps-50k, fbc-auburn and fbcm all took the new `sync-check.mjs` (fbcm added the `.ncs-starter` checkout to its CI first).
+
 ## Card 187: Eleven small generic fixes from first-baptist-auburn (2026-10-27)
 
 **Origin:** first-baptist-auburn, the second of the Auburn-to-family port runs (inventory rows A8, A10, A38, A33, A18,
@@ -11930,6 +11929,8 @@ screenshots of the header at 375 and 1280 with and without the second button.
 (`red-budget.ts`, `give.ts`, `ownNewsletter.ts`); its sync PR takes the PORTABLE copies. Other sites: the six PORTABLE
 files plus the per-site edits (`CtaLink`, `SectionRenderer`, `Header`, `Footer`, `MobileNav`, `CopyEmailButton`,
 `BaseLayout`, the schema fields and `siteSettings.ts`/`queries.ts`), in the Phase 2 rollout.
+
+**Rollout (2026-10-27):** Taken in part by most sites. fbc-auburn: whole. nixoncreativestudio: header rule skipped on purpose, rest n/a (no Sanity). Others: partial, the pieces their own layouts use.
 
 ## Card 188: One scale, a shape class contract, metric-matched fallback fonts, and the board grammar as `hero: board` (2026-10-27)
 
@@ -12002,6 +12003,8 @@ the font-fallback scripts (PORTABLE), `npm run font-fallback` for its display fo
 schema change (PORTABLE, so site PRs wait for the starter merge). `hero: board` is offered per site; fbcm is the
 closest fit. first-baptist-auburn moves its gable, slab, tile and marker values into tokens over the PORTABLE files.
 
+**Rollout (2026-10-27):** fbcm: whole (arch shapes, Castoro fallbacks). reid, mas-monograms, stonesteps-50k, fbc-auburn: partial, each keeps its own fallback faces by hand. nixoncreativestudio: display fallback only (its body face is woff2-only, the next CLS lever). presacademy: skipped, already has its own fallbacks.
+
 ## Card 189: "Photo behind the words": the photo hero, a short-facts card and a silent background video (2026-10-27)
 
 **Origin:** first-baptist-auburn (inventory rows A1, A2, A3). Auburn's Home opens on a full-width photograph with the
@@ -12072,6 +12075,8 @@ site that never picks the style renders as before. fbcm is the natural first use
 times in the card); stonesteps-50k (race-day card: date, distance, entry link) and presacademy (open-house card) next.
 first-baptist-auburn's sync PR moves Home and `PageHeroPhoto` onto `PhotoHero.astro` with its This Sunday card as
 the glance slot's church filling, and renames its `hb-` hero classes to `ph-`.
+
+**Rollout (2026-10-27):** reid-design-site, stonesteps-50k and fbcm: opt-in, home page left on its existing hero. fbc-auburn: partial (own hero forks). presacademy and mas-monograms: skipped (own home layout). nixoncreativestudio: n/a.
 
 ## Card 194: The form builder: forms an editor writes, a Form block, `/api/form/` and D1 submissions (2026-10-27)
 
@@ -12144,6 +12149,8 @@ it: the three marked files plus the changed marked files, the schema, block, end
 under the site's next number, `npm run typegen`, a styleguide fixture and `npm run thumbnails`.
 ---
 
+**Rollout (2026-10-27):** presacademy, reid-design-site, mas-monograms: partial (submissions and messages only). fbc-auburn: partial (reconciled with its own forms). stonesteps-50k and fbcm: skipped. nixoncreativestudio: n/a.
+
 ## Card 195: Client notes, the pre-launch review layer (2026-10-27)
 
 **Origin:** First Baptist Auburn's "For Jacob" notes pill and shot list (inventory rows A36 and A37), generalised in the
@@ -12181,6 +12188,8 @@ output) and with it on (pill, highlight and boxes), screenshots at 375 and 1280.
 
 **Applied:** starter (this card). Sites: turn it on only while a client is reviewing; Auburn's sync PR adopts the
 renamed files.
+
+**Rollout (2026-10-27):** stonesteps-50k: taken, switched off. fbc-auburn: pill kept as a fork. Every other live site: skipped (all live). nixoncreativestudio: n/a.
 
 ## Card 192: The flow layer, opt-in as `layout.motion` (2026-10-27)
 
@@ -12239,6 +12248,8 @@ face too. The spec now prints each counted shift's node and rects when it fails.
 pick a motion in their own character (`reveal` stays the safe default). first-baptist-auburn's sync PR moves onto the
 PORTABLE files and keeps its bricks, verse, sketch and hero drift as `addFlowExtension` / CSS hooks.
 
+**Rollout (2026-10-27):** fbcm: taken (reveal left as the default motion). fbc-auburn: its flow layer stays a fork. presacademy, reid-design-site, mas-monograms, stonesteps-50k: skipped. nixoncreativestudio: skipped, it has its own smooth-scroll and WebGL motion.
+
 ## Card 191: Wayfinding: where-next rows, phone menu groups, a compact footer and a phone action bar (2026-10-27)
 
 **Origin:** first-baptist-auburn (inventory rows A11 to A14): `WhereNext.astro`, the grouped `MobileNav.astro`, the
@@ -12291,6 +12302,8 @@ none of it); full Playwright suite green; screenshots at 375 (menu, footer, bar)
 
 **Applied:** starter (this card). Sites: opt in per site in the rollout; fbcm takes the church shape (groups, Sunday
 bar), the others a bar where there is one clear action (book, shop, register).
+
+**Rollout (2026-10-27):** Partial everywhere it applies: where-next rows, menu groups, action bar or Sunday bar, each only where the site has the matching fields. mas-monograms wrote its action bar settings under the write protocol. reid-design-site left the new fields empty for the client to fill. fbc-auburn keeps its own tables (needs a dataset write). nixoncreativestudio: n/a.
 
 ## Card 193: Seven more builder blocks: contact card, progress bar, newsletter, calendar buttons, icon cards, steps on a path and a hub (2026-10-27)
 
@@ -12359,6 +12372,8 @@ wants the generic ones.
 
 **Status, 2026-10-27.** Starter `yes`. Sites not applied yet (the per-site rollout follows the last starter card).
 
+**Rollout (2026-10-27):** fbcm and stonesteps-50k: six of seven blocks. presacademy, reid-design-site, mas-monograms: skipped (no builder kit, card 173). fbc-auburn and nixoncreativestudio: n/a.
+
 ## Card 190: Every main page a page builder: Contact, Privacy and Journal (2026-10-27)
 
 **Origin:** first-baptist-auburn, "Every main page a page builder" (2026-10-26; inventory row A17). Auburn's Contact,
@@ -12421,6 +12436,8 @@ classic layout and of a seeded layout (banner, block, extra band).
 **Applied:** starter (this card). Sites take it in the Auburn port run's per-site phase; Auburn's own copies are the
 origin and differ only by church words, the hidden fossils and its `DEFAULT_*_SECTIONS` fallback.
 
+**Rollout (2026-10-27):** Skipped by presacademy, reid-design-site, mas-monograms, stonesteps-50k and fbcm (no starter page builder, or the extra layout adds CSS weight for little gain). fbc-auburn and nixoncreativestudio: n/a.
+
 ## Card 196: Business facts typed once, open now, and hours changes that undo themselves (2026-10-27)
 
 **Origin:** First Baptist Auburn's church facts (inventory rows C1, C2, C3, A26 and A34): every fact typed once in
@@ -12468,6 +12485,8 @@ service has no equivalent yet). Auburn keeps its own church layer; the mapping t
 Business info and add the blocks where they help; presacademy can use the hours for its office; stonesteps-50k needs
 only the address and map; fbcm keeps church facts its own way.
 
+**Rollout (2026-10-27):** stonesteps-50k: whole. reid-design-site: fields added, left empty until the address and hours are confirmed. fbcm: reads its church facts through the shared reader. fbc-auburn: partial (place line). presacademy, mas-monograms: skipped (no public address or hours). nixoncreativestudio: n/a.
+
 ## Card 197: Latest video block, Documents library, page-weight budget, SVG path compactor (2026-10-27)
 
 **Origin:** first-baptist-auburn, the last starter card of the Auburn-to-family port run (inventory rows C7, C10, B6,
@@ -12514,6 +12533,8 @@ the branch, screenshots of both blocks at 375 and 1280 (no horizontal scroll), a
 `page-weight.spec.ts`); its sync PR takes the PORTABLE copies only. Other sites in the Phase 2 rollout, in their own
 character: blocks and the documents capability where the site has Sanity; the spec and compactor everywhere.
 
+**Rollout (2026-10-27):** stonesteps-50k: whole. Page-weight budget taken by presacademy, reid-design-site, mas-monograms, nixoncreativestudio, fbc-auburn and fbcm; their Latest video and Documents blocks were skipped where there is no builder kit.
+
 ## Card 199: PORTABLE tests and sync-check that assumed they ran in the starter (2026-10-27)
 
 **Origin:** rolling cards 186, 191 and 197 out to presacademy and stonesteps-50k.
@@ -12536,6 +12557,10 @@ number starts with a decimal point was written with a needless space, and a path
 (they read files every site has, such as `public/_headers`, or build temp trees).
 
 **Applied:** starter (this card). Sites: copy the three PORTABLE files with the next sync.
+
+**Scope limits.** Sites that left the starter's page-builder foundations (cards 72, 158, 173: `SectionRenderer`, `sections.ts`, layout slots) could take only part of the cards 186 to 198 set; presacademy is the clearest case. Whether to re-found presacademy on the starter foundations is an open question for Nathan.
+
+**Matrix:** the 2026-10-27 rollout results for rows 186 to 198 are filled from each site's report; row 199 is `staged` for every site while a sync pass copies its files.
 
 ## Card 198: The contact card fills itself from business facts, and the regex-backslash test survives scaffold removal (2026-10-27)
 
@@ -12562,6 +12587,8 @@ but still tracked until committed, so the test failed with ENOENT.
 
 **Applied:** starter (this card). Sites: pick up with the card 196 rollout; fbcm keeps its church facts layer and
 passes `strict` through its own reader.
+
+**Rollout (2026-10-27):** stonesteps-50k, fbc-auburn and fbcm: whole. presacademy, reid-design-site, mas-monograms: partial (regex-test fix and facts reader where present). nixoncreativestudio: n/a.
 
 ## Card 200: Heading accent matches whole words only (2026-10-27)
 
