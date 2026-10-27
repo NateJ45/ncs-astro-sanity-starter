@@ -84,7 +84,7 @@ test.describe('flow layer with motion on', () => {
     expect(anim).toBe('flow-fade');
   });
 
-  test('no layout shift in main, and nothing moves once settled', async ({ page }) => {
+  for (const rep of Array.from({ length: 16 }, (_, i) => i)) test(`no layout shift in main, and nothing moves once settled #${rep}`, async ({ page }) => {
     // Shifts whose moved nodes are inside <main>, where the layer works. The header's own
     // font-swap shift (about 0.0004, the same under reduced motion) is not the layer's.
     // Each counted shift is also described (moved node, its rect before and after, the scroll
