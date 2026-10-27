@@ -40,21 +40,23 @@ The four core pages (home, about, services, process) and every custom `page` doc
 
 `SECTION_TYPES` (exported from `sections.ts`) is the single source of truth for the eleven general block types available on every page builder:
 
-| `_type`            | Cadence        | Description                                                                        |
-| ------------------ | -------------- | ---------------------------------------------------------------------------------- |
-| `heroSection`      | SELF_CONTAINED | Full-width headline block, optional background photo, primary and secondary CTAs   |
-| `richTextSection`  | CONTENT        | Portable Text with heading, prose, optional alignment and width controls           |
-| `imageTextSection` | CONTENT        | Side-by-side image and text, configurable image side                               |
-| `gallerySection`   | CONTENT        | Image grid with optional lightbox, configurable column count                       |
-| `quoteSection`     | CONTENT        | Pull quote with attribution and optional context line                              |
-| `statSection`      | SELF_CONTAINED | Row of up to 4 labeled numbers (auto-counted up animation)                         |
-| `ctaBandSection`   | SELF_CONTAINED | Full-width call-to-action band, optional background photo                          |
-| `videoSection`     | CONTENT        | YouTube or Vimeo embed with optional heading and caption                           |
-| `spacerSection`    | SELF_CONTAINED | Explicit vertical gap -- ornament, line, or invisible space                        |
-| `logoStripSection` | SELF_CONTAINED | Row or grid of client/partner logos with optional eyebrow and headline             |
-| `embedSection`     | SELF_CONTAINED | Embed URL, or pasted code in its own sandboxed box (card 121, custom-code.md)      |
-| `rsvpSection`      | CONTENT        | RSVP form for one event: places, waiting list, questions; replies in D1 (card 127) |
-| `formSection`      | CONTENT        | One editor-written `form` document; answers to `/api/form/` and D1 (card 194)      |
+| `_type`              | Cadence        | Description                                                                                        |
+| -------------------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| `heroSection`        | SELF_CONTAINED | Full-width headline block, optional background photo, primary and secondary CTAs                   |
+| `richTextSection`    | CONTENT        | Portable Text with heading, prose, optional alignment and width controls                           |
+| `imageTextSection`   | CONTENT        | Side-by-side image and text, configurable image side                                               |
+| `gallerySection`     | CONTENT        | Image grid with optional lightbox, configurable column count                                       |
+| `quoteSection`       | CONTENT        | Pull quote with attribution and optional context line                                              |
+| `statSection`        | SELF_CONTAINED | Row of up to 4 labeled numbers (auto-counted up animation)                                         |
+| `ctaBandSection`     | SELF_CONTAINED | Full-width call-to-action band, optional background photo                                          |
+| `videoSection`       | CONTENT        | YouTube or Vimeo embed with optional heading and caption                                           |
+| `spacerSection`      | SELF_CONTAINED | Explicit vertical gap -- ornament, line, or invisible space                                        |
+| `logoStripSection`   | SELF_CONTAINED | Row or grid of client/partner logos with optional eyebrow and headline                             |
+| `embedSection`       | SELF_CONTAINED | Embed URL, or pasted code in its own sandboxed box (card 121, custom-code.md)                      |
+| `rsvpSection`        | CONTENT        | RSVP form for one event: places, waiting list, questions; replies in D1 (card 127)                 |
+| `formSection`        | CONTENT        | One editor-written `form` document; answers to `/api/form/` and D1 (card 194)                      |
+| `latestVideoSection` | CONTENT        | Newest video of a YouTube channel, read at build time; draws nothing when unset or down (card 197) |
+| `documentsSection`   | CONTENT        | Newest files from the Documents collection, all groups or one (card 197, scaffold `documents`)     |
 
 Blocks deliberately carry no `backgroundColor` field. Background assignment is `SectionRenderer`'s responsibility.
 

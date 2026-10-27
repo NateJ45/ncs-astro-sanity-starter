@@ -75,6 +75,9 @@ export const CONTENT_TYPES = new Set([
   'guaranteeSection',
   // The email backbone (card 127)
   'rsvpSection',
+  // The latest video and the documents list (card 197)
+  'latestVideoSection',
+  'documentsSection', // scaffold: documents
   // The form builder (card 194)
   'formSection',
   // The builder kit (builderSections.ts, PORTS.md card 173)

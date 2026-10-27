@@ -46,6 +46,8 @@ import {
 } from './_appearanceFields';
 import { sideOptions } from '../../lib/layout-variants';
 import { rsvpSection } from './rsvpSection';
+import { latestVideoSection } from './latestVideoSection';
+import { documentsSection } from './documentsSection'; // scaffold: documents
 import { ClipboardIcon } from '@sanity/icons/Clipboard';
 // The builder kit (PORTS.md card 173): columns, buttons, a wide photo, fold-outs,
 // tabs, a countdown, a dated notice, a timeline, a letter and the event blocks.
@@ -731,6 +733,9 @@ export const pageSectionSchemas = [
   embedSection,
   // The email backbone (card 127): replies kept in D1, never in Sanity.
   rsvpSection,
+  // The latest video from a YouTube channel, read at build time (card 197).
+  latestVideoSection,
+  documentsSection, // scaffold: documents
   // The form builder (card 194): answers kept in D1, never in Sanity.
   formSection,
   // The builder kit (builderSections.ts, PORTS.md card 173).
@@ -779,6 +784,8 @@ export const sectionThumbnailUrl = (type: string): string | undefined =>
 // already exists gains the types, a new name becomes a new group at the end.
 const SITE_INSERT_GROUPS: InsertGroup[] = [
   ...BUILDER_INSERT_GROUPS,
+  { name: 'media', title: 'Media', of: ['latestVideoSection'] },
+  { name: 'files', title: 'Files to download', of: ['documentsSection'] }, // scaffold: documents
   {
     // Every main page a page builder (card 190): the piece a page is built around. Each shows
     // only on its own page (richSections.ts); a group whose types are absent does not appear.
