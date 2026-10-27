@@ -14,6 +14,14 @@ import {
   shouldStart,
 } from '../../lib/preview-refresh.ts';
 import { isRedundantRender, morph } from '../../lib/preview-morph.ts';
+import {
+  POSTED_DRAFT_HEADER,
+  localChannelCovers,
+  parseChangeSignal,
+  parseLiveDraft,
+  type LiveDraftDocument,
+} from '../../lib/preview-live-draft.ts';
+import { sameContent } from '../../lib/preview-text-diff.ts';
 
 // Studio-driven navigation (the navigator side panel, document locations, the
 // preview URL bar) reaches the iframe through this adapter. The DEFAULT is
@@ -87,6 +95,10 @@ const mpaHistory: HistoryAdapter = {
 //     b. MANUAL: the comlink `refresh` handler, i.e. the preview's refresh
 //        button, kept as the fallback if the stream is down. Its `mutation`
 //        calls only mark a running render stale (card 182a).
+//     c. LOCAL (card 184): the Studio's own copy of the draft, posted into the
+//        frame as the editor types. The refresh POSTs it and the server
+//        renders it, so this is the trigger that shows an edit; while it is
+//        live, (a) and (b) ignore changes to this page's own document.
 //     Both triggers go through the SCHEDULER in src/lib/preview-refresh.ts:
 //     single-flight, stale-response discard, and a floor on the interval between
 //     renders. Read that file before touching anything below; it is where the
@@ -133,6 +145,15 @@ export default function VisualEditingOverlay({ pageId }: Props) {
    * live tree's own `outerHTML`.
    */
   const lastMarkup = useRef<string | null>(null);
+  /**
+   * The newest draft of THIS page the Studio's local channel has posted, or
+   * null when it has none (never spoke, or said "no draft"). Card 184: the soft
+   * refresh POSTs it, so the server renders the Studio's own copy instead of
+   * waiting for the autosave and the query index.
+   */
+  const localDraft = useRef<LiveDraftDocument | null>(null);
+  /** When that draft arrived, for `localChannelCovers`. */
+  const lastLocalAt = useRef<number | null>(null);
 
   // `tick` and `runRefresh` call each other (a refresh that settles asks whether
   // another is owed). A ref breaks the cycle without either one changing
@@ -178,10 +199,26 @@ export default function VisualEditingOverlay({ pageId }: Props) {
   const runRefresh = useCallback(async () => {
     const stop = startTiming('soft-refresh');
     let html: string | null = null;
+    // Card 184: with a local draft in hand, the server renders THAT (it checks
+    // it is this page's draft and falls back to the stored one otherwise).
+    // Read once, here: the scheduler stamped this start with the sequence the
+    // draft belongs to, so a newer post makes this render stale, as it should.
+    const draft = localDraft.current;
     try {
-      const res = await fetch(window.location.href, {
-        headers: { 'x-preview-soft-refresh': '1' },
-      });
+      const res = await fetch(
+        window.location.href,
+        draft
+          ? {
+              method: 'POST',
+              headers: {
+                'x-preview-soft-refresh': '1',
+                [POSTED_DRAFT_HEADER]: '1',
+                'content-type': 'application/json',
+              },
+              body: JSON.stringify({ document: draft }),
+            }
+          : { headers: { 'x-preview-soft-refresh': '1' } },
+      );
       html = await res.text();
     } catch {
       // The fetch itself failed. Settle the scheduler first so the state cannot
@@ -295,6 +332,52 @@ export default function VisualEditingOverlay({ pageId }: Props) {
   // Never leave a timer behind on unmount.
   useEffect(() => () => clearTimeout(timer.current), []);
 
+  // THE LOCAL CHANNEL STARTS THE RENDER (2026-10-26, card 184). The Studio posts
+  // its own copy of the draft (src/sanity/components/LiveDraftBridge.tsx), and
+  // the soft refresh now sends that copy to the server, so a render started on
+  // it already carries the edit: no waiting for the autosave and the query
+  // index, which is what the SSE `change` used to stand for. Same scheduler,
+  // same 80ms debounce, 1200ms floor, single flight and stale discard; one
+  // render per burst, started a second sooner.
+  //
+  // `useInstantText` hears the same message and calls `onKnownChange`, which
+  // only bumps the sequence. The tick is deferred a task so that bump can never
+  // land AFTER this render starts and mark it stale: listener order is not
+  // something to lean on. `document: null` (no draft: published or discarded)
+  // hands the page back to the SSE, which then renders the stored document.
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      const message = parseLiveDraft(event.data);
+      if (!message) return;
+      const doc = message.document;
+      if (!doc) {
+        localDraft.current = null;
+        lastLocalAt.current = null;
+        return;
+      }
+      // A post for the page the frame was on a moment ago is not this page.
+      if (doc._id !== `drafts.${pageId}`) return;
+      lastLocalAt.current = Date.now();
+      const previous = localDraft.current;
+      localDraft.current = doc;
+      // An autosave re-sends the same words under a new `_rev`: not an edit.
+      if (previous && sameContent(previous, doc)) return;
+      schedule.current = onRefreshChange(schedule.current, Date.now());
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => tickRef.current(), 0);
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [pageId]);
+
+  /** A change to this page that the local channel has already rendered. */
+  const coveredLocally = useCallback(
+    (changedId: string | null) =>
+      localChannelCovers(changedId, pageId, lastLocalAt.current, Date.now()),
+    [pageId],
+  );
+
   // Auto-refresh: subscribe to the Worker's change stream WHILE THIS PREVIEW TAB
   // IS VISIBLE. Relevance filtering already happened server-side in the GROQ
   // listen filter, so every "change" event means "refetch now". The Page
@@ -315,7 +398,16 @@ export default function VisualEditingOverlay({ pageId }: Props) {
   useEffect(() => {
     let es: EventSource | null = null;
     let wasHidden = false;
-    const onChange = () => void softRefresh();
+    // The event names the changed document (card 184). This page's own
+    // document, while the local channel is live, was rendered from the Studio's
+    // copy a second ago: skip it entirely, because even marking the running
+    // render stale would throw away the render that HAS the edit. Every other
+    // document (site settings, a synced section), an event that names nothing,
+    // and a channel gone quiet all render as before.
+    const onChange = (event: Event) => {
+      if (coveredLocally(parseChangeSignal((event as MessageEvent).data))) return;
+      void softRefresh();
+    };
 
     const open = () => {
       if (es) return;
@@ -358,7 +450,7 @@ export default function VisualEditingOverlay({ pageId }: Props) {
       window.removeEventListener('pageshow', sync);
       close();
     };
-  }, [pageId, softRefresh]);
+  }, [coveredLocally, pageId, softRefresh]);
 
   const refresh = useCallback(
     (payload: HistoryRefresh): false | Promise<void> => {
@@ -380,10 +472,13 @@ export default function VisualEditingOverlay({ pageId }: Props) {
       const id = payload.document._id.replace(/^drafts\./, '');
       const isThisPage = id === pageId;
       const isSharedDoc = payload.document._type !== 'page';
+      // This page, while the local channel is live: the render it would mark
+      // stale is the one carrying the edit (card 184). Leave it alone.
+      if (isThisPage && coveredLocally(id)) return false;
       if (isThisPage || isSharedDoc) schedule.current = onKnownChange(schedule.current);
       return false;
     },
-    [pageId, softRefresh],
+    [coveredLocally, pageId, softRefresh],
   );
 
   return (

@@ -56,6 +56,27 @@ import {
 
 const LISTEN_QUERY = '*[_id in [$pageId, $draftId] || !(_type in ["page"])]';
 
+/**
+ * The `data:` this proxy sends for one upstream mutation block: `{"id":"..."}`
+ * naming the changed document, or `{}` when the block does not carry a
+ * readable id. The listen API's mutation payload has `documentId` even with
+ * `includeResult` and `includeMutations` off (card 184).
+ */
+function changeData(block: string): string {
+  try {
+    const data = block
+      .split('\n')
+      .filter((l) => l.startsWith('data:'))
+      .map((l) => l.slice('data:'.length))
+      .join('\n');
+    const id = (JSON.parse(data) as { documentId?: unknown }).documentId;
+    if (typeof id === 'string' && /^[\w.-]{1,200}$/.test(id)) return JSON.stringify({ id });
+  } catch {
+    // Not JSON, or no data line: the overlay treats {} as "render".
+  }
+  return '{}';
+}
+
 export const GET: APIRoute = async ({ cookies, url, request }) => {
   // Same draft-mode gate as the preview pages themselves: only a browser that
   // went through the Presentation Tool's URL-secret handshake has this cookie.
@@ -88,7 +109,7 @@ export const GET: APIRoute = async ({ cookies, url, request }) => {
   upstream.searchParams.set('query', LISTEN_QUERY);
   upstream.searchParams.set('$pageId', JSON.stringify(pageId));
   upstream.searchParams.set('$draftId', JSON.stringify(`drafts.${pageId}`));
-  // Signal-only: we tell the overlay THAT something changed, never what.
+  // Signal-only: we tell the overlay THAT something changed and which id, never what.
   upstream.searchParams.set('includeResult', 'false');
   upstream.searchParams.set('includeMutations', 'false');
   // DO NOT change this to "transaction" to make the preview feel faster.
@@ -187,9 +208,12 @@ export const GET: APIRoute = async ({ cookies, url, request }) => {
               .find((l) => l.startsWith('event:'))
               ?.slice('event:'.length)
               .trim();
-            // A doc matching the filter changed. That is the whole signal.
+            // A doc matching the filter changed. That is the whole signal, plus
+            // WHICH doc (card 184): the overlay skips a change to its own page
+            // while the Studio's local channel has already rendered it. Only an
+            // id-shaped string is forwarded; anything else sends {}.
             // welcome/reconnect and upstream comments are ours to swallow.
-            if (type === 'mutation') send('event: change\ndata: {}\n\n');
+            if (type === 'mutation') send(`event: change\ndata: ${changeData(block)}\n\n`);
             // The listen API's "stop and do not reconnect" order (e.g. dataset
             // gone). Obey by ending; a reconnect would just 403/404 anyway.
             if (type === 'disconnect') {

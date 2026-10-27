@@ -116,6 +116,66 @@ export function acceptsSource(
 }
 
 // ---------------------------------------------------------------------------
+// The local channel starts the render (2026-10-26, PORTS.md card 184)
+// ---------------------------------------------------------------------------
+
+/**
+ * How long after the last local draft the SSE and Presentation's `mutation`
+ * calls about THIS page's document are treated as old news.
+ *
+ * Since card 184 the soft refresh posts the newest local draft to the server,
+ * so a render started on a local snapshot already carries the edit. The SSE
+ * `change` for the same edit fires 0.9 to 1.5 s later (autosave, then query
+ * visibility), and acting on it would cost a second render of the same words,
+ * or worse, mark the render that has them stale. Five seconds covers the
+ * slowest autosave-plus-index lag measured with room to spare. A channel that
+ * goes quiet (the bridge unmounted, a preview opened outside Presentation)
+ * hands the page back to the SSE after this long, and a change to any OTHER
+ * document (site settings, a synced section) is never covered.
+ */
+export const LOCAL_COVER_MS = 5000;
+
+/**
+ * The request header the soft refresh sets when its body is the Studio's draft
+ * of the page (card 184). Read by src/lib/preview-posted-draft.ts on the server.
+ */
+export const POSTED_DRAFT_HEADER = 'x-preview-posted-draft';
+
+/**
+ * The document id a `/preview/live` `change` event names, or null when it
+ * names none (an older Worker sent `{}`). Null is never "covered": unknown
+ * means render.
+ */
+export function parseChangeSignal(data: unknown): string | null {
+  if (typeof data !== 'string' || data.length > 512) return null;
+  try {
+    const parsed: unknown = JSON.parse(data);
+    if (!isPlainObject(parsed)) return null;
+    const id = parsed.id;
+    return typeof id === 'string' && /^[\w.-]{1,200}$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether a change to `changedId` is already covered by the local channel:
+ * it is this page's own document (either twin) and a local draft of it arrived
+ * within `coverMs`. Covered changes neither start a render nor mark one stale.
+ */
+export function localChannelCovers(
+  changedId: string | null,
+  pageId: string,
+  lastLocalAt: number | null,
+  now: number,
+  coverMs: number = LOCAL_COVER_MS,
+): boolean {
+  if (changedId === null || lastLocalAt === null) return false;
+  if (changedId !== pageId && changedId !== `drafts.${pageId}`) return false;
+  return now - lastLocalAt < coverMs;
+}
+
+// ---------------------------------------------------------------------------
 // The pending-swap memory
 // ---------------------------------------------------------------------------
 
