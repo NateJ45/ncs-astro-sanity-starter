@@ -323,6 +323,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 193  | Seven builder blocks: contact, progress, newsletter, calendar, icons, steps, hub         | no          | yes      | no               | no            | no                  | no             | partial    | no      |
 | 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor           | no          | yes      | no               | no            | partial             | no             | partial    | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
@@ -12094,6 +12095,73 @@ output) and with it on (pill, highlight and boxes), screenshots at 375 and 1280.
 
 **Applied:** starter (this card). Sites: turn it on only while a client is reviewing; Auburn's sync PR adopts the
 renamed files.
+
+## Card 193: Seven more builder blocks: contact card, progress bar, newsletter, calendar buttons, icon cards, steps on a path and a hub (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A20, A21, A22, A25, A27, A28, A29). Card 173 ported the generic half of
+Auburn's block library; these seven were left because they leaned on Auburn's church facts, its stone icons and its
+brick art. They are the same blocks with the church nouns taken out, the pictures on card 188's shape classes and
+the numbers and links derived (rule 15).
+
+**Fix.** Seven blocks in `src/sanity/schemaTypes/builderSections.ts`, drawn by `src/components/builder-blocks/`
+(`BuilderBlock.astro` picks one) with `src/styles/builder-blocks-more.css`, types in `builderBlocks.types.ts`, and the
+logic in `src/lib/builder-blocks.ts` (tested in `builder-blocks.test.ts`). No colour field (rule 9); every block has
+`look` (the hub offers Standard and Quiet only), a fixture on `/styleguide/sections/`, a thumbnail and a place in the
+"+ Add item" menu (Basics, a new "Contact and updates" group, "Events and notices").
+
+- **Contact details** (`contactCardSection`, A25). Phone, email, address with a directions link, opening hours, a
+  column each. The phone and email default to Site settings and can be overridden on the block; "Lead with big Call and
+  Email buttons" puts two 56px buttons (`tel:` and `mailto:` through `CtaLink`) above the details, and Call is the
+  page's one accent button when the renderer hands it that (the accent predicate in `SectionRenderer.astro`). Self-
+  filling (in `SELF_FILLING_SECTIONS`). Auburn's version read the church facts and offered Text; the starter has no
+  facts store yet (card 196), so address and hours are typed on the block.
+- **Progress toward a goal** (`progressSection`, A27). Goal and so-far typed; percent, "to go", the as-of line and
+  the 20-step bar are derived (`progressState`, `asOfLabel`). Dollars or a plain count (`unit`, a NON_STEGA field).
+  One `role="progressbar"` with a spoken value. Auburn's stepping stones are plain steps here.
+- **Newsletter sign-up** (`newsletterSection`, A29). The card 127 backbone: the same `NewsletterSignup` island as the
+  footer, reading Site settings > Newsletter signup once. If the box is off, a typed sign-up page shows as a button, which
+  is also the route for a site whose list lives elsewhere (`OWN_NEWSLETTER = false`, cards 163 and 187: the Studio's own
+  newsletter screens hide, the block still works). Neither: it draws nothing.
+- **Add our calendar** (`calendarSubscribeSection` and `SubscribeButtons.astro`, A28). One typed feed (https, webcal,
+  or a path on this site such as a card 158 calendar file) becomes Google, Apple and Outlook subscribe links
+  (`subscribeLinks`, `feedAddress`; an `http` or `javascript:` address is refused). The starter publishes no site-wide
+  feed; a site with one (Auburn's Church Trac feed) points the block at it. `lib/ics.ts` supplies the files a `/`
+  path points to.
+- **Cards with icons** (`iconCardsSection`, A20). Open cards, three across, the icon the hero; a card can show a photo
+  instead (in `.shape-step`). **The icon set is per site:** `src/lib/block-icons.ts` ships 17 neutral line icons
+  (24px grid, `currentColor`), `BlockIcon.astro` draws them, the field is always named `icon`. A site with its own art
+  (Auburn's stones) replaces the list and, if the art is image files, the one component: `docs/agent/block-icons.md`.
+- **Steps on a path** (`stepsRailSection`, A21). Numbered steps joined by a dashed connector, an icon each, the first
+  step optionally on a card, a closing line and button. Kept SEPARATE from `processSection` on purpose: that block draws
+  the shared Process steps from their own collection (one list for the whole site, with illustrations); this one holds
+  its steps in the block, so any page can show a short path with nothing to maintain elsewhere. Extending
+  `processSection` with a rail style could not have held per-page steps.
+- **Groups of cards with an index** (`hubSection`, A22; Auburn's "Find your place"). Every group shows at once, a sticky
+  index jumps to one and a tiny script marks the group in view (`aria-current`); chips on a phone. Cards take
+  `.shape-step` or `.shape-tile` (card 188), the whole card is its link, every group and card has an anchor
+  (`hubIds`). "When" and "Where" are typed text here (Auburn derived them from church facts), and Auburn's forced "Ask
+  about" action is dropped: a card with no link is not a link.
+
+**Rules kept.** Rule 8b: `unit` joins `NON_STEGA_FIELDS` (`icon` was already there). Rule 15: percent, remaining,
+links, anchors, directions and the call and mail links are derived. Self-filling: contact card and newsletter. Setting
+keys: `unit`, `callButtons`, `firstStepCard`. Titles sit one heading level under the block's heading and move up when
+there is none.
+
+**Proved:** `npm run typegen`, `npm run check`, `npm run test:unit` (new tests: `telHref`, progress, feed addresses,
+subscribe links, hub ids; the authoring test now covers seven more fixtures and thumbnails), build, screenshots of the
+sections wall at 375 and 1280, axe and a 320px reflow sweep on the seven blocks.
+
+**Adopting it in a site.** Copy `src/components/builder-blocks/{ContactCard,Progress,Newsletter,CalendarSubscribe,
+IconCards,StepsRail,Hub}Block.astro`, `SubscribeButtons.astro`, `BlockIcon.astro`, `src/styles/builder-blocks-more.css`,
+`src/lib/block-icons.ts`, the additions to `builder-blocks.ts` (+ test), and `docs/agent/block-icons.md`. Hand-merge:
+the seven schemas and the insert groups in `builderSections.ts`; the types and the `BUILDER_BLOCK_TYPES` entries; the
+arms in `queries.ts`; `LOOKS_BY_TYPE`; `CONTENT_TYPES`; `NON_STEGA_FIELDS` (`unit`); the accent predicate in
+`SectionRenderer.astro`; `SELF_FILLING_SECTIONS` and `extraSettingKeys`; the `import` of the new stylesheet and the
+branches in `BuilderBlock.astro`; the fixtures. Swap the icon list for the site's own. A church site (fbcm, Auburn)
+keeps its church versions where they read the church facts, and takes `hubSection` and `stepsRailSection` only if it
+wants the generic ones.
+
+**Status, 2026-10-27.** Starter `yes`. Sites not applied yet (the per-site rollout follows the last starter card).
 
 ## Card 190: Every main page a page builder: Contact, Privacy and Journal (2026-10-27)
 

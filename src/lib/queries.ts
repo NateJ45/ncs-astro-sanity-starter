@@ -83,6 +83,22 @@ const SECTION_ARMS = `
       ...,
       cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} }
     },
+    // Card 193: blocks with pictures or buttons inside them. The contact card, newsletter and
+    // calendar blocks carry plain fields only.
+    _type == "progressSection" => { ..., link${CTA_PROJECTION} },
+    _type == "iconCardsSection" => {
+      ...,
+      cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} }
+    },
+    _type == "stepsRailSection" => {
+      ...,
+      steps[]{ ..., link${CTA_PROJECTION} },
+      link${CTA_PROJECTION}
+    },
+    _type == "hubSection" => {
+      ...,
+      groups[]{ ..., cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} } }
+    },
     _type == "heroSection" => {
       ...,
       backgroundImage${IMAGE_PROJECTION},

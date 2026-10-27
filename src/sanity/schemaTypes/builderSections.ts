@@ -39,6 +39,12 @@
 
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { BellIcon } from '@sanity/icons/Bell';
+import { ChartUpwardIcon } from '@sanity/icons/ChartUpward';
+import { MobileDeviceIcon } from '@sanity/icons/MobileDevice';
+import { SyncIcon } from '@sanity/icons/Sync';
+import { ThLargeIcon } from '@sanity/icons/ThLarge';
+import { ThListIcon } from '@sanity/icons/ThList';
+import { UsersIcon } from '@sanity/icons/Users';
 import { CalendarIcon } from '@sanity/icons/Calendar';
 import { ClockIcon } from '@sanity/icons/Clock';
 import { EnvelopeIcon } from '@sanity/icons/Envelope';
@@ -52,6 +58,7 @@ import { SplitVerticalIcon } from '@sanity/icons/SplitVertical';
 import { TimelineIcon } from '@sanity/icons/Timeline';
 import { lookField } from './_appearanceFields';
 import { TIME_OPTIONS } from '../../lib/builder-blocks';
+import { BLOCK_ICONS } from '../../lib/block-icons';
 import type { InsertGroup } from '../../lib/insert-groups';
 
 // ── Shared fields ────────────────────────────────────────────────────────────
@@ -880,6 +887,458 @@ export const photoCardsSection = defineType({
   },
 });
 
+// ── Card 193 blocks (from FBC Auburn): contact card, progress, newsletter, calendar subscribe,
+// icon cards, a steps rail and a hub. Same rules as above: no colour field, derived values
+// worked out in src/lib/builder-blocks.ts, dropdowns in NON_STEGA_FIELDS.
+
+/** A picker for one icon of the block icon set. Always named `icon` (on NON_STEGA_FIELDS). */
+const iconField = (title = 'Icon (optional)', description?: string) =>
+  defineField({
+    name: 'icon',
+    title,
+    type: 'string',
+    description,
+    options: { list: BLOCK_ICONS.map((i) => ({ title: i.title, value: i.value })) },
+  });
+
+const bodyField = (title = 'A few sentences (optional)') =>
+  defineField({ name: 'body', title, type: 'text', rows: 3, validation: (R) => R.max(280) });
+
+// ── Contact details ──────────────────────────────────────────────────────────
+export const contactCardSection = defineType({
+  name: 'contactCardSection',
+  title: 'Contact details',
+  type: 'object',
+  icon: MobileDeviceIcon,
+  description:
+    'Phone, email, address and opening hours on one card, with big Call and Email buttons if you want them. The phone and email come from Site settings unless you type others here.',
+  fields: [
+    defineField({
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+      initialValue: 'Get in touch',
+    }),
+    introField(),
+    defineField({
+      name: 'callButtons',
+      title: 'Lead with big Call and Email buttons',
+      type: 'boolean',
+      description:
+        'Two big buttons above the details. Good for a page where getting in touch is the point.',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'phone',
+      title: 'Phone (optional)',
+      type: 'string',
+      description: 'Leave empty to use the phone number in Site settings.',
+    }),
+    defineField({
+      name: 'email',
+      title: 'Email (optional)',
+      type: 'string',
+      description: 'Leave empty to use the public email in Site settings.',
+      validation: (R) =>
+        R.regex(/^\S+@\S+\.\S+$/, { name: 'email' }).warning(
+          'That does not look like an email address.',
+        ),
+    }),
+    defineField({
+      name: 'address',
+      title: 'Address (optional)',
+      type: 'text',
+      rows: 3,
+      description:
+        'One line each for the street and the town. A "Get directions" link is made from it.',
+    }),
+    defineField({
+      name: 'hours',
+      title: 'Opening hours (optional)',
+      type: 'text',
+      rows: 4,
+      description: 'One line for each, like "Monday to Friday, 9 am to 5 pm".',
+    }),
+    lookField('contactCardSection'),
+  ],
+  preview: {
+    select: { title: 'heading' },
+    prepare: ({ title }) => ({ title: title || 'Contact details', subtitle: 'Contact details' }),
+  },
+});
+
+// ── Progress toward a goal ───────────────────────────────────────────────────
+export const progressSection = defineType({
+  name: 'progressSection',
+  title: 'Progress toward a goal',
+  type: 'object',
+  icon: ChartUpwardIcon,
+  description:
+    'A bar that fills toward a goal: a fundraiser, a campaign, a target. You type two numbers; the bar, the percent and "to go" work themselves out.',
+  fields: [
+    headingField(),
+    introField(),
+    defineField({
+      name: 'unit',
+      title: 'What are you counting?',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Dollars', value: 'dollars' },
+          { title: 'A plain number (people, meals, signatures)', value: 'number' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'dollars',
+    }),
+    defineField({
+      name: 'goal',
+      title: 'Goal',
+      type: 'number',
+      description: 'Numbers only, like 50000.',
+      validation: (R) => R.required().positive(),
+    }),
+    defineField({
+      name: 'raised',
+      title: 'So far',
+      type: 'number',
+      validation: (R) => R.required().min(0),
+    }),
+    defineField({
+      name: 'asOf',
+      title: 'As of (optional)',
+      type: 'date',
+      description:
+        'Shows "As of October 18, 2026" under the bar, so nobody wonders how old the number is.',
+    }),
+    linkField(),
+    lookField('progressSection'),
+  ],
+  preview: {
+    select: { title: 'heading', goal: 'goal', raised: 'raised' },
+    prepare: ({ title, goal, raised }) => ({
+      title: title || 'Progress toward a goal',
+      subtitle: typeof goal === 'number' ? `${raised ?? 0} of ${goal}` : 'Progress',
+    }),
+  },
+});
+
+// ── Newsletter sign-up ───────────────────────────────────────────────────────
+export const newsletterSection = defineType({
+  name: 'newsletterSection',
+  title: 'Newsletter sign-up',
+  type: 'object',
+  icon: EnvelopeIcon,
+  description:
+    'An email sign-up box. It uses the email service set up once in Site settings > Newsletter signup. Until that is switched on, it shows a button to the sign-up page below, or nothing.',
+  fields: [
+    defineField({
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+      initialValue: 'Stay in touch',
+    }),
+    introField(),
+    defineField({
+      name: 'signupUrl',
+      title: 'Sign-up page (optional)',
+      type: 'url',
+      description:
+        'A sign-up page from your email service, used when the box in Site settings is not switched on.',
+      validation: (R) => R.uri({ scheme: ['https'] }),
+    }),
+    lookField('newsletterSection'),
+  ],
+  preview: {
+    select: { title: 'heading' },
+    prepare: ({ title }) => ({
+      title: title || 'Newsletter sign-up',
+      subtitle: 'Newsletter sign-up',
+    }),
+  },
+});
+
+// ── Add our calendar ─────────────────────────────────────────────────────────
+export const calendarSubscribeSection = defineType({
+  name: 'calendarSubscribeSection',
+  title: 'Add our calendar to your phone',
+  type: 'object',
+  icon: SyncIcon,
+  description:
+    'Buttons that add your calendar to Google, Apple or Outlook, so new dates show up on visitors’ phones by themselves.',
+  fields: [
+    defineField({
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+      initialValue: 'Never miss a date',
+    }),
+    introField(),
+    defineField({
+      name: 'feed',
+      title: 'Calendar feed address',
+      type: 'string',
+      description:
+        'The address of a calendar feed (it ends in .ics, or starts with webcal://): from Google Calendar, your booking tool, or a file this site publishes (a path starting with /, like /calendar/events.ics).',
+      validation: (R) =>
+        R.required().custom((v) =>
+          !v || /^(https:\/\/|webcal:\/\/|\/(?!\/))/i.test(String(v).trim())
+            ? true
+            : 'Start with https://, webcal:// or a /',
+        ),
+    }),
+    lookField('calendarSubscribeSection'),
+  ],
+  preview: {
+    select: { title: 'heading' },
+    prepare: ({ title }) => ({ title: title || 'Calendar buttons', subtitle: 'Add our calendar' }),
+  },
+});
+
+// ── Cards with icons ─────────────────────────────────────────────────────────
+export const iconCardsSection = defineType({
+  name: 'iconCardsSection',
+  title: 'Cards with icons',
+  type: 'object',
+  icon: ThLargeIcon,
+  description:
+    'Two to twelve open cards, each with a big icon (or a photo), a title and a few sentences. Three across on a computer, one on a phone.',
+  fields: [
+    headingField(),
+    introField(),
+    defineField({
+      name: 'cards',
+      title: 'Cards',
+      type: 'array',
+      validation: (R) => R.required().min(2).max(12),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'iconCard',
+          title: 'Card',
+          fields: [
+            iconField(),
+            photoField('image', 'Photo (optional)', {
+              description: 'With a photo the card shows the photo instead of the icon.',
+            }),
+            defineField({
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              validation: (R) => R.required().max(60),
+            }),
+            bodyField(),
+            defineField({
+              name: 'note',
+              title: 'Small note (optional)',
+              type: 'string',
+              description: 'A day, a reference, a size: shown small under the text.',
+              validation: (R) => R.max(80),
+            }),
+            linkField('Link (optional)'),
+          ],
+          preview: {
+            select: { title: 'title', subtitle: 'note', media: 'image' },
+            prepare: ({ title, subtitle, media }) => ({ title: title || 'Card', subtitle, media }),
+          },
+        }),
+      ],
+    }),
+    lookField('iconCardsSection'),
+  ],
+  preview: {
+    select: { title: 'heading', cards: 'cards' },
+    prepare: ({ title, cards }) => ({
+      title: title || 'Cards with icons',
+      subtitle: `Cards with icons${Array.isArray(cards) ? ` (${cards.length})` : ''}`,
+    }),
+  },
+});
+
+// ── Steps on a path ──────────────────────────────────────────────────────────
+// The inline sibling of processSection: that one draws the shared Process steps from their own
+// collection (the Process page); this one holds its steps in the block, so any page can show a
+// short path ("how it works", "what happens on the day") without a collection to keep.
+export const stepsRailSection = defineType({
+  name: 'stepsRailSection',
+  title: 'Steps on a path',
+  type: 'object',
+  icon: ThListIcon,
+  description:
+    'Numbered steps down a line, each with an icon. For "how it works" or "what to expect". The numbers and the line are drawn for you.',
+  fields: [
+    headingField(),
+    introField(),
+    defineField({
+      name: 'steps',
+      title: 'Steps',
+      type: 'array',
+      validation: (R) => R.required().min(2).max(8),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'railStep',
+          title: 'Step',
+          fields: [
+            iconField(),
+            defineField({
+              name: 'title',
+              title: 'Title',
+              type: 'string',
+              validation: (R) => R.required().max(80),
+            }),
+            bodyField('A sentence or two (optional)'),
+            linkField('Link (optional)'),
+          ],
+          preview: {
+            select: { title: 'title', subtitle: 'body' },
+            prepare: ({ title, subtitle }) => ({ title: title || 'Step', subtitle }),
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'firstStepCard',
+      title: 'Set the first step apart on a card',
+      type: 'boolean',
+      description: 'Good when step one is the one that matters most.',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'endHeading',
+      title: 'Closing line (optional)',
+      type: 'string',
+      description: 'A line after the last step, like "Ready when you are."',
+    }),
+    linkField('Closing button (optional)'),
+    lookField('stepsRailSection'),
+  ],
+  preview: {
+    select: { title: 'heading', steps: 'steps' },
+    prepare: ({ title, steps }) => ({
+      title: title || 'Steps on a path',
+      subtitle: `Steps${Array.isArray(steps) ? ` (${steps.length})` : ''}`,
+    }),
+  },
+});
+
+// ── Hub: groups of cards with a sticky index ─────────────────────────────────
+export const hubSection = defineType({
+  name: 'hubSection',
+  title: 'Groups of cards with an index',
+  type: 'object',
+  icon: UsersIcon,
+  description:
+    'A page of cards in named groups ("For families", "For businesses"), with an index that follows the scroll and jumps to a group. Every group shows at once. Good for a long list of services, programs or offers.',
+  fields: [
+    defineField({
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+      description: 'Leave it empty when the page title already says it.',
+    }),
+    introField(),
+    defineField({
+      name: 'groups',
+      title: 'Groups',
+      type: 'array',
+      description: 'Each group gets a place in the index. Keep the names short.',
+      validation: (R) => R.required().min(1).max(8),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'hubGroup',
+          title: 'Group',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Group name',
+              type: 'string',
+              validation: (R) => R.required().max(24),
+            }),
+            defineField({
+              name: 'line',
+              title: 'One line about the group (optional)',
+              type: 'string',
+              validation: (R) => R.max(140),
+            }),
+            defineField({
+              name: 'cards',
+              title: 'Cards',
+              type: 'array',
+              validation: (R) => R.required().min(1).max(12),
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  name: 'hubCard',
+                  title: 'Card',
+                  fields: [
+                    photoField('image', 'Photo (optional)', {
+                      description: 'Without a photo the card shows its icon.',
+                    }),
+                    iconField('Icon (shown when there is no photo)'),
+                    defineField({
+                      name: 'title',
+                      title: 'Title',
+                      type: 'string',
+                      validation: (R) => R.required().max(60),
+                    }),
+                    defineField({
+                      name: 'label',
+                      title: 'Who it is for (optional)',
+                      type: 'string',
+                      description: 'A few words, like "Families" or "Everyone".',
+                      validation: (R) => R.max(40),
+                    }),
+                    defineField({
+                      name: 'when',
+                      title: 'When (optional)',
+                      type: 'string',
+                      description: 'Like "Saturdays, 10 am".',
+                      validation: (R) => R.max(60),
+                    }),
+                    defineField({
+                      name: 'place',
+                      title: 'Where (optional)',
+                      type: 'string',
+                      validation: (R) => R.max(60),
+                    }),
+                    bodyField('A sentence or two (optional)'),
+                    linkField('Link (optional)'),
+                  ],
+                  preview: {
+                    select: { title: 'title', label: 'label', when: 'when', media: 'image' },
+                    prepare: ({ title, label, when, media }) => ({
+                      title: title || 'Card',
+                      subtitle: [label, when].filter(Boolean).join(' · '),
+                      media,
+                    }),
+                  },
+                }),
+              ],
+            }),
+          ],
+          preview: {
+            select: { title: 'title', cards: 'cards' },
+            prepare: ({ title, cards }) => ({
+              title: title || 'Group',
+              subtitle: `Cards${Array.isArray(cards) ? ` (${cards.length})` : ''}`,
+            }),
+          },
+        }),
+      ],
+    }),
+    lookField('hubSection'),
+  ],
+  preview: {
+    select: { title: 'heading', groups: 'groups' },
+    prepare: ({ title, groups }) => ({
+      title: title || 'Groups of cards',
+      subtitle: `Groups${Array.isArray(groups) ? ` (${groups.length})` : ''}`,
+    }),
+  },
+});
+
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 export const builderSectionSchemas = [
@@ -895,6 +1354,13 @@ export const builderSectionSchemas = [
   eventDetailsSection,
   scheduleSection,
   photoCardsSection,
+  contactCardSection,
+  progressSection,
+  newsletterSection,
+  calendarSubscribeSection,
+  iconCardsSection,
+  stepsRailSection,
+  hubSection,
 ];
 
 /**
@@ -912,7 +1378,15 @@ export const BUILDER_INSERT_GROUPS: InsertGroup[] = [
       'photoSection',
       'photoCardsSection',
       'letterSection',
+      'iconCardsSection',
+      'stepsRailSection',
+      'hubSection',
     ],
+  },
+  {
+    name: 'contact',
+    title: 'Contact and updates',
+    of: ['contactCardSection', 'newsletterSection', 'calendarSubscribeSection'],
   },
   {
     name: 'dates',
@@ -923,6 +1397,7 @@ export const BUILDER_INSERT_GROUPS: InsertGroup[] = [
       'countdownSection',
       'noticeSection',
       'timelineSection',
+      'progressSection',
     ],
   },
   { name: 'folding', title: 'Fold-outs and tabs', of: ['accordionSection', 'tabsSection'] },
