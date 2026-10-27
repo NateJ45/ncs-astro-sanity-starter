@@ -19,6 +19,13 @@ const description = page?.seoDescription ?? 'Your tagline goes here.';
 const sections = page?.pageBuilder?.length ? page.pageBuilder : DEFAULT_HOME_SECTIONS;
 ---
 
-<BaseLayout {title} {description} {siteSettings} seoImage={page?.seoImage} ogCard={{ home: true }}>
+<BaseLayout
+  {title}
+  {description}
+  {siteSettings}
+  seoImage={page?.seoImage}
+  ogCard={{ home: true }}
+  flow="full"
+>
   <SectionRenderer {sections} idPrefix="home" />
 </BaseLayout>

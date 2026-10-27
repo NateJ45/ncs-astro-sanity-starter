@@ -456,19 +456,25 @@ function rewriteGlobalsCss(config) {
 }
 
 // ---- Rewrite: src/data/layout.ts ----------------------------------------
-// The `layout` block (header / hero / density / cards) is the structure axis.
+// The `layout` block (header / hero / density / cards / motion) is the structure axis.
 // Missing block or missing slots mean the defaults, which is the original
 // layout, so an older config reskins exactly as before. The file is generated
 // whole (no patterns to drift); values were already enum-checked by the schema.
 
-const LAYOUT_DEFAULTS = { header: 'inline', hero: 'bleed', density: 'standard', cards: 'standard' };
+const LAYOUT_DEFAULTS = {
+  header: 'inline',
+  hero: 'bleed',
+  density: 'standard',
+  cards: 'standard',
+  motion: 'reveal',
+};
 
 function rewriteLayoutTs(config) {
   const l = Object.assign({}, LAYOUT_DEFAULTS, config.layout || {});
   const lines = [
     '// Safe to edit by hand, but normally WRITTEN BY `npm run apply-brand` from the',
     '// `layout` block of brand/brand.config.json. Edit the config, not this file.',
-    '// Defaults (inline, bleed, standard, standard) reproduce the original layout.',
+    '// Defaults (inline, bleed, standard, standard, reveal) reproduce the original layout.',
     "import { resolveLayout } from '@/lib/site-layout';",
     '',
     'export const layout = resolveLayout({',

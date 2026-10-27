@@ -42,6 +42,14 @@ export const LAYOUT_SLOTS = {
   /** Card and list surface. standard = hairline border and soft shadow.
    *  outline = square, firmer border, no shadow. soft = borderless tinted fill. */
   cards: ['standard', 'outline', 'soft'],
+  /** Motion (card 192). reveal = the starter's scroll reveals ([data-reveal],
+   *  stagger grids, the image curtain) and the plain cross-fade between pages.
+   *  flow = FBC Auburn's flow layer: on a page marked full (Home and the 404)
+   *  headings rise line by line, the rest fades up, photos settle and drift, and
+   *  pages lift and rise between clicks; every other page gets a 200ms fade.
+   *  fade = the 200ms fade on every page. none = nothing moves, not even the
+   *  reveals or the page cross-fade. src/scripts/flow.ts, src/styles/flow.css. */
+  motion: ['reveal', 'flow', 'fade', 'none'],
 } as const;
 
 export type LayoutSlot = keyof typeof LAYOUT_SLOTS;
@@ -52,6 +60,7 @@ export const DEFAULT_LAYOUT: SiteLayout = {
   hero: 'bleed',
   density: 'standard',
   cards: 'standard',
+  motion: 'reveal',
 };
 
 /** Fill a partial or missing config with defaults; an unknown value falls back
@@ -65,13 +74,13 @@ export function resolveLayout(raw?: Partial<Record<LayoutSlot, string>> | null):
   return out as SiteLayout;
 }
 
-/** The data-* attributes for <html>. Header, density and cards; and the hero
+/** The data-* attributes for <html>. Header, density, cards and motion; and the hero
  *  only when it is board, the one hero whose grammar covers the page body. A
  *  slot at its default contributes nothing, so the default site's markup is
  *  unchanged. */
 export function layoutAttrs(layout: SiteLayout): Record<string, string> {
   const attrs: Record<string, string> = {};
-  for (const slot of ['header', 'density', 'cards'] as const) {
+  for (const slot of ['header', 'density', 'cards', 'motion'] as const) {
     if (layout[slot] !== DEFAULT_LAYOUT[slot]) attrs[`data-${slot}`] = layout[slot];
   }
   if (layout.hero === 'board') attrs['data-hero'] = 'board';
@@ -80,6 +89,12 @@ export function layoutAttrs(layout: SiteLayout): Record<string, string> {
 
 /** True when the site draws the board grammar (hero: board): SectionRenderer
  *  opens each section with a BoardRule. */
+/** True when the flow layer runs (motion flow or fade): BaseLayout loads
+ *  src/scripts/flow.ts only then, so the default site ships no extra script. */
+export function hasFlow(layout: SiteLayout): boolean {
+  return layout.motion === 'flow' || layout.motion === 'fade';
+}
+
 export function isBoard(layout: SiteLayout): boolean {
   return layout.hero === 'board';
 }

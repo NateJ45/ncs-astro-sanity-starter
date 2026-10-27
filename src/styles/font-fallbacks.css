@@ -14,7 +14,7 @@
 }
 @font-face {
   font-family: 'Libre Baskerville Fallback Times';
-  src: local('Times New Roman'), local('Times');
+  src: local('Times New Roman'), local('Times'), local('Liberation Serif'), local('Tinos');
   size-adjust: 127.26%;
   ascent-override: 76.22%;
   descent-override: 21.22%;

@@ -27,6 +27,15 @@ screenshots unchanged). A brand retunes the site by changing these, never by hun
 | `--btn-height` / `--btn-tracking` / `--tracking-label`        | 44px / 0.18em / 0.18em                  | The button measure (also the tap-target floor); uppercase labels and eyebrows.                          |
 | `--focus-ring-width` / `--focus-ring-offset`                  | 2px / 2px                               | The one focus ring.                                                                                     |
 
+**Motion (card 192).** The flow layer's timings and distances sit in the same block, read only when
+`layout.motion` is `flow` or `fade` (`docs/agent/animation.md`, "The flow layer"; the script reads the
+durations too): `--motion-ease` (expo-out), `--motion-fade` / `--motion-fade-distance` /
+`--motion-stagger-calm` (200ms / 8px / 40ms, calm pages), `--motion-rise` / `--motion-rise-distance` /
+`--motion-stagger` (600ms / 16px / 60ms), `--motion-line` / `--motion-line-stagger` (800ms / 80ms),
+`--motion-photo` / `--motion-photo-zoom` (900ms / 1.06), `--motion-side` / `--motion-side-distance`
+(800ms / 32px), `--motion-page-out` / `--motion-page-in` / `--motion-page-distance` (120ms / 260ms / 12px).
+Auburn's values from its 2026-10-25 audit ("gentle and quick").
+
 The band rhythm stays `--spacing-section-md` / `--spacing-section-lg` (the `density` layout slot moves
 them). FBC Auburn's brand layer holds its own values in the same names (13 / 15 / 18px text, a 20px card
 corner, three navy-tinted shadows); that is the model for a site that wants a firmer system.
@@ -52,8 +61,12 @@ table) and its hhea ascent, descent and line gap, and writes `src/styles/font-fa
 `"<Family> Fallback Times"` over Times New Roman, each with `size-adjust`, `ascent-override`,
 `descent-override` and `line-gap-override`. The faces are named second in the display stack
 (`brand.config.json` `fonts.display.familyValue`, which `apply-brand` writes into `--font-display`).
-Once the real font has loaded nothing changes; Android has none of these local fonts and falls through
-to plain `serif`, as before. The unit test reproduces Auburn's Young Serif numbers (114.71% over Georgia)
+Once the real font has loaded nothing changes. Linux and ChromeOS have no Times or Arial, so the Times
+and Arial faces also name their metric twins (Liberation Serif and Tinos, Liberation Sans and Arimo:
+the same advance widths, and the vertical metrics are overridden anyway). Without them a first-screen
+title on Linux drew in plain `serif` and moved 3px when the web font arrived, which the flow layer's CLS
+test caught on CI (card 192). Android has none of these local fonts and falls through to plain `serif`,
+as before. The unit test reproduces Auburn's Young Serif numbers (114.71% over Georgia)
 within 0.1%.
 
 Rerun it after any display-font change. A variable `@fontsource` package ships woff2 only, which

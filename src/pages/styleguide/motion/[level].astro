@@ -1,0 +1,91 @@
+---
+// Foundation, edit with care
+//
+// THE MOTION WALL (PORTS.md card 192): the fixed-data pages tests/flow-motion.spec.ts drives.
+// The starter's own layout.motion is 'reveal', so these pages override it for themselves
+// (BaseLayout's `motion` prop) to exercise the flow layer from the default build:
+//
+//   /styleguide/motion/full/   motion 'flow' with <main data-flow-full>: lines, fade-ups, photos
+//   /styleguide/motion/fade/   motion 'fade': one short fade on every unit
+//
+// The first screen is a heading and a paragraph that must show as they are; everything after the
+// spacer is below the fold and rises as it arrives. Fixed data on purpose. noindex, filtered from
+// the sitemap (astro.config.mjs matches '/styleguide'), and 'styleguide' is a reserved slug.
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { site } from '@/data/site';
+
+export function getStaticPaths() {
+  return [{ params: { level: 'full' } }, { params: { level: 'fade' } }];
+}
+
+const { level } = Astro.params as { level: 'full' | 'fade' };
+const sections = [
+  {
+    id: 'one',
+    heading: 'A heading long enough to wrap across two lines on a phone',
+    body: 'One paragraph of fixed copy under the heading, so the section has words to fade up.',
+  },
+  {
+    id: 'two',
+    heading: 'A second section with a list',
+    body: 'Things arriving together come up in document order, a beat apart.',
+    items: ['The first item', 'The second item', 'The third item'],
+  },
+  {
+    id: 'three',
+    heading: 'A photograph in a cropping frame',
+    body: 'On a full page it settles from a slight zoom; on a calm page it only fades.',
+    photo: true,
+  },
+];
+---
+
+<BaseLayout
+  title={`Motion wall (${level}) | ${site.name}`}
+  description="Fixed-data motion wall for the flow layer. Not for visitors."
+  noindex
+  motion={level === 'full' ? 'flow' : 'fade'}
+  flow="full"
+>
+  <section class="mx-auto max-w-content px-m py-section-md" data-fx="first-screen">
+    <h1 class="font-display text-h2">Motion wall: {level}</h1>
+    <p class="mt-m max-w-prose">
+      This first screen shows as it is. Scroll down: each section below comes in as it reaches you.
+    </p>
+  </section>
+
+  {/* Pushes the sections below the first screen at every test viewport. */}
+  <div aria-hidden="true" style="height: 120vh"></div>
+
+  {sections.map((s) => (
+    <section class="mx-auto max-w-content px-m py-section-md" data-fx={s.id} data-reveal>
+      <h2 class="font-display text-h3">{s.heading}</h2>
+      <p class="mt-m max-w-prose">{s.body}</p>
+      {s.items && (
+        <ul class="mt-m list-disc pl-l">
+          {s.items.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      )}
+      {s.photo && (
+        <div class="mt-m overflow-hidden rounded-md" style="height: 320px">
+          <img
+            src="/og-default.png"
+            alt="Fixture photograph"
+            width="1200"
+            height="630"
+            class="h-full w-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      )}
+      <p class="mt-m">
+        <a href="#main" class="underline">
+          A link in section {s.id}
+        </a>
+      </p>
+    </section>
+  ))}
+</BaseLayout>

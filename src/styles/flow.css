@@ -1,0 +1,184 @@
+/* PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+   The flow layer (PORTS.md card 192, from FBC Auburn's flow layer, 2026-10-24). The script that
+   picks the units and runs the observer is src/scripts/flow.ts; docs/agent/animation.md
+   ("The flow layer") has the map. Imported by globals.css on every site; every rule is keyed on
+   html[data-motion='flow' | 'fade' | 'none'] (brand.config.json layout.motion) or on a class
+   flow.ts adds, so the default ('reveal') draws exactly what it did before.
+
+   Every hidden starting state here is the FIRST FRAME OF A PAUSED ANIMATION (`both paused`),
+   started by `.flow-go`. So: no `html.motion` (reduced motion, JS off) means none of this
+   applies; a script that never runs never adds a unit class, so nothing is hidden; a test that
+   sets `animation: none` sees the page at rest; and once a unit has landed the script takes its
+   classes off and the element is plain again. Only opacity and the individual `translate` and
+   `scale` properties move, so a component's own `transform` is never fought and nothing shifts
+   the layout (CLS 0).
+
+   Durations and distances come from the one scale in globals.css ("Motion", card 192); the
+   fallbacks here are the same values, so a site that has not merged the tokens yet still works. */
+
+@keyframes flow-up {
+  from {
+    opacity: 0;
+    translate: 0 var(--motion-rise-distance, 16px);
+  }
+}
+/* Calm pages: one short fade. */
+@keyframes flow-fade {
+  from {
+    opacity: 0;
+    translate: 0 var(--motion-fade-distance, 8px);
+  }
+}
+@keyframes flow-photo {
+  from {
+    opacity: 0;
+    scale: var(--motion-photo-zoom, 1.06);
+  }
+}
+@keyframes flow-side {
+  from {
+    opacity: 0;
+    translate: var(--motion-side-distance, 32px) 0;
+  }
+}
+@keyframes flow-line {
+  from {
+    translate: 0 125%;
+  }
+}
+
+/* ---- The older reveals step aside -----------------------------------------------------------
+   [data-reveal] sections, [data-stagger-grid] cards and the .img-curtain would play a second,
+   smaller entrance around the units inside them. Once the flow layer has armed the page they show
+   at rest and the units do the moving. */
+html.motion.flow-armed [data-reveal],
+html.motion.flow-armed [data-stagger-grid] > * {
+  opacity: 1;
+  translate: none;
+  transition: none;
+}
+html.motion.flow-armed .img-curtain {
+  display: none;
+}
+
+/* ---- Units ------------------------------------------------------------------------------- */
+html.motion .flow--up {
+  animation: flow-up var(--motion-rise, 600ms) var(--motion-ease, cubic-bezier(0.16, 1, 0.3, 1))
+    var(--flow-delay, 0ms) both paused;
+}
+html.motion[data-flow='calm'] .flow--up {
+  animation: flow-fade var(--motion-fade, 200ms) ease-out var(--flow-delay, 0ms) both paused;
+}
+html.motion .flow--photo {
+  animation: flow-photo var(--motion-photo, 900ms) var(--motion-ease, cubic-bezier(0.16, 1, 0.3, 1))
+    var(--flow-delay, 0ms) both paused;
+}
+html.motion .flow--side {
+  animation: flow-side var(--motion-side, 800ms) var(--motion-ease, cubic-bezier(0.16, 1, 0.3, 1))
+    var(--flow-delay, 0ms) both paused;
+}
+
+/* Headings: each line rises out of its own mask. The mask is a clip-path, not overflow with
+   padding: it changes nothing in the layout. Only the bottom edge needs to hide anything, a little
+   below the line so descenders are never cut. A landed heading keeps its line spans but nothing
+   clips them, so focus rings and long descenders are never cut either. */
+.flow-line,
+.flow-line__in {
+  display: block;
+}
+.flow--lines .flow-line {
+  clip-path: inset(-60% -30% -0.2em -30%);
+}
+html.motion .flow--lines .flow-line__in {
+  animation: flow-line var(--motion-line, 800ms) var(--motion-ease, cubic-bezier(0.16, 1, 0.3, 1))
+    calc(var(--flow-delay, 0ms) + var(--flow-i, 0) * var(--motion-line-stagger, 80ms)) both paused;
+}
+
+html.motion .flow.flow-go,
+html.motion .flow-go .flow-line__in {
+  animation-play-state: running;
+}
+
+/* ---- Photographs drift inside their frames as the page passes ----------------------------
+   On `transform` (a translate and a fixed zoom so the frame never shows an edge), which composes
+   with the reveal's `scale`. Scroll-timeline browsers only; elsewhere the photo just sits still,
+   which is the finished picture. A scroll timeline reads the scroll; it never drives it. */
+@keyframes flow-par {
+  from {
+    transform: translateY(-5%) scale(1.12);
+  }
+  to {
+    transform: translateY(5%) scale(1.12);
+  }
+}
+@supports (animation-timeline: view()) {
+  html.motion .flow-par {
+    animation: flow-par linear both;
+    animation-timeline: view();
+  }
+  html.motion .flow-par.flow--photo {
+    animation:
+      flow-photo var(--motion-photo, 900ms) var(--motion-ease, cubic-bezier(0.16, 1, 0.3, 1))
+        var(--flow-delay, 0ms) both paused,
+      flow-par linear both paused;
+    animation-timeline: auto, view();
+  }
+  html.motion .flow-par.flow--photo.flow-go {
+    animation-play-state: running;
+  }
+}
+
+/* ---- Page to page: the old page lifts away, the new one rises into place ------------------
+   motion 'flow' only; it replaces the plain cross-fade in globals.css for <main>, and the header
+   and footer stay pinned as before. Astro skips view transitions under reduced motion. Quick on
+   purpose (Auburn's audit, 2026-10-25): gone in 120ms, in place in 260ms, no wait between. */
+@keyframes flow-vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--motion-page-distance, 12px) * -0.67));
+  }
+}
+@keyframes flow-vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-page-distance, 12px));
+  }
+}
+html[data-motion='flow']::view-transition-old(main-content) {
+  animation: flow-vt-out var(--motion-page-out, 120ms) cubic-bezier(0.4, 0, 1, 1) both;
+}
+html[data-motion='flow']::view-transition-new(main-content) {
+  animation: flow-vt-in var(--motion-page-in, 260ms)
+    var(--motion-ease, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+/* motion 'none': a plain cut between pages too. */
+html[data-motion='none']::view-transition-old(main-content),
+html[data-motion='none']::view-transition-new(main-content) {
+  animation: none;
+}
+
+/* ---- Keyboard focus shows at once ----------------------------------------------------------
+   A link reached by Tab before its unit has risen sat at opacity 0 on Auburn's 404. Any unit that
+   holds focus drops its starting frame and shows as it rests; flow.ts also lands the unit on
+   focusin, so it does not replay once focus moves on. */
+html.motion[data-flow] :is(.flow, [data-reveal], [data-stagger-grid] > *):focus-within,
+html.motion[data-flow] .flow:focus-within .flow-line__in {
+  animation: none !important;
+  opacity: 1 !important;
+  translate: none !important;
+  transition: none !important;
+}
+
+/* ---- motion 'none': the entrances that do not wait for html.motion stay still too ------------
+   The reveals are already off (the head script never adds html.motion); the hero's load stagger
+   and the slideshow's slow zoom are plain CSS, so they are stopped here, as under reduced motion.
+   Hover and press feedback is left alone: it answers the visitor, it does not decorate. */
+html[data-motion='none'] .hero-entry-stagger > * {
+  opacity: 1;
+  animation: none;
+  transform: none;
+}
+html[data-motion='none'] .hero-slide {
+  animation: none;
+  transform: none;
+}

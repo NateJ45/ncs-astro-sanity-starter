@@ -215,7 +215,8 @@
         "header": { "type": "string", "enum": ["inline", "centered", "minimal"] },
         "hero": { "type": "string", "enum": ["bleed", "split", "editorial", "board"] },
         "density": { "type": "string", "enum": ["standard", "airy", "tight"] },
-        "cards": { "type": "string", "enum": ["standard", "outline", "soft"] }
+        "cards": { "type": "string", "enum": ["standard", "outline", "soft"] },
+        "motion": { "type": "string", "enum": ["reveal", "flow", "fade", "none"] }
       }
     },
     "workerName": {
