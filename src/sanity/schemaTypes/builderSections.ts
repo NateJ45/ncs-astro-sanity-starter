@@ -914,7 +914,7 @@ export const contactCardSection = defineType({
   type: 'object',
   icon: MobileDeviceIcon,
   description:
-    'Phone, email, address and opening hours on one card, with big Call and Email buttons if you want them. The phone and email come from Site settings unless you type others here.',
+    'Phone, email, address and opening hours on one card, with big Call and Email buttons if you want them. Everything fills itself from Site settings and Business info; type something here only for a different one.',
   fields: [
     defineField({
       name: 'heading',
@@ -953,14 +953,15 @@ export const contactCardSection = defineType({
       type: 'text',
       rows: 3,
       description:
-        'One line each for the street and the town. A "Get directions" link is made from it.',
+        'Leave empty to use the address in Business info. Otherwise one line each for the street and the town; a "Get directions" link is made from it.',
     }),
     defineField({
       name: 'hours',
       title: 'Opening hours (optional)',
       type: 'text',
       rows: 4,
-      description: 'One line for each, like "Monday to Friday, 9 am to 5 pm".',
+      description:
+        'Leave empty to use the opening hours in Business info, with today\'s status. Otherwise one line for each, like "Monday to Friday, 9 am to 5 pm".',
     }),
     lookField('contactCardSection'),
   ],

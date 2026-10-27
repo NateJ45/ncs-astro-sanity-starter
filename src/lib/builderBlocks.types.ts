@@ -169,6 +169,8 @@ export interface ProjectedContactCardSection extends Base {
   email?: string;
   address?: string;
   hours?: string;
+  /** Set only by the styleguide wall's fixture (card 198). */
+  facts?: RawBusinessFacts | null;
 }
 
 export interface ProjectedProgressSection extends Base {

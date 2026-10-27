@@ -76,7 +76,7 @@ test.describe('Builder kit blocks', () => {
   // ── Card 193 ──────────────────────────────────────────────────────────────
 
   test('contact card: big Call and Email buttons, details and directions', async ({ page }) => {
-    const card = page.locator(box('contactCardSection'));
+    const card = page.locator(box('contactCardSection')).first();
     const buttons = card.locator('[data-call-buttons] a');
     await expect(buttons).toHaveCount(2);
     await expect(buttons.first()).toHaveAttribute('href', 'tel:5555550100');
@@ -86,6 +86,26 @@ test.describe('Builder kit blocks', () => {
       'href',
       /^https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=/,
     );
+  });
+
+  test('contact card with nothing typed fills from business facts and tags the unconfirmed', async ({
+    page,
+  }) => {
+    const card = page.locator(box('contactCardSection')).nth(1);
+    await expect(card.getByRole('link', { name: '(555) 555-0142' })).toHaveAttribute(
+      'href',
+      'tel:5555550142',
+    );
+    await expect(card.getByRole('link', { name: 'office@example.com' })).toBeVisible();
+    await expect(card.getByText('12 Main Street')).toBeVisible();
+    await expect(card.getByRole('link', { name: /Get directions/ })).toBeVisible();
+    await expect(card.locator('[data-biz-status]')).toContainText(/Today|Closed|Open/);
+    // Only the phone is marked unconfirmed in the fixture.
+    await expect(card.locator('[data-to-confirm]')).toHaveCount(1);
+    // The block that types its own words shows no tags and none of the facts.
+    const own = page.locator(box('contactCardSection')).first();
+    await expect(own.locator('[data-to-confirm]')).toHaveCount(0);
+    await expect(own.locator('[data-biz-status]')).toHaveCount(0);
   });
 
   test('progress: one progressbar with a spoken value and twenty steps', async ({ page }) => {
