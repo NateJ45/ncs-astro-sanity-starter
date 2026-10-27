@@ -98,7 +98,7 @@ export const privacyPage = defineType({
       type: 'string',
       group: 'hero',
       description:
-        'A single word from the headline to render in the script accent font. Must match exactly. Leave blank to skip.',
+        'A single word from the headline to render in the script accent font. Must be a whole word from it (capitals do not matter). Leave blank to skip.',
     }),
 
     // Content

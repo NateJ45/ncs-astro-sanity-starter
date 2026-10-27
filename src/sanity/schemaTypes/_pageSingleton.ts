@@ -113,7 +113,7 @@ export function definePageSingleton(
         type: 'string',
         group: 'hero',
         description:
-          'One word from the headline to render in the script font. Must match the headline exactly. Leave blank to skip.',
+          'One word from the headline to render in the script font. Must be a whole word from it (capitals do not matter). Leave blank to skip.',
       }),
       defineField({
         name: 'heroSubhead',

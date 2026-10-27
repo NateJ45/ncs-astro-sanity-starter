@@ -96,7 +96,7 @@ export const contactPage = defineType({
       type: 'string',
       group: 'hero',
       description:
-        'A single word from the headline to render in the handwritten script accent font. Must match exactly (case-sensitive). Leave blank to skip.',
+        'A single word from the headline to render in the handwritten script accent font. Must be a whole word from the headline (capitals do not matter). Leave blank to skip.',
     }),
 
     defineField({

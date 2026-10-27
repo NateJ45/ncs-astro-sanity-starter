@@ -183,7 +183,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'A single word from the headline to render in the handwritten script accent font for editorial flourish. Must match the word exactly (case-sensitive). The first occurrence wins. Leave blank to skip. Note: when "rotating words" is also set, the rotation wins and this is ignored.',
+        'A single word from the headline to render in the handwritten script accent font for editorial flourish. Must be a whole word from the headline (capitals do not matter). The first occurrence wins. Leave blank to skip. Note: when "rotating words" is also set, the rotation wins and this is ignored.',
     }),
 
     // Meet the Founder (legacy — hidden for rollback safety)
@@ -411,7 +411,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must be whole words from the headline (capitals do not matter). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({
       name: 'testimonialsSubhead',
@@ -473,7 +473,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must be whole words from the headline (capitals do not matter). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({
       name: 'servicesGridSubhead',
@@ -539,7 +539,7 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must match the headline text exactly (case-sensitive). Leave blank to skip. Use sparingly, one accent per heading.',
+        'Optional. One word or short phrase from the headline to render in the handwritten script accent font. Must be whole words from the headline (capitals do not matter). Leave blank to skip. Use sparingly, one accent per heading.',
     }),
     defineField({
       name: 'finalCtaSubhead',
