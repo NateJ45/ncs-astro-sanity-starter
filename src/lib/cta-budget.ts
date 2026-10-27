@@ -41,3 +41,39 @@ export function primaryBudget<T>(
   const first = firstPrimaryIndex(blocks, drawsPrimary);
   return (index: number) => (index === first ? 'primary' : 'secondary');
 }
+
+// =============================================================================
+// The header rule (PORTS.md card 187, from FBC Auburn's red-budget.ts)
+// =============================================================================
+// The header's button stays the accent colour on every page. A button in the
+// page body that goes where the header button goes (while the header shows it)
+// repeats it, so it draws the quieter secondary variant, never a second accent.
+// The page's own accent then passes to the next button that is NOT a repeat, or
+// to nothing, which is fine: a page does not need two "Book a consultation".
+//
+// Callers (SectionRenderer.astro) fold it into the `drawsPrimary` test: a block
+// whose main button repeats the header does not draw a primary one, so it never
+// spends the budget above.
+// =============================================================================
+
+export interface HeaderButton {
+  show: boolean;
+  href: string;
+}
+
+/** "/contact/?x#y" -> "/contact": the page a link opens, for comparing. */
+function comparablePath(href: string): string {
+  const path = href.trim().replace(/[?#].*$/, '');
+  return path.replace(/\/+$/, '') || '/';
+}
+
+/** True when a body button goes to the page the header button opens, and the header shows it. */
+export function repeatsHeaderCta(
+  href: string | null | undefined,
+  header: HeaderButton | null | undefined,
+): boolean {
+  if (!href || !header?.show || !header.href) return false;
+  // Only site pages: an off-site header button (a booking service) is never "repeated" by a path.
+  if (!header.href.startsWith('/') || !href.startsWith('/')) return false;
+  return comparablePath(href) === comparablePath(header.href);
+}

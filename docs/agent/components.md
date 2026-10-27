@@ -96,7 +96,7 @@ The Portable Text renderer (`JournalPortableText.tsx`) detects image orientation
 **Contact page pieces:**
 
 - `ContactForm.tsx` -- Name / Email / Phone / Message, plus any project-specific fields; posts as a plain form with scripting off, lists every error in a focused summary, keeps the draft in sessionStorage, reads `?topic=` and `&about=`. See form section in `docs/agent/sanity.md`.
-- `CopyEmailButton.tsx` -- mailto link + clipboard fallback.
+- `CopyEmailButton.astro` -- mailto link + a copy button. An Astro component with one delegated click handler (card 187): the icon turns into a tick and a visually hidden live region says "Email address copied", so there is no React island and no toast region.
 - `CalendlyInline.tsx` -- click-to-load Calendly iframe placeholder. Heavy widget stays off the budget until the visitor opts in.
 
 **Site-wide affordances:**
@@ -124,7 +124,7 @@ The desktop nav dropdowns live directly in `Header.astro` as SSR'd `<details>` (
 - **Secondary variant** swaps from `border-primary text-link` (brand accent on light) to `border-white/70 text-white hover:bg-white/10` (cream on dark).
 - **Focus ring** offsets against `transparent` instead of `--background` so the ring still reads on photographic surfaces.
 
-**One accent button per page (card 158).** `Hero.astro` and `FinalCta.astro` take `primaryVariant` (`'primary'` by default). `SectionRenderer` passes `'secondary'` to every section after the first one that draws a primary button (`src/lib/cta-budget.ts`), so a page builder page never shows two filled accent buttons. A new block that draws a primary button joins the `drawsPrimary` test in `SectionRenderer.astro` and takes the same prop.
+**One accent button per page (card 158).** `Hero.astro` and `FinalCta.astro` take `primaryVariant` (`'primary'` by default). `SectionRenderer` passes `'secondary'` to every section after the first one that draws a primary button (`src/lib/cta-budget.ts`), so a page builder page never shows two filled accent buttons. A button that goes where the header button goes (`repeatsHeaderCta`, card 187) repeats it, draws secondary and does not spend the accent either; `ctaHref()` (`src/lib/cta-href.ts`) says where any `ctaBlock` goes. A new block that draws a primary button joins the `drawsPrimary` test in `SectionRenderer.astro` and takes the same prop.
 
 ### Calendar files (`src/lib/ics.ts`, card 158)
 

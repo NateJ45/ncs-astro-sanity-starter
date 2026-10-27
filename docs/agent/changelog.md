@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-27: eleven small fixes from first-baptist-auburn (PORTS card 187)._ A body button that repeats the header button draws secondary (`cta-budget.ts`); an optional second header button (Site settings > Navigation); a custom page's menu and footer switches now add the page (`page-switches.ts`); `ctaHref()`, `publicPath()` and `linkableRows()` as shared helpers; the copy-email button is Astro and the Sonner toast region is gone; one accent box and one subhead box per block in the Studio (hidden, never removed); word breaks for site search between side-by-side buttons; and `OWN_NEWSLETTER` hides every newsletter screen for a site whose list lives elsewhere. No stored value moves; an untouched site only changes where a hero or band button repeats the header button.
+
 _2026-10-26: popups, one at a time, with guard rails (PORTS card 170)._
 
 **Decision.** A popup is its own document type (Content > Popups), not a style of Announcement, because it interrupts: the site shows one at a time (the newest started), it opens only after 4 seconds AND a quarter screen of scroll, it is remembered per visitor or per visit, and it must have an end date. A native `<dialog>` gives the inert page, Escape and focus return. With no popup documents nothing renders and no script ships. The logic is PORTABLE `src/lib/popup.ts`; page addresses come from each site's `SINGLETON_LIVE_PATHS`. Detail: `docs/agent/popups.md`.
