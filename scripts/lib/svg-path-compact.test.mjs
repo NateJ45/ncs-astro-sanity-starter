@@ -76,6 +76,15 @@ describe('compactPath', () => {
     assert.equal(compactPath('M0 0 L-0.04 3'), 'm0 0 0 3');
     assert.deepEqual(absolute(c), absolute('M0 0 L0 5 l0 0 c0 0 0 0 0 0z'));
   });
+  it('glues a repeated command that starts with a decimal, and never returns a longer path', () => {
+    const d = 'm131.1-93q1.3-3.6 2.4-4.6 1.1-1.1 3.2-1.1q.8 0 1.1.4.4.3.4.7';
+    const c = compactPath(d);
+    assert.ok(c.length <= d.length, c);
+    assert.ok(!c.includes('.4 .4'), c);
+    assert.deepEqual(absolute(c), absolute(d));
+    const tight = 'm1 1l.5.5';
+    assert.equal(compactPath(tight), tight);
+  });
   it('keeps every point of every SVG this repo ships, and never grows one', () => {
     const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
     let seen = 0;
@@ -88,7 +97,7 @@ describe('compactPath', () => {
         for (const [, d] of svg.matchAll(/ d="([^"]*)"/g)) {
           const c = compactPath(d);
           assert.deepEqual(absolute(c), absolute(d), `${f}: a point moved`);
-          assert.ok(c.length <= d.length + 2, `${f}: a path got longer`);
+          assert.ok(c.length <= d.length, `${f}: a path got longer`);
           seen++;
         }
       }

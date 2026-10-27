@@ -43,7 +43,14 @@ function join(nums) {
   return out;
 }
 
+/** The compact form, or the original when that is not shorter (a path already written tightly
+ *  can come out a character or two longer; never make a file bigger). */
 export function compactPath(d) {
+  const c = compactPathRaw(d);
+  return c.length < d.length ? c : d;
+}
+
+function compactPathRaw(d) {
   if (/[aA]/.test(d)) return d;
   const tokens = d.match(/[a-zA-Z]|-?(?:\d+\.?\d*|\.\d+)(?:e-?\d+)?/g) ?? [];
   // "+ 0" turns a rounded -0 (from "-0.04" or "-0") into 0, so no "-0" ever reaches the output.
@@ -56,15 +63,20 @@ export function compactPath(d) {
   let sy = 0; // subpath start
   let out = '';
   let lastLetter = '';
+  let lastNum = ''; // last number written, to know if a repeat needs a separator
   const emit = (letter, nums) => {
-    const body = join(nums.map(num));
+    const strs = nums.map(num);
+    const body = join(strs);
     // A repeated command letter can be left out, except after z.
     if (letter === lastLetter && letter !== 'z' && letter !== 'm') {
-      out += (body.startsWith('-') ? '' : ' ') + body;
+      const first = strs[0];
+      const glued = first.startsWith('-') || (first.startsWith('.') && lastNum.includes('.'));
+      out += (glued ? '' : ' ') + body;
     } else {
       out += letter + body;
     }
     lastLetter = letter === 'm' ? 'l' : letter;
+    lastNum = strs[strs.length - 1] ?? '';
   };
   while (i < tokens.length) {
     if (/[a-zA-Z]/.test(tokens[i])) cmd = tokens[i++];

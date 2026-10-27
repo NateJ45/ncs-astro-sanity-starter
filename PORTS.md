@@ -12523,7 +12523,10 @@ own reader does the same, and a new case pins it. (3) `wayfinding.test.ts` (card
 pages. It now lists them as published and uses `/studio/`, reserved everywhere, for the route case. (4) `sync-check.mjs`
 decided "I am the starter" from the package name alone, and stonesteps-50k kept that name, so a plain run silently
 self-checked. `isStarter()` now also needs a git `origin` URL naming the starter; the exit-2 guard is kept and tested
-(forked site refused, real checkout allowed). Sweep of the other PORTABLE tests for starter-only paths found none
+(forked site refused, real checkout allowed). (5) On mas-monograms the compactor's own test failed with "favicon.svg: a path got longer": a repeated command whose
+number starts with a decimal point was written with a needless space, and a path already tight can come out longer.
+`compactPath` now glues that case and returns the original when its output is not shorter, so the site-wide test
+(no path gets longer) holds on any SVG. Sweep of the other PORTABLE tests for starter-only paths found none
 (they read files every site has, such as `public/_headers`, or build temp trees).
 
 **Applied:** starter (this card). Sites: copy the three PORTABLE files with the next sync.
