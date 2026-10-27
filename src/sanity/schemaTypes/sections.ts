@@ -777,7 +777,20 @@ export const sectionThumbnailUrl = (type: string): string | undefined =>
 // (say, a church's service times and giving blocks) appends ITS groups here, or
 // spreads them in, and never edits the base list below: a group with a name that
 // already exists gains the types, a new name becomes a new group at the end.
-const SITE_INSERT_GROUPS: InsertGroup[] = [...BUILDER_INSERT_GROUPS];
+const SITE_INSERT_GROUPS: InsertGroup[] = [
+  ...BUILDER_INSERT_GROUPS,
+  {
+    // Every main page a page builder (card 190): the piece a page is built around. Each shows
+    // only on its own page (richSections.ts); a group whose types are absent does not appear.
+    name: 'thispage',
+    title: 'This page',
+    of: [
+      'contactFormSection',
+      'privacyPolicySection',
+      'journalPostsSection', // scaffold: journal
+    ],
+  },
+];
 
 export const SECTION_INSERT_MENU: ArrayOptions['insertMenu'] = {
   filter: true,
