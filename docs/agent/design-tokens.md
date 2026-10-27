@@ -91,6 +91,20 @@ as Auburn has it), `--board-rule-height`, `--board-title-size` (the theme's H1; 
 and `--board-accent`. Fixture: the board head at the end of `/styleguide/layouts/`, shot by the visual
 suite as `hero-board`.
 
+## The photo hero's shade (card 189)
+
+"Photo behind the words" (`PhotoHero.astro`, `src/styles/photo-hero.css`) sets white words over
+any photo, so the shade over the photo carries the contrast. Four tokens on `.ph-hero`:
+`--photo-scrim` (the colour, `var(--color-accent-dark)` by default), `--photo-scrim-text` (the
+least strength anywhere words sit, 72%), `--photo-scrim-deep` (88%, behind the start of the words
+and at a phone hero's foot) and `--photo-scrim-clear` (20%, where the photo should read).
+`src/lib/photo-hero.test.ts` (a unit gate) resolves the scrim to the brand's hex in
+`globals.css` and fails unless white over a pure white photo under `--photo-scrim-text` is at
+least 4.5:1; its message names the least strength that would pass. It also checks the shade is
+built from these tokens only and that the words stay inside it (the left 7/12 on a wide screen,
+below `--ph-band` less 160px on a phone). A brand overrides them on `.ph-hero`, never in `:root`
+(every rule here needs a `.ph-` class, so pages without the photo hero ship none of it).
+
 ## Typography
 
 - Headings (h1 through h6): **Libre Baskerville**, with its metric-matched fallbacks second in the stack (above). Self-hosted via `@fontsource/libre-baskerville`. Editorial serif that reads as premium without narrowing the brand voice to any specific style.

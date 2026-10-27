@@ -1,0 +1,112 @@
+---
+// Safe to edit by hand
+// Contact details on one card (PORTS.md card 193, from FBC Auburn's contact block): phone, email,
+// address (with a directions link) and opening hours, a column each on a wide screen. The phone
+// and email default to Site settings (rule 15: typed once); a block can type its own for a
+// department or a second location. Lines that are empty are left out, and with none at all the
+// block draws nothing.
+//
+// "Lead with big Call and Email buttons" (callButtons) puts two large buttons above the details,
+// tel: and mailto: links built from the same two values. Call is the page's one accent button when
+// SectionRenderer hands this block the accent (primaryVariant, card 158); Email is the outline.
+import BuilderBand from './BuilderBand.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import { getSiteSettings } from '@/lib/queries';
+import { eventPlace, plain, telHref } from '@/lib/builder-blocks';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedContactCardSection } from '@/lib/builderBlocks.types';
+
+interface Props {
+  block: ProjectedContactCardSection;
+  surface?: CadenceSurface;
+  headingId: string;
+  primaryVariant?: 'primary' | 'secondary';
+}
+const { block, surface, headingId, primaryVariant = 'secondary' } = Astro.props;
+
+const settings = await getSiteSettings().catch(() => null);
+const phone = plain(block.phone) || plain(settings?.phone);
+const tel = telHref(phone);
+const email = plain(block.email) || plain(settings?.email);
+const place = eventPlace(block.address);
+const hours = plain(block.hours)
+  .split(/\r?\n/)
+  .map((l) => l.trim())
+  .filter(Boolean);
+
+const count = [Boolean(tel), Boolean(email), Boolean(place), hours.length > 0].filter(
+  Boolean,
+).length;
+const big = block.callButtons === true;
+---
+
+{count > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Contact details"
+  >
+    {big && (tel || email) && (
+      <div class="bb-call" data-call-buttons>
+        {tel && (
+          <CtaLink
+            cta={{ label: `Call ${phone}`, linkType: 'phone', phoneNumber: phone }}
+            variant={primaryVariant === 'primary' ? 'primary' : 'secondary'}
+            class="bb-call__btn"
+          />
+        )}
+        {email && (
+          <CtaLink
+            cta={{ label: 'Email us', linkType: 'email', emailAddress: email }}
+            variant="secondary"
+            class="bb-call__btn"
+          />
+        )}
+      </div>
+    )}
+    <dl class="bb-board" data-n={count}>
+      {tel && (
+        <div class="bb-board__cell">
+          <dt>Phone</dt>
+          <dd>
+            <a href={tel}>{phone}</a>
+          </dd>
+        </div>
+      )}
+      {email && (
+        <div class="bb-board__cell">
+          <dt>Email</dt>
+          <dd>
+            <a href={`mailto:${email}`}>{email}</a>
+          </dd>
+        </div>
+      )}
+      {place && (
+        <div class="bb-board__cell">
+          <dt>Address</dt>
+          <dd>
+            {place.lines.map((line) => (
+              <span class="bb-line">{line}</span>
+            ))}
+            <a href={place.mapsUrl} target="_blank" rel="noopener noreferrer">
+              Get directions<span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </dd>
+        </div>
+      )}
+      {hours.length > 0 && (
+        <div class="bb-board__cell">
+          <dt>Opening hours</dt>
+          <dd>
+            {hours.map((line) => (
+              <span class="bb-line">{line}</span>
+            ))}
+          </dd>
+        </div>
+      )}
+    </dl>
+  </BuilderBand>
+)}

@@ -113,6 +113,54 @@ The first slide stays the eager `fetchpriority="high"` LCP image; the rest lazy-
 
 ---
 
+## Photo hero video (`HeroVideo.astro`, PORTS.md card 189)
+
+An opening banner whose **Style** is "Photo behind the words" (`heroSection.heroStyle = 'photo'`,
+drawn by `PhotoHero.astro`) can play a short silent clip over its background photo: Studio > the
+page > the opening banner > **Background video**, and **Phone video** under it. From FBC Auburn's
+Home hero (2026-10-25). The rules, in `src/lib/hero-video.ts` (unit tested):
+
+- The photo is drawn first and stays the LCP (eager, `fetchpriority="high"`). `HeroVideo.astro`
+  is rendered only when the block has a clip, and its script waits for the `load` event, then
+  builds a `<video muted playsinline loop preload="none">` with the photo's `currentSrc` as the
+  poster, puts it over the photo and under `.ph-photo__shade` (so the words keep their contrast),
+  starts it with `play()` (no `autoplay`, so the Pause choice and the off-screen pause win) and
+  fades it in on `playing`. It carries `aria-hidden`, `tabindex=-1`, no controls and
+  `pointer-events: none`.
+- `heroVideoAllowed()` says no for reduced motion, Save-Data, an `effectiveType` of slow-2g, 2g or
+  3g, a measured `downlink` under 1 Mbps (0 counts as unknown) and print: then there is no
+  `<video>` at all and nothing downloads. Switching reduced motion on while the page is open
+  removes it; CSS hides it under reduced motion and in print as a second guard.
+- A Pause / Play button (`[data-hero-video-toggle]`, `aria-pressed`) at the top right (WCAG
+  2.2.2). The choice is kept in `localStorage` (`hero-video-paused`). The clip pauses while the
+  hero is off screen, and starts again when a tab opened in the background comes to the front.
+- It plays at `opacity: 0.99`, never 1: Chrome on Windows promotes a fully opaque video to a
+  hardware overlay plane drawn outside the page, and the shade vanished on screen mid-scroll. That
+  never shows in a browser screenshot, only by eye.
+- **Phone video.** Sanity serves a file as uploaded and does not transcode, so the small copy is a
+  second upload (`backgroundVideoPhone`). Under 768px (`HERO_PHONE_QUERY`) `heroVideoPick()`
+  chooses it before the `<video>` is built, so a phone fetches only the small copy; with none,
+  phones play the main clip. On Auburn this cut a phone's video download from 1,000 KB to 267 KB
+  with LCP unchanged.
+- **Fast start.** The browser streams the clip with range requests (Sanity's CDN answers
+  `206`), which only works when the .mp4's index (`moov`) comes before the data (`mdat`). The
+  Studio reads the first 64 KB of an .mp4 upload (`checkFastStart()` / `mp4FastStart()`) and warns
+  when it does not; a failed request raises nothing. It also warns over 3 MB (1 MB for the phone
+  copy) and refuses anything but .mp4 or .webm.
+- Exporting: 1280x720, H.264, no audio, 15 to 30 seconds, under 3 MB, "Web optimized" (HandBrake)
+  or "Fast start" (Premiere, CapCut, Shotcut). With ffmpeg:
+  `ffmpeg -i in.mov -an -vf scale=1280:-2 -c:v libx264 -preset slow -crf 26 -movflags +faststart out.mp4`.
+  The phone copy: the same at `scale=640:-2`, under 1 MB. An existing mp4 is fixed without
+  re-encoding by `ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4`.
+- `tests/photo-hero.spec.ts` drives `/styleguide/photo-hero/home/` (fixed data; the CDN is
+  answered with `tests/visual/fixtures/hero-clip.mp4`). Playback itself is not asserted.
+
+The words' contrast over any photo is a separate promise: the shade tokens on `.ph-hero`
+(`--photo-scrim`, `--photo-scrim-text`, `-deep`, `-clear`) are checked by
+`src/lib/photo-hero.test.ts` against a pure white photo (see `docs/agent/design-tokens.md`).
+
+---
+
 ## View-transition cross-fade
 
 `<main id="main">` carries `view-transition-name: main-content` and cross-fades on every navigation (`vt-fade-out` 150ms -> `vt-fade-in` 200ms). The header and footer are named (`site-header` / `site-footer`) and pinned with `animation: none` so they stay put through the swap instead of flashing. Astro respects `prefers-reduced-motion` automatically -- reduced-motion users get an instant cut. Pure CSS, no JS. Under `layout.motion: flow` the flow layer replaces it with a lift and rise; under `none` pages cut (see "The flow layer").

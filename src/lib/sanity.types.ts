@@ -21,6 +21,12 @@ type ArrayOf<T> = Array<
 >;
 
 // Source: schema.json
+export type Glance = {
+  title?: string;
+  lines?: Array<string>;
+  link?: CtaBlock;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: 'reference';
@@ -40,6 +46,24 @@ export type TimelineEntryImage = {
 export type PhotoCardImage = {
   asset?: SanityImageAssetReference;
   media?: unknown; // Unable to locate the referenced type "photoCard.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
+};
+
+export type IconCardImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "iconCard.image.media" in schema
+  hotspot?: SanityImageHotspot;
+  crop?: SanityImageCrop;
+  alt?: string;
+  _type: 'image';
+};
+
+export type HubCardImage = {
+  asset?: SanityImageAssetReference;
+  media?: unknown; // Unable to locate the referenced type "hubCard.image.media" in schema
   hotspot?: SanityImageHotspot;
   crop?: SanityImageCrop;
   alt?: string;
@@ -216,6 +240,12 @@ export type PrivatePage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -253,6 +283,27 @@ export type PrivatePage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -438,6 +489,32 @@ export type FaqCategory = {
   title?: string;
   slug?: Slug;
   displayOrder?: number;
+};
+
+export type SanityFileAssetReference = {
+  _ref: string;
+  _type: 'reference';
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset';
+};
+
+export type LibraryDocument = {
+  _id: string;
+  _type: 'libraryDocument';
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  category?: string;
+  date?: string;
+  file?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
+  };
+  note?: string;
+  expires?: string;
+  publishAt?: string;
 };
 
 export type Popup = {
@@ -1125,6 +1202,12 @@ export type SectionPreset = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -1164,6 +1247,27 @@ export type SectionPreset = {
       } & PhotoCardsSection)
     | ({
         _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
+    | ({
+        _key: string;
       } & FounderSection)
     | ({
         _key: string;
@@ -1197,6 +1301,157 @@ export type SectionPreset = {
       } & DynamicListSection)
   >;
   note?: string;
+};
+
+export type HubSection = {
+  _type: 'hubSection';
+  heading?: string;
+  intro?: string;
+  groups?: Array<{
+    title?: string;
+    line?: string;
+    cards?: Array<{
+      image?: HubCardImage;
+      icon?:
+        | 'home'
+        | 'heart'
+        | 'star'
+        | 'calendar'
+        | 'clock'
+        | 'map-pin'
+        | 'phone'
+        | 'mail'
+        | 'chat'
+        | 'users'
+        | 'book'
+        | 'coffee'
+        | 'gift'
+        | 'leaf'
+        | 'tool'
+        | 'door'
+        | 'check';
+      title?: string;
+      label?: string;
+      when?: string;
+      place?: string;
+      body?: string;
+      link?: CtaBlock;
+      _type: 'hubCard';
+      _key: string;
+    }>;
+    _type: 'hubGroup';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet';
+};
+
+export type StepsRailSection = {
+  _type: 'stepsRailSection';
+  heading?: string;
+  intro?: string;
+  steps?: Array<{
+    icon?:
+      | 'home'
+      | 'heart'
+      | 'star'
+      | 'calendar'
+      | 'clock'
+      | 'map-pin'
+      | 'phone'
+      | 'mail'
+      | 'chat'
+      | 'users'
+      | 'book'
+      | 'coffee'
+      | 'gift'
+      | 'leaf'
+      | 'tool'
+      | 'door'
+      | 'check';
+    title?: string;
+    body?: string;
+    link?: CtaBlock;
+    _type: 'railStep';
+    _key: string;
+  }>;
+  firstStepCard?: boolean;
+  endHeading?: string;
+  link?: CtaBlock;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type IconCardsSection = {
+  _type: 'iconCardsSection';
+  heading?: string;
+  intro?: string;
+  cards?: Array<{
+    icon?:
+      | 'home'
+      | 'heart'
+      | 'star'
+      | 'calendar'
+      | 'clock'
+      | 'map-pin'
+      | 'phone'
+      | 'mail'
+      | 'chat'
+      | 'users'
+      | 'book'
+      | 'coffee'
+      | 'gift'
+      | 'leaf'
+      | 'tool'
+      | 'door'
+      | 'check';
+    image?: IconCardImage;
+    title?: string;
+    body?: string;
+    note?: string;
+    link?: CtaBlock;
+    _type: 'iconCard';
+    _key: string;
+  }>;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type CalendarSubscribeSection = {
+  _type: 'calendarSubscribeSection';
+  heading?: string;
+  intro?: string;
+  feed?: string;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type NewsletterSection = {
+  _type: 'newsletterSection';
+  heading?: string;
+  intro?: string;
+  signupUrl?: string;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type ProgressSection = {
+  _type: 'progressSection';
+  heading?: string;
+  intro?: string;
+  unit?: 'dollars' | 'number';
+  goal?: number;
+  raised?: number;
+  asOf?: string;
+  link?: CtaBlock;
+  look?: 'standard' | 'quiet' | 'feature';
+};
+
+export type ContactCardSection = {
+  _type: 'contactCardSection';
+  heading?: string;
+  intro?: string;
+  callButtons?: boolean;
+  phone?: string;
+  email?: string;
+  address?: string;
+  hours?: string;
+  look?: 'standard' | 'quiet' | 'feature';
 };
 
 export type PhotoCardsSection = {
@@ -1703,6 +1958,23 @@ export type Form = {
   successMessage?: string;
 };
 
+export type DocumentsSection = {
+  _type: 'documentsSection';
+  heading?: string;
+  intro?: string;
+  category?: string;
+  limit?: number;
+  showDates?: boolean;
+};
+
+export type LatestVideoSection = {
+  _type: 'latestVideoSection';
+  heading?: string;
+  intro?: string;
+  channelId?: string;
+  showChannelLink?: boolean;
+};
+
 export type RsvpSection = {
   _type: 'rsvpSection';
   heading?: string;
@@ -1909,6 +2181,18 @@ export type HeroSection = {
     alt?: string;
     _type: 'image';
   };
+  heroStyle?: 'standard' | 'photo';
+  glance?: Glance;
+  backgroundVideo?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
+  };
+  backgroundVideoPhone?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
+  };
   primaryCta?: CtaBlock;
   secondaryCta?: CtaBlock;
   size?: 'tall' | 'short';
@@ -2023,6 +2307,12 @@ export type PrivacyPage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -2060,6 +2350,27 @@ export type PrivacyPage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2151,6 +2462,12 @@ export type Page = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -2188,6 +2505,27 @@ export type Page = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2469,6 +2807,12 @@ export type JournalPage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -2506,6 +2850,27 @@ export type JournalPage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2634,6 +2999,12 @@ export type ContactPage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -2671,6 +3042,27 @@ export type ContactPage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2786,6 +3178,12 @@ export type ProcessPage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -2823,6 +3221,27 @@ export type ProcessPage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -2890,6 +3309,12 @@ export type ServicesPage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -2927,6 +3352,27 @@ export type ServicesPage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -3034,6 +3480,12 @@ export type AboutPage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -3071,6 +3523,27 @@ export type AboutPage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -3237,6 +3710,12 @@ export type HomePage = {
       } & RsvpSection)
     | ({
         _key: string;
+      } & LatestVideoSection)
+    | ({
+        _key: string;
+      } & DocumentsSection)
+    | ({
+        _key: string;
       } & FormSection)
     | ({
         _key: string;
@@ -3274,6 +3753,27 @@ export type HomePage = {
     | ({
         _key: string;
       } & PhotoCardsSection)
+    | ({
+        _key: string;
+      } & ContactCardSection)
+    | ({
+        _key: string;
+      } & ProgressSection)
+    | ({
+        _key: string;
+      } & NewsletterSection)
+    | ({
+        _key: string;
+      } & CalendarSubscribeSection)
+    | ({
+        _key: string;
+      } & IconCardsSection)
+    | ({
+        _key: string;
+      } & StepsRailSection)
+    | ({
+        _key: string;
+      } & HubSection)
     | ({
         _key: string;
       } & SyncedSection)
@@ -3600,9 +4100,12 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | Glance
   | SanityImageAssetReference
   | TimelineEntryImage
   | PhotoCardImage
+  | IconCardImage
+  | HubCardImage
   | Photo
   | PageReference
   | HomePageReference
@@ -3628,6 +4131,8 @@ export type AllSanitySchemaTypes =
   | FaqCategoryReference
   | FaqItem
   | FaqCategory
+  | SanityFileAssetReference
+  | LibraryDocument
   | Popup
   | Announcement
   | StudioNotes
@@ -3655,6 +4160,13 @@ export type AllSanitySchemaTypes =
   | SectionPresetReference
   | SyncedSection
   | SectionPreset
+  | HubSection
+  | StepsRailSection
+  | IconCardsSection
+  | CalendarSubscribeSection
+  | NewsletterSection
+  | ProgressSection
+  | ContactCardSection
   | PhotoCardsSection
   | ScheduleSection
   | EventDetailsSection
@@ -3670,6 +4182,8 @@ export type AllSanitySchemaTypes =
   | FormReference
   | FormSection
   | Form
+  | DocumentsSection
+  | LatestVideoSection
   | RsvpSection
   | EmbedSection
   | LogoStripSection

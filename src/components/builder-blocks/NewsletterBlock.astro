@@ -1,0 +1,64 @@
+---
+// Safe to edit by hand
+// Newsletter sign-up as a page block (PORTS.md card 193, from FBC Auburn). It rides the email
+// backbone of card 127: Site settings > Newsletter signup is where the email service is set up once
+// (rule 15: the provider address is never typed per block), and the box is the same NewsletterSignup
+// island the footer uses, so a sign-up goes the same way from either place.
+//
+//   - Site settings newsletter ON: the box, in the block's frame.
+//   - Otherwise, a sign-up page link typed on the block shows as a button. This is also the way for
+//     a site whose list lives elsewhere (OWN_NEWSLETTER = false, src/sanity/ownNewsletter.ts,
+//     cards 163 and 187): point the block at the outside list's own page.
+//   - Neither: the block draws nothing.
+import BuilderBand from './BuilderBand.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import NewsletterSignup from '@/components/NewsletterSignup';
+import { getSiteSettings } from '@/lib/queries';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedNewsletterSection } from '@/lib/builderBlocks.types';
+import type { NewsletterConfig } from '@/components/NewsletterSignup';
+
+interface Props {
+  block: ProjectedNewsletterSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface, headingId } = Astro.props;
+const settings = await getSiteSettings().catch(() => null);
+const newsletter = (settings?.newsletter ?? null) as NewsletterConfig | null;
+const boxOn = Boolean(newsletter?.enabled);
+const signupUrl = /^https:\/\//.test(block.signupUrl ?? '') ? (block.signupUrl as string) : null;
+---
+
+{(boxOn || signupUrl) && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Newsletter sign-up"
+  >
+    <div class="bb-signup">
+      {boxOn && newsletter ? (
+        <NewsletterSignup
+          client:visible
+          newsletter={newsletter}
+          source="newsletter-block"
+          hideHeading
+          idPrefix={`${headingId}-newsletter`}
+          fallbackUrl={signupUrl}
+        />
+      ) : (
+        <CtaLink
+          cta={{
+            label: 'Sign up for the newsletter',
+            linkType: 'external',
+            externalUrl: signupUrl ?? '',
+          }}
+          variant="secondary"
+        />
+      )}
+    </div>
+  </BuilderBand>
+)}

@@ -102,6 +102,9 @@ const NON_STEGA_FIELDS = new Set([
   'category',
   'columns',
   'heightHint',
+  // Card 189: the opening banner's Style. Hero.astro compares it to 'photo'; an encoded value
+  // would draw the standard hero in the preview.
+  'heroStyle',
   'imageSide',
   'layout',
   'linkType',
@@ -130,6 +133,9 @@ const NON_STEGA_FIELDS = new Set([
   'urgency',
   'startTime',
   'endTime',
+  // Card 193: the progress bar's unit picks dollars or a plain number (builder-blocks.ts compares it).
+  // `icon` (the icon picker) is listed below.
+  'unit',
   // Not in this template yet, but standard enum names across the site family.
   // Carried so a block ported from a sibling repo is not a preview-only bug
   // waiting to be found.

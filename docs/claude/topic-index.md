@@ -13,6 +13,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | **Open loops registry (read early each session)**                                                           | `docs/PENDING.md`                                                    |
 | Stack detail + astro.config landmines                                                                       | `docs/agent/stack-and-config.md`                                     |
 | Page + section architecture, nav, visibility toggles                                                        | `docs/agent/page-architecture.md`                                    |
+| Latest video block, Documents library, page-weight budget (card 197)                                        | `docs/agent/video-documents-weight.md`                               |
 | Brand colors + theme system (light/dark discipline)                                                         | `docs/agent/theme-and-color.md`                                      |
 | Brand reskin system (config schema, apply-brand, /reskin skill)                                             | `docs/brand/brand-system.md`                                         |
 | Polish layer (brand stripe, card-lift, scroll, script accents)                                              | `docs/agent/polish-layer.md`                                         |

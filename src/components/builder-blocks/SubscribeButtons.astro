@@ -1,0 +1,36 @@
+---
+// Safe to edit by hand
+// "Add to your calendar" buttons for one calendar feed (PORTS.md card 193, from FBC Auburn):
+// Google, Apple (and desktop Outlook, which opens webcal links) and Outlook on the web, derived
+// from the one feed address by subscribeLinks() (rule 15). A subscription keeps itself up to date
+// on the phone, which a downloaded .ics does not. The feed can be an https:// or webcal:// address
+// or a path on this site, such as a calendar file card 158 writes ("/calendar/events.ics").
+// Draws nothing without a usable feed.
+import { subscribeLinks } from '@/lib/builder-blocks';
+import { site } from '@/data/site';
+
+interface Props {
+  feed?: string | null;
+  /** The calendar's name, shown in Outlook's subscribe dialog. */
+  name?: string;
+}
+const { feed, name = site.name } = Astro.props;
+const links = subscribeLinks(feed, name, site.url);
+// The same outline-button look CtaLink draws, so the buttons sit in the one button family.
+const btn =
+  'press-tactile inline-flex items-center justify-center min-h-[44px] px-l py-s text-xs font-semibold uppercase tracking-[0.18em] rounded-sm border border-primary text-link hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+---
+
+{links && (
+  <div class="bb-actions" data-bb-subscribe>
+    <a class={btn} href={links.google} target="_blank" rel="noopener noreferrer">
+      Google Calendar<span class="sr-only"> (opens in a new tab)</span>
+    </a>
+    <a class={btn} href={links.apple}>
+      Apple Calendar
+    </a>
+    <a class={btn} href={links.outlook} target="_blank" rel="noopener noreferrer">
+      Outlook<span class="sr-only"> (opens in a new tab)</span>
+    </a>
+  </div>
+)}

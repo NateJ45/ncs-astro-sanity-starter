@@ -1,0 +1,80 @@
+---
+// Safe to edit by hand
+// Steps on a path (PORTS.md card 193, from FBC Auburn's steps rail): numbered steps, each beside an
+// icon, joined icon to icon by one connector line, with an optional closing line and button. Step
+// one can be set apart on a card (firstStepCard) when it is the one that matters most.
+//
+// How it differs from processSection: that block draws the shared Process steps from their own
+// collection (the Process page's illustrated steps, one list for the whole site). This one holds its
+// steps in the block, so any page can show a short path ("how it works", "what to expect") with
+// nothing to maintain elsewhere. Everything is server-rendered, so it reads the same without
+// JavaScript; no motion of its own (the site's reveal handles the entrance). The closing button is
+// the page's one accent button when SectionRenderer hands it that (card 158).
+import BuilderBand from './BuilderBand.astro';
+import BlockIcon from './BlockIcon.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedStepsRailSection } from '@/lib/builderBlocks.types';
+
+interface Props {
+  block: ProjectedStepsRailSection;
+  surface?: CadenceSurface;
+  headingId: string;
+  primaryVariant?: 'primary' | 'secondary';
+}
+const { block, surface, headingId, primaryVariant = 'secondary' } = Astro.props;
+
+const steps = (block.steps ?? []).filter((s) => s?.title?.trim());
+const StepTitle = block.heading ? 'h3' : 'h2';
+const end = block.endHeading || block.link?.label;
+---
+
+{steps.length > 0 && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Steps"
+  >
+    <ol class="bb-rail" role="list">
+      {steps.map((s, n) => (
+        <li class:list={['bb-rail__step', n === 0 && block.firstStepCard && 'bb-rail__step--card']}>
+          <div class="bb-rail__col">
+            <span class="bb-rail__badge">
+              <BlockIcon name={s.icon} size={28} />
+              {!s.icon && (
+                <span class="bb-rail__num" aria-hidden="true">
+                  {n + 1}
+                </span>
+              )}
+            </span>
+            {n < steps.length - 1 && <span class="bb-rail__trail" aria-hidden="true" />}
+          </div>
+          <div class="bb-rail__body">
+            <p class="bb-rail__n">Step {n + 1}</p>
+            <StepTitle class="bb-title">{s.title}</StepTitle>
+            {s.body && <p class="bb-rail__text">{s.body}</p>}
+            {s.link?.label && (
+              <p class="bb-rail__link">
+                <CtaLink cta={s.link} variant="secondary" />
+              </p>
+            )}
+          </div>
+        </li>
+      ))}
+    </ol>
+    {end && (
+      <div class="bb-rail__end">
+        {block.endHeading && <p class="bb-rail__endline">{block.endHeading}</p>}
+        {block.link?.label && (
+          <CtaLink
+            cta={block.link}
+            variant={primaryVariant === 'primary' ? 'primary' : 'secondary'}
+          />
+        )}
+      </div>
+    )}
+  </BuilderBand>
+)}

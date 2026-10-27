@@ -1,0 +1,281 @@
+/* PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+   Foundation, edit with care.
+   The photo hero, "Photo behind the words" (PhotoHero.astro, PORTS.md card 189, from FBC Auburn):
+   the opening banner's background photo across the whole band with the words over it in white,
+   an optional short-facts card beside them, and an optional silent clip over the photo. Only a
+   hero whose Style is set to it draws these classes, so a site that never picks it ships none of
+   this (the per-page CSS purge drops every rule here, they all need a .ph- class).
+
+   THE CONTRAST PROMISE. White words sit on any picture an editor uploads, so the shade over the
+   photo is what keeps them readable: wherever words sit it is at least --photo-scrim-text of the
+   scrim colour. src/lib/photo-hero.test.ts reads these tokens and the brand's dark accent and
+   checks white over a pure white photo under that shade is at least 4.5:1. Thin the shade or
+   lighten the scrim and the unit tests fail. Every shade below is built from the three tokens;
+   do not write a literal rgba() into .ph-photo__shade.
+
+   The geometry that makes the promise hold:
+   - wide screens: the words live in the left 7/12 of the content column (never past 60% of the
+     screen), and the left-to-right shade is at least --photo-scrim-text up to 60%;
+   - phones: the words start --ph-band minus 160px down, and the top-down shade reaches
+     --photo-scrim-text 20px above that.
+   Light only on sites that are light only; the words are white on the shade in either theme. */
+
+.ph-hero {
+  /* The scrim colour and its three strengths. Override per site on .ph-hero, never lower than
+     the unit test allows. */
+  --photo-scrim: var(--color-accent-dark);
+  --photo-scrim-deep: 88%;
+  --photo-scrim-text: 72%;
+  --photo-scrim-clear: 20%;
+  --ph-gutter: var(--spacing-m);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: min(68vh, 620px);
+  padding-top: 120px;
+  color: #ffffff;
+  /* The scrim colour shows while the photo loads. */
+  background: var(--photo-scrim);
+}
+/* A tall hero (a home page): most of the first screen. */
+.ph-hero--tall {
+  min-height: min(86vh, 780px);
+}
+.ph-wrap {
+  width: 100%;
+  max-width: var(--container-content);
+  margin-inline: auto;
+  padding-inline: var(--ph-gutter);
+}
+
+.ph-photo,
+.ph-photo__shade {
+  position: absolute;
+  inset: 0;
+}
+.ph-photo {
+  z-index: -1;
+  overflow: hidden;
+}
+.ph-photo picture,
+.ph-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+/* Wide screens: darkest behind the words at the left, never below the text strength up to 60%,
+   easing to clear at the right so the picture reads; a bottom-up shade adds weight under the
+   buttons on a bright picture. */
+.ph-photo__shade {
+  z-index: 1; /* above the clip (.ph-photo__video, z-index 0) */
+  background:
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--photo-scrim) var(--photo-scrim-clear), transparent) 0%,
+      transparent 45%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--photo-scrim) var(--photo-scrim-deep), transparent) 0%,
+      color-mix(in srgb, var(--photo-scrim) var(--photo-scrim-text), transparent) 60%,
+      color-mix(in srgb, var(--photo-scrim) var(--photo-scrim-clear), transparent) 100%
+    );
+}
+
+/* The clip (HeroVideo.astro): over the photo, under the shade, invisible until it plays, so the
+   photo is all anyone sees before then. Nothing on it is clickable. It plays at 0.99 opacity, not
+   1: Chrome on Windows hands a fully opaque video to the GPU as a hardware overlay plane drawn
+   outside the page, and when it switched to that mid-scroll the shade vanished on screen (FBC
+   Auburn, 2026-10-25; it never shows in a browser screenshot). */
+.ph-photo .ph-photo__video {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.ph-hero.is-video-playing .ph-photo__video {
+  opacity: 0.99;
+}
+/* Pause / Play (WCAG 2.2.2, motion longer than five seconds): small, top right, keyboard
+   reachable, white on the scrim. */
+.ph-video-toggle {
+  position: absolute;
+  top: 16px;
+  right: var(--ph-gutter);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, #ffffff 55%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--photo-scrim) var(--photo-scrim-text), transparent);
+  color: #ffffff;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+.ph-video-toggle[hidden] {
+  display: none;
+}
+.ph-video-toggle:hover {
+  background: var(--photo-scrim);
+}
+.ph-video-toggle:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+/* Two bars for Pause, a triangle for Play. */
+.ph-video-toggle__icon {
+  width: 10px;
+  height: 12px;
+  border-inline: 3px solid currentColor;
+}
+.ph-video-toggle[aria-pressed='true'] .ph-video-toggle__icon {
+  width: 0;
+  height: 0;
+  border-block: 6px solid transparent;
+  border-inline-start: 10px solid currentColor;
+  border-inline-end: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ph-photo .ph-photo__video,
+  .ph-video-toggle {
+    display: none;
+  }
+}
+@media print {
+  .ph-photo .ph-photo__video,
+  .ph-video-toggle {
+    display: none !important;
+  }
+}
+
+/* The words and the card. The words keep the left 7/12 whether or not there is a card, which is
+   what keeps them inside the shade's text strength. */
+.ph-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--spacing-l);
+  align-items: end;
+  padding-bottom: calc(var(--spacing-l) * 1.5);
+}
+.ph-eyebrow {
+  margin: 0 0 14px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+.ph-h1 {
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 6vw, 5rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  color: #ffffff;
+}
+.ph-hero--tall .ph-h1 {
+  font-size: clamp(3rem, 7vw, 6rem);
+}
+.ph-intro {
+  max-width: 34rem;
+  margin: 0 0 var(--spacing-m);
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: #ffffff;
+}
+.ph-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+/* The short-facts card: the site's own card surface, so it reads as part of the page. */
+.ph-card {
+  padding: var(--pad-card);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.45);
+}
+.ph-card__title {
+  margin: 0 0 var(--spacing-s);
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  line-height: 1.15;
+}
+.ph-card__lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+.ph-card__lines li + li {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+.ph-card__link {
+  margin-top: var(--spacing-m);
+}
+
+/* Phones and narrow tablets: a photo band at the top, the words starting partway down it on the
+   shade, the card under the words. svh: the screen with the browser's bars showing. */
+@media (max-width: 960px) {
+  .ph-hero,
+  .ph-hero--tall {
+    --ph-band: clamp(220px, 44svh, 380px);
+    min-height: 0;
+    padding-top: 0;
+  }
+  .ph-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding-bottom: 32px;
+  }
+  .ph-copy {
+    padding-top: calc(var(--ph-band) - 160px);
+  }
+  /* Top down: clear over the top of the picture, the text strength 20px above where the words
+     start, deepest at the foot. */
+  .ph-photo__shade {
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--photo-scrim) var(--photo-scrim-clear), transparent) 0,
+      color-mix(in srgb, var(--photo-scrim) var(--photo-scrim-text), transparent)
+        calc(var(--ph-band) - 180px),
+      color-mix(in srgb, var(--photo-scrim) var(--photo-scrim-deep), transparent) 100%
+    );
+  }
+}
+/* Phones: the two buttons stack full width. */
+@media (max-width: 520px) {
+  .ph-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ph-actions > * {
+    width: 100%;
+  }
+}

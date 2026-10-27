@@ -33,6 +33,19 @@ export const CTA_PROJECTION = `{
 const SECTION_ARMS = `
     // The RSVP form names its event "<document id>:<block key>" (card 127).
     _type == "rsvpSection" => { "pageId": ^._id },
+    // The documents list (card 197): the newest 60 files; the block picks its group and count.
+    // scaffold: documents
+    _type == "documentsSection" => {
+      ...,
+      "items": *[_type == "libraryDocument" && defined(file.asset)] | order(date desc)[0...60]{
+        _id, title, category, date, note, expires,
+        "file": file{
+          "url": asset->url, "size": asset->size,
+          "extension": asset->extension, "originalFilename": asset->originalFilename
+        }
+      }
+    },
+    // scaffold:end
     // Every main page a page builder (card 190): the Contact form block draws the form's
     // settings from the Contact page document, so it is the same form wherever it is placed.
     _type == "contactFormSection" => {
@@ -70,11 +83,31 @@ const SECTION_ARMS = `
       ...,
       cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} }
     },
+    // Card 193: blocks with pictures or buttons inside them. The contact card, newsletter and
+    // calendar blocks carry plain fields only.
+    _type == "progressSection" => { ..., link${CTA_PROJECTION} },
+    _type == "iconCardsSection" => {
+      ...,
+      cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} }
+    },
+    _type == "stepsRailSection" => {
+      ...,
+      steps[]{ ..., link${CTA_PROJECTION} },
+      link${CTA_PROJECTION}
+    },
+    _type == "hubSection" => {
+      ...,
+      groups[]{ ..., cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} } }
+    },
     _type == "heroSection" => {
       ...,
       backgroundImage${IMAGE_PROJECTION},
       primaryCta${CTA_PROJECTION},
-      secondaryCta${CTA_PROJECTION}
+      secondaryCta${CTA_PROJECTION},
+      // The photo hero (card 189): the clips as URL and type, the short-facts card's link resolved.
+      backgroundVideo{ "url": asset->url, "mimeType": asset->mimeType },
+      backgroundVideoPhone{ "url": asset->url, "mimeType": asset->mimeType },
+      glance{ ..., link${CTA_PROJECTION} }
     },
     _type == "ctaBandSection" => {
       ...,

@@ -1,0 +1,165 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+// =============================================================================
+// HeroVideo: the photo hero's silent background clip (PORTS.md card 189, from FBC Auburn)
+// =============================================================================
+// Rendered by PhotoHero.astro only when the block has a clip, so a page without one carries no
+// script at all. The rules (src/lib/hero-video.ts, unit tested):
+//   - the photo is drawn first and stays the page's LCP. This script waits for the load event,
+//     then builds a <video muted playsinline loop preload="none"> with the photo's currentSrc as
+//     its poster (nothing new is fetched for it), over the photo and under the shade;
+//   - heroVideoAllowed() says no for reduced motion, Save-Data, a 2G or 3G connection, a measured
+//     downlink under 1 Mbps, and print: then there is no <video> element and nothing downloads;
+//   - phones (under 768px) get the "Phone video" copy when there is one. The pick is made once,
+//     before the element is built, so only one copy is ever fetched;
+//   - started with play(), not the autoplay attribute, so the Pause choice and the off-screen
+//     pause always win. It fades in on `playing`; until then the photo is all anyone sees;
+//   - a Pause / Play button (WCAG 2.2.2), remembered on this device; the clip pauses while the
+//     hero is off screen, restarts when a background tab comes to the front, and is removed if
+//     reduced motion is switched on while the page is open.
+// Detail and export settings: docs/agent/animation.md, "Photo hero video".
+---
+
+<script>
+  import { HERO_PHONE_QUERY, heroVideoAllowed, heroVideoPick } from '@/lib/hero-video';
+
+  const PAUSED_KEY = 'hero-video-paused';
+  const readPaused = () => {
+    try {
+      return localStorage.getItem(PAUSED_KEY) === '1';
+    } catch {
+      return false;
+    }
+  };
+  const writePaused = (paused: boolean) => {
+    try {
+      if (paused) localStorage.setItem(PAUSED_KEY, '1');
+      else localStorage.removeItem(PAUSED_KEY);
+    } catch {
+      /* private window: the choice lasts for this page only */
+    }
+  };
+
+  function initHeroVideo() {
+    const hero = document.querySelector<HTMLElement>('.ph-hero[data-hero-video]');
+    if (!hero || hero.dataset.videoOn) return;
+    // After the load event, so the clip never competes with the photo (the LCP) for the network.
+    if (document.readyState !== 'complete') {
+      addEventListener('load', initHeroVideo, { once: true });
+      return;
+    }
+    const conn = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string; downlink?: number };
+      }
+    ).connection;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const allowed = heroVideoAllowed({
+      reducedMotion: reduce.matches,
+      saveData: conn?.saveData,
+      effectiveType: conn?.effectiveType,
+      downlink: conn?.downlink,
+      print: matchMedia('print').matches,
+    });
+    if (!allowed) return;
+
+    const frame = hero.querySelector<HTMLElement>('.ph-photo');
+    const still = frame?.querySelector<HTMLImageElement>('img');
+    const toggle = hero.querySelector<HTMLButtonElement>('[data-hero-video-toggle]');
+    if (!frame) return;
+    const { heroVideo, heroVideoType, heroVideoPhone, heroVideoPhoneType } = hero.dataset;
+    const pick = heroVideoPick(
+      heroVideo ? { url: heroVideo, type: heroVideoType ?? 'video/mp4' } : null,
+      heroVideoPhone ? { url: heroVideoPhone, type: heroVideoPhoneType ?? 'video/mp4' } : null,
+      matchMedia(HERO_PHONE_QUERY).matches,
+    );
+    if (!pick) return;
+    hero.dataset.videoOn = '1';
+
+    const clip = document.createElement('video');
+    clip.className = 'ph-photo__video';
+    clip.muted = true;
+    clip.defaultMuted = true;
+    clip.loop = true;
+    clip.playsInline = true;
+    clip.preload = 'none';
+    clip.setAttribute('muted', '');
+    clip.setAttribute('playsinline', '');
+    clip.setAttribute('aria-hidden', 'true');
+    clip.tabIndex = -1;
+    clip.disablePictureInPicture = true;
+    // The photo the browser already chose is the poster, so nothing new is fetched for it.
+    if (still?.currentSrc) clip.poster = still.currentSrc;
+    const source = document.createElement('source');
+    source.src = pick.url;
+    source.type = pick.type;
+    clip.append(source);
+    frame.insertBefore(clip, frame.querySelector('.ph-photo__shade'));
+
+    let paused = readPaused();
+    let onScreen = true;
+    const label = toggle?.querySelector('.ph-video-toggle__label');
+    const sync = () => {
+      if (!toggle || !label) return;
+      toggle.setAttribute('aria-pressed', String(paused));
+      label.textContent = paused ? 'Play video' : 'Pause video';
+    };
+    const run = () => {
+      if (paused || !onScreen) clip.pause();
+      else clip.play().catch(() => {});
+    };
+    const drop = () => {
+      clip.remove();
+      hero.classList.remove('is-video-playing');
+      if (toggle) toggle.hidden = true;
+    };
+    clip.addEventListener('playing', () => hero.classList.add('is-video-playing'), { once: true });
+    clip.addEventListener('error', drop, { once: true });
+    source.addEventListener('error', drop, { once: true });
+    if (toggle) {
+      toggle.hidden = false;
+      toggle.addEventListener('click', () => {
+        paused = !paused;
+        writePaused(paused);
+        sync();
+        run();
+      });
+    }
+    sync();
+
+    // Pause while the hero is scrolled away.
+    const io = new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting;
+      run();
+    });
+    io.observe(hero);
+    // Start now rather than on the observer's first report, which a browser may hold back (a
+    // background tab runs no observer callbacks); the observer pauses the clip if it is off screen.
+    run();
+    const onReduce = () => {
+      if (!reduce.matches) return;
+      clip.pause();
+      drop();
+    };
+    reduce.addEventListener('change', onReduce);
+    // Chrome pauses a muted video in a hidden tab and does not always start it again, so a page
+    // opened in a background tab showed the still photo after switching to it. Pick up again here.
+    const onVisible = () => {
+      if (!document.hidden && clip.isConnected) run();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        io.disconnect();
+        reduce.removeEventListener('change', onReduce);
+        document.removeEventListener('visibilitychange', onVisible);
+        clip.pause();
+      },
+      { once: true },
+    );
+  }
+  initHeroVideo();
+  document.addEventListener('astro:page-load', initHeroVideo);
+</script>
