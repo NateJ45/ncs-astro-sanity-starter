@@ -28,17 +28,29 @@
 //   node scripts/sync-check.mjs                 # check the current repo
 //   node scripts/sync-check.mjs <site-repo>     # check another repo
 //   NCS_STARTER_DIR=<path> node scripts/sync-check.mjs <site-repo>
+//   node scripts/sync-check.mjs --allow-self-check   # compare a non-starter repo with itself
 //
 // The starter is located by, in order: NCS_STARTER_DIR, then a sibling
-// directory named ncs-astro-sanity-starter next to the site repo, then this
-// script's own repo root (which is what makes the self-check work: run it
-// from the starter and the starter is both site and library, so everything
-// must report SAME).
+// directory named ncs-astro-sanity-starter next to the site repo, then
+// <ancestor>/internal/ncs-astro-sanity-starter (or <ancestor>/ncs-astro-sanity-starter)
+// for each parent folder of the site, walking up (card 186: a site in
+// clients/<site> or nested as clients/<group>/<site> never has the starter as
+// a sibling, and used to fall through to the next step), then this script's
+// own repo root (which is what makes the self-check work: run it from the
+// starter and the starter is both site and library, so everything must
+// report SAME).
+//
+// SELF-CHECK GUARD (card 186): if the starter resolves to the site itself and
+// that repo is not the starter (its package.json name is not
+// ncs-astro-sanity-starter), the run would compare a site with itself and
+// report all SAME whatever the drift. That is an error (exit 2) unless
+// --allow-self-check is passed.
 //
 // EXIT CODES
 //   0  every marked file matches (or there were none to check)
 //   1  at least one DRIFT or MISSING-IN-STARTER
-//   2  bad invocation (site or starter path does not exist)
+//   2  bad invocation (site or starter path does not exist, or a non-starter
+//      repo would be checked against itself)
 //
 // COMPARISON RULES
 //   - Line endings are normalized (CRLF -> LF) before comparing. This family
@@ -125,11 +137,27 @@ const SIZE_CAP = 2 * 1024 * 1024; // no marker hides in a 2MB file
 
 const SCRIPT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
+const ARGS = process.argv.slice(2);
+const ALLOW_SELF = ARGS.includes('--allow-self-check');
+const POSITIONAL = ARGS.filter((a) => !a.startsWith('--'));
+
 function resolveSite() {
-  const arg = process.argv[2];
+  const arg = POSITIONAL[0];
   const dir = arg ? resolve(process.cwd(), arg) : process.cwd();
   if (!existsSync(dir)) die(`Site repo not found: ${dir}`, 2);
   return dir;
+}
+
+/** True when `dir` is the starter repo itself (a worktree of it counts: the name is read from package.json). */
+function isStarter(dir) {
+  try {
+    return (
+      JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')).name ===
+      'ncs-astro-sanity-starter'
+    );
+  } catch {
+    return false;
+  }
 }
 
 function resolveStarter(siteDir) {
@@ -138,8 +166,19 @@ function resolveStarter(siteDir) {
     if (!existsSync(dir)) die(`NCS_STARTER_DIR does not exist: ${dir}`, 2);
     return { dir, how: 'NCS_STARTER_DIR' };
   }
+  // The site IS the starter (or a worktree of it): check it against itself, not against another checkout.
+  if (isStarter(siteDir)) return { dir: siteDir, how: 'the site is the starter' };
   const sibling = resolve(siteDir, '..', 'ncs-astro-sanity-starter');
   if (existsSync(sibling)) return { dir: sibling, how: 'sibling directory' };
+  // Walk up: Projects/clients/<site> and Projects/clients/<group>/<site> keep the
+  // starter at Projects/internal/ncs-astro-sanity-starter.
+  for (let p = resolve(siteDir, '..'); ; p = dirname(p)) {
+    for (const rel of ['internal/ncs-astro-sanity-starter', 'ncs-astro-sanity-starter']) {
+      const found = join(p, ...rel.split('/'));
+      if (existsSync(found) && isStarter(found)) return { dir: found, how: 'ancestor folder' };
+    }
+    if (dirname(p) === p) break;
+  }
   if (existsSync(SCRIPT_ROOT)) return { dir: SCRIPT_ROOT, how: "this script's own repo" };
   die('Could not locate the starter. Set NCS_STARTER_DIR.', 2);
 }
@@ -225,6 +264,15 @@ function die(msg, code) {
 const siteDir = resolveSite();
 const { dir: starterDir, how } = resolveStarter(siteDir);
 const selfCheck = resolve(siteDir) === resolve(starterDir);
+
+if (selfCheck && !isStarter(siteDir) && !ALLOW_SELF) {
+  die(
+    `no starter found for ${siteDir}; the check would compare the repo with itself and report every file SAME.
+` +
+      '  Set NCS_STARTER_DIR to the ncs-astro-sanity-starter checkout, or pass --allow-self-check to run it anyway.',
+    2,
+  );
+}
 
 console.log(`site:    ${siteDir}`);
 console.log(`starter: ${starterDir}  (${how})${selfCheck ? '  [self-check]' : ''}`);

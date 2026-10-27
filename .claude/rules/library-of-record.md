@@ -50,9 +50,11 @@ still carries its column and its historical cards, but nothing syncs to it any m
 - **`npm run sync-check [site-repo]`** walks a repo, finds the marked files, and diffs
   each against this starter's copy of the same path: `SAME` / `DRIFT` /
   `MISSING-IN-STARTER`, exit 1 on drift. Line endings are normalized; everything else is
-  byte-exact. Point it at the starter with `NCS_STARTER_DIR`, or let it find a sibling
-  `ncs-astro-sanity-starter`. It is dependency-free so it runs in any repo in the family.
-  Run with no argument from here for a self-check (everything must be `SAME`).
+  byte-exact. Point it at the starter with `NCS_STARTER_DIR`, or let it find one: a sibling
+  `ncs-astro-sanity-starter`, then `internal/ncs-astro-sanity-starter` in any parent folder (so it works from
+  `clients/<site>` and `clients/<group>/<site>`; card 186). It is dependency-free so it runs in any repo in the family.
+  Run with no argument from here for a self-check (everything must be `SAME`). From any other repo a self-check is
+  an error (exit 2) unless `--allow-self-check` is passed, because it would compare the repo with itself.
   The walker skips folders by exact name (`SKIP_DIRS`): `node_modules`, `dist`, `.git`, `.ncs-starter`,
   `worktrees` (`.claude/worktrees`) and `_worktrees` (`<repo>/_worktrees/<name>`, a full second copy of the
   repo, which doubled fbcm's count to 172; card 80). Add a name there, never a substring or suffix pattern:
