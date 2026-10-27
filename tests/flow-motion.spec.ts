@@ -87,22 +87,51 @@ test.describe('flow layer with motion on', () => {
   test('no layout shift in main, and nothing moves once settled', async ({ page }) => {
     // Shifts whose moved nodes are inside <main>, where the layer works. The header's own
     // font-swap shift (about 0.0004, the same under reduced motion) is not the layer's.
-    type Shift = { value: number; sources?: { node?: Node | null }[] };
+    // Each counted shift is also described (moved node, its rect before and after, the scroll
+    // position), so a failure names what moved instead of only how much.
+    type Shift = {
+      value: number;
+      startTime: number;
+      sources?: {
+        node?: Node | null;
+        previousRect: DOMRectReadOnly;
+        currentRect: DOMRectReadOnly;
+      }[];
+    };
+    type Log = { __cls: number; __shifts: string[] };
     await page.addInitScript(() => {
-      (window as unknown as { __cls: number }).__cls = 0;
+      const w = window as unknown as Log;
+      w.__cls = 0;
+      w.__shifts = [];
       new PerformanceObserver((list) => {
         for (const e of list.getEntries() as unknown as Shift[]) {
           const main = document.getElementById('main');
-          const inMain = (e.sources ?? []).some((s) => s.node && main?.contains(s.node));
-          if (inMain) (window as unknown as { __cls: number }).__cls += e.value;
+          const inMain = (e.sources ?? []).filter((s) => s.node && main?.contains(s.node));
+          if (!inMain.length) continue;
+          w.__cls += e.value;
+          const rect = (r: DOMRectReadOnly) =>
+            [r.x, r.y, r.width, r.height].map((n) => Math.round(n * 100) / 100).join(',');
+          for (const s of inMain) {
+            const n = s.node as Node;
+            const el = n.nodeType === 1 ? (n as Element) : n.parentElement;
+            const name = `${el?.tagName.toLowerCase()}.${String(el?.className ?? '').replace(/\s+/g, '.')}`;
+            w.__shifts.push(
+              `${Math.round(e.startTime)}ms y=${Math.round(scrollY)} ${e.value.toFixed(5)} ` +
+                `${name} "${(n.textContent ?? '').trim().slice(0, 30)}" ` +
+                `[${rect(s.previousRect)}] -> [${rect(s.currentRect)}]`,
+            );
+          }
         }
       }).observe({ type: 'layout-shift', buffered: true });
     });
     await page.goto(FULL, { waitUntil: 'load' });
     await walk(page);
     await page.waitForTimeout(1500);
-    const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
-    expect(cls).toBe(0);
+    const { cls, shifts } = await page.evaluate(() => {
+      const w = window as unknown as Log;
+      return { cls: w.__cls, shifts: w.__shifts };
+    });
+    expect(cls, shifts.join('\n')).toBe(0);
     const rects = () =>
       page.evaluate(() =>
         [...document.querySelectorAll('main h2, main p, main li, main img')].map((el) => {
