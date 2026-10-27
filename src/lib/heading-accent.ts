@@ -45,6 +45,13 @@
 // plain() also TRIMS, so on a hit the rendered halves come from the trimmed
 // heading. Headings with padding are a content bug, not a layout device, and
 // the parity harness confirms no page in this repo has one.
+//
+// Matching is WHOLE-WORD (2026-10-27). A bare substring search let the accent
+// "test" land inside "TESTING", so the heading rendered as half script, half
+// display face in the middle of one word. A match now only counts when the
+// characters either side of it are not letters or digits, so "test" skips
+// "TESTING" and finds a later standalone "test" if there is one. Punctuation
+// still counts as a boundary, so "God" matches in "God's" and "run" in "run,".
 // =============================================================================
 
 // Explicit .ts extension: this module is reached by `node --test` (see
@@ -59,6 +66,18 @@ export interface HeadingAccentResult {
   after: string;
   /** The heading to render when `found` is false: the original, untouched. */
   heading: string;
+}
+
+const WORD_CHAR = /[\p{L}\p{N}]/u;
+
+/** First index of `needle` in `hay` that does not start or end inside a word. */
+function findWholeWord(hay: string, needle: string): number {
+  for (let i = hay.indexOf(needle); i >= 0; i = hay.indexOf(needle, i + 1)) {
+    const before = hay[i - 1];
+    const after = hay[i + needle.length];
+    if ((!before || !WORD_CHAR.test(before)) && (!after || !WORD_CHAR.test(after))) return i;
+  }
+  return -1;
 }
 
 export function splitHeadingAccent(
@@ -82,7 +101,7 @@ export function splitHeadingAccent(
   const clean = plain(original);
   if (!clean) return miss;
 
-  const idx = clean.toLowerCase().indexOf(needle.toLowerCase());
+  const idx = findWholeWord(clean.toLowerCase(), needle.toLowerCase());
   if (idx < 0) return miss;
 
   return {

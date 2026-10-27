@@ -175,7 +175,7 @@ export const heroSection = defineType({
       title: 'Handwritten accent word (optional)',
       type: 'string',
       description:
-        'One word from the headline to render in the script font. Must match exactly. Leave blank to skip.',
+        'One word from the headline to render in the script font. Must be a whole word from it (capitals do not matter). Leave blank to skip.',
     }),
     defineField({ name: 'subhead', title: 'Subhead', type: 'text', rows: 2 }),
     imageWithAlt('backgroundImage', 'Background photo (optional)'),
