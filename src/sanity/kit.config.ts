@@ -30,6 +30,7 @@ import { EditIcon } from '@sanity/icons/Edit';
 import { PinIcon } from '@sanity/icons/Pin';
 import { runPageCheck } from './actions/checkPage';
 import { PAGE_BUILDER_TYPES } from './pageBuilderConfig';
+import { OWN_NEWSLETTER, OWN_NEWSLETTER_JOBS } from './ownNewsletter';
 import { slugify } from '../lib/slugify'; // scaffold: journal
 
 /**
@@ -375,6 +376,9 @@ export const kitConfig: KitConfig = {
     // The email backbone (card 127): the Newsletter card and RSVP counts. Each
     // says "not set up yet" until the Worker has the settings (OPERATIONS.md, "Email").
     mail: true,
+    // Home's Newsletter card follows ownNewsletter.ts (card 187), the one switch for every
+    // newsletter screen. TRUE (the default) keeps it.
+    newsletter: OWN_NEWSLETTER,
     // Card 110: the status line under the top bar, and the help panel.
     navbarStatus: true,
     helpPanel: true,
@@ -393,6 +397,12 @@ export const kitConfig: KitConfig = {
     plan: 'auto',
   },
 };
+
+// The website's own newsletter job and tile are left out while the list lives elsewhere
+// (ownNewsletter.ts, card 187). Filtered here rather than in the list, so each job keeps its typing.
+kitConfig.quickUpdate = kitConfig.quickUpdate?.filter(
+  (job) => OWN_NEWSLETTER || !OWN_NEWSLETTER_JOBS.has(job.id),
+);
 
 /**
  * The site's own page-builder rules (the authoring kit, PORTS.md card 109).
