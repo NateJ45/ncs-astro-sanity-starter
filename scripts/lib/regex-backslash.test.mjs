@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { looksStripped, scanFile } from './regex-backslash.mjs';
+import { looksStripped, onDisk, scanFile } from './regex-backslash.mjs';
 
 test('the detector catches the shapes a heredoc leaves behind', () => {
   for (const body of ['(s+)', '^s+$', 'd+', '(d{1,2})', '[^s]', 'w+@', '^day-(d{1,2})$']) {
@@ -30,14 +30,24 @@ test('the detector leaves real regexes alone', () => {
   }
 });
 
+test('a tracked file that a scaffold removal deleted is skipped, not read', () => {
+  const gone = new Set(['src/gone.ts']);
+  assert.deepEqual(
+    onDisk(['src/a.ts', 'src/gone.ts', 'src/b.ts'], (f) => !gone.has(f)),
+    ['src/a.ts', 'src/b.ts'],
+  );
+});
+
 test('no script in the repo holds a regex that lost its backslashes', () => {
-  const files = execFileSync(
+  const tracked = execFileSync(
     'git',
     ['ls-files', '--', '*.ts', '*.tsx', '*.mjs', '*.js', '*.astro'],
     { encoding: 'utf8' },
   )
     .split('\n')
     .filter((f) => f && !f.includes('.generated.') && !f.startsWith('public/'));
+  // A capability removed with scaffold --remove is deleted but still tracked until committed.
+  const files = onDisk(tracked);
   const hits = [];
   for (const f of files) {
     for (const h of scanFile(f)) hits.push(`${f}:${h.line} ${h.regex}`);

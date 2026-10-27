@@ -65,7 +65,7 @@ import { publicPath } from '@/lib/page-path';
 import { footerStyle, pickActionBar, whereNextRows } from '@/lib/wayfinding';
 import WhereNext from '@/components/WhereNext.astro';
 import ActionBar from '@/components/ActionBar.astro';
-import { resolveBusinessFacts, type RawBusinessFacts } from '@/lib/business-facts';
+import { resolveBusinessFacts, todayBarLine, type RawBusinessFacts } from '@/lib/business-facts';
 import ToConfirm from '@/components/business/ToConfirm.astro';
 import OpenStatus from '@/components/business/OpenStatus.astro';
 import BusinessAddress from '@/components/business/BusinessAddress.astro';
@@ -171,7 +171,12 @@ const whereNext = siteSettings?.whereNext?.length
   : [];
 const compact = footerStyle(siteSettings?.footerStyle) === 'compact';
 const secondary = chrome.headerSecondary;
-const actionBar = pickActionBar(siteSettings?.actionBars, here);
+const pickedBar = pickActionBar(siteSettings?.actionBars, here);
+// A bar with no line of its own shows today's hours from the business facts (card 198).
+const actionBar =
+  pickedBar && !pickedBar.text
+    ? { ...pickedBar, text: todayBarLine(facts, new Date(), site.timeZone) }
+    : pickedBar;
 ---
 
 <footer

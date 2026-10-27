@@ -583,6 +583,19 @@ const SECTIONS: Record<string, unknown>[] = [
     address: 'The community hall\n123 Main Street, Springfield',
     hours: 'Monday to Friday, 9 am to 5 pm\nSaturday, 10 am to 2 pm',
   },
+  // Card 198: the same block with nothing typed, filling itself from business facts
+  // (the wall's fixture facts; phone and email set, the phone still unconfirmed).
+  {
+    _type: 'contactCardSection',
+    _key: 'contact-facts',
+    heading: 'Visit or call',
+    facts: {
+      ...FIXTURE_FACTS,
+      phone: '(555) 555-0142',
+      phoneConfirmed: false,
+      email: 'office@example.com',
+    },
+  },
   {
     _type: 'progressSection',
     _key: 'progress',
