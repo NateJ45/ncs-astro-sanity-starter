@@ -332,6 +332,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 196  | Business facts once, confirmed flags, open now, hours changes, hours and map blocks       | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor            | no          | yes      | no               | no            | partial             | no             | partial    | no      |
 | 198  | Contact card fills from business facts; regex-backslash test skips scaffold-removed files | no          | yes      | no               | no            | partial             | no             | partial    | no      |
+| 199  | Portable tests run in a site: starter-itself case skips, compactor never writes -0        | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 192  | Flow layer: lines rise, the rest fades up, photos drift, page lift (`layout.motion`)      | no          | yes      | no               | no            | no                  | no             | partial    | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
@@ -12506,6 +12507,22 @@ the branch, screenshots of both blocks at 375 and 1280 (no horizontal scroll), a
 **Applied:** starter (this card). first-baptist-auburn runs its own church versions (`church-video.ts`, `downloads`,
 `page-weight.spec.ts`); its sync PR takes the PORTABLE copies only. Other sites in the Phase 2 rollout, in their own
 character: blocks and the documents capability where the site has Sanity; the spec and compactor everywhere.
+
+## Card 199: Two PORTABLE tests that failed inside a site (2026-10-27)
+
+**Origin:** rolling cards 186 and 197 out to presacademy.
+
+**Problem.** (1) `scripts/lib/sync-check-find-starter.test.mjs` (card 186) has a "starter checking itself" case that runs
+`sync-check` against the repo the test lives in, so in a site it failed (a site is not the starter). (2) The path
+compactor (card 197) kept `-0` from `Math.round` of a tiny negative, so its point-for-point test compared `-0` with `0`
+and failed on presacademy's `public/studio-art/cover-shelf-phone.svg`.
+
+**What changed.** The self-check case reads `package.json` and skips unless the name is `ncs-astro-sanity-starter`, so the
+file copies byte-exact to every site. `compactPath` normalises `-0` to `0` when it reads and when it writes, the test's
+own reader does the same, and a new case pins it. Sweep of the other PORTABLE tests for starter-only paths found none
+(they read files every site has, such as `public/_headers`, or build temp trees).
+
+**Applied:** starter (this card). Sites: copy the three PORTABLE files with the next sync.
 
 ## Card 198: The contact card fills itself from business facts, and the regex-backslash test survives scaffold removal (2026-10-27)
 

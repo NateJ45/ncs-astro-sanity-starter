@@ -20,6 +20,7 @@ const ARGS = { m: 2, l: 2, h: 1, v: 1, c: 6, s: 4, q: 4, t: 2, z: 0 };
 
 /** "0.5" -> ".5", "-0.5" -> "-.5", "3.0" -> "3". */
 function num(tenths) {
+  tenths += 0; // -0 becomes 0
   const neg = tenths < 0;
   const a = Math.abs(tenths);
   const whole = Math.floor(a / 10);
@@ -45,7 +46,8 @@ function join(nums) {
 export function compactPath(d) {
   if (/[aA]/.test(d)) return d;
   const tokens = d.match(/[a-zA-Z]|-?(?:\d+\.?\d*|\.\d+)(?:e-?\d+)?/g) ?? [];
-  const t10 = (s) => Math.round(Number(s) * 10);
+  // "+ 0" turns a rounded -0 (from "-0.04" or "-0") into 0, so no "-0" ever reaches the output.
+  const t10 = (s) => Math.round(Number(s) * 10) + 0;
   let i = 0;
   let cmd = '';
   let x = 0;

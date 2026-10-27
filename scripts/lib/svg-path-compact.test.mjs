@@ -30,7 +30,7 @@ function absolute(d) {
       y = sy;
       continue;
     }
-    const v = tokens.slice(i, i + n).map((t) => Math.round(Number(t) * 10));
+    const v = tokens.slice(i, i + n).map((t) => Math.round(Number(t) * 10) + 0);
     i += n;
     if (lower === 'h') {
       x = rel ? x + v[0] : v[0];
@@ -69,6 +69,12 @@ describe('compactPath', () => {
     const arc = 'M0 0 A5 5 0 0 1 10 10';
     assert.equal(compactPath(arc), arc);
     assert.equal(compactPath('M0.04 0.06 L1.26 2'), 'm0 .1 1.3 1.9');
+  });
+  it('never writes -0 (a tiny negative rounds to 0)', () => {
+    const c = compactPath('M-0.04 -0.02 L-0 5 l-0.04 0 c-0.03 0 -0.04 -0.01 -0.01 -0.04z');
+    assert.ok(!/-0(?![.\d])/.test(c), c);
+    assert.equal(compactPath('M0 0 L-0.04 3'), 'm0 0 0 3');
+    assert.deepEqual(absolute(c), absolute('M0 0 L0 5 l0 0 c0 0 0 0 0 0z'));
   });
   it('keeps every point of every SVG this repo ships, and never grows one', () => {
     const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

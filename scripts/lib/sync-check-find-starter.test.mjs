@@ -13,7 +13,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -80,8 +80,23 @@ test('a non-starter repo with no starter anywhere is an error, not a silent self
   assert.match(allowed.out, /\[self-check\]/);
 });
 
-test('the starter checking itself is still allowed', () => {
-  const root = resolve(dirname(SYNC_CHECK), '..');
+// Only the starter checks itself cleanly. A site carries a copy of this file (PORTS.md card 199),
+// and there the repo root is not the starter, so the case skips instead of failing.
+const ROOT = resolve(dirname(SYNC_CHECK), '..');
+function isStarter() {
+  try {
+    return (
+      JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).name ===
+      'ncs-astro-sanity-starter'
+    );
+  } catch {
+    return false;
+  }
+}
+
+test('the starter checking itself is still allowed', (t) => {
+  if (!isStarter()) return t.skip('not running in the starter repo');
+  const root = ROOT;
   const { status, out } = run(SYNC_CHECK, root);
   assert.match(out, /\[self-check\]/);
   assert.equal(status, 0);
