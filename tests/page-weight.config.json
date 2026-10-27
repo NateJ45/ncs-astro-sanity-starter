@@ -1,0 +1,26 @@
+{
+  "_comment": [
+    "EXPECTED TO DIFFER PER SITE. The budgets tests/page-weight.spec.ts checks (decoded kilobytes).",
+    "Start from what the site weighs today plus about 25%, then tighten: a budget set far above",
+    "reality never fails. Keys left out fall back to the spec's own numbers.",
+    "A route that must be heavy gets its own entry under pages, with the reason in _why.",
+    "jsonLd lists the schema.org types a route must carry, e.g. { \"/\": [\"Organization\"] }."
+  ],
+  "defaults": {
+    "maxHtmlKb": 150,
+    "maxInlineCssKb": 90,
+    "maxScriptKb": 400,
+    "maxImagesKb": 1200,
+    "maxImageKb": 500,
+    "maxLcpImageKb": 250,
+    "maxFontPreloads": 3,
+    "maxFontKb": 120
+  },
+  "pages": {
+    "/contact/": {
+      "_why": "The form island loads React and the form libraries (1596 KB decoded when measured, 2026-10-27).",
+      "maxScriptKb": 2000
+    }
+  },
+  "jsonLd": {}
+}

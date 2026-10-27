@@ -320,9 +320,10 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 188  | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`        | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
-| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor           | no          | yes      | no               | no            | partial             | no             | partial    | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12155,3 +12156,49 @@ classic layout and of a seeded layout (banner, block, extra band).
 
 **Applied:** starter (this card). Sites take it in the Auburn port run's per-site phase; Auburn's own copies are the
 origin and differ only by church words, the hidden fossils and its `DEFAULT_*_SECTIONS` fallback.
+
+## Card 197: Latest video block, Documents library, page-weight budget, SVG path compactor (2026-10-27)
+
+**Origin:** first-baptist-auburn, the last starter card of the Auburn-to-family port run (inventory rows C7, C10, B6,
+M4). Card 159 had filed three of these as Auburn-only; each has a generic core, ported here without the church words.
+
+**What changed.**
+
+- **C7 `latestVideoSection` ("Latest video").** `src/lib/youtube-feed.ts` (PORTABLE, with a test and an invented feed
+  fixture) reads a YouTube channel's public Atom feed at build time: no key, newest 15 uploads, one fetch per channel
+  per build, two tries with a timeout. `LatestVideo.astro` draws a thumbnail link that swaps to the `youtube-nocookie`
+  player on a press (no YouTube script on load, 16:9 reserved). The schema (`latestVideoSection.ts`, PORTABLE) takes a
+  channel ID or a pasted `/channel/UC...` link. **It shows nothing, not an empty box**, with no channel, a bad id, a
+  failing feed or a channel with nothing public, and the build never fails on a feed error (the card's build proof ran a
+  deliberately bad channel: two 404s logged, block absent, exit 0). Auburn's church parts (the "Last Sunday" label, the
+  upcoming-stream card, Church facts) stay in that repo.
+- **C10 `libraryDocument` + `documentsSection` ("Documents").** A Studio collection of downloadable files (title, a
+  free-text group, date, file, note, "take it down after" date, `publishAt`) and a block listing the newest current ones,
+  all groups or one. `src/lib/documents.ts` holds the rules (current, newest first, file label "PDF, 240 KB"); the GROQ
+  arm fetches the newest 60 inside the page query, so there is no new build-time read and the CI snapshot answers it.
+  **It is the eighth scaffold capability, `documents`** (rule 14): every registration site is marked, and
+  `npm run scaffold -- --remove documents --write` was run, then typegen, check, build and the unit tests (see Proved).
+  Auburn's fixed categories, "this week's bulletin" and search tags are not ported.
+- **B6 `tests/page-weight.spec.ts` (PORTABLE) + `tests/page-weight.config.json` (per site).** For every route in
+  `tests/routes.ts`: HTML, inline CSS, scripts, images, the LCP image, preloaded fonts (count, woff2, size) and JSON-LD
+  validity against budgets read from the config. Auburn's version pinned Auburn's own fonts and pages; this one pins
+  numbers.
+- **M4 `scripts/lib/svg-path-compact.mjs` (PORTABLE, with its test).** Shortest relative path data, rounded to a tenth of
+  a unit; arcs returned unchanged. The test proves every point of every SVG the repo ships stays put. Generic on its own
+  (card 159 listed it Auburn-only).
+- Both blocks have a `/styleguide/sections/` fixture (the video one a sample with no network) and a picker thumbnail;
+  `authoring.test.ts` now reads their schema files too. `docs/agent/video-documents-weight.md` is the reference.
+
+**Adapt per site.** Documents: the Studio label ("Document") and the heading default are plain words; rename for the
+trade ("Brochures", "Price lists") in `libraryDocument.ts` and `documentsSection.ts`. Video: a site with a full CSP
+needs `img-src https://i.ytimg.com` and `frame-src https://www.youtube-nocookie.com`. Page weight: set the budgets from the
+site's own numbers (+25 percent), and the `jsonLd` types per route. A site without Sanity (nixoncreativestudio) takes only
+the page-weight spec and the path compactor.
+
+**Proved:** `npm run typegen`, `check`, `test:unit` (youtube-feed, documents, svg-path-compact), `build`, the page-weight
+spec, `scaffold --remove documents --write` followed by typegen, check, build and unit tests on a throwaway copy of
+the branch, screenshots of both blocks at 375 and 1280 (no horizontal scroll), and a build with a bad channel.
+
+**Applied:** starter (this card). first-baptist-auburn runs its own church versions (`church-video.ts`, `downloads`,
+`page-weight.spec.ts`); its sync PR takes the PORTABLE copies only. Other sites in the Phase 2 rollout, in their own
+character: blocks and the documents capability where the site has Sanity; the spec and compactor everywhere.
