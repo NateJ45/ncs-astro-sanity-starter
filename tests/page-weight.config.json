@@ -16,6 +16,11 @@
     "maxFontPreloads": 3,
     "maxFontKb": 120
   },
-  "pages": {},
+  "pages": {
+    "/contact/": {
+      "_why": "The form island loads React and the form libraries (1596 KB decoded when measured, 2026-10-27).",
+      "maxScriptKb": 2000
+    }
+  },
   "jsonLd": {}
 }
