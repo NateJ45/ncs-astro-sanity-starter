@@ -103,7 +103,11 @@ const SECTION_ARMS = `
       ...,
       backgroundImage${IMAGE_PROJECTION},
       primaryCta${CTA_PROJECTION},
-      secondaryCta${CTA_PROJECTION}
+      secondaryCta${CTA_PROJECTION},
+      // The photo hero (card 189): the clips as URL and type, the short-facts card's link resolved.
+      backgroundVideo{ "url": asset->url, "mimeType": asset->mimeType },
+      backgroundVideoPhone{ "url": asset->url, "mimeType": asset->mimeType },
+      glance{ ..., link${CTA_PROJECTION} }
     },
     _type == "ctaBandSection" => {
       ...,

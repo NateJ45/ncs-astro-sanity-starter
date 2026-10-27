@@ -102,6 +102,9 @@ const NON_STEGA_FIELDS = new Set([
   'category',
   'columns',
   'heightHint',
+  // Card 189: the opening banner's Style. Hero.astro compares it to 'photo'; an encoded value
+  // would draw the standard hero in the preview.
+  'heroStyle',
   'imageSide',
   'layout',
   'linkType',

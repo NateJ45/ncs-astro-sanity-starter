@@ -202,6 +202,10 @@ const editKeyOf = (block: unknown) => {
           size={s.size ?? 'short'}
           headingId={headingId}
           primaryVariant={ctaVariant(rowIndex)}
+          heroStyle={s.heroStyle}
+          glance={s.glance}
+          backgroundVideo={s.backgroundVideo}
+          backgroundVideoPhone={s.backgroundVideoPhone}
         />
       ) : s._type === 'ctaBandSection' ? (
         <FinalCta

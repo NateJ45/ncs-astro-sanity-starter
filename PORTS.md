@@ -320,6 +320,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 188  | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`        | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 189  | Photo hero: "Photo behind the words" style, short-facts card, silent background video    | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
@@ -11986,6 +11987,77 @@ variant (built with `hero: board`) shot at 320, 375 and 1280 on `/about/`, `/ser
 the font-fallback scripts (PORTABLE), `npm run font-fallback` for its display font, and the `site-layout.ts` /
 schema change (PORTABLE, so site PRs wait for the starter merge). `hero: board` is offered per site; fbcm is the
 closest fit. first-baptist-auburn moves its gable, slab, tile and marker values into tokens over the PORTABLE files.
+
+## Card 189: "Photo behind the words": the photo hero, a short-facts card and a silent background video (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A1, A2, A3). Auburn's Home opens on a full-width photograph with the
+welcome over it in white and its This Sunday card beside it (2026-10-23, `home/HomeHero.astro`); since 2026-10-26
+any page's opening banner can take the same treatment (`heroSection.heroStyle`, `PageHeroPhoto.astro`); and the
+hero can play a short silent clip over the photo, with a phone-sized copy (2026-10-25/26, `lib/hero-video.ts`).
+
+**Problem.** The starter's bleed hero already lays a photo under a scrim, but only as the site-wide hero shape, with no
+card beside the words, no clip, and no per-page choice: an event page could not open on a photo on a site whose hero
+is split, editorial or board. And nothing promised the white words stay readable on whatever photo an editor uploads.
+
+**Fix.**
+
+- **The style (A2).** `heroSection.heroStyle`: Standard (the default, `initialValue: 'standard'`) or "Photo behind
+  the words" (`'photo'`), in `NON_STEGA_FIELDS`. `Hero.astro` checks it first: `'photo'` with a background photo
+  draws `src/components/PhotoHero.astro`; anything else, or no photo, falls through to the hero exactly as before
+  (bleed, split, editorial, board), so no site moves until an editor picks it. Size Tall is the home shape (most of the
+  first screen), Short the inner-page shape. Buttons are the site's own `CtaLink` pair `onDark`, and the page's
+  accent budget (cards 158, 187) still decides the main one.
+- **The short-facts card (A1).** Auburn's This Sunday card made generic: `heroSection.glance` (shown only with the
+  photo style) holds a title, up to four short lines and a link, drawn as `.ph-card` on the site's card surface,
+  beside the words from 961px and under them on a phone. Empty means no card. Opening hours, the next date, a price
+  from: whatever the site's first screen should answer.
+- **The phone band (A1).** Under 961px the hero is a photo band (`--ph-band`, 44svh clamped 220 to 380px) with the
+  words starting on its darkened foot and the card after them; the two buttons stack full width under 521px.
+- **The contrast promise.** The shade is four tokens on `.ph-hero` (`--photo-scrim` = the brand's
+  `--color-accent-dark`, `--photo-scrim-text` 72%, `-deep` 88%, `-clear` 20%). The wide-screen shade holds the
+  text strength across the left 60% (the words keep the left 7/12 of the grid, card or not); the phone shade reaches
+  it 20px above where the words start. `src/lib/photo-hero.ts` + test (a unit gate) resolve the scrim to the brand's
+  hex in `globals.css` and fail unless white over a PURE WHITE photo under the text strength is 4.5:1 or better
+  (the starter: 6.48:1; the least passing strength is 62%), and check the shade uses the tokens only. axe cannot
+  judge text over an image (`contrast.spec.ts` counts and skips it), so the promise is held arithmetically.
+- **The background video (A3).** `backgroundVideo` and `backgroundVideoPhone` (files, .mp4 or .webm, photo style
+  only). `src/lib/hero-video.ts` (PORTABLE, tested): type and size checks (3 MB, 1 MB for the phone copy), the
+  fast-start check (reads the first 64 KB with one range request; warns when `mdat` comes before `moov`), the phone
+  pick (under 768px), and `heroVideoAllowed()` (no clip with reduced motion, Save-Data, 2G/3G, a measured downlink
+  under 1 Mbps, or print). `src/components/HeroVideo.astro` is rendered only when there is a clip, so other pages
+  carry no script: after `load` it builds a muted, looping, `preload="none"` video with the photo's `currentSrc` as
+  poster, under the shade at 0.99 opacity (the Windows overlay-plane trap), with a remembered Pause button (WCAG
+  2.2.2), off-screen pause and background-tab resume. The photo stays the LCP; the clip never blocks it.
+- **Wall and tests.** `/styleguide/photo-hero/home/` (tall, card, clip and phone copy) and `/styleguide/photo-hero/page/`
+  (short, no card): fixed data, noindex. `tests/photo-hero.spec.ts` (PORTABLE) answers the CDN with
+  `tests/visual/fixtures/layout-hero.jpg` and `hero-clip.mp4` (17 KB, made with ffmpeg, fast start) and checks the
+  frame, the card, reduced motion, poster, Pause, phone copy, slow link, 320px reflow and axe.
+
+**Files.** PORTABLE: `src/components/PhotoHero.astro`, `src/components/HeroVideo.astro`, `src/styles/photo-hero.css`,
+`src/lib/hero-video.ts` (+ test), `src/lib/photo-hero.ts` (+ test), `tests/photo-hero.spec.ts`. Starter-owned
+(merge by hand): `Hero.astro`, `SectionRenderer.astro`, `sections.ts` (`heroStyle`, `glance`, the two video fields,
+`heroVideoCheck`), `queries.ts` (the clips as url and mimeType, the card's link), `cms-preview.ts`, the wall page.
+Docs: `docs/agent/animation.md` "Photo hero video", `docs/agent/design-tokens.md` "The photo hero's shade".
+
+**Not ported, on purpose.** Auburn's This Sunday card (church facts; card 196's business facts can fill a glance card
+later), its town line, the "Stand-in photograph" label and the "Photo needed" hero note with a stock church clip
+(card 195's shot list covers pictures; a hero shot can be added per site), its name line, and its fixed 0.85/0.70
+navy shade (now the tokens). Auburn draws the hero on Home only through its board; the starter offers it on any page.
+
+**Proved:** `npm run typegen`, `npm run check` (0 errors), `npm run test:unit` (1781 + 166 pass, including the new
+`hero-video` and `photo-hero` tests), `npm run build` (CSP: 11 inline scripts, 706 bytes, unchanged; the clip's
+script is a bundled module from 'self'). Parity against card 188's build: 18 of 19 pages PASS, inline CSS checksums
+included (the purge drops every `.ph-` rule where unused); the one DIFF is `styleguide/sections`' build-time ICS
+timestamp, not this card. Full Playwright suite: 181 pass, the 9 new `photo-hero.spec.ts` among them. Screenshots at
+375 and 1280: the standard hero (unchanged), the tall photo hero with its card (still, the clip's poster), the same
+with the clip playing under the shade and the Pause button, and the short inner-page shape; no horizontal overflow.
+No new block type, so the heroSection thumbnail stays as shot.
+
+**Applied:** starter (this card). Sites take the PORTABLE files plus the schema, query and `Hero.astro` branch. A
+site that never picks the style renders as before. fbcm is the natural first user (a home photo hero with service
+times in the card); stonesteps-50k (race-day card: date, distance, entry link) and presacademy (open-house card) next.
+first-baptist-auburn's sync PR moves Home and `PageHeroPhoto` onto `PhotoHero.astro` with its This Sunday card as
+the glance slot's church filling, and renames its `hb-` hero classes to `ph-`.
 
 ## Card 194: The form builder: forms an editor writes, a Form block, `/api/form/` and D1 submissions (2026-10-27)
 

@@ -21,6 +21,12 @@ type ArrayOf<T> = Array<
 >;
 
 // Source: schema.json
+export type Glance = {
+  title?: string;
+  lines?: Array<string>;
+  link?: CtaBlock;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: 'reference';
@@ -2175,6 +2181,18 @@ export type HeroSection = {
     alt?: string;
     _type: 'image';
   };
+  heroStyle?: 'standard' | 'photo';
+  glance?: Glance;
+  backgroundVideo?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
+  };
+  backgroundVideoPhone?: {
+    asset?: SanityFileAssetReference;
+    media?: unknown;
+    _type: 'file';
+  };
   primaryCta?: CtaBlock;
   secondaryCta?: CtaBlock;
   size?: 'tall' | 'short';
@@ -4082,6 +4100,7 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | Glance
   | SanityImageAssetReference
   | TimelineEntryImage
   | PhotoCardImage
