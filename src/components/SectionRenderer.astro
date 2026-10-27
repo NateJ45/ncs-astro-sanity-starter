@@ -16,6 +16,9 @@ import Hero from '@/components/Hero.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import StatsRow from '@/components/StatsRow.astro';
 import SectionDivider from '@/components/SectionDivider.astro';
+import BoardRule from '@/components/board/BoardRule.astro';
+import { layout } from '@/data/layout';
+import { isBoard } from '@/lib/site-layout';
 import RichTextSection from '@/components/sections/RichTextSection.astro';
 import ImageText from '@/components/sections/ImageText.astro';
 import GalleryGrid from '@/components/sections/GalleryGrid.astro';
@@ -39,6 +42,7 @@ import RsvpSection from '@/components/sections/RsvpSection.astro';
 import ContactFormSection from '@/components/sections/ContactFormSection.astro';
 import PrivacyPolicy from '@/components/sections/PrivacyPolicy.astro';
 import JournalPosts from '@/components/sections/JournalPosts.astro'; // scaffold: journal
+import FormSection from '@/components/sections/FormSection.astro';
 import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
 import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
@@ -140,6 +144,17 @@ const ctaVariant = primaryBudget(rows, ({ block }) =>
         own(ctaHref(block.button)),
 );
 
+// The board grammar (brand.config.json layout.hero = 'board', card 188): every section opens with
+// a rule (BoardRule) on one ground, in place of the cadence's divider. Not before the first
+// section, not before or straight after a hero (the page head has its own spacing), and not
+// before a spacer, which is a break of its own. Off on every other site, so nothing changes.
+const board = isBoard(layout);
+const UNRULED = new Set(['heroSection', 'spacerSection']);
+const ruled = rows.map(
+  ({ block }, i) =>
+    board && i > 0 && !UNRULED.has(block._type) && rows[i - 1].block._type !== 'heroSection',
+);
+
 // A real element in preview, nothing at all on the live site. The wrapper must
 // NOT be `display: contents`: the overlay outlines the element's rect, and a
 // contents element has none. A plain block-level div around a full-width
@@ -157,7 +172,8 @@ const editKeyOf = (block: unknown) => {
 
 {rows.map(({ block: s, surface, insertDividerBefore, headingId }, rowIndex) => (
   <>
-    {insertDividerBefore && <SectionDivider />}
+    {insertDividerBefore && !board && <SectionDivider />}
+    {ruled[rowIndex] && <BoardRule />}
 
     <Wrap {...wrapAttrs(editKeyOf(s))}>
       {isBuilderBlock(s) ? (
@@ -376,6 +392,8 @@ const editKeyOf = (block: unknown) => {
         />
       ) : s._type === 'rsvpSection' ? (
         <RsvpSection block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : s._type === 'formSection' ? (
+        <FormSection block={s} surface={surface ?? 'background'} headingId={headingId} />
       ) : s._type === 'embedSection' ? (
         <EmbedSection
           eyebrow={s.eyebrow}

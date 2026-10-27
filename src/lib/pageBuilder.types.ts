@@ -377,6 +377,16 @@ export interface ProjectedRsvpSection {
   confirmationNote?: string;
 }
 
+/**
+ * formSection - one editor-written form (the form builder, card 194). CONTENT type.
+ * `form` is the dereferenced form document; src/lib/site-form.ts normalizes it.
+ */
+export interface ProjectedFormSection {
+  _type: 'formSection';
+  _key: string;
+  form?: Record<string, unknown> | null;
+}
+
 // ---------------------------------------------------------------------------
 // Church-reverse-port: dynamicListSection
 // ---------------------------------------------------------------------------
@@ -504,6 +514,7 @@ export type PageBuilderBlock =
   | ProjectedTeamSection
   | ProjectedEmbedSection
   | ProjectedRsvpSection
+  | ProjectedFormSection
   // Church-reverse-port
   | ProjectedDynamicListSection
   // Every main page a page builder (card 190)

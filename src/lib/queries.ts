@@ -47,6 +47,16 @@ const SECTION_ARMS = `
         schedulingLink, schedulingLinkLabel, availabilityNote
       }
     },
+    // The form builder (card 194): the form's words only. The recipient's NAME is looked up for
+    // the page; its address is never in the dataset (src/lib/site-form.ts).
+    _type == "formSection" => {
+      ...,
+      "form": form->{
+        _id, title, intro, mode, askForContact, allowAnonymous, questions, recipient,
+        submitLabel, successMessage,
+        "recipientName": *[_type == "siteSettings"][0].formRecipients[key == ^.recipient][0].name
+      }
+    },
     // The builder kit (builderSections.ts, PORTS.md card 173). Columns, fold-outs,
     // tabs and the schedule carry no image or button, so they need no arm.
     _type == "buttonRowSection" => { ..., links[]{ ..., link${CTA_PROJECTION} } },

@@ -43,6 +43,7 @@ Every core route except `/`, `/contact`, `/privacy`, `/404` and the Studio and p
 | `/api/subscribe/confirm/` (SSR)                       | the confirm link; 303 to `/email/confirmed/` or `/email/link-problem/`          |
 | `/api/unsubscribe/` (SSR)                             | POST only: the unsubscribe button and RFC 8058 one-click                        |
 | `/api/rsvp/` (SSR)                                    | GET an event's state, POST a reply                                              |
+| `/api/form/` (SSR)                                    | the form builder: GET ready, POST a form; stored in D1, emailed (card 194)      |
 | `/api/studio/newsletter/`, `/api/studio/rsvps/` (SSR) | the Studio's protected mail routes                                              |
 | `/api/studio/form-recipients/` (SSR)                  | where form messages go: administrators only, addresses kept in D1 (card 174)    |
 | `/api/form-recipient/confirm/` (SSR)                  | the confirmation link for a new form address; GET shows a button, POST confirms |

@@ -319,6 +319,8 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 185  | Type straight onto the page in the preview                                               | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 188  | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`        | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 
@@ -11347,7 +11349,7 @@ again, or on a site that made the table under another number, changes nothing. U
 step is needed and `CONTACT_TO` decides. On Cloudflare Email Sending a new destination must also be verified in
 Cloudflare before mail reaches it.
 
-**Not ported:** Auburn's own form builder (`church-form.ts`, `/api/form/`, `FORM_RECIPIENTS`, the "Who forms can go
+**Not ported (since ported, generalised, by card 194):** Auburn's own form builder (`church-form.ts`, `/api/form/`, `FORM_RECIPIENTS`, the "Who forms can go
 to" list) and its "date" and "tick any that apply" question kinds stay in Auburn. They do not slot into the PORTABLE
 `custom-form-fields.ts` kinds list cleanly: Auburn adds them as separate schema types (`formDateQuestion`,
 `formTickQuestion`) read by `_type`, not as new `kind` values, with structured answers (an ISO date and its words,
@@ -11912,6 +11914,146 @@ screenshots of the header at 375 and 1280 with and without the second button.
 files plus the per-site edits (`CtaLink`, `SectionRenderer`, `Header`, `Footer`, `MobileNav`, `CopyEmailButton`,
 `BaseLayout`, the schema fields and `siteSettings.ts`/`queries.ts`), in the Phase 2 rollout.
 
+## Card 188: One scale, a shape class contract, metric-matched fallback fonts, and the board grammar as `hero: board` (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A4, A5, A35, A6). Auburn's standardising pass (2026-10-24) found about
+a hundred distinct font sizes, five card radii and four section H2 sizes across its routes, and fixed it with one
+scale at the top of its brand stylesheet; its shape system made the church's phone photos read as one family; its
+re-audit (2026-10-26) cut title layout shift on five inner pages from about 0.05 to 0.002 with metric-matched fallback
+faces and set lining figures; and its board grammar gave every inner page one head, one ground and one left edge.
+Every family site gets the discipline here, styled in its own brand.
+
+**Fix.**
+
+- **The one scale (A4).** A `:root` block "The one scale" in `src/styles/globals.css`: text (`--fs-tag`, `-small`,
+  `-body`, `-lead`, `-button`, `-title`, `-title-sm`, `-numeral`), leading (`--lh-*`), `--figures`, corners
+  (`--radius-control`, `-card`, `-inner`, `-tag`, `-pill`), space (`--pad-card`, `--pad-panel`, `--gap-grid`,
+  `--gap-heading`), shadows (`--shadow-card`, `--shadow-raised`), the button measure (`--btn-height`,
+  `--btn-tracking`, `--tracking-label`) and the focus ring. The starter's values are the ones it already drew
+  (Tailwind's 12/14/16/18px, `rounded-sm` and `rounded-md` from `--radius`, its fluid spacing, the `.card-lift` hover
+  shadow), so naming them moved nothing. Tailwind's `--text-xs` to `--text-lg` now read the scale, the base heading
+  rule reads `--lh-heading`, and `.card-lift:hover` reads `--shadow-card` (its `.dark` twin became a token). The block
+  sits AFTER the palette's `:root` and `.dark` because `apply-brand` rewrites the first of each (found the hard way:
+  placed first, apply-brand failed on `--background`).
+- **Lining figures (A35).** `html { font-variant-numeric: var(--figures) }`, `normal` by default; a brand whose
+  display face has old-style figures sets `lining-nums tabular-nums` (Auburn does).
+- **Metric-matched fallback fonts (A35).** `scripts/font-fallback.mjs` and `scripts/lib/font-fallback.mjs` (PORTABLE,
+  new, tested; `npm run font-fallback`): reads the display font's Latin `.woff` from its `@fontsource` package with
+  `opentype.js` (already a dependency), computes capsize's frequency-weighted average width (capsize's latin table,
+  copied) and the hhea metrics, and writes `src/styles/font-fallbacks.css` with `"<Family> Fallback"` over Georgia
+  (Arial for a sans) and `"<Family> Fallback Times"` over Times New Roman. The local fonts' metrics are constants,
+  measured once from the Windows copies, so CI needs no system fonts. The starter now ships Libre Baskerville's
+  (115.97% / 83.64% / 23.28% over Georgia), named second in `fonts.display.familyValue` and `--font-display`. The test
+  reproduces Auburn's Young Serif numbers within 0.1% (Georgia) and 0.25% (Times).
+- **The shape contract (A5).** `src/styles/shapes.css` (PORTABLE, new): `.shape-step` (a picture in a card),
+  `.shape-gable` (a standalone picture: the brand's cut), `.shape-slab` / `--left` / `.shape-slab-host`,
+  `.shape-card` + `.shape-zoom`, `.shape-tile`, with Auburn's class names so its markup moves over unchanged. Geometry
+  and paint are tokens under `:where(:root)` (`--shape-feature-clip`, `--shape-feature-radius`, `--gable-pitch`,
+  `--shape-gable-polygon`, `--shape-slab`, `--shape-slab-inset`, `--shape-tile`, `--shape-zoom`); the defaults are
+  neutral (frames on the scale's corners, a muted slab and tile). Auburn's gable, red brick slab and pale tile become
+  its brand-layer token values. Class rules only, so a site that uses none renders as before.
+- **The board grammar (A6), opt-in.** `hero: board` joins the `layout` slot (rule 18: `site-layout.ts`, the schema
+  enum, the test). `Hero.astro` draws `src/components/board/BoardPageHead.astro` for any non-tall hero: eyebrow with
+  the brand marker (`BoardLabel.astro`), title (the hero's script accent words in `--board-accent`), subhead, buttons,
+  the photo beside the words in `.shape-gable` on the shared split's tracks (card 91); a tall home hero draws as
+  bleed. `layoutAttrs` puts `data-hero="board"` on `<html>` for this value only (the one hero whose grammar covers the
+  body), where `src/styles/board.css` draws the cadence's tinted bands on the page ground, and `SectionRenderer`
+  opens every section after the first with `BoardRule.astro` (not straight after a hero, not before a spacer) instead
+  of the cadence's divider. Brand knobs: `--board-marker` (a short primary bar; Auburn's three bricks),
+  `--board-marker-width/-height`, `--board-rule` (a hairline; `none` = Auburn's whitespace), `--board-rule-height`,
+  `--board-title-size`, `--board-accent`. Fixtures at the END of `/styleguide/layouts/` (a shot region placed earlier
+  moves the existing baselines): the board head (shot by the hero loop as `hero-board`, baselines generated in CI)
+  and an unshot shape-contract band.
+
+**Not ported, on purpose.** Auburn's brick title (StoneHeading), its Sunday times band, the stone icon beside a page
+title, its 88px title cap and phone-polish spacing rules: they are its brand, set through the tokens above or kept in
+its own layer. The board components and `board.css` are starter-owned (not PORTABLE): Auburn's versions draw its
+church pieces.
+
+**Proved:** `npm ci`, `npm run check` (0 errors), `npm run test:unit` (1690 + 163 pass, including the new
+`font-fallback` and board `site-layout` tests), `npm run build`. Parity against `origin/main`'s build: 17 of 19 pages
+PASS; the two DIFFs are intended (`styleguide/layouts` gains the board head and shapes fixtures;
+`styleguide/sections`' custom-code frame CSS names the new fallback faces in the display stack, which the frame does
+not define, so it still falls to Georgia). Pixels: `/`, `/about/`, `/contact/`, `/faq/`, `/journal/`, `/privacy/`,
+`/services/` and `/styleguide/` at 375 and 1280, full page, before against after: 0 pixels differ on all 16. The board
+variant (built with `hero: board`) shot at 320, 375 and 1280 on `/about/`, `/services/`, `/contact/`, `/` and
+`/styleguide/layouts/`: no horizontal overflow; `<html data-hero="board">`, one ground, rules between sections.
+`apply-brand` runs clean and is idempotent with the scale block in place.
+
+**Applied:** starter (this card). Every family site needs: the scale block (with its own values), `shapes.css` and
+the font-fallback scripts (PORTABLE), `npm run font-fallback` for its display font, and the `site-layout.ts` /
+schema change (PORTABLE, so site PRs wait for the starter merge). `hero: board` is offered per site; fbcm is the
+closest fit. first-baptist-auburn moves its gable, slab, tile and marker values into tokens over the PORTABLE files.
+
+## Card 194: The form builder: forms an editor writes, a Form block, `/api/form/` and D1 submissions (2026-10-27)
+
+**Origin:** first-baptist-auburn (its form builder, 2026-10-18, and the date and "tick any that apply" questions,
+2026-10-26). Card 174 ported only the recipient addresses and said the builder was not ported; this card ports it,
+generalised: `church-form` becomes `site-form`, the "prayer" mode becomes "private", and no schema title or visitor
+line names a church.
+
+**Canonical:** PORTABLE `src/lib/site-form.ts`, `src/lib/site-form.test.ts`, `src/lib/site-form-fixtures.ts` (new);
+the already-PORTABLE `src/lib/studio-messages.ts` (+ test), `src/lib/cms-preview.ts` and `src/lib/studio-icons.ts`
+(changed, below). Non-marked, per site: `src/sanity/schemaTypes/form.ts` (the `form` document and the
+`formRecipients` Site settings field), `src/sanity/schemaTypes/formQuestionMore.ts` (`formDateQuestion`,
+`formTickQuestion`), `src/sanity/components/FormRecipientInput.tsx`, the `formSection` block in `sections.ts`,
+`src/components/sections/FormSection.astro`, `src/pages/api/form.ts`, `migrations/0005_form_submissions.sql`, and the
+wiring (schema index, desk structure "Content > Forms", `queries.ts` arm, `pageBuilder.types.ts`, `sectionCadence.ts`
+CONTENT, SectionRenderer branch, the `/styleguide/sections/` fixture and `public/section-thumbnails/formSection.jpg`).
+Docs: OPERATIONS.md ("Forms: the form builder"), `docs/agent/deployment.md`, `docs/agent/page-architecture.md`,
+`docs/claude/routes.md`.
+
+**What it does.**
+
+- **Content > Forms**: a form's name, a sentence above it, up to 12 questions (the shared six `formQuestion` kinds,
+  plus "A date" with "Only from today on", and "Tick any that apply" with 2 to 12 choices), who receives it (a code
+  from Site settings > Forms > Who forms can go to, `office` by default), name and email on or off, "send without my
+  name", the button words and the thank-you line. "Private" forms carry a Studio warning.
+- **The Form block** (`formSection`, insert group "Sign-ups") picks one form. It draws with the shared tokens (the
+  RsvpForm defaults, rule 17), asks `GET /api/form/` first and shows "please use the contact page" until mail can reach
+  a person. Errors show under each field with `aria-invalid`, and focus goes to the first. `?topic=<word>&about=<text>`
+  prefills the first matching list (a "pick one", else a "tick any") and the first paragraph box: the Contact form's
+  card 156 convention, now on every built form (row F4; the Contact form already had it).
+- **`/api/form/`**: body cap 64 KB (413), honeypot and timing check (silent 200), ten sends per visitor per 15
+  minutes per isolate (429 + Retry-After, `FailureLimiter` from card 122), the PUBLISHED form loaded by id (drafts
+  refused; `fixture-*` only with `MAIL_TEST_FIXTURES=1`), every answer checked against that form's questions on the
+  server (choices on the list, real dates, not before today on `site.timeZone`, 2,000 per answer, 12,000 in all),
+  Turnstile when set, then STORE in `form_submissions`, then email (D1 address from card 174, then the
+  `FORM_RECIPIENTS` secret, then `office`, then `CONTACT_TO`; Web3Forms as the fallback). A private form's name,
+  email and words are wiped from D1 once its email is accepted. Nothing is ever written to the dataset.
+- **Messages** (card 117) already listed `form_submissions`; `studio-messages.ts` now treats `mode = 'private'` like
+  `'prayer'` (no name, email or words read or shown), titled "Private message". `'prayer'` rows read as before.
+- The recipient panel (card 174) lists each `formRecipients` code beside the Contact form, and its route now passes the
+  `FORM_RECIPIENTS` secret's codes as fallbacks.
+- Rule 8b: `mode` and `recipient` joined `NON_STEGA_FIELDS`; `site-form.ts` also strips markers from every value
+  it compares.
+
+**Migration numbering.** The starter's D1 files are 0001 contact, 0002 message status, 0003 mail, 0004 form
+recipients, so the submissions table is **0005** here. FBC Auburn made the same table as `0002_form_submissions.sql`
+(its 0003 to 0005 are message status, mail and recipients). Both files are `CREATE TABLE IF NOT EXISTS` with the same
+columns, and `site-form.test.ts` accepts any `NNNN_form_submissions.sql` carrying the DDL. A site with Auburn's
+numbering keeps its file and does not add 0005 (or adds it: D1 runs it once as a no-op). A site taking this card
+fresh adds the table under its own next free number.
+
+**Switching it on.** The email backbone (card 127), then `npx wrangler d1 migrations apply <site>-contact --remote`.
+Optional: `FORM_RECIPIENTS` secret, Turnstile keys. With no migration the endpoint still emails (the store is skipped
+and logged).
+
+**Verified (2026-10-27):** `npm run typegen`, `npm run check`, `npm run build`, `npm run test:unit` (1,723 + 158 pass;
+31 new site-form tests, 1 new studio-messages test). `npm run preview` with a local D1 (all five migrations applied)
+and `MAIL_TEST_FIXTURES=1`: a good sign-up 200 and stored with its tick list and date in words; a bad one 422 with
+five field errors; a private one 200, emailed, then stored with name, email and answers NULL and `cleared = 1`;
+honeypot 200 and not stored; unknown form 404; a 70 KB body 413; malformed JSON 400; PUT 405; the eleventh send
+in the window 429. Both emails read correctly in the local mail folder. The block at 375 and 1280 px: no sideways
+scroll, the errors under their fields, and `?topic=setting-up&about=the%20fair` prefilled the list and the box.
+
+**Applied:** starter (this card). first-baptist-auburn: origin (`partial`: its `church-form.ts`, `FormBlock.astro`
+and `/api/form/` are the church versions; taking this card means swapping them for the marked files, keeping its own
+block for the Church Trac and phone lines, and its `0002` migration).
+
+**Who should take it.** Any site whose client wants more than one form (sign-ups, bookings, volunteer lists). Taking
+it: the three marked files plus the changed marked files, the schema, block, endpoint and wiring above, the migration
+under the site's next number, `npm run typegen`, a styleguide fixture and `npm run thumbnails`.
 ---
 
 ## Card 195: Client notes, the pre-launch review layer (2026-10-27)

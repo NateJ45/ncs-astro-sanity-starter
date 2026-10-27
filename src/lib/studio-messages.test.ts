@@ -218,6 +218,14 @@ describe('mapping helpers', () => {
     assert.match(d.note ?? '', /did not go out/);
     assert.deepEqual(d.answers, []);
   });
+  it("a form builder 'private' form is kept as privately, under its own name (card 194)", () => {
+    const d = formDetail({ ...prayer, mode: 'private' });
+    assert.equal(d.prayer, true);
+    assert.equal(d.from, 'Private message');
+    assert.deepEqual(d.answers, []);
+    assert.equal(d.email, null);
+    assert.match(d.note ?? '', /^A private message arrived/);
+  });
   it('mergeList tolerates broken answers JSON', () => {
     assert.equal(mergeList([], [{ ...visit, answers: '{bad' }], []).length, 1);
     assert.deepEqual(formDetail({ ...visit, answers: '{bad' }).answers, []);

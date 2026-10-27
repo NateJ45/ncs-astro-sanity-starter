@@ -20,6 +20,7 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { site } from '@/data/site';
 import { fallbackKeys, handleRecipientStudio } from '@/lib/form-recipients';
+import { parseRecipients } from '@/lib/site-form';
 import type { D1Database } from '@/lib/mail-db';
 import { originOf, workerMailer, type MailWorkerEnv } from '@/lib/mail-env';
 import { secretUsable } from '@/lib/mail-token';
@@ -28,7 +29,10 @@ import { bearerToken, isSameOrigin, verifyStudioUser } from '@/lib/studio-auth';
 export const prerender = false;
 
 const handler: APIRoute = async ({ request }) => {
-  const e = env as unknown as MailWorkerEnv & { CONTACT_DB?: D1Database };
+  const e = env as unknown as MailWorkerEnv & {
+    CONTACT_DB?: D1Database;
+    FORM_RECIPIENTS?: string;
+  };
   const { mailer } = workerMailer(e);
   return handleRecipientStudio(request, {
     sameOrigin: isSameOrigin,
@@ -38,7 +42,8 @@ const handler: APIRoute = async ({ request }) => {
     secret: secretUsable(e.MAIL_SECRET) ? e.MAIL_SECRET : null,
     origin: originOf(request),
     siteName: site.name,
-    fallbacks: fallbackKeys({}, e.CONTACT_TO),
+    // The form builder (card 194): keys the FORM_RECIPIENTS secret already covers.
+    fallbacks: fallbackKeys(parseRecipients(e.FORM_RECIPIENTS), e.CONTACT_TO),
   });
 };
 

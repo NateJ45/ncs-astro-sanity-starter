@@ -54,6 +54,7 @@ The four core pages (home, about, services, process) and every custom `page` doc
 | `logoStripSection` | SELF_CONTAINED | Row or grid of client/partner logos with optional eyebrow and headline             |
 | `embedSection`     | SELF_CONTAINED | Embed URL, or pasted code in its own sandboxed box (card 121, custom-code.md)      |
 | `rsvpSection`      | CONTENT        | RSVP form for one event: places, waiting list, questions; replies in D1 (card 127) |
+| `formSection`      | CONTENT        | One editor-written `form` document; answers to `/api/form/` and D1 (card 194)      |
 
 Blocks deliberately carry no `backgroundColor` field. Background assignment is `SectionRenderer`'s responsibility.
 

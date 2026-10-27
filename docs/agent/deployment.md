@@ -106,6 +106,14 @@ Bindings (`CONTACT_DB` for D1, `EMAIL` for Email Sending) are configured in `wra
 - `PUBLIC_CALENDLY_URL` -- optional. Booking link for the discovery call CTA.
 - `PUBLIC_NEWSLETTER_FORM_ACTION` -- optional. Build-time override for the ESP form-action endpoint.
 
+### The form builder endpoint (`/api/form`, card 194)
+
+The Form block posts here. It shares the contact endpoint's settings (`CONTACT_DB`, the email backbone,
+`CONTACT_TO`, `WEB3FORMS_KEY`, `TURNSTILE_SECRET`) and adds one optional secret, `FORM_RECIPIENTS` (JSON, recipient
+code to address; a Studio-set address in D1 wins). It needs migration `0005_form_submissions.sql` applied to
+`CONTACT_DB`. Without an email path `GET /api/form/` answers `{ ready: false }` and the block shows "please use the
+contact page". Detail and commands: OPERATIONS.md, "Forms: the form builder".
+
 ### Contact form: turning it on
 
 Added 2026-09-18. Until then nobody in the family had watched a message actually arrive, and this section said so. One has now (Stone Steps 50K, confirmed by the client the same morning), so these are the six steps that worked, in the order they worked in. `wrangler.jsonc` carries the same list as a comment next to the bindings themselves; PORTS.md card 45 carries the reasoning.
