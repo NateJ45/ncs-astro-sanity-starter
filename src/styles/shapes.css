@@ -1,0 +1,152 @@
+/* PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+   The shape contract (PORTS.md card 188, from FBC Auburn's shape system, 2026-10-24).
+
+   A handful of picture shapes make a client's own phone photos read as one designed family.
+   The CLASS NAMES are the contract and are the same on every site; the GEOMETRY and the paint
+   are tokens, set per brand in the brand layer (globals.css on the starter, a site's own brand
+   stylesheet). The defaults below are neutral: a plain frame on the scale's corners and a
+   muted panel, so a site that uses the classes without setting a token gets a clean look,
+   and a site that never uses them gets nothing at all (class rules only).
+
+     .shape-step   a picture inside a card: a plain frame with the inner corner. (Named for the
+                   stepped brick corner it once cut on Auburn; the name stayed.)
+     .shape-gable  a picture that stands alone (a text-and-picture band, a page head's photo):
+                   the brand's signature cut. Neutral default: the card corner, no cut. Auburn
+                   sets the building's gable: --shape-feature-clip: var(--shape-gable-polygon).
+     .shape-slab   a panel behind a picture, from a third of the way in out past the page edge,
+                   so the picture sits set into it. .shape-slab--left runs it to the left. The
+                   section around it needs .shape-slab-host (it clips the overflow).
+     .shape-card + .shape-zoom
+                   the picture inside the frame grows a little on hover or keyboard focus of the
+                   card; the zoom is on an inner wrapper, so the frame never moves.
+     .shape-tile   a card with no photo: its icon or mark centred on the tinted panel, in the
+                   same frame, so a grid never breaks.
+
+   The cuts are clip-paths, so an image, a video or a plain panel take them the same way. A
+   clipped border shows as a hairline along the cut, so the frames have border: 0.
+   Docs: docs/agent/shapes.md (the tokens, and how a reskin sets its own shapes). */
+
+/* Zero specificity, so a brand's own :root wins whatever the order. */
+:where(:root) {
+  /* The standalone picture's cut and corner. */
+  --shape-feature-clip: none;
+  --shape-feature-radius: var(--radius-card);
+  /* A ready-made cut a brand can point --shape-feature-clip at: a roofline whose eaves sit
+     --gable-pitch down the box, so a narrow box reads steep and a wide one reads like a porch. */
+  --gable-pitch: 24%;
+  --shape-gable-polygon: polygon(
+    0 var(--gable-pitch),
+    50% 0,
+    100% var(--gable-pitch),
+    100% 100%,
+    0 100%
+  );
+  /* The slab behind a standalone picture, and where it starts across the picture. */
+  --shape-slab: var(--muted);
+  --shape-slab-inset: 34%;
+  /* The panel behind a card with no photo, and the zoom on hover. */
+  --shape-tile: var(--muted);
+  --shape-zoom: 1.06;
+}
+
+/* ---- Frames ---------------------------------------------------------------------------- */
+.shape-step {
+  border-radius: var(--radius-inner);
+}
+/* A big picture that is still a frame, not a cut (a post's cover): the card corner. */
+.shape-step--lg {
+  border-radius: var(--radius-card);
+}
+.shape-gable {
+  border-radius: var(--shape-feature-radius);
+  clip-path: var(--shape-feature-clip);
+}
+.shape-step,
+.shape-gable {
+  overflow: hidden;
+  border: 0;
+  /* The tint behind a picture while it loads. */
+  background: var(--muted);
+}
+.shape-step > img,
+.shape-step > picture,
+.shape-step > picture > img,
+.shape-gable > img,
+.shape-gable > picture,
+.shape-gable > picture > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---- Zoom on hover or focus of the card --------------------------------------------------- */
+.shape-zoom {
+  width: 100%;
+  height: 100%;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.shape-zoom > img,
+.shape-zoom > picture,
+.shape-zoom > picture > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .shape-card:hover .shape-zoom,
+  .shape-card:focus-within .shape-zoom {
+    transform: scale(var(--shape-zoom));
+  }
+}
+
+/* ---- A card with no photo ------------------------------------------------------------------ */
+.shape-tile {
+  display: grid;
+  place-items: center;
+  background: var(--shape-tile);
+}
+.shape-tile > :is(img, svg) {
+  width: min(42%, 96px);
+  height: auto;
+  object-fit: contain;
+}
+
+/* ---- The slab ------------------------------------------------------------------------------- */
+/* The holder is positioned and holds the picture; the slab is its ::before, run out past the
+   page edge, so the section around it clips sideways overflow. */
+.shape-slab-host {
+  overflow-x: clip;
+}
+.shape-slab {
+  position: relative;
+  isolation: isolate;
+}
+.shape-slab::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 12%;
+  bottom: -9%;
+  left: var(--shape-slab-inset);
+  right: -100vw;
+  background: var(--shape-slab);
+}
+.shape-slab--left::before {
+  left: -100vw;
+  right: var(--shape-slab-inset);
+}
+/* On a phone the slab is a short band behind the lower part of the picture, edge to edge. */
+@media (max-width: 47.99rem) {
+  .shape-slab {
+    margin-bottom: 1.75rem;
+  }
+  .shape-slab::before,
+  .shape-slab--left::before {
+    top: 38%;
+    bottom: -1rem;
+    left: -100vw;
+    right: -100vw;
+  }
+}

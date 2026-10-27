@@ -1,0 +1,84 @@
+---
+// Safe to edit by hand
+// The board grammar's page head (PORTS.md card 188, from FBC Auburn's BoardPageHead). Hero.astro
+// draws it for an inner page when the site's hero is `board` (brand.config.json layout.hero).
+// A short head on the page ground: the eyebrow with the brand marker (BoardLabel), the title,
+// the subhead and the buttons, all on the one left edge; the page photo beside the words in the
+// brand's standalone shape (.shape-gable, src/styles/shapes.css), on the shared split's media
+// track (card 91) so its seam lines up with the text-and-picture bands below.
+// Styles: src/styles/board.css. Docs: docs/agent/design-tokens.md, "The board grammar".
+import '@/styles/board.css';
+import SanityImage from '@/components/SanityImage.astro';
+import CtaLink from '@/components/CtaLink.astro';
+import BoardLabel from './BoardLabel.astro';
+import { splitHeadingAccent } from '@/lib/heading-accent';
+import type { SanityImageObject } from '@/lib/pageBuilder.types';
+import type { ComponentProps } from 'astro/types';
+
+type Cta = ComponentProps<typeof CtaLink>['cta'];
+
+interface Props {
+  eyebrow?: string;
+  headline: string;
+  subhead?: string;
+  image?: SanityImageObject | null;
+  primaryCta?: Cta | null;
+  secondaryCta?: Cta | null;
+  headingId: string;
+  /** Words of the title drawn in the accent colour (the block's script accent field). */
+  headingAccent?: string;
+  /** The one-accent-button rule (cta-budget.ts): secondary when an earlier block has it. */
+  primaryVariant?: 'primary' | 'secondary';
+}
+const {
+  eyebrow,
+  headline,
+  subhead,
+  image,
+  primaryCta,
+  secondaryCta,
+  headingId,
+  headingAccent,
+  primaryVariant = 'primary',
+} = Astro.props as Props;
+const split = splitHeadingAccent(headline, headingAccent);
+const hasImage = !!image?.asset;
+---
+
+<section class="board-head" aria-labelledby={headingId} data-hero="board">
+  <div class:list={['board-head__inner', hasImage && 'board-head__inner--side']}>
+    <div class="board-head__copy">
+      {eyebrow && <BoardLabel text={eyebrow} />}
+      <h1 id={headingId} class="board-head__title">
+        {split.found ? (
+          <>
+            {split.before}
+            <span class="board-head__accent">{split.word}</span>
+            {split.after}
+          </>
+        ) : (
+          headline
+        )}
+      </h1>
+      {subhead && <p class="board-head__sub">{subhead}</p>}
+      {(primaryCta || secondaryCta) && (
+        <div class="board-head__ctas">
+          {primaryCta && <CtaLink cta={primaryCta} variant={primaryVariant} />}
+          {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" />}
+        </div>
+      )}
+    </div>
+    {hasImage && (
+      <div class="board-head__photo shape-gable">
+        <SanityImage
+          source={image}
+          width={720}
+          sizes="(min-width: 60rem) 36vw, 100vw"
+          loading="eager"
+          fetchpriority="high"
+          quality={70}
+        />
+      </div>
+    )}
+  </div>
+</section>

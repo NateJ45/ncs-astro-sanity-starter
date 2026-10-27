@@ -6,7 +6,9 @@
 // system at the site's configured layout; this page exists so every VARIANT of
 // every slot can be shot from one build.
 //
-//   - hero: three <Hero> instances, each given an explicit `variant`.
+//   - hero: one <Hero> per variant, each given an explicit `variant`. The board
+//     head (card 188) sits at the END of the page, after the split bands: a shot
+//     region placed earlier would move the existing baselines by a pixel.
 //   - cards, density, header: the spec flips the matching data-* attribute on
 //     <html>, the same attributes BaseLayout emits from brand.config.json, so the
 //     CSS under test is the CSS a configured site ships.
@@ -156,4 +158,51 @@ const entry = {
       headingId="fx-split-card"
     />
   </div>
+
+  {/* The board head (hero: board, PORTS.md card 188), shot by the hero loop. Its page grammar
+      (one ground, section rules) is keyed on html[data-hero='board'], which this page does not
+      set, so nothing above it moves. */}
+  <div data-fx="hero-board">
+    <Hero
+      {...hero}
+      backgroundImage={image}
+      headingId="fx-h-board"
+      variant="board"
+      scriptAccent="two lines"
+    />
+  </div>
+
+  {/* THE SHAPE CONTRACT (src/styles/shapes.css, card 188). Not shot: it is here so a reskin can
+      see its shape tokens on one page. Neutral defaults: frames on the scale's corners. */}
+  <section
+    data-fx="shapes"
+    class="shape-slab-host bg-background py-section-md"
+    aria-labelledby="fx-shapes"
+  >
+    <div class="mx-auto max-w-content px-m">
+      <SectionHeading eyebrow="Shapes" headline="The shape contract" headingId="fx-shapes" />
+      <div class="mt-l grid gap-m md:grid-cols-3">
+        <a href="/" class="shape-card block">
+          <div class="shape-step aspect-[4/3]">
+            <div class="shape-zoom bg-secondary"></div>
+          </div>
+          <p class="mt-s text-sm">.shape-step inside a .shape-card</p>
+        </a>
+        <div>
+          <div class="shape-step shape-tile aspect-[4/3]">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="currentColor" />
+            </svg>
+          </div>
+          <p class="mt-s text-sm">.shape-tile, a card with no photo</p>
+        </div>
+        <div class="shape-slab">
+          <div class="shape-gable aspect-[5/4.4]">
+            <div class="h-full w-full bg-primary"></div>
+          </div>
+          <p class="mt-s text-sm">.shape-gable over a .shape-slab</p>
+        </div>
+      </div>
+    </div>
+  </section>
 </BaseLayout>

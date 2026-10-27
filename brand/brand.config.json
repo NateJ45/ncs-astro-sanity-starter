@@ -105,7 +105,7 @@
   },
   "fonts": {
     "display": {
-      "familyValue": "\"Libre Baskerville\", Georgia, \"Times New Roman\", serif",
+      "familyValue": "\"Libre Baskerville\", \"Libre Baskerville Fallback\", \"Libre Baskerville Fallback Times\", Georgia, \"Times New Roman\", serif",
       "ogFontStack": "Libre Baskerville, Georgia, Cambria, Times New Roman, serif",
       "imports": ["@fontsource/libre-baskerville/400.css", "@fontsource/libre-baskerville/700.css"]
     },
