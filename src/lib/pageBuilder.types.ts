@@ -466,6 +466,7 @@ export interface ProjectedPrivacyPolicySection {
   lastUpdated?: string | null;
   body?: PortableTextBlock[] | null;
 }
+// scaffold: journal
 /** journalPostsSection: the category chips, every post and the newsletter. */
 export interface ProjectedJournalPostsSection {
   _type: 'journalPostsSection';
@@ -473,6 +474,7 @@ export interface ProjectedJournalPostsSection {
   showCategories?: boolean;
   showNewsletter?: boolean;
 }
+// scaffold:end
 
 // ---------------------------------------------------------------------------
 // Discriminated union
