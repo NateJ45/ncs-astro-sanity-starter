@@ -122,7 +122,8 @@
     "header": "inline",
     "hero": "bleed",
     "density": "standard",
-    "cards": "standard"
+    "cards": "standard",
+    "motion": "reveal"
   },
 
   "workerName": null,

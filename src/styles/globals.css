@@ -17,6 +17,9 @@
 /* The shape contract (.shape-step, .shape-gable, .shape-slab, .shape-tile, .shape-zoom), PORTABLE,
    card 188. Class rules only: nothing changes until markup uses a class. */
 @import './shapes.css';
+/* The flow layer (src/scripts/flow.ts), PORTABLE, card 192. Every rule is keyed on
+   html[data-motion] or a class the script adds, so the default ('reveal') draws as before. */
+@import './flow.css';
 
 /* Tailwind v4 scans every non-gitignored file for class names. The committed
    parity baselines (scripts/.parity/*.html) and the Markdown docs name hundreds
@@ -415,6 +418,26 @@
   /* Focus: one ring. */
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
+
+  /* Motion (card 192): the flow layer's timings and distances (brand.config.json layout.motion,
+     src/styles/flow.css, src/scripts/flow.ts, which reads the durations). Nothing reads them
+     under the default motion ('reveal'). Auburn's values, from its 2026-10-25 audit. */
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1); /* expo-out: fast start, long settle */
+  --motion-fade: 200ms; /* calm pages: one short fade */
+  --motion-fade-distance: 8px;
+  --motion-stagger-calm: 40ms;
+  --motion-rise: 600ms; /* full pages: a fade-up */
+  --motion-rise-distance: 16px;
+  --motion-stagger: 60ms; /* between units arriving together */
+  --motion-line: 800ms; /* a heading line rising out of its mask */
+  --motion-line-stagger: 80ms;
+  --motion-photo: 900ms; /* a photo settling from a slight zoom */
+  --motion-photo-zoom: 1.06;
+  --motion-side: 800ms; /* a [data-flow='side'] piece sliding in */
+  --motion-side-distance: 32px;
+  --motion-page-out: 120ms; /* page to page: the old page lifts away */
+  --motion-page-in: 260ms; /* and the new one rises into place */
+  --motion-page-distance: 12px;
 }
 .dark {
   --shadow-card: 0 16px 34px -18px rgba(0, 0, 0, 0.6);

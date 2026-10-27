@@ -11,6 +11,7 @@ import {
   resolveLayout,
   layoutAttrs,
   isBoard,
+  hasFlow,
 } from './site-layout.ts';
 
 const schema = JSON.parse(readFileSync('brand/brand.config.schema.json', 'utf-8'));
@@ -63,4 +64,17 @@ test('non-default values emit attributes; a non-board hero does not; unknowns fa
     'data-cards': 'soft',
   });
   assert.equal(resolveLayout({ header: 'nope' }).header, 'inline');
+});
+
+test('motion: reveal is the default and emits nothing; the others emit data-motion (card 192)', () => {
+  assert.equal(DEFAULT_LAYOUT.motion, 'reveal');
+  assert.deepEqual(layoutAttrs(resolveLayout({ motion: 'reveal' })), {});
+  for (const motion of ['flow', 'fade', 'none']) {
+    assert.deepEqual(layoutAttrs(resolveLayout({ motion })), { 'data-motion': motion }, motion);
+  }
+  assert.equal(hasFlow(resolveLayout({ motion: 'flow' })), true);
+  assert.equal(hasFlow(resolveLayout({ motion: 'fade' })), true);
+  assert.equal(hasFlow(resolveLayout({ motion: 'none' })), false);
+  assert.equal(hasFlow(resolveLayout()), false);
+  assert.equal(resolveLayout({ motion: 'wobble' }).motion, 'reveal');
 });

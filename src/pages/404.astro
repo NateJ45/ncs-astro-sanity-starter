@@ -56,7 +56,13 @@ const photo = notFoundPage?.heroImage ?? fallbackPhoto;
 const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
 ---
 
-<BaseLayout title={seoTitle} description={seoDescription} siteSettings={siteSettings} noindex>
+<BaseLayout
+  title={seoTitle}
+  description={seoDescription}
+  siteSettings={siteSettings}
+  noindex
+  flow="full"
+>
   {/* THE SHARED SPLIT (PORTS.md card 91). Words first, photo on the narrow track; it was
       1fr / 1.1fr at `md`, so its seam sat left of every other band's. The photo stays
       first in the DOM for the stacked phone order and `lg:order-2` puts it on the right. */}

@@ -201,7 +201,7 @@ The `/reskin` skill handles this sequence for you (Step 3 in the skill).
 
 ## Before the skill: pick a direction
 
-`brand.config.json` can express palette, fonts, radius and the four coarse `layout` slots (header, hero, density, cards). Section order, finer nav and hero structure, density beyond three steps, and imagery treatment come from the design-directions step (`.claude/commands/design-directions.md`), which runs before the skill; the skill reads the recorded pick. See `.claude/rules/design-flow.md`.
+`brand.config.json` can express palette, fonts, radius and the five coarse `layout` slots (header, hero, density, cards, motion). Section order, finer nav and hero structure, density beyond three steps, and imagery treatment come from the design-directions step (`.claude/commands/design-directions.md`), which runs before the skill; the skill reads the recorded pick. See `.claude/rules/design-flow.md`.
 
 ## The `/reskin` skill -- 8-step flow
 

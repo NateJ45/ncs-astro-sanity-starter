@@ -1,0 +1,11 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Loads the flow layer (PORTS.md card 192; src/scripts/flow.ts, src/styles/flow.css). BaseLayout
+// renders this only when brand.config.json layout.motion is 'flow' or 'fade', so a site on the
+// default ('reveal') ships no flow script. Runs on every astro:page-load (View Transitions).
+---
+
+<script>
+  import { initFlow } from '@/scripts/flow';
+  document.addEventListener('astro:page-load', initFlow);
+</script>

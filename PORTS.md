@@ -320,6 +320,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 188  | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`        | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 192  | Flow layer: lines rise, the rest fades up, photos drift, page lift (`layout.motion`)     | no          | yes      | no               | no            | no                  | no             | partial    | no      |
 | 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
 
@@ -12092,3 +12093,52 @@ output) and with it on (pill, highlight and boxes), screenshots at 375 and 1280.
 
 **Applied:** starter (this card). Sites: turn it on only while a client is reviewing; Auburn's sync PR adopts the
 renamed files.
+
+## Card 192: The flow layer, opt-in as `layout.motion` (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows M1, M2). Auburn's flow layer (2026-10-24, tuned by its 2026-10-25
+audit to "gentle and quick"): headings rise line by line out of a mask, everything else fades up as it arrives,
+photos settle from a slight zoom and drift inside their frames, pages lift and rise between clicks, and every page
+but Home and the 404 gets one short 200ms fade. Built with no library: one IntersectionObserver, CSS keyframes and
+scroll timelines. Card 155 listed `flow-split` as not ported; it is now.
+
+**Fix.**
+
+- **A fifth layout slot, `motion`** (rule 18: `site-layout.ts`, the schema enum, `apply-brand`, the gate test):
+  `reveal` (default: today's reveals and cross-fade, no attribute, no script), `flow` (full on pages that pass
+  `flow="full"` to BaseLayout, so `<main data-flow-full>`: Home and the 404; calm elsewhere; page lift and rise),
+  `fade` (calm everywhere) and `none` (the head script never adds `html.motion`; hero stagger, slideshow zoom and
+  page cross-fade off). `layoutAttrs` emits `data-motion` for the three non-defaults; `hasFlow()` decides whether
+  BaseLayout renders `src/components/FlowMotion.astro`, the only thing that loads the script.
+- **PORTABLE, new:** `src/scripts/flow.ts`, `src/styles/flow.css` (imported by `globals.css`, every rule keyed on
+  `html[data-motion]` or a script-added class), `src/lib/flow-split.ts` + test, `FlowMotion.astro`,
+  `tests/flow-motion.spec.ts`.
+- **Motion tokens** in the one scale (card 188): `--motion-ease`, `--motion-fade`/`-distance`/`--motion-stagger-calm`,
+  `--motion-rise`/`-distance`/`--motion-stagger`, `--motion-line`/`-line-stagger`, `--motion-photo`/`-zoom`,
+  `--motion-side`/`-distance`, `--motion-page-out`/`-in`/`-distance`; the script reads the durations.
+- **Safety rules kept from Auburn:** hidden states are first frames of paused animations on script-added classes (JS
+  off, a failed script, reduced motion: nothing hidden); the first screen shows as it is at every width; transforms
+  and opacity only; splits only on real fonts and only if the height is unchanged; 600ms font cap; units land and
+  shed their classes; focus lands a unit at once; live preview never splits; print drops `html.motion`
+  (`print.css` rests units and masks; `print.spec.ts` probes `.flow` units when the layer is armed).
+- **Hooks for a site's motif:** `.flow-go` and `--flow-delay` on a starting unit, `data-flow-ms`, `data-flow="off" |
+"lines" | "side"`, `data-flow-item`, and `addFlowExtension(fn)`. `docs/agent/animation.md`, "The flow layer".
+- **Motion wall:** `/styleguide/motion/full/` and `/fade/` override the motion per page (BaseLayout `motion` prop), so
+  the spec runs on any build.
+
+**Not ported, on purpose.** Auburn's brick laying (titles, sill, markers), footer verse slide, building-sketch
+draw-in, Home hero scroll drift, This Sunday card slide and magnetic buttons (branding; the hooks above carry them);
+the desktop first-screen hold on full pages (the starter Hero has its own load stagger, and LCP stays untouched).
+
+**Proved:** `npm run check` (0 errors), `npm run test:unit` (1772 + 166 pass), `npm run build` (default: Home and
+inner pages load no flow script and carry no `data-motion`; the wall loads `FlowMotion`). `flow-motion.spec.ts` 9/9;
+native-scroll, print, reduced-motion, smoke, a11y green on both the default build and a local `motion: flow` build.
+Home, Playwright, 3 loads each, walking the whole page (LCP ms; CLS): default 1280 LCP 76-124, CLS 0.0003-0.0074;
+`flow` 1280 LCP 72-84, CLS 0.0003-0.0071; default 375 LCP 60-76, CLS 0.0010-0.0013; `flow` 375 LCP 60-96, CLS
+0.0010-0.0013. The remaining shift is the existing font swap in the hero and header (present under reduced motion
+too); shift caused inside `<main>` by the layer: 0 on the wall. Settled screenshots at 375 and 1280 of `/`, `/about/`
+and the wall: no horizontal overflow, no unit left armed.
+
+**Applied:** starter (this card). Sites take the PORTABLE files and `site-layout.ts` after the starter merges and
+pick a motion in their own character (`reveal` stays the safe default). first-baptist-auburn's sync PR moves onto the
+PORTABLE files and keeps its bricks, verse, sketch and hero drift as `addFlowExtension` / CSS hooks.

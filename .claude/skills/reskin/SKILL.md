@@ -10,8 +10,8 @@ Collect all brand inputs, write them into `brand/brand.config.json`, and run
 
 ## Where this sits: brief, references, design-directions, reskin
 
-Reskin is step 4 of 4. A reskin applies colours, fonts, radius and the four coarse `layout` slots
-(header, hero, density, cards); it cannot express section order, nav pattern, imagery treatment or
+Reskin is step 4 of 4. A reskin applies colours, fonts, radius and the five coarse `layout` slots
+(header, hero, density, cards, motion); it cannot express section order, nav pattern, imagery treatment or
 a bespoke structure, so running it first is how sites drift toward the same layout.
 
 1. **Brief:** `docs/templates/design-brief.md` becomes `PRODUCT.md` / `DESIGN.md`.
@@ -212,7 +212,7 @@ This rewrites:
 
 - `src/styles/globals.css` -- `@theme` palette tokens, font tokens, `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string
 - `src/data/site.ts` -- `name`, `domain`, `brandColors` (derived fields `storageKeyPrefix`, `themeStorageKey`, `studio` are computed automatically -- never stale)
-- `src/data/layout.ts` -- the `layout` block (header, hero, density, cards); defaults reproduce the original layout
+- `src/data/layout.ts` -- the `layout` block (header, hero, density, cards, motion); defaults reproduce the original layout
 - `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json), and `src/sanity/studioFonts.css` (the font files the Studio loads). The Studio's colours are read from brand.config.json at build time (PORTS.md cards 110 and 116; optional `studio.accent`, `studio.paper`, `studio.chrome`); `npm run test:unit` is their contrast gate
 - `scripts/generate-og-default.mjs` -- `wordmark`, `tagline`
 - `scripts/og-theme.mjs` -- `OG_THEME` share-image colors and font stack (never `scripts/lib/render-og.mjs`, which is PORTABLE; card 104)

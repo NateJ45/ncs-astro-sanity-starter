@@ -16,7 +16,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Brand colors + theme system (light/dark discipline)                                                         | `docs/agent/theme-and-color.md`                                      |
 | Brand reskin system (config schema, apply-brand, /reskin skill)                                             | `docs/brand/brand-system.md`                                         |
 | Polish layer (brand stripe, card-lift, scroll, script accents)                                              | `docs/agent/polish-layer.md`                                         |
-| Animation layer (native scrolling, motion, scroll-reveal, script accent)                                    | `docs/agent/animation.md`                                            |
+| Animation layer (native scrolling, motion, scroll-reveal, the flow layer, script accent)                    | `docs/agent/animation.md`                                            |
 | The one scale, typography + spacing tokens, metric fallback fonts, the board grammar                        | `docs/agent/design-tokens.md`                                        |
 | Picture shapes (the shape class contract and its brand tokens)                                              | `docs/agent/shapes.md`                                               |
 | Component catalog + long-read layout                                                                        | `docs/agent/components.md`                                           |
