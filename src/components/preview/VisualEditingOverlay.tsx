@@ -85,7 +85,8 @@ const mpaHistory: HistoryAdapter = {
 //        listen API into tiny "change" signals). Event-driven on purpose;
 //        never reintroduce an interval poll here.
 //     b. MANUAL: the comlink `refresh` handler, i.e. the preview's refresh
-//        button, kept as the fallback if the stream is down.
+//        button, kept as the fallback if the stream is down. Its `mutation`
+//        calls only mark a running render stale (card 182a).
 //     Both triggers go through the SCHEDULER in src/lib/preview-refresh.ts:
 //     single-flight, stale-response discard, and a floor on the interval between
 //     renders. Read that file before touching anything below; it is where the
@@ -367,10 +368,20 @@ export default function VisualEditingOverlay({ pageId }: Props) {
       // when a shared or referenced doc changed (services, testimonials,
       // process steps, settings: anything that is not some OTHER custom page),
       // since those can appear on this page through the auto-populating blocks.
+      //
+      // But a mutation only MARKS a running render stale; it never starts one
+      // (card 182a, 2026-10-26). @sanity/visual-editing calls this twice per
+      // autosave, at once and again 1000ms later, and both arrive before the
+      // edit is visible to a query, so each started a render of the old data.
+      // Measured on the deployed Studio after card 182: still three renders per
+      // keystroke, 1.2s apart. The SSE `change` (query visibility) starts the one
+      // render that carries the edit. Returning false tells the library we did
+      // nothing, so it posts no "refreshing" state to the Studio.
       const id = payload.document._id.replace(/^drafts\./, '');
       const isThisPage = id === pageId;
       const isSharedDoc = payload.document._type !== 'page';
-      return isThisPage || isSharedDoc ? softRefresh() : false;
+      if (isThisPage || isSharedDoc) schedule.current = onKnownChange(schedule.current);
+      return false;
     },
     [pageId, softRefresh],
   );
