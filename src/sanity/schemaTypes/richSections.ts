@@ -27,7 +27,13 @@ import { UsersIcon } from '@sanity/icons/Users';
 import { HelpCircleIcon } from '@sanity/icons/HelpCircle';
 import { SyncIcon } from '@sanity/icons/Sync';
 import { SECTION_TYPES } from './sections';
-import { columnsField, headingAccentField, hideWhenRich, richTwin } from './_appearanceFields';
+import {
+  columnsField,
+  headingAccentField,
+  hideWhenRich,
+  richTwin,
+  scriptAccentField,
+} from './_appearanceFields';
 
 // ── Shared helpers (mirrors sections.ts helpers — keep in sync if you change
 //    the main helpers, or extract to a shared file in a future refactor) ──────
@@ -143,13 +149,7 @@ export const servicesGridSection = defineType({
       type: 'string',
       validation: (R) => R.required(),
     }),
-    defineField({
-      name: 'scriptAccent',
-      title: 'Handwritten accent word (optional)',
-      type: 'string',
-      description:
-        'One word from the headline to render in the script font. Must be a whole word from it (capitals do not matter). Leave blank to skip.',
-    }),
+    scriptAccentField('headline'),
     headingAccentField(),
     defineField({
       name: 'subhead',
@@ -206,13 +206,7 @@ export const testimonialsSection = defineType({
       type: 'string',
       validation: (R) => R.required(),
     }),
-    defineField({
-      name: 'scriptAccent',
-      title: 'Handwritten accent word (optional)',
-      type: 'string',
-      description:
-        'One word from the headline to render in the script font. Must be a whole word from it (capitals do not matter).',
-    }),
+    scriptAccentField('headline'),
     headingAccentField(),
     defineField({
       name: 'subhead',
@@ -724,6 +718,16 @@ export const SERVICES_SECTION_TYPES = [
   { type: 'guaranteeSection' },
   { type: 'faqSection' }, // scaffold: faq
 ];
+
+// Every main page a page builder (card 190, ported from FBC Auburn). Contact and Privacy also
+// take the block their page is built around (mainPageSections.ts); Journal takes its posts block
+// (journalPostsSection.ts). Those blocks are offered on their own page only, not in the general
+// library or the saved sections.
+export const CONTACT_SECTION_TYPES = [...ABOUT_SECTION_TYPES, { type: 'contactFormSection' }];
+export const PRIVACY_SECTION_TYPES = [...ABOUT_SECTION_TYPES, { type: 'privacyPolicySection' }];
+// scaffold: journal
+export const JOURNAL_SECTION_TYPES = [...ABOUT_SECTION_TYPES, { type: 'journalPostsSection' }];
+// scaffold:end
 
 export const PROCESS_SECTION_TYPES = [
   ...SECTION_TYPES,

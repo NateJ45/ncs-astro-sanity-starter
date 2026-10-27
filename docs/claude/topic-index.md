@@ -13,11 +13,13 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | **Open loops registry (read early each session)**                                                           | `docs/PENDING.md`                                                    |
 | Stack detail + astro.config landmines                                                                       | `docs/agent/stack-and-config.md`                                     |
 | Page + section architecture, nav, visibility toggles                                                        | `docs/agent/page-architecture.md`                                    |
+| Latest video block, Documents library, page-weight budget (card 197)                                        | `docs/agent/video-documents-weight.md`                               |
 | Brand colors + theme system (light/dark discipline)                                                         | `docs/agent/theme-and-color.md`                                      |
 | Brand reskin system (config schema, apply-brand, /reskin skill)                                             | `docs/brand/brand-system.md`                                         |
 | Polish layer (brand stripe, card-lift, scroll, script accents)                                              | `docs/agent/polish-layer.md`                                         |
-| Animation layer (native scrolling, motion, scroll-reveal, script accent)                                    | `docs/agent/animation.md`                                            |
-| Typography + spacing tokens                                                                                 | `docs/agent/design-tokens.md`                                        |
+| Animation layer (native scrolling, motion, scroll-reveal, the flow layer, script accent)                    | `docs/agent/animation.md`                                            |
+| The one scale, typography + spacing tokens, metric fallback fonts, the board grammar                        | `docs/agent/design-tokens.md`                                        |
+| Picture shapes (the shape class contract and its brand tokens)                                              | `docs/agent/shapes.md`                                               |
 | Component catalog + long-read layout                                                                        | `docs/agent/components.md`                                           |
 | Component sourcing (shadcn, Starwind, Magic UI, PrimeReact, copy-paste sources, token-remap cheat sheet)    | `docs/agent/component-sources.md`                                    |
 | Error + empty states                                                                                        | `docs/agent/error-states.md`                                         |
@@ -35,8 +37,11 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Popups (one at a time, date-windowed, the guard rails; card 170)                                            | `docs/agent/popups.md`                                               |
 | Visitor site search (Pagefind, opt-in) + share buttons                                                      | `docs/agent/site-search.md`                                          |
 | Hidden pages, password pages (security note), Checkup link and heading checks                               | `docs/agent/private-pages.md`                                        |
+| Client notes: the pre-launch pill, yellow placeholders and "Photo needed" shot list (card 195)              | `docs/agent/client-notes.md`                                         |
+| Business facts once: address, phone, email, hours, To confirm, open now, hours changes (card 196)           | `docs/agent/business-facts.md`                                       |
 | Deployment + env vars + rebuild model                                                                       | `docs/agent/deployment.md`                                           |
 | Form recipient addresses set in the Studio (kept in D1, confirmed by email; card 174)                       | `docs/agent/deployment.md` ("The contact endpoint"), `OPERATIONS.md` |
+| The form builder: forms, the Form block, `/api/form/`, D1 submissions (card 194)                            | `OPERATIONS.md` ("Forms"), `docs/agent/deployment.md`                |
 | Editor-driven vs hardcoded                                                                                  | `docs/agent/editor-vs-hardcoded.md`                                  |
 | Cross-repo shared improvements (port cards + applied-to matrix + drift check)                               | `PORTS.md`                                                           |
 | Change history (prose ledger; the checkable matrix lives in PORTS.md)                                       | `docs/agent/changelog.md`                                            |

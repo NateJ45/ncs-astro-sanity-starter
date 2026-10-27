@@ -6,6 +6,7 @@
 // empty-safe: a block with nothing to show (a notice outside its dates, an event
 // whose dates have all passed, a schedule with nothing in it) renders nothing.
 import '@/styles/builder-blocks.css';
+import '@/styles/builder-blocks-more.css';
 import type { BuilderPageBlock } from '@/lib/builderBlocks.types';
 import type { CadenceSurface } from '@/lib/surfaces';
 import ColumnsBlock from './ColumnsBlock.astro';
@@ -20,6 +21,15 @@ import LetterBlock from './LetterBlock.astro';
 import EventDetailsBlock from './EventDetailsBlock.astro';
 import ScheduleBlock from './ScheduleBlock.astro';
 import PhotoCardsBlock from './PhotoCardsBlock.astro';
+import HoursBlock from './HoursBlock.astro';
+import MapBlock from './MapBlock.astro';
+import ContactCardBlock from './ContactCardBlock.astro';
+import ProgressBlock from './ProgressBlock.astro';
+import NewsletterBlock from './NewsletterBlock.astro';
+import CalendarSubscribeBlock from './CalendarSubscribeBlock.astro';
+import IconCardsBlock from './IconCardsBlock.astro';
+import StepsRailBlock from './StepsRailBlock.astro';
+import HubBlock from './HubBlock.astro';
 
 interface Props {
   block: BuilderPageBlock;
@@ -66,4 +76,22 @@ const common = { surface, headingId };
   <ScheduleBlock block={b} {...common} />
 ) : b._type === 'photoCardsSection' ? (
   <PhotoCardsBlock block={b} {...common} isFirst={isFirst} />
+) : b._type === 'hoursSection' ? (
+  <HoursBlock block={b} {...common} />
+) : b._type === 'mapSection' ? (
+  <MapBlock block={b} {...common} />
+) : b._type === 'contactCardSection' ? (
+  <ContactCardBlock block={b} {...common} primaryVariant={primaryVariant} />
+) : b._type === 'progressSection' ? (
+  <ProgressBlock block={b} {...common} />
+) : b._type === 'newsletterSection' ? (
+  <NewsletterBlock block={b} {...common} />
+) : b._type === 'calendarSubscribeSection' ? (
+  <CalendarSubscribeBlock block={b} {...common} />
+) : b._type === 'iconCardsSection' ? (
+  <IconCardsBlock block={b} {...common} isFirst={isFirst} />
+) : b._type === 'stepsRailSection' ? (
+  <StepsRailBlock block={b} {...common} primaryVariant={primaryVariant} />
+) : b._type === 'hubSection' ? (
+  <HubBlock block={b} {...common} isFirst={isFirst} />
 ) : null}

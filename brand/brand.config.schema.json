@@ -213,9 +213,10 @@
       "description": "Structure variants (the second axis beside palette and fonts). Each slot's FIRST value is the original layout. See src/lib/site-layout.ts.",
       "properties": {
         "header": { "type": "string", "enum": ["inline", "centered", "minimal"] },
-        "hero": { "type": "string", "enum": ["bleed", "split", "editorial"] },
+        "hero": { "type": "string", "enum": ["bleed", "split", "editorial", "board"] },
         "density": { "type": "string", "enum": ["standard", "airy", "tight"] },
-        "cards": { "type": "string", "enum": ["standard", "outline", "soft"] }
+        "cards": { "type": "string", "enum": ["standard", "outline", "soft"] },
+        "motion": { "type": "string", "enum": ["reveal", "flow", "fade", "none"] }
       }
     },
     "workerName": {

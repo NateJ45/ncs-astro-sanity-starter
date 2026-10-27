@@ -125,200 +125,215 @@ card records, such as Auburn's own button budget on row 158); `no` = none are pr
 file (6, 7, 14, 16, 31, 32, 34, 39, 40, 68, 181) were checked by hand. The older notes below that say "first-baptist-auburn
 has no column" or "fbcm is not a column" describe the matrix as it was when they were written.
 
-| #    | Card                                                                                     | presacademy | starter  | reid-design-site | mas-monograms | nixoncreativestudio | stonesteps-50k | fbc-auburn | fbcm    |
-| ---- | ---------------------------------------------------------------------------------------- | ----------- | -------- | ---------------- | ------------- | ------------------- | -------------- | ---------- | ------- |
-| 1    | with-workerd build wrapper                                                               | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 2    | free-dist prebuild unlock                                                                | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 3    | page-parity harness                                                                      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 4    | sanity-lib seed/patch plumbing                                                           | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 5    | stale-types CI guard                                                                     | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 6    | Nightly Sanity backup workflow                                                           | yes         | template | yes              | yes           | n/a                 | template       | yes        | yes     |
-| 7    | Uptime workflow                                                                          | yes         | template | yes              | yes           | yes                 | template       | yes        | yes     |
-| 8    | Playwright + axe + reflow suite                                                          | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
-| 9    | contrast.ts + theme-token gate                                                           | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 10   | Embedded-studio live-preview stack                                                       | yes         | yes      | yes              | staged        | n/a                 | yes            | yes        | yes     |
-| 11   | Preview click interceptor                                                                | yes         | yes      | yes              | staged        | n/a                 | yes            | yes        | yes     |
-| 12   | Parity-gated page-builder conversion                                                     | yes         | partial  | partial          | no            | no                  | partial        | yes        | yes     |
-| 13   | react/react-dom exact pin                                                                | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 14   | wrangler legacy_env pin                                                                  | yes         | yes      | yes              | staged        | no                  | yes            | yes        | yes     |
-| 15   | PENDING.md / TESTING.md docs registry                                                    | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 16   | Quarterly slop sweep                                                                     | no          | no       | no               | no            | no                  | no             | no         | no      |
-| 17   | In-canvas section controls (overlay insert/drag/duplicate/remove)                        | yes         | yes      | yes              | staged        | n/a                 | yes            | yes        | yes     |
-| 18   | Chrome options (editable header/footer content)                                          | yes         | yes      | yes              | staged        | n/a                 | yes            | yes        | yes     |
-| 19   | Shareable draft links                                                                    | no          | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 20   | publishAt scheduled publishing (free-tier)                                               | no          | template | no               | no            | n/a                 | template       | yes        | yes     |
-| 21   | Pages as first-class objects (duplicate / archive / SEO panel)                           | no          | yes      | partial          | no            | n/a                 | yes            | yes        | yes     |
-| 22   | Redirects on rename                                                                      | no          | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 23   | Editor-defined forms                                                                     | no          | yes      | no               | no            | no                  | yes            | yes        | no      |
-| 24   | Saved sections (section presets)                                                         | no          | yes      | no               | no            | n/a                 | yes            | yes        | yes     |
-| 25   | Pre-publish page checks                                                                  | no          | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 26   | Appearance controls (surfaces, accents, rich twins, layout)                              | yes         | partial  | partial          | no            | no                  | partial        | yes        | yes     |
-| 27   | Undo & redo                                                                              | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 28   | Floating in-canvas controls (accent word, "Edit here")                                   | yes         | partial  | partial          | no            | n/a                 | partial        | yes        | yes     |
-| 29   | Instant preview text                                                                     | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 29a  | Local edit-state channel (LiveDraftBridge)                                               | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 29b  | Refresh scheduler (single-flight / stale discard / floor)                                | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 29c  | Preview morph (in-place reconcile)                                                       | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 29d  | Staleness counts every channel                                                           | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 30   | One branch vocabulary (main only; staging abandoned 2026-10-03)                          | yes         | yes      | yes              | yes           | yes                 | no             | yes        | yes     |
-| 31   | Studio welcome tour (StudioTour)                                                         | yes         | no       | no               | no            | n/a                 | yes            | yes        | yes     |
-| 32   | Branded tool headings (ToolHeading)                                                      | yes         | no       | no               | no            | n/a                 | yes            | yes        | yes     |
-| 33   | Year-scoped lists for accumulating types                                                 | yes         | no       | no               | no            | n/a                 | no             | yes        | yes     |
-| 34   | Studio search weights (__experimental_search)                                            | yes         | no       | yes              | no            | n/a                 | no             | no         | no      |
-| 35   | The family test standard (gates, suites, budgets)                                        | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
-| 36   | sync-check as a CI gate                                                                  | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 37   | Visual regression on a fixed-data styleguide                                             | no          | yes      | no               | no            | no                  | yes            | yes        | partial |
-| 37a  | Drift opens its own PR (propose-drift in CI)                                             | yes         | n/a      | yes              | yes           | yes                 | no             | yes        | yes     |
-| 38   | Studio Checkup (what needs attention)                                                    | no          | no       | no               | no            | no                  | yes            | yes        | yes     |
-| 39   | Year-rollover wizard                                                                     | no          | no       | no               | no            | no                  | yes            | no         | no      |
-| 39a  | Restore drill + off-site backup copy                                                     | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 40   | Studio Welcome pane (task cards)                                                         | no          | no       | no               | no            | no                  | yes            | partial    | partial |
-| 40a  | Public-data audit in CI                                                                  | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 41   | Guide handbook held as repo data                                                         | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
-| 42   | External link health, on its own schedule                                                | no          | yes      | fork             | no            | no                  | yes            | yes        | yes     |
-| 43   | Contrast for what axe declines to judge                                                  | no          | yes      | no               | no            | no                  | yes            | yes        | partial |
-| 44   | Fork residue audit                                                                       | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
-| 45   | The site's own contact endpoint                                                          | staged      | yes      | no               | no            | no                  | yes            | yes        | partial |
-| 46   | Share cards in the brand's real typeface                                                 | no          | yes      | fork             | no            | no                  | yes            | yes        | partial |
-| 47   | The icon set, from one drawing                                                           | no          | yes      | yes              | no            | no                  | yes            | yes        | yes     |
-| 48   | Domain cutover script + zone audit                                                       | no          | yes      | no               | no            | no                  | partial        | yes        | yes     |
-| 49   | Automation patterns (import-and-deploy, record-and-bake)                                 | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
-| 50   | Production deploy workflow                                                               | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
-| 51   | Compressed static server for Lighthouse                                                  | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
-| 52   | Radix islands hydrate at client:idle, not client:only                                    | partial     | yes      | yes              | no            | yes                 | partial        | yes        | yes     |
-| 53   | One accent splitter (heading-accent absorbs scriptAccent)                                | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
-| 54   | Analytics component (GA4 + Cloudflare beacon, canonical)                                 | no          | yes      | yes              | no            | yes                 | yes            | yes        | yes     |
-| 55   | Build reads always use the Sanity CDN; a PROD fetch error throws                         | no          | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 56   | No page-level `.catch()` swallows the PROD throw                                         | no          | yes      | yes              | no            | n/a                 | partial        | partial    | partial |
-| 57   | Preview cookie's value is checked, not its presence                                      | no          | yes      | yes              | no            | n/a                 | no             | yes        | yes     |
-| 58   | GA4 fires only on the production hostname                                                | n/a         | yes      | yes              | n/a           | no                  | no             | yes        | yes     |
-| 59   | `_headers`: one rule per path; /_astro/* owns its cache                                  | n/a         | yes      | yes              | n/a           | yes                 | n/a            | yes        | yes     |
-| 60   | `astro dev` on Windows: repair @sanity/astro's dedupe alias                              | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 61   | Reduced motion zeroes transitions; a spec holds it                                       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
-| 62   | Dependabot config: grouped, pinned stack ignored                                         | yes         | yes      | yes              | yes           | yes                 | no             | yes        | yes     |
-| 63   | `astro dev`: pre-bundle what the first render discovers                                  | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
-| 64   | Tailwind `@source not` for baselines and docs                                            | no          | yes      | yes              | no            | no                  | yes            | partial    | partial |
-| 65   | dynamicList slices at a literal max, trims in the component                              | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | partial |
-| 66   | `confirmed` flag + Provisional badge for unsourced content                               | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | no      |
-| 67   | Tinted-chip variant-matrix contrast gate                                                 | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 68   | Never regenerate package-lock.json; `npm ci`                                             | no          | yes      | yes              | yes           | n/a                 | no             | yes        | yes     |
-| 69   | No `--` inside an SVG/XML comment                                                        | no          | yes      | no               | no            | no                  | no             | yes        | yes     |
-| 70   | CI: parallel gates, sharded Playwright, scheduled Lighthouse                             | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
-| 71   | Tracked `.claude/settings.json` deny rules + shared conventions import                   | yes         | yes      | yes              | partial       | no                  | yes            | yes        | yes     |
-| 72   | Layout variants: structure as a brand.config axis                                        | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 73   | Design directions before reskin (brief, references, mockups)                             | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 74   | page-parity `--exclude` (parity-glob helper + test)                                      | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
-| 75   | Playwright fixture: Sanity images from a disk cache                                      | no          | yes      | no               | no            | n/a                 | yes            | yes        | partial |
-| 76   | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`                    | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 77   | Preview morph keeps client-state classes (reveal state)                                  | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 78   | `preview-stega.ts` exports `RUN_SOURCE`                                                  | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 79   | Redirect destinations keep `?query` and `#fragment`                                      | yes         | yes      | yes              | n/a           | n/a                 | yes            | yes        | yes     |
-| 80   | `sync-check` skips `_worktrees/` folders                                                 | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 81   | llms-full identity from brand config; audit shared field consts                          | yes         | yes      | no               | no            | n/a                 | yes            | yes        | partial |
-| 82   | Invisible 44px hit area for small links                                                  | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
-| 83   | `measure-tap-targets.mjs` 390px tap-target scan                                          | yes         | yes      | no               | yes           | yes                 | no             | yes        | partial |
-| 84   | Linux-runner font-swap layout-shift check (fallback faces, preload)                      | no          | no       | yes              | no            | no                  | no             | yes        | yes     |
-| 85   | MapLibre 6.x: `setMissingStyleImageResolver` for generated icons                         | n/a         | n/a      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
-| 86   | Production-write second factor (NCS_PRODUCTION_WRITE) for data scripts                   | partial     | yes      | no               | no            | n/a                 | no             | yes        | partial |
-| 87   | Dead-weight scan: unused kits and packages inflate every page's CSS                      | yes         | no       | no               | no            | staged              | no             | yes        | partial |
-| 88   | Cloudflare beacon starts after load and idle, not deferred in head                       | no          | no       | no               | no            | staged              | no             | yes        | yes     |
-| 89   | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`)           | yes         | yes      | yes              | yes           | no                  | yes            | yes        | partial |
-| 90   | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                          | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 91   | One text/picture column split (`.split`) and `measure-columns.mjs`                       | no          | yes      | yes              | no            | no                  | yes            | yes        | partial |
-| 92   | Dependabot pins `astro` with its adapter; formatters in their own group                  | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
-| 93   | SanityImage srcset ladder starts at 160w; `sizes` trims dead steps                       | staged      | yes      | staged           | staged        | n/a                 | staged         | yes        | yes     |
-| 94   | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)                  | staged      | yes      | staged           | staged        | staged              | staged         | yes        | partial |
-| 95   | `audit:data`: live data vs compiled schema; `_type` backfill                             | no          | yes      | no               | fork          | n/a                 | no             | yes        | partial |
-| 96   | GA4 skips automated browsers (WebDriver, Lighthouse, PageSpeed, GTmetrix)                | staged      | yes      | staged           | staged        | staged              | staged         | yes        | yes     |
-| 97   | astro 7.4 with adapter 14.4.0 (wrangler stays 4.129)                                     | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 98   | Date labels independent of build-machine timezone (`formatDate`)                         | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 99   | Scaffold markers stay out of PORTABLE files; styleguide wall marked                      | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | partial    | partial |
-| 100  | Scaffold prunes the Lighthouse, smoke and uptime route lists                             | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | yes     |
-| 101  | Preview renders "no document" inside the layout, so Presentation connects                | open        | yes      | open             | open          | n/a                 | open           | yes        | yes     |
-| 102  | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)            | yes         | yes      | yes              | n/a           | staged              | n/a            | yes        | partial |
-| 103  | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)                        | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 104  | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file                  | no          | yes      | n/a              | no            | n/a                 | no             | yes        | partial |
-| 105  | A text hero (no photo, or editorial) still renders its buttons                           | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 106  | Studio kit: Home, Site Guide, Checkup, staff view, Trash                                 | yes         | yes      | yes              | yes           | n/a                 | no             | yes        | yes     |
-| 107  | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page            | yes         | yes      | yes              | partial       | partial             | yes            | yes        | yes     |
-| 108  | The header logo renders with JS off (`<noscript>` light variant)                         | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
-| 109  | Authoring kit: page templates, picture picker, patterns, synced sections                 | yes         | yes      | yes              | partial       | no                  | yes            | yes        | yes     |
-| 110  | Studio looks like the site: name, mark, colours, status line, help panel                 | yes         | yes      | yes              | yes           | n/a                 | no             | yes        | yes     |
-| 111  | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc            | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
-| 112  | React 19.3.1, one copy in the tree                                                       | yes         | yes      | yes              | yes           | yes                 | yes            | partial    | partial |
-| 113  | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it             | yes         | yes      | no               | yes           | no                  | no             | yes        | yes     |
-| 114  | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)                        | yes         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
-| 115  | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos               | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
-| 116  | Studio as the site's admin: paper, navy chrome, fonts, text in site type                 | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
-| 117  | Studio workflow: change note, expiring preview links, Messages, table panes              | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
-| 118  | Studio Home banner: navy welcome, mark, motif, the site's lettering                      | yes         | yes      | no               | yes           | n/a                 | yes            | yes        | yes     |
-| 119  | Studio icons by meaning, a picture on every list row                                     | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
-| 120  | Studio edges: own /studio page and splash, site words, navbar wordmark                   | yes         | yes      | no               | yes           | n/a                 | yes            | yes        | yes     |
-| 121  | Custom code in its own box; opt-in on-page and site-wide code                            | yes         | yes      | no               | yes           | no                  | no             | yes        | partial |
-| 122  | Hidden and password pages; Checkup link, heading and orphan checks                       | no          | yes      | no               | yes           | n/a                 | no             | yes        | partial |
-| 123  | Studio writing help (Claude API), Before you publish panel, AI visitors                  | no          | yes      | no               | yes           | n/a                 | no             | yes        | partial |
-| 124  | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer                | no          | yes      | no               | no            | n/a                 | yes            | yes        | partial |
-| 125  | Studio on a phone (PWA), Post a photo, Earlier versions from backups                     | no          | yes      | no               | no            | n/a                 | yes            | yes        | partial |
-| 126  | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code            | no          | yes      | no               | no            | no                  | yes            | yes        | partial |
-| 127  | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs                     | no          | yes      | no               | no            | n/a                 | yes            | partial    | partial |
-| 128  | Studio design language (studio.look), shared UI pieces, Site Guide redesign              | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | partial |
-| 129  | Studio signs in by token (kit routes need it); recentIgnoreTypes                         | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 130  | Real screenshots in the Site Guide: per-site shot registry                               | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 131  | Every Studio surface in the design language (first pass)                                 | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 132  | Studio design pass two: Home, Post a photo, tour, splash, offline page                   | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | partial |
-| 133  | Studio polish from a signed-in review: Home's ways-in tiles                              | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 134  | Field "How to" chip to the Site Guide; icons on every field group                        | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 135  | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS            | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 136  | Visitors card reads GA4 via studio-status; Search Console card on Home                   | no          | yes      | no               | no            | no                  | no             | yes        | yes     |
-| 137  | Spotlight tours, welcome, What's new, own clips, Quick update jobs as data               | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 138  | CI builds from a pinned content snapshot; scheduled live-watch (non-blocking)            | no          | yes      | no               | no            | no                  | no             | yes        | yes     |
-| 139  | Warn when a site's `studio.look` is still the neutral marker and stone                   | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 140  | Success toasts carry the Is-it-live stones (KitToastBody)                                | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 141  | Quick update's yes/no field is a drawn switch, not a native checkbox                     | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 142  | How-to chip on date and datetime fields (they draw their own header)                     | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 145  | Home is a full-width dashboard: status rail at the right, main column, mobile-first      | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 146  | The Trash desk item shows a page of its own when empty (trashListItem)                   | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 147  | Checkup in columns by level, with a count strip (LevelSummary)                           | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 148  | Quick update uses a wide pane: tile grid, and the form with a path rail beside it        | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 149  | AI suggestion and the private-page password status are the kit's callouts                | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 151  | Component type fixes: FAQ size through cn, 12px labels, safe-centred logo row            | n/a         | yes      | no               | no            | no                  | no             | yes        | partial |
-| 152  | Church Trac pattern: form band, page reader, link boxes (church sites, no code)          | n/a         | n/a      | n/a              | n/a           | n/a                 | n/a            | yes        | yes     |
-| 153  | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)        | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 154  | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms                | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 155  | Print stylesheet and the regex-backslash guard                                           | no          | yes      | no               | no            | no                  | no             | yes        | no      |
-| 156  | Contact form no-JS post + error summary, FAQ landmark, dark-band rings                   | no          | yes      | no               | no            | no                  | no             | partial    | partial |
-| 157  | Phone menu on a native dialog, one dropdown model, transform-only header compaction      | no          | yes      | no               | no            | no                  | no             | yes        | no      |
-| 158  | One accent button per page, named section anchors, a 404 with search, calendar files     | no          | yes      | no               | no            | no                  | partial        | partial    | partial |
-| 159  | Page weight, cache and security headers, share images                                    | partial     | yes      | no               | partial       | no                  | partial        | partial    | no      |
-| 160  | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)                  | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
-| 161  | `snapshot.mjs run` reads the project id from the snapshot when the job env has none      | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 162  | `studio.look.splash: motif`: the site's own art replaces the splash's stone path         | yes         | yes      | yes              | yes           | no                  | yes            | yes        | yes     |
-| 163  | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept                    | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 164  | American spelling in every string a visitor or editor reads; CSP line-length guard       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
-| 165  | Search index waits for Pagefind to finish writing, and fails on a cut-short script       | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | no      |
-| 166  | Searching the original spelling drops Pagefind's loose pages (no word matched)           | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
-| 167  | Social links read by URL host (16 platforms + plain link icon, WhatsApp rule)            | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 168  | Site settings logo rules and a square icon that becomes the favicon set at build         | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
-| 169  | Share cards drawn at build (hash cache, Chrome fallback, og-default if no browser)       | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
-| 170  | Popups: one at a time, date-windowed, after 4 s and some scroll (`popup.ts`)             | no          | yes      | no               | no            | n/a                 | no             | partial    | partial |
-| 171  | Short links into `_redirects` at build time, plus a Studio QR code action                | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 172  | Embed provider registry: paste-and-go, unknown-script guard, per-build embed CSP         | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
-| 173  | Builder kit: twelve smaller blocks, grouped templates, patterns as code, withSiteGroups  | no          | yes      | no               | no            | no                  | partial        | partial    | partial |
-| 174  | Form recipient addresses set in the Studio, kept in D1, confirmed by email               | no          | yes      | n/a              | n/a           | n/a                 | no             | partial    | partial |
-| 175  | Staff view by role; the staff list adds to it; "Simple view" marks from the Studio       | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
-| 176  | People tool: invite a Helper or an Administrator from the Studio                         | no          | yes      | no               | no            | n/a                 | no             | yes        | partial |
-| 177  | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence           | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
-| 178  | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)           | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
-| 179  | An open Studio reloads itself after a deploy                                             | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 180  | A brick stone and printed flecks for the Studio's numbered steps                         | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 181  | Preview navigator drops the trailing slash, so instant text's bridge mounts              | yes         | yes      | yes              | n/a           | n/a                 | yes            | yes        | yes     |
-| 182  | Instant text in rich text boxes, and one render per edit                                 | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 182a | Presentation's mutation refreshes no longer start renders                                | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 183  | Section moves, removals, copies and picture swaps show in the preview at once            | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 184  | The preview renders the Studio's own copy of the draft                                   | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 185  | Type straight onto the page in the preview                                               | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
-| 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
-| 188  | Heading accent matches whole words only ("test" no longer inside "TESTING")              | no          | yes      | no               | no            | n/a                 | staged         | no         | no      |
+| #    | Card                                                                                      | presacademy | starter  | reid-design-site | mas-monograms | nixoncreativestudio | stonesteps-50k | fbc-auburn | fbcm    |
+| ---- | ----------------------------------------------------------------------------------------- | ----------- | -------- | ---------------- | ------------- | ------------------- | -------------- | ---------- | ------- |
+| 1    | with-workerd build wrapper                                                                | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 2    | free-dist prebuild unlock                                                                 | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 3    | page-parity harness                                                                       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 4    | sanity-lib seed/patch plumbing                                                            | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 5    | stale-types CI guard                                                                      | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 6    | Nightly Sanity backup workflow                                                            | yes         | template | yes              | yes           | n/a                 | template       | yes        | yes     |
+| 7    | Uptime workflow                                                                           | yes         | template | yes              | yes           | yes                 | template       | yes        | yes     |
+| 8    | Playwright + axe + reflow suite                                                           | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
+| 9    | contrast.ts + theme-token gate                                                            | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 10   | Embedded-studio live-preview stack                                                        | yes         | yes      | yes              | staged        | n/a                 | yes            | yes        | yes     |
+| 11   | Preview click interceptor                                                                 | yes         | yes      | yes              | staged        | n/a                 | yes            | yes        | yes     |
+| 12   | Parity-gated page-builder conversion                                                      | yes         | partial  | partial          | no            | no                  | partial        | yes        | yes     |
+| 13   | react/react-dom exact pin                                                                 | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 14   | wrangler legacy_env pin                                                                   | yes         | yes      | yes              | staged        | no                  | yes            | yes        | yes     |
+| 15   | PENDING.md / TESTING.md docs registry                                                     | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 16   | Quarterly slop sweep                                                                      | no          | no       | no               | no            | no                  | no             | no         | no      |
+| 17   | In-canvas section controls (overlay insert/drag/duplicate/remove)                         | yes         | yes      | yes              | staged        | n/a                 | yes            | yes        | yes     |
+| 18   | Chrome options (editable header/footer content)                                           | yes         | yes      | yes              | staged        | n/a                 | yes            | yes        | yes     |
+| 19   | Shareable draft links                                                                     | no          | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 20   | publishAt scheduled publishing (free-tier)                                                | no          | template | no               | no            | n/a                 | template       | yes        | yes     |
+| 21   | Pages as first-class objects (duplicate / archive / SEO panel)                            | no          | yes      | partial          | no            | n/a                 | yes            | yes        | yes     |
+| 22   | Redirects on rename                                                                       | no          | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 23   | Editor-defined forms                                                                      | no          | yes      | no               | no            | no                  | yes            | yes        | no      |
+| 24   | Saved sections (section presets)                                                          | no          | yes      | no               | no            | n/a                 | yes            | yes        | yes     |
+| 25   | Pre-publish page checks                                                                   | no          | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 26   | Appearance controls (surfaces, accents, rich twins, layout)                               | yes         | partial  | partial          | no            | no                  | partial        | yes        | yes     |
+| 27   | Undo & redo                                                                               | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 28   | Floating in-canvas controls (accent word, "Edit here")                                    | yes         | partial  | partial          | no            | n/a                 | partial        | yes        | yes     |
+| 29   | Instant preview text                                                                      | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 29a  | Local edit-state channel (LiveDraftBridge)                                                | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 29b  | Refresh scheduler (single-flight / stale discard / floor)                                 | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 29c  | Preview morph (in-place reconcile)                                                        | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 29d  | Staleness counts every channel                                                            | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 30   | One branch vocabulary (main only; staging abandoned 2026-10-03)                           | yes         | yes      | yes              | yes           | yes                 | no             | yes        | yes     |
+| 31   | Studio welcome tour (StudioTour)                                                          | yes         | no       | no               | no            | n/a                 | yes            | yes        | yes     |
+| 32   | Branded tool headings (ToolHeading)                                                       | yes         | no       | no               | no            | n/a                 | yes            | yes        | yes     |
+| 33   | Year-scoped lists for accumulating types                                                  | yes         | no       | no               | no            | n/a                 | no             | yes        | yes     |
+| 34   | Studio search weights (__experimental_search)                                             | yes         | no       | yes              | no            | n/a                 | no             | no         | no      |
+| 35   | The family test standard (gates, suites, budgets)                                         | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
+| 36   | sync-check as a CI gate                                                                   | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 37   | Visual regression on a fixed-data styleguide                                              | no          | yes      | no               | no            | no                  | yes            | yes        | partial |
+| 37a  | Drift opens its own PR (propose-drift in CI)                                              | yes         | n/a      | yes              | yes           | yes                 | no             | yes        | yes     |
+| 38   | Studio Checkup (what needs attention)                                                     | no          | no       | no               | no            | no                  | yes            | yes        | yes     |
+| 39   | Year-rollover wizard                                                                      | no          | no       | no               | no            | no                  | yes            | no         | no      |
+| 39a  | Restore drill + off-site backup copy                                                      | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 40   | Studio Welcome pane (task cards)                                                          | no          | no       | no               | no            | no                  | yes            | partial    | partial |
+| 40a  | Public-data audit in CI                                                                   | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 41   | Guide handbook held as repo data                                                          | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
+| 42   | External link health, on its own schedule                                                 | no          | yes      | fork             | no            | no                  | yes            | yes        | yes     |
+| 43   | Contrast for what axe declines to judge                                                   | no          | yes      | no               | no            | no                  | yes            | yes        | partial |
+| 44   | Fork residue audit                                                                        | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
+| 45   | The site's own contact endpoint                                                           | staged      | yes      | no               | no            | no                  | yes            | yes        | partial |
+| 46   | Share cards in the brand's real typeface                                                  | no          | yes      | fork             | no            | no                  | yes            | yes        | partial |
+| 47   | The icon set, from one drawing                                                            | no          | yes      | yes              | no            | no                  | yes            | yes        | yes     |
+| 48   | Domain cutover script + zone audit                                                        | no          | yes      | no               | no            | no                  | partial        | yes        | yes     |
+| 49   | Automation patterns (import-and-deploy, record-and-bake)                                  | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
+| 50   | Production deploy workflow                                                                | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
+| 51   | Compressed static server for Lighthouse                                                   | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
+| 52   | Radix islands hydrate at client:idle, not client:only                                     | partial     | yes      | yes              | no            | yes                 | partial        | yes        | yes     |
+| 53   | One accent splitter (heading-accent absorbs scriptAccent)                                 | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
+| 54   | Analytics component (GA4 + Cloudflare beacon, canonical)                                  | no          | yes      | yes              | no            | yes                 | yes            | yes        | yes     |
+| 55   | Build reads always use the Sanity CDN; a PROD fetch error throws                          | no          | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 56   | No page-level `.catch()` swallows the PROD throw                                          | no          | yes      | yes              | no            | n/a                 | partial        | partial    | partial |
+| 57   | Preview cookie's value is checked, not its presence                                       | no          | yes      | yes              | no            | n/a                 | no             | yes        | yes     |
+| 58   | GA4 fires only on the production hostname                                                 | n/a         | yes      | yes              | n/a           | no                  | no             | yes        | yes     |
+| 59   | `_headers`: one rule per path; /_astro/* owns its cache                                   | n/a         | yes      | yes              | n/a           | yes                 | n/a            | yes        | yes     |
+| 60   | `astro dev` on Windows: repair @sanity/astro's dedupe alias                               | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 61   | Reduced motion zeroes transitions; a spec holds it                                        | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
+| 62   | Dependabot config: grouped, pinned stack ignored                                          | yes         | yes      | yes              | yes           | yes                 | no             | yes        | yes     |
+| 63   | `astro dev`: pre-bundle what the first render discovers                                   | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
+| 64   | Tailwind `@source not` for baselines and docs                                             | no          | yes      | yes              | no            | no                  | yes            | partial    | partial |
+| 65   | dynamicList slices at a literal max, trims in the component                               | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | partial |
+| 66   | `confirmed` flag + Provisional badge for unsourced content                                | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | no      |
+| 67   | Tinted-chip variant-matrix contrast gate                                                  | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 68   | Never regenerate package-lock.json; `npm ci`                                              | no          | yes      | yes              | yes           | n/a                 | no             | yes        | yes     |
+| 69   | No `--` inside an SVG/XML comment                                                         | no          | yes      | no               | no            | no                  | no             | yes        | yes     |
+| 70   | CI: parallel gates, sharded Playwright, scheduled Lighthouse                              | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
+| 71   | Tracked `.claude/settings.json` deny rules + shared conventions import                    | yes         | yes      | yes              | partial       | no                  | yes            | yes        | yes     |
+| 72   | Layout variants: structure as a brand.config axis                                         | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 73   | Design directions before reskin (brief, references, mockups)                              | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 74   | page-parity `--exclude` (parity-glob helper + test)                                       | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
+| 75   | Playwright fixture: Sanity images from a disk cache                                       | no          | yes      | no               | no            | n/a                 | yes            | yes        | partial |
+| 76   | Visual suite webServer timeout from `PLAYWRIGHT_WEBSERVER_TIMEOUT_MS`                     | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 77   | Preview morph keeps client-state classes (reveal state)                                   | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 78   | `preview-stega.ts` exports `RUN_SOURCE`                                                   | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 79   | Redirect destinations keep `?query` and `#fragment`                                       | yes         | yes      | yes              | n/a           | n/a                 | yes            | yes        | yes     |
+| 80   | `sync-check` skips `_worktrees/` folders                                                  | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 81   | llms-full identity from brand config; audit shared field consts                           | yes         | yes      | no               | no            | n/a                 | yes            | yes        | partial |
+| 82   | Invisible 44px hit area for small links                                                   | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
+| 83   | `measure-tap-targets.mjs` 390px tap-target scan                                           | yes         | yes      | no               | yes           | yes                 | no             | yes        | partial |
+| 84   | Linux-runner font-swap layout-shift check (fallback faces, preload)                       | no          | no       | yes              | no            | no                  | no             | yes        | yes     |
+| 85   | MapLibre 6.x: `setMissingStyleImageResolver` for generated icons                          | n/a         | n/a      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
+| 86   | Production-write second factor (NCS_PRODUCTION_WRITE) for data scripts                    | partial     | yes      | no               | no            | n/a                 | no             | yes        | partial |
+| 87   | Dead-weight scan: unused kits and packages inflate every page's CSS                       | yes         | no       | no               | no            | staged              | no             | yes        | partial |
+| 88   | Cloudflare beacon starts after load and idle, not deferred in head                        | no          | no       | no               | no            | staged              | no             | yes        | yes     |
+| 89   | Internal links end in a slash (`trailingSlash: 'always'`, `withTrailingSlash`)            | yes         | yes      | yes              | yes           | no                  | yes            | yes        | partial |
+| 90   | Sanity backup: 14-day artifact, docs-only weekdays, full weekly                           | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 91   | One text/picture column split (`.split`) and `measure-columns.mjs`                        | no          | yes      | yes              | no            | no                  | yes            | yes        | partial |
+| 92   | Dependabot pins `astro` with its adapter; formatters in their own group                   | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
+| 93   | SanityImage srcset ladder starts at 160w; `sizes` trims dead steps                        | staged      | yes      | staged           | staged        | n/a                 | staged         | yes        | yes     |
+| 94   | Planned major stack upgrade (astro 7.3, adapter 14.3.4, wrangler 4.129)                   | staged      | yes      | staged           | staged        | staged              | staged         | yes        | partial |
+| 95   | `audit:data`: live data vs compiled schema; `_type` backfill                              | no          | yes      | no               | fork          | n/a                 | no             | yes        | partial |
+| 96   | GA4 skips automated browsers (WebDriver, Lighthouse, PageSpeed, GTmetrix)                 | staged      | yes      | staged           | staged        | staged              | staged         | yes        | yes     |
+| 97   | astro 7.4 with adapter 14.4.0 (wrangler stays 4.129)                                      | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 98   | Date labels independent of build-machine timezone (`formatDate`)                          | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 99   | Scaffold markers stay out of PORTABLE files; styleguide wall marked                       | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | partial    | partial |
+| 100  | Scaffold prunes the Lighthouse, smoke and uptime route lists                              | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | yes     |
+| 101  | Preview renders "no document" inside the layout, so Presentation connects                 | open        | yes      | open             | open          | n/a                 | open           | yes        | yes     |
+| 102  | Native scrolling replaces Lenis (router owns the reset; `data-smooth-scroll`)             | yes         | yes      | yes              | n/a           | staged              | n/a            | yes        | partial |
+| 103  | Sanity phase 2: `@sanity/ui` 4, `@sanity/icons` 5 (sanity 6.19.0)                         | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 104  | Reskin-safe forks: default fields and hrefs, layout gate, OG theme file                   | no          | yes      | n/a              | no            | n/a                 | no             | yes        | partial |
+| 105  | A text hero (no photo, or editorial) still renders its buttons                            | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 106  | Studio kit: Home, Site Guide, Checkup, staff view, Trash                                  | yes         | yes      | yes              | yes           | n/a                 | no             | yes        | yes     |
+| 107  | Hidden reveal states wait for `html.motion`, so no-JS shows the finished page             | yes         | yes      | yes              | partial       | partial             | yes            | yes        | yes     |
+| 108  | The header logo renders with JS off (`<noscript>` light variant)                          | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
+| 109  | Authoring kit: page templates, picture picker, patterns, synced sections                  | yes         | yes      | yes              | partial       | no                  | yes            | yes        | yes     |
+| 110  | Studio looks like the site: name, mark, colours, status line, help panel                  | yes         | yes      | yes              | yes           | n/a                 | no             | yes        | yes     |
+| 111  | The Studio remembers: failed deploys, weekly ticks, Quick update, restore-doc             | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
+| 112  | React 19.3.1, one copy in the tree                                                        | yes         | yes      | yes              | yes           | yes                 | yes            | partial    | partial |
+| 113  | SanityImage aims CSS crops at the hotspot; Church type, no priceRange for it              | yes         | yes      | no               | yes           | no                  | no             | yes        | yes     |
+| 114  | publish-due.mjs takes the write gate (scripts/lib/write-gate.mjs)                         | yes         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
+| 115  | Studio Home dashboard: Coming up, Fix-it list, visitors, pages map, videos                | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
+| 116  | Studio as the site's admin: paper, navy chrome, fonts, text in site type                  | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
+| 117  | Studio workflow: change note, expiring preview links, Messages, table panes               | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
+| 118  | Studio Home banner: navy welcome, mark, motif, the site's lettering                       | yes         | yes      | no               | yes           | n/a                 | yes            | yes        | yes     |
+| 119  | Studio icons by meaning, a picture on every list row                                      | yes         | yes      | no               | yes           | n/a                 | no             | yes        | yes     |
+| 120  | Studio edges: own /studio page and splash, site words, navbar wordmark                    | yes         | yes      | no               | yes           | n/a                 | yes            | yes        | yes     |
+| 121  | Custom code in its own box; opt-in on-page and site-wide code                             | yes         | yes      | no               | yes           | no                  | no             | yes        | partial |
+| 122  | Hidden and password pages; Checkup link, heading and orphan checks                        | no          | yes      | no               | yes           | n/a                 | no             | yes        | partial |
+| 123  | Studio writing help (Claude API), Before you publish panel, AI visitors                   | no          | yes      | no               | yes           | n/a                 | no             | yes        | partial |
+| 124  | Section looks (Standard, Quiet, Feature) instead of colours; photo viewer                 | no          | yes      | no               | no            | n/a                 | yes            | yes        | partial |
+| 125  | Studio on a phone (PWA), Post a photo, Earlier versions from backups                      | no          | yes      | no               | no            | n/a                 | yes            | yes        | partial |
+| 126  | Visitor site search (Pagefind, opt-in) and share buttons, no third-party code             | no          | yes      | no               | no            | no                  | yes            | yes        | partial |
+| 127  | Email backbone: Cloudflare/Resend sender, newsletter (opt-in), RSVPs                      | no          | yes      | no               | no            | n/a                 | yes            | partial    | partial |
+| 128  | Studio design language (studio.look), shared UI pieces, Site Guide redesign               | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | partial |
+| 129  | Studio signs in by token (kit routes need it); recentIgnoreTypes                          | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 130  | Real screenshots in the Site Guide: per-site shot registry                                | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 131  | Every Studio surface in the design language (first pass)                                  | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 132  | Studio design pass two: Home, Post a photo, tour, splash, offline page                    | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | partial |
+| 133  | Studio polish from a signed-in review: Home's ways-in tiles                               | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 134  | Field "How to" chip to the Site Guide; icons on every field group                         | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 135  | Home banner style slot (`homeBanner.style`) and documented hooks, no site CSS             | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 136  | Visitors card reads GA4 via studio-status; Search Console card on Home                    | no          | yes      | no               | no            | no                  | no             | yes        | yes     |
+| 137  | Spotlight tours, welcome, What's new, own clips, Quick update jobs as data                | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 138  | CI builds from a pinned content snapshot; scheduled live-watch (non-blocking)             | no          | yes      | no               | no            | no                  | no             | yes        | yes     |
+| 139  | Warn when a site's `studio.look` is still the neutral marker and stone                    | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 140  | Success toasts carry the Is-it-live stones (KitToastBody)                                 | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 141  | Quick update's yes/no field is a drawn switch, not a native checkbox                      | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 142  | How-to chip on date and datetime fields (they draw their own header)                      | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 145  | Home is a full-width dashboard: status rail at the right, main column, mobile-first       | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 146  | The Trash desk item shows a page of its own when empty (trashListItem)                    | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 147  | Checkup in columns by level, with a count strip (LevelSummary)                            | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 148  | Quick update uses a wide pane: tile grid, and the form with a path rail beside it         | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 149  | AI suggestion and the private-page password status are the kit's callouts                 | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 151  | Component type fixes: FAQ size through cn, 12px labels, safe-centred logo row             | n/a         | yes      | no               | no            | no                  | no             | yes        | partial |
+| 152  | Church Trac pattern: form band, page reader, link boxes (church sites, no code)           | n/a         | n/a      | n/a              | n/a           | n/a                 | n/a            | yes        | yes     |
+| 153  | Build-time script-src: hash every inline script into `_headers` (`build-csp.mjs`)         | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 154  | Search reads uploaded PDF/Word/text files, corrects typos, tries synonyms                 | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 155  | Print stylesheet and the regex-backslash guard                                            | no          | yes      | no               | no            | no                  | no             | yes        | no      |
+| 156  | Contact form no-JS post + error summary, FAQ landmark, dark-band rings                    | no          | yes      | no               | no            | no                  | no             | partial    | partial |
+| 157  | Phone menu on a native dialog, one dropdown model, transform-only header compaction       | no          | yes      | no               | no            | no                  | no             | yes        | no      |
+| 158  | One accent button per page, named section anchors, a 404 with search, calendar files      | no          | yes      | no               | no            | no                  | partial        | partial    | partial |
+| 159  | Page weight, cache and security headers, share images                                     | partial     | yes      | no               | partial       | no                  | partial        | partial    | no      |
+| 160  | Exact slashless `_redirects` rule for file-style sources (`/index.htm`)                   | yes         | yes      | yes              | no            | n/a                 | yes            | yes        | yes     |
+| 161  | `snapshot.mjs run` reads the project id from the snapshot when the job env has none       | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 162  | `studio.look.splash: motif`: the site's own art replaces the splash's stone path          | yes         | yes      | yes              | yes           | no                  | yes            | yes        | yes     |
+| 163  | `features.newsletter: false` hides Home's Newsletter card, RSVPs kept                     | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 164  | American spelling in every string a visitor or editor reads; CSP line-length guard        | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | partial |
+| 165  | Search index waits for Pagefind to finish writing, and fails on a cut-short script        | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | no      |
+| 166  | Searching the original spelling drops Pagefind's loose pages (no word matched)            | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
+| 167  | Social links read by URL host (16 platforms + plain link icon, WhatsApp rule)             | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 168  | Site settings logo rules and a square icon that becomes the favicon set at build          | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
+| 169  | Share cards drawn at build (hash cache, Chrome fallback, og-default if no browser)        | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
+| 170  | Popups: one at a time, date-windowed, after 4 s and some scroll (`popup.ts`)              | no          | yes      | no               | no            | n/a                 | no             | partial    | partial |
+| 171  | Short links into `_redirects` at build time, plus a Studio QR code action                 | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 172  | Embed provider registry: paste-and-go, unknown-script guard, per-build embed CSP          | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
+| 173  | Builder kit: twelve smaller blocks, grouped templates, patterns as code, withSiteGroups   | no          | yes      | no               | no            | no                  | partial        | partial    | partial |
+| 174  | Form recipient addresses set in the Studio, kept in D1, confirmed by email                | no          | yes      | n/a              | n/a           | n/a                 | no             | partial    | partial |
+| 175  | Staff view by role; the staff list adds to it; "Simple view" marks from the Studio        | no          | yes      | no               | no            | n/a                 | no             | yes        | yes     |
+| 176  | People tool: invite a Helper or an Administrator from the Studio                          | no          | yes      | no               | no            | n/a                 | no             | yes        | partial |
+| 177  | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence            | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | partial |
+| 178  | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)            | no          | yes      | no               | no            | no                  | yes            | yes        | yes     |
+| 179  | An open Studio reloads itself after a deploy                                              | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 180  | A brick stone and printed flecks for the Studio's numbered steps                          | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 181  | Preview navigator drops the trailing slash, so instant text's bridge mounts               | yes         | yes      | yes              | n/a           | n/a                 | yes            | yes        | yes     |
+| 182  | Instant text in rich text boxes, and one render per edit                                  | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 182a | Presentation's mutation refreshes no longer start renders                                 | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 183  | Section moves, removals, copies and picture swaps show in the preview at once             | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 184  | The preview renders the Studio's own copy of the draft                                    | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 185  | Type straight onto the page in the preview                                                | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table  | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 187  | Small fixes: header rule, second header button, page switches, newsletter switch          | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 188  | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`         | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                       | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 191  | Wayfinding: where-next rows, phone menu groups, compact footer, phone action bar          | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds  | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch             | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 189  | Photo hero: "Photo behind the words" style, short-facts card, silent background video     | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                       | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 194  | Form builder: form document, Form block, /api/form/, D1 submissions, date and tick kinds  | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch             | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 193  | Seven builder blocks: contact, progress, newsletter, calendar, icons, steps, hub          | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 196  | Business facts once, confirmed flags, open now, hours changes, hours and map blocks       | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor            | no          | yes      | no               | no            | partial             | no             | partial    | no      |
+| 198  | Contact card fills from business facts; regex-backslash test skips scaffold-removed files | no          | yes      | no               | no            | partial             | no             | partial    | no      |
+| 192  | Flow layer: lines rise, the rest fades up, photos drift, page lift (`layout.motion`)      | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 200  | Heading accent matches whole words only ("test" no longer inside "TESTING")               | no          | yes      | no               | no            | n/a                 | staged         | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -5574,7 +5589,7 @@ happened yet.
 | `(undefined, 'x')`                        | throws `TypeError`                      | `found: false`, `heading: ''`          |
 | miss                                      | `{found, before, word, after}`          | plus `heading`, the original untouched |
 
-**Superseded in part by card 188 (2026-10-27):** both matchers in the table above were bare
+**Superseded in part by card 200 (2026-10-27):** both matchers in the table above were bare
 substring searches, so `('TESTING', 'test')` was a hit that split one word across two
 typefaces. `splitHeadingAccent` now only takes a match with a non-letter, non-digit on both
 sides; case-insensitivity and first-occurrence-wins are unchanged.
@@ -11350,7 +11365,7 @@ again, or on a site that made the table under another number, changes nothing. U
 step is needed and `CONTACT_TO` decides. On Cloudflare Email Sending a new destination must also be verified in
 Cloudflare before mail reaches it.
 
-**Not ported:** Auburn's own form builder (`church-form.ts`, `/api/form/`, `FORM_RECIPIENTS`, the "Who forms can go
+**Not ported (since ported, generalised, by card 194):** Auburn's own form builder (`church-form.ts`, `/api/form/`, `FORM_RECIPIENTS`, the "Who forms can go
 to" list) and its "date" and "tick any that apply" question kinds stay in Auburn. They do not slot into the PORTABLE
 `custom-form-fields.ts` kinds list cleanly: Auburn adds them as separate schema types (`formDateQuestion`,
 `formTickQuestion`) read by `_type`, not as new `kind` values, with structured answers (an ISO date and its words,
@@ -11851,7 +11866,680 @@ drift instead of a false all-clear.
 copy; the site PRs in the Auburn port run do this). Until a site resyncs, its own old copy keeps the old fallback
 and should be run with `NCS_STARTER_DIR` set or from the starter (`node <starter>/scripts/sync-check.mjs <site>`).
 
-## Card 188: Heading accent matches whole words only (2026-10-27)
+## Card 187: Eleven small generic fixes from first-baptist-auburn (2026-10-27)
+
+**Origin:** first-baptist-auburn, the second of the Auburn-to-family port runs (inventory rows A8, A10, A38, A33, A18,
+A19, P2, S4, S5, G2, S12). Each is small and generic; none draws anything new on a site that does not opt in, except
+the header rule (A8), noted below.
+
+**What changed.**
+
+- **A38 `src/lib/cta-href.ts` (PORTABLE, new, with tests).** `ctaHref(cta, fallback)` resolves a `ctaBlock` to a path.
+  It used to live inside `CtaLink.astro`, so nothing else could ask where a button goes. It reads page routes from
+  `SINGLETON_LIVE_PATHS` (`nav-href.ts`), the same table the menus use, so a page type has one route. `CtaLink` now
+  calls it.
+- **A8 `cta-budget.ts` (PORTABLE).** `repeatsHeaderCta(href, header)`: a body button that goes to the page the header
+  button opens (while the header shows it) repeats it, so it draws secondary and does not spend the page's one accent
+  button; the accent passes to the next real step, or to nothing. `SectionRenderer` folds it into `drawsPrimary`.
+  This is the one visible change: a hero or closing band whose button goes where the header button goes (by default
+  both go to Contact) now draws outlined. A site that wants the old look points the header button elsewhere.
+- **A10 optional second header button.** Site settings > Navigation > "Second header button (optional)":
+  a label and a link (`headerSecondary`). `resolveSiteSettings` returns it as `null` until both halves are filled and
+  the link resolves, so the header and the phone menu draw it with one `&&` and an untouched site is byte-identical.
+  Drawn outlined (the secondary style), left of the header button on desktop and under it in the phone menu.
+- **A18 `src/lib/page-switches.ts` (PORTABLE, new, with tests).** "Show in the top menu" and "Show in the footer" on a
+  custom page were fetched (`getNavPages`) but never read. `mergePageSwitches` now appends a ticked page to the menu
+  (honoring "Where in the top menu": its own item, or under a Services or Resources dropdown when the menu has one)
+  and to the last footer column, never twice. `Header.astro` merges the menu. `Footer.astro` merges only when custom
+  footer columns are set; the built-in footer is bespoke markup with no column list to add to.
+- **A19 `src/lib/published-links.ts` (PORTABLE, new, with tests).** Rule plus helper: a hard-coded link to a page the
+  editor makes in the Studio carries `studio: '<slug>'` and is filtered through `linkableRows(rows, here, slugs, max)`
+  with `getAllPageSlugs()`, so a renamed, archived or unpublished page (or a CI build with no dataset) never leaves a
+  broken link, and the row after it takes its place. The starter has no such row yet; the where-next footer (card 191)
+  is the first consumer.
+- **P2 `src/lib/page-path.ts` (PORTABLE, new, with tests).** `publicPath()` strips `/preview` so anything that looks a
+  page up by its address behaves the same in the draft preview. `Header.astro` uses it, so Home's "active" state works
+  at `/preview/`.
+- **A33 `CopyEmailButton.astro`.** The React island and the Sonner `Toaster` are gone: one delegated click handler,
+  the icon turns into a tick, and a visually hidden live region says "Email address copied". React, the toast library
+  and its region no longer load on every page for one message. `ui/sonner.tsx` is left in place, unused.
+- **S4 one accent box and one subhead box per block.** `scriptAccentField()` (the older "Handwritten accent word")
+  now shows only on a block that already holds a word, on the four blocks that also have "Accent word in the heading"
+  (the hero has no twin, so it stays visible). `richTwin()` hides while empty, so only one "Subhead" box shows until
+  the in-canvas editor bolds a word. Hidden, never removed (rule 1): no stored value moves.
+- **S5 self-filling blocks.** The starter's `SELF_FILLING_SECTIONS` already listed its blocks; the rule is now written
+  at the list (add a block in the commit that adds it) and `authoring.test.ts` checks a fresh one of each raises no
+  "empty" finding.
+- **G2 search word breaks.** `{' '}` between the hero's two buttons and the closing band's two buttons (Pagefind read
+  "BookCall"), and the rule in `docs/agent/site-search.md`: decorative fact lines get `data-pagefind-ignore="all"`.
+  Flex rows, so nothing moves on screen.
+- **S12 `src/sanity/ownNewsletter.ts`.** One switch (`OWN_NEWSLETTER`, default true) hides every screen about the
+  website's own newsletter for a site whose list lives elsewhere: Home's card (`features.newsletter`), the Quick update
+  jobs, Content > Newsletter, the "+" menu, the Site Guide page and its field link. The schema type stays registered.
+  Extends card 163, which hid Home's card only.
+
+**Not done, and why.** Auburn's `give.ts` (the second header button repointed by one Church Trac field) is church
+wiring; the generic half is A10. Auburn's `OWN_NEWSLETTER_TOUR` has no starter tour, so only the constant exists.
+
+**Proved:** unit tests for each pure piece (`cta-budget`, `cta-href`, `page-switches`, `page-path`,
+`published-links`, `authoring`); `npm run typegen`, `npm run check`, `npm run test:unit` and `npm run build`;
+screenshots of the header at 375 and 1280 with and without the second button.
+
+**Applied:** starter (this card). first-baptist-auburn already runs the same ideas in its own files
+(`red-budget.ts`, `give.ts`, `ownNewsletter.ts`); its sync PR takes the PORTABLE copies. Other sites: the six PORTABLE
+files plus the per-site edits (`CtaLink`, `SectionRenderer`, `Header`, `Footer`, `MobileNav`, `CopyEmailButton`,
+`BaseLayout`, the schema fields and `siteSettings.ts`/`queries.ts`), in the Phase 2 rollout.
+
+## Card 188: One scale, a shape class contract, metric-matched fallback fonts, and the board grammar as `hero: board` (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A4, A5, A35, A6). Auburn's standardising pass (2026-10-24) found about
+a hundred distinct font sizes, five card radii and four section H2 sizes across its routes, and fixed it with one
+scale at the top of its brand stylesheet; its shape system made the church's phone photos read as one family; its
+re-audit (2026-10-26) cut title layout shift on five inner pages from about 0.05 to 0.002 with metric-matched fallback
+faces and set lining figures; and its board grammar gave every inner page one head, one ground and one left edge.
+Every family site gets the discipline here, styled in its own brand.
+
+**Fix.**
+
+- **The one scale (A4).** A `:root` block "The one scale" in `src/styles/globals.css`: text (`--fs-tag`, `-small`,
+  `-body`, `-lead`, `-button`, `-title`, `-title-sm`, `-numeral`), leading (`--lh-*`), `--figures`, corners
+  (`--radius-control`, `-card`, `-inner`, `-tag`, `-pill`), space (`--pad-card`, `--pad-panel`, `--gap-grid`,
+  `--gap-heading`), shadows (`--shadow-card`, `--shadow-raised`), the button measure (`--btn-height`,
+  `--btn-tracking`, `--tracking-label`) and the focus ring. The starter's values are the ones it already drew
+  (Tailwind's 12/14/16/18px, `rounded-sm` and `rounded-md` from `--radius`, its fluid spacing, the `.card-lift` hover
+  shadow), so naming them moved nothing. Tailwind's `--text-xs` to `--text-lg` now read the scale, the base heading
+  rule reads `--lh-heading`, and `.card-lift:hover` reads `--shadow-card` (its `.dark` twin became a token). The block
+  sits AFTER the palette's `:root` and `.dark` because `apply-brand` rewrites the first of each (found the hard way:
+  placed first, apply-brand failed on `--background`).
+- **Lining figures (A35).** `html { font-variant-numeric: var(--figures) }`, `normal` by default; a brand whose
+  display face has old-style figures sets `lining-nums tabular-nums` (Auburn does).
+- **Metric-matched fallback fonts (A35).** `scripts/font-fallback.mjs` and `scripts/lib/font-fallback.mjs` (PORTABLE,
+  new, tested; `npm run font-fallback`): reads the display font's Latin `.woff` from its `@fontsource` package with
+  `opentype.js` (already a dependency), computes capsize's frequency-weighted average width (capsize's latin table,
+  copied) and the hhea metrics, and writes `src/styles/font-fallbacks.css` with `"<Family> Fallback"` over Georgia
+  (Arial for a sans) and `"<Family> Fallback Times"` over Times New Roman. The local fonts' metrics are constants,
+  measured once from the Windows copies, so CI needs no system fonts. The starter now ships Libre Baskerville's
+  (115.97% / 83.64% / 23.28% over Georgia), named second in `fonts.display.familyValue` and `--font-display`. The test
+  reproduces Auburn's Young Serif numbers within 0.1% (Georgia) and 0.25% (Times).
+- **The shape contract (A5).** `src/styles/shapes.css` (PORTABLE, new): `.shape-step` (a picture in a card),
+  `.shape-gable` (a standalone picture: the brand's cut), `.shape-slab` / `--left` / `.shape-slab-host`,
+  `.shape-card` + `.shape-zoom`, `.shape-tile`, with Auburn's class names so its markup moves over unchanged. Geometry
+  and paint are tokens under `:where(:root)` (`--shape-feature-clip`, `--shape-feature-radius`, `--gable-pitch`,
+  `--shape-gable-polygon`, `--shape-slab`, `--shape-slab-inset`, `--shape-tile`, `--shape-zoom`); the defaults are
+  neutral (frames on the scale's corners, a muted slab and tile). Auburn's gable, red brick slab and pale tile become
+  its brand-layer token values. Class rules only, so a site that uses none renders as before.
+- **The board grammar (A6), opt-in.** `hero: board` joins the `layout` slot (rule 18: `site-layout.ts`, the schema
+  enum, the test). `Hero.astro` draws `src/components/board/BoardPageHead.astro` for any non-tall hero: eyebrow with
+  the brand marker (`BoardLabel.astro`), title (the hero's script accent words in `--board-accent`), subhead, buttons,
+  the photo beside the words in `.shape-gable` on the shared split's tracks (card 91); a tall home hero draws as
+  bleed. `layoutAttrs` puts `data-hero="board"` on `<html>` for this value only (the one hero whose grammar covers the
+  body), where `src/styles/board.css` draws the cadence's tinted bands on the page ground, and `SectionRenderer`
+  opens every section after the first with `BoardRule.astro` (not straight after a hero, not before a spacer) instead
+  of the cadence's divider. Brand knobs: `--board-marker` (a short primary bar; Auburn's three bricks),
+  `--board-marker-width/-height`, `--board-rule` (a hairline; `none` = Auburn's whitespace), `--board-rule-height`,
+  `--board-title-size`, `--board-accent`. Fixtures at the END of `/styleguide/layouts/` (a shot region placed earlier
+  moves the existing baselines): the board head (shot by the hero loop as `hero-board`, baselines generated in CI)
+  and an unshot shape-contract band.
+
+**Not ported, on purpose.** Auburn's brick title (StoneHeading), its Sunday times band, the stone icon beside a page
+title, its 88px title cap and phone-polish spacing rules: they are its brand, set through the tokens above or kept in
+its own layer. The board components and `board.css` are starter-owned (not PORTABLE): Auburn's versions draw its
+church pieces.
+
+**Proved:** `npm ci`, `npm run check` (0 errors), `npm run test:unit` (1690 + 163 pass, including the new
+`font-fallback` and board `site-layout` tests), `npm run build`. Parity against `origin/main`'s build: 17 of 19 pages
+PASS; the two DIFFs are intended (`styleguide/layouts` gains the board head and shapes fixtures;
+`styleguide/sections`' custom-code frame CSS names the new fallback faces in the display stack, which the frame does
+not define, so it still falls to Georgia). Pixels: `/`, `/about/`, `/contact/`, `/faq/`, `/journal/`, `/privacy/`,
+`/services/` and `/styleguide/` at 375 and 1280, full page, before against after: 0 pixels differ on all 16. The board
+variant (built with `hero: board`) shot at 320, 375 and 1280 on `/about/`, `/services/`, `/contact/`, `/` and
+`/styleguide/layouts/`: no horizontal overflow; `<html data-hero="board">`, one ground, rules between sections.
+`apply-brand` runs clean and is idempotent with the scale block in place.
+
+**Applied:** starter (this card). Every family site needs: the scale block (with its own values), `shapes.css` and
+the font-fallback scripts (PORTABLE), `npm run font-fallback` for its display font, and the `site-layout.ts` /
+schema change (PORTABLE, so site PRs wait for the starter merge). `hero: board` is offered per site; fbcm is the
+closest fit. first-baptist-auburn moves its gable, slab, tile and marker values into tokens over the PORTABLE files.
+
+## Card 189: "Photo behind the words": the photo hero, a short-facts card and a silent background video (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A1, A2, A3). Auburn's Home opens on a full-width photograph with the
+welcome over it in white and its This Sunday card beside it (2026-10-23, `home/HomeHero.astro`); since 2026-10-26
+any page's opening banner can take the same treatment (`heroSection.heroStyle`, `PageHeroPhoto.astro`); and the
+hero can play a short silent clip over the photo, with a phone-sized copy (2026-10-25/26, `lib/hero-video.ts`).
+
+**Problem.** The starter's bleed hero already lays a photo under a scrim, but only as the site-wide hero shape, with no
+card beside the words, no clip, and no per-page choice: an event page could not open on a photo on a site whose hero
+is split, editorial or board. And nothing promised the white words stay readable on whatever photo an editor uploads.
+
+**Fix.**
+
+- **The style (A2).** `heroSection.heroStyle`: Standard (the default, `initialValue: 'standard'`) or "Photo behind
+  the words" (`'photo'`), in `NON_STEGA_FIELDS`. `Hero.astro` checks it first: `'photo'` with a background photo
+  draws `src/components/PhotoHero.astro`; anything else, or no photo, falls through to the hero exactly as before
+  (bleed, split, editorial, board), so no site moves until an editor picks it. Size Tall is the home shape (most of the
+  first screen), Short the inner-page shape. Buttons are the site's own `CtaLink` pair `onDark`, and the page's
+  accent budget (cards 158, 187) still decides the main one.
+- **The short-facts card (A1).** Auburn's This Sunday card made generic: `heroSection.glance` (shown only with the
+  photo style) holds a title, up to four short lines and a link, drawn as `.ph-card` on the site's card surface,
+  beside the words from 961px and under them on a phone. Empty means no card. Opening hours, the next date, a price
+  from: whatever the site's first screen should answer.
+- **The phone band (A1).** Under 961px the hero is a photo band (`--ph-band`, 44svh clamped 220 to 380px) with the
+  words starting on its darkened foot and the card after them; the two buttons stack full width under 521px.
+- **The contrast promise.** The shade is four tokens on `.ph-hero` (`--photo-scrim` = the brand's
+  `--color-accent-dark`, `--photo-scrim-text` 72%, `-deep` 88%, `-clear` 20%). The wide-screen shade holds the
+  text strength across the left 60% (the words keep the left 7/12 of the grid, card or not); the phone shade reaches
+  it 20px above where the words start. `src/lib/photo-hero.ts` + test (a unit gate) resolve the scrim to the brand's
+  hex in `globals.css` and fail unless white over a PURE WHITE photo under the text strength is 4.5:1 or better
+  (the starter: 6.48:1; the least passing strength is 62%), and check the shade uses the tokens only. axe cannot
+  judge text over an image (`contrast.spec.ts` counts and skips it), so the promise is held arithmetically.
+- **The background video (A3).** `backgroundVideo` and `backgroundVideoPhone` (files, .mp4 or .webm, photo style
+  only). `src/lib/hero-video.ts` (PORTABLE, tested): type and size checks (3 MB, 1 MB for the phone copy), the
+  fast-start check (reads the first 64 KB with one range request; warns when `mdat` comes before `moov`), the phone
+  pick (under 768px), and `heroVideoAllowed()` (no clip with reduced motion, Save-Data, 2G/3G, a measured downlink
+  under 1 Mbps, or print). `src/components/HeroVideo.astro` is rendered only when there is a clip, so other pages
+  carry no script: after `load` it builds a muted, looping, `preload="none"` video with the photo's `currentSrc` as
+  poster, under the shade at 0.99 opacity (the Windows overlay-plane trap), with a remembered Pause button (WCAG
+  2.2.2), off-screen pause and background-tab resume. The photo stays the LCP; the clip never blocks it.
+- **Wall and tests.** `/styleguide/photo-hero/home/` (tall, card, clip and phone copy) and `/styleguide/photo-hero/page/`
+  (short, no card): fixed data, noindex. `tests/photo-hero.spec.ts` (PORTABLE) answers the CDN with
+  `tests/visual/fixtures/layout-hero.jpg` and `hero-clip.mp4` (17 KB, made with ffmpeg, fast start) and checks the
+  frame, the card, reduced motion, poster, Pause, phone copy, slow link, 320px reflow and axe.
+
+**Files.** PORTABLE: `src/components/PhotoHero.astro`, `src/components/HeroVideo.astro`, `src/styles/photo-hero.css`,
+`src/lib/hero-video.ts` (+ test), `src/lib/photo-hero.ts` (+ test), `tests/photo-hero.spec.ts`. Starter-owned
+(merge by hand): `Hero.astro`, `SectionRenderer.astro`, `sections.ts` (`heroStyle`, `glance`, the two video fields,
+`heroVideoCheck`), `queries.ts` (the clips as url and mimeType, the card's link), `cms-preview.ts`, the wall page.
+Docs: `docs/agent/animation.md` "Photo hero video", `docs/agent/design-tokens.md` "The photo hero's shade".
+
+**Not ported, on purpose.** Auburn's This Sunday card (church facts; card 196's business facts can fill a glance card
+later), its town line, the "Stand-in photograph" label and the "Photo needed" hero note with a stock church clip
+(card 195's shot list covers pictures; a hero shot can be added per site), its name line, and its fixed 0.85/0.70
+navy shade (now the tokens). Auburn draws the hero on Home only through its board; the starter offers it on any page.
+
+**Proved:** `npm run typegen`, `npm run check` (0 errors), `npm run test:unit` (1781 + 166 pass, including the new
+`hero-video` and `photo-hero` tests), `npm run build` (CSP: 11 inline scripts, 706 bytes, unchanged; the clip's
+script is a bundled module from 'self'). Parity against card 188's build: 18 of 19 pages PASS, inline CSS checksums
+included (the purge drops every `.ph-` rule where unused); the one DIFF is `styleguide/sections`' build-time ICS
+timestamp, not this card. Full Playwright suite: 181 pass, the 9 new `photo-hero.spec.ts` among them. Screenshots at
+375 and 1280: the standard hero (unchanged), the tall photo hero with its card (still, the clip's poster), the same
+with the clip playing under the shade and the Pause button, and the short inner-page shape; no horizontal overflow.
+No new block type, so the heroSection thumbnail stays as shot.
+
+**Applied:** starter (this card). Sites take the PORTABLE files plus the schema, query and `Hero.astro` branch. A
+site that never picks the style renders as before. fbcm is the natural first user (a home photo hero with service
+times in the card); stonesteps-50k (race-day card: date, distance, entry link) and presacademy (open-house card) next.
+first-baptist-auburn's sync PR moves Home and `PageHeroPhoto` onto `PhotoHero.astro` with its This Sunday card as
+the glance slot's church filling, and renames its `hb-` hero classes to `ph-`.
+
+## Card 194: The form builder: forms an editor writes, a Form block, `/api/form/` and D1 submissions (2026-10-27)
+
+**Origin:** first-baptist-auburn (its form builder, 2026-10-18, and the date and "tick any that apply" questions,
+2026-10-26). Card 174 ported only the recipient addresses and said the builder was not ported; this card ports it,
+generalised: `church-form` becomes `site-form`, the "prayer" mode becomes "private", and no schema title or visitor
+line names a church.
+
+**Canonical:** PORTABLE `src/lib/site-form.ts`, `src/lib/site-form.test.ts`, `src/lib/site-form-fixtures.ts` (new);
+the already-PORTABLE `src/lib/studio-messages.ts` (+ test), `src/lib/cms-preview.ts` and `src/lib/studio-icons.ts`
+(changed, below). Non-marked, per site: `src/sanity/schemaTypes/form.ts` (the `form` document and the
+`formRecipients` Site settings field), `src/sanity/schemaTypes/formQuestionMore.ts` (`formDateQuestion`,
+`formTickQuestion`), `src/sanity/components/FormRecipientInput.tsx`, the `formSection` block in `sections.ts`,
+`src/components/sections/FormSection.astro`, `src/pages/api/form.ts`, `migrations/0005_form_submissions.sql`, and the
+wiring (schema index, desk structure "Content > Forms", `queries.ts` arm, `pageBuilder.types.ts`, `sectionCadence.ts`
+CONTENT, SectionRenderer branch, the `/styleguide/sections/` fixture and `public/section-thumbnails/formSection.jpg`).
+Docs: OPERATIONS.md ("Forms: the form builder"), `docs/agent/deployment.md`, `docs/agent/page-architecture.md`,
+`docs/claude/routes.md`.
+
+**What it does.**
+
+- **Content > Forms**: a form's name, a sentence above it, up to 12 questions (the shared six `formQuestion` kinds,
+  plus "A date" with "Only from today on", and "Tick any that apply" with 2 to 12 choices), who receives it (a code
+  from Site settings > Forms > Who forms can go to, `office` by default), name and email on or off, "send without my
+  name", the button words and the thank-you line. "Private" forms carry a Studio warning.
+- **The Form block** (`formSection`, insert group "Sign-ups") picks one form. It draws with the shared tokens (the
+  RsvpForm defaults, rule 17), asks `GET /api/form/` first and shows "please use the contact page" until mail can reach
+  a person. Errors show under each field with `aria-invalid`, and focus goes to the first. `?topic=<word>&about=<text>`
+  prefills the first matching list (a "pick one", else a "tick any") and the first paragraph box: the Contact form's
+  card 156 convention, now on every built form (row F4; the Contact form already had it).
+- **`/api/form/`**: body cap 64 KB (413), honeypot and timing check (silent 200), ten sends per visitor per 15
+  minutes per isolate (429 + Retry-After, `FailureLimiter` from card 122), the PUBLISHED form loaded by id (drafts
+  refused; `fixture-*` only with `MAIL_TEST_FIXTURES=1`), every answer checked against that form's questions on the
+  server (choices on the list, real dates, not before today on `site.timeZone`, 2,000 per answer, 12,000 in all),
+  Turnstile when set, then STORE in `form_submissions`, then email (D1 address from card 174, then the
+  `FORM_RECIPIENTS` secret, then `office`, then `CONTACT_TO`; Web3Forms as the fallback). A private form's name,
+  email and words are wiped from D1 once its email is accepted. Nothing is ever written to the dataset.
+- **Messages** (card 117) already listed `form_submissions`; `studio-messages.ts` now treats `mode = 'private'` like
+  `'prayer'` (no name, email or words read or shown), titled "Private message". `'prayer'` rows read as before.
+- The recipient panel (card 174) lists each `formRecipients` code beside the Contact form, and its route now passes the
+  `FORM_RECIPIENTS` secret's codes as fallbacks.
+- Rule 8b: `mode` and `recipient` joined `NON_STEGA_FIELDS`; `site-form.ts` also strips markers from every value
+  it compares.
+
+**Migration numbering.** The starter's D1 files are 0001 contact, 0002 message status, 0003 mail, 0004 form
+recipients, so the submissions table is **0005** here. FBC Auburn made the same table as `0002_form_submissions.sql`
+(its 0003 to 0005 are message status, mail and recipients). Both files are `CREATE TABLE IF NOT EXISTS` with the same
+columns, and `site-form.test.ts` accepts any `NNNN_form_submissions.sql` carrying the DDL. A site with Auburn's
+numbering keeps its file and does not add 0005 (or adds it: D1 runs it once as a no-op). A site taking this card
+fresh adds the table under its own next free number.
+
+**Switching it on.** The email backbone (card 127), then `npx wrangler d1 migrations apply <site>-contact --remote`.
+Optional: `FORM_RECIPIENTS` secret, Turnstile keys. With no migration the endpoint still emails (the store is skipped
+and logged).
+
+**Verified (2026-10-27):** `npm run typegen`, `npm run check`, `npm run build`, `npm run test:unit` (1,723 + 158 pass;
+31 new site-form tests, 1 new studio-messages test). `npm run preview` with a local D1 (all five migrations applied)
+and `MAIL_TEST_FIXTURES=1`: a good sign-up 200 and stored with its tick list and date in words; a bad one 422 with
+five field errors; a private one 200, emailed, then stored with name, email and answers NULL and `cleared = 1`;
+honeypot 200 and not stored; unknown form 404; a 70 KB body 413; malformed JSON 400; PUT 405; the eleventh send
+in the window 429. Both emails read correctly in the local mail folder. The block at 375 and 1280 px: no sideways
+scroll, the errors under their fields, and `?topic=setting-up&about=the%20fair` prefilled the list and the box.
+
+**Applied:** starter (this card). first-baptist-auburn: origin (`partial`: its `church-form.ts`, `FormBlock.astro`
+and `/api/form/` are the church versions; taking this card means swapping them for the marked files, keeping its own
+block for the Church Trac and phone lines, and its `0002` migration).
+
+**Who should take it.** Any site whose client wants more than one form (sign-ups, bookings, volunteer lists). Taking
+it: the three marked files plus the changed marked files, the schema, block, endpoint and wiring above, the migration
+under the site's next number, `npm run typegen`, a styleguide fixture and `npm run thumbnails`.
+---
+
+## Card 195: Client notes, the pre-launch review layer (2026-10-27)
+
+**Origin:** First Baptist Auburn's "For Jacob" notes pill and shot list (inventory rows A36 and A37), generalised in the
+Auburn-to-family port run.
+
+**Problem.** Every new site waits on its client for wording, facts and photos, and the asking happens in email threads
+that lose track of which page needs what. Auburn built a review layer on the site itself and it worked, but it was
+named for one pastor, wrote church nouns into its copy, and shipped a Facebook-photo stand-in rule and a set of stock
+church photos with it.
+
+**What it is.** Three parts and one switch (`docs/agent/client-notes.md`): a notes pill per page
+(`ClientNotes.astro`, notes in `src/data/client-notes.ts`), yellow highlighting of `[Client: ...]`,
+`[Placeholder: ...]` and `[Photo: ...]` text wherever it sits in the page, and "Photo needed" boxes over empty or
+stand-in pictures (`ShotRequest.astro`, shots in `src/data/shot-list.ts`, wired into the Image and text block and
+the journal card). The client's name (`CLIENT_NAME`) and the marker words (`MARKERS`) are settings, not code.
+
+**Safe by default.** `CLIENT_NOTES_ON` ships `false`, so a site that does not opt in changes nothing (no markup, no
+script). When on, the layer also needs `site.url` to be a pre-launch address (`localhost`, `*.workers.dev`,
+`*.pages.dev`, `*.test`, `example.com`); the day `site.ts` takes the real domain it goes quiet, and
+`src/lib/client-notes.test.ts` fails until the switch is turned off, which blocks `deploy.yml` (it runs the unit tests
+first). Pill and boxes carry `data-pagefind-ignore`, the highlight is added in the browser after the search index is
+built, the pill does not print and the highlight drops to plain text on paper.
+
+**Files.** PORTABLE: `src/lib/client-notes.ts` (pure rules, guard), `src/components/ClientNotes.astro`,
+`src/components/ShotRequest.astro`, `src/styles/client-notes.css`. Per site, safe to edit: `src/data/client-notes.ts`, `src/data/shot-list.ts`.
+Tests: `src/lib/client-notes.test.ts`, `src/lib/shot-list.test.ts`.
+
+**Differences from Auburn.** Auburn keeps its own names (`PRE_LAUNCH_NOTES`, `ForJacob.astro`, `[Jacob: ...]`) and its
+Facebook stand-in rule until its sync PR renames them to this shape (add `'Jacob'` to `MARKERS`, widen
+`STAND_IN_FILE`). The starter drops the example video and the hero-specific helpers (Auburn's card 189 owns those) and
+ships no stock photos. Page lookups use `publicPath()` from card 187 (`lib/page-path.ts`).
+
+**Proved:** unit tests for the guard, paths, markers and shot rules; build with the switch off (no layer markup in the
+output) and with it on (pill, highlight and boxes), screenshots at 375 and 1280.
+
+**Applied:** starter (this card). Sites: turn it on only while a client is reviewing; Auburn's sync PR adopts the
+renamed files.
+
+## Card 192: The flow layer, opt-in as `layout.motion` (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows M1, M2). Auburn's flow layer (2026-10-24, tuned by its 2026-10-25
+audit to "gentle and quick"): headings rise line by line out of a mask, everything else fades up as it arrives,
+photos settle from a slight zoom and drift inside their frames, pages lift and rise between clicks, and every page
+but Home and the 404 gets one short 200ms fade. Built with no library: one IntersectionObserver, CSS keyframes and
+scroll timelines. Card 155 listed `flow-split` as not ported; it is now.
+
+**Fix.**
+
+- **A fifth layout slot, `motion`** (rule 18: `site-layout.ts`, the schema enum, `apply-brand`, the gate test):
+  `reveal` (default: today's reveals and cross-fade, no attribute, no script), `flow` (full on pages that pass
+  `flow="full"` to BaseLayout, so `<main data-flow-full>`: Home and the 404; calm elsewhere; page lift and rise),
+  `fade` (calm everywhere) and `none` (the head script never adds `html.motion`; hero stagger, slideshow zoom and
+  page cross-fade off). `layoutAttrs` emits `data-motion` for the three non-defaults; `hasFlow()` decides whether
+  BaseLayout renders `src/components/FlowMotion.astro`, the only thing that loads the script.
+- **PORTABLE, new:** `src/scripts/flow.ts`, `src/styles/flow.css` (imported by `globals.css`, every rule keyed on
+  `html[data-motion]` or a script-added class), `src/lib/flow-split.ts` + test, `FlowMotion.astro`,
+  `tests/flow-motion.spec.ts`.
+- **Motion tokens** in the one scale (card 188): `--motion-ease`, `--motion-fade`/`-distance`/`--motion-stagger-calm`,
+  `--motion-rise`/`-distance`/`--motion-stagger`, `--motion-line`/`-line-stagger`, `--motion-photo`/`-zoom`,
+  `--motion-side`/`-distance`, `--motion-page-out`/`-in`/`-distance`; the script reads the durations.
+- **Safety rules kept from Auburn:** hidden states are first frames of paused animations on script-added classes (JS
+  off, a failed script, reduced motion: nothing hidden); the first screen shows as it is at every width; transforms
+  and opacity only; splits only on real fonts and only if the height is unchanged; 600ms font cap; units land and
+  shed their classes; focus lands a unit at once; live preview never splits; print drops `html.motion`
+  (`print.css` rests units and masks; `print.spec.ts` probes `.flow` units when the layer is armed).
+- **Hooks for a site's motif:** `.flow-go` and `--flow-delay` on a starting unit, `data-flow-ms`, `data-flow="off" |
+"lines" | "side"`, `data-flow-item`, and `addFlowExtension(fn)`. `docs/agent/animation.md`, "The flow layer".
+- **Motion wall:** `/styleguide/motion/full/` and `/fade/` override the motion per page (BaseLayout `motion` prop), so
+  the spec runs on any build.
+
+**Not ported, on purpose.** Auburn's brick laying (titles, sill, markers), footer verse slide, building-sketch
+draw-in, Home hero scroll drift, This Sunday card slide and magnetic buttons (branding; the hooks above carry them);
+the desktop first-screen hold on full pages (the starter Hero has its own load stagger, and LCP stays untouched).
+
+**Proved:** `npm run check` (0 errors), `npm run test:unit` (1772 + 166 pass), `npm run build` (default: Home and
+inner pages load no flow script and carry no `data-motion`; the wall loads `FlowMotion`). `flow-motion.spec.ts` 9/9;
+native-scroll, print, reduced-motion, smoke, a11y green on both the default build and a local `motion: flow` build.
+Home, Playwright, 3 loads each, walking the whole page (LCP ms; CLS): default 1280 LCP 76-124, CLS 0.0003-0.0074;
+`flow` 1280 LCP 72-84, CLS 0.0003-0.0071; default 375 LCP 60-76, CLS 0.0010-0.0013; `flow` 375 LCP 60-96, CLS
+0.0010-0.0013. The remaining shift is the existing font swap in the hero and header (present under reduced motion
+too); shift caused inside `<main>` by the layer: 0 on the wall. Settled screenshots at 375 and 1280 of `/`, `/about/`
+and the wall: no horizontal overflow, no unit left armed.
+
+**Found on CI, fixed with this card (card 188's fallback fonts).** The CLS test failed on Linux runners only: the
+wall's first-screen h1 moved up 3px (CLS 0.0002 to 0.0016) about 100ms in, before the layer does anything. Linux has
+no Georgia or Times, so the display font fell back to plain serif, unscaled, and jumped when Libre Baskerville
+arrived. Reproduced on Windows with reduced motion (no layer) by blocking the Georgia face and drawing the h1 in
+unscaled Times: the same 229.8 to 226.8 move. `scripts/lib/font-fallback.mjs` now lists the metric twins after
+Times (`Liberation Serif`, `Tinos`) and Arial (`Liberation Sans`, `Arimo`), so Linux and ChromeOS get the scaled
+face too. The spec now prints each counted shift's node and rects when it fails.
+
+**Applied:** starter (this card). Sites take the PORTABLE files and `site-layout.ts` after the starter merges and
+pick a motion in their own character (`reveal` stays the safe default). first-baptist-auburn's sync PR moves onto the
+PORTABLE files and keeps its bricks, verse, sketch and hero drift as `addFlowExtension` / CSS hooks.
+
+## Card 191: Wayfinding: where-next rows, phone menu groups, a compact footer and a phone action bar (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A11 to A14): `WhereNext.astro`, the grouped `MobileNav.astro`, the
+compact `Footer.astro` and `church/SundayBar.astro`, generalised in the Auburn-to-family port run.
+
+**Problem.** Pages ended at a dead end, the phone menu was one long list once a site passed eight pages, the footer
+was two screens tall on a phone, and the one thing a phone visitor came to do (book, visit, call) scrolled away with
+the page heading. Auburn fixed all four, but with its own routes typed into the component, church facts in the bar
+and its brand colours in the CSS.
+
+**What it is.** Four Site settings pieces (Navigation group), resolved by one pure file, `src/lib/wayfinding.ts`:
+
+- **Where next rows** (`whereNext`, `WhereNext.astro`): up to five links with a small note; the footer opens with the
+  first three that are not the page you are on (`page-path.ts`), and a row that names a Studio page (a picked page,
+  or a typed one-segment address no site route serves, per `reservedSlugs.ts`) shows only while that page is
+  published (`published-links.ts`, card 187). Big display-font rows, a fill sweep in `--primary`, hidden on a page
+  whose `<main>` holds a `[data-final-cta]` (one closing device per page).
+- **Phone menu groups** (`phoneMenuGroups`, `MobileNav.astro`): named groups of links; the drawer goes full width and
+  the links become big display-font rows under each group's name. Still the card 157 `<dialog>` (focus trap, Escape,
+  focus return); each group name is an `h2` that labels its `ul`; the current page is `aria-current="page"`; the
+  header button's page is not listed again. Desktop nav is untouched (rule 4).
+- **Footer style** (`footerStyle`: Columns or Compact, in `NON_STEGA_FIELDS`): compact puts the logo, tagline and the
+  second header button (card 187) in one brand row on top, packs the link groups two by two on phones with Get in
+  touch across the width, hides empty groups and drops the logo block at the foot.
+- **Phone action bar** (`actionBars`, `ActionBar.astro`): one short line and one button, picked for a page or for
+  every page (a page's own bar wins; a bar whose button points at the page you are on is not drawn). Phones only;
+  shows once `main [data-action-bar-anchor]` (else the `h1`) has scrolled away, hides while the footer is on screen,
+  pads for the safe-area inset, sets `html[data-action-bar-on]` so `scroll-padding-bottom` keeps focus clear of it and
+  lifts BackToTop and the journal's CTA chip above it. Inside `<footer>`, so it is in the contentinfo landmark.
+
+**Safe by default.** Every field is empty or unset on an untouched site, and Footer renders `WhereNext` and
+`ActionBar` only when they have something to draw (a rendered-but-empty `ActionBar` still shipped its script; caught by
+parity). Parity: 19/19 pages unchanged against the `origin/main` build (`styleguide/sections` differs only by its ICS
+`DTSTAMP` when the two builds straddle a minute).
+
+**Files.** PORTABLE: `src/lib/wayfinding.ts`, `src/lib/wayfinding.test.ts`. Per site, restyle freely:
+`src/components/WhereNext.astro`, `src/components/ActionBar.astro`. Edited: `MobileNav.astro`, `Header.astro`,
+`Footer.astro`, `globals.css` ("Phone menu groups", "Compact footer"), `siteSettings.ts` schema, `queries.ts`
+projection, `siteSettings.ts` types, `cms-preview.ts`. Fixture `/styleguide/wayfinding/`, spec
+`tests/wayfinding.spec.ts`.
+
+**Differences from Auburn.** Auburn's rows and bars are hard-coded tables (`ROWS`, `BARS`) and its bar line is the
+Sunday times from Church facts; here both are Site settings, and the bar's line is plain text until card 196 (business
+facts) gives it a derived one. Auburn's groups are its header dropdowns; here they are a separate phone-only list, so
+the desktop menu can stay flat. Auburn's sync PR can keep its church bar and move its rows into Site settings.
+
+**Proved:** 7 unit tests; `tests/wayfinding.spec.ts` (7, chromium: groups and axe in the open dialog, published-only
+rows, 2x2 phone footer, bar timing, bottom edge, 44px button and axe, never on desktop, 320px, a real route carries
+none of it); full Playwright suite green; screenshots at 375 (menu, footer, bar), 768 (menu) and 1280 (footer).
+
+**Applied:** starter (this card). Sites: opt in per site in the rollout; fbcm takes the church shape (groups, Sunday
+bar), the others a bar where there is one clear action (book, shop, register).
+
+## Card 193: Seven more builder blocks: contact card, progress bar, newsletter, calendar buttons, icon cards, steps on a path and a hub (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A20, A21, A22, A25, A27, A28, A29). Card 173 ported the generic half of
+Auburn's block library; these seven were left because they leaned on Auburn's church facts, its stone icons and its
+brick art. They are the same blocks with the church nouns taken out, the pictures on card 188's shape classes and
+the numbers and links derived (rule 15).
+
+**Fix.** Seven blocks in `src/sanity/schemaTypes/builderSections.ts`, drawn by `src/components/builder-blocks/`
+(`BuilderBlock.astro` picks one) with `src/styles/builder-blocks-more.css`, types in `builderBlocks.types.ts`, and the
+logic in `src/lib/builder-blocks.ts` (tested in `builder-blocks.test.ts`). No colour field (rule 9); every block has
+`look` (the hub offers Standard and Quiet only), a fixture on `/styleguide/sections/`, a thumbnail and a place in the
+"+ Add item" menu (Basics, a new "Contact and updates" group, "Events and notices").
+
+- **Contact details** (`contactCardSection`, A25). Phone, email, address with a directions link, opening hours, a
+  column each. The phone and email default to Site settings and can be overridden on the block; "Lead with big Call and
+  Email buttons" puts two 56px buttons (`tel:` and `mailto:` through `CtaLink`) above the details, and Call is the
+  page's one accent button when the renderer hands it that (the accent predicate in `SectionRenderer.astro`). Self-
+  filling (in `SELF_FILLING_SECTIONS`). Auburn's version read the church facts and offered Text; the starter has no
+  facts store yet (card 196), so address and hours are typed on the block.
+- **Progress toward a goal** (`progressSection`, A27). Goal and so-far typed; percent, "to go", the as-of line and
+  the 20-step bar are derived (`progressState`, `asOfLabel`). Dollars or a plain count (`unit`, a NON_STEGA field).
+  One `role="progressbar"` with a spoken value. Auburn's stepping stones are plain steps here.
+- **Newsletter sign-up** (`newsletterSection`, A29). The card 127 backbone: the same `NewsletterSignup` island as the
+  footer, reading Site settings > Newsletter signup once. If the box is off, a typed sign-up page shows as a button, which
+  is also the route for a site whose list lives elsewhere (`OWN_NEWSLETTER = false`, cards 163 and 187: the Studio's own
+  newsletter screens hide, the block still works). Neither: it draws nothing.
+- **Add our calendar** (`calendarSubscribeSection` and `SubscribeButtons.astro`, A28). One typed feed (https, webcal,
+  or a path on this site such as a card 158 calendar file) becomes Google, Apple and Outlook subscribe links
+  (`subscribeLinks`, `feedAddress`; an `http` or `javascript:` address is refused). The starter publishes no site-wide
+  feed; a site with one (Auburn's Church Trac feed) points the block at it. `lib/ics.ts` supplies the files a `/`
+  path points to.
+- **Cards with icons** (`iconCardsSection`, A20). Open cards, three across, the icon the hero; a card can show a photo
+  instead (in `.shape-step`). **The icon set is per site:** `src/lib/block-icons.ts` ships 17 neutral line icons
+  (24px grid, `currentColor`), `BlockIcon.astro` draws them, the field is always named `icon`. A site with its own art
+  (Auburn's stones) replaces the list and, if the art is image files, the one component: `docs/agent/block-icons.md`.
+- **Steps on a path** (`stepsRailSection`, A21). Numbered steps joined by a dashed connector, an icon each, the first
+  step optionally on a card, a closing line and button. Kept SEPARATE from `processSection` on purpose: that block draws
+  the shared Process steps from their own collection (one list for the whole site, with illustrations); this one holds
+  its steps in the block, so any page can show a short path with nothing to maintain elsewhere. Extending
+  `processSection` with a rail style could not have held per-page steps.
+- **Groups of cards with an index** (`hubSection`, A22; Auburn's "Find your place"). Every group shows at once, a sticky
+  index jumps to one and a tiny script marks the group in view (`aria-current`); chips on a phone. Cards take
+  `.shape-step` or `.shape-tile` (card 188), the whole card is its link, every group and card has an anchor
+  (`hubIds`). "When" and "Where" are typed text here (Auburn derived them from church facts), and Auburn's forced "Ask
+  about" action is dropped: a card with no link is not a link.
+
+**Rules kept.** Rule 8b: `unit` joins `NON_STEGA_FIELDS` (`icon` was already there). Rule 15: percent, remaining,
+links, anchors, directions and the call and mail links are derived. Self-filling: contact card and newsletter. Setting
+keys: `unit`, `callButtons`, `firstStepCard`. Titles sit one heading level under the block's heading and move up when
+there is none.
+
+**Proved:** `npm run typegen`, `npm run check`, `npm run test:unit` (new tests: `telHref`, progress, feed addresses,
+subscribe links, hub ids; the authoring test now covers seven more fixtures and thumbnails), build, screenshots of the
+sections wall at 375 and 1280, axe and a 320px reflow sweep on the seven blocks.
+
+**Adopting it in a site.** Copy `src/components/builder-blocks/{ContactCard,Progress,Newsletter,CalendarSubscribe,
+IconCards,StepsRail,Hub}Block.astro`, `SubscribeButtons.astro`, `BlockIcon.astro`, `src/styles/builder-blocks-more.css`,
+`src/lib/block-icons.ts`, the additions to `builder-blocks.ts` (+ test), and `docs/agent/block-icons.md`. Hand-merge:
+the seven schemas and the insert groups in `builderSections.ts`; the types and the `BUILDER_BLOCK_TYPES` entries; the
+arms in `queries.ts`; `LOOKS_BY_TYPE`; `CONTENT_TYPES`; `NON_STEGA_FIELDS` (`unit`); the accent predicate in
+`SectionRenderer.astro`; `SELF_FILLING_SECTIONS` and `extraSettingKeys`; the `import` of the new stylesheet and the
+branches in `BuilderBlock.astro`; the fixtures. Swap the icon list for the site's own. A church site (fbcm, Auburn)
+keeps its church versions where they read the church facts, and takes `hubSection` and `stepsRailSection` only if it
+wants the generic ones.
+
+**Status, 2026-10-27.** Starter `yes`. Sites not applied yet (the per-site rollout follows the last starter card).
+
+## Card 190: Every main page a page builder: Contact, Privacy and Journal (2026-10-27)
+
+**Origin:** first-baptist-auburn, "Every main page a page builder" (2026-10-26; inventory row A17). Auburn's Contact,
+Privacy and News and notes pages each kept a hero plus one fixed piece drawn in code (the form, the policy, the post
+list). The editor could not put a photo above the form or move the posts. Each page now has a Page layout like About,
+and the fixed piece became a block that holds it.
+
+**What changed.**
+
+- **Three blocks, each the old markup moved whole.** `contactFormSection` (`ContactFormSection.astro`: the form
+  column, the email and phone lines, the booking widget, "What happens next", and the sticky sidebar with the map),
+  `privacyPolicySection` (`PrivacyPolicy.astro`: the typed text and date, or the built-in policy whose wording branches
+  on the analytics this build ships) and `journalPostsSection` (`JournalPosts.astro`: category chips, the post grid with
+  the featured card, the newsletter sign-up). Schemas: `mainPageSections.ts` (Contact and Privacy, core) and
+  `journalPostsSection.ts` (`scaffold-file: journal`, so `npm run scaffold -- --remove journal` takes it along).
+  Neither carries a colour (rule 9); all three are SELF_CONTAINED in `sectionCadence.ts` and on
+  `SELF_FILLING_SECTIONS`, so the Studio never calls them empty.
+- **Offered on their own page only.** `CONTACT_`, `PRIVACY_` and `JOURNAL_SECTION_TYPES` in `richSections.ts` are the
+  About list plus that page's block. A custom page or a saved section never takes them (a second contact form is a
+  mistake). They sit in a "This page" group of the + Add menu.
+- **`pageBuilder` on `contactPage`, `privacyPage`, `journalPage`.** Own tab "Page layout", last in the tab list, with
+  `pageBuilderAuthoring`, so the three main pages get the kit's "Insert a saved section" button, the page warnings and
+  the grid picker like About. `SECTION_HOST_TYPES` lists them. Privacy's required hero headline, date and body are
+  required only while the layout is empty.
+- **The contact block reads the form's settings through a GROQ arm** (`SECTION_ARMS`, `queries.ts`): the questions,
+  the note above the form and "What happens next" stay on the Contact page's own tabs, and the block draws the same
+  form wherever it is placed.
+- **Preview.** The three singletons preview as builder pages once their layout has sections (`HYBRID_SINGLETONS` in
+  `preview/[...slug].astro`); with it empty they preview as before (hero fields and a note).
+- **`scripts/main-pages-builder.mjs` (+ `scripts/lib/main-pages-plan.mjs`, tested).** Seeds each Page layout from the
+  old fields: banner (the hero fields), the block, and for Journal the closing band (the final-CTA fields). Dry by
+  default; production needs `--apply` and `NCS_PRODUCTION_WRITE=yes`; backs up every touched document first; skips a
+  page whose layout is filled; stops on an unpublished draft. The old fields stay in the schema (rule 16).
+
+**Why existing content keeps rendering (the rule of this card).** The pages do NOT fall back to a DEFAULT_*_SECTIONS
+array like About. A singleton with an EMPTY Page layout draws exactly what it drew before: the same `Hero` from the
+hero fields, then the same block component fed by the document itself (`<ContactFormSection settings={page} />`,
+`<PrivacyPolicy lastUpdated body />`, `<JournalPosts />`, then the same `FinalCta`). The markup moved into the
+components unchanged, so the rendered HTML is the same. A site needs no migration and no data write to take this card.
+The script is for the day the editor should be able to move things.
+
+**Proved:** `npm run parity capture` on the pre-change build, `compare` on the new one: contact, privacy and journal
+(and every other page) PASS with zero diff. The unit tests (new `main-pages-plan` test, the thumbnail test now covering
+the three blocks), `astro check`, build, and the page-builder Playwright specs pass. Screenshots at 375 and 1280 of the
+classic layout and of a seeded layout (banner, block, extra band).
+
+**Adapting per site.**
+
+- Swap the plan's fallback words in `main-pages-plan.mjs` for the page's own (they are the starter's defaults).
+- A site that wants the editor to land on the new tab sets `default: true` on the `pageBuilder` group and hides the old
+  fields (`hidden: true, readOnly: true`) once its layout is filled, as Auburn did; the starter leaves the old tabs
+  visible so a site that does nothing sees nothing change.
+- A site whose contact page has no map or no sidebar passes `sidebar: false`, or removes the aside in
+  `ContactFormSection.astro`. A church has no "Studio location" label: reword it there.
+- `contactFormSection`'s settings projection reads fields the Contact page already had; if a site adds a field to the
+  Contact page, add it to the arm in `queries.ts` and to `ContactFormSettings`.
+- Journal's name is the site's own noun (Auburn: "News and notes", Dispatches, Notes from the shop): the block title in
+  `journalPostsSection.ts` and the three words in `journal/index.astro`.
+
+**Applied:** starter (this card). Sites take it in the Auburn port run's per-site phase; Auburn's own copies are the
+origin and differ only by church words, the hidden fossils and its `DEFAULT_*_SECTIONS` fallback.
+
+## Card 196: Business facts typed once, open now, and hours changes that undo themselves (2026-10-27)
+
+**Origin:** First Baptist Auburn's church facts (inventory rows C1, C2, C3, A26 and A34): every fact typed once in
+Site settings with a `confirmed` flag and a "To confirm" tag, `dayPlan()` and "A different Sunday" dated changes,
+the times band, the drawn map card and the place line. Generalised here as their non-church form.
+
+**Problem.** A business site shows its address, phone and hours in four or five places (footer, Contact, a hero, a
+band, Google's structured data). Typed by hand in each, they drift; a holiday closure means editing the hours and
+remembering to change them back; and a new site built from an old flyer publishes guesses as facts.
+
+**What it is** (`docs/agent/business-facts.md`):
+
+- **Facts once.** Business info gains `street`, `zip`, `addressConfirmed`, `findUs`, `openingHours[]` (days,
+  opens, closes, optional label, `confirmed`), `hoursNote` and `hoursChanges[]`; Site settings gains
+  `phoneConfirmed` and `emailConfirmed`. `resolveBusinessFacts()` is the one reader; `placeLine()` gives
+  "Hamilton, OH".
+- **Confirmed flags.** `ToConfirm.astro` tags a fact whose box is unticked, and the LocalBusiness JSON-LD leaves it
+  out. Only an explicit untick counts by default (old data shows as before); `strict` is Auburn's way. Checkup's
+  existing `unconfirmedRule` (card 66) already reports the new flags.
+- **Open now.** `openState()` on `site.timeZone`: open until, or the next opening (skipping closures, spells past
+  midnight, 24 hours). Built as today's hours, made live in the browser by `src/scripts/business-live.ts`, which also
+  hides an expired change and marks today's row, so nothing stale shows between rebuilds.
+- **Hours changes.** Dated closures or different hours, applied everywhere by `dayHours()`, ignored after their last
+  day; never edit the usual week. Quick update: "Change the hours for a day".
+- **Blocks.** Opening hours (`hoursSection`: "Today beside the week" or "One slim band") and Map and directions
+  (`mapSection`: a drawn map, no map service, Google and Apple Maps buttons), both self-filling, in the new "Hours
+  and location" insert group. Footer and Contact show the address and hours only when set.
+- **Search engines.** `openingHoursSpecification` from confirmed rows plus upcoming changes as dated specials;
+  `streetAddress`, `postalCode`, `telephone` only when confirmed.
+
+**Safe by default.** A site with no hours and no street shows nothing new anywhere; existing data has no flags, which
+counts as confirmed, so live sites render as before.
+
+**Files.** PORTABLE: `src/lib/business-hours.ts`, `src/lib/business-facts.ts`, `src/lib/place-line.ts`. Safe to edit:
+`src/lib/business-data.ts`, `src/scripts/business-live.ts`, `src/components/business/*`, `src/styles/business.css`,
+`HoursBlock.astro`, `MapBlock.astro`. Schema: `businessInfo.ts`, `siteSettings.ts`, `builderSections.ts`;
+`NON_STEGA_FIELDS` gains `days`, `opens`, `closes`, `kind`. Tests: `business-hours.test.ts` (both DST changes and
+midnight in America/New_York, past-midnight spells, closures, JSON-LD), `business-facts.test.ts`,
+`tests/business-facts.spec.ts`.
+
+**Church mapping.** A gathering is an hours row with a label; "A different Sunday" is an hours change (an extra
+service has no equivalent yet). Auburn keeps its own church layer; the mapping table is in the doc.
+
+**Applied:** starter (this card). Sites: shops and studios with set hours (mas-monograms, reid-design-site) fill
+Business info and add the blocks where they help; presacademy can use the hours for its office; stonesteps-50k needs
+only the address and map; fbcm keeps church facts its own way.
+
+## Card 197: Latest video block, Documents library, page-weight budget, SVG path compactor (2026-10-27)
+
+**Origin:** first-baptist-auburn, the last starter card of the Auburn-to-family port run (inventory rows C7, C10, B6,
+M4). Card 159 had filed three of these as Auburn-only; each has a generic core, ported here without the church words.
+
+**What changed.**
+
+- **C7 `latestVideoSection` ("Latest video").** `src/lib/youtube-feed.ts` (PORTABLE, with a test and an invented feed
+  fixture) reads a YouTube channel's public Atom feed at build time: no key, newest 15 uploads, one fetch per channel
+  per build, two tries with a timeout. `LatestVideo.astro` draws a thumbnail link that swaps to the `youtube-nocookie`
+  player on a press (no YouTube script on load, 16:9 reserved). The schema (`latestVideoSection.ts`, PORTABLE) takes a
+  channel ID or a pasted `/channel/UC...` link. **It shows nothing, not an empty box**, with no channel, a bad id, a
+  failing feed or a channel with nothing public, and the build never fails on a feed error (the card's build proof ran a
+  deliberately bad channel: two 404s logged, block absent, exit 0). Auburn's church parts (the "Last Sunday" label, the
+  upcoming-stream card, Church facts) stay in that repo.
+- **C10 `libraryDocument` + `documentsSection` ("Documents").** A Studio collection of downloadable files (title, a
+  free-text group, date, file, note, "take it down after" date, `publishAt`) and a block listing the newest current ones,
+  all groups or one. `src/lib/documents.ts` holds the rules (current, newest first, file label "PDF, 240 KB"); the GROQ
+  arm fetches the newest 60 inside the page query, so there is no new build-time read and the CI snapshot answers it.
+  **It is the eighth scaffold capability, `documents`** (rule 14): every registration site is marked, and
+  `npm run scaffold -- --remove documents --write` was run, then typegen, check, build and the unit tests (see Proved).
+  Auburn's fixed categories, "this week's bulletin" and search tags are not ported.
+- **B6 `tests/page-weight.spec.ts` (PORTABLE) + `tests/page-weight.config.json` (per site).** For every route in
+  `tests/routes.ts`: HTML, inline CSS, scripts, images, the LCP image, preloaded fonts (count, woff2, size) and JSON-LD
+  validity against budgets read from the config. Auburn's version pinned Auburn's own fonts and pages; this one pins
+  numbers.
+- **M4 `scripts/lib/svg-path-compact.mjs` (PORTABLE, with its test).** Shortest relative path data, rounded to a tenth of
+  a unit; arcs returned unchanged. The test proves every point of every SVG the repo ships stays put. Generic on its own
+  (card 159 listed it Auburn-only).
+- Both blocks have a `/styleguide/sections/` fixture (the video one a sample with no network) and a picker thumbnail;
+  `authoring.test.ts` now reads their schema files too. `docs/agent/video-documents-weight.md` is the reference.
+
+**Adapt per site.** Documents: the Studio label ("Document") and the heading default are plain words; rename for the
+trade ("Brochures", "Price lists") in `libraryDocument.ts` and `documentsSection.ts`. Video: a site with a full CSP
+needs `img-src https://i.ytimg.com` and `frame-src https://www.youtube-nocookie.com`. Page weight: set the budgets from the
+site's own numbers (+25 percent), and the `jsonLd` types per route. A site without Sanity (nixoncreativestudio) takes only
+the page-weight spec and the path compactor.
+
+**Proved:** `npm run typegen`, `check`, `test:unit` (youtube-feed, documents, svg-path-compact), `build`, the page-weight
+spec, `scaffold --remove documents --write` followed by typegen, check, build and unit tests on a throwaway copy of
+the branch, screenshots of both blocks at 375 and 1280 (no horizontal scroll), and a build with a bad channel.
+
+**Applied:** starter (this card). first-baptist-auburn runs its own church versions (`church-video.ts`, `downloads`,
+`page-weight.spec.ts`); its sync PR takes the PORTABLE copies only. Other sites in the Phase 2 rollout, in their own
+character: blocks and the documents capability where the site has Sanity; the spec and compactor everywhere.
+
+## Card 198: The contact card fills itself from business facts, and the regex-backslash test survives scaffold removal (2026-10-27)
+
+**Origin:** follow-ups found while porting cards 193 and 196. Two small fixes, no new feature.
+
+**Problem.** (1) The Contact details block (card 193) typed its own address and hours while card 196 held the same
+facts once, so an editor filled them twice and they drifted. (2) `scripts/lib/regex-backslash.test.mjs` read every
+file `git ls-files` lists; after `npm run scaffold -- --remove <capability> --write` the removed files are deleted
+but still tracked until committed, so the test failed with ENOENT.
+
+**What changed.**
+
+- `ContactCardBlock.astro` reads `factsFor()` (card 196). Phone, email, address and hours default to the business
+  facts when the block's own field is empty; a field typed in the block still wins. Hours from the facts draw as
+  "Today 9 am to 5 pm" plus the live open-now status (`OpenStatus`, so "Opens tomorrow at 9 am" when closed) and the
+  hours note. A fact from the facts that is unticked carries the "To confirm" tag; the block's own words never do.
+  `strict` follows `resolveBusinessFacts` (Auburn passes it in its own reader). With no facts and nothing typed the
+  block still draws nothing. Studio descriptions say "leave empty to use Business info".
+- `onDisk()` in `scripts/lib/regex-backslash.mjs` (PORTABLE) drops tracked paths missing from the working tree; the
+  test uses it and has a case for it.
+- Wall fixture `contact-facts` and a Playwright test in `tests/builder-blocks.spec.ts`.
+
+**Action bar (card 191).** A bar with no text of its own shows `todayBarLine()` (`business-facts.ts`, PORTABLE): "Today 9 am to 5 pm" or "Closed today" on the site clock, wired in `Footer.astro`. Text typed on the bar wins; no hours, or any unconfirmed row, leaves the line empty.
+
+**Applied:** starter (this card). Sites: pick up with the card 196 rollout; fbcm keeps its church facts layer and
+passes `strict` through its own reader.
+
+## Card 200: Heading accent matches whole words only (2026-10-27)
 
 **Origin:** stonesteps-50k, 2026-10-27 (NateJ45/stonesteps-50k#179). An editor set the
 handwritten accent to `test` on a heading reading `TESTING`. `splitHeadingAccent` searched

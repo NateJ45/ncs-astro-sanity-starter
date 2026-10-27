@@ -1,0 +1,110 @@
+---
+// Safe to edit by hand
+// Email widget. The primary click target is a mailto: link that opens the visitor's mail client
+// with a draft. A small icon button beside it copies the address for visitors who would rather
+// paste.
+//
+// An Astro component with one small script since 2026-10-25 (audit DEV-M2). It was a React island
+// that called a toast library, so React, the toaster and its theme hook loaded on every page for
+// one "copied" message. Now the icon turns into a tick and a visually hidden live region says
+// "Email address copied", which a screen reader reads out the same way the toast was. Used in the
+// Footer and on the Contact page. Same props as the old island.
+
+interface Props {
+  email: string;
+  /** Visible label override. Defaults to the email address itself. */
+  label?: string;
+  /** "link" is an inline mailto link with a small copy icon; "button" is a bordered button that opens the mail draft. */
+  variant?: 'link' | 'button';
+}
+
+const { email, label, variant = 'link' } = Astro.props;
+---
+
+{variant === 'button' ? (
+  <a
+    href={`mailto:${email}`}
+    class="inline-flex items-center gap-2 border border-primary px-m py-s text-link transition-colors hover:bg-muted"
+  >
+    <span>{label ?? email}</span>
+  </a>
+) : (
+  <span class="inline-flex items-center gap-1.5 align-middle" data-copy-email={email}>
+    <a
+      href={`mailto:${email}`}
+      class="text-link underline underline-offset-2 transition-colors hover:text-primary-dark"
+    >
+      {label ?? email}
+    </a>
+    <button
+      type="button"
+      aria-label={`Copy ${email} to clipboard`}
+      title="Copy email address"
+      class="copy-email__btn inline-flex h-7 w-7 items-center justify-center rounded text-foreground/55 transition-colors hover:bg-accent hover:text-link"
+    >
+      {/* The two lucide icons the island used (Copy, Check), drawn inline. */}
+      <svg
+        class="copy-email__copy"
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+      </svg>
+      <svg
+        class="copy-email__check hidden"
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M20 6 9 17l-5-5" />
+      </svg>
+    </button>
+    <span class="sr-only" role="status" aria-live="polite" data-copy-email-status></span>
+  </span>
+)}
+
+<script>
+  // One delegated listener on the document: it survives the page router's swaps, so a footer
+  // drawn by a later navigation works with no re-binding.
+  document.addEventListener('click', async (e) => {
+    const btn = (e.target as Element | null)?.closest?.('.copy-email__btn');
+    const host = btn?.closest<HTMLElement>('[data-copy-email]');
+    if (!btn || !host) return;
+    e.preventDefault();
+    const email = host.dataset.copyEmail ?? '';
+    try {
+      await navigator.clipboard.writeText(email);
+    } catch {
+      // The clipboard needs HTTPS (or localhost); without it, open the mail draft instead.
+      window.location.href = `mailto:${email}`;
+      return;
+    }
+    const copy = btn.querySelector<SVGElement>('.copy-email__copy');
+    const check = btn.querySelector<SVGElement>('.copy-email__check');
+    const status = host.querySelector<HTMLElement>('[data-copy-email-status]');
+    copy?.classList.add('hidden');
+    check?.classList.remove('hidden');
+    if (status) status.textContent = 'Email address copied';
+    window.setTimeout(() => {
+      check?.classList.add('hidden');
+      copy?.classList.remove('hidden');
+      if (status) status.textContent = '';
+    }, 2000);
+  });
+</script>

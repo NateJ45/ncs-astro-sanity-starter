@@ -30,10 +30,17 @@
   html.motion [data-reveal],
   html.motion [data-stagger-grid] > *,
   [data-stagger-grid] > *:not(.is-filtered-out),
-  .hero-entry-stagger > * {
+  .hero-entry-stagger > *,
+  .flow,
+  .flow-line__in {
     opacity: 1 !important;
     transform: none !important;
     translate: none !important;
+  }
+  /* The flow layer's heading masks (card 192): nothing is clipped on paper. flow.ts also drops
+     html.motion on beforeprint, which puts every unit on its resting frame. */
+  .flow-line {
+    clip-path: none !important;
   }
   /* The image curtain is a panel laid OVER a picture to uncover it; in print it is just in the way. */
   .img-curtain {

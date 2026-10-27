@@ -1,0 +1,12 @@
+---
+// Safe to edit by hand
+// The board grammar's section break (PORTS.md card 188, from FBC Auburn's BoardRule).
+// SectionRenderer draws one before every section on a site whose hero is `board`
+// (brand.config.json layout.hero), in place of the alternating band colours. Whitespace only
+// by default: the marker lives beside worded eyebrows (BoardLabel), so it marks something
+// instead of punctuating every band. A brand that wants a visible rule sets --board-rule
+// (a hairline, a short bar) in its brand layer; src/styles/board.css draws it.
+import '@/styles/board.css';
+---
+
+<div class="board-rule-wrap" aria-hidden="true"></div>

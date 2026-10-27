@@ -1,0 +1,77 @@
+---
+// Safe to edit by hand
+// The usual week and the dated changes still to come (PORTS.md card 196).
+// Days that keep the same hours run together ("Monday to Friday"), Monday
+// first; the row that holds today is marked in the browser (data-today), and a
+// change disappears after its last day even between rebuilds
+// (src/scripts/business-live.ts). Unconfirmed rows carry the "To confirm" tag.
+// All words are worked out from the data (src/lib/business-hours.ts, rule 15).
+//
+// Renders nothing when the site has no hours.
+import '@/styles/business.css';
+import BusinessLive from './BusinessLive.astro';
+import ToConfirm from './ToConfirm.astro';
+import { site } from '@/data/site';
+import { changeParts, upcomingChanges, weekRows, zonedClock } from '@/lib/business-hours';
+import type { BusinessFacts } from '@/lib/business-facts';
+
+interface Props {
+  facts: BusinessFacts;
+  /** Show the "Changes coming up" list (holidays, closures). */
+  showChanges?: boolean;
+  /** At most this many changes. */
+  maxChanges?: number;
+  class?: string;
+  /** The build moment; tests pass a fixed one. */
+  now?: Date;
+}
+
+const {
+  facts,
+  showChanges = true,
+  maxChanges = 4,
+  class: className = '',
+  now = new Date(),
+} = Astro.props;
+const rows = weekRows(facts.hours);
+const changes = showChanges
+  ? upcomingChanges(facts.hours, zonedClock(now, site.timeZone).date).slice(0, maxChanges)
+  : [];
+---
+
+{rows.length > 0 && (
+  <div class:list={['biz-hours', className]}>
+    <dl class="biz-hours__week">
+      {rows.map((r) => (
+        <div class="biz-hours__row" data-biz-days={r.days.join(',')}>
+          <dt>{r.label}</dt>
+          <dd>
+            {r.text}
+            <ToConfirm confirmed={r.confirmed} />
+          </dd>
+        </div>
+      ))}
+    </dl>
+    {facts.hoursNote && <p class="biz-hours__note">{facts.hoursNote}</p>}
+    {changes.length > 0 && (
+      <div class="biz-changes" data-biz-changes>
+        <p class="biz-changes__title">Changes coming up</p>
+        <ul>
+          {changes.map((c) => {
+            const p = changeParts(c);
+            return (
+              <li data-biz-until={c.to}>
+                <span class="biz-changes__when">{p.when}</span>
+                <span class="biz-changes__what">
+                  {p.what}
+                  {p.note && <span class="biz-changes__note"> ({p.note})</span>}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )}
+    <BusinessLive />
+  </div>
+)}

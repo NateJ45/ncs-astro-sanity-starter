@@ -102,6 +102,9 @@ const NON_STEGA_FIELDS = new Set([
   'category',
   'columns',
   'heightHint',
+  // Card 189: the opening banner's Style. Hero.astro compares it to 'photo'; an encoded value
+  // would draw the standard hero in the preview.
+  'heroStyle',
   'imageSide',
   'layout',
   'linkType',
@@ -124,12 +127,25 @@ const NON_STEGA_FIELDS = new Set([
   // an encoded value would fall back to every page / once per visitor in the preview).
   'where',
   'frequency',
+  // Card 191: Site settings > Footer style (src/lib/wayfinding.ts compares it to 'compact').
+  'footerStyle',
   // The builder kit (builderSections.ts, PORTS.md card 173): the notice's
   // urgency picks its look, and the event and schedule times are read as
   // "HH:MM" by src/lib/builder-blocks.ts. (`layout` above covers the button row.)
   'urgency',
   'startTime',
   'endTime',
+  // The business facts (card 196, src/lib/business-hours.ts): an hours row's
+  // `days` and its `opens` / `closes` times, and an hours change's `kind`, are
+  // read as weekday keys, "HH:MM" and closed | hours. (The resolver also strips
+  // markers with plain(), belt and braces.) `layout` above covers the hours block.
+  'days',
+  'opens',
+  'closes',
+  'kind',
+  // Card 193: the progress bar's unit picks dollars or a plain number (builder-blocks.ts compares it).
+  // `icon` (the icon picker) is listed below.
+  'unit',
   // Not in this template yet, but standard enum names across the site family.
   // Carried so a block ported from a sibling repo is not a preview-only bug
   // waiting to be found.
@@ -167,6 +183,10 @@ const NON_STEGA_FIELDS = new Set([
   // leaves booleans alone today, listed so the rule 8b audit finds it.
   'embedCode',
   'runsOnPage',
+  // The form builder (card 194): a form's kind picks the private branch and its
+  // recipient key is matched to a name and an address (src/lib/site-form.ts).
+  'mode',
+  'recipient',
 ]);
 
 export function getPreviewClient(draftMode: boolean): SanityClient {

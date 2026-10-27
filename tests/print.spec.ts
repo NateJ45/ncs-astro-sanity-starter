@@ -62,7 +62,12 @@ test('print.css is what makes the difference: reveals are hidden on screen, show
   for (const route of routes) {
     await page.goto(route, { waitUntil: 'load' });
     const state = await page.evaluate(() => {
-      const els = [...document.querySelectorAll<HTMLElement>('[data-reveal]:not(.is-visible)')];
+      // Under the flow layer (layout.motion flow or fade, card 192) the reveals show at rest and
+      // the flow units are the ones waiting on their hidden first frame.
+      const waiting = document.documentElement.classList.contains('flow-armed')
+        ? '.flow'
+        : '[data-reveal]:not(.is-visible)';
+      const els = [...document.querySelectorAll<HTMLElement>(waiting)];
       const el = els.find((e) => e.getBoundingClientRect().top > innerHeight);
       if (!el) return null;
       el.dataset.printProbe = '1';

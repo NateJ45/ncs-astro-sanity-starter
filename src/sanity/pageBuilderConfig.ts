@@ -29,6 +29,10 @@ export const SECTION_HOST_TYPES: Readonly<Record<string, string>> = {
   // Private pages (card 122) are built from the same library.
   privatePage: 'pageBuilder',
   homePage: 'pageBuilder',
+  // Every main page a page builder (card 190).
+  contactPage: 'pageBuilder',
+  privacyPage: 'pageBuilder',
+  journalPage: 'pageBuilder', // scaffold: journal
   aboutPage: 'pageBuilder', // scaffold: about
   servicesPage: 'pageBuilder', // scaffold: services
   processPage: 'pageBuilder', // scaffold: process
@@ -45,13 +49,31 @@ export const PAGE_BUILDER_TYPES = new Set<string>(Object.keys(SECTION_HOST_TYPES
  * Keep roughly in step with src/sanity/schemaTypes/sections.ts and
  * richSections.ts. A name that drifts off the list only costs a false "worth a
  * look", never a wrong page.
+ *
+ * RULE (card 187): a block whose content comes from another tab, a collection
+ * or Business info is added here in the SAME commit that adds the block. Without
+ * it a freshly added one is told "This section is empty... fill it in or remove
+ * it" when it is already full (FBC Auburn's Contact form and News list were).
+ * authoring.test.ts checks a fresh one of each listed block raises no warning.
  */
 const SELF_FILLING_SECTIONS = [
+  'documentsSection', // scaffold: documents
+  // Every main page a page builder (card 190): their words come from the Contact tab, the
+  // policy built into the site, and the Journal list.
+  'contactFormSection',
+  'privacyPolicySection',
+  'journalPostsSection', // scaffold: journal
   'dynamicListSection',
   'faqSection', // scaffold: faq
   'guaranteeSection',
+  // Its words are the channel's newest video, read at build time (card 197).
+  'latestVideoSection',
   'logoStripSection',
   'processSection', // scaffold: process
+  // Card 193: filled from Site settings (the phone, the email, the newsletter box), so a fresh one
+  // is already complete.
+  'contactCardSection',
+  'newsletterSection',
   'serviceAreaSection',
   'servicesGridSection', // scaffold: services
   'spacerSection',
@@ -60,6 +82,9 @@ const SELF_FILLING_SECTIONS = [
   'syncedSection',
   'testimonialsSection', // scaffold: testimonials
   'valuesSection', // scaffold: philosophy
+  // Card 196: the hours and the map fill themselves from Business info.
+  'hoursSection',
+  'mapSection',
 ];
 
 export const PAGE_CHECK_CONFIG: PageCheckConfig = {
@@ -85,6 +110,10 @@ export const PAGE_CHECK_CONFIG: PageCheckConfig = {
     'afterText',
     'greeting',
     'signOff',
+    // Card 193: the progress bar's unit and the two switches arrive set.
+    'unit',
+    'callButtons',
+    'firstStepCard',
   ],
   // Every built-in route, plus the folders the build writes into. RESERVED_SLUGS
   // is the same list the slug validation uses, so a new route is added once.

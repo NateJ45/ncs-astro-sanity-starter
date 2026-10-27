@@ -24,8 +24,12 @@ import MobileNav from './MobileNav.astro';
 import { ChevronDown } from 'lucide-react';
 import logoLightAsset from '@/assets/logo-light.svg';
 import logoDarkAsset from '@/assets/logo-dark.svg';
+import { publicPath } from '@/lib/page-path';
+import { mergePageSwitches } from '@/lib/page-switches';
+import { getNavPages } from '@/lib/queries';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
+import { phoneMenuGroups } from '@/lib/wayfinding';
 import { urlFor } from '@/lib/sanity';
 import SearchButton from './search/SearchButton.astro';
 import SiteSearch from './search/SiteSearch.astro';
@@ -63,6 +67,13 @@ const availability = siteSettings?.availabilityStatus ?? '';
 // drawer, and the footer can never disagree about what the menu is.
 const chrome = resolveSiteSettings(siteSettings);
 const headerCta = chrome.headerCta;
+// Card 191: Site settings > Phone menu groups. Empty (the default) keeps the phone menu's usual list.
+// The menu's own button is left out of the rows, so the same page is not offered twice.
+const phoneGroups = phoneMenuGroups(
+  siteSettings?.phoneMenuGroups,
+  headerCta.show ? headerCta.href : undefined,
+);
+const headerSecondary = chrome.headerSecondary;
 const logo = chrome.logo;
 // The logo box is 48px tall (h-12), so 280w covers a wide wordmark at 1x and
 // 560w covers it at 2x. Built with urlFor() rather than <SanityImage> because
@@ -121,12 +132,16 @@ const mobileNavSettings = siteSettings
 // and the built-in safety-net menu live in src/lib/siteSettings.ts, so the
 // header, the drawer, and the footer read one source. Empty in Sanity = the
 // built-in menu, so a fresh clone is byte-identical to the old behavior.
-const NAV_ITEMS = chrome.headerNav;
+// Pages whose "Show in the top menu" switch is on are added after the editor's own order
+// (src/lib/page-switches.ts, card 187).
+const NAV_ITEMS = mergePageSwitches(chrome.headerNav, [], await getNavPages()).nav;
 
 // MobileNav takes the same NavItem[] shape (flat links and dropdown groups).
 const NAV_LINKS = NAV_ITEMS;
 
-const pathname = Astro.url.pathname;
+// publicPath: the draft preview serves Home at /preview/, which would otherwise never match "/"
+// (PORTS.md card 187).
+const pathname = publicPath(Astro.url.pathname);
 function isActive(href: string) {
   if (href === '/') return pathname === '/';
   return pathname.startsWith(href.endsWith('/') ? href : `${href}/`);
@@ -420,6 +435,19 @@ function isGroupActive(items: { href: string }[]) {
       {/* Visitor search (card 126). Renders nothing when search is off. */}
       <SearchButton class="inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground transition-colors hover:bg-accent hover:text-link focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none" />
       <span class="h-6 w-px bg-border-soft" aria-hidden="true"></span>
+      {headerSecondary && (
+        <a
+          href={headerSecondary.href}
+          class:list={[
+            'press-tactile inline-flex items-center rounded-md border px-m py-2 text-xs font-semibold tracking-eyebrow uppercase transition-colors',
+            isActive(headerSecondary.href)
+              ? 'border-primary bg-accent text-link'
+              : 'border-primary text-link hover:bg-accent',
+          ]}
+        >
+          {headerSecondary.label}
+        </a>
+      )}
       {headerCta.show && (
         <a
           href={headerCta.href}
@@ -449,6 +477,9 @@ function isGroupActive(items: { href: string }[]) {
       logoDarkUrl={logoDarkImg.src}
       brandName={brandName}
       cta={headerCta}
+      secondary={headerSecondary}
+      groups={phoneGroups}
+      current={pathname}
     />
   </div>
   {site.search.enabled && <SiteSearch />}

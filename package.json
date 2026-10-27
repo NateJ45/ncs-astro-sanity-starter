@@ -18,6 +18,7 @@
     "og": "node scripts/generate-og-default.mjs",
     "contact:migration": "node --experimental-strip-types scripts/gen-contact-migration.mjs",
     "apply-brand": "node scripts/apply-brand.mjs",
+    "font-fallback": "node scripts/font-fallback.mjs",
     "llms:full": "node scripts/generate-llms-full.mjs",
     "studio:import": "node scripts/import-content.mjs",
     "seed": "node scripts/seed-core.mjs",

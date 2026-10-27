@@ -11,10 +11,14 @@ import { faqCategory } from './faqCategory'; // scaffold: faq
 import { faqItem } from './faqItem'; // scaffold: faq
 import { faqPage } from './faqPage'; // scaffold: faq
 import { formQuestion } from './formQuestion';
+import { form } from './form';
+import { formDateQuestion, formTickQuestion } from './formQuestionMore';
 import { homePage } from './homePage';
 import { journalCategory } from './journalCategory'; // scaffold: journal
 import { journalEntry } from './journalEntry'; // scaffold: journal
 import { journalPage } from './journalPage'; // scaffold: journal
+import { journalPostsSection } from './journalPostsSection'; // scaffold: journal
+import { mainPageSectionSchemas } from './mainPageSections';
 import { navLink } from './navLink';
 import { newsletter } from './newsletter';
 import { page } from './page';
@@ -35,6 +39,7 @@ import { siteSettings } from './siteSettings';
 import { studioGuide } from './studioGuide';
 import { studioNotes } from './studioNotes';
 import { testimonial } from './testimonial'; // scaffold: testimonials
+import { libraryDocument } from './libraryDocument'; // scaffold: documents
 
 export const schemaTypes = [
   // Object types (embedded) first so they're defined before docs that reference them
@@ -43,11 +48,17 @@ export const schemaTypes = [
   navLink,
   // One editor-written form question (contactPage.formFields).
   formQuestion,
+  // The form builder's two extra question kinds (card 194): a date, tick any that apply.
+  formDateQuestion,
+  formTickQuestion,
   // Page-builder section blocks (objects). Registered before the documents
   // whose pageBuilder arrays reference them.
   ...pageSectionSchemas,
   syncedSection, // authoring kit, card 109: shows a saved section, edit once everywhere
   ...richSectionSchemas,
+  // Every main page a page builder (card 190): blocks offered on their own page only.
+  ...mainPageSectionSchemas,
+  journalPostsSection, // scaffold: journal
 
   // Singletons
   siteSettings,
@@ -69,6 +80,7 @@ export const schemaTypes = [
   announcement, // site-wide banner collection (enabled + date-windowed)
   popup, // popups (card 170): one at a time, date-windowed, src/lib/popup.ts
   testimonial, // scaffold: testimonials
+  libraryDocument, // scaffold: documents
   faqCategory, // scaffold: faq
   faqItem, // scaffold: faq
   philosophyPoint, // scaffold: philosophy
@@ -91,4 +103,6 @@ export const schemaTypes = [
   redirect,
   // Short addresses like /spring for flyers and QR codes (PORTS.md card 171).
   shortLink,
+  // Forms an editor writes (card 194), shown by the Form block; answers go to D1.
+  form,
 ];

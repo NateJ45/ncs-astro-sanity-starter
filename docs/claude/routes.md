@@ -12,10 +12,10 @@ Core routes that ship with the starter. None of them is toggleable in the Studio
 | `/process`            | `src/pages/process.astro`            | `process`  | Process -- section-driven, plus the `processStep` collection (graduated from module into core)                                                      |
 | `/[slug]`             | `src/pages/[slug].astro`             | --         | Custom pages created in the Studio; reserved slugs are filtered inside `getStaticPaths` (see `src/lib/reservedSlugs.ts`)                            |
 | `/faq`                | `src/pages/faq.astro`                | `faq`      | FAQ page + faqItem and faqCategory collections + faqSection                                                                                         |
-| `/contact`            | `src/pages/contact.astro`            | --         | Contact page + Web3Forms form + Calendly embed                                                                                                      |
-| `/journal`            | `src/pages/journal/index.astro`      | `journal`  | Post grid with category chips                                                                                                                       |
+| `/contact`            | `src/pages/contact.astro`            | --         | Contact page: page builder (card 190); the form is the `contactFormSection` block (Web3Forms form + Calendly embed)                                 |
+| `/journal`            | `src/pages/journal/index.astro`      | `journal`  | Journal: page builder (card 190); the `journalPostsSection` block draws the post grid with category chips                                           |
 | `/journal/[slug]`     | `src/pages/journal/[slug].astro`     | `journal`  | Post detail: reading progress + header + cover + body + related                                                                                     |
-| `/privacy`            | `src/pages/privacy.astro`            | --         | Privacy policy from singleton, with static fallback when doc is absent                                                                              |
+| `/privacy`            | `src/pages/privacy.astro`            | --         | Privacy policy: page builder (card 190); the `privacyPolicySection` block holds the singleton's text, with static fallback when empty               |
 | `/journal/rss.xml`    | `src/pages/journal/rss.xml.ts`       | `journal`  | Journal RSS feed                                                                                                                                    |
 | `/studio`             | `src/pages/studio/index.astro`       | --         | The embedded Sanity Studio                                                                                                                          |
 | `/search`             | `src/pages/search/[...search].astro` | --         | Visitor search page (card 126); built only when `site.search.enabled`. noindex, sitemap-excluded. Index under `/pagefind/`                          |
@@ -43,6 +43,7 @@ Every core route except `/`, `/contact`, `/privacy`, `/404` and the Studio and p
 | `/api/subscribe/confirm/` (SSR)                       | the confirm link; 303 to `/email/confirmed/` or `/email/link-problem/`          |
 | `/api/unsubscribe/` (SSR)                             | POST only: the unsubscribe button and RFC 8058 one-click                        |
 | `/api/rsvp/` (SSR)                                    | GET an event's state, POST a reply                                              |
+| `/api/form/` (SSR)                                    | the form builder: GET ready, POST a form; stored in D1, emailed (card 194)      |
 | `/api/studio/newsletter/`, `/api/studio/rsvps/` (SSR) | the Studio's protected mail routes                                              |
 | `/api/studio/form-recipients/` (SSR)                  | where form messages go: administrators only, addresses kept in D1 (card 174)    |
 | `/api/form-recipient/confirm/` (SSR)                  | the confirmation link for a new form address; GET shows a button, POST confirms |

@@ -43,6 +43,7 @@ import type { KitGuideBlock } from '../kit/guide/GuidePage';
 import { phoneGuides } from './phoneGuides.ts';
 import { peopleGuides } from './people.ts';
 import { linkGuides } from './links.ts';
+import { OWN_NEWSLETTER, OWN_NEWSLETTER_GUIDE } from '../ownNewsletter.ts';
 import type { FieldGuideMap } from '../../lib/studio-kit';
 
 export type DiyLevel = 'self' | 'ask' | 'mixed';
@@ -478,6 +479,43 @@ export const guides: Guide[] = [
         tone: 'caution',
         title: 'A long menu is a worse menu.',
         text: 'Every item you add makes the others harder to find, and the header runs out of room on a phone before it does on your screen. If something has to go in, consider what comes out.',
+      },
+    ],
+  },
+
+  // Card 196: the business facts and opening hours (docs/agent/business-facts.md).
+  {
+    slug: 'hours-and-address',
+    category: 'Housekeeping',
+    title: 'Change your hours or address',
+    icon: 'clock',
+    lead: 'Typed once, shown everywhere: the footer, Contact, the hours and map blocks, and Google.',
+    diy: 'self',
+    body: [
+      {
+        kind: 'path',
+        items: ['Business info'],
+        link: { doc: 'businessInfo' },
+      },
+      {
+        kind: 'p',
+        text: 'Your street address and your usual week of opening hours live in **Business info**. Change them there and every place on the website that shows them changes too. The phone number and email are in Site settings.',
+      },
+      { kind: 'h', text: 'A holiday or a closure' },
+      {
+        kind: 'p',
+        text: 'Add a row under **Hours changes**: the day (and the last day, for more than one), closed all day or different hours, and why. The website shows it on those days, lists it under "Changes coming up" beforehand, and goes back to your usual hours by itself afterward. You never need to touch your usual hours. Quick update has a shortcut: **Change the hours for a day**.',
+      },
+      { kind: 'h', text: 'Not sure yet?' },
+      {
+        kind: 'p',
+        text: 'Untick a fact\'s **confirmed** box while it is still a guess. The website shows a small "To confirm" tag beside it and keeps it out of search results, and Checkup reminds you about it, until you tick the box again.',
+      },
+      {
+        kind: 'callout',
+        tone: 'primary',
+        title: 'Open now works out the time for you.',
+        text: 'The "Open now" line is worked out in each visitor\'s browser from your hours, on your own time zone, so it is right at any time of day without you doing anything.',
       },
     ],
   },
@@ -1116,6 +1154,14 @@ guides.push(...peopleGuides(SITE.contactName));
 // Short links and QR codes (PORTS.md card 171, guides/links.ts).
 guides.push(...linkGuides);
 
+// The newsletter guide goes while the list lives elsewhere (ownNewsletter.ts, card 187). Removed in
+// place, after every push above, because other files import `guides` as one array.
+if (!OWN_NEWSLETTER) {
+  for (let i = guides.length - 1; i >= 0; i--) {
+    if (guides[i].slug === OWN_NEWSLETTER_GUIDE) guides.splice(i, 1);
+  }
+}
+
 /**
  * Which guides "Help for this page" shows for each document type (kit.config.ts
  * guide.forType, PORTS.md card 110). '*' is the fallback for anything unlisted.
@@ -1135,9 +1181,9 @@ export const GUIDES_FOR_TYPE: Record<string, string[]> = {
   ],
   privatePage: ['make-a-page-private', 'edit-a-page'],
   homePage: ['edit-a-page', 'images-and-alt', 'seo-fields'],
-  newsletter: ['send-the-newsletter'],
+  ...(OWN_NEWSLETTER ? { newsletter: [OWN_NEWSLETTER_GUIDE] } : {}),
   siteSettings: ['menus-and-footer', 'website-status', 'add-a-widget'],
-  businessInfo: ['menus-and-footer'],
+  businessInfo: ['hours-and-address', 'menus-and-footer'],
   redirect: ['rename-a-page'],
   popup: ['put-up-a-popup'],
   shortLink: ['short-links', 'qr-codes'],

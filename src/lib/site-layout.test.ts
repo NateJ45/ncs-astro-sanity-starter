@@ -5,7 +5,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { LAYOUT_SLOTS, DEFAULT_LAYOUT, resolveLayout, layoutAttrs } from './site-layout.ts';
+import {
+  LAYOUT_SLOTS,
+  DEFAULT_LAYOUT,
+  resolveLayout,
+  layoutAttrs,
+  isBoard,
+  hasFlow,
+} from './site-layout.ts';
 
 const schema = JSON.parse(readFileSync('brand/brand.config.schema.json', 'utf-8'));
 const config = JSON.parse(readFileSync('brand/brand.config.json', 'utf-8'));
@@ -40,7 +47,16 @@ test('a default or missing config emits no attributes', () => {
   assert.deepEqual(layoutAttrs(resolveLayout(DEFAULT_LAYOUT)), {});
 });
 
-test('non-default values emit attributes; hero never does; unknowns fall back', () => {
+test('the board hero puts data-hero on <html>; no other hero does (card 188)', () => {
+  assert.deepEqual(layoutAttrs(resolveLayout({ hero: 'board' })), { 'data-hero': 'board' });
+  for (const hero of ['bleed', 'split', 'editorial']) {
+    assert.deepEqual(layoutAttrs(resolveLayout({ hero })), {}, hero);
+  }
+  assert.equal(isBoard(resolveLayout({ hero: 'board' })), true);
+  assert.equal(isBoard(resolveLayout()), false);
+});
+
+test('non-default values emit attributes; a non-board hero does not; unknowns fall back', () => {
   const l = resolveLayout({ header: 'centered', hero: 'split', density: 'tight', cards: 'soft' });
   assert.deepEqual(layoutAttrs(l), {
     'data-header': 'centered',
@@ -48,4 +64,17 @@ test('non-default values emit attributes; hero never does; unknowns fall back', 
     'data-cards': 'soft',
   });
   assert.equal(resolveLayout({ header: 'nope' }).header, 'inline');
+});
+
+test('motion: reveal is the default and emits nothing; the others emit data-motion (card 192)', () => {
+  assert.equal(DEFAULT_LAYOUT.motion, 'reveal');
+  assert.deepEqual(layoutAttrs(resolveLayout({ motion: 'reveal' })), {});
+  for (const motion of ['flow', 'fade', 'none']) {
+    assert.deepEqual(layoutAttrs(resolveLayout({ motion })), { 'data-motion': motion }, motion);
+  }
+  assert.equal(hasFlow(resolveLayout({ motion: 'flow' })), true);
+  assert.equal(hasFlow(resolveLayout({ motion: 'fade' })), true);
+  assert.equal(hasFlow(resolveLayout({ motion: 'none' })), false);
+  assert.equal(hasFlow(resolveLayout()), false);
+  assert.equal(resolveLayout({ motion: 'wobble' }).motion, 'reveal');
 });

@@ -28,8 +28,10 @@ import { AddDocumentIcon } from '@sanity/icons/AddDocument';
 import { BellIcon } from '@sanity/icons/Bell';
 import { EditIcon } from '@sanity/icons/Edit';
 import { PinIcon } from '@sanity/icons/Pin';
+import { HOURS_TIME_OPTIONS } from '../lib/business-hours';
 import { runPageCheck } from './actions/checkPage';
 import { PAGE_BUILDER_TYPES } from './pageBuilderConfig';
+import { OWN_NEWSLETTER, OWN_NEWSLETTER_JOBS } from './ownNewsletter';
 import { slugify } from '../lib/slugify'; // scaffold: journal
 
 /**
@@ -86,6 +88,7 @@ export const kitConfig: KitConfig = {
     announcement: 'Announcement',
     popup: 'Popup',
     testimonial: 'Testimonial', // scaffold: testimonials
+    libraryDocument: 'Document', // scaffold: documents
     faqItem: 'Question and answer', // scaffold: faq
     faqCategory: 'Question group', // scaffold: faq
     journalEntry: 'Journal post', // scaffold: journal
@@ -179,6 +182,7 @@ export const kitConfig: KitConfig = {
         { title: 'Journal posts', target: { pane: 'journal;journalEntry' } }, // scaffold: journal
         { title: 'Questions and answers', target: { pane: 'content;faqItem' } }, // scaffold: faq
         { title: 'Testimonials', target: { pane: 'content;testimonial' } }, // scaffold: testimonials
+        { title: 'Documents', target: { pane: 'content;libraryDocument' } }, // scaffold: documents
       ],
     },
     {
@@ -305,6 +309,52 @@ export const kitConfig: KitConfig = {
       job: { kind: 'edit', doc: 'siteSettings' },
       fields: [{ name: 'phone', title: 'Phone number', kind: 'string', max: 40 }],
     },
+    // Card 196: a dated hours change (a holiday, a closure, a short day) on
+    // Business info. The usual hours are never touched and the website goes
+    // back to them by itself after the day (src/lib/business-hours.ts).
+    {
+      id: 'hours-change',
+      title: 'Change the hours for a day',
+      detail: 'Closed for a holiday, or different hours. Back to normal after.',
+      meaning: 'times',
+      job: {
+        kind: 'append',
+        doc: 'businessInfo',
+        array: 'hoursChanges',
+        itemType: 'hoursChange',
+        at: 'end',
+      },
+      fields: [
+        { name: 'date', title: 'Which day', kind: 'date', required: true },
+        { name: 'endDate', title: 'Last day, if more than one', kind: 'date' },
+        {
+          name: 'kind',
+          title: 'What is different',
+          kind: 'select',
+          required: true,
+          options: [
+            { title: 'Closed all day', value: 'closed' },
+            { title: 'Different hours', value: 'hours' },
+          ],
+          initial: () => 'closed',
+        },
+        {
+          name: 'opens',
+          title: 'Opens (for different hours)',
+          kind: 'select',
+          options: HOURS_TIME_OPTIONS,
+        },
+        {
+          name: 'closes',
+          title: 'Closes (for different hours)',
+          kind: 'select',
+          options: HOURS_TIME_OPTIONS,
+        },
+        { name: 'note', title: 'Why (optional)', kind: 'string', max: 60 },
+      ],
+      doneMessage:
+        'The website shows the change on that day and goes back to your usual hours by itself.',
+    },
     // "Make a short link" (card 171) opens a new short link rather than a short
     // form: the full form has the page picker, the clash warnings while typing
     // and the QR code button, none of which a Quick update form can offer.
@@ -375,6 +425,9 @@ export const kitConfig: KitConfig = {
     // The email backbone (card 127): the Newsletter card and RSVP counts. Each
     // says "not set up yet" until the Worker has the settings (OPERATIONS.md, "Email").
     mail: true,
+    // Home's Newsletter card follows ownNewsletter.ts (card 187), the one switch for every
+    // newsletter screen. TRUE (the default) keeps it.
+    newsletter: OWN_NEWSLETTER,
     // Card 110: the status line under the top bar, and the help panel.
     navbarStatus: true,
     helpPanel: true,
@@ -393,6 +446,12 @@ export const kitConfig: KitConfig = {
     plan: 'auto',
   },
 };
+
+// The website's own newsletter job and tile are left out while the list lives elsewhere
+// (ownNewsletter.ts, card 187). Filtered here rather than in the list, so each job keeps its typing.
+kitConfig.quickUpdate = kitConfig.quickUpdate?.filter(
+  (job) => OWN_NEWSLETTER || !OWN_NEWSLETTER_JOBS.has(job.id),
+);
 
 /**
  * The site's own page-builder rules (the authoring kit, PORTS.md card 109).

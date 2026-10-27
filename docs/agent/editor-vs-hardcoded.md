@@ -17,7 +17,7 @@
 - **`stickyCtaLabel`** -- per-page label for the sticky CTA chip. Clearing it hides the chip on that surface.
 - **Section visibility** -- `siteSettings.sectionVisibility` boolean toggles for each opt-in module section. Toggling any one off removes that section from the nav, footer, homepage, and its own route simultaneously. Core pages are always on. See [Section visibility](page-architecture.md#section-visibility).
 - **404 page** -- `notFoundPage` singleton (eyebrow, headline, body, hero photo, CTA labels + hrefs). Every field has a hardcoded fallback so the page works before the doc exists.
-- **Privacy page** -- `privacyPage` singleton (body Portable Text, lastUpdated). A plain static fallback renders before the doc exists.
+- **Privacy page** -- `privacyPage` singleton (body Portable Text, lastUpdated; or a Page layout with a "Privacy policy text" block, card 190). A plain static fallback renders before the doc exists.
 - **Start Here guide** -- `studioGuide` singleton: the "How the website works" handbook panel in Studio. Update the site map, how-tos, and tips without a code change.
 - **Start Here business notes** -- `studioNotes` singleton: the three static positioning sections in the "Your business at a glance" panel.
 

@@ -200,7 +200,7 @@ right from the first deploy.
 
 ## Step 5 - Choose a direction, then apply the brand
 
-Do not start with the reskin: it changes colours, fonts, radius and four coarse layout slots, not the full structure. First fill
+Do not start with the reskin: it changes colours, fonts, radius and five coarse layout slots, not the full structure. First fill
 `docs/templates/design-brief.md` (PRODUCT.md and DESIGN.md), capture references with
 `npm run references -- <urls>`, and run the `/design-directions` command to pick one of 3 or 4
 genuinely different homepage directions. See OPERATIONS.md, "Design directions".
@@ -444,6 +444,11 @@ npm run parity compare
 
 Then Lighthouse on the key pages. The target is 100/100/100/100 on desktop. When
 a score drops, find out why before merging rather than after.
+
+If the client has things to give you (wording, facts, photos), turn on the client notes first: `CLIENT_NOTES_ON` in
+`src/data/client-notes.ts` (off by default; `docs/agent/client-notes.md`). It shows a notes pill per page, highlights
+`[Client: ...]` and `[Placeholder: ...]` wording and puts a "Photo needed" box over stand-in pictures. Turn it off at
+launch, and search the content for leftover `[Client:` and `[Placeholder:` text before you do.
 
 Then work through `docs/bootstrap/setup-checklist.md` end to end. It exists so
 that the things with no gate behind them (a real favicon, a tested contact form,

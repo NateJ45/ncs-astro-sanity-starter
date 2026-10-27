@@ -33,6 +33,43 @@ export const CTA_PROJECTION = `{
 const SECTION_ARMS = `
     // The RSVP form names its event "<document id>:<block key>" (card 127).
     _type == "rsvpSection" => { "pageId": ^._id },
+    // The documents list (card 197): the newest 60 files; the block picks its group and count.
+    // scaffold: documents
+    _type == "documentsSection" => {
+      ...,
+      "items": *[_type == "libraryDocument" && defined(file.asset)] | order(date desc)[0...60]{
+        _id, title, category, date, note, expires,
+        "file": file{
+          "url": asset->url, "size": asset->size,
+          "extension": asset->extension, "originalFilename": asset->originalFilename
+        }
+      }
+    },
+    // scaffold:end
+    // Every main page a page builder (card 190): the Contact form block draws the form's
+    // settings from the Contact page document, so it is the same form wherever it is placed.
+    _type == "contactFormSection" => {
+      ...,
+      "settings": *[_type == "contactPage"][0]{
+        formIntroNote,
+        formProjectTypeOptions, formLocationOptions, formBudgetOptions,
+        formTimelineOptions, formSourceOptions,
+        formFields[]{ label, kind, options, required },
+        whatToExpectEyebrow, whatToExpectHeadline, whatToExpectContent,
+        postInquiryRoadmap[]{ title, body, timeEstimate },
+        schedulingLink, schedulingLinkLabel, availabilityNote
+      }
+    },
+    // The form builder (card 194): the form's words only. The recipient's NAME is looked up for
+    // the page; its address is never in the dataset (src/lib/site-form.ts).
+    _type == "formSection" => {
+      ...,
+      "form": form->{
+        _id, title, intro, mode, askForContact, allowAnonymous, questions, recipient,
+        submitLabel, successMessage,
+        "recipientName": *[_type == "siteSettings"][0].formRecipients[key == ^.recipient][0].name
+      }
+    },
     // The builder kit (builderSections.ts, PORTS.md card 173). Columns, fold-outs,
     // tabs and the schedule carry no image or button, so they need no arm.
     _type == "buttonRowSection" => { ..., links[]{ ..., link${CTA_PROJECTION} } },
@@ -46,11 +83,31 @@ const SECTION_ARMS = `
       ...,
       cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} }
     },
+    // Card 193: blocks with pictures or buttons inside them. The contact card, newsletter and
+    // calendar blocks carry plain fields only.
+    _type == "progressSection" => { ..., link${CTA_PROJECTION} },
+    _type == "iconCardsSection" => {
+      ...,
+      cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} }
+    },
+    _type == "stepsRailSection" => {
+      ...,
+      steps[]{ ..., link${CTA_PROJECTION} },
+      link${CTA_PROJECTION}
+    },
+    _type == "hubSection" => {
+      ...,
+      groups[]{ ..., cards[]{ ..., image${IMAGE_PROJECTION}, link${CTA_PROJECTION} } }
+    },
     _type == "heroSection" => {
       ...,
       backgroundImage${IMAGE_PROJECTION},
       primaryCta${CTA_PROJECTION},
-      secondaryCta${CTA_PROJECTION}
+      secondaryCta${CTA_PROJECTION},
+      // The photo hero (card 189): the clips as URL and type, the short-facts card's link resolved.
+      backgroundVideo{ "url": asset->url, "mimeType": asset->mimeType },
+      backgroundVideoPhone{ "url": asset->url, "mimeType": asset->mimeType },
+      glance{ ..., link${CTA_PROJECTION} }
     },
     _type == "ctaBandSection" => {
       ...,
@@ -248,7 +305,9 @@ export const SITE_SETTINGS_PROJECTION = `{
     title,
     tagline,
     email,
+    emailConfirmed,
     phone,
+    phoneConfirmed,
     businessType,
     "availabilityStatus": *[_type == "businessInfo"][0].availabilityStatus,
     "serviceAreas": *[_type == "businessInfo"][0].serviceAreas,
@@ -258,6 +317,18 @@ export const SITE_SETTINGS_PROJECTION = `{
     "city": *[_type == "businessInfo"][0].city,
     "state": *[_type == "businessInfo"][0].state,
     "serviceRegion": *[_type == "businessInfo"][0].serviceRegion,
+    // The business facts (card 196, src/lib/business-facts.ts): the street
+    // address, its confirmed flag, and the opening hours with their dated changes.
+    ...*[_type == "businessInfo"][0]{
+      businessModel,
+      street,
+      zip,
+      addressConfirmed,
+      findUs,
+      openingHours[]{ _key, days, opens, closes, label, confirmed },
+      hoursNote,
+      hoursChanges[]{ _key, date, endDate, kind, opens, closes, note }
+    },
     socialInstagram,
     socialFacebook,
     socialLinks[]{
@@ -285,9 +356,21 @@ export const SITE_SETTINGS_PROJECTION = `{
     },
     legalNav[]${NAV_LINK_PROJECTION},
     headerCta{ show, label, link${NAV_LINK_PROJECTION} },
+    headerSecondary{ label, link${NAV_LINK_PROJECTION} },
     showEmail,
     showSocials,
     showFooterSocials,
+    // Wayfinding (card 191, src/lib/wayfinding.ts). All empty on an untouched site.
+    phoneMenuGroups[]{ _key, title, links[]${NAV_LINK_PROJECTION} },
+    whereNext[]{ _key, note, link${NAV_LINK_PROJECTION} },
+    footerStyle,
+    actionBars[]{
+      _key,
+      everyPage,
+      text,
+      "page": page->{ "docType": _type, "slug": slug.current, archived },
+      action${NAV_LINK_PROJECTION}
+    },
     sectionVisibility{
       showPortfolio,
       showJournal,
@@ -509,6 +592,7 @@ export async function getFaqPage() {
 export async function getContactPage() {
   return sanityFetch(
     `*[_type == "contactPage"][0]{
+    ${sectionsProjection('pageBuilder')},
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -606,6 +690,7 @@ const JOURNAL_CARD_PROJECTION = `{
 export async function getJournalPage() {
   return sanityFetch(
     `*[_type == "journalPage"][0]{
+    ${sectionsProjection('pageBuilder')},
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -708,6 +793,7 @@ export async function getAllJournalSlugs(): Promise<string[]> {
 export async function getPrivacyPage() {
   return sanityFetch(
     `*[_type == "privacyPage"][0]{
+    ${sectionsProjection('pageBuilder')},
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},

@@ -1,0 +1,13 @@
+---
+// Safe to edit by hand
+// Loads the browser half of the opening hours (src/scripts/business-live.ts,
+// PORTS.md card 196). Its own component so it is rendered, and its script
+// bundled into the page, ONLY where hours actually show: Astro includes a
+// component's script when the component renders, so OpenStatus and HoursTable
+// render this inside their "has hours" branch and a site with no hours ships no
+// script at all.
+---
+
+<script>
+  import '@/scripts/business-live';
+</script>

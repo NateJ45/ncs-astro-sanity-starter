@@ -21,7 +21,11 @@
 //   3. "Search the site" row (only when site search is on, card 126)
 //   4. Tagline in the display serif
 //   5. Nav links: flat items are single rows; dropdown groups are a heading with indented
-//      sub-items underneath (always expanded, the drawer scrolls)
+//      sub-items underneath (always expanded, the drawer scrolls). With Site settings > Phone
+//      menu groups filled in (card 191, from FBC Auburn), the drawer goes full width and the
+//      links become labelled groups of big display-font rows instead: each group's name is an
+//      h2 that labels its list, and the page you are on is marked (aria-current). No groups =
+//      this list, byte for byte.
 //   6. Email, phone, social icons and the theme toggle, pushed to the bottom
 //   7. The logo at the foot of the panel
 // Motion: the panel slides in from the right with a transform (globals.css, "Mobile menu"); the
@@ -35,6 +39,7 @@ import { IconBrandInstagram, IconBrandFacebook } from '@tabler/icons-react';
 import ThemeToggle from './ThemeToggle';
 import { telHref } from '@/lib/phone';
 import type { NavItem } from '@/lib/siteSettings';
+import type { PhoneMenuGroup } from '@/lib/wayfinding';
 
 interface Props {
   links: NavItem[];
@@ -52,8 +57,14 @@ interface Props {
   brandName?: string;
   /** The drawer's primary button: the header's own button (Site Settings). */
   cta?: { show: boolean; label: string; href: string };
+  /** The optional second header button (card 187); null or absent draws nothing. */
+  secondary?: { label: string; href: string } | null;
   /** Visitor search is on (src/data/site.ts search.enabled, PORTS.md card 126). */
   search?: boolean;
+  /** Card 191: Site settings > Phone menu groups, resolved (src/lib/wayfinding.ts). Empty = the usual list. */
+  groups?: PhoneMenuGroup[];
+  /** The page being viewed (publicPath), so its row is marked in the groups. */
+  current?: string;
 }
 
 const {
@@ -63,8 +74,15 @@ const {
   logoDarkUrl,
   brandName = 'Studio Starter',
   cta = { show: true, label: 'Book a consultation', href: '/contact/' },
+  secondary = null,
   search = false,
+  groups = [],
+  current,
 } = Astro.props;
+
+const grouped = groups.length > 0;
+const isCurrent = (href: string) =>
+  !!current && (href === '/' ? current === '/' : current.startsWith(href.replace(/\/?$/, '/')));
 
 const tagline = siteSettings?.tagline ?? 'Your tagline goes here.';
 const email = siteSettings?.email;
@@ -85,7 +103,12 @@ const fb = siteSettings?.socialFacebook;
     <Menu size={22} aria-hidden="true" />
   </a>
 
-  <dialog id="site-menu" class="mobile-menu" aria-labelledby="site-menu-title" data-menu>
+  <dialog
+    id="site-menu"
+    class={grouped ? 'mobile-menu mobile-menu--groups' : 'mobile-menu'}
+    aria-labelledby="site-menu-title"
+    data-menu
+  >
     <div class="mobile-menu__panel flex flex-col overflow-y-auto border-t-4 border-t-primary bg-background text-foreground">
       <div class="flex items-center justify-between pt-l pr-m pb-m pl-l">
         <p
@@ -116,6 +139,17 @@ const fb = siteSettings?.socialFacebook;
         </div>
       )}
 
+      {secondary && (
+        <div class="px-l pb-l">
+          <a
+            href={secondary.href}
+            class="block w-full rounded-md border border-primary px-m py-m text-center text-xs font-semibold tracking-eyebrow text-link uppercase transition-colors hover:bg-accent"
+          >
+            {secondary.label}
+          </a>
+        </div>
+      )}
+
       {/* Visitor search (card 126). A real link to /search/, so it works without the script. */}
       {search && (
         <div class="px-l pb-l">
@@ -132,38 +166,80 @@ const fb = siteSettings?.socialFacebook;
 
       <p class="px-l pb-l font-display text-h4 leading-snug text-foreground/85 italic">{tagline}</p>
 
-      <nav class="border-t border-border-soft py-s" aria-label="Primary mobile">
-        {links.map((item) =>
-          item.kind === 'flat' ? (
-            <a
-              href={item.href}
-              class="flex items-center px-l py-s font-display text-lg text-foreground transition-colors hover:bg-muted hover:text-link"
-            >
-              {item.label}
-            </a>
-          ) : (
-            <div>
-              {/* Group heading: not a link; the sub-items carry the real hrefs. */}
-              <p class="px-l pt-m pb-xs text-xs tracking-eyebrow text-foreground/80 uppercase">
-                {item.label}
-              </p>
-              {item.items.map((sub) => (
-                <a
-                  href={sub.href}
-                  class="flex items-center gap-xs py-xs pr-l pl-[calc(theme(spacing.l)+0.5rem)] font-body text-base text-foreground transition-colors hover:bg-muted hover:text-link"
-                >
-                  <ChevronRight
-                    size={12}
-                    className="shrink-0 text-foreground/40"
-                    aria-hidden="true"
-                  />
-                  {sub.label}
-                </a>
-              ))}
+      {grouped ? (
+        <nav class="mobile-menu__groups border-t border-border-soft" aria-label="Primary mobile">
+          {groups.map((group, gi) => (
+            <div class="mobile-menu__group">
+              <h2 id={`site-menu-group-${gi}`} class="mobile-menu__group-label">
+                {group.title}
+              </h2>
+              <ul class="mobile-menu__rows" aria-labelledby={`site-menu-group-${gi}`}>
+                {group.links.map((link) => (
+                  <li>
+                    <a
+                      href={link.href}
+                      class="mobile-menu__row"
+                      aria-current={isCurrent(link.href) ? 'page' : undefined}
+                    >
+                      <span class="mobile-menu__label">{link.label}</span>
+                      <svg
+                        class="mobile-menu__arrow"
+                        viewBox="0 0 48 14"
+                        width="48"
+                        height="14"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path
+                          d="M0 7h46M40 1l6 6-6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ),
-        )}
-      </nav>
+          ))}
+        </nav>
+      ) : (
+        <nav class="border-t border-border-soft py-s" aria-label="Primary mobile">
+          {links.map((item) =>
+            item.kind === 'flat' ? (
+              <a
+                href={item.href}
+                class="flex items-center px-l py-s font-display text-lg text-foreground transition-colors hover:bg-muted hover:text-link"
+              >
+                {item.label}
+              </a>
+            ) : (
+              <div>
+                {/* Group heading: not a link; the sub-items carry the real hrefs. */}
+                <p class="px-l pt-m pb-xs text-xs tracking-eyebrow text-foreground/80 uppercase">
+                  {item.label}
+                </p>
+                {item.items.map((sub) => (
+                  <a
+                    href={sub.href}
+                    class="flex items-center gap-xs py-xs pr-l pl-[calc(theme(spacing.l)+0.5rem)] font-body text-base text-foreground transition-colors hover:bg-muted hover:text-link"
+                  >
+                    <ChevronRight
+                      size={12}
+                      className="shrink-0 text-foreground/40"
+                      aria-hidden="true"
+                    />
+                    {sub.label}
+                  </a>
+                ))}
+              </div>
+            ),
+          )}
+        </nav>
+      )}
 
       {/* Spacer pushes the contact block and logo to the bottom. */}
       <div class="flex-1"></div>

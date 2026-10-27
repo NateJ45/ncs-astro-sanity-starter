@@ -16,6 +16,9 @@ import Hero from '@/components/Hero.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import StatsRow from '@/components/StatsRow.astro';
 import SectionDivider from '@/components/SectionDivider.astro';
+import BoardRule from '@/components/board/BoardRule.astro';
+import { layout } from '@/data/layout';
+import { isBoard } from '@/lib/site-layout';
 import RichTextSection from '@/components/sections/RichTextSection.astro';
 import ImageText from '@/components/sections/ImageText.astro';
 import GalleryGrid from '@/components/sections/GalleryGrid.astro';
@@ -35,11 +38,21 @@ import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
 import RsvpSection from '@/components/sections/RsvpSection.astro';
+import LatestVideo from '@/components/sections/LatestVideo.astro';
+import DocumentsList from '@/components/sections/DocumentsList.astro'; // scaffold: documents
+// Every main page a page builder (card 190): the pieces Contact, Privacy and Journal drew in code.
+import ContactFormSection from '@/components/sections/ContactFormSection.astro';
+import PrivacyPolicy from '@/components/sections/PrivacyPolicy.astro';
+import JournalPosts from '@/components/sections/JournalPosts.astro'; // scaffold: journal
+import FormSection from '@/components/sections/FormSection.astro';
 import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
 import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
 import { sectionAnchors, sectionHeadingText } from '@/lib/section-anchors';
-import { primaryBudget } from '@/lib/cta-budget';
+import { primaryBudget, repeatsHeaderCta } from '@/lib/cta-budget';
+import { ctaHref } from '@/lib/cta-href';
+import { getSiteSettings } from '@/lib/queries';
+import { resolveSiteSettings } from '@/lib/siteSettings';
 import { expandSyncedSections } from '@/lib/authoring';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
 import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
@@ -116,13 +129,35 @@ const rows = classified.map((row, i) => ({ ...row, headingId: anchorIds[i] }));
 // secondary variant. A closing band always draws one (CtaLink has a fallback).
 // A Hero or FinalCta a page draws OUTSIDE this renderer is not counted.
 // An event's main button (the builder kit, card 173) counts too.
+// The header's button keeps the accent on every page (card 187), so a body
+// button that goes where the header button goes repeats it and draws secondary
+// without spending the budget: the accent passes to the page's own next step.
+const headerCta = resolveSiteSettings(await getSiteSettings()).headerCta;
+const own = (href: string) => !repeatsHeaderCta(href, headerCta);
 const ctaVariant = primaryBudget(rows, ({ block }) =>
   block._type === 'ctaBandSection'
     ? // A button left empty draws nothing (CtaLink), so it cannot hold the accent either.
-      !(block.cta && !block.cta.label && !block.cta.linkType && !block.cta.href)
+      !(block.cta && !block.cta.label && !block.cta.linkType && !block.cta.href) &&
+      own(ctaHref(block.cta))
     : block._type === 'heroSection'
-      ? !!block.primaryCta
-      : block._type === 'eventDetailsSection' && !!block.button?.label,
+      ? !!block.primaryCta && own(ctaHref(block.primaryCta))
+      : block._type === 'eventDetailsSection'
+        ? !!block.button?.label && own(ctaHref(block.button))
+        : // Card 193: the contact card's big Call button, and the steps rail's closing button.
+          block._type === 'contactCardSection'
+          ? block.callButtons === true
+          : block._type === 'stepsRailSection' && !!block.link?.label && own(ctaHref(block.link)),
+);
+
+// The board grammar (brand.config.json layout.hero = 'board', card 188): every section opens with
+// a rule (BoardRule) on one ground, in place of the cadence's divider. Not before the first
+// section, not before or straight after a hero (the page head has its own spacing), and not
+// before a spacer, which is a break of its own. Off on every other site, so nothing changes.
+const board = isBoard(layout);
+const UNRULED = new Set(['heroSection', 'spacerSection']);
+const ruled = rows.map(
+  ({ block }, i) =>
+    board && i > 0 && !UNRULED.has(block._type) && rows[i - 1].block._type !== 'heroSection',
 );
 
 // A real element in preview, nothing at all on the live site. The wrapper must
@@ -142,7 +177,8 @@ const editKeyOf = (block: unknown) => {
 
 {rows.map(({ block: s, surface, insertDividerBefore, headingId }, rowIndex) => (
   <>
-    {insertDividerBefore && <SectionDivider />}
+    {insertDividerBefore && !board && <SectionDivider />}
+    {ruled[rowIndex] && <BoardRule />}
 
     <Wrap {...wrapAttrs(editKeyOf(s))}>
       {isBuilderBlock(s) ? (
@@ -166,6 +202,10 @@ const editKeyOf = (block: unknown) => {
           size={s.size ?? 'short'}
           headingId={headingId}
           primaryVariant={ctaVariant(rowIndex)}
+          heroStyle={s.heroStyle}
+          glance={s.glance}
+          backgroundVideo={s.backgroundVideo}
+          backgroundVideoPhone={s.backgroundVideoPhone}
         />
       ) : s._type === 'ctaBandSection' ? (
         <FinalCta
@@ -361,6 +401,22 @@ const editKeyOf = (block: unknown) => {
         />
       ) : s._type === 'rsvpSection' ? (
         <RsvpSection block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : s._type === 'latestVideoSection' ? (
+        <LatestVideo block={s} surface={surface ?? 'background'} headingId={headingId} />
+      ) : // scaffold-branch: documents
+      s._type === 'documentsSection' ? (
+        <DocumentsList
+          heading={s.heading}
+          intro={s.intro}
+          category={s.category}
+          limit={s.limit}
+          showDates={s.showDates}
+          items={s.items ?? []}
+          surface={surface ?? 'background'}
+          headingId={headingId}
+        />
+      ) : s._type === 'formSection' ? (
+        <FormSection block={s} surface={surface ?? 'background'} headingId={headingId} />
       ) : s._type === 'embedSection' ? (
         <EmbedSection
           eyebrow={s.eyebrow}
@@ -371,6 +427,17 @@ const editKeyOf = (block: unknown) => {
           runsOnPage={s.runsOnPage === true}
           trustedCode={trustedCode}
           heightHint={s.heightHint ?? 'medium'}
+          headingId={headingId}
+        />
+      ) : s._type === 'contactFormSection' ? (
+        <ContactFormSection settings={s.settings} sidebar={s.sidebar !== false} />
+      ) : s._type === 'privacyPolicySection' ? (
+        <PrivacyPolicy lastUpdated={s.lastUpdated} body={s.body} />
+      ) : // scaffold-branch: journal
+      s._type === 'journalPostsSection' ? (
+        <JournalPosts
+          showCategories={s.showCategories !== false}
+          showNewsletter={s.showNewsletter !== false}
           headingId={headingId}
         />
       ) : s._type === 'dynamicListSection' ? (

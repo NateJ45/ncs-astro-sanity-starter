@@ -19,6 +19,7 @@ import {
 import { PAGE_TEMPLATES, TEMPLATE_GROUPS, templateMenuTitle } from '../sanity/pageTemplates.ts';
 import { SECTION_PATTERNS } from '../sanity/sectionPatterns.ts';
 import { pageWarnings, type PageRules } from './page-guardrails.ts';
+import { checkPage, type PageCheckConfig } from './page-checks.ts';
 
 const counter = () => {
   let n = 0;
@@ -50,9 +51,11 @@ function arrayMembers(value: unknown, out: Record<string, unknown>[] = []) {
   return out;
 }
 
-/** Block type names declared in a schema library file. */
+/** Block type names declared in a schema library file ([] when a scaffold removed the file). */
 function declaredTypes(file: string): string[] {
-  const src = readFileSync(new URL(`../sanity/schemaTypes/${file}`, import.meta.url), 'utf8');
+  const url = new URL(`../sanity/schemaTypes/${file}`, import.meta.url);
+  if (!existsSync(url)) return [];
+  const src = readFileSync(url, 'utf8');
   return [...src.matchAll(/defineType\(\{\s*name:\s*'([A-Za-z]+)'/g)].map((m) => m[1]);
 }
 
@@ -314,7 +317,21 @@ const LIBRARY = [
   ...declaredTypes('sections.ts'),
   ...declaredTypes('builderSections.ts'),
   ...declaredTypes('richSections.ts'),
+  // Each in a file of its own (card 197); the documents one goes with its scaffold capability.
+  ...declaredTypes('latestVideoSection.ts'),
+  ...declaredTypes('documentsSection.ts'),
 ].filter((t) => t !== 'syncedSection');
+
+// The blocks a main page is built around (card 190). They are offered on their own page only, so
+// they are not in LIBRARY (a custom page or a saved section never takes them), but each still needs
+// a fixture on the wall and a thumbnail in the + Add menu. journalPostsSection.ts is deleted by
+// `npm run scaffold -- --remove journal`, so it is read only when it is there.
+const PAGE_BLOCKS = [
+  ...declaredTypes('mainPageSections.ts'),
+  ...(existsSync(new URL('../sanity/schemaTypes/journalPostsSection.ts', import.meta.url))
+    ? declaredTypes('journalPostsSection.ts')
+    : []),
+];
 
 describe('page templates (src/sanity/pageTemplates.ts)', () => {
   const allowed = new Set(LIBRARY);
@@ -429,7 +446,7 @@ describe('section patterns (src/sanity/sectionPatterns.ts)', () => {
 });
 
 describe('section thumbnails (the grid view of the + Add menu)', () => {
-  const types = LIBRARY;
+  const types = [...LIBRARY, ...PAGE_BLOCKS];
   const wall = readFileSync(new URL('../pages/styleguide/sections.astro', import.meta.url), 'utf8');
 
   for (const type of types) {
@@ -437,6 +454,23 @@ describe('section thumbnails (the grid view of the + Add menu)', () => {
       assert.ok(wall.includes(`_type: '${type}'`), `add a ${type} fixture to the sections wall`);
       const file = new URL(`../../public/section-thumbnails/${type}.jpg`, import.meta.url);
       assert.ok(existsSync(file), `run npm run thumbnails to shoot ${type}`);
+    });
+  }
+});
+
+// A block that fills itself from a collection or another tab must not be told it is empty
+// (PORTS.md card 187). A fresh one of each listed block, nothing typed, raises no "empty" finding.
+describe('self-filling blocks (pageBuilderConfig.ts SELF_FILLING_SECTIONS)', () => {
+  const config: PageCheckConfig = {
+    sectionArrays: ['pageBuilder'],
+    selfFillingSections: CHECKS.selfFillingSections,
+    codeOwnedPaths: [],
+  };
+  for (const type of CHECKS.selfFillingSections) {
+    it(`${type}: a fresh one raises no empty-section finding`, () => {
+      const doc = { pageBuilder: [{ _type: type, _key: 'k1' }] };
+      const empty = checkPage(doc, config).find((g) => g.id === 'empty')!;
+      assert.deepEqual(empty.findings, []);
     });
   }
 });

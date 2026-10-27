@@ -3,6 +3,9 @@
 // /journal. The posts grid itself is auto-populated from journalEntry documents.
 
 import { defineType, defineField } from 'sanity';
+import { sectionArrayOptions } from './sections';
+import { JOURNAL_SECTION_TYPES } from './richSections';
+import { pageBuilderAuthoring } from '../pageBuilderAuthoring';
 
 export const journalPage = defineType({
   name: 'journalPage',
@@ -14,6 +17,7 @@ export const journalPage = defineType({
     { name: 'seo', title: 'SEO' },
     { name: 'hero', title: 'Hero' },
     { name: 'final', title: 'Final CTA' },
+    { name: 'pageBuilder', title: 'Page layout' },
   ],
   fields: [
     defineField({
@@ -140,6 +144,23 @@ export const journalPage = defineType({
       options: { hotspot: true },
       description:
         'Optional. A photo behind the closing call-to-action. The site automatically darkens it so the headline and button stay readable. Leave empty to keep the solid charcoal panel.',
+    }),
+    // Every main page a page builder (card 190, ported from FBC Auburn). LEAVE THIS EMPTY and the
+    // page draws exactly as it always has, from the Hero and Final CTA fields on the other tabs. Add
+    // sections and the page is drawn from them instead: the posts list is a block you can move,
+    // and you can put anything from the library above or below it.
+    // scripts/main-pages-builder.mjs fills it from the old fields. Those fields are never
+    // deleted (rule 16).
+    defineField({
+      name: 'pageBuilder',
+      title: 'Page layout',
+      type: 'array',
+      group: 'pageBuilder',
+      description:
+        'Optional. Leave empty and this page keeps its usual layout (the Hero tab and the rest). Add sections to build the page yourself: drag to reorder, remove one to hide it, or add one from the library. Once this has sections it replaces the usual layout.',
+      of: JOURNAL_SECTION_TYPES,
+      options: sectionArrayOptions,
+      ...pageBuilderAuthoring,
     }),
   ],
   preview: { prepare: () => ({ title: 'Journal Page' }) },

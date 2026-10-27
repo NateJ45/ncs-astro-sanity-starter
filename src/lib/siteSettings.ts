@@ -32,6 +32,7 @@
 // document. Porting those is a separate change (see PORTS.md card 18).
 
 import { navHref, resolveNavLinks, type RawNavLink, type ResolvedNavLink } from '@/lib/nav-href';
+import type { RawActionBar, RawPhoneMenuGroup, RawWhereNextRow } from '@/lib/wayfinding';
 import { getSectionVisibility, type SectionVisibility } from '@/lib/sectionVisibility';
 
 /** One header menu entry: a plain link, or a dropdown group of links. */
@@ -48,6 +49,12 @@ export interface FooterColumn {
 /** The header's single button. */
 export interface HeaderCta {
   show: boolean;
+  label: string;
+  href: string;
+}
+
+/** The optional second header button: a label and a place to go. */
+export interface HeaderSecondary {
   label: string;
   href: string;
 }
@@ -71,11 +78,18 @@ export interface RawChromeSettings {
   footerColumns?: RawFooterColumn[] | null;
   legalNav?: (RawNavLink | null)[] | null;
   headerCta?: { show?: boolean | null; label?: string | null; link?: RawNavLink | null } | null;
+  /** Card 187: the optional second, quieter header button. */
+  headerSecondary?: { label?: string | null; link?: RawNavLink | null } | null;
   /** Undefined means YES: an untouched site keeps showing these. */
   showEmail?: boolean | null;
   showSocials?: boolean | null;
   showFooterSocials?: boolean | null;
   sectionVisibility?: Parameters<typeof getSectionVisibility>[0];
+  /** Card 191, wayfinding (src/lib/wayfinding.ts): all empty on an untouched site. */
+  phoneMenuGroups?: RawPhoneMenuGroup[] | null;
+  whereNext?: RawWhereNextRow[] | null;
+  footerStyle?: string | null;
+  actionBars?: RawActionBar[] | null;
 }
 
 export interface ResolvedChromeSettings {
@@ -85,6 +99,12 @@ export interface ResolvedChromeSettings {
   headerNav: NavItem[];
   /** The header's single button, already resolved to a label + href. */
   headerCta: HeaderCta;
+  /**
+   * The optional second header button (card 187). NULL until both its label and
+   * its link are filled in (and resolve to a page that exists), so the header
+   * and the phone menu draw it with one `&&` and an untouched site is unchanged.
+   */
+  headerSecondary: HeaderSecondary | null;
   /** Show the email row in the eyebrow strip + phone menu. Unset means yes. */
   showEmail: boolean;
   /** Show the social buttons in the eyebrow strip + phone menu. Unset means yes. */
@@ -169,6 +189,13 @@ function navFromSettings(items?: RawNavItem[] | null): NavItem[] | null {
   return mapped.length > 0 ? mapped : null;
 }
 
+/** The second header button, or null when either half is missing or the link goes nowhere. */
+function secondaryFromSettings(raw?: RawChromeSettings['headerSecondary']): HeaderSecondary | null {
+  const label = clean(raw?.label);
+  const href = navHref(raw?.link);
+  return label && href ? { label, href } : null;
+}
+
 /** Same idea for the footer's titled columns. */
 function footerColumnsFromSettings(cols?: RawFooterColumn[] | null): FooterColumn[] {
   if (!Array.isArray(cols) || cols.length === 0) return [];
@@ -192,6 +219,7 @@ export function resolveSiteSettings(raw?: RawChromeSettings | null): ResolvedChr
       label: clean(s.headerCta?.label) ?? FALLBACK_HEADER_CTA.label,
       href: navHref(s.headerCta?.link) ?? FALLBACK_HEADER_CTA.href,
     },
+    headerSecondary: secondaryFromSettings(s.headerSecondary),
     showEmail: onUnlessOff(s.showEmail),
     showSocials: onUnlessOff(s.showSocials),
     footerColumns: footerColumnsFromSettings(s.footerColumns),

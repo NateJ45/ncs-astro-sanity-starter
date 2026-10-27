@@ -1,17 +1,23 @@
 ---
 // Safe to edit by hand
-// Page hero. Two shapes:
+// Page hero. Two shapes, plus the opt-in photo hero:
 //   1) "image" hero (home, optionally Process/Services if a hero photo is added)
 //      — full-bleed Sanity background image with a dark scrim, h1 + subhead + CTAs overlay.
 //   2) "text" hero (About, Contact, FAQ, Process by default)
 //      — clean editorial heading on Soft Linen with eyebrow + headline + subhead, and the
 //      CTAs when the block has them.
 //
+//   3) "photo" hero (card 189): the block's Style set to "Photo behind the words" and a photo.
+//      PhotoHero.astro draws it (white words over the photo, an optional short-facts card and
+//      silent clip). Checked first; without the style or the photo nothing below changes.
+//
 // The image hero is the LCP element on the homepage. SanityImage is set to loading="eager"
 // in that case and the headline uses font-display (Cormorant Garamond), which BaseLayout
 // preloads inline. Don't add layout-shift animations to this section.
 
 import HeroBackground from '@/components/HeroBackground.astro';
+import PhotoHero, { type PhotoHeroGlance, type PhotoHeroVideo } from '@/components/PhotoHero.astro';
+import BoardPageHead from '@/components/board/BoardPageHead.astro';
 import CtaLink from '@/components/CtaLink.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 import { splitHeadingAccent } from '@/lib/heading-accent';
@@ -62,8 +68,10 @@ interface Props {
   scriptAccent?: string;
   /**
    * Hero structure: bleed (full-bleed image under a scrim, the original),
-   * split (dark text panel beside the image) or editorial (type only, image
-   * ignored). Defaults to the site-wide `layout.hero` from brand.config.json
+   * split (dark text panel beside the image), editorial (type only, image
+   * ignored) or board (an inner page's head on the page ground, the photo
+   * beside the words in the brand's shape: BoardPageHead, card 188; a tall
+   * hero draws as bleed). Defaults to the site-wide `layout.hero` from brand.config.json
    * (src/data/layout.ts). Pass it only to override one page, or from the
    * layouts fixture. With no image, split renders exactly as bleed does.
    */
@@ -73,6 +81,15 @@ interface Props {
    * section on the page already drew the one accent button (cta-budget.ts, card 158).
    */
   primaryVariant?: 'primary' | 'secondary';
+  /**
+   * The block's Style (card 189). 'photo' ("Photo behind the words") draws PhotoHero.astro when
+   * there is a background photo; anything else, or no photo, leaves this hero exactly as it was.
+   */
+  heroStyle?: string | null;
+  /** The photo hero's short-facts card and silent clips (card 189); ignored by every other style. */
+  glance?: PhotoHeroGlance | null;
+  backgroundVideo?: PhotoHeroVideo | null;
+  backgroundVideoPhone?: PhotoHeroVideo | null;
 }
 
 const {
@@ -89,9 +106,15 @@ const {
   scriptAccent,
   variant,
   primaryVariant = 'primary',
+  heroStyle,
+  glance,
+  backgroundVideo,
+  backgroundVideoPhone,
 } = Astro.props as Props;
 
-const heroVariant = variant ?? layout.hero;
+// The board head is for inner pages; a tall (home) hero on a board site keeps the bleed shape.
+const boardHead = (variant ?? layout.hero) === 'board' && size !== 'tall';
+const heroVariant = (variant ?? layout.hero) === 'board' ? 'bleed' : (variant ?? layout.hero);
 
 // Split the headline into a first word + the rest, so the rotator can swap
 // the first word in place without touching the rest of the line. Matches
@@ -248,7 +271,34 @@ const wrapperHeight =
   </script>
 )}
 
-{hasImage ? (
+{heroStyle === 'photo' && effectiveImages[0] ? (
+  <PhotoHero
+    eyebrow={eyebrow}
+    headline={headline}
+    subhead={subhead}
+    image={effectiveImages[0]}
+    primaryCta={primaryCta}
+    secondaryCta={secondaryCta}
+    headingId={headingId}
+    size={size}
+    primaryVariant={primaryVariant}
+    glance={glance}
+    video={backgroundVideo}
+    videoPhone={backgroundVideoPhone}
+  />
+) : boardHead ? (
+  <BoardPageHead
+    eyebrow={eyebrow}
+    headline={headline}
+    subhead={subhead}
+    image={effectiveImages[0] ?? null}
+    primaryCta={primaryCta}
+    secondaryCta={secondaryCta}
+    headingId={headingId}
+    headingAccent={scriptAccent}
+    primaryVariant={primaryVariant}
+  />
+) : hasImage ? (
   <section
     class:list={[
       'relative overflow-hidden bg-accent-dark text-bg flex flex-col justify-end',
@@ -309,6 +359,8 @@ const wrapperHeight =
         {(primaryCta || secondaryCta) && (
           <div class="mt-l flex flex-wrap gap-s">
             {primaryCta && <CtaLink cta={primaryCta} variant={primaryVariant} onDark />}
+            {/* A space between the buttons so site search reads two words, not "BookCall" (card 187);
+                the row is flex, so it changes nothing on screen. */}{' '}
             {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" onDark />}
           </div>
         )}
@@ -350,6 +402,8 @@ const wrapperHeight =
         {(primaryCta || secondaryCta) && (
           <div class="mt-l flex flex-wrap gap-s">
             {primaryCta && <CtaLink cta={primaryCta} variant={primaryVariant} />}
+            {/* A space between the buttons so site search reads two words, not "BookCall" (card 187);
+                the row is flex, so it changes nothing on screen. */}{' '}
             {secondaryCta && <CtaLink cta={secondaryCta} variant="secondary" />}
           </div>
         )}

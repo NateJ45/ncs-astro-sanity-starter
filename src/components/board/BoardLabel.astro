@@ -1,0 +1,20 @@
+---
+// Safe to edit by hand
+// The board grammar's one eyebrow (PORTS.md card 188, from FBC Auburn's SectionLabel): small caps
+// led by the brand marker. The marker is a token (--board-marker in src/styles/board.css): a short
+// rule in the primary colour by default; a brand points it at its own mark (Auburn draws three
+// stepped bricks). Renders as a <p> beside a heading, or an h2 when it IS the section's heading.
+import '@/styles/board.css';
+
+interface Props {
+  text: string;
+  as?: 'h2' | 'p';
+  id?: string;
+}
+const { text, as: Tag = 'p', id } = Astro.props as Props;
+---
+
+<Tag class="board-label" id={id}>
+  <span class="board-marker" aria-hidden="true"></span>
+  {text}
+</Tag>

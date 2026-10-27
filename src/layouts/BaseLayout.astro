@@ -14,7 +14,7 @@
 import { ClientRouter } from 'astro:transitions';
 import { site } from '@/data/site';
 import { layout } from '@/data/layout';
-import { layoutAttrs } from '@/lib/site-layout';
+import { layoutAttrs, hasFlow, type SiteLayout } from '@/lib/site-layout';
 import { urlFor } from '@/lib/sanity';
 import { localBusinessSchema } from '@/lib/schemas';
 import { getActiveAnnouncement, getPopups, getSiteCode } from '@/lib/queries';
@@ -24,9 +24,10 @@ import { resolveShareImage, type CardRequest } from '@/lib/og-card-marker';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import SitePopup from '@/components/SitePopup.astro';
+import ClientNotes from '@/components/ClientNotes.astro';
+import FlowMotion from '@/components/FlowMotion.astro';
 import BackToTop from '@/components/BackToTop';
 import Analytics from '@/components/Analytics.astro';
-import { Toaster } from '@/components/ui/sonner';
 import '@/styles/globals.css';
 // Starwind UI CSS — accordion keyframes + @theme inline for new semantic tokens.
 // Imported AFTER globals.css so the brand :root declarations in globals.css win
@@ -56,6 +57,10 @@ interface Props {
   searchType?: string;
   /** The generated share card's words (card 169): `{ kicker }` for the small line (a section, a date), `{ title }` to replace the page title, `{ home: true }` for Home's card (the site name with the Site settings tagline). */
   ogCard?: Partial<CardRequest>;
+  /** The flow layer's full level for this page (card 192): 'full' marks <main> data-flow-full when the site's motion is 'flow' (Home and the 404 pass it). Ignored under any other motion. */
+  flow?: 'full';
+  /** Override brand.config.json layout.motion for this page only. For the styleguide's motion wall (/styleguide/motion/), so every motion can be tested from one build. */
+  motion?: SiteLayout['motion'];
 }
 
 const {
@@ -70,7 +75,14 @@ const {
   ogArticle,
   searchType = 'page',
   ogCard = {},
+  flow,
+  motion,
 } = Astro.props as Props;
+
+// Motion (card 192): the site's layout.motion, or this page's override. The flow layer's script
+// is rendered only when it runs (flow or fade), so the default ('reveal') ships nothing new.
+const pageLayout: SiteLayout = motion ? { ...layout, motion } : layout;
+const flowFull = flow === 'full' && pageLayout.motion === 'flow';
 
 // Visitor search (PORTS.md card 126). With search on, <main> carries
 // data-pagefind-body so scripts/build-search-index.mjs indexes main content
@@ -166,7 +178,7 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
 ---
 
 <!doctype html>
-<html lang={site.lang} {...layoutAttrs(layout)}>
+<html lang={site.lang} {...layoutAttrs(pageLayout)}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -248,13 +260,16 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
         state in globals.css ([data-reveal], [data-stagger-grid], .img-curtain)
         is scoped to it, so with JavaScript off the page renders finished.
         Reduced-motion visitors never get the class, so they see the page at
-        rest too. The swap resets className, so it rides the same re-apply. */}
+        rest too. The swap resets className, so it rides the same re-apply.
+        A site whose layout.motion is 'none' (html[data-motion=none], card 192)
+        never gets it either. */}
     <script is:inline define:vars={{ key: site.themeStorageKey }}>
       (function () {
         function applyTheme() {
           document.documentElement.classList.toggle(
             'motion',
-            !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+              document.documentElement.getAttribute('data-motion') !== 'none',
           );
           let dark = false;
           try {
@@ -353,18 +368,25 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       data-pagefind-body={searchable ? '' : undefined}
       data-pagefind-filter={searchable ? `type:${searchType}` : undefined}
       data-pagefind-ignore={noindex ? 'all' : undefined}
+      data-flow-full={flowFull ? '' : undefined}
     >
       <slot />
     </main>
 
     <Footer siteSettings={siteSettings} />
 
+    {/* The client review layer (card 195): renders nothing unless CLIENT_NOTES_ON is true in
+        src/data/client-notes.ts AND the site is on a pre-launch address. */}
+    <ClientNotes />
+
+    {/* The flow layer (card 192): only when layout.motion is flow or fade. */}
+    {hasFlow(pageLayout) && <FlowMotion />}
+
     {/*
-      Both islands were previously `client:load` which forced the JS to
-      execute before the first paint completed. Neither is interactive
-      until later in the page lifecycle (BackToTop only appears after the
-      visitor scrolls 600px; Toaster only mounts a region, the toast call
-      sites import it on demand). Hydrating with `client:idle` lets the
+      BackToTop was previously `client:load` which forced the JS to
+      execute before the first paint completed. It is not interactive
+      until later in the page lifecycle (it only appears after the
+      visitor scrolls 600px). Hydrating with `client:idle` lets the
       browser settle the main thread first and shifts ~10–20ms of TBT off
       the critical path on mobile.
     */}
@@ -373,8 +395,8 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
     {/* The popup, when one is live for this page (SitePopup.astro has the rules). */}
     {showPopup && popup && <SitePopup popup={popup} />}
 
-    {/* Sonner toast region. Used by CopyEmailButton and ContactForm. Position bottom-right by default. */}
-    <Toaster client:idle position="bottom-right" />
+    {/* No toast region (card 187): the copy-email button confirms in a live region of its own,
+        so React and the toast library no longer load on every page for one "copied" message. */}
 
     {/* No Lenis (removed 2026-10-17, PORTS.md card 102, ported from fbcm's
         2026-09-24 removal). It added only a wheel glide, at a few KB of

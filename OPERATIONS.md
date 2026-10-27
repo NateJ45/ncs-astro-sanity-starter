@@ -80,7 +80,7 @@ The four core pages (home, about, services, process) and any custom `page` docum
 
 **Once a Sanity project is connected:** seed the pages with `npm run seed`, then edit sections in Studio → the relevant page singleton → the "Sections" tab.
 
-**Available block types:** the twelve general blocks (heroSection, richTextSection, imageTextSection, gallerySection, quoteSection, statSection, ctaBandSection, videoSection, spacerSection, logoStripSection, embedSection ("Custom code or embed", card 121), rsvpSection (card 127)) plus the page-specific rich blocks (founderSection, servicesGridSection, testimonialsSection, processSection, faqSection, teamSection on Home; storySection, valuesSection, faqSection, teamSection on About; servicesGridSection, serviceAreaSection, guaranteeSection, faqSection on Services; processSection, faqSection on Process).
+**Available block types:** the fourteen general blocks (heroSection, richTextSection, imageTextSection, gallerySection, quoteSection, statSection, ctaBandSection, videoSection, spacerSection, logoStripSection, embedSection ("Custom code or embed", card 121), rsvpSection (card 127), latestVideoSection ("Latest video", card 197), documentsSection ("Documents", card 197)) plus the page-specific rich blocks (founderSection, servicesGridSection, testimonialsSection, processSection, faqSection, teamSection on Home; storySection, valuesSection, faqSection, teamSection on About; servicesGridSection, serviceAreaSection, guaranteeSection, faqSection on Services; processSection, faqSection on Process).
 
 Blocks carry no background color field. `SectionRenderer` owns the alternating surface cadence automatically.
 
@@ -408,6 +408,39 @@ Without `MAIL_SECRET` and a sender the panel still saves an address, marked unco
 that already made the table under another migration number is fine: the SQL is `CREATE TABLE IF NOT EXISTS`. To see
 what is on file:
 `npx wrangler d1 execute <site>-contact --remote --command "SELECT recipient_key, email, pending_email, pending_status FROM form_recipient_addresses"`.
+
+### Forms: the form builder (PORTS.md card 194)
+
+An editor writes a form under **Content > Forms** (its questions, including a date and "tick any that apply", who
+receives it, and whether it is private) and puts it on any page with the **Form** block. Visitors post to
+`/api/form/`, which checks every answer against the form's own questions, stores the message in `CONTACT_DB` (table
+`form_submissions`) and emails it. Nothing anyone types reaches the public dataset; the Studio's **Messages** tool lists
+the rows. A **private** form's words are wiped from D1 as soon as its email is accepted, so the inbox is the only copy.
+
+Switching it on, after steps 1 to 3 above (a sender is required: until mail can reach a person, the block shows "please
+use the contact page" instead of the form):
+
+```powershell
+npx wrangler d1 migrations apply <site>-contact --remote   # adds form_submissions (0005); safe to run again
+```
+
+Where each form goes: **Site settings > Forms > Who forms can go to** lists names and short codes (`office` by
+default). An administrator sets each code's address in "Where form messages go" just below (card 174, confirmed by
+email). A code with no address goes to `office`, then to `CONTACT_TO`. A site can also keep the map in a secret:
+`npx wrangler secret put FORM_RECIPIENTS` with `{"office":"office@example.org"}`; a Studio address wins over it.
+
+Spam and size: a honeypot and a timing check (shared with the Contact form), Turnstile when `TURNSTILE_SECRET` and
+`PUBLIC_TURNSTILE_SITE_KEY` are both set, a 64 KB body cap and ten sends per visitor in fifteen minutes per Worker
+isolate. For a hard limit add a Cloudflare rate limiting rule on `POST /api/form/`.
+
+**A site that already has the table under another number** (FBC Auburn made it as `0002_form_submissions.sql`): keep
+your own file and do not add `0005`, or add it anyway; both are `CREATE TABLE IF NOT EXISTS` with the same columns,
+so applying either again changes nothing. D1 tracks applied files by name, so a renumbered copy simply runs as a no-op.
+
+**Locally:** as in "Email" above (`MAIL_TEST_FIXTURES=1` in `dist/server/.dev.vars`), then post the made-up
+`fixture-signup` or `fixture-private` form (`src/lib/site-form-fixtures.ts`) to `http://localhost:8787/api/form/`.
+To read what arrived:
+`npx wrangler d1 execute <site>-contact --remote --command "SELECT id, received_at, form_title, notified FROM form_submissions ORDER BY id DESC LIMIT 20"`.
 
 ## Studio workflow tools (PORTS.md card 117)
 

@@ -11,6 +11,15 @@
 @import '@fontsource-variable/inter';
 /* The photo viewer (src/components/Lightbox.astro), PORTABLE. */
 @import './lightbox.css';
+/* Metric-matched stand-ins for the display font while it loads (PORTS.md card 188), written by
+   `npm run font-fallback`; named second in --font-display below. */
+@import './font-fallbacks.css';
+/* The shape contract (.shape-step, .shape-gable, .shape-slab, .shape-tile, .shape-zoom), PORTABLE,
+   card 188. Class rules only: nothing changes until markup uses a class. */
+@import './shapes.css';
+/* The flow layer (src/scripts/flow.ts), PORTABLE, card 192. Every rule is keyed on
+   html[data-motion] or a class the script adds, so the default ('reveal') draws as before. */
+@import './flow.css';
 
 /* Tailwind v4 scans every non-gitignored file for class names. The committed
    parity baselines (scripts/.parity/*.html) and the Markdown docs name hundreds
@@ -42,7 +51,9 @@
   --color-white-pure: #ffffff;
 
   /* Fonts */
-  --font-display: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --font-display:
+    'Libre Baskerville', 'Libre Baskerville Fallback', 'Libre Baskerville Fallback Times', Georgia,
+    'Times New Roman', serif;
   --font-body: 'Inter Variable', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
   --font-script: 'Snell Roundhand', 'Apple Chancery', cursive;
@@ -54,6 +65,13 @@
   --text-h3: clamp(1.5rem, 2.5vw, 2rem);
   --text-h2: clamp(2rem, 4vw, 3rem);
   --text-h1: clamp(2.5rem, 6vw, 5rem);
+
+  /* Tailwind's small text sizes read the one scale (the :root block below, card 188), so a
+     utility and a stylesheet can never disagree. Same values as Tailwind's defaults. */
+  --text-xs: var(--fs-tag);
+  --text-sm: var(--fs-small);
+  --text-base: var(--fs-body);
+  --text-lg: var(--fs-lead);
 
   /* Typographic micro-rules. Codified so usage stays consistent across
      components — drift from ad-hoc arbitrary values (tracking-[0.22em],
@@ -347,6 +365,90 @@
 
 /* ---------- Base resets and defaults ---------------------------------- */
 
+/* ---------- The one scale (PORTS.md card 188, from FBC Auburn 2026-10-24) -------------
+   Every size, corner, gap, shadow and button measure a component or the brand layer asks for
+   comes from here. A value that is not on the scale is a bug: add a token before a one-off.
+   The starter's values are the ones it already drew (Tailwind's text sizes, the --radius
+   multiples its cards and buttons use, its fluid spacing), so naming them moved nothing. A brand
+   retunes the site by changing these, not by hunting utilities. Not theme-dependent, so no .dark
+   twin except the shadow. Placed AFTER the palette's :root and .dark blocks on purpose:
+   apply-brand rewrites the FIRST of each. docs/agent/design-tokens.md, "The one scale". */
+:root {
+  /* Text. */
+  --fs-tag: 0.75rem; /* 12px: eyebrows, tags, buttons, captions */
+  --fs-small: 0.875rem; /* 14px: meta lines, labels, footnotes */
+  --fs-body: 1rem; /* 16px: reading text */
+  --fs-lead: 1.125rem; /* 18px: a page or band intro (the hero subhead) */
+  --fs-button: var(--fs-tag);
+  --fs-title: var(--text-h4); /* a card or block title */
+  --fs-title-sm: var(--text-h5); /* a row title in a list, an accordion question */
+  --fs-numeral: var(--text-h3); /* big figures: times, dates, stats */
+  --lh-body: 1.5;
+  --lh-title: 1.2;
+  --lh-heading: 1.1;
+  /* Figures. normal = the face's own. A display face whose default figures are old-style (a
+     time "11:00" reads "II:00") sets lining-nums tabular-nums here; FBC Auburn does. */
+  --figures: normal;
+
+  /* Corners, all from --radius (brand.config.json "radius"). */
+  --radius-control: calc(var(--radius) * 0.6); /* rounded-sm: buttons, fields, tabs */
+  --radius-card: calc(
+    var(--radius) * 0.8
+  ); /* rounded-md: cards, panels, a picture that stands alone */
+  --radius-inner: var(--radius-control); /* a picture inside a card or a list row */
+  --radius-tag: var(--radius-control);
+  --radius-pill: 9999px;
+
+  /* Space inside things. The rhythm between bands is --spacing-section-md / -lg. */
+  --pad-card: var(--spacing-l); /* inside a card or panel */
+  --pad-panel: var(--spacing-l); /* a feature panel */
+  --gap-grid: var(--spacing-m); /* between cards in a grid */
+  --gap-heading: var(--spacing-l); /* a section heading to its content */
+
+  /* Shadows. */
+  --shadow-card: 0 16px 34px -18px rgba(42, 45, 49, 0.22); /* a card lifted on hover */
+  --shadow-raised:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* shadow-lg: a panel over another layer */
+
+  /* Buttons (CtaLink). */
+  --btn-height: 44px; /* also the tap-target floor */
+  --tracking-label: 0.18em; /* tracking-eyebrow: uppercase labels and eyebrows */
+  --btn-tracking: var(--tracking-label);
+
+  /* Focus: one ring. */
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
+  /* Motion (card 192): the flow layer's timings and distances (brand.config.json layout.motion,
+     src/styles/flow.css, src/scripts/flow.ts, which reads the durations). Nothing reads them
+     under the default motion ('reveal'). Auburn's values, from its 2026-10-25 audit. */
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1); /* expo-out: fast start, long settle */
+  --motion-fade: 200ms; /* calm pages: one short fade */
+  --motion-fade-distance: 8px;
+  --motion-stagger-calm: 40ms;
+  --motion-rise: 600ms; /* full pages: a fade-up */
+  --motion-rise-distance: 16px;
+  --motion-stagger: 60ms; /* between units arriving together */
+  --motion-line: 800ms; /* a heading line rising out of its mask */
+  --motion-line-stagger: 80ms;
+  --motion-photo: 900ms; /* a photo settling from a slight zoom */
+  --motion-photo-zoom: 1.06;
+  --motion-side: 800ms; /* a [data-flow='side'] piece sliding in */
+  --motion-side-distance: 32px;
+  --motion-page-out: 120ms; /* page to page: the old page lifts away */
+  --motion-page-in: 260ms; /* and the new one rises into place */
+  --motion-page-distance: 12px;
+}
+.dark {
+  --shadow-card: 0 16px 34px -18px rgba(0, 0, 0, 0.6);
+}
+
+/* Lining figures when the brand asks for them (--figures above): one rule on the root, inherited
+   by every time, date and phone number. */
+html {
+  font-variant-numeric: var(--figures);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -385,7 +487,7 @@
     font-family: var(--font-display);
     font-weight: 500;
     color: inherit;
-    line-height: 1.1;
+    line-height: var(--lh-heading);
     letter-spacing: -0.01em;
   }
 }
@@ -592,6 +694,148 @@ html:has(.mobile-menu[open]) {
   }
 }
 
+/* Phone menu groups (PORTS.md card 191, from FBC Auburn): with Site settings > Phone menu groups
+   filled in, the drawer takes the whole screen and the links are labelled groups of big
+   display-font rows with a long arrow and hairlines between. Class-only selectors, so a site
+   without groups ships none of it in a page's own CSS. */
+.mobile-menu--groups {
+  width: 100vw;
+}
+.mobile-menu--groups .mobile-menu__panel {
+  box-shadow: none;
+}
+.mobile-menu__groups {
+  padding-block: var(--spacing-m, 1rem) var(--spacing-l, 1.5rem);
+}
+.mobile-menu__group + .mobile-menu__group {
+  margin-top: 1.5rem;
+}
+.mobile-menu__group-label {
+  margin: 0;
+  padding: 0 var(--spacing-l, 1.5rem) 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--link);
+}
+.mobile-menu__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+.mobile-menu__rows > li {
+  border-bottom: 1px solid var(--border);
+}
+.mobile-menu__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  min-height: 4rem;
+  padding: 0.5rem var(--spacing-l, 1.5rem);
+  color: var(--foreground);
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.5rem + 1.2vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: background-color 200ms ease;
+}
+.mobile-menu__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.mobile-menu__arrow {
+  flex: none;
+  width: clamp(40px, 8vw, 56px);
+  height: auto;
+  color: var(--link);
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.mobile-menu__row:hover {
+  background: var(--muted);
+}
+.mobile-menu__row:hover .mobile-menu__label {
+  transform: translateX(0.25rem);
+}
+.mobile-menu__row:hover .mobile-menu__arrow {
+  transform: translateX(6px);
+}
+.mobile-menu__row:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: -3px;
+}
+/* The page you are on: a short bar in the primary colour after its name. */
+.mobile-menu__row[aria-current='page'] .mobile-menu__label::after {
+  content: '';
+  display: inline-block;
+  width: 0.6em;
+  height: 0.28em;
+  margin-left: 0.4em;
+  vertical-align: 0.14em;
+  border-radius: 2px;
+  background: var(--primary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu__label,
+  .mobile-menu__arrow {
+    transition: none;
+  }
+}
+
+/* Compact footer (card 191, Site settings > Footer style "Compact"): the brand row on top, short
+   link columns side by side, and on phones the groups two by two with Get in touch across the
+   width. Footer.astro adds .site-footer--compact only when the style is chosen. */
+.site-footer__brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+.site-footer__tagline {
+  flex: 1 1 14rem;
+  margin: 0;
+}
+.site-footer__brand-action {
+  margin-left: auto;
+}
+.site-footer--compact .site-footer__links {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1.5rem 1.75rem;
+}
+.site-footer--compact .site-footer__links > div[aria-hidden='true']:empty,
+.site-footer--compact .site-footer__links > nav:not(:has(li)) {
+  display: none;
+}
+.site-footer--compact .site-footer__links .justify-center {
+  justify-content: flex-start;
+}
+@media (max-width: 767px) {
+  /* The logo and the button share the first row; the tagline runs under them. */
+  .site-footer__tagline {
+    order: 3;
+    flex-basis: 100%;
+  }
+  /* A smaller lockup so it and the button fit one row at 375px. */
+  .site-footer__brand-logo img {
+    height: 2rem;
+  }
+  .site-footer--compact .site-footer__links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding-top: var(--spacing-m, 1rem);
+  }
+  .site-footer--compact .site-footer__links > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Card lift on hover. Marketing cards (project, journal, service) opt in via
    .card-lift; pairs with the existing border + image scale transitions. */
 .card-lift {
@@ -605,10 +849,7 @@ html:has(.mobile-menu[open]) {
 }
 .card-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px -18px rgba(42, 45, 49, 0.22);
-}
-.dark .card-lift:hover {
-  box-shadow: 0 16px 34px -18px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-card);
 }
 
 /* Slower lift for image cards. The home Featured Work / Featured Journal cards

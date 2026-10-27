@@ -7,6 +7,7 @@ import { ChevronDownIcon } from '@sanity/icons/ChevronDown';
 import { ListIcon } from '@sanity/icons/List';
 import { CodeTextInput } from '../components/CodeTextInput';
 import { FormRecipientAddressesInput } from '../components/FormRecipientAddresses';
+import { formRecipientsField } from './form';
 import { codeWarningMessage } from '../../lib/custom-code';
 import { IconImageInput, LogoImageInput } from '../components/BrandImageInput';
 import { checkIcon, checkLogo } from '../../lib/brand-uploads';
@@ -63,6 +64,26 @@ export const siteSettings = defineType({
       title: 'Phone (optional)',
       type: 'string',
       description: 'Public phone number, if you want one shown. Leave blank to hide.',
+    }),
+    // Card 196: a fact's confirmed flag (src/lib/business-facts.ts). Untick while
+    // it is still a guess: the site shows a small "To confirm" tag beside it and
+    // keeps it out of the data search engines read. Unset counts as confirmed.
+    defineField({
+      name: 'phoneConfirmed',
+      title: 'The phone number is confirmed',
+      type: 'boolean',
+      description:
+        'Untick while the number is still a guess: the site shows a small "To confirm" tag beside it and keeps it out of search results until you tick it again.',
+      initialValue: true,
+      hidden: ({ document }) => !document?.phone,
+    }),
+    defineField({
+      name: 'emailConfirmed',
+      title: 'The email address is confirmed',
+      type: 'boolean',
+      description:
+        'Untick while the address is still a guess: the site shows a small "To confirm" tag beside it until you tick it again.',
+      initialValue: true,
     }),
     // ── Navigation ────────────────────────────────────────────────────────────
     // Optional editor-managed nav menus. When empty the header and footer render
@@ -250,6 +271,154 @@ export const siteSettings = defineType({
       },
     }),
 
+    // An optional second, quieter button beside the header button (card 187):
+    // a "Give", "Shop" or "Book online" link. Absent until BOTH boxes are
+    // filled, so a site that never uses it is unchanged.
+    defineField({
+      name: 'headerSecondary',
+      title: 'Second header button (optional)',
+      type: 'object',
+      group: 'navigation',
+      description:
+        'An outlined button beside the header button, for a second ask like "Shop" or "Book online". It shows only when both boxes are filled in.',
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({
+          name: 'label',
+          title: 'Button text',
+          type: 'string',
+          description: 'A word or two. Leave blank to show no second button.',
+          validation: (rule) => rule.max(24),
+        }),
+        defineField({
+          name: 'link',
+          title: 'Where the button goes',
+          type: 'navLink',
+          description: 'Pick a page or paste a web address. Leave blank to show no second button.',
+        }),
+      ],
+      preview: {
+        select: { label: 'label' },
+        prepare: ({ label }) => ({
+          title: label || 'No second button',
+          subtitle: label ? 'Second header button' : 'Not showing',
+        }),
+      },
+    }),
+
+    // Wayfinding (PORTS.md card 191, from FBC Auburn). Four optional pieces;
+    // every one is empty or unset on an untouched site, which draws exactly
+    // what it drew before. Resolved by src/lib/wayfinding.ts.
+    defineField({
+      name: 'phoneMenuGroups',
+      title: 'Phone menu groups (optional)',
+      type: 'array',
+      group: 'navigation',
+      description:
+        'Sort the phone menu into a few labelled groups, like "New here" and "Get in touch", each a short list of pages in big type. Leave empty to keep the phone menu as one plain list of the top menu links.',
+      validation: (Rule) => Rule.max(6),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'phoneMenuGroup',
+          title: 'Group',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Group name',
+              type: 'string',
+              description: 'A word or three, like "New here".',
+              validation: (Rule) => Rule.required().max(30),
+            }),
+            defineField({
+              name: 'links',
+              title: 'Pages in this group',
+              type: 'array',
+              validation: (Rule) => Rule.max(8),
+              of: [defineArrayMember({ type: 'navLink' })],
+            }),
+          ],
+          preview: {
+            select: { title: 'title', links: 'links' },
+            prepare: ({ title, links }) => ({
+              title: title ?? '(no name)',
+              subtitle: `${Array.isArray(links) ? links.length : 0} page(s)`,
+            }),
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'actionBars',
+      title: 'Phone action bar (optional)',
+      type: 'array',
+      group: 'navigation',
+      description:
+        'A slim bar that sticks to the bottom of a phone screen once the visitor scrolls past the page heading: one short line and one button. Pick the page it belongs to, or tick "Every page". A page with no bar shows none.',
+      validation: (Rule) => Rule.max(12),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'actionBar',
+          title: 'Bar',
+          fields: [
+            defineField({
+              name: 'everyPage',
+              title: 'Every page',
+              type: 'boolean',
+              description:
+                'Show this bar on every page that has no bar of its own. Leave off to pick one page below.',
+              initialValue: false,
+            }),
+            defineField({
+              name: 'page',
+              title: 'Page',
+              type: 'reference',
+              description: 'The page this bar shows on.',
+              to: [
+                { type: 'homePage' },
+                { type: 'aboutPage' }, // scaffold: about
+                { type: 'servicesPage' }, // scaffold: services
+                { type: 'processPage' }, // scaffold: process
+                { type: 'faqPage' }, // scaffold: faq
+                { type: 'contactPage' },
+                { type: 'journalPage' }, // scaffold: journal
+                { type: 'page' },
+              ],
+              hidden: ({ parent }) => parent?.everyPage === true,
+            }),
+            defineField({
+              name: 'text',
+              title: 'Short line',
+              type: 'string',
+              description:
+                'One short line beside the button, like "Open today until 5". Leave empty to show the hours for today from Business info (when it has them). Keep it under about 30 characters so it fits a phone.',
+              validation: (Rule) => Rule.max(48),
+            }),
+            defineField({
+              name: 'action',
+              title: 'Button',
+              type: 'navLink',
+              description: 'The one button. The bar shows only when it has a label and a page.',
+              validation: (Rule) => Rule.required(),
+            }),
+          ],
+          preview: {
+            select: {
+              everyPage: 'everyPage',
+              pageTitle: 'page.title',
+              label: 'action.label',
+              text: 'text',
+            },
+            prepare: ({ everyPage, pageTitle, label, text }) => ({
+              title: label || '(no button yet)',
+              subtitle: `${everyPage ? 'Every page' : pageTitle || 'No page picked'}${text ? ` · ${text}` : ''}`,
+            }),
+          },
+        }),
+      ],
+    }),
+
     // Small on/off switches for the bits of contact detail the chrome carries.
     // All are ON unless explicitly turned off, so an untouched site is
     // unchanged (the site reads a blank value as "yes").
@@ -291,6 +460,59 @@ export const siteSettings = defineType({
         'The little links beside the copyright line at the very bottom, e.g. Privacy policy. Leave empty to keep the built-in privacy link.',
       validation: (Rule) => Rule.max(6),
       of: [defineArrayMember({ type: 'navLink' })],
+    }),
+
+    // Card 191: the footer's opening rows and its shape. Both off until set.
+    defineField({
+      name: 'whereNext',
+      title: 'Where next rows (optional)',
+      type: 'array',
+      group: 'navigation',
+      description:
+        'Big links across the top of the footer so no page ends at a dead end. Add up to five in order of importance: each page shows the first three that are not the page itself. Leave empty for none.',
+      validation: (Rule) => Rule.max(5),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'whereNextRow',
+          title: 'Row',
+          fields: [
+            defineField({
+              name: 'link',
+              title: 'Link',
+              type: 'navLink',
+              validation: (Rule) => Rule.required(),
+            }),
+            defineField({
+              name: 'note',
+              title: 'Small line under it',
+              type: 'string',
+              description: 'Optional, a few words, like "Your first visit".',
+              validation: (Rule) => Rule.max(40),
+            }),
+          ],
+          preview: {
+            select: { title: 'link.label', subtitle: 'note' },
+            prepare: ({ title, subtitle }) => ({ title: title || '(no link yet)', subtitle }),
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'footerStyle',
+      title: 'Footer style',
+      type: 'string',
+      group: 'navigation',
+      description:
+        'Columns is the usual footer. Compact puts the logo and name on one row at the top and packs the link groups two by two on phones, so the footer is about half as tall.',
+      options: {
+        list: [
+          { title: 'Columns', value: 'columns' },
+          { title: 'Compact', value: 'compact' },
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
     }),
 
     // An uploaded logo replaces the built-in image logo at the top of every
@@ -560,7 +782,8 @@ export const siteSettings = defineType({
           name: 'enabled',
           title: 'Enable newsletter signup',
           type: 'boolean',
-          description: 'When off, the newsletter block does not render anywhere on the site.',
+          description:
+            'When off, the sign-up boxes (footer, journal) do not render. A Newsletter sign-up block can still show a button to a sign-up page typed on the block.',
           initialValue: false,
         }),
         defineField({
@@ -780,7 +1003,10 @@ export const siteSettings = defineType({
       validation: (Rule) => Rule.custom((value) => codeWarningMessage(value, true)).warning(),
     }),
 
-    // ── Forms (PORTS.md card 174) ─────────────────────────────────────────────
+    // ── Forms (PORTS.md cards 174 and 194) ────────────────────────────────────
+    // The names a built form can go to (card 194). Keys and names only; the
+    // address panel below lists each one beside the Contact form.
+    formRecipientsField,
     // A panel, not data: the input never writes, so this field stays empty in the
     // public dataset. The addresses live in the Worker's D1 database, set through
     // /api/studio/form-recipients/ by an administrator (src/lib/form-recipients.ts).

@@ -3,7 +3,20 @@
 // One instance only; singleton enforcement in sanity.config.ts.
 // Safe to edit by hand.
 
-import { defineType, defineField, defineArrayMember } from 'sanity';
+import { defineType, defineField, defineArrayMember, type CustomValidator } from 'sanity';
+import { sectionArrayOptions } from './sections';
+import { PRIVACY_SECTION_TYPES } from './richSections';
+import { pageBuilderAuthoring } from '../pageBuilderAuthoring';
+
+// The hero headline, date and body are required ONLY while the Page layout is empty: once the
+// editor builds the page from sections, the policy lives in a block and these tabs are unused.
+const unlessLayout: CustomValidator<unknown> = (value, context) => {
+  const hasValue = Array.isArray(value) ? value.length > 0 : Boolean(value);
+  const layout = (context.document as { pageBuilder?: unknown[] } | undefined)?.pageBuilder;
+  return hasValue || (layout?.length ?? 0) > 0
+    ? true
+    : 'Required (unless you build the page in Page layout instead).';
+};
 
 export const privacyPage = defineType({
   name: 'privacyPage',
@@ -15,6 +28,7 @@ export const privacyPage = defineType({
     { name: 'seo', title: 'SEO' },
     { name: 'hero', title: 'Hero' },
     { name: 'content', title: 'Content' },
+    { name: 'pageBuilder', title: 'Page layout' },
   ],
   fields: [
     // SEO
@@ -68,7 +82,7 @@ export const privacyPage = defineType({
       type: 'string',
       group: 'hero',
       initialValue: 'Privacy Policy',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.custom(unlessLayout),
     }),
     defineField({
       name: 'heroSubhead',
@@ -108,7 +122,7 @@ export const privacyPage = defineType({
       type: 'date',
       group: 'content',
       description: 'Shown at the top of the policy. Update whenever the policy content changes.',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.custom(unlessLayout),
     }),
     defineField({
       name: 'body',
@@ -152,7 +166,24 @@ export const privacyPage = defineType({
           },
         }),
       ],
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.custom(unlessLayout),
+    }),
+    // Every main page a page builder (card 190, ported from FBC Auburn). LEAVE THIS EMPTY and the
+    // page draws exactly as it always has, from the Hero and Content fields on the other tabs. Add
+    // sections and the page is drawn from them instead: the policy text is a block you can move,
+    // and you can put anything from the library above or below it.
+    // scripts/main-pages-builder.mjs fills it from the old fields. Those fields are never
+    // deleted (rule 16).
+    defineField({
+      name: 'pageBuilder',
+      title: 'Page layout',
+      type: 'array',
+      group: 'pageBuilder',
+      description:
+        'Optional. Leave empty and this page keeps its usual layout (the Hero tab and the rest). Add sections to build the page yourself: drag to reorder, remove one to hide it, or add one from the library. Once this has sections it replaces the usual layout.',
+      of: PRIVACY_SECTION_TYPES,
+      options: sectionArrayOptions,
+      ...pageBuilderAuthoring,
     }),
   ],
   preview: { prepare: () => ({ title: 'Privacy Policy Page' }) },

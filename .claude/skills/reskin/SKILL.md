@@ -10,8 +10,8 @@ Collect all brand inputs, write them into `brand/brand.config.json`, and run
 
 ## Where this sits: brief, references, design-directions, reskin
 
-Reskin is step 4 of 4. A reskin applies colours, fonts, radius and the four coarse `layout` slots
-(header, hero, density, cards); it cannot express section order, nav pattern, imagery treatment or
+Reskin is step 4 of 4. A reskin applies colours, fonts, radius and the five coarse `layout` slots
+(header, hero, density, cards, motion); it cannot express section order, nav pattern, imagery treatment or
 a bespoke structure, so running it first is how sites drift toward the same layout.
 
 1. **Brief:** `docs/templates/design-brief.md` becomes `PRODUCT.md` / `DESIGN.md`.
@@ -99,13 +99,27 @@ c. **Keep the neutral default.** Skip palette changes entirely.
 6b. Layout. Palette and fonts do not change the page's shape; the `layout` block does.
 Offer it once, after palette and radius, and leave it at the defaults if the user has
 no opinion (the defaults are the original layout). Four slots:
-`header` (`inline` | `centered` | `minimal`), `hero` (`bleed` | `split` | `editorial`),
+`header` (`inline` | `centered` | `minimal`), `hero` (`bleed` | `split` | `editorial` | `board`),
 `density` (`standard` | `airy` | `tight`), `cards` (`standard` | `outline` | `soft`).
 Suggest by character: editorial or luxury brands pair `centered` + `editorial` + `airy` +
 `outline`; dense information sites pair `minimal` or `inline` + `bleed` + `tight` + `standard`.
 `split` needs a hero photo to show (without one it renders as `bleed`); `editorial`
-never shows the hero image. Check the result at 390px and 1280px, light and dark.
-Reference: `docs/brand/brand-system.md`, PORTS.md card 72.
+never shows the hero image. `board` is the inner-page grammar from FBC Auburn (card 188):
+a short page head on the page ground with the photo beside the words in the brand's
+standalone shape, one ground for every band, and a rule opening each section; a tall home
+hero stays `bleed`. Pick it for a site with many inner pages that should read as one
+document (a church, a school, a practice). Check the result at 390px and 1280px, light and dark.
+Reference: `docs/brand/brand-system.md`, PORTS.md cards 72 and 188.
+
+6c. The scale and the shapes (card 188). After the palette, retune the one scale at
+the top of the brand layer if the brand needs it (`globals.css`, the `:root` block
+"The one scale": text sizes, corners, padding, gaps, shadows, the button measure,
+`--figures`), never component utilities. Then set the brand's shapes and board
+knobs as tokens in the same layer: `--shape-feature-clip` / `--shape-feature-radius`
+(the standalone picture's cut; `var(--shape-gable-polygon)` is ready-made),
+`--shape-slab`, `--shape-tile`, `--board-marker`, `--board-rule`. The defaults are
+neutral, so skip this if the brand has no signature shape. Detail:
+`docs/agent/design-tokens.md` and `docs/agent/shapes.md`.
 
 **Fonts**
 
@@ -158,6 +172,16 @@ Before writing the config or running `apply-brand`:
 Do not skip this step if fonts change. Font packages are not installed automatically
 by `apply-brand`.
 
+6. Metric-matched fallback (card 188). With the display font installed and named in
+   `fonts.display`, run `npm run font-fallback`. It rewrites `src/styles/font-fallbacks.css`
+   with `"<Family> Fallback"` (Georgia, or Arial for a sans) and, for a serif,
+   `"<Family> Fallback Times"`, scaled to the new font so a title drawn before the font
+   arrives breaks where the real one will. Name them second in `fonts.display.familyValue`
+   (`"\"Family\", \"Family Fallback\", \"Family Fallback Times\", Georgia, serif"`). A
+   variable package ships woff2 only: pass `-- --file <a .ttf or .woff of the face>`.
+   If the display face's default figures are old-style, set `--figures: lining-nums
+tabular-nums` in the scale.
+
 ---
 
 ## Step 4 -- Write brand/brand.config.json, validate, and run apply-brand
@@ -188,7 +212,7 @@ This rewrites:
 
 - `src/styles/globals.css` -- `@theme` palette tokens, font tokens, `@fontsource` import lines, `:root` semantic tokens, `.dark` semantic tokens, `--radius`, print footer brand string
 - `src/data/site.ts` -- `name`, `domain`, `brandColors` (derived fields `storageKeyPrefix`, `themeStorageKey`, `studio` are computed automatically -- never stale)
-- `src/data/layout.ts` -- the `layout` block (header, hero, density, cards); defaults reproduce the original layout
+- `src/data/layout.ts` -- the `layout` block (header, hero, density, cards, motion); defaults reproduce the original layout
 - `sanity.config.ts` -- the Studio theme's `DISPLAY_STACK` / `BODY_STACK` font stacks (from `studio.fonts` in brand.config.json), and `src/sanity/studioFonts.css` (the font files the Studio loads). The Studio's colours are read from brand.config.json at build time (PORTS.md cards 110 and 116; optional `studio.accent`, `studio.paper`, `studio.chrome`); `npm run test:unit` is their contrast gate
 - `scripts/generate-og-default.mjs` -- `wordmark`, `tagline`
 - `scripts/og-theme.mjs` -- `OG_THEME` share-image colors and font stack (never `scripts/lib/render-og.mjs`, which is PORTABLE; card 104)
