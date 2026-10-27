@@ -130,6 +130,14 @@ const NON_STEGA_FIELDS = new Set([
   'urgency',
   'startTime',
   'endTime',
+  // The business facts (card 196, src/lib/business-hours.ts): an hours row's
+  // `days` and its `opens` / `closes` times, and an hours change's `kind`, are
+  // read as weekday keys, "HH:MM" and closed | hours. (The resolver also strips
+  // markers with plain(), belt and braces.) `layout` above covers the hours block.
+  'days',
+  'opens',
+  'closes',
+  'kind',
   // Not in this template yet, but standard enum names across the site family.
   // Carried so a block ported from a sibling repo is not a preview-only bug
   // waiting to be found.

@@ -1,0 +1,66 @@
+---
+// Safe to edit by hand
+// Opening hours (builderSections.ts hoursSection, PORTS.md card 196). Self-filling:
+// the hours, the dated changes and the address come from Business info through
+// src/lib/business-data.ts, so nothing here is typed twice (rule 15).
+//
+//   card  "Today beside the week": a card with the live status ("Open now until
+//         5 pm") and the address, on the narrow track of the shared split (rule
+//         17), first on a phone; the week and the changes coming up beside it.
+//   band  "One slim band": the status, the week on one line and the directions
+//         link, for a Home page or under a hero.
+//
+// Draws nothing when the site has no hours.
+import BuilderBand from './BuilderBand.astro';
+import OpenStatus from '@/components/business/OpenStatus.astro';
+import HoursTable from '@/components/business/HoursTable.astro';
+import BusinessAddress from '@/components/business/BusinessAddress.astro';
+import { factsFor } from '@/lib/business-data';
+import type { CadenceSurface } from '@/lib/surfaces';
+import type { ProjectedHoursSection } from '@/lib/builderBlocks.types';
+
+interface Props {
+  block: ProjectedHoursSection;
+  surface?: CadenceSurface;
+  headingId: string;
+}
+const { block, surface, headingId } = Astro.props;
+const facts = await factsFor(block.facts);
+const showAddress = block.showAddress !== false && facts.address;
+const showChanges = block.showChanges !== false;
+const band = block.layout === 'band';
+---
+
+{facts.hasHours && (
+  <BuilderBand
+    type={block._type}
+    heading={block.heading}
+    intro={block.intro}
+    headingId={headingId}
+    surface={surface}
+    label="Opening hours"
+  >
+    {band ? (
+      <div class="biz-band">
+        <OpenStatus facts={facts} size="lead" />
+        <HoursTable
+          facts={facts}
+          showChanges={showChanges}
+          maxChanges={1}
+          class="biz-hours--inline"
+        />
+        {showAddress && (
+          <BusinessAddress address={facts.address} findUs={false} class="biz-address--inline" />
+        )}
+      </div>
+    ) : (
+      <div class="split split--media-first biz-hours-block">
+        <div class="bb-card biz-today">
+          <OpenStatus facts={facts} size="lead" />
+          {showAddress && <BusinessAddress address={facts.address} />}
+        </div>
+        <HoursTable facts={facts} showChanges={showChanges} />
+      </div>
+    )}
+  </BuilderBand>
+)}

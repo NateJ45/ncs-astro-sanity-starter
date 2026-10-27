@@ -320,6 +320,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 196  | Business facts once, confirmed flags, open now, hours changes, hours and map blocks      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -11950,3 +11951,50 @@ output) and with it on (pill, highlight and boxes), screenshots at 375 and 1280.
 
 **Applied:** starter (this card). Sites: turn it on only while a client is reviewing; Auburn's sync PR adopts the
 renamed files.
+
+## Card 196: Business facts typed once, open now, and hours changes that undo themselves (2026-10-27)
+
+**Origin:** First Baptist Auburn's church facts (inventory rows C1, C2, C3, A26 and A34): every fact typed once in
+Site settings with a `confirmed` flag and a "To confirm" tag, `dayPlan()` and "A different Sunday" dated changes,
+the times band, the drawn map card and the place line. Generalised here as their non-church form.
+
+**Problem.** A business site shows its address, phone and hours in four or five places (footer, Contact, a hero, a
+band, Google's structured data). Typed by hand in each, they drift; a holiday closure means editing the hours and
+remembering to change them back; and a new site built from an old flyer publishes guesses as facts.
+
+**What it is** (`docs/agent/business-facts.md`):
+
+- **Facts once.** Business info gains `street`, `zip`, `addressConfirmed`, `findUs`, `openingHours[]` (days,
+  opens, closes, optional label, `confirmed`), `hoursNote` and `hoursChanges[]`; Site settings gains
+  `phoneConfirmed` and `emailConfirmed`. `resolveBusinessFacts()` is the one reader; `placeLine()` gives
+  "Hamilton, OH".
+- **Confirmed flags.** `ToConfirm.astro` tags a fact whose box is unticked, and the LocalBusiness JSON-LD leaves it
+  out. Only an explicit untick counts by default (old data shows as before); `strict` is Auburn's way. Checkup's
+  existing `unconfirmedRule` (card 66) already reports the new flags.
+- **Open now.** `openState()` on `site.timeZone`: open until, or the next opening (skipping closures, spells past
+  midnight, 24 hours). Built as today's hours, made live in the browser by `src/scripts/business-live.ts`, which also
+  hides an expired change and marks today's row, so nothing stale shows between rebuilds.
+- **Hours changes.** Dated closures or different hours, applied everywhere by `dayHours()`, ignored after their last
+  day; never edit the usual week. Quick update: "Change the hours for a day".
+- **Blocks.** Opening hours (`hoursSection`: "Today beside the week" or "One slim band") and Map and directions
+  (`mapSection`: a drawn map, no map service, Google and Apple Maps buttons), both self-filling, in the new "Hours
+  and location" insert group. Footer and Contact show the address and hours only when set.
+- **Search engines.** `openingHoursSpecification` from confirmed rows plus upcoming changes as dated specials;
+  `streetAddress`, `postalCode`, `telephone` only when confirmed.
+
+**Safe by default.** A site with no hours and no street shows nothing new anywhere; existing data has no flags, which
+counts as confirmed, so live sites render as before.
+
+**Files.** PORTABLE: `src/lib/business-hours.ts`, `src/lib/business-facts.ts`, `src/lib/place-line.ts`. Safe to edit:
+`src/lib/business-data.ts`, `src/scripts/business-live.ts`, `src/components/business/*`, `src/styles/business.css`,
+`HoursBlock.astro`, `MapBlock.astro`. Schema: `businessInfo.ts`, `siteSettings.ts`, `builderSections.ts`;
+`NON_STEGA_FIELDS` gains `days`, `opens`, `closes`, `kind`. Tests: `business-hours.test.ts` (both DST changes and
+midnight in America/New_York, past-midnight spells, closures, JSON-LD), `business-facts.test.ts`,
+`tests/business-facts.spec.ts`.
+
+**Church mapping.** A gathering is an hours row with a label; "A different Sunday" is an hours change (an extra
+service has no equivalent yet). Auburn keeps its own church layer; the mapping table is in the doc.
+
+**Applied:** starter (this card). Sites: shops and studios with set hours (mas-monograms, reid-design-site) fill
+Business info and add the blocks where they help; presacademy can use the hours for its office; stonesteps-50k needs
+only the address and map; fbcm keeps church facts its own way.

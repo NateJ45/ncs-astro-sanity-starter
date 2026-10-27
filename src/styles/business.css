@@ -1,0 +1,313 @@
+/* Safe to edit by hand
+   The business facts' pieces (PORTS.md card 196): the "To confirm" tag, the
+   open-now line, the hours table and changes, the address, the slim hours band
+   and the drawn map. Theme tokens only (both themes, any reskin); class names
+   start `biz-`; state set by src/scripts/business-live.ts is a data attribute
+   (data-open, data-today, hidden). */
+
+/* ---- The "To confirm" tag ---- */
+.biz-confirm {
+  display: inline-block;
+  margin-inline-start: 0.4em;
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--destructive) 14%, var(--background));
+  color: color-mix(in oklab, var(--destructive) 70%, var(--foreground));
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* ---- Open now / Closed now ---- */
+.biz-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.5em;
+  margin: 0;
+  color: var(--foreground);
+}
+.biz-status__dot {
+  flex: none;
+  align-self: center;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--muted-foreground);
+}
+.biz-status[data-open='true'] .biz-status__dot {
+  background: color-mix(in oklab, var(--success) 45%, var(--success-foreground));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--success) 40%, transparent);
+}
+.biz-status[data-open='false'] .biz-status__dot {
+  background: color-mix(in oklab, var(--destructive) 75%, var(--foreground));
+}
+.biz-status__headline {
+  font-weight: 600;
+}
+.biz-status__detail {
+  color: var(--muted-foreground);
+}
+.biz-status__detail:empty {
+  display: none;
+}
+.biz-status--lead {
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+.biz-status--lead .biz-status__headline {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+}
+.biz-status--lead .biz-status__detail {
+  flex-basis: 100%;
+  padding-inline-start: calc(0.55rem + 0.5em);
+}
+
+/* ---- The week ---- */
+.biz-hours__week {
+  display: grid;
+  margin: 0;
+}
+.biz-hours__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--spacing-s);
+  align-items: baseline;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.biz-hours__row:first-child {
+  border-top: 1px solid var(--border);
+}
+.biz-hours__row dt {
+  font-weight: 500;
+}
+.biz-hours__row dd {
+  margin: 0;
+  text-align: end;
+  color: var(--foreground);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.biz-hours__row[data-today='true'] {
+  box-shadow: inset 3px 0 0 var(--primary);
+  padding-inline-start: 0.75rem;
+}
+.biz-hours__row[data-today='true'] dt::after {
+  content: ' (today)';
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+.biz-hours__note {
+  margin-top: var(--spacing-s);
+  color: var(--muted-foreground);
+}
+.biz-changes {
+  margin-top: var(--spacing-m);
+}
+.biz-changes__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.biz-changes ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.biz-changes li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5em;
+}
+.biz-changes__when {
+  font-weight: 600;
+}
+.biz-changes__note {
+  color: var(--muted-foreground);
+}
+
+/* The week on one line (the slim band). */
+.biz-hours--inline .biz-hours__week {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+.biz-hours--inline .biz-hours__row,
+.biz-hours--inline .biz-hours__row:first-child {
+  display: flex;
+  gap: 0.4em;
+  padding: 0;
+  border: 0;
+}
+.biz-hours--inline .biz-hours__row[data-today='true'] {
+  box-shadow: none;
+  padding: 0;
+}
+.biz-hours--inline .biz-hours__row[data-today='true'] dt::after {
+  content: none;
+}
+.biz-hours--inline .biz-hours__row[data-today='true'] dd {
+  font-weight: 600;
+}
+.biz-hours--inline .biz-hours__row dd {
+  text-align: start;
+  color: var(--muted-foreground);
+}
+.biz-hours--inline .biz-changes {
+  margin-top: 0.5rem;
+}
+.biz-hours--inline .biz-changes__title {
+  display: none;
+}
+
+/* ---- The address ---- */
+.biz-address__lines {
+  display: grid;
+  gap: 0.1rem;
+  font-style: normal;
+  line-height: 1.5;
+}
+.biz-address__lines span:first-child {
+  font-weight: 600;
+}
+.biz-address__find {
+  margin-top: 0.5rem;
+  color: var(--muted-foreground);
+  line-height: 1.55;
+}
+.biz-address__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--spacing-m);
+  margin-top: 0.25rem;
+}
+.biz-address__links a,
+.biz-map__apple {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.biz-address__links a:hover,
+.biz-map__apple:hover {
+  text-decoration-thickness: 2px;
+}
+.biz-address--inline .biz-address__lines {
+  display: inline;
+}
+.biz-address--inline .biz-address__lines span {
+  font-weight: 400;
+}
+.biz-address--inline .biz-address__lines span + span::before {
+  content: ', ';
+}
+
+/* ---- Opening hours block ---- */
+.biz-today {
+  display: grid;
+  gap: var(--spacing-m);
+  align-content: start;
+}
+.biz-today .biz-address {
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--border);
+}
+
+/* The slim band: status, the week, the address, side by side on a wide screen. */
+.biz-band {
+  display: grid;
+  gap: var(--spacing-s);
+}
+@media (width >= 64rem) {
+  .biz-band {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--spacing-l);
+  }
+  .biz-band .biz-status--lead .biz-status__detail {
+    flex-basis: auto;
+    padding: 0;
+  }
+}
+
+/* ---- Map and directions: a drawn street grid in the theme's own colors ---- */
+.biz-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--card-foreground);
+}
+@media (width >= 40rem) {
+  .biz-map {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+.biz-map__art {
+  --road: color-mix(in oklab, var(--border) 85%, var(--foreground) 6%);
+  --lane: color-mix(in oklab, var(--border) 60%, var(--muted));
+  display: grid;
+  place-items: center;
+  min-height: 12rem;
+  background-color: var(--muted);
+  background-image:
+    linear-gradient(90deg, transparent 46%, var(--road) 46%, var(--road) 54%, transparent 54%),
+    linear-gradient(0deg, transparent 57%, var(--road) 57%, var(--road) 62%, transparent 62%),
+    linear-gradient(90deg, var(--lane) 1px, transparent 1px),
+    linear-gradient(0deg, var(--lane) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    28px 28px,
+    28px 28px;
+}
+.biz-map__pin {
+  color: var(--primary);
+  fill: var(--card);
+  filter: drop-shadow(0 8px 10px color-mix(in oklab, var(--foreground) 18%, transparent));
+}
+/* Phones: the drawn map becomes a slim strip beside the address. */
+@media (width < 40rem) {
+  .biz-map {
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+  }
+  .biz-map__art {
+    min-height: 0;
+  }
+  .biz-map__pin {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+.biz-map__body {
+  display: grid;
+  align-content: center;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+}
+.biz-map__actions {
+  align-items: center;
+}
+
+/* A centered column on phones (the footer's Get in touch): center the flex rows too. */
+@media (width < 48rem) {
+  .biz-center-sm.biz-status,
+  .biz-center-sm .biz-address__links {
+    justify-content: center;
+  }
+}

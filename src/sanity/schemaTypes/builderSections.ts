@@ -31,6 +31,8 @@
 //     link and the number of card columns are worked out at build time.
 //   - Rule 8b: every dropdown that drives logic (`layout`, `urgency`,
 //     `startTime`, `endTime`, `look`) is in NON_STEGA_FIELDS.
+//   - Card 196 adds Opening hours and Map and directions: self-filling from
+//     Business info (src/lib/business-facts.ts), so they hold no facts at all.
 //   - Words: plain American English for a non-technical editor. No "CTA" or
 //     "slug", no em-dashes in anything a visitor reads.
 // A FORK adds its own blocks in its own file and its own insert groups the same
@@ -48,6 +50,7 @@ import { ImagesIcon } from '@sanity/icons/Images';
 import { LaunchIcon } from '@sanity/icons/Launch';
 import { LinkIcon } from '@sanity/icons/Link';
 import { MenuIcon } from '@sanity/icons/Menu';
+import { PinIcon } from '@sanity/icons/Pin';
 import { SplitVerticalIcon } from '@sanity/icons/SplitVertical';
 import { TimelineIcon } from '@sanity/icons/Timeline';
 import { lookField } from './_appearanceFields';
@@ -880,6 +883,89 @@ export const photoCardsSection = defineType({
   },
 });
 
+// ── Opening hours (card 196) ─────────────────────────────────────────────────
+// Self-filling: the hours, the dated changes and the address come from
+// Business info (src/lib/business-facts.ts), never typed here (rule 15). With
+// no hours set the block draws nothing.
+export const hoursSection = defineType({
+  name: 'hoursSection',
+  title: 'Opening hours',
+  type: 'object',
+  icon: ClockIcon,
+  description:
+    'Your hours from Business info, with "Open now" or when you next open, and any holiday changes coming up. Change the hours once in Business info and every place updates.',
+  fields: [
+    defineField({
+      name: 'heading',
+      title: 'Heading (optional)',
+      type: 'string',
+      initialValue: 'Opening hours',
+    }),
+    introField(),
+    defineField({
+      name: 'layout',
+      title: 'Layout',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Today beside the week', value: 'card' },
+          { title: 'One slim band', value: 'band' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'card',
+    }),
+    defineField({
+      name: 'showAddress',
+      title: 'Show the address and directions',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
+      name: 'showChanges',
+      title: 'Show holiday and closure changes coming up',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    lookField('hoursSection'),
+  ],
+  preview: {
+    select: { heading: 'heading', layout: 'layout' },
+    prepare: ({ heading, layout }) => ({
+      title: heading || 'Opening hours',
+      subtitle: layout === 'band' ? 'Opening hours, one slim band' : 'Opening hours',
+    }),
+  },
+});
+
+// ── Map and directions (card 196) ────────────────────────────────────────────
+// A drawn map card from the stored address: nothing loads from a map service
+// and nothing tracks a visitor until they choose a directions button. Draws
+// nothing without a street address in Business info.
+export const mapSection = defineType({
+  name: 'mapSection',
+  title: 'Map and directions',
+  type: 'object',
+  icon: PinIcon,
+  description:
+    'Your address from Business info with Directions and Apple Maps buttons. Change the address once in Business info and every place updates.',
+  fields: [
+    headingField(),
+    introField(),
+    defineField({
+      name: 'showHours',
+      title: "Show today's hours under the address",
+      type: 'boolean',
+      initialValue: true,
+    }),
+    lookField('mapSection'),
+  ],
+  preview: {
+    select: { heading: 'heading' },
+    prepare: ({ heading }) => ({ title: heading || 'Map and directions', subtitle: 'Map' }),
+  },
+});
+
 // ── Exports ──────────────────────────────────────────────────────────────────
 
 export const builderSectionSchemas = [
@@ -895,6 +981,8 @@ export const builderSectionSchemas = [
   eventDetailsSection,
   scheduleSection,
   photoCardsSection,
+  hoursSection,
+  mapSection,
 ];
 
 /**
@@ -926,6 +1014,8 @@ export const BUILDER_INSERT_GROUPS: InsertGroup[] = [
     ],
   },
   { name: 'folding', title: 'Fold-outs and tabs', of: ['accordionSection', 'tabsSection'] },
+  // Card 196: self-filling from Business info.
+  { name: 'visit', title: 'Hours and location', of: ['hoursSection', 'mapSection'] },
 ];
 
 /** Blocks that draw their own band (the notice); the rest take the page cadence. */

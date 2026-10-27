@@ -66,6 +66,9 @@ const SELF_FILLING_SECTIONS = [
   'syncedSection',
   'testimonialsSection', // scaffold: testimonials
   'valuesSection', // scaffold: philosophy
+  // Card 196: the hours and the map fill themselves from Business info.
+  'hoursSection',
+  'mapSection',
 ];
 
 export const PAGE_CHECK_CONFIG: PageCheckConfig = {

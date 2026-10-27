@@ -100,6 +100,9 @@ export const LOOKS_BY_TYPE: Record<string, SectionLook[]> = {
   eventDetailsSection: ALL,
   scheduleSection: ALL,
   photoCardsSection: ALL,
+  // Card 196: the hours and the map read from Business info.
+  hoursSection: ALL,
+  mapSection: ['standard', 'quiet'],
 };
 
 /** The options a block's `look` field offers, in display order. */

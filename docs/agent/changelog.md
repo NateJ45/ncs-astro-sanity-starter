@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-27: business facts typed once, open now, and hours changes that undo themselves (PORTS card 196)._
+
+**Decision.** The non-church form of first-baptist-auburn's church facts. The address, phone, email and opening hours are typed once (Business info, Site settings) with `confirmed` flags, and every place reads them through `resolveBusinessFacts()`. A missing flag counts as confirmed so existing sites render as before; Auburn's strict reading is an option. "Open now" is worked out in the browser on `site.timeZone` with the same pure functions the build uses, because a static page cannot know when it is read, and the same script hides an expired hours change between rebuilds. Hours changes never edit the usual week (rule 15). The map is drawn, not embedded, so no map service loads and no CSP or consent change is needed. Detail: `docs/agent/business-facts.md`.
+
 _2026-10-27: eleven small fixes from first-baptist-auburn (PORTS card 187)._ A body button that repeats the header button draws secondary (`cta-budget.ts`); an optional second header button (Site settings > Navigation); a custom page's menu and footer switches now add the page (`page-switches.ts`); `ctaHref()`, `publicPath()` and `linkableRows()` as shared helpers; the copy-email button is Astro and the Sonner toast region is gone; one accent box and one subhead box per block in the Studio (hidden, never removed); word breaks for site search between side-by-side buttons; and `OWN_NEWSLETTER` hides every newsletter screen for a site whose list lives elsewhere. No stored value moves; an untouched site only changes where a hero or band button repeats the header button.
 
 _2026-10-26: popups, one at a time, with guard rails (PORTS card 170)._

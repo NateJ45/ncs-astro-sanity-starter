@@ -20,6 +20,8 @@ import LetterBlock from './LetterBlock.astro';
 import EventDetailsBlock from './EventDetailsBlock.astro';
 import ScheduleBlock from './ScheduleBlock.astro';
 import PhotoCardsBlock from './PhotoCardsBlock.astro';
+import HoursBlock from './HoursBlock.astro';
+import MapBlock from './MapBlock.astro';
 
 interface Props {
   block: BuilderPageBlock;
@@ -66,4 +68,8 @@ const common = { surface, headingId };
   <ScheduleBlock block={b} {...common} />
 ) : b._type === 'photoCardsSection' ? (
   <PhotoCardsBlock block={b} {...common} isFirst={isFirst} />
+) : b._type === 'hoursSection' ? (
+  <HoursBlock block={b} {...common} />
+) : b._type === 'mapSection' ? (
+  <MapBlock block={b} {...common} />
 ) : null}

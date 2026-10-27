@@ -47,6 +47,22 @@ const para = (key: string, text: string) => ({
 /** A calendar day `n` days after the build, as YYYY-MM-DD. */
 const inDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
 
+// Made-up business facts for the hours and map blocks (card 196), in the shape
+// the site settings query folds in from Business info. The holiday is always
+// ten days out, so the "Changes coming up" line is on the thumbnail.
+const FIXTURE_FACTS = {
+  street: '12 Main Street',
+  city: 'Hamilton',
+  state: 'OH',
+  zip: '45013',
+  findUs: 'Park behind the building and use the side door.',
+  openingHours: [
+    { _key: 'wk', days: ['mon', 'tue', 'wed', 'thu', 'fri'], opens: '09:00', closes: '17:00' },
+    { _key: 'sat', days: ['sat'], opens: '10:00', closes: '14:00' },
+  ],
+  hoursChanges: [{ _key: 'hol', date: inDays(10), kind: 'closed', note: 'Staff holiday' }],
+};
+
 const cta = (label: string) => ({
   _type: 'ctaBlock',
   label,
@@ -517,6 +533,26 @@ const SECTIONS: Record<string, unknown>[] = [
       body,
       link: cta('Read more'),
     })),
+  },
+  // ── Hours and location (card 196) ──────────────────────────────────────────
+  // These two fill themselves from Business info; on the wall they carry the
+  // made-up facts below instead (the `facts` key exists only for fixtures).
+  {
+    _type: 'hoursSection',
+    _key: 'hours',
+    heading: 'Opening hours',
+    layout: 'card',
+    showAddress: true,
+    showChanges: true,
+    facts: FIXTURE_FACTS,
+  },
+  {
+    _type: 'mapSection',
+    _key: 'map',
+    heading: 'Find us',
+    intro: 'Five minutes from the town square, with parking at the back.',
+    showHours: true,
+    facts: FIXTURE_FACTS,
   },
 ];
 ---

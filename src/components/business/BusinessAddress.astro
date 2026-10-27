@@ -1,0 +1,46 @@
+---
+// Safe to edit by hand
+// The street address as an <address>, with the "To confirm" tag while it is a
+// guess, the optional "how to find us" sentence, and Directions (Google Maps)
+// and Apple Maps links built from the same stored parts (PORTS.md card 196,
+// src/lib/business-facts.ts). Nothing loads from a map service until a visitor
+// chooses a link. Renders nothing without a street address.
+import '@/styles/business.css';
+import ToConfirm from './ToConfirm.astro';
+import type { BusinessAddress } from '@/lib/business-facts';
+
+interface Props {
+  address: BusinessAddress | null;
+  /** Show the Directions and Apple Maps links. */
+  links?: boolean;
+  /** Show the "how to find us" sentence. */
+  findUs?: boolean;
+  class?: string;
+}
+
+const { address, links = true, findUs = true, class: className = '' } = Astro.props;
+---
+
+{address && (
+  <div class:list={['biz-address', className]}>
+    <address class="biz-address__lines">
+      {address.lines.map((line, i) => (
+        <span>
+          {line}
+          {i === address.lines.length - 1 && <ToConfirm confirmed={address.confirmed} />}
+        </span>
+      ))}
+    </address>
+    {findUs && address.findUs && <p class="biz-address__find">{address.findUs}</p>}
+    {links && (
+      <p class="biz-address__links">
+        <a href={address.mapsUrl} target="_blank" rel="noopener noreferrer">
+          Directions<span class="sr-only"> to {address.oneLine} (opens in a new tab)</span>
+        </a>
+        <a href={address.appleMapsUrl} target="_blank" rel="noopener noreferrer">
+          Apple Maps<span class="sr-only"> (opens in a new tab)</span>
+        </a>
+      </p>
+    )}
+  </div>
+)}
