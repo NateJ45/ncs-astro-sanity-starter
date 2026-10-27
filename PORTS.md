@@ -1301,6 +1301,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 177 | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 178 | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)          | n/a     | no          | yes      | no               | no            | n/a            | no                 | no                  | yes            |
+| 181 | Preview navigator drops the trailing slash, so instant text's bridge mounts             | n/a     | no          | yes      | no               | n/a           | n/a            | n/a                | n/a                 | yes            |
 | #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
 | 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
@@ -12841,3 +12842,23 @@ and a 4px band along the bottom, both clipped inside; an outlined (waiting) ston
 **Applied:** starter (this card), first-baptist-auburn (origin: `stone: brick`, navy `markColors`, its
 `print-flecks.svg` copied to `public/studio-banner/`). fbcm and stonesteps-50k: the marked copies only, no look
 change.
+
+## Card 181: The preview navigator drops the trailing slash, so instant text works (2026-10-26)
+
+**Origin:** first-baptist-auburn (NateJ45/fbc-auburn#235). Measured on the deployed Auburn Studio: zero
+`pa:live-draft` messages while typing. With `trailingSlash: 'always'` the Presentation frame reports `/preview/`
+and `/preview/about/`, while `PreviewNavigator`'s row hrefs are `/preview` and `/preview/about`. No row ever
+matched, so no row lit up, `currentRow` stayed null and `LiveDraftBridge` (the Studio-to-frame keystroke channel
+behind instant text, cards 29-29d) never mounted. Every edit fell back to the listen path, 3 to 5 seconds.
+
+**Fix.** `src/sanity/components/PreviewNavigator.tsx` (not PORTABLE):
+`const current = toPreviewPath(params.preview).replace(/(.)\/+$/, '$1');` with a comment saying why. The `(.)`
+keeps a bare `/` intact. One line added to `.claude/rules/preview-stack.md` under the `useEditState` rule.
+
+**Who needs it:** any site with `trailingSlash: 'always'` and this navigator. A site without `trailingSlash`
+(fbcm) gets slashless frame paths, so the line is harmless there and optional. presacademy and reid-design-site
+set `'always'` and have the bug too (presacademy's navigator is older and splits the query by hand; port the
+same strip there).
+
+**Applied:** first-baptist-auburn (origin), starter (this card), stonesteps-50k (`.claude/rules/live-preview.md`
+carries the note). fbcm optional. presacademy, reid-design-site: not yet.
