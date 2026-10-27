@@ -175,6 +175,37 @@ describe('splitHeadingAccent, cases absorbed from the retired script splitter', 
   });
 });
 
+describe('splitHeadingAccent, whole-word matching', () => {
+  // The bug that prompted it: "test" accented the first four letters of
+  // "TESTING", so one word rendered in two typefaces.
+  it('does not match inside a longer word', () => {
+    assert.equal(splitHeadingAccent('TESTING', 'test').found, false);
+    assert.equal(splitHeadingAccent('Untested', 'test').found, false);
+  });
+
+  it('skips a partial match and takes the later whole word', () => {
+    const r = splitHeadingAccent('Testing the test', 'test');
+    assert.equal(r.found, true);
+    assert.equal(r.before, 'Testing the ');
+    assert.equal(r.word, 'test');
+    assert.equal(r.after, '');
+  });
+
+  it('treats punctuation as a word boundary', () => {
+    const r = splitHeadingAccent("God's trail, run.", 'God');
+    assert.equal(r.word, 'God');
+    assert.equal(r.after, "'s trail, run.");
+    assert.equal(splitHeadingAccent("God's trail, run.", 'run').found, true);
+  });
+
+  it('still matches a multi-word phrase on its boundaries', () => {
+    const r = splitHeadingAccent('Run the hills hard', 'the hills');
+    assert.equal(r.before, 'Run ');
+    assert.equal(r.word, 'the hills');
+    assert.equal(splitHeadingAccent('Run the hillside', 'the hills').found, false);
+  });
+});
+
 describe('splitHeadingWords', () => {
   it('splits a heading into words and the spaces between them', () => {
     const tokens = splitHeadingWords('Work that earns the look');

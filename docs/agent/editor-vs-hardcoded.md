@@ -13,7 +13,7 @@
 - **Journal post extras** -- coverImage caption, `sourcedFrom` annotation in body, related project reference (if portfolio module is active).
 - **Testimonial extras** -- photo, optional location label, `relatedProject` reference (links to a portfolio case study when the module is active).
 - **Hero home slideshow** -- `homePage.heroImages` array: one image = static hero, two or more = cross-fading Ken Burns slideshow.
-- **Section heading script accents** -- `scriptAccent` field on each page singleton's section headings. At most one accent word per heading; the word must match the heading text exactly. Leave empty for no accent. See `docs/agent/polish-layer.md`.
+- **Section heading script accents** -- `scriptAccent` field on each page singleton's section headings. At most one accent word per heading; the word must be a whole word (or phrase) from the heading; capitals do not matter, and it never matches inside a longer word. Leave empty for no accent. See `docs/agent/polish-layer.md`.
 - **`stickyCtaLabel`** -- per-page label for the sticky CTA chip. Clearing it hides the chip on that surface.
 - **Section visibility** -- `siteSettings.sectionVisibility` boolean toggles for each opt-in module section. Toggling any one off removes that section from the nav, footer, homepage, and its own route simultaneously. Core pages are always on. See [Section visibility](page-architecture.md#section-visibility).
 - **404 page** -- `notFoundPage` singleton (eyebrow, headline, body, hero photo, CTA labels + hrefs). Every field has a hardcoded fallback so the page works before the doc exists.

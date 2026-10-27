@@ -333,6 +333,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor            | no          | yes      | no               | no            | partial             | no             | partial    | no      |
 | 198  | Contact card fills from business facts; regex-backslash test skips scaffold-removed files | no          | yes      | no               | no            | partial             | no             | partial    | no      |
 | 192  | Flow layer: lines rise, the rest fades up, photos drift, page lift (`layout.motion`)      | no          | yes      | no               | no            | no                  | no             | partial    | no      |
+| 200  | Heading accent matches whole words only ("test" no longer inside "TESTING")               | no          | yes      | no               | no            | n/a                 | staged         | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -5587,6 +5588,11 @@ happened yet.
 | heading carries a stega run               | the run lands inside `word` and renders | run stripped, halves clean             |
 | `(undefined, 'x')`                        | throws `TypeError`                      | `found: false`, `heading: ''`          |
 | miss                                      | `{found, before, word, after}`          | plus `heading`, the original untouched |
+
+**Superseded in part by card 200 (2026-10-27):** both matchers in the table above were bare
+substring searches, so `('TESTING', 'test')` was a hit that split one word across two
+typefaces. `splitHeadingAccent` now only takes a match with a non-letter, non-digit on both
+sides; case-insensitivity and first-occurrence-wins are unchanged.
 
 **The merge, and the two ways it could have changed the site.** Only two rows above are
 behaviour changes on a live page rather than fixes, and both were checked before the
@@ -12532,3 +12538,37 @@ but still tracked until committed, so the test failed with ENOENT.
 
 **Applied:** starter (this card). Sites: pick up with the card 196 rollout; fbcm keeps its church facts layer and
 passes `strict` through its own reader.
+
+## Card 200: Heading accent matches whole words only (2026-10-27)
+
+**Origin:** stonesteps-50k, 2026-10-27 (NateJ45/stonesteps-50k#179). An editor set the
+handwritten accent to `test` on a heading reading `TESTING`. `splitHeadingAccent` searched
+with a case-insensitive `indexOf`, found `TEST` at index 0, and the heading rendered as
+`TEST` in the script face and `ING` in the display face. **Canonical:**
+`src/lib/heading-accent.ts` and `src/lib/heading-accent.test.ts` (both PORTABLE, card 53).
+
+**The fix.** A private `findWholeWord(hay, needle)` walks every `indexOf` hit and returns the
+first whose neighbours on both sides are not a letter or digit (`\p{L}` / `\p{N}`), or are the
+string's edge. So `test` misses `TESTING` and `Untested`, and on `Testing the test` it skips
+the partial hit and takes the later standalone word. Punctuation is a boundary, so `God` still
+matches in `God's` and `run` in `run.`. A multi-word phrase works the same way (`the hills`
+matches in `Run the hills hard`, not in `Run the hillside`). Case-insensitive matching and
+first-occurrence-wins are unchanged from card 53.
+
+**Help text.** Every accent field's description said "Must match exactly" or "(case-sensitive)",
+and both were wrong: matching has been case-insensitive since card 53. The descriptions now say
+the accent must be a whole word from the headline and that capitals do not matter. Same change
+in `docs/agent/editor-vs-hardcoded.md`.
+
+**Visible change on a live site.** Only a heading whose accent currently lands inside a longer
+word, which was already rendering wrongly. After the port that heading renders with no accent
+(or on a later whole-word hit). Before porting, check each site's content for an accent that is
+a fragment of a heading word on purpose; none is known.
+
+**Porting it.** Copy both PORTABLE files from the starter (`npm run sync-check` should then read
+SAME), then search the site's schemas for accent descriptions that say "case-sensitive" or
+"Must match exactly" and reword them. Unit tests: the new `whole-word matching` describe block
+(four cases).
+
+**Applied:** starter (this card), stonesteps-50k (PR #179, open). fbcm, first-baptist-auburn and
+presacademy carry `heading-accent.ts` and need the sync.
