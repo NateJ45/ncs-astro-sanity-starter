@@ -1301,6 +1301,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 177 | `buildIcs` exceptions: EXDATE skips a date, RECURRENCE-ID moves one occurrence          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 178 | An optional button left empty no longer blocks Publish (`ctaBlock`, `CtaLink`)          | n/a     | no          | yes      | no               | no            | n/a            | no                 | no                  | yes            |
+| 181 | Preview navigator drops the trailing slash, so instant text's bridge mounts             | n/a     | yes         | yes      | yes              | n/a           | n/a            | n/a                | n/a                 | yes            |
 | #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
 | 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
@@ -12878,6 +12879,47 @@ by the SSE change, a known change still discards an in-flight render; `sameConte
 copies (first-baptist-auburn, fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k), plus the
 two per-repo edits: `onKnownChange` in `VisualEditingOverlay.tsx` and the `sameContent` early return in
 `useInstantText.ts`.
+
+## Card 181: The preview navigator drops the trailing slash, so instant text works (2026-10-26)
+
+**Origin:** first-baptist-auburn (NateJ45/fbc-auburn#235). Measured on the deployed Auburn Studio: zero
+`pa:live-draft` messages while typing. With `trailingSlash: 'always'` the Presentation frame reports `/preview/`
+and `/preview/about/`, while `PreviewNavigator`'s row hrefs are `/preview` and `/preview/about`. No row ever
+matched, so no row lit up, `currentRow` stayed null and `LiveDraftBridge` (the Studio-to-frame keystroke channel
+behind instant text, cards 29-29d) never mounted. Every edit fell back to the listen path, 3 to 5 seconds.
+
+**Fix.** `src/sanity/components/PreviewNavigator.tsx` (not PORTABLE):
+`const current = toPreviewPath(params.preview).replace(/(.)\/+$/, '$1');` with a comment saying why. The `(.)`
+keeps a bare `/` intact. One line added to `.claude/rules/preview-stack.md` under the `useEditState` rule.
+
+**Who needs it:** any site with `trailingSlash: 'always'` and this navigator. A site without `trailingSlash`
+(fbcm) gets slashless frame paths, so the line is harmless there and optional. presacademy and reid-design-site
+set `'always'` and have the bug too (presacademy's navigator is older and splits the query by hand; port the
+same strip there).
+
+**Applied:** first-baptist-auburn (origin, #235), starter (this card), stonesteps-50k (#175;
+`.claude/rules/live-preview.md` carries the note), presacademy (#141, on its older `split('?')` line), reid-design-site
+(#186), fbcm (#126, harmless there; `docs/agent/preview.md` carries the note).
+
+## Card 182a: Presentation's mutation refreshes no longer start renders (2026-10-26)
+
+**Origin:** first-baptist-auburn, deployed Studio, checking card 182: one keystroke in a rich text box still started three
+`/preview` renders 1.2 s apart (at about 1.0, 2.2 and 3.4 s); the text itself showed in 0.34 s.
+
+**Cause.** `@sanity/visual-editing` calls the overlay's `refresh` handler with `source: 'mutation'` for every autosave,
+once at once and again 1000 ms later (its `Refresh` component), and `VisualEditingOverlay.tsx` answered each with
+`softRefresh()`. Both calls arrive before the edit is visible to a query, so each started a render of old data that the
+SSE `change` then made stale.
+
+**Fix.** `VisualEditingOverlay.tsx` (per repo): for `mutation`, call `onKnownChange` (marks a running render stale) and
+return `false`, which tells the library nothing was done; `manual` (the refresh button) still renders. The SSE
+`change` is the one trigger. Docs: `.claude/rules/preview-stack.md`.
+
+**Proved:** deployed check recorded on the first-baptist-auburn PR (renders per keystroke before and after).
+
+**Applied:** starter (this card). Every site with the preview overlay needs the same edit in `VisualEditingOverlay.tsx`
+(first-baptist-auburn, fbcm, mas-monograms-rebuild, presacademy, reid-design-site, stonesteps-50k). No PORTABLE file
+changes, so no sync-check ordering.
 
 ## Card 183: Section moves, removals, copies and picture swaps show in the preview at once (2026-10-26)
 
