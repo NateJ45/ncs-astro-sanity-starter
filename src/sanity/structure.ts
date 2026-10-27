@@ -77,6 +77,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
   'shortLink', // placed explicitly under "Pages" -> Short links (card 171)
+  'form', // placed explicitly under Content -> Forms (card 194)
   TRASH_TYPE, // the Studio kit's Trash, placed explicitly at the bottom
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
@@ -379,6 +380,9 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               // Popups (card 170, schemaTypes/popup.ts): a box over the page, one at a time,
               // with dates. Also built into the site at build time.
               S.documentTypeListItem('popup').title('Popups').icon(typeIcon('popup')),
+              // Forms (card 194, schemaTypes/form.ts): the questions only; the Form block puts one
+              // on a page, and what people send is listed under Messages, never here.
+              S.documentTypeListItem('form').title('Forms').icon(typeIcon('form')),
             ]),
         ),
 

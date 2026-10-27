@@ -39,6 +39,7 @@ import type {
 } from './sanity.types';
 import type { BuilderPageBlock } from './builderBlocks.types';
 import type { LibraryDocument } from './documents'; // scaffold: documents
+import type { PortableTextBlock } from '@portabletext/types';
 
 // ---------------------------------------------------------------------------
 // Shared projected shapes
@@ -409,6 +410,16 @@ export interface ProjectedRsvpSection {
   confirmationNote?: string;
 }
 
+/**
+ * formSection - one editor-written form (the form builder, card 194). CONTENT type.
+ * `form` is the dereferenced form document; src/lib/site-form.ts normalizes it.
+ */
+export interface ProjectedFormSection {
+  _type: 'formSection';
+  _key: string;
+  form?: Record<string, unknown> | null;
+}
+
 // ---------------------------------------------------------------------------
 // Church-reverse-port: dynamicListSection
 // ---------------------------------------------------------------------------
@@ -463,6 +474,52 @@ export interface ProjectedDynamicListSection {
 }
 
 // ---------------------------------------------------------------------------
+// Every main page a page builder (card 190, ported from FBC Auburn): the parts of Contact,
+// Privacy and Journal that were drawn in code. Self-contained.
+// ---------------------------------------------------------------------------
+
+/** The Contact page's form settings, read into the Contact form block by its GROQ arm. */
+export interface ContactFormSettings {
+  formIntroNote?: string | null;
+  formProjectTypeOptions?: string[] | null;
+  formLocationOptions?: string[] | null;
+  formBudgetOptions?: string[] | null;
+  formTimelineOptions?: string[] | null;
+  formSourceOptions?: string[] | null;
+  formFields?: { label?: string; kind?: string; options?: string[]; required?: boolean }[] | null;
+  whatToExpectEyebrow?: string | null;
+  whatToExpectHeadline?: string | null;
+  whatToExpectContent?: PortableTextBlock[] | null;
+  postInquiryRoadmap?: { title?: string; body?: string; timeEstimate?: string }[] | null;
+  schedulingLink?: string | null;
+  schedulingLinkLabel?: string | null;
+  availabilityNote?: string | null;
+}
+/** contactFormSection: the contact form and its sidebar. */
+export interface ProjectedContactFormSection {
+  _type: 'contactFormSection';
+  _key: string;
+  sidebar?: boolean;
+  settings?: ContactFormSettings | null;
+}
+/** privacyPolicySection: the policy text and its date. */
+export interface ProjectedPrivacyPolicySection {
+  _type: 'privacyPolicySection';
+  _key: string;
+  lastUpdated?: string | null;
+  body?: PortableTextBlock[] | null;
+}
+// scaffold: journal
+/** journalPostsSection: the category chips, every post and the newsletter. */
+export interface ProjectedJournalPostsSection {
+  _type: 'journalPostsSection';
+  _key: string;
+  showCategories?: boolean;
+  showNewsletter?: boolean;
+}
+// scaffold:end
+
+// ---------------------------------------------------------------------------
 // Discriminated union
 // ---------------------------------------------------------------------------
 
@@ -492,7 +549,12 @@ export type PageBuilderBlock =
   | ProjectedRsvpSection
   | ProjectedLatestVideoSection
   | ProjectedDocumentsSection // scaffold: documents
+  | ProjectedFormSection
   // Church-reverse-port
   | ProjectedDynamicListSection
+  // Every main page a page builder (card 190)
+  | ProjectedContactFormSection
+  | ProjectedPrivacyPolicySection
+  | ProjectedJournalPostsSection // scaffold: journal
   // The builder kit (builderBlocks.types.ts, PORTS.md card 173)
   | BuilderPageBlock;

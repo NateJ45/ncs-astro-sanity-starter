@@ -46,6 +46,30 @@ const SECTION_ARMS = `
       }
     },
     // scaffold:end
+    // Every main page a page builder (card 190): the Contact form block draws the form's
+    // settings from the Contact page document, so it is the same form wherever it is placed.
+    _type == "contactFormSection" => {
+      ...,
+      "settings": *[_type == "contactPage"][0]{
+        formIntroNote,
+        formProjectTypeOptions, formLocationOptions, formBudgetOptions,
+        formTimelineOptions, formSourceOptions,
+        formFields[]{ label, kind, options, required },
+        whatToExpectEyebrow, whatToExpectHeadline, whatToExpectContent,
+        postInquiryRoadmap[]{ title, body, timeEstimate },
+        schedulingLink, schedulingLinkLabel, availabilityNote
+      }
+    },
+    // The form builder (card 194): the form's words only. The recipient's NAME is looked up for
+    // the page; its address is never in the dataset (src/lib/site-form.ts).
+    _type == "formSection" => {
+      ...,
+      "form": form->{
+        _id, title, intro, mode, askForContact, allowAnonymous, questions, recipient,
+        submitLabel, successMessage,
+        "recipientName": *[_type == "siteSettings"][0].formRecipients[key == ^.recipient][0].name
+      }
+    },
     // The builder kit (builderSections.ts, PORTS.md card 173). Columns, fold-outs,
     // tabs and the schedule carry no image or button, so they need no arm.
     _type == "buttonRowSection" => { ..., links[]{ ..., link${CTA_PROJECTION} } },
@@ -523,6 +547,7 @@ export async function getFaqPage() {
 export async function getContactPage() {
   return sanityFetch(
     `*[_type == "contactPage"][0]{
+    ${sectionsProjection('pageBuilder')},
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -620,6 +645,7 @@ const JOURNAL_CARD_PROJECTION = `{
 export async function getJournalPage() {
   return sanityFetch(
     `*[_type == "journalPage"][0]{
+    ${sectionsProjection('pageBuilder')},
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},
@@ -722,6 +748,7 @@ export async function getAllJournalSlugs(): Promise<string[]> {
 export async function getPrivacyPage() {
   return sanityFetch(
     `*[_type == "privacyPage"][0]{
+    ${sectionsProjection('pageBuilder')},
     seoTitle,
     seoDescription,
     seoImage${IMAGE_PROJECTION},

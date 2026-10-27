@@ -1,0 +1,112 @@
+---
+// scaffold-file: journal
+// Safe to edit by hand
+// Page-builder block (card 190, ported from FBC Auburn): "Journal posts". The category chips,
+// every post newest first (the first featured post gets the big card) and the newsletter sign-up
+// under them when it is switched on in Site settings. Moved here from journal/index.astro so the
+// Journal page can be a page builder like the others.
+//
+// Two callers, one markup: journal/index.astro with an EMPTY Page layout draws it with the
+// default switches (how the page drew before it was a page builder), and SectionRenderer draws it
+// with the block's. The posts come from the Journal list itself; the block holds only its switches.
+import JournalCard from '@/components/JournalCard.astro';
+import JournalCategoryChip from '@/components/JournalCategoryChip.astro';
+import NewsletterSignup from '@/components/NewsletterSignup';
+import { getAllJournalEntries, getAllJournalCategories, getSiteSettings } from '@/lib/queries';
+
+interface Props {
+  /** Show the category chips above the posts (default yes; they need a post in a category). */
+  showCategories?: boolean;
+  /** Show the newsletter sign-up under the posts when Site settings switches it on (default yes). */
+  showNewsletter?: boolean;
+  headingId: string;
+}
+const { showCategories = true, showNewsletter = true, headingId } = Astro.props;
+const [entries, categories, siteSettings] = await Promise.all([
+  getAllJournalEntries(),
+  getAllJournalCategories(),
+  getSiteSettings(),
+]);
+
+// Categories with at least one post (filters out empty taxonomies).
+const usedCategories = (categories ?? []).filter((c: any) => (c.postCount ?? 0) > 0);
+
+// Posts have already come back sorted "featured desc, publishedAt desc" via the query.
+const list = entries ?? [];
+---
+
+{/* Category chips (display-only for now) */}
+{showCategories && usedCategories.length > 0 && (
+  <section class="bg-background" aria-label="Journal categories">
+    <div class="mx-auto max-w-content px-m pt-l">
+      <ul class="flex list-none flex-wrap gap-xs p-0">
+        {usedCategories.map((cat: any) => (
+          <li>
+            <JournalCategoryChip
+              title={cat.title}
+              tooltip={
+                cat.description ?? `${cat.postCount} ${cat.postCount === 1 ? 'post' : 'posts'}`
+              }
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+{/* Post grid */}
+<section class="bg-background" aria-labelledby={headingId}>
+  <div class="mx-auto max-w-content px-m py-section-md">
+    {/* Visually-hidden H2: keeps the heading hierarchy from skipping H1 directly to each card's H3. */}
+    <h2 id={headingId} class="sr-only">
+      Recent posts
+    </h2>
+
+    {list.length > 0 ? (
+      <div class="grid grid-cols-1 gap-l md:grid-cols-2 lg:grid-cols-3" data-stagger-grid>
+        {list.map((entry: any, i: number) => (
+          <JournalCard entry={entry} featured={i === 0 && entry.featured} />
+        ))}
+      </div>
+    ) : (
+      <div class="py-section-lg text-center">
+        <p class="mx-auto max-w-prose text-lg text-foreground/80">
+          The first journal entries are on their way.
+        </p>
+        <p class="mt-s text-muted-foreground">
+          In the meantime,{' '}
+          <Fragment>
+            {/* scaffold: services */}
+            <a href="/services/" class="text-link underline underline-offset-2">
+              see what we do
+            </a>{' '}
+            or
+            {/* scaffold:end */}
+          </Fragment>
+          <a href="/contact/" class="text-link underline underline-offset-2">
+            {' '}
+            start a conversation
+          </a>
+          .
+        </p>
+      </div>
+    )}
+  </div>
+</section>
+
+{/* Newsletter signup: renders only when the newsletter is enabled and configured in Site settings.
+    The island hydrates when scrolled into view. */}
+{showNewsletter && siteSettings?.newsletter?.enabled && (
+  <section class="bg-muted" aria-label="Newsletter signup">
+    <div class="mx-auto max-w-content px-m py-section-md">
+      <div class="mx-auto max-w-lg">
+        <NewsletterSignup
+          client:visible
+          newsletter={siteSettings.newsletter}
+          source="journal-index"
+        />
+      </div>
+    </div>
+  </section>
+)}

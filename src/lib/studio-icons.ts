@@ -125,6 +125,7 @@ export const TYPE_ICON_DEFAULTS: Record<string, BrandIconKey> = {
   sectionPreset: 'savedSection',
   redirect: 'redirect',
   shortLink: 'link', // card 171
+  form: 'form', // the form builder, card 194
   // Plugin types (the kit's Trash, weekly tick and marks, the workflow's share links).
   trashedItem: 'trash',
   studioWeek: 'times',

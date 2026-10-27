@@ -16,10 +16,10 @@ The starter ships these routes (always on, not toggleable):
 | `/process`        | `src/pages/process.astro`        | Process — section-driven                                                                |
 | `/[slug]`         | `src/pages/[slug].astro`         | Custom pages created in the Studio; reserved slugs are filtered inside `getStaticPaths` |
 | `/faq`            | `src/pages/faq.astro`            | FAQ page + faqItem collection grouped by category                                       |
-| `/contact`        | `src/pages/contact.astro`        | Contact page + Web3Forms form + Calendly embed                                          |
-| `/journal`        | `src/pages/journal/index.astro`  | Post grid with category chips                                                           |
+| `/contact`        | `src/pages/contact.astro`        | Contact page: page builder (card 190), form block + Web3Forms form + Calendly embed     |
+| `/journal`        | `src/pages/journal/index.astro`  | Journal: page builder (card 190), post grid block with category chips                   |
 | `/journal/[slug]` | `src/pages/journal/[slug].astro` | Post detail: reading progress + header + cover + body + related                         |
-| `/privacy`        | `src/pages/privacy.astro`        | Privacy policy from singleton                                                           |
+| `/privacy`        | `src/pages/privacy.astro`        | Privacy policy: page builder (card 190), policy text block                              |
 | `/404`            | `src/pages/404.astro`            | Custom 404                                                                              |
 
 Additional routes come from opt-in modules staged under `modules/` (off by default). Each module is documented under `docs/modules/`. There are 13 opt-in modules: `portfolio`, `shop`, `virtual-services`, `gift-certificates`, `press`, `resources`, `lead-magnets`, `newsletter`, `style-quiz`, `budget-calculator`, `events`, `donations`, `team`. Key routes they add: `/virtual-services` (was `/e-design`), `/events`, `/donate`, `/team`. (The `process` route is always-on core, not a module.)
@@ -31,6 +31,8 @@ Additional routes come from opt-in modules staged under `modules/` (off by defau
 ### How section-driven pages work
 
 The four core pages (home, about, services, process) and every custom `page` document render from a `pageBuilder` array: an ordered list of typed blocks the editor builds in Sanity Studio. No code change is needed to reorder sections, add a new one, or remove one. The code handles layout; the editor handles content.
+
+**Contact, Privacy and Journal (PORTS.md card 190).** These three singletons carry a `pageBuilder` too, but they do NOT fall back to a `DEFAULT_*_SECTIONS` array: with an EMPTY Page layout the route draws exactly what it always drew (the `Hero` from the hero fields, then the page's fixed piece), so a site that takes the card needs no data migration. The fixed piece is a block component used by both paths: `ContactFormSection.astro` (`contactFormSection`; the form's questions and "What happens next" stay on the Contact page's own tabs and reach the block through the GROQ arm in `SECTION_ARMS`), `PrivacyPolicy.astro` (`privacyPolicySection`; the typed text, or the built-in policy) and `JournalPosts.astro` (`journalPostsSection`; chips, posts, newsletter). Once the layout has sections the route renders them through `SectionRenderer` and the hero is a hero block. Each block is offered on its own page only (`CONTACT_`, `PRIVACY_` and `JOURNAL_SECTION_TYPES` in `richSections.ts`), is SELF_CONTAINED in `sectionCadence.ts` and is on `SELF_FILLING_SECTIONS`. `node scripts/main-pages-builder.mjs <backup-folder>` (dry by default) seeds a layout from the old fields; the old fields are never deleted (rule 16). A new main page that wants this treatment copies the shape: block component, schema, `SECTION_HOST_TYPES`, `HYBRID_SINGLETONS` in the preview route, a fixture and a thumbnail.
 
 **Default fallback.** `src/data/defaultSections.ts` holds code-defined default section arrays for each core page. When `PUBLIC_SANITY_PROJECT_ID` is absent (fresh clone) or a page's `pageBuilder` array is empty, the route renders from these defaults. The site always renders non-blank content.
 
@@ -52,6 +54,7 @@ The four core pages (home, about, services, process) and every custom `page` doc
 | `logoStripSection`   | SELF_CONTAINED | Row or grid of client/partner logos with optional eyebrow and headline                             |
 | `embedSection`       | SELF_CONTAINED | Embed URL, or pasted code in its own sandboxed box (card 121, custom-code.md)                      |
 | `rsvpSection`        | CONTENT        | RSVP form for one event: places, waiting list, questions; replies in D1 (card 127)                 |
+| `formSection`        | CONTENT        | One editor-written `form` document; answers to `/api/form/` and D1 (card 194)                      |
 | `latestVideoSection` | CONTENT        | Newest video of a YouTube channel, read at build time; draws nothing when unset or down (card 197) |
 | `documentsSection`   | CONTENT        | Newest files from the Documents collection, all groups or one (card 197, scaffold `documents`)     |
 

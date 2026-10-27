@@ -10,7 +10,7 @@ Design context: `PRODUCT.md` and `DESIGN.md` at the repo root are neutral PLACEH
 
 ## What this is
 
-A production-ready **Astro 7 + Sanity v6 + Cloudflare Workers** site template, forked from the Reid Design build. **Page-builder-first**: home, about, services and process render through `SectionRenderer` from Sanity `pageBuilder` arrays, and any Studio page gets a `/[slug]` route. A new project pours in a brand (`brand/brand.config.json` then `npm run apply-brand`) and content. It ships FULL and subtracts: `npm run scaffold` removes the seven capabilities (`about`, `faq`, `journal`, `philosophy`, `process`, `services`, `testimonials`). Full overview and stack notes: `docs/claude/overview.md`.
+A production-ready **Astro 7 + Sanity v6 + Cloudflare Workers** site template, forked from the Reid Design build. **Page-builder-first**: home, about, services and process render through `SectionRenderer` from Sanity `pageBuilder` arrays, and any Studio page gets a `/[slug]` route. Contact, Privacy and Journal are page builders too (card 190): empty Page layout draws the classic page, a filled one draws the sections around a block that holds the old piece (`docs/agent/page-architecture.md`). A new project pours in a brand (`brand/brand.config.json` then `npm run apply-brand`) and content. It ships FULL and subtracts: `npm run scaffold` removes the seven capabilities (`about`, `faq`, `journal`, `philosophy`, `process`, `services`, `testimonials`). Full overview and stack notes: `docs/claude/overview.md`.
 
 The must-knows:
 
@@ -59,7 +59,7 @@ Numbering is load-bearing; other docs cite it. Rules 1 to 7 and 10 are in full b
 15. **Anything computable from data is derived at build time,** never stored as a field an editor can retype. Full text: `.claude/rules/sanity-schema.md`.
 16. **Retiring data is a backup-then-delete script, run dry first,** never a raw delete. Every data script is dry by default, and a write to the production dataset needs `--apply` AND `NCS_PRODUCTION_WRITE=yes` in the same command, set under the write protocol (backup, dry run, apply, verify; PORTS.md card 86). Never put backticked text in a shell string. Full text: `.claude/rules/data-scripts.md`.
 17. **One grammar per page:** one heading system, one left edge, one text/picture split (`.split`, PORTS.md card 91), one button family. Check with `node scripts/measure-columns.mjs`. Full text: `.claude/rules/ui-grammar.md`.
-18. **Layout variants are a config axis** (`brand.config.json` `layout`: header, hero, density, cards); a default emits nothing, so existing sites do not move. Full text: `.claude/rules/brand-reskin.md`.
+18. **Layout variants are a config axis** (`brand.config.json` `layout`: header, hero, density, cards; `hero: board` is FBC Auburn's inner-page grammar, card 188); a default emits nothing, so existing sites do not move. Sizes, corners, gaps and shadows come from the one scale at the top of the brand layer (`globals.css`, `docs/agent/design-tokens.md`); picture shapes are a PORTABLE class contract styled by brand tokens (`docs/agent/shapes.md`). Full text: `.claude/rules/brand-reskin.md`.
 19. **Internal page links end in a slash** (`/about/`), matching `trailingSlash: 'always'`, canonicals and the sitemap; a bare `/about` 307s and Search Console reports "Page with redirect". Hand-written hrefs carry it; hrefs built from data go through `withTrailingSlash()` (`src/lib/href.ts`, PORTABLE). Files, `#anchors`, `mailto:`/`tel:`, `/studio`, `/api` are left alone. Full text: PORTS.md card 89.
 
 ## Design flow
