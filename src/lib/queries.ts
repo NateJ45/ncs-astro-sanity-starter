@@ -295,6 +295,7 @@ export const SITE_SETTINGS_PROJECTION = `{
     },
     legalNav[]${NAV_LINK_PROJECTION},
     headerCta{ show, label, link${NAV_LINK_PROJECTION} },
+    headerSecondary{ label, link${NAV_LINK_PROJECTION} },
     showEmail,
     showSocials,
     showFooterSocials,

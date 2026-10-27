@@ -251,6 +251,41 @@ export const siteSettings = defineType({
       },
     }),
 
+    // An optional second, quieter button beside the header button (card 187):
+    // a "Give", "Shop" or "Book online" link. Absent until BOTH boxes are
+    // filled, so a site that never uses it is unchanged.
+    defineField({
+      name: 'headerSecondary',
+      title: 'Second header button (optional)',
+      type: 'object',
+      group: 'navigation',
+      description:
+        'An outlined button beside the header button, for a second ask like "Shop" or "Book online". It shows only when both boxes are filled in.',
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({
+          name: 'label',
+          title: 'Button text',
+          type: 'string',
+          description: 'A word or two. Leave blank to show no second button.',
+          validation: (rule) => rule.max(24),
+        }),
+        defineField({
+          name: 'link',
+          title: 'Where the button goes',
+          type: 'navLink',
+          description: 'Pick a page or paste a web address. Leave blank to show no second button.',
+        }),
+      ],
+      preview: {
+        select: { label: 'label' },
+        prepare: ({ label }) => ({
+          title: label || 'No second button',
+          subtitle: label ? 'Second header button' : 'Not showing',
+        }),
+      },
+    }),
+
     // Small on/off switches for the bits of contact detail the chrome carries.
     // All are ON unless explicitly turned off, so an untouched site is
     // unchanged (the site reads a blank value as "yes").

@@ -33,6 +33,7 @@ import { TRASH_TYPE } from '../lib/studio-trash';
 import { privateDocId } from '../lib/private-pages';
 import { STAFF_TYPE, WEEK_TYPE } from '../lib/studio-kit';
 import { tableListItem } from './workflow';
+import { OWN_NEWSLETTER } from './ownNewsletter';
 import { TABLES } from './tables.config';
 
 const SINGLETON_TYPES = [
@@ -68,6 +69,8 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'faqCategory', // scaffold: faq
   'journalEntry', // scaffold: journal
   'journalCategory', // scaffold: journal
+  // No newsletter issues while the list lives elsewhere (ownNewsletter.ts, card 187).
+  ...(OWN_NEWSLETTER ? [] : ['newsletter']),
   'page', // custom pages, placed explicitly under "Pages"
   'privatePage', // private pages (card 122), placed explicitly under "Pages"
   'sectionPreset', // saved sections, placed explicitly under "Pages"

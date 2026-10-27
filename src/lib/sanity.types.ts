@@ -642,6 +642,10 @@ export type SiteSettings = {
     label?: string;
     link?: NavLink;
   };
+  headerSecondary?: {
+    label?: string;
+    link?: NavLink;
+  };
   showEmail?: boolean;
   showSocials?: boolean;
   showFooterSocials?: boolean;

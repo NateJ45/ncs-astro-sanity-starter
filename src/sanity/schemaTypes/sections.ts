@@ -39,6 +39,7 @@ import { SyncIcon } from '@sanity/icons/Sync';
 import {
   columnsField,
   headingAccentField,
+  scriptAccentField,
   hideWhenRich,
   lookField,
   richTwin,
@@ -167,12 +168,7 @@ export const richTextSection = defineType({
   fields: [
     defineField({ name: 'eyebrow', title: 'Eyebrow (optional)', type: 'string' }),
     defineField({ name: 'heading', title: 'Heading (optional)', type: 'string' }),
-    defineField({
-      name: 'scriptAccent',
-      title: 'Handwritten accent word (optional)',
-      type: 'string',
-      description: 'One word from the heading to render in the script font. Must match exactly.',
-    }),
+    scriptAccentField('heading'),
     headingAccentField(),
     proseBody('body', 'Text'),
     defineField({
@@ -387,12 +383,7 @@ export const ctaBandSection = defineType({
       type: 'string',
       validation: (R) => R.required(),
     }),
-    defineField({
-      name: 'scriptAccent',
-      title: 'Handwritten accent word (optional)',
-      type: 'string',
-      description: 'One word from the headline to render in the script font. Must match exactly.',
-    }),
+    scriptAccentField('headline'),
     headingAccentField(),
     defineField({
       name: 'subhead',
