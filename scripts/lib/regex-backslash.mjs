@@ -10,12 +10,21 @@
 // trusted. Regex literals are found with the TypeScript scanner, so strings and comments that
 // merely mention a pattern never count. `new RegExp('...')` strings are checked the same way.
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import ts from 'typescript';
 
 // A class letter that is quantified, or opens a group, or sits alone in a bracket. Preceded by
 // something that is not a letter, so ordinary words ("class+", "words*") do not trip it.
 const SUSPECT = /(?:^|[^A-Za-z])[sdwbSDWB](?:[+*?]|\{\d)|\[\^?[sdwSDW]\]|\((?:\?:)?[sdwSDW][+*]/;
+
+/**
+ * Drops paths that are not on disk. `git ls-files` still lists a file that
+ * `npm run scaffold -- --remove <capability> --write` deleted and has not committed yet, and
+ * reading it would throw ENOENT (PORTS.md card 198).
+ */
+export function onDisk(files, exists = existsSync) {
+  return files.filter((f) => exists(f));
+}
 
 /** True when a regex body (without slashes or flags) looks like it lost its backslashes. */
 export function looksStripped(body) {

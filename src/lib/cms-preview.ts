@@ -127,12 +127,22 @@ const NON_STEGA_FIELDS = new Set([
   // an encoded value would fall back to every page / once per visitor in the preview).
   'where',
   'frequency',
+  // Card 191: Site settings > Footer style (src/lib/wayfinding.ts compares it to 'compact').
+  'footerStyle',
   // The builder kit (builderSections.ts, PORTS.md card 173): the notice's
   // urgency picks its look, and the event and schedule times are read as
   // "HH:MM" by src/lib/builder-blocks.ts. (`layout` above covers the button row.)
   'urgency',
   'startTime',
   'endTime',
+  // The business facts (card 196, src/lib/business-hours.ts): an hours row's
+  // `days` and its `opens` / `closes` times, and an hours change's `kind`, are
+  // read as weekday keys, "HH:MM" and closed | hours. (The resolver also strips
+  // markers with plain(), belt and braces.) `layout` above covers the hours block.
+  'days',
+  'opens',
+  'closes',
+  'kind',
   // Card 193: the progress bar's unit picks dollars or a plain number (builder-blocks.ts compares it).
   // `icon` (the icon picker) is listed below.
   'unit',

@@ -1,0 +1,30 @@
+---
+// Safe to edit by hand
+// The small inline "To confirm" tag beside a fact that is still a guess
+// (PORTS.md card 196, from first-baptist-auburn's NotConfirmed.astro).
+//
+// DRIVEN BY DATA. Pass the fact's resolved `confirmed` flag (from
+// src/lib/business-facts.ts); the tag renders nothing once it is true, so a
+// caller never writes the conditional and the tag disappears on its own the day
+// someone ticks the box in the Studio.
+//
+// Colors come from the theme's destructive token, mixed into a pale tag, so it
+// reads in both themes and follows a reskin.
+import '@/styles/business.css';
+
+interface Props {
+  /** The fact's resolved `confirmed` flag. Only false shows the tag. */
+  confirmed?: boolean | null;
+  /** The tag's words. */
+  label?: string;
+  class?: string;
+}
+
+const { confirmed, label = 'To confirm', class: className = '' } = Astro.props;
+---
+
+{confirmed === false && (
+  <span class:list={['biz-confirm', className]} data-to-confirm>
+    {label}
+  </span>
+)}

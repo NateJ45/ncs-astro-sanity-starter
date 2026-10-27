@@ -29,6 +29,7 @@ import { mergePageSwitches } from '@/lib/page-switches';
 import { getNavPages } from '@/lib/queries';
 import { resolveSiteSettings, type RawChromeSettings } from '@/lib/siteSettings';
 import { telHref } from '@/lib/phone';
+import { phoneMenuGroups } from '@/lib/wayfinding';
 import { urlFor } from '@/lib/sanity';
 import SearchButton from './search/SearchButton.astro';
 import SiteSearch from './search/SiteSearch.astro';
@@ -66,6 +67,12 @@ const availability = siteSettings?.availabilityStatus ?? '';
 // drawer, and the footer can never disagree about what the menu is.
 const chrome = resolveSiteSettings(siteSettings);
 const headerCta = chrome.headerCta;
+// Card 191: Site settings > Phone menu groups. Empty (the default) keeps the phone menu's usual list.
+// The menu's own button is left out of the rows, so the same page is not offered twice.
+const phoneGroups = phoneMenuGroups(
+  siteSettings?.phoneMenuGroups,
+  headerCta.show ? headerCta.href : undefined,
+);
 const headerSecondary = chrome.headerSecondary;
 const logo = chrome.logo;
 // The logo box is 48px tall (h-12), so 280w covers a wide wordmark at 1x and
@@ -471,6 +478,8 @@ function isGroupActive(items: { href: string }[]) {
       brandName={brandName}
       cta={headerCta}
       secondary={headerSecondary}
+      groups={phoneGroups}
+      current={pathname}
     />
   </div>
   {site.search.enabled && <SiteSearch />}

@@ -305,7 +305,9 @@ export const SITE_SETTINGS_PROJECTION = `{
     title,
     tagline,
     email,
+    emailConfirmed,
     phone,
+    phoneConfirmed,
     businessType,
     "availabilityStatus": *[_type == "businessInfo"][0].availabilityStatus,
     "serviceAreas": *[_type == "businessInfo"][0].serviceAreas,
@@ -315,6 +317,18 @@ export const SITE_SETTINGS_PROJECTION = `{
     "city": *[_type == "businessInfo"][0].city,
     "state": *[_type == "businessInfo"][0].state,
     "serviceRegion": *[_type == "businessInfo"][0].serviceRegion,
+    // The business facts (card 196, src/lib/business-facts.ts): the street
+    // address, its confirmed flag, and the opening hours with their dated changes.
+    ...*[_type == "businessInfo"][0]{
+      businessModel,
+      street,
+      zip,
+      addressConfirmed,
+      findUs,
+      openingHours[]{ _key, days, opens, closes, label, confirmed },
+      hoursNote,
+      hoursChanges[]{ _key, date, endDate, kind, opens, closes, note }
+    },
     socialInstagram,
     socialFacebook,
     socialLinks[]{
@@ -346,6 +360,17 @@ export const SITE_SETTINGS_PROJECTION = `{
     showEmail,
     showSocials,
     showFooterSocials,
+    // Wayfinding (card 191, src/lib/wayfinding.ts). All empty on an untouched site.
+    phoneMenuGroups[]{ _key, title, links[]${NAV_LINK_PROJECTION} },
+    whereNext[]{ _key, note, link${NAV_LINK_PROJECTION} },
+    footerStyle,
+    actionBars[]{
+      _key,
+      everyPage,
+      text,
+      "page": page->{ "docType": _type, "slug": slug.current, archived },
+      action${NAV_LINK_PROJECTION}
+    },
     sectionVisibility{
       showPortfolio,
       showJournal,
