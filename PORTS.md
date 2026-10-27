@@ -319,6 +319,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 185  | Type straight onto the page in the preview                                               | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -11909,3 +11910,65 @@ screenshots of the header at 375 and 1280 with and without the second button.
 (`red-budget.ts`, `give.ts`, `ownNewsletter.ts`); its sync PR takes the PORTABLE copies. Other sites: the six PORTABLE
 files plus the per-site edits (`CtaLink`, `SectionRenderer`, `Header`, `Footer`, `MobileNav`, `CopyEmailButton`,
 `BaseLayout`, the schema fields and `siteSettings.ts`/`queries.ts`), in the Phase 2 rollout.
+
+## Card 190: Every main page a page builder: Contact, Privacy and Journal (2026-10-27)
+
+**Origin:** first-baptist-auburn, "Every main page a page builder" (2026-10-26; inventory row A17). Auburn's Contact,
+Privacy and News and notes pages each kept a hero plus one fixed piece drawn in code (the form, the policy, the post
+list). The editor could not put a photo above the form or move the posts. Each page now has a Page layout like About,
+and the fixed piece became a block that holds it.
+
+**What changed.**
+
+- **Three blocks, each the old markup moved whole.** `contactFormSection` (`ContactFormSection.astro`: the form
+  column, the email and phone lines, the booking widget, "What happens next", and the sticky sidebar with the map),
+  `privacyPolicySection` (`PrivacyPolicy.astro`: the typed text and date, or the built-in policy whose wording branches
+  on the analytics this build ships) and `journalPostsSection` (`JournalPosts.astro`: category chips, the post grid with
+  the featured card, the newsletter sign-up). Schemas: `mainPageSections.ts` (Contact and Privacy, core) and
+  `journalPostsSection.ts` (`scaffold-file: journal`, so `npm run scaffold -- --remove journal` takes it along).
+  Neither carries a colour (rule 9); all three are SELF_CONTAINED in `sectionCadence.ts` and on
+  `SELF_FILLING_SECTIONS`, so the Studio never calls them empty.
+- **Offered on their own page only.** `CONTACT_`, `PRIVACY_` and `JOURNAL_SECTION_TYPES` in `richSections.ts` are the
+  About list plus that page's block. A custom page or a saved section never takes them (a second contact form is a
+  mistake). They sit in a "This page" group of the + Add menu.
+- **`pageBuilder` on `contactPage`, `privacyPage`, `journalPage`.** Own tab "Page layout", last in the tab list, with
+  `pageBuilderAuthoring`, so the three main pages get the kit's "Insert a saved section" button, the page warnings and
+  the grid picker like About. `SECTION_HOST_TYPES` lists them. Privacy's required hero headline, date and body are
+  required only while the layout is empty.
+- **The contact block reads the form's settings through a GROQ arm** (`SECTION_ARMS`, `queries.ts`): the questions,
+  the note above the form and "What happens next" stay on the Contact page's own tabs, and the block draws the same
+  form wherever it is placed.
+- **Preview.** The three singletons preview as builder pages once their layout has sections (`HYBRID_SINGLETONS` in
+  `preview/[...slug].astro`); with it empty they preview as before (hero fields and a note).
+- **`scripts/main-pages-builder.mjs` (+ `scripts/lib/main-pages-plan.mjs`, tested).** Seeds each Page layout from the
+  old fields: banner (the hero fields), the block, and for Journal the closing band (the final-CTA fields). Dry by
+  default; production needs `--apply` and `NCS_PRODUCTION_WRITE=yes`; backs up every touched document first; skips a
+  page whose layout is filled; stops on an unpublished draft. The old fields stay in the schema (rule 16).
+
+**Why existing content keeps rendering (the rule of this card).** The pages do NOT fall back to a DEFAULT_*_SECTIONS
+array like About. A singleton with an EMPTY Page layout draws exactly what it drew before: the same `Hero` from the
+hero fields, then the same block component fed by the document itself (`<ContactFormSection settings={page} />`,
+`<PrivacyPolicy lastUpdated body />`, `<JournalPosts />`, then the same `FinalCta`). The markup moved into the
+components unchanged, so the rendered HTML is the same. A site needs no migration and no data write to take this card.
+The script is for the day the editor should be able to move things.
+
+**Proved:** `npm run parity capture` on the pre-change build, `compare` on the new one: contact, privacy and journal
+(and every other page) PASS with zero diff. The unit tests (new `main-pages-plan` test, the thumbnail test now covering
+the three blocks), `astro check`, build, and the page-builder Playwright specs pass. Screenshots at 375 and 1280 of the
+classic layout and of a seeded layout (banner, block, extra band).
+
+**Adapting per site.**
+
+- Swap the plan's fallback words in `main-pages-plan.mjs` for the page's own (they are the starter's defaults).
+- A site that wants the editor to land on the new tab sets `default: true` on the `pageBuilder` group and hides the old
+  fields (`hidden: true, readOnly: true`) once its layout is filled, as Auburn did; the starter leaves the old tabs
+  visible so a site that does nothing sees nothing change.
+- A site whose contact page has no map or no sidebar passes `sidebar: false`, or removes the aside in
+  `ContactFormSection.astro`. A church has no "Studio location" label: reword it there.
+- `contactFormSection`'s settings projection reads fields the Contact page already had; if a site adds a field to the
+  Contact page, add it to the arm in `queries.ts` and to `ContactFormSettings`.
+- Journal's name is the site's own noun (Auburn: "News and notes", Dispatches, Notes from the shop): the block title in
+  `journalPostsSection.ts` and the three words in `journal/index.astro`.
+
+**Applied:** starter (this card). Sites take it in the Auburn port run's per-site phase; Auburn's own copies are the
+origin and differ only by church words, the hidden fossils and its `DEFAULT_*_SECTIONS` fallback.
