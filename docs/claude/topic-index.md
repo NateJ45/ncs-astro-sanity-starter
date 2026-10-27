@@ -24,36 +24,6 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Image handling                                                                                              | `docs/agent/images.md`                                               |
 | Accessibility                                                                                               | `docs/agent/accessibility.md`                                        |
 | SEO + JSON-LD                                                                                               | `docs/agent/seo.md`                                                  |
-| Performance budgets + Lighthouse                                                                            | `docs/agent/performance.md`                                          |
-| Content data + Sanity integration                                                                           | `docs/agent/sanity.md`                                               |
-| Custom code: the trust model (pasted widgets, the box, the opt-outs, the embed provider registry)           | `docs/agent/custom-code.md`                                          |
-| Studio kit (Home, Site Guide, Checkup, staff view, Trash; `kit.config.ts`)                                  | `docs/agent/studio-kit.md`                                           |
-| People: invite a Helper or an Administrator from the Studio, Simple view, roles by plan, the members secret | `docs/agent/studio-people.md`                                        |
-| Visitor site search (Pagefind, opt-in) + share buttons                                                      | `docs/agent/site-search.md`                                          |
-| Hidden pages, password pages (security note), Checkup link and heading checks                               | `docs/agent/private-pages.md`                                        |
-| Deployment + env vars + rebuild model                                                                       | `docs/agent/deployment.md`                                           |
-| Editor-driven vs hardcoded                                                                                  | `docs/agent/editor-vs-hardcoded.md`                                  |
-| Cross-repo shared improvements (port cards + applied-to matrix + drift check)                               | `PORTS.md`                                                           |
-| Change history (prose ledger; the checkable matrix lives in PORTS.md)                                       | `docs/agent/changelog.md`                                            |
-| New-project setup runbook + pre-launch checklist                                                            | `docs/bootstrap/NEW-PROJECT.md`, `docs/bootstrap/setup-checklist.md` |
-| Per-module enable guides (`events`, `resources`)                                                            | `docs/modules/<module-name>.md`                                      |
-| The eleven archived modules: what they are and how to bring one back                                        | `archive/README.md`                                                  |
-| Area                                                                                                        | Doc                                                                  |
-| --------------------------------------------------------------------------------------------------------    | -------------------------------------------------------------------- |
-| **Open loops registry (read early each session)**                                                           | `docs/PENDING.md`                                                    |
-| Stack detail + astro.config landmines                                                                       | `docs/agent/stack-and-config.md`                                     |
-| Page + section architecture, nav, visibility toggles                                                        | `docs/agent/page-architecture.md`                                    |
-| Brand colors + theme system (light/dark discipline)                                                         | `docs/agent/theme-and-color.md`                                      |
-| Brand reskin system (config schema, apply-brand, /reskin skill)                                             | `docs/brand/brand-system.md`                                         |
-| Polish layer (brand stripe, card-lift, scroll, script accents)                                              | `docs/agent/polish-layer.md`                                         |
-| Animation layer (native scrolling, motion, scroll-reveal, script accent)                                    | `docs/agent/animation.md`                                            |
-| Typography + spacing tokens                                                                                 | `docs/agent/design-tokens.md`                                        |
-| Component catalog + long-read layout                                                                        | `docs/agent/components.md`                                           |
-| Component sourcing (shadcn, Starwind, Magic UI, PrimeReact, copy-paste sources, token-remap cheat sheet)    | `docs/agent/component-sources.md`                                    |
-| Error + empty states                                                                                        | `docs/agent/error-states.md`                                         |
-| Image handling                                                                                              | `docs/agent/images.md`                                               |
-| Accessibility                                                                                               | `docs/agent/accessibility.md`                                        |
-| SEO + JSON-LD                                                                                               | `docs/agent/seo.md`                                                  |
 | Short links (/spring into `_redirects`) and Studio QR codes (card 171)                                      | `docs/agent/seo.md`, "Short links"                                   |
 | Performance budgets + Lighthouse                                                                            | `docs/agent/performance.md`                                          |
 | Content data + Sanity integration (and the Studio logo and icon uploads, card 168)                          | `docs/agent/sanity.md`                                               |
@@ -61,6 +31,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Social links read by URL host (platform and icon from the pasted link; card 167)                            | `docs/agent/sanity.md`                                               |
 | Custom code: the trust model (pasted widgets, the box, the opt-outs, the embed provider registry)           | `docs/agent/custom-code.md`                                          |
 | Studio kit (Home, Site Guide, Checkup, staff view, Trash; `kit.config.ts`)                                  | `docs/agent/studio-kit.md`                                           |
+| People: invite a Helper or an Administrator from the Studio, Simple view, roles by plan, the members secret | `docs/agent/studio-people.md`                                        |
 | Popups (one at a time, date-windowed, the guard rails; card 170)                                            | `docs/agent/popups.md`                                               |
 | Visitor site search (Pagefind, opt-in) + share buttons                                                      | `docs/agent/site-search.md`                                          |
 | Hidden pages, password pages (security note), Checkup link and heading checks                               | `docs/agent/private-pages.md`                                        |
