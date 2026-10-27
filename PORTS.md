@@ -12756,3 +12756,22 @@ applying on the marked person's next visit.
 **Applied:** starter (this card). first-baptist-auburn: origin (branch `port/card-176`, after this merges).
 
 **Who should take it.** Every site with the Studio kit (card 106) whose client adds their own editors. Needs card 175.
+
+## Card 180: A brick stone and printed flecks for the Studio's numbered steps (2026-10-26)
+
+**Origin:** first-baptist-auburn. The Studio's numbered steps were pebbles, then plain circles, while the site's own
+"Your first Sunday" steps on Home are printed navy bricks with linocut flecks. Nathan asked for the Studio to match.
+
+**Fix.** `src/lib/studio-look.ts` (PORTABLE): a fifth `studio.look.stone` shape, `brick` (a course 44 high to 64
+wide, near-square corners), a new `stoneBox(shape, size)` that every Stone sizes from (a brick is `size` wide and
+0.69 of it high; every other shape keeps its 0.9 box, so nothing else moves), and an optional `studio.look.stoneFlecks`
+(an SVG path in `public/`, the print laid over every filled stone, clipped to its outline).
+`src/sanity/kit/ui/primitives.tsx` (PORTABLE) `Stone`: a filled brick gets the site bricks' print, a 2px darker rim
+and a 4px band along the bottom, both clipped inside; an outlined (waiting) stone stays plain. Schema
+(`brand.config.schema.json`), test (`studio-look.test.ts`) and `docs/agent/studio-kit.md` updated.
+
+**Default unchanged:** a site without `stone: brick` or `stoneFlecks` draws exactly what it drew before.
+
+**Applied:** starter (this card), first-baptist-auburn (origin: `stone: brick`, navy `markColors`, its
+`print-flecks.svg` copied to `public/studio-banner/`). fbcm and stonesteps-50k: the marked copies only, no look
+change.

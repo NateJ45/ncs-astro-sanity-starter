@@ -23,6 +23,7 @@ import {
   resolveLook,
   shotMarks,
   shotSrc,
+  stoneBox,
   stonePath,
 } from './studio-look.ts';
 
@@ -166,8 +167,25 @@ describe('stones', () => {
     assert.ok(nums.every((n) => n >= 0 && n <= 44));
   });
   it('every shape draws a closed path', () => {
-    for (const s of ['pebble', 'round', 'square', 'lozenge'] as const)
+    for (const s of ['pebble', 'round', 'square', 'lozenge', 'brick'] as const)
       assert.match(stonePath(s, 1, 40, 36), /^M.*Z$/);
+  });
+  it('card 180: a brick is a wide course, the other shapes keep their box', () => {
+    assert.deepEqual(stoneBox('brick', 64), { w: 64, h: 44 });
+    assert.deepEqual(stoneBox('round', 48), { w: 48, h: 43 });
+    assert.deepEqual(stoneBox('pebble', 48), stoneBox('square', 48));
+  });
+  it('card 180: stoneFlecks takes a public path only', () => {
+    const base = lookBase(studioColors({}, stock), {});
+    assert.equal(
+      resolveLook({ stone: 'brick', stoneFlecks: '/x/flecks.svg' }, base).stoneFlecks,
+      '/x/flecks.svg',
+    );
+    assert.equal(
+      resolveLook({ stoneFlecks: 'https://evil.example/f.svg' }, base).stoneFlecks,
+      undefined,
+    );
+    assert.equal(resolveLook({ stone: 'brick' }, base).stone, 'brick');
   });
 });
 

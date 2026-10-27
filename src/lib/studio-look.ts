@@ -40,7 +40,7 @@ export interface MarkerArt {
 }
 
 export type MarkerKind = 'dot' | 'steps' | 'rule' | 'diamond';
-export type StoneShape = 'pebble' | 'round' | 'square' | 'lozenge';
+export type StoneShape = 'pebble' | 'round' | 'square' | 'lozenge' | 'brick';
 export type ConnectorKind = 'dashes' | 'dots' | 'line' | 'none';
 export type MotionVerb = 'lay' | 'draw' | 'none';
 /** What the /studio loading splash lays (card 162): the stone path, or the site's own motif. */
@@ -56,8 +56,13 @@ export interface StudioLookInput {
   headingColor?: string;
   /** The numbered stones' colours, in order. Default: the accent alone. */
   markColors?: string[];
-  /** The stones' shape. Default 'round'. */
+  /**
+   * The stones' shape. Default 'round'. Card 180: 'brick' is a printed brick, a wide course with
+   * a darker rim, heavier along the bottom, for a site whose own numbered steps are bricks.
+   */
   stone?: StoneShape;
+  /** Card 180: a print texture laid over every filled stone (an SVG in public/), such as linocut flecks. */
+  stoneFlecks?: string;
   /** What joins numbered steps. Default a plain line in the rule colour. */
   connector?: { kind?: ConnectorKind; color?: string };
   /** The three callout colours (the hue; grounds and text are worked out). */
@@ -145,6 +150,7 @@ export interface SchemeTokens {
 export interface ResolvedLook {
   marker: MarkerKind | MarkerArt;
   stone: StoneShape;
+  stoneFlecks?: string;
   connector: ConnectorKind;
   motion: MotionVerb;
   splash: SplashKind;
@@ -285,7 +291,7 @@ function scheme(
 }
 
 const MARKERS: MarkerKind[] = ['dot', 'steps', 'rule', 'diamond'];
-const STONES: StoneShape[] = ['pebble', 'round', 'square', 'lozenge'];
+const STONES: StoneShape[] = ['pebble', 'round', 'square', 'lozenge', 'brick'];
 const CONNECTORS: ConnectorKind[] = ['dashes', 'dots', 'line', 'none'];
 const MOTIONS: MotionVerb[] = ['lay', 'draw', 'none'];
 const SPLASHES: SplashKind[] = ['path', 'motif'];
@@ -344,6 +350,7 @@ export function resolveLook(input: StudioLookInput | undefined, base: LookBase):
   return {
     marker,
     stone: pick(look.stone, STONES, 'round', 'stone', notes),
+    stoneFlecks: isPublicPath(look.stoneFlecks) ? look.stoneFlecks : undefined,
     connector: pick(look.connector?.kind, CONNECTORS, 'line', 'connector.kind', notes),
     motion: pick(look.motion, MOTIONS, 'draw', 'motion', notes),
     splash: pick(look.splash, SPLASHES, 'path', 'splash', notes),
@@ -524,6 +531,14 @@ export function pebblePath(seed: number, w: number, h: number, sides = 6): strin
   return 'M' + pts.map((p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join('L') + 'Z';
 }
 
+/**
+ * Card 180: a stone's box for a given size. Every shape is `size` wide; a brick is a course
+ * (44 high to 64 wide, the proportions of a printed brick), the rest a little shorter than wide.
+ */
+export function stoneBox(shape: StoneShape, size: number): { w: number; h: number } {
+  return { w: size, h: Math.round(size * (shape === 'brick' ? 0.69 : 0.9)) };
+}
+
 /** The token outline for a shape, as an SVG path in a w x h box. */
 export function stonePath(shape: StoneShape, seed: number, w: number, h: number): string {
   if (shape === 'pebble') return pebblePath(seed, w, h);
@@ -532,6 +547,11 @@ export function stonePath(shape: StoneShape, seed: number, w: number, h: number)
     return `M${r} 0H${w - r}Q${w} 0 ${w} ${r}V${h - r}Q${w} ${h} ${w - r} ${h}H${r}Q0 ${h} 0 ${h - r}V${r}Q0 0 ${r} 0Z`;
   }
   if (shape === 'lozenge') return `M${w / 2} 0L${w} ${h / 2}L${w / 2} ${h}L0 ${h / 2}Z`;
+  if (shape === 'brick') {
+    // A laid brick: square corners, softened by a hair so the edge does not shimmer.
+    const r = Math.max(1, Math.min(w, h) * 0.05);
+    return `M${r} 0H${w - r}Q${w} 0 ${w} ${r}V${h - r}Q${w} ${h} ${w - r} ${h}H${r}Q0 ${h} 0 ${h - r}V${r}Q0 0 ${r} 0Z`;
+  }
   const rx = w / 2;
   const ry = h / 2;
   return `M0 ${ry}A${rx} ${ry} 0 1 0 ${w} ${ry}A${rx} ${ry} 0 1 0 0 ${ry}Z`;
@@ -801,7 +821,7 @@ export function neutralLookWarnings(input: StudioLookInput | undefined): string[
     );
   if (look.stone === undefined || look.stone === 'round')
     out.push(
-      'studio.look.stone is the neutral round stone: pick pebble, square, lozenge or a shape of its own.',
+      'studio.look.stone is the neutral round stone: pick pebble, square, lozenge, brick or a shape of its own.',
     );
   if (!look.markColors || look.markColors.length < 2)
     out.push('studio.look.markColors names fewer than two colors, so every stone is the accent.');

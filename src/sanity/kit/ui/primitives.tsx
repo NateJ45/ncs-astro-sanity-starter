@@ -15,7 +15,8 @@
 //   Marker         the section marker (Auburn: three gold steps)
 //   SectionRule    marker + optional small-caps label + hairline (a heading's rule)
 //   KitPanel       a titled panel: SectionRule with a real heading, then children
-//   Stone          a numbered or plain stone in the look's shape and colours
+//   Stone          a numbered or plain stone in the look's shape and colours (a
+//                  brick gets a printed rim and the look's flecks, card 180)
 //   SeverityStone  a stone in a callout tone, with words ("Needs doing")
 //   StepPath       numbered stones joined by the connector, down or across
 //   KitNotice      a callout: note (sky), tip (gold), careful (brick), plain
@@ -38,6 +39,7 @@
 import {
   Fragment,
   useEffect,
+  useId,
   useInsertionEffect,
   useMemo,
   useRef,
@@ -50,6 +52,7 @@ import { useRootTheme } from '@sanity/ui';
 import {
   chipKind,
   inlineParts,
+  stoneBox,
   stonePath,
   type MarkerArt,
   type SchemeTokens,
@@ -342,9 +345,15 @@ export function Stone({
 }) {
   const t = useLookTokens();
   const s = t.stones[index % t.stones.length];
-  const w = size;
-  const h = Math.round(size * 0.9);
+  const { w, h } = stoneBox(LOOK.stone, size);
   const d = useMemo(() => stonePath(LOOK.stone, seed ?? index * 5 + 3, w, h), [seed, index, w, h]);
+  // useId can hold characters a url(#id) reference will not take, so keep the safe ones.
+  const clip = `stone${useId().replace(/[^\w-]/g, '')}`;
+  // Card 180: a filled stone (not an outlined, waiting one) carries the print: a brick's darker
+  // rim, heavier along the bottom, and the look's flecks over the colour.
+  const printed = !edge;
+  const brick = LOOK.stone === 'brick' && printed;
+  const flecks = printed ? LOOK.stoneFlecks : undefined;
   return (
     <span
       className="ui-stone"
@@ -361,8 +370,32 @@ export function Stone({
           strokeWidth={edge ? Math.max(1.5, Math.min(2.25, size / 18)) : undefined}
           strokeLinejoin="round"
         />
+        {(flecks || brick) && (
+          <clipPath id={clip}>
+            <path d={d} />
+          </clipPath>
+        )}
+        {flecks && (
+          <image
+            href={flecks}
+            width={w}
+            height={h}
+            preserveAspectRatio="none"
+            clipPath={`url(#${clip})`}
+          />
+        )}
+        {brick && (
+          // Inside the brick, as the site's own printed bricks draw it: a 2px rim all round and a
+          // 4px band along the bottom, both a shade of black over the colour.
+          <g clipPath={`url(#${clip})`}>
+            <path d={d} fill="none" stroke="rgb(0 0 0 / 0.2)" strokeWidth={4} />
+            <rect y={h - 4} width={w} height={4} fill="rgb(0 0 0 / 0.16)" />
+          </g>
+        )}
       </svg>
-      {n !== undefined && <b style={{ fontSize: Math.round(size * 0.42) }}>{n}</b>}
+      {n !== undefined && (
+        <b style={{ fontSize: Math.round(size * (LOOK.stone === 'brick' ? 0.4 : 0.42)) }}>{n}</b>
+      )}
     </span>
   );
 }

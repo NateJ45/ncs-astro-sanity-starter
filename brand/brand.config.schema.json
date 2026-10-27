@@ -272,7 +272,14 @@
               "description": "The numbered stones' colors, in order.",
               "items": { "$ref": "#/definitions/hex" }
             },
-            "stone": { "type": "string", "enum": ["pebble", "round", "square", "lozenge"] },
+            "stone": {
+              "type": "string",
+              "enum": ["pebble", "round", "square", "lozenge", "brick"]
+            },
+            "stoneFlecks": {
+              "type": "string",
+              "description": "Card 180: a print texture over every filled stone, an SVG path in public/."
+            },
             "connector": {
               "type": "object",
               "properties": {
