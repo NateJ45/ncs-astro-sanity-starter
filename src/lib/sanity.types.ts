@@ -2167,13 +2167,6 @@ export type RichTextSection = {
   look?: 'standard' | 'quiet' | 'feature';
 };
 
-export type SanityFileAssetReference = {
-  _ref: string;
-  _type: 'reference';
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset';
-};
-
 export type HeroSection = {
   _type: 'heroSection';
   eyebrow?: string;
@@ -4202,7 +4195,6 @@ export type AllSanitySchemaTypes =
   | GallerySection
   | ImageTextSection
   | RichTextSection
-  | SanityFileAssetReference
   | HeroSection
   | FormTickQuestion
   | FormDateQuestion
