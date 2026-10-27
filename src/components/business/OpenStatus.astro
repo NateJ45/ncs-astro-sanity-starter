@@ -1,0 +1,50 @@
+---
+// Safe to edit by hand
+// "Open now until 5 pm" / "Closed now. Opens tomorrow at 9 am" (PORTS.md card 196).
+//
+// A static page cannot know the time a visitor reads it, so the HTML carries
+// today's hours from the build ("Today: 9 am to 5 pm", right without
+// JavaScript) and the week's hours as data; the script below works out the live
+// status on the site's clock (site.timeZone, never the visitor's) with the same
+// pure functions the build uses (src/lib/business-hours.ts), and again every
+// minute (src/scripts/business-live.ts, loaded by BusinessLive.astro only when
+// there are hours). The same script hides any dated change whose last day has passed
+// ([data-biz-until]) and marks today's row in an hours table ([data-biz-days]),
+// so nothing stale shows between rebuilds.
+//
+// Renders nothing when the site has no hours.
+import '@/styles/business.css';
+import BusinessLive from './BusinessLive.astro';
+import { site } from '@/data/site';
+import { dayHours, dayText, zonedClock } from '@/lib/business-hours';
+import type { BusinessFacts } from '@/lib/business-facts';
+
+interface Props {
+  facts: BusinessFacts;
+  /** 'line' is one quiet line (footer); 'lead' is the bigger status in a card. */
+  size?: 'line' | 'lead';
+  class?: string;
+  /** The build moment; tests pass a fixed one. */
+  now?: Date;
+}
+
+const { facts, size = 'line', class: className = '', now = new Date() } = Astro.props;
+const today = dayHours(facts.hours, zonedClock(now, site.timeZone).date);
+const todayText = today.closed ? 'Closed today' : `Today ${dayText(today.intervals)}`;
+---
+
+{facts.hasHours && (
+  <p
+    class:list={['biz-status', `biz-status--${size}`, className]}
+    data-biz-status
+    data-zone={site.timeZone}
+    data-hours={JSON.stringify(facts.hours)}
+  >
+    <span class="biz-status__dot" aria-hidden="true" />
+    <span class="biz-status__headline" data-headline>
+      {todayText}
+    </span>
+    <span class="biz-status__detail" data-detail />
+    <BusinessLive />
+  </p>
+)}

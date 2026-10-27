@@ -28,6 +28,7 @@ import { AddDocumentIcon } from '@sanity/icons/AddDocument';
 import { BellIcon } from '@sanity/icons/Bell';
 import { EditIcon } from '@sanity/icons/Edit';
 import { PinIcon } from '@sanity/icons/Pin';
+import { HOURS_TIME_OPTIONS } from '../lib/business-hours';
 import { runPageCheck } from './actions/checkPage';
 import { PAGE_BUILDER_TYPES } from './pageBuilderConfig';
 import { OWN_NEWSLETTER, OWN_NEWSLETTER_JOBS } from './ownNewsletter';
@@ -307,6 +308,52 @@ export const kitConfig: KitConfig = {
       meaning: 'contact',
       job: { kind: 'edit', doc: 'siteSettings' },
       fields: [{ name: 'phone', title: 'Phone number', kind: 'string', max: 40 }],
+    },
+    // Card 196: a dated hours change (a holiday, a closure, a short day) on
+    // Business info. The usual hours are never touched and the website goes
+    // back to them by itself after the day (src/lib/business-hours.ts).
+    {
+      id: 'hours-change',
+      title: 'Change the hours for a day',
+      detail: 'Closed for a holiday, or different hours. Back to normal after.',
+      meaning: 'times',
+      job: {
+        kind: 'append',
+        doc: 'businessInfo',
+        array: 'hoursChanges',
+        itemType: 'hoursChange',
+        at: 'end',
+      },
+      fields: [
+        { name: 'date', title: 'Which day', kind: 'date', required: true },
+        { name: 'endDate', title: 'Last day, if more than one', kind: 'date' },
+        {
+          name: 'kind',
+          title: 'What is different',
+          kind: 'select',
+          required: true,
+          options: [
+            { title: 'Closed all day', value: 'closed' },
+            { title: 'Different hours', value: 'hours' },
+          ],
+          initial: () => 'closed',
+        },
+        {
+          name: 'opens',
+          title: 'Opens (for different hours)',
+          kind: 'select',
+          options: HOURS_TIME_OPTIONS,
+        },
+        {
+          name: 'closes',
+          title: 'Closes (for different hours)',
+          kind: 'select',
+          options: HOURS_TIME_OPTIONS,
+        },
+        { name: 'note', title: 'Why (optional)', kind: 'string', max: 60 },
+      ],
+      doneMessage:
+        'The website shows the change on that day and goes back to your usual hours by itself.',
     },
     // "Make a short link" (card 171) opens a new short link rather than a short
     // form: the full form has the page picker, the clash warnings while typing

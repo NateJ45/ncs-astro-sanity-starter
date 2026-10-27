@@ -23,6 +23,11 @@ import CalendlyInline from '@/components/CalendlyInline';
 import ServiceAreaMap from '@/components/ServiceAreaMap.astro';
 import { Mail, Phone } from 'lucide-react';
 import PostInquiryRoadmap from '@/components/PostInquiryRoadmap.astro';
+import { resolveBusinessFacts } from '@/lib/business-facts';
+import OpenStatus from '@/components/business/OpenStatus.astro';
+import ToConfirm from '@/components/business/ToConfirm.astro';
+import HoursTable from '@/components/business/HoursTable.astro';
+import BusinessAddress from '@/components/business/BusinessAddress.astro';
 import type { ContactFormSettings } from '@/lib/pageBuilder.types';
 
 interface Props {
@@ -48,6 +53,9 @@ const schedulingLinkLabel = page?.schedulingLinkLabel ?? 'Schedule a 20-minute d
 const availability = page?.availabilityNote ?? siteSettings?.availabilityStatus;
 const email = siteSettings?.email;
 const phone = siteSettings?.phone;
+// The business facts (card 196): the address and the hours show in the side column only when
+// Business info has them, so a site without them is unchanged.
+const facts = resolveBusinessFacts(siteSettings);
 
 // Satisfaction guarantee: renders near the form CTA when set in siteSettings.
 const satisfactionGuarantee = siteSettings?.satisfactionGuarantee;
@@ -171,6 +179,7 @@ const hasRoadmap = roadmapSteps.length > 0;
         <div>
           <p class="mb-xs text-xs tracking-widest text-foreground/80 uppercase">Email</p>
           <CopyEmailButton email={email} variant="link" />
+          <ToConfirm confirmed={facts.email?.confirmed} />
         </div>
       )}
 
@@ -184,6 +193,26 @@ const hasRoadmap = roadmapSteps.length > 0;
             <Phone size={14} aria-hidden="true" />
             {phone}
           </a>
+          <ToConfirm confirmed={facts.phone?.confirmed} />
+        </div>
+      )}
+
+      {facts.address && (
+        <div>
+          <p class="mb-xs text-xs tracking-widest text-foreground/80 uppercase">Visit</p>
+          <div class="text-sm">
+            <BusinessAddress address={facts.address} />
+          </div>
+        </div>
+      )}
+
+      {facts.hasHours && (
+        <div>
+          <p class="mb-xs text-xs tracking-widest text-foreground/80 uppercase">Hours</p>
+          <div class="space-y-s text-sm">
+            <OpenStatus facts={facts} />
+            <HoursTable facts={facts} />
+          </div>
         </div>
       )}
 
