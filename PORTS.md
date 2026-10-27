@@ -332,6 +332,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 196  | Business facts once, confirmed flags, open now, hours changes, hours and map blocks       | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 | 197  | Latest video and Documents blocks, page-weight budget spec, SVG path compactor            | no          | yes      | no               | no            | partial             | no             | partial    | no      |
 | 198  | Contact card fills from business facts; regex-backslash test skips scaffold-removed files | no          | yes      | no               | no            | partial             | no             | partial    | no      |
+| 199  | Portable tests run in a site: starter-itself case skips, compactor never writes -0        | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 192  | Flow layer: lines rise, the rest fades up, photos drift, page lift (`layout.motion`)      | no          | yes      | no               | no            | no                  | no             | partial    | no      |
 | 200  | Heading accent matches whole words only ("test" no longer inside "TESTING")               | no          | yes      | no               | no            | n/a                 | staged         | no         | no      |
 
@@ -12512,6 +12513,29 @@ the branch, screenshots of both blocks at 375 and 1280 (no horizontal scroll), a
 **Applied:** starter (this card). first-baptist-auburn runs its own church versions (`church-video.ts`, `downloads`,
 `page-weight.spec.ts`); its sync PR takes the PORTABLE copies only. Other sites in the Phase 2 rollout, in their own
 character: blocks and the documents capability where the site has Sanity; the spec and compactor everywhere.
+
+## Card 199: PORTABLE tests and sync-check that assumed they ran in the starter (2026-10-27)
+
+**Origin:** rolling cards 186, 191 and 197 out to presacademy and stonesteps-50k.
+
+**Problem.** (1) `scripts/lib/sync-check-find-starter.test.mjs` (card 186) has a "starter checking itself" case that runs
+`sync-check` against the repo the test lives in, so in a site it failed (a site is not the starter). (2) The path
+compactor (card 197) kept `-0` from `Math.round` of a tiny negative, so its point-for-point test compared `-0` with `0`
+and failed on presacademy's `public/studio-art/cover-shelf-phone.svg`.
+
+**What changed.** The self-check case reads `package.json` and skips unless the name is `ncs-astro-sanity-starter`, so the
+file copies byte-exact to every site. `compactPath` normalises `-0` to `0` when it reads and when it writes, the test's
+own reader does the same, and a new case pins it. (3) `wayfinding.test.ts` (card 191) assumed `/contact/` and `/about/` are site routes; on stonesteps-50k they are Studio
+pages. It now lists them as published and uses `/studio/`, reserved everywhere, for the route case. (4) `sync-check.mjs`
+decided "I am the starter" from the package name alone, and stonesteps-50k kept that name, so a plain run silently
+self-checked. `isStarter()` now also needs a git `origin` URL naming the starter; the exit-2 guard is kept and tested
+(forked site refused, real checkout allowed). (5) On mas-monograms the compactor's own test failed with "favicon.svg: a path got longer": a repeated command whose
+number starts with a decimal point was written with a needless space, and a path already tight can come out longer.
+`compactPath` now glues that case and returns the original when its output is not shorter, so the site-wide test
+(no path gets longer) holds on any SVG. Sweep of the other PORTABLE tests for starter-only paths found none
+(they read files every site has, such as `public/_headers`, or build temp trees).
+
+**Applied:** starter (this card). Sites: copy the three PORTABLE files with the next sync.
 
 ## Card 198: The contact card fills itself from business facts, and the regex-backslash test survives scaffold removal (2026-10-27)
 

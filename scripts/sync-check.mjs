@@ -42,7 +42,7 @@
 //
 // SELF-CHECK GUARD (card 186): if the starter resolves to the site itself and
 // that repo is not the starter (its package.json name is not
-// ncs-astro-sanity-starter), the run would compare a site with itself and
+// ncs-astro-sanity-starter, or its git remote is not the starter's: card 199), the run would compare a site with itself and
 // report all SAME whatever the drift. That is an error (exit 2) unless
 // --allow-self-check is passed.
 //
@@ -69,6 +69,7 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const MARKER = 'ncs-astro-sanity-starter is the library of record';
 /** Only the first few lines are scanned: the marker is a header comment. */
@@ -148,16 +149,23 @@ function resolveSite() {
   return dir;
 }
 
-/** True when `dir` is the starter repo itself (a worktree of it counts: the name is read from package.json). */
+/**
+ * True when `dir` is the starter repo itself (a worktree of it counts). Two signals, both needed
+ * (card 199): package.json name `ncs-astro-sanity-starter` AND a git remote named like the starter.
+ * The name alone is not enough: a site forked from the starter can keep the name (stonesteps-50k did),
+ * and then a plain run silently compared the site with itself. A fork's own remote gives it away.
+ */
 function isStarter(dir) {
   try {
-    return (
-      JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')).name ===
-      'ncs-astro-sanity-starter'
-    );
+    const name = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')).name;
+    if (name !== 'ncs-astro-sanity-starter') return false;
   } catch {
     return false;
   }
+  const r = spawnSync('git', ['-C', dir, 'config', '--get', 'remote.origin.url'], {
+    encoding: 'utf8',
+  });
+  return r.status === 0 && /ncs-astro-sanity-starter/.test(r.stdout);
 }
 
 function resolveStarter(siteDir) {
