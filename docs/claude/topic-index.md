@@ -36,6 +36,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Visitor site search (Pagefind, opt-in) + share buttons                                                      | `docs/agent/site-search.md`                                          |
 | Hidden pages, password pages (security note), Checkup link and heading checks                               | `docs/agent/private-pages.md`                                        |
 | Deployment + env vars + rebuild model                                                                       | `docs/agent/deployment.md`                                           |
+| Form recipient addresses set in the Studio (kept in D1, confirmed by email; card 174)                       | `docs/agent/deployment.md` ("The contact endpoint"), `OPERATIONS.md` |
 | Editor-driven vs hardcoded                                                                                  | `docs/agent/editor-vs-hardcoded.md`                                  |
 | Cross-repo shared improvements (port cards + applied-to matrix + drift check)                               | `PORTS.md`                                                           |
 | Change history (prose ledger; the checkable matrix lives in PORTS.md)                                       | `docs/agent/changelog.md`                                            |

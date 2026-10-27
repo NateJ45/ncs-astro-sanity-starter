@@ -37,12 +37,14 @@ Every core route except `/`, `/contact`, `/privacy`, `/404` and the Studio and p
 
 ## Email routes (card 127)
 
-| Route                                                 | What                                                                       |
-| ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| `/api/subscribe/` (SSR)                               | GET ready, POST sign-up (double opt-in)                                    |
-| `/api/subscribe/confirm/` (SSR)                       | the confirm link; 303 to `/email/confirmed/` or `/email/link-problem/`     |
-| `/api/unsubscribe/` (SSR)                             | POST only: the unsubscribe button and RFC 8058 one-click                   |
-| `/api/rsvp/` (SSR)                                    | GET an event's state, POST a reply                                         |
-| `/api/studio/newsletter/`, `/api/studio/rsvps/` (SSR) | the Studio's protected mail routes                                         |
-| `/email/[state]/`                                     | confirmed, unsubscribe, link-problem (static, noindex, out of the sitemap) |
-| `/newsletter/`, `/newsletter/<slug>/`                 | the archive; no pages at all when no issue is marked for the website       |
+| Route                                                 | What                                                                            |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `/api/subscribe/` (SSR)                               | GET ready, POST sign-up (double opt-in)                                         |
+| `/api/subscribe/confirm/` (SSR)                       | the confirm link; 303 to `/email/confirmed/` or `/email/link-problem/`          |
+| `/api/unsubscribe/` (SSR)                             | POST only: the unsubscribe button and RFC 8058 one-click                        |
+| `/api/rsvp/` (SSR)                                    | GET an event's state, POST a reply                                              |
+| `/api/studio/newsletter/`, `/api/studio/rsvps/` (SSR) | the Studio's protected mail routes                                              |
+| `/api/studio/form-recipients/` (SSR)                  | where form messages go: administrators only, addresses kept in D1 (card 174)    |
+| `/api/form-recipient/confirm/` (SSR)                  | the confirmation link for a new form address; GET shows a button, POST confirms |
+| `/email/[state]/`                                     | confirmed, unsubscribe, link-problem (static, noindex, out of the sitemap)      |
+| `/newsletter/`, `/newsletter/<slug>/`                 | the archive; no pages at all when no issue is marked for the website            |

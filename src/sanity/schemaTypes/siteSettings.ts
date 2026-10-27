@@ -6,6 +6,7 @@ import { LinkIcon } from '@sanity/icons/Link';
 import { ChevronDownIcon } from '@sanity/icons/ChevronDown';
 import { ListIcon } from '@sanity/icons/List';
 import { CodeTextInput } from '../components/CodeTextInput';
+import { FormRecipientAddressesInput } from '../components/FormRecipientAddresses';
 import { codeWarningMessage } from '../../lib/custom-code';
 import { IconImageInput, LogoImageInput } from '../components/BrandImageInput';
 import { checkIcon, checkLogo } from '../../lib/brand-uploads';
@@ -31,6 +32,8 @@ export const siteSettings = defineType({
     { name: 'reviews', title: 'Reviews' },
     // PORTS.md card 121: site-wide extra code, rendered by BaseLayout only.
     { name: 'code', title: 'Code on every page' },
+    // PORTS.md card 174: where form messages go, set by an administrator.
+    { name: 'forms', title: 'Forms' },
   ],
   fields: [
     defineField({
@@ -775,6 +778,20 @@ export const siteSettings = defineType({
       description:
         'Goes just before </body> on every page. It runs directly on every page of the website, not in a box, so it can do anything the website can. Only paste code from a provider you trust (an analytics or chat service, say). It never runs in the Studio or the preview. The Checkup lists it while it is here.',
       validation: (Rule) => Rule.custom((value) => codeWarningMessage(value, true)).warning(),
+    }),
+
+    // ── Forms (PORTS.md card 174) ─────────────────────────────────────────────
+    // A panel, not data: the input never writes, so this field stays empty in the
+    // public dataset. The addresses live in the Worker's D1 database, set through
+    // /api/studio/form-recipients/ by an administrator (src/lib/form-recipients.ts).
+    defineField({
+      name: 'formRecipientAddresses',
+      title: 'Where form messages go',
+      type: 'string',
+      group: 'forms',
+      components: { input: FormRecipientAddressesInput },
+      description:
+        'The email address each form sends to. Only an administrator can change it, and a new address has to be confirmed from its own inbox before anything is sent there.',
     }),
   ],
   preview: {

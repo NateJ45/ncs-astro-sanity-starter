@@ -278,6 +278,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 165 | Search index waits for Pagefind to finish writing, and fails on a cut-short script      | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 166 | Searching the original spelling drops Pagefind's loose pages (no word matched)          | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
 | 172 | Embed provider registry: paste-and-go, unknown-script guard, per-build embed CSP        | n/a     | n/a         | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | n/a            |
+| 174 | Form recipient addresses set in the Studio, kept in D1, confirmed by email              | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | no             |
 | 175 | Staff view by role; the staff list adds to it; "Simple view" marks from the Studio      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 176 | People tool: invite a Helper or an Administrator from the Studio                        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
@@ -12626,6 +12627,71 @@ label, so none relied on an empty object drawing the fallback.
 **Applied:** starter (this card). first-baptist-auburn: origin. Not applied to the other family sites: **every site that uses
 `ctaBlock` has the bug** (any optional button field). Port the three files and check that no page relied on an empty
 button drawing "Get in touch".
+
+## Card 174: Form recipient addresses set in the Studio, kept in D1, confirmed by email (2026-10-26)
+
+**Origin:** first-baptist-auburn #212. Changing where a form's messages went meant asking whoever held the Worker
+secrets (`CONTACT_TO`, Auburn's `FORM_RECIPIENTS`). Auburn let a Studio administrator set the address instead, kept
+it out of the public dataset, and made a new address prove itself from its own inbox before anything is sent there.
+
+**Canonical:** PORTABLE `src/lib/form-recipients.ts` and `src/lib/form-recipients.test.ts` (new); the
+already-PORTABLE `src/pages/api/contact.ts` (changed: the D1 lookup). Non-marked, per site:
+`migrations/0004_form_recipients.sql` (the starter's number; Auburn keeps its `0005`), the routes
+`src/pages/api/studio/form-recipients.ts` and `src/pages/api/form-recipient/confirm.ts`, the panel
+`src/sanity/components/FormRecipientAddresses.tsx`, and the Site settings field `formRecipientAddresses` (group
+"Forms"). Docs: `docs/agent/deployment.md` ("The contact endpoint"), `OPERATIONS.md` ("Where form messages go"),
+`docs/claude/routes.md`, `docs/claude/topic-index.md`.
+
+**What it does.**
+
+- **Site settings > Forms** shows a signed-in administrator one row per form (the Contact form, plus any keys a site
+  lists in a `formRecipients` array on the same document) with the address in use and a box to change it. Anyone
+  else sees one sentence saying an administrator sets these. The field is a panel only: it never writes, so nothing
+  lands in the dataset.
+- `/api/studio/form-recipients/` checks same origin, a signed-in project member and the administrator role before
+  touching D1, on every method. A saved address is kept as pending and emailed a signed link (`MAIL_SECRET`, its own
+  key derivation, 7 days). `/api/form-recipient/confirm/` shows one button on GET (a mail scanner opening the link
+  changes nothing) and only the POST puts the address to use. Without the email backbone the address is saved as
+  "unconfirmed" and the panel says so plainly; nothing is sent to it.
+- The PORTABLE `/api/contact/` now sends to `contactRecipient()`: the confirmed `contact` row, else `CONTACT_TO`.
+  No D1, no table (migration not applied) or no row all read as `CONTACT_TO`, so a site that never opens the panel
+  behaves exactly as before. The Web3Forms fallback is unaffected.
+- `recipientAddressFor()` keeps Auburn's multi-form order (the key's D1 address, the secret's, the fallback key's,
+  then the Contact address) for a site with several forms; the fallback key is a parameter (`office` by default).
+- The confirmation page takes its colours from the route (`theme`, optional `darkTheme`; only `#hex` values are
+  accepted). The starter's route reads both palettes from `brand/brand.config.json`; Auburn passes its own, light only.
+
+**Switching it on.** Needs the email backbone (card 127: `CONTACT_DB`, a sender, `MAIL_SECRET`). Then once:
+`npx wrangler d1 migrations apply <site>-contact --remote`. The SQL is `CREATE TABLE IF NOT EXISTS`, so running it
+again, or on a site that made the table under another number, changes nothing. Until it runs, the panel says one more
+step is needed and `CONTACT_TO` decides. On Cloudflare Email Sending a new destination must also be verified in
+Cloudflare before mail reaches it.
+
+**Not ported:** Auburn's own form builder (`church-form.ts`, `/api/form/`, `FORM_RECIPIENTS`, the "Who forms can go
+to" list) and its "date" and "tick any that apply" question kinds stay in Auburn. They do not slot into the PORTABLE
+`custom-form-fields.ts` kinds list cleanly: Auburn adds them as separate schema types (`formDateQuestion`,
+`formTickQuestion`) read by `_type`, not as new `kind` values, with structured answers (an ISO date and its words,
+a list of picks) and the church's clock for "not in the past". Folding them in would change the shared renderer,
+schema and answer format of every site's contact form for a feature only Auburn's builder uses. The lookup itself
+is generic, so a site that later grows several forms passes its own key map and fallback key.
+
+**Verified (2026-10-26):** starter `npm run check`, `npm run build`, `npm run test:unit` (12 form-recipients tests:
+the administrator gate, confirm-before-use, unconfirmed without email, the confirmation page and its theme guard,
+D1-then-secret order, the Contact lookup with no D1, no table, a pending row and a confirmed row, and the migration
+applied twice). first-baptist-auburn on `port/card-174`: the same gates, and `sync-check` against this branch all
+SAME. The signed-in administrator panel was not exercised against a live D1 (no remote apply from an agent).
+
+**Applied:** starter (this card). first-baptist-auburn: origin (its marked copies now match; its `0005` migration,
+routes, panel and `/api/form/` stay its own).
+
+**Who must take it.** presacademy and stonesteps-50k carry the PORTABLE `contact.ts`, which now imports
+`form-recipients.ts`: they take both marked files (and nothing else is required; with no migration, panel or routes
+the route still sends to `CONTACT_TO`). presacademy sync-checks the live starter in CI, so its next PR is red until it
+does.
+
+**Who should take it.** Any site with the email backbone (card 127) whose client would rather change the Contact
+address themselves. Taking it: copy the two marked files and `contact.ts`, add the migration under the site's next
+number, the two routes, the panel and the Site settings field, then `npm run typegen`.
 stonesteps-50k, 2026-10-26 (its PR #173): `yes`. No accent-button budget there, so only `ctaBlock` and `CtaLink`;
 `CtaLink` checks every link field before calling a button empty. Its CI snapshot held no label-less button.
 fbcm, 2026-10-26 (its PR #123): `yes`. No accent-button budget there, so only `ctaBlock` and `CtaLink`; with no

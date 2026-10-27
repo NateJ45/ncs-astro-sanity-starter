@@ -742,6 +742,7 @@ export type SiteSettings = {
   satisfactionGuarantee?: string;
   headCode?: string;
   bodyEndCode?: string;
+  formRecipientAddresses?: string;
 };
 
 export type NavLink = {
