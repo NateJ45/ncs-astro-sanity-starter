@@ -319,6 +319,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 185  | Type straight onto the page in the preview                                               | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 186  | sync-check finds the starter from clients/ and nested folders; PORTS matrix is one table | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 187  | Small fixes: header rule, second header button, page switches, newsletter switch         | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
+| 195  | Client notes: pre-launch pill, yellow placeholders, shot list, one off switch            | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 190  | Every main page a page builder: Contact, Privacy and Journal blocks                      | no          | yes      | no               | no            | n/a                 | no             | partial    | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
@@ -11910,6 +11911,46 @@ screenshots of the header at 375 and 1280 with and without the second button.
 (`red-budget.ts`, `give.ts`, `ownNewsletter.ts`); its sync PR takes the PORTABLE copies. Other sites: the six PORTABLE
 files plus the per-site edits (`CtaLink`, `SectionRenderer`, `Header`, `Footer`, `MobileNav`, `CopyEmailButton`,
 `BaseLayout`, the schema fields and `siteSettings.ts`/`queries.ts`), in the Phase 2 rollout.
+
+---
+
+## Card 195: Client notes, the pre-launch review layer (2026-10-27)
+
+**Origin:** First Baptist Auburn's "For Jacob" notes pill and shot list (inventory rows A36 and A37), generalised in the
+Auburn-to-family port run.
+
+**Problem.** Every new site waits on its client for wording, facts and photos, and the asking happens in email threads
+that lose track of which page needs what. Auburn built a review layer on the site itself and it worked, but it was
+named for one pastor, wrote church nouns into its copy, and shipped a Facebook-photo stand-in rule and a set of stock
+church photos with it.
+
+**What it is.** Three parts and one switch (`docs/agent/client-notes.md`): a notes pill per page
+(`ClientNotes.astro`, notes in `src/data/client-notes.ts`), yellow highlighting of `[Client: ...]`,
+`[Placeholder: ...]` and `[Photo: ...]` text wherever it sits in the page, and "Photo needed" boxes over empty or
+stand-in pictures (`ShotRequest.astro`, shots in `src/data/shot-list.ts`, wired into the Image and text block and
+the journal card). The client's name (`CLIENT_NAME`) and the marker words (`MARKERS`) are settings, not code.
+
+**Safe by default.** `CLIENT_NOTES_ON` ships `false`, so a site that does not opt in changes nothing (no markup, no
+script). When on, the layer also needs `site.url` to be a pre-launch address (`localhost`, `*.workers.dev`,
+`*.pages.dev`, `*.test`, `example.com`); the day `site.ts` takes the real domain it goes quiet, and
+`src/lib/client-notes.test.ts` fails until the switch is turned off, which blocks `deploy.yml` (it runs the unit tests
+first). Pill and boxes carry `data-pagefind-ignore`, the highlight is added in the browser after the search index is
+built, the pill does not print and the highlight drops to plain text on paper.
+
+**Files.** PORTABLE: `src/lib/client-notes.ts` (pure rules, guard), `src/components/ClientNotes.astro`,
+`src/components/ShotRequest.astro`, `src/styles/client-notes.css`. Per site, safe to edit: `src/data/client-notes.ts`, `src/data/shot-list.ts`.
+Tests: `src/lib/client-notes.test.ts`, `src/lib/shot-list.test.ts`.
+
+**Differences from Auburn.** Auburn keeps its own names (`PRE_LAUNCH_NOTES`, `ForJacob.astro`, `[Jacob: ...]`) and its
+Facebook stand-in rule until its sync PR renames them to this shape (add `'Jacob'` to `MARKERS`, widen
+`STAND_IN_FILE`). The starter drops the example video and the hero-specific helpers (Auburn's card 189 owns those) and
+ships no stock photos. Page lookups use `publicPath()` from card 187 (`lib/page-path.ts`).
+
+**Proved:** unit tests for the guard, paths, markers and shot rules; build with the switch off (no layer markup in the
+output) and with it on (pill, highlight and boxes), screenshots at 375 and 1280.
+
+**Applied:** starter (this card). Sites: turn it on only while a client is reviewing; Auburn's sync PR adopts the
+renamed files.
 
 ## Card 190: Every main page a page builder: Contact, Privacy and Journal (2026-10-27)
 
