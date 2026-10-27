@@ -3,7 +3,7 @@
 // line (src/lib/place-line.ts), PORTS.md card 196.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveBusinessFacts } from './business-facts.ts';
+import { resolveBusinessFacts, todayBarLine } from './business-facts.ts';
 import { placeLine, townOf } from './place-line.ts';
 
 describe('place line', () => {
@@ -94,5 +94,21 @@ describe('business facts', () => {
     });
     assert.equal(f.hasHours, true);
     assert.equal(f.hoursNote, 'By appointment on Saturdays.');
+  });
+});
+
+describe('todayBarLine (card 198)', () => {
+  const hours = [{ _key: 'wk', days: ['mon', 'tue'], opens: '09:00', closes: '17:00' }];
+  const monday = new Date('2026-11-02T17:00:00Z'); // Monday noon in New York
+  const sunday = new Date('2026-11-01T17:00:00Z');
+  it('names today in the site zone, or says closed', () => {
+    const f = resolveBusinessFacts({ openingHours: hours });
+    assert.equal(todayBarLine(f, monday, 'America/New_York'), 'Today 9 am to 5 pm');
+    assert.equal(todayBarLine(f, sunday, 'America/New_York'), 'Closed today');
+  });
+  it('is empty with no hours or an unconfirmed row', () => {
+    assert.equal(todayBarLine(resolveBusinessFacts({}), monday, 'America/New_York'), '');
+    const guess = resolveBusinessFacts({ openingHours: [{ ...hours[0], confirmed: false }] });
+    assert.equal(todayBarLine(guess, monday, 'America/New_York'), '');
   });
 });

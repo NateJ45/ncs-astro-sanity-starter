@@ -127,6 +127,8 @@ const NON_STEGA_FIELDS = new Set([
   // an encoded value would fall back to every page / once per visitor in the preview).
   'where',
   'frequency',
+  // Card 191: Site settings > Footer style (src/lib/wayfinding.ts compares it to 'compact').
+  'footerStyle',
   // The builder kit (builderSections.ts, PORTS.md card 173): the notice's
   // urgency picks its look, and the event and schedule times are read as
   // "HH:MM" by src/lib/builder-blocks.ts. (`layout` above covers the button row.)

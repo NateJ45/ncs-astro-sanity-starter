@@ -23,10 +23,13 @@
 import { telHref } from './phone.ts';
 import { placeLine } from './place-line.ts';
 import {
+  dayHours,
+  dayText,
   hasHours,
   isConfirmed,
   plain,
   resolveWeeklyHours,
+  zonedClock,
   type RawHoursChange,
   type RawHoursRow,
   type WeeklyHours,
@@ -139,4 +142,15 @@ export function resolveBusinessFacts(
     hasHours: hasHours(hours),
     hoursNote: plain(s.hoursNote),
   };
+}
+
+/**
+ * The line a bar (the phone action bar, card 191) shows when its own text is empty: "Today 9 am to
+ * 5 pm" or "Closed today", on the site's clock (PORTS.md card 198). Empty when the site has no
+ * hours, or while any usual-hours row is still unconfirmed (a guess is not put in a bar).
+ */
+export function todayBarLine(facts: BusinessFacts, now: Date, timeZone: string): string {
+  if (!facts.hasHours || facts.hours.rows.some((r) => !r.confirmed)) return '';
+  const today = dayHours(facts.hours, zonedClock(now, timeZone).date);
+  return today.closed ? 'Closed today' : `Today ${dayText(today.intervals)}`;
 }
