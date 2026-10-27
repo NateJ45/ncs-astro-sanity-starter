@@ -1,5 +1,9 @@
 # Change history
 
+_2026-10-27: every main page a page builder: Contact, Privacy and Journal (PORTS card 190)._
+
+**Decision.** Ported from first-baptist-auburn. Each page's fixed piece (the form, the policy, the post list) became a block, and each singleton gained a `pageBuilder` so the editor can put sections around it and gets "Insert a saved section". Unlike About, an empty layout does not render a default section array: it draws the page exactly as before (same hero, same block component fed by the document), which is what lets a site take the card with no migration. Proved with `npm run parity`: contact, privacy and journal differ only in stylesheet link names (and four spaces of indentation in a text node). `scripts/main-pages-builder.mjs` fills a layout from the old fields when the editor should be able to rearrange. Old fields stay (rule 16). Privacy's required hero headline, date and body are required only while the layout is empty.
+
 _2026-10-26: popups, one at a time, with guard rails (PORTS card 170)._
 
 **Decision.** A popup is its own document type (Content > Popups), not a style of Announcement, because it interrupts: the site shows one at a time (the newest started), it opens only after 4 seconds AND a quarter screen of scroll, it is remembered per visitor or per visit, and it must have an end date. A native `<dialog>` gives the inert page, Escape and focus return. With no popup documents nothing renders and no script ships. The logic is PORTABLE `src/lib/popup.ts`; page addresses come from each site's `SINGLETON_LIVE_PATHS`. Detail: `docs/agent/popups.md`.

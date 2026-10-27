@@ -35,6 +35,10 @@ import TeamGrid from '@/components/sections/TeamGrid.astro';
 import EmbedSection from '@/components/sections/EmbedSection.astro';
 import DynamicList from '@/components/sections/DynamicList.astro';
 import RsvpSection from '@/components/sections/RsvpSection.astro';
+// Every main page a page builder (card 190): the pieces Contact, Privacy and Journal drew in code.
+import ContactFormSection from '@/components/sections/ContactFormSection.astro';
+import PrivacyPolicy from '@/components/sections/PrivacyPolicy.astro';
+import JournalPosts from '@/components/sections/JournalPosts.astro'; // scaffold: journal
 import BuilderBlock from '@/components/builder-blocks/BuilderBlock.astro';
 import { isBuilderBlock } from '@/lib/builderBlocks.types';
 import { classifySections } from '@/lib/sectionCadence';
@@ -371,6 +375,17 @@ const editKeyOf = (block: unknown) => {
           runsOnPage={s.runsOnPage === true}
           trustedCode={trustedCode}
           heightHint={s.heightHint ?? 'medium'}
+          headingId={headingId}
+        />
+      ) : s._type === 'contactFormSection' ? (
+        <ContactFormSection settings={s.settings} sidebar={s.sidebar !== false} />
+      ) : s._type === 'privacyPolicySection' ? (
+        <PrivacyPolicy lastUpdated={s.lastUpdated} body={s.body} />
+      ) : // scaffold-branch: journal
+      s._type === 'journalPostsSection' ? (
+        <JournalPosts
+          showCategories={s.showCategories !== false}
+          showNewsletter={s.showNewsletter !== false}
           headingId={headingId}
         />
       ) : s._type === 'dynamicListSection' ? (

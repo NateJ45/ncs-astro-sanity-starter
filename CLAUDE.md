@@ -10,7 +10,7 @@ Design context: `PRODUCT.md` and `DESIGN.md` at the repo root are neutral PLACEH
 
 ## What this is
 
-A production-ready **Astro 7 + Sanity v6 + Cloudflare Workers** site template, forked from the Reid Design build. **Page-builder-first**: home, about, services and process render through `SectionRenderer` from Sanity `pageBuilder` arrays, and any Studio page gets a `/[slug]` route. A new project pours in a brand (`brand/brand.config.json` then `npm run apply-brand`) and content. It ships FULL and subtracts: `npm run scaffold` removes the seven capabilities (`about`, `faq`, `journal`, `philosophy`, `process`, `services`, `testimonials`). Full overview and stack notes: `docs/claude/overview.md`.
+A production-ready **Astro 7 + Sanity v6 + Cloudflare Workers** site template, forked from the Reid Design build. **Page-builder-first**: home, about, services and process render through `SectionRenderer` from Sanity `pageBuilder` arrays, and any Studio page gets a `/[slug]` route. Contact, Privacy and Journal are page builders too (card 190): empty Page layout draws the classic page, a filled one draws the sections around a block that holds the old piece (`docs/agent/page-architecture.md`). A new project pours in a brand (`brand/brand.config.json` then `npm run apply-brand`) and content. It ships FULL and subtracts: `npm run scaffold` removes the seven capabilities (`about`, `faq`, `journal`, `philosophy`, `process`, `services`, `testimonials`). Full overview and stack notes: `docs/claude/overview.md`.
 
 The must-knows:
 

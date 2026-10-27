@@ -724,6 +724,16 @@ export const SERVICES_SECTION_TYPES = [
   { type: 'faqSection' }, // scaffold: faq
 ];
 
+// Every main page a page builder (card 190, ported from FBC Auburn). Contact and Privacy also
+// take the block their page is built around (mainPageSections.ts); Journal takes its posts block
+// (journalPostsSection.ts). Those blocks are offered on their own page only, not in the general
+// library or the saved sections.
+export const CONTACT_SECTION_TYPES = [...ABOUT_SECTION_TYPES, { type: 'contactFormSection' }];
+export const PRIVACY_SECTION_TYPES = [...ABOUT_SECTION_TYPES, { type: 'privacyPolicySection' }];
+// scaffold: journal
+export const JOURNAL_SECTION_TYPES = [...ABOUT_SECTION_TYPES, { type: 'journalPostsSection' }];
+// scaffold:end
+
 export const PROCESS_SECTION_TYPES = [
   ...SECTION_TYPES,
   { type: 'processSection' }, // scaffold: process
