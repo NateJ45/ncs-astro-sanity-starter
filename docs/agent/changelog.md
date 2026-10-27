@@ -1,5 +1,25 @@
 # Change history
 
+_2026-10-26: popups, one at a time, with guard rails (PORTS card 170)._
+
+**Decision.** A popup is its own document type (Content > Popups), not a style of Announcement, because it interrupts: the site shows one at a time (the newest started), it opens only after 4 seconds AND a quarter screen of scroll, it is remembered per visitor or per visit, and it must have an end date. A native `<dialog>` gives the inert page, Escape and focus return. With no popup documents nothing renders and no script ships. The logic is PORTABLE `src/lib/popup.ts`; page addresses come from each site's `SINGLETON_LIVE_PATHS`. Detail: `docs/agent/popups.md`.
+_2026-10-26: an open Studio reloads itself after a deploy (PORTS card 179)._ A Studio tab opened before a deploy asked for a lazily loaded code file the new build no longer had and showed a raw "Failed to fetch dynamically imported module" inside a field. The boot page now catches that error, says "The Studio was updated", and reloads once after 2.5 s; a repeat within a minute offers a Reload button instead of looping. Sanity saves edits as they are typed, so nothing is lost.
+
+_2026-10-26: an optional button left empty no longer blocks Publish (PORTS card 178)._ `ctaBlock` had `openInNewTab` `initialValue: false`, so a new block with an optional button carried a half-made button whose required text and link type blocked Publish. Text and link type are now required only once any part of the button is filled in, `CtaLink` draws nothing for an empty button object, and an empty closing-band button no longer takes the page's accent.
+
+_2026-10-26: social links read by URL host (PORTS card 167)._
+
+**Decision.** The editor pastes a link and the platform comes from its host, so a new account is never a code change or a dropdown choice, and a wrong pick can no longer show the wrong icon. The old dropdown stays hidden because rows hold it (rule 1), and it only decides the icon for an address the host table does not know. WhatsApp is the one platform with a rule on the address, because only an invite or number link opens a chat. Ported from first-baptist-auburn.
+_2026-10-26: calendar files can skip or move one date of a repeating event (PORTS card 177)._
+
+**Decision.** The exceptions live in `buildIcs` itself (`exdate`, `recurrenceId` on `IcsEvent`) rather than in each site splicing lines into the finished file, which is what first-baptist-auburn did first. Both are standard RFC 5545 properties, so a subscribed calendar keeps one series and changes only the date in question. Value types are checked against DTSTART and a bad combination throws at build time instead of shipping a file some apps reject. Events without exceptions are written byte for byte as before.
+
+_2026-10-26: the builder kit: twelve smaller blocks, grouped templates, patterns as code (PORTS card 173)._
+
+**Decision.** Ported from first-baptist-auburn and made generic: columns, a button row, a wide photo, fold-outs, tabs, a countdown, a dated notice, a timeline, a letter, event details, a schedule and photo cards, each a content block with a look (the notice draws its own band), no colour fields. Event details requires a typed place because the starter has no business address to fall back on; its calendar file is a `data:` link, so no route or file is published. Dates run on the new `site.timeZone`. Templates gain groups shown as "Group: Title"; patterns live in code and are seeded as drafts that are never overwritten. `withSiteGroups()` lets a fork add insert-menu groups without editing the base list. Auburn's hero "Photo behind the words" style was not ported: the starter's hero already draws its photo behind the words.
+
+_2026-10-26: Playwright installs time out instead of hanging (PORTS card 70)._ Three docs-only PRs across the family sat 40 to 60 minutes in "Install Playwright system libraries" on 2026-10-26: the runner's Azure Ubuntu mirror fed a normal 30-second `install-deps` at 29 kB/s, and the workflows had no timeout, so a stuck apt could hold a required check for GitHub's 6-hour default. Each install attempt now runs under `timeout` (180s for `install-deps`, 360s for a full browser download), so a crawling first try is killed and the retry resumes the partial download; the step has `timeout-minutes` (8 and 15) and the Playwright job 30.
+
 _2026-10-25: one accent button per page, named section anchors, a 404 with search, calendar files (PORTS card 158)._
 
 **Decision.** The one-accent-button rule is the renderer's, not the editor's (rule 9): the first section that draws a primary button keeps it and the rest draw the secondary variant. Section ids come from the heading rather than a key map, so every site gets linkable sections with no data to keep; the cost is that a retitle moves the anchor, and a site that needs a fixed one pins it by block `_key`. The 404 search is a plain GET form, not the live panel, so it works without JavaScript and loads no Pagefind on an error page. The starter has no calendar, so only the `.ics` builder is ported; Auburn's gathering files are the reference wiring.

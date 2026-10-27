@@ -62,6 +62,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   ...SINGLETON_TYPES,
   ...ORDERABLE_TYPES,
   'announcement', // placed explicitly under Content → Announcements
+  'popup', // placed explicitly under Content → Popups, after Announcements
   'testimonial', // scaffold: testimonials
   'faqItem', // scaffold: faq
   'faqCategory', // scaffold: faq
@@ -71,6 +72,7 @@ const HIDDEN_FROM_DEFAULT = new Set<string>([
   'privatePage', // private pages (card 122), placed explicitly under "Pages"
   'sectionPreset', // saved sections, placed explicitly under "Pages"
   'redirect', // placed explicitly under "Pages" -> Redirects
+  'shortLink', // placed explicitly under "Pages" -> Short links (card 171)
   TRASH_TYPE, // the Studio kit's Trash, placed explicitly at the bottom
   // sanity-plugin-media registers this tag type; keep it out of the desk root
   // (the "Media" tool in the top sidebar is where tags belong).
@@ -293,6 +295,13 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               S.documentTypeListItem('redirect')
                 .title('Redirects (old links)')
                 .icon(typeIcon('redirect')),
+
+              // Short links (PORTS.md card 171): /spring-style addresses for
+              // flyers and QR codes, written into _redirects at build time.
+              // Made here or from Quick update; src/lib/short-links.ts.
+              S.documentTypeListItem('shortLink')
+                .title('Short links (like /spring)')
+                .icon(typeIcon('shortLink')),
             ]),
         ),
 
@@ -358,6 +367,9 @@ const fullDesk = (S: StructureBuilder, context: StructureResolverContext) =>
               S.documentTypeListItem('announcement')
                 .title('Announcements')
                 .icon(typeIcon('announcement')),
+              // Popups (card 170, schemaTypes/popup.ts): a box over the page, one at a time,
+              // with dates. Also built into the site at build time.
+              S.documentTypeListItem('popup').title('Popups').icon(typeIcon('popup')),
             ]),
         ),
 

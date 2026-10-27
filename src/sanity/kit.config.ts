@@ -84,6 +84,7 @@ export const kitConfig: KitConfig = {
   // Archive (pageActions.tsx); singletons cannot be deleted at all.
   trashTypes: {
     announcement: 'Announcement',
+    popup: 'Popup',
     testimonial: 'Testimonial', // scaffold: testimonials
     faqItem: 'Question and answer', // scaffold: faq
     faqCategory: 'Question group', // scaffold: faq
@@ -174,6 +175,7 @@ export const kitConfig: KitConfig = {
       title: 'Lists',
       links: [
         { title: 'Announcements', target: { pane: 'content;announcement' } },
+        { title: 'Popups', target: { pane: 'content;popup' } },
         { title: 'Journal posts', target: { pane: 'journal;journalEntry' } }, // scaffold: journal
         { title: 'Questions and answers', target: { pane: 'content;faqItem' } }, // scaffold: faq
         { title: 'Testimonials', target: { pane: 'content;testimonial' } }, // scaffold: testimonials
@@ -302,6 +304,16 @@ export const kitConfig: KitConfig = {
       meaning: 'contact',
       job: { kind: 'edit', doc: 'siteSettings' },
       fields: [{ name: 'phone', title: 'Phone number', kind: 'string', max: 40 }],
+    },
+    // "Make a short link" (card 171) opens a new short link rather than a short
+    // form: the full form has the page picker, the clash warnings while typing
+    // and the QR code button, none of which a Quick update form can offer.
+    {
+      id: 'short-link',
+      title: 'Make a short link',
+      detail: 'A short address like /spring for a flyer, a card or a QR code.',
+      meaning: 'link',
+      job: { kind: 'link', target: { create: 'shortLink' } },
     },
   ],
 
