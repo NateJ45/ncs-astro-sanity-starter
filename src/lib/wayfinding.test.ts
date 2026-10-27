@@ -18,13 +18,15 @@ test('where next: three rows, the page you are on drops out and the next moves u
     row('Pricing', '/pricing/'),
     row('Privacy', '/privacy/'),
   ];
-  const onHome = whereNextRows(raw, '/', ['pricing']);
+  // Which of these are site routes differs per site, so list them all as published.
+  const published = ['contact', 'about', 'pricing', 'privacy'];
+  const onHome = whereNextRows(raw, '/', published);
   assert.deepEqual(
     onHome.map((r) => r.href),
     ['/contact/', '/about/', '/pricing/'],
   );
   assert.equal(onHome[0].note, 'Say hello');
-  const onAbout = whereNextRows(raw, '/about/', ['pricing']);
+  const onAbout = whereNextRows(raw, '/about/', published);
   assert.deepEqual(
     onAbout.map((r) => r.href),
     ['/contact/', '/pricing/', '/privacy/'],
@@ -32,10 +34,10 @@ test('where next: three rows, the page you are on drops out and the next moves u
 });
 
 test('where next: a Studio page shows only while it is published', () => {
-  const raw = [row('Pricing', '/pricing'), row('About', '/about/')];
+  const raw = [row('Pricing', '/pricing'), row('Studio', '/studio/')];
   assert.deepEqual(
     whereNextRows(raw, '/', []).map((r) => r.href),
-    ['/about/'],
+    ['/studio/'],
   );
   const picked = [{ link: { label: 'Team', linkType: 'internal', docType: 'page', slug: 'team' } }];
   assert.equal(whereNextRows(picked, '/', []).length, 0);
@@ -48,7 +50,7 @@ test('where next: empty or broken settings draw nothing', () => {
 });
 
 test('studioSlugOf: site routes and outside links are never Studio pages', () => {
-  assert.equal(studioSlugOf({ href: '/contact/' }, '/contact/'), undefined);
+  assert.equal(studioSlugOf({ href: '/studio/' }, '/studio/'), undefined);
   assert.equal(studioSlugOf({ href: '/team/' }, '/team/'), 'team');
   assert.equal(studioSlugOf({ href: '/journal/post/' }, '/journal/post/'), undefined);
   assert.equal(studioSlugOf({ href: '/brochure.pdf' }, '/brochure.pdf'), undefined);

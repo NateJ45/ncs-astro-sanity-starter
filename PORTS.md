@@ -12508,9 +12508,9 @@ the branch, screenshots of both blocks at 375 and 1280 (no horizontal scroll), a
 `page-weight.spec.ts`); its sync PR takes the PORTABLE copies only. Other sites in the Phase 2 rollout, in their own
 character: blocks and the documents capability where the site has Sanity; the spec and compactor everywhere.
 
-## Card 199: Two PORTABLE tests that failed inside a site (2026-10-27)
+## Card 199: PORTABLE tests and sync-check that assumed they ran in the starter (2026-10-27)
 
-**Origin:** rolling cards 186 and 197 out to presacademy.
+**Origin:** rolling cards 186, 191 and 197 out to presacademy and stonesteps-50k.
 
 **Problem.** (1) `scripts/lib/sync-check-find-starter.test.mjs` (card 186) has a "starter checking itself" case that runs
 `sync-check` against the repo the test lives in, so in a site it failed (a site is not the starter). (2) The path
@@ -12519,7 +12519,11 @@ and failed on presacademy's `public/studio-art/cover-shelf-phone.svg`.
 
 **What changed.** The self-check case reads `package.json` and skips unless the name is `ncs-astro-sanity-starter`, so the
 file copies byte-exact to every site. `compactPath` normalises `-0` to `0` when it reads and when it writes, the test's
-own reader does the same, and a new case pins it. Sweep of the other PORTABLE tests for starter-only paths found none
+own reader does the same, and a new case pins it. (3) `wayfinding.test.ts` (card 191) assumed `/contact/` and `/about/` are site routes; on stonesteps-50k they are Studio
+pages. It now lists them as published and uses `/studio/`, reserved everywhere, for the route case. (4) `sync-check.mjs`
+decided "I am the starter" from the package name alone, and stonesteps-50k kept that name, so a plain run silently
+self-checked. `isStarter()` now also needs a git `origin` URL naming the starter; the exit-2 guard is kept and tested
+(forked site refused, real checkout allowed). Sweep of the other PORTABLE tests for starter-only paths found none
 (they read files every site has, such as `public/_headers`, or build temp trees).
 
 **Applied:** starter (this card). Sites: copy the three PORTABLE files with the next sync.
