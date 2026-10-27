@@ -8,7 +8,8 @@
 //
 // ONE source of truth for the slots, the allowed values and the defaults. Read
 // by: scripts/apply-brand.mjs (validates and writes src/data/layout.ts),
-// BaseLayout.astro (emits the data-* attributes), Hero.astro (hero variant) and
+// BaseLayout.astro (emits the data-* attributes), Hero.astro (hero variant),
+// SectionRenderer.astro (the board's section rules) and
 // src/lib/site-layout.test.ts (asserts the schema enum and this file agree).
 //
 // THE DEFAULT RULE. Every slot's first value is today's behaviour. A default
@@ -16,7 +17,9 @@
 // markup it always did. The variants are CSS keyed on those attributes
 // (html[data-header=...], html[data-density=...], html[data-cards=...]) except
 // the hero, which is a per-section attribute because it changes what the hero
-// renders, not just how it is painted.
+// renders, not just how it is painted. One hero value reaches the page body:
+// board (card 188) also puts data-hero="board" on <html>, because its grammar
+// (the section rules, one ground, one left edge) covers every section.
 //
 // NAMING. Not to be confused with src/lib/layout-variants.ts, which is the
 // per-SECTION column count and media side an editor picks in the Studio.
@@ -27,8 +30,13 @@ export const LAYOUT_SLOTS = {
   header: ['inline', 'centered', 'minimal'],
   /** Page hero. bleed = full-bleed image under a scrim (text-only when the page
    *  has no image). split = dark text panel beside the image. editorial =
-   *  type only: large display heading on the page ground, image ignored. */
-  hero: ['bleed', 'split', 'editorial'],
+   *  type only: large display heading on the page ground, image ignored.
+   *  board = FBC Auburn's grammar (card 188): an inner page opens on a short
+   *  head on the page ground (eyebrow with the brand marker, title, subhead,
+   *  buttons, the photo beside it in the brand's standalone shape), and the
+   *  sections below sit on one ground and one left edge, opened by a rule
+   *  instead of a change of band colour. A tall (home) hero draws as bleed. */
+  hero: ['bleed', 'split', 'editorial', 'board'],
   /** Vertical rhythm between sections. */
   density: ['standard', 'airy', 'tight'],
   /** Card and list surface. standard = hairline border and soft shadow.
@@ -57,12 +65,21 @@ export function resolveLayout(raw?: Partial<Record<LayoutSlot, string>> | null):
   return out as SiteLayout;
 }
 
-/** The data-* attributes for <html>. Header, density and cards only; a slot at
- *  its default contributes nothing, so the default site's markup is unchanged. */
+/** The data-* attributes for <html>. Header, density and cards; and the hero
+ *  only when it is board, the one hero whose grammar covers the page body. A
+ *  slot at its default contributes nothing, so the default site's markup is
+ *  unchanged. */
 export function layoutAttrs(layout: SiteLayout): Record<string, string> {
   const attrs: Record<string, string> = {};
   for (const slot of ['header', 'density', 'cards'] as const) {
     if (layout[slot] !== DEFAULT_LAYOUT[slot]) attrs[`data-${slot}`] = layout[slot];
   }
+  if (layout.hero === 'board') attrs['data-hero'] = 'board';
   return attrs;
+}
+
+/** True when the site draws the board grammar (hero: board): SectionRenderer
+ *  opens each section with a BoardRule. */
+export function isBoard(layout: SiteLayout): boolean {
+  return layout.hero === 'board';
 }

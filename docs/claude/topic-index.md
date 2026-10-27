@@ -17,7 +17,8 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | Brand reskin system (config schema, apply-brand, /reskin skill)                                             | `docs/brand/brand-system.md`                                         |
 | Polish layer (brand stripe, card-lift, scroll, script accents)                                              | `docs/agent/polish-layer.md`                                         |
 | Animation layer (native scrolling, motion, scroll-reveal, script accent)                                    | `docs/agent/animation.md`                                            |
-| Typography + spacing tokens                                                                                 | `docs/agent/design-tokens.md`                                        |
+| The one scale, typography + spacing tokens, metric fallback fonts, the board grammar                        | `docs/agent/design-tokens.md`                                        |
+| Picture shapes (the shape class contract and its brand tokens)                                              | `docs/agent/shapes.md`                                               |
 | Component catalog + long-read layout                                                                        | `docs/agent/components.md`                                           |
 | Component sourcing (shadcn, Starwind, Magic UI, PrimeReact, copy-paste sources, token-remap cheat sheet)    | `docs/agent/component-sources.md`                                    |
 | Error + empty states                                                                                        | `docs/agent/error-states.md`                                         |

@@ -12,6 +12,7 @@
 // preloads inline. Don't add layout-shift animations to this section.
 
 import HeroBackground from '@/components/HeroBackground.astro';
+import BoardPageHead from '@/components/board/BoardPageHead.astro';
 import CtaLink from '@/components/CtaLink.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
 import { splitHeadingAccent } from '@/lib/heading-accent';
@@ -62,8 +63,10 @@ interface Props {
   scriptAccent?: string;
   /**
    * Hero structure: bleed (full-bleed image under a scrim, the original),
-   * split (dark text panel beside the image) or editorial (type only, image
-   * ignored). Defaults to the site-wide `layout.hero` from brand.config.json
+   * split (dark text panel beside the image), editorial (type only, image
+   * ignored) or board (an inner page's head on the page ground, the photo
+   * beside the words in the brand's shape: BoardPageHead, card 188; a tall
+   * hero draws as bleed). Defaults to the site-wide `layout.hero` from brand.config.json
    * (src/data/layout.ts). Pass it only to override one page, or from the
    * layouts fixture. With no image, split renders exactly as bleed does.
    */
@@ -91,7 +94,9 @@ const {
   primaryVariant = 'primary',
 } = Astro.props as Props;
 
-const heroVariant = variant ?? layout.hero;
+// The board head is for inner pages; a tall (home) hero on a board site keeps the bleed shape.
+const boardHead = (variant ?? layout.hero) === 'board' && size !== 'tall';
+const heroVariant = (variant ?? layout.hero) === 'board' ? 'bleed' : (variant ?? layout.hero);
 
 // Split the headline into a first word + the rest, so the rotator can swap
 // the first word in place without touching the rest of the line. Matches
@@ -248,7 +253,19 @@ const wrapperHeight =
   </script>
 )}
 
-{hasImage ? (
+{boardHead ? (
+  <BoardPageHead
+    eyebrow={eyebrow}
+    headline={headline}
+    subhead={subhead}
+    image={effectiveImages[0] ?? null}
+    primaryCta={primaryCta}
+    secondaryCta={secondaryCta}
+    headingId={headingId}
+    headingAccent={scriptAccent}
+    primaryVariant={primaryVariant}
+  />
+) : hasImage ? (
   <section
     class:list={[
       'relative overflow-hidden bg-accent-dark text-bg flex flex-col justify-end',

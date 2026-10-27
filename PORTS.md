@@ -281,6 +281,7 @@ archived and nixoncreativestudio has no Sanity, hence `n/a`.
 | 174 | Form recipient addresses set in the Studio, kept in D1, confirmed by email              | n/a     | no          | yes      | n/a              | n/a           | n/a            | n/a                | n/a                 | no             |
 | 175 | Staff view by role; the staff list adds to it; "Simple view" marks from the Studio      | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
 | 176 | People tool: invite a Helper or an Administrator from the Studio                        | n/a     | no          | yes      | no               | no            | n/a            | n/a                | n/a                 | no             |
+| 188 | One scale, shape class contract, lining figures + metric fallbacks, `hero: board`       | n/a     | no          | yes      | no               | no            | n/a            | n/a                | no                  | no             |
 | #   | Card                                                                                    | wcp     | presacademy | starter  | reid-design-site | mas-monograms | 2ndpreschicago | ncs-church-starter | nixoncreativestudio | stonesteps-50k |
 | --- | --------------------------------------------------------------------------------------- | ------- | ----------- | -------- | ---------------- | ------------- | -------------- | ------------------ | ------------------- | -------------- |
 | 1   | with-workerd build wrapper                                                              | yes     | yes         | yes      | yes              | yes           | yes            | yes                | yes                 | yes            |
@@ -13130,3 +13131,74 @@ and the card 184 overlay (fbcm, mas-monograms-rebuild, presacademy, reid-design-
 PORTABLE files plus the four per-repo edits above (`InlineText.tsx`, the resolver line, the two `underCaret` skips in
 `useInstantText.ts`, and the overlay's `heldForEdit` plus done listener). A site whose resolver is shaped differently
 only needs `InlineText` added to whatever it returns. Site PRs wait for the starter merge (sync-check).
+
+## Card 188: One scale, a shape class contract, metric-matched fallback fonts, and the board grammar as `hero: board` (2026-10-27)
+
+**Origin:** first-baptist-auburn (inventory rows A4, A5, A35, A6). Auburn's standardising pass (2026-10-24) found about
+a hundred distinct font sizes, five card radii and four section H2 sizes across its routes, and fixed it with one
+scale at the top of its brand stylesheet; its shape system made the church's phone photos read as one family; its
+re-audit (2026-10-26) cut title layout shift on five inner pages from about 0.05 to 0.002 with metric-matched fallback
+faces and set lining figures; and its board grammar gave every inner page one head, one ground and one left edge.
+Every family site gets the discipline here, styled in its own brand.
+
+**Fix.**
+
+- **The one scale (A4).** A `:root` block "The one scale" in `src/styles/globals.css`: text (`--fs-tag`, `-small`,
+  `-body`, `-lead`, `-button`, `-title`, `-title-sm`, `-numeral`), leading (`--lh-*`), `--figures`, corners
+  (`--radius-control`, `-card`, `-inner`, `-tag`, `-pill`), space (`--pad-card`, `--pad-panel`, `--gap-grid`,
+  `--gap-heading`), shadows (`--shadow-card`, `--shadow-raised`), the button measure (`--btn-height`,
+  `--btn-tracking`, `--tracking-label`) and the focus ring. The starter's values are the ones it already drew
+  (Tailwind's 12/14/16/18px, `rounded-sm` and `rounded-md` from `--radius`, its fluid spacing, the `.card-lift` hover
+  shadow), so naming them moved nothing. Tailwind's `--text-xs` to `--text-lg` now read the scale, the base heading
+  rule reads `--lh-heading`, and `.card-lift:hover` reads `--shadow-card` (its `.dark` twin became a token). The block
+  sits AFTER the palette's `:root` and `.dark` because `apply-brand` rewrites the first of each (found the hard way:
+  placed first, apply-brand failed on `--background`).
+- **Lining figures (A35).** `html { font-variant-numeric: var(--figures) }`, `normal` by default; a brand whose
+  display face has old-style figures sets `lining-nums tabular-nums` (Auburn does).
+- **Metric-matched fallback fonts (A35).** `scripts/font-fallback.mjs` and `scripts/lib/font-fallback.mjs` (PORTABLE,
+  new, tested; `npm run font-fallback`): reads the display font's Latin `.woff` from its `@fontsource` package with
+  `opentype.js` (already a dependency), computes capsize's frequency-weighted average width (capsize's latin table,
+  copied) and the hhea metrics, and writes `src/styles/font-fallbacks.css` with `"<Family> Fallback"` over Georgia
+  (Arial for a sans) and `"<Family> Fallback Times"` over Times New Roman. The local fonts' metrics are constants,
+  measured once from the Windows copies, so CI needs no system fonts. The starter now ships Libre Baskerville's
+  (115.97% / 83.64% / 23.28% over Georgia), named second in `fonts.display.familyValue` and `--font-display`. The test
+  reproduces Auburn's Young Serif numbers within 0.1% (Georgia) and 0.25% (Times).
+- **The shape contract (A5).** `src/styles/shapes.css` (PORTABLE, new): `.shape-step` (a picture in a card),
+  `.shape-gable` (a standalone picture: the brand's cut), `.shape-slab` / `--left` / `.shape-slab-host`,
+  `.shape-card` + `.shape-zoom`, `.shape-tile`, with Auburn's class names so its markup moves over unchanged. Geometry
+  and paint are tokens under `:where(:root)` (`--shape-feature-clip`, `--shape-feature-radius`, `--gable-pitch`,
+  `--shape-gable-polygon`, `--shape-slab`, `--shape-slab-inset`, `--shape-tile`, `--shape-zoom`); the defaults are
+  neutral (frames on the scale's corners, a muted slab and tile). Auburn's gable, red brick slab and pale tile become
+  its brand-layer token values. Class rules only, so a site that uses none renders as before.
+- **The board grammar (A6), opt-in.** `hero: board` joins the `layout` slot (rule 18: `site-layout.ts`, the schema
+  enum, the test). `Hero.astro` draws `src/components/board/BoardPageHead.astro` for any non-tall hero: eyebrow with
+  the brand marker (`BoardLabel.astro`), title (the hero's script accent words in `--board-accent`), subhead, buttons,
+  the photo beside the words in `.shape-gable` on the shared split's tracks (card 91); a tall home hero draws as
+  bleed. `layoutAttrs` puts `data-hero="board"` on `<html>` for this value only (the one hero whose grammar covers the
+  body), where `src/styles/board.css` draws the cadence's tinted bands on the page ground, and `SectionRenderer`
+  opens every section after the first with `BoardRule.astro` (not straight after a hero, not before a spacer) instead
+  of the cadence's divider. Brand knobs: `--board-marker` (a short primary bar; Auburn's three bricks),
+  `--board-marker-width/-height`, `--board-rule` (a hairline; `none` = Auburn's whitespace), `--board-rule-height`,
+  `--board-title-size`, `--board-accent`. Fixtures at the END of `/styleguide/layouts/` (a shot region placed earlier
+  moves the existing baselines): the board head (shot by the hero loop as `hero-board`, baselines generated in CI)
+  and an unshot shape-contract band.
+
+**Not ported, on purpose.** Auburn's brick title (StoneHeading), its Sunday times band, the stone icon beside a page
+title, its 88px title cap and phone-polish spacing rules: they are its brand, set through the tokens above or kept in
+its own layer. The board components and `board.css` are starter-owned (not PORTABLE): Auburn's versions draw its
+church pieces.
+
+**Proved:** `npm ci`, `npm run check` (0 errors), `npm run test:unit` (1690 + 163 pass, including the new
+`font-fallback` and board `site-layout` tests), `npm run build`. Parity against `origin/main`'s build: 17 of 19 pages
+PASS; the two DIFFs are intended (`styleguide/layouts` gains the board head and shapes fixtures;
+`styleguide/sections`' custom-code frame CSS names the new fallback faces in the display stack, which the frame does
+not define, so it still falls to Georgia). Pixels: `/`, `/about/`, `/contact/`, `/faq/`, `/journal/`, `/privacy/`,
+`/services/` and `/styleguide/` at 375 and 1280, full page, before against after: 0 pixels differ on all 16. The board
+variant (built with `hero: board`) shot at 320, 375 and 1280 on `/about/`, `/services/`, `/contact/`, `/` and
+`/styleguide/layouts/`: no horizontal overflow; `<html data-hero="board">`, one ground, rules between sections.
+`apply-brand` runs clean and is idempotent with the scale block in place.
+
+**Applied:** starter (this card). Every family site needs: the scale block (with its own values), `shapes.css` and
+the font-fallback scripts (PORTABLE), `npm run font-fallback` for its display font, and the `site-layout.ts` /
+schema change (PORTABLE, so site PRs wait for the starter merge). `hero: board` is offered per site; fbcm is the
+closest fit. first-baptist-auburn moves its gable, slab, tile and marker values into tokens over the PORTABLE files.
