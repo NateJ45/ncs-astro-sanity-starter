@@ -11,6 +11,11 @@
 //   - a short-facts card beside the words (`glance`: a title, up to four lines, a link). Wide
 //     screens put it at the right; phones put it under the words;
 //   - a silent background clip over the photo (HeroVideo.astro), with a phone-sized copy.
+// The page's accent word (PORTS.md card 203) shows here too: pass the word the site's own hero
+// accents (the starter's script accent, a site's own field) as `accent` and the first whole-word
+// match is wrapped in .ph-accent. It stays WHITE on the same shade as the rest of the headline, so
+// the contrast promise covers it; a site changes only its face, size and slant, through the
+// --ph-accent-* tokens on .ph-hero (photo-hero.css), never its colour (photo-hero.test.ts).
 //
 // Hero.astro picks this only when the block's Style is "photo" AND it has a background photo, so
 // every site and page that does not choose it renders exactly as before. Styles:
@@ -22,6 +27,7 @@ import CtaLink from '@/components/CtaLink.astro';
 import HeroVideo from '@/components/HeroVideo.astro';
 import { heroVideoSource } from '@/lib/hero-video';
 import { splitStega } from '@/lib/preview-stega';
+import { splitHeadingAccent } from '@/lib/heading-accent';
 import type { SanityImageObject } from '@/lib/pageBuilder.types';
 
 type Cta = NonNullable<Parameters<typeof CtaLink>[0]['cta']>;
@@ -40,6 +46,8 @@ export interface PhotoHeroGlance {
 interface Props {
   eyebrow?: string;
   headline: string;
+  /** One word or short phrase of the headline to set in the site's accent face (card 203). */
+  accent?: string | null;
   subhead?: string;
   image: SanityImageObject;
   primaryCta?: Cta | null;
@@ -57,6 +65,7 @@ interface Props {
 const {
   eyebrow,
   headline,
+  accent,
   subhead,
   image,
   primaryCta,
@@ -78,6 +87,10 @@ const phoneClip = heroVideoSource({
   mimeType: clean(videoPhone?.mimeType),
 });
 const hasClip = !!(clip || phoneClip);
+
+// The accent word: the shared splitter (whole word, any case, stega-safe). No word, or no match,
+// leaves the headline exactly as it was.
+const split = splitHeadingAccent(headline, accent ?? undefined);
 
 const lines = (glance?.lines ?? []).filter((l): l is string => !!l?.trim()).slice(0, 4);
 const hasCard = !!(glance?.title?.trim() || lines.length || glance?.link?.label);
@@ -120,7 +133,15 @@ const hasCard = !!(glance?.title?.trim() || lines.length || glance?.link?.label)
     <div class="ph-copy">
       {eyebrow && <p class="ph-eyebrow">{eyebrow}</p>}
       <h1 class="ph-h1" id={headingId}>
-        {headline}
+        {split.found ? (
+          <>
+            {split.before}
+            <span class="ph-accent">{split.word}</span>
+            {split.after}
+          </>
+        ) : (
+          headline
+        )}
       </h1>
       {subhead && <p class="ph-intro">{subhead}</p>}
       {(primaryCta?.label || secondaryCta?.label) && (
