@@ -55,7 +55,7 @@ import { getSiteSettings } from '@/lib/queries';
 import { resolveSiteSettings } from '@/lib/siteSettings';
 import { expandSyncedSections } from '@/lib/authoring';
 import type { PageBuilderBlock } from '@/lib/pageBuilder.types';
-import { sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
+import { SECTION_DRAG_FLOW, sectionEditAttr, type EditDoc } from '@/lib/preview-edit-attr';
 
 interface Props {
   sections?: unknown[];
@@ -166,7 +166,7 @@ const ruled = rows.map(
 // <section> changes no layout.
 const Wrap = editDoc ? 'div' : Fragment;
 const wrapAttrs = (key: string | undefined) =>
-  editDoc && key ? { 'data-sanity': sectionEditAttr(editDoc, key) } : {};
+  editDoc && key ? { 'data-sanity': sectionEditAttr(editDoc, key), ...SECTION_DRAG_FLOW } : {};
 // A section that came out of a synced section is not in the page itself; its
 // in-canvas controls act on the synced block it came from, which is.
 const editKeyOf = (block: unknown) => {
