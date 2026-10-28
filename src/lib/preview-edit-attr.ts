@@ -38,6 +38,17 @@ export interface EditDoc {
   field?: 'pageBuilder';
 }
 
+/**
+ * Sections stack, always (2026-10-27, PORTS.md card 201). The overlay works out
+ * which way a drag runs from the sections' boxes: if any two START at the same
+ * height it decides "side by side" and only listens for left/right moves. A
+ * section that renders nothing (an empty row, a feed with no posts, a retired
+ * marker) is a zero-height box starting exactly where the next section starts,
+ * so one such row made the whole page "horizontal" and a drag up or down found
+ * nowhere to drop. Every section wrapper names the direction instead.
+ */
+export const SECTION_DRAG_FLOW = { 'data-sanity-drag-flow': 'vertical' } as const;
+
 /** The `data-sanity` value that targets one section array item on a doc. */
 export function sectionEditAttr(doc: EditDoc, key: string): string {
   return createDataAttribute({

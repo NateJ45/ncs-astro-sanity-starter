@@ -332,6 +332,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 198  | Contact card fills from business facts; regex-backslash test skips scaffold-removed files | partial     | yes      | partial          | partial       | n/a                 | yes            | yes        | yes     |
 | 199  | Portable tests run in a site: starter-itself case skips, compactor never writes -0        | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 200  | Heading accent matches whole words only ("test" no longer inside "TESTING")               | no          | yes      | no               | no            | n/a                 | staged         | no         | no      |
+| 201  | Preview: new section gets its layout card, Move submenu width, vertical drag              | no          | yes      | yes              | no            | n/a                 | no             | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12625,3 +12626,51 @@ SAME), then search the site's schemas for accent descriptions that say "case-sen
 
 **Applied:** starter (this card), stonesteps-50k (PR #179, open). fbcm, first-baptist-auburn and
 presacademy carry `heading-accent.ts` and need the sync.
+
+## Card 201: Studio preview, a new section's layout card, the Move submenu and vertical drag (2026-10-27)
+
+**Origin:** reid-design-site, 2026-10-27 (NateJ45/reid-design-site#194), from the signed-in
+Presentation check after its refoundation. The Move sliver showed on first-baptist-auburn's
+deployed Studio too, and the new-section race follows from card 184 on every site.
+**Canonical:** `src/lib/preview-union-retry.ts` and its test,
+`src/components/preview/overlay/useUnionTypeRetry.ts`,
+`src/components/preview/overlay/submenuWidthFix.ts` (all four PORTABLE).
+
+**1. The layout card never opened on a NEW section.** @sanity/visual-editing 6.1.3 can only
+resolve a path into a page-builder item once the Studio has said which block type that `_key`
+is. It asks once per new keyed path (`visual-editing/schema-union-types`) and caches the
+question. Since card 184 the frame renders the Studio's posted draft before the commit is
+readable, so the one answer is "no type", every path inside the new section resolves to no
+field, and anything that needs a field (the layout card, card 28; inline typing, card 185)
+never mounts until the frame reloads. The handle still outlines and selects the field in the
+form, which is what the report looked like. **Fix:** `useUnionTypeRetry` watches for keyed
+`data-sanity` targets that were not there before and, 1.5 s and 4.5 s later, adds a hidden
+element with a throwaway keyed path (`<field>:ncs-retype-<n>`) on the same document for one
+second. A path the library has not seen makes it re-ask about every keyed path; the throwaway
+one resolves to nothing. The string handling is in `preview-union-retry.ts` (node test).
+
+**2. The Move submenu drew 8 px wide.** Upstream, @sanity/visual-editing 6.1.3 with
+@sanity/ui 4.4.9: the context menu's submenus are `MenuGroup` popovers with `constrainSize`
+and no portal, so they render inside the scrolling parent menu and the size step writes
+`max-width: 0px` inline. **Fix:** `installSubmenuWidthFix()` adds one stylesheet rule,
+`[data-ui="MenuGroup__popover"]{max-width:none !important;}`, in the preview only. Drop it
+when a release portals or unconstrains its submenus (right-click a section, hover Move).
+
+**3. A canvas drag did nothing.** The overlay picks the drag direction from the sections'
+boxes: if two start at the same height it decides "side by side" and only tracks left and
+right. A section that renders nothing (an empty row, a feed with no posts, a retired marker)
+is a zero-height box starting where the next one starts. **Fix:** `SECTION_DRAG_FLOW`
+(`{ 'data-sanity-drag-flow': 'vertical' }`) in `src/lib/preview-edit-attr.ts`, spread into
+every section wrapper's attributes. The wrapper exists only behind `editDoc`, so live pages
+are byte-identical (parity).
+
+**Porting it.** Copy the four PORTABLE files (`npm run sync-check` then reads SAME). In
+`VisualEditingOverlay.tsx` import both, call `useUnionTypeRetry()` and
+`useEffect(() => installSubmenuWidthFix(), [])` at the top of the component. Add
+`SECTION_DRAG_FLOW` to the site's `preview-edit-attr.ts` and spread it in every renderer
+that builds a `sectionEditAttr` wrapper (marker renderers and board layouts included). A
+site whose unit runner is vitest lists the new node:test file in its node test script and
+excludes it from vitest, as reid-design-site does.
+
+**Applied:** starter (this card), reid-design-site (PR #194, the origin; aligned to the
+starter copy in the port run).
