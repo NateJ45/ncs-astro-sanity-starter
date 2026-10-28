@@ -417,6 +417,14 @@ export interface KitConfig {
   /** After this many minutes, "on its way" becomes "taking longer than usual". */
   liveSlowAfterMinutes: number;
 
+  /**
+   * Card 202: the site's own cards for Home's status rail, drawn under "Is it
+   * live?" (a race site's "Fetch the latest results"). Each takes no props;
+   * build it from HomeCards.tsx's Panel and Quiet and ui's KitAction so it
+   * looks like the kit's own cards. Missing or empty: the rail is unchanged.
+   */
+  homeRail?: ComponentType[];
+
   /** Per-feature switches. Off means the tool or card is not there at all. */
   features: {
     home: boolean;

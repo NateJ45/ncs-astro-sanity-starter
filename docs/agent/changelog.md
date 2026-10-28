@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-28: a site's own cards on Studio Home (PORTS card 202)._ `kitConfig.homeRail` takes a list of components drawn under Is it live?, so a site can add a card to Home without editing the PORTABLE `HomeTool.tsx`. Empty by default; Home is unchanged.
+
 _2026-10-27: wayfinding from first-baptist-auburn (PORTS card 191)._ Four opt-in Site settings pieces resolved by `src/lib/wayfinding.ts`: where-next rows at the top of the footer (`WhereNext.astro`, published-only via `published-links.ts`, current page via `page-path.ts`), phone menu groups with big display rows in `MobileNav.astro`, a compact footer style, and a sticky phone action bar (`ActionBar.astro`). Empty settings render byte-identical pages (parity 19/19).
 
 _2026-10-27: every main page a page builder: Contact, Privacy and Journal (PORTS card 190)._

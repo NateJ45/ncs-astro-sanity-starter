@@ -27,6 +27,7 @@
 //   3. Is it live? The build time from /build-info.json against the newest
 //      published change (liveStatus in src/lib/studio-kit.ts). Card 111: a
 //      FAILED deploy (the deploy route) says so, with "Try again".
+//   3b. The site's own rail cards (card 202, kitConfig.homeRail), if any.
 //   4. Fix-it list (card 115, was Site health): the Checkup's findings by
 //      name, each with Edit, and "See the whole list".
 //   4b. Coming up (card 115): what will publish by itself, soonest first.
@@ -608,6 +609,10 @@ export function makeHomeTool(config: KitConfig) {
 
             <aside className="ui-dash__rail" aria-label="Where things stand">
               <IsItLive slowAfter={config.liveSlowAfterMinutes} helperName={config.helper.name} />
+              {/* Card 202: the site's own status cards. The list is fixed for the Studio's life. */}
+              {(config.homeRail ?? []).map((RailCard, i) => (
+                <RailCard key={i} />
+              ))}
               {config.features.checkup && (
                 <FixItList results={checkup.results} failed={checkup.failed} />
               )}

@@ -333,6 +333,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 199  | Portable tests run in a site: starter-itself case skips, compactor never writes -0        | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 200  | Heading accent matches whole words only ("test" no longer inside "TESTING")               | no          | yes      | no               | no            | n/a                 | staged         | no         | no      |
 | 201  | Preview: new section gets its layout card, Move submenu width, vertical drag              | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 202  | Studio Home: the site's own cards in the status rail (kitConfig.homeRail)                 | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12675,3 +12676,23 @@ excludes it from vitest, as reid-design-site does.
 **Applied:** starter (#257), reid-design-site (#194 the origin, aligned in #195), first-baptist-auburn
 (#249), fbcm (#132), presacademy (#157), stonesteps-50k (#187), mas-monograms (#159; files and
 overlay only, it has no page-builder section wrappers). nixoncreativestudio: n/a (no Sanity).
+
+## Card 202: The site's own cards in Home's status rail (2026-10-28)
+
+**Origin:** stonesteps-50k, 2026-10-28. The race director wanted to pull corrected results in
+from RunSignUp himself, from the Studio's front page, instead of waiting for the nightly run.
+That card is race-only, but Home had nowhere for a site to put a card of its own without
+editing `HomeTool.tsx`, which is PORTABLE. **Canonical:** `src/sanity/kit/types.ts` and
+`src/sanity/kit/HomeTool.tsx` (both PORTABLE).
+
+**The slot.** `KitConfig.homeRail?: ComponentType[]`. Home draws each one, in order, under
+"Is it live?" in the right-hand rail (first on a phone, with the rest of the status). Each
+component takes no props; build it from `Panel` and `Quiet` (HomeCards.tsx) and `KitAction`
+(ui) so it reads as one of the kit's cards. Missing or empty, Home is unchanged, so a site
+takes the card with no config change.
+
+**Porting it.** Copy both PORTABLE files (`npm run sync-check` then reads SAME). Nothing else.
+
+**Applied:** starter (this card), stonesteps-50k (its "Race results" card and
+`/api/studio/results-import/` route). The other sites carry the two files and get the empty
+slot when they sync.
