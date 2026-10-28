@@ -95,6 +95,8 @@ person or a document type; everything site-specific comes in through `kitConfig`
   `liveSlowAfterMinutes`) "taking longer than usual". Re-checks every minute. Until the Sanity publish webhook is set
   up, a publish waits for the next deploy, and the card says so after `liveSlowAfterMinutes`. Card 111: when the
   deploy route says the newest deploy failed, the card says "The last update didn't go through" with "Try again".
+- **The site's own rail cards** (card 202): `kitConfig.homeRail`, a list of no-prop components drawn under
+  Is it live?. Build them from `Panel`, `Quiet` and `KitAction`. stonesteps-50k's "Race results" is the example.
 - **Quick update** button (card 111): beside "Edit the website" when `kitConfig.quickUpdate` has forms.
 - **Fix-it list** (card 115, replaced Site health): the Checkup's counts, then its findings one row per page, by name,
   with what is wrong and an **Edit** button that opens the page at the field (`fixItList()` in `studio-home.ts`, at
