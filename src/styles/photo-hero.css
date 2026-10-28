@@ -28,12 +28,6 @@
   --photo-scrim-text: 72%;
   --photo-scrim-clear: 20%;
   --ph-gutter: var(--spacing-m);
-  /* The accent word's face (card 203): the site's script by default. A site with its own accent
-     face overrides these on .ph-hero; the colour is not a token on purpose (see .ph-accent). */
-  --ph-accent-font: var(--font-script);
-  --ph-accent-style: normal;
-  --ph-accent-weight: inherit;
-  --ph-accent-size: 1em;
 
   position: relative;
   isolation: isolate;
@@ -45,6 +39,15 @@
   color: #ffffff;
   /* The scrim colour shows while the photo loads. */
   background: var(--photo-scrim);
+}
+/* The accent word's face (card 203): the site's script by default. Zero specificity, so a site's
+   own .ph-hero rule sets them whichever stylesheet the build happens to load last. The colour is
+   not a token on purpose (see .ph-accent). */
+:where(.ph-hero) {
+  --ph-accent-font: var(--font-script);
+  --ph-accent-style: normal;
+  --ph-accent-weight: inherit;
+  --ph-accent-size: 1em;
 }
 /* A tall hero (a home page): most of the first screen. */
 .ph-hero--tall {

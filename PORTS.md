@@ -12710,7 +12710,8 @@ said so. **Canonical:** `src/components/PhotoHero.astro`, `src/styles/photo-hero
 splitter (`splitHeadingAccent`, whole word, any case, stega-safe) wraps the first match in
 `.ph-accent`. No word, or no match, renders the headline exactly as before. The accent stays
 WHITE on the same shade as every other word, so card 189's contrast promise covers it; a site
-changes only the face through four tokens on `.ph-hero`: `--ph-accent-font` (default
+changes only the face through four tokens, whose defaults sit in a zero-specificity
+`:where(.ph-hero)` block so a site's own `.ph-hero` rule wins whatever order the CSS loads in: `--ph-accent-font` (default
 `var(--font-script)`), `--ph-accent-style`, `--ph-accent-weight`, `--ph-accent-size` (default
 `1em`). A site stylesheet may add face-only rules on `.ph-accent` (such as `font-synthesis`).
 
@@ -12719,7 +12720,7 @@ stylesheet or component `<style>` block, and every `--ph-accent-size`, and fails
 other than white, any opacity, a clipped, stroked, blended or filtered fill, or a size below the
 headline's (under 1em). `tests/photo-hero.spec.ts` checks the rendered word on the wall
 (`/styleguide/photo-hero/home/` now sets `scriptAccent: 'promise'`): white, opacity 1, at least
-the h1's size.
+the h1's size, and in a different face from the h1 (so the site's tokens really reached it).
 
 **Porting it.** Copy the three PORTABLE files, then in the site's own `Hero.astro` pass the word
 the site's hero already accents to `<PhotoHero accent={...} />`: the starter passes
