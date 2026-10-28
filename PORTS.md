@@ -332,7 +332,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 198  | Contact card fills from business facts; regex-backslash test skips scaffold-removed files | partial     | yes      | partial          | partial       | n/a                 | yes            | yes        | yes     |
 | 199  | Portable tests run in a site: starter-itself case skips, compactor never writes -0        | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 200  | Heading accent matches whole words only ("test" no longer inside "TESTING")               | no          | yes      | no               | no            | n/a                 | staged         | no         | no      |
-| 201  | Preview: new section gets its layout card, Move submenu width, vertical drag              | no          | yes      | yes              | no            | n/a                 | no             | no         | no      |
+| 201  | Preview: new section gets its layout card, Move submenu width, vertical drag              | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12672,5 +12672,6 @@ that builds a `sectionEditAttr` wrapper (marker renderers and board layouts incl
 site whose unit runner is vitest lists the new node:test file in its node test script and
 excludes it from vitest, as reid-design-site does.
 
-**Applied:** starter (this card), reid-design-site (PR #194, the origin; aligned to the
-starter copy in the port run).
+**Applied:** starter (#257), reid-design-site (#194 the origin, aligned in #195), first-baptist-auburn
+(#249), fbcm (#132), presacademy (#157), stonesteps-50k (#187), mas-monograms (#159; files and
+overlay only, it has no page-builder section wrappers). nixoncreativestudio: n/a (no Sanity).
