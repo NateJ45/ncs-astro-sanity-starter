@@ -45,6 +45,26 @@ test.describe('the frame', () => {
     await expect(hero.locator('.ph-card')).toContainText('Open Monday to Friday, 9 to 5');
   });
 
+  test("the page's accent word shows in the headline, white like the rest (card 203)", async ({
+    page,
+  }) => {
+    await load(page);
+    const accent = page.locator('.ph-hero h1 .ph-accent');
+    await expect(accent).toHaveCount(1);
+    await expect(accent).toHaveText('promise');
+    const look = await accent.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const h1 = getComputedStyle(el.closest('h1')!);
+      return { color: cs.color, opacity: cs.opacity, size: cs.fontSize, h1Size: h1.fontSize };
+    });
+    expect(look.color).toBe('rgb(255, 255, 255)');
+    expect(look.opacity).toBe('1');
+    expect(parseFloat(look.size)).toBeGreaterThanOrEqual(parseFloat(look.h1Size));
+    // The page without an accent word keeps a plain headline.
+    await load(page, PAGE);
+    await expect(page.locator('.ph-accent')).toHaveCount(0);
+  });
+
   test('the inner-page shape: shorter, no card, no clip', async ({ page }) => {
     await load(page, PAGE);
     const hero = page.locator('.ph-hero');

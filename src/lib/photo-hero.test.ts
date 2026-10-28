@@ -5,7 +5,7 @@
 // reskin or a thinner shade fails here, before an unreadable hero ships.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import {
   PHOTO_HERO_MIN_CONTRAST,
   contrast,
@@ -78,4 +78,66 @@ test('the shade is built from the tokens only, and reaches the text strength whe
   // Phones: the text strength 20px above where the words start (band less 160px).
   assert.match(shades[1], /calc\(var\(--ph-band\) - 180px\)/);
   assert.match(css, /padding-top:\s*calc\(var\(--ph-band\) - 160px\)/);
+});
+
+// The accent word (card 203): PhotoHero wraps the page's accent word in .ph-accent. It keeps the
+// promise above only if it stays the same white, at full strength and at least the headline's
+// size, wherever a site styles it. So every rule that names .ph-accent, in any stylesheet or
+// component under src/, is read here, along with every --ph-accent-size a site sets.
+function sourceFiles(dir: URL): URL[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const u = new URL(e.name + (e.isDirectory() ? '/' : ''), dir);
+    if (e.isDirectory()) return sourceFiles(u);
+    return /\.(css|astro)$/.test(e.name) ? [u] : [];
+  });
+}
+
+test('the accent word stays white, solid and full size over the photo', () => {
+  const own = /(?:^|\n)\.ph-accent\s*\{([^}]*)\}/.exec(css);
+  assert.ok(own, 'photo-hero.css styles .ph-accent');
+  assert.match(own[1], /(?:^|[;\s])color:\s*#ffffff\s*;/, '.ph-accent is white');
+
+  const rules: { file: string; body: string }[] = [];
+  const sizes: { file: string; value: string }[] = [];
+  for (const file of sourceFiles(new URL('../', import.meta.url))) {
+    // Stylesheets whole, components by their <style> blocks only, comments dropped.
+    const raw = readFileSync(file, 'utf8');
+    const text = (
+      file.pathname.endsWith('.astro')
+        ? [...raw.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n')
+        : raw
+    ).replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const m of text.matchAll(/([^{}]*\.ph-accent\b[^{}]*)\{([^}]*)\}/g)) {
+      rules.push({ file: file.pathname, body: m[2] });
+    }
+    for (const m of text.matchAll(/--ph-accent-size:\s*([^;]+);/g)) {
+      sizes.push({ file: file.pathname, value: m[1].trim() });
+    }
+  }
+  assert.ok(rules.length >= 1);
+  for (const { file, body } of rules) {
+    const colour = /(?:^|[;\s])color:\s*([^;]+);/.exec(body);
+    if (colour) {
+      assert.match(colour[1].trim(), /^(#fff|#ffffff|white)$/i, `${file}: .ph-accent stays white`);
+    }
+    assert.doesNotMatch(body, /(?:^|[;\s])opacity\s*:/, `${file}: no opacity on .ph-accent`);
+    assert.doesNotMatch(
+      body,
+      /text-fill-color|text-stroke|background-clip|mix-blend-mode|filter\s*:/,
+      `${file}: no clipped, stroked or blended fill on .ph-accent`,
+    );
+    const size = /(?:^|[;\s])font-size:\s*([^;]+);/.exec(body);
+    if (size) {
+      const v = size[1].trim();
+      const em = /^(\d*\.?\d+)em$/.exec(v);
+      assert.ok(
+        v === 'var(--ph-accent-size)' || (em && Number(em[1]) >= 1),
+        `${file}: .ph-accent font-size ${v} is at least the headline's`,
+      );
+    }
+  }
+  for (const { file, value } of sizes) {
+    const em = /^(\d*\.?\d+)em$/.exec(value);
+    assert.ok(em && Number(em[1]) >= 1, `${file}: --ph-accent-size ${value} is 1em or more`);
+  }
 });

@@ -28,6 +28,12 @@
   --photo-scrim-text: 72%;
   --photo-scrim-clear: 20%;
   --ph-gutter: var(--spacing-m);
+  /* The accent word's face (card 203): the site's script by default. A site with its own accent
+     face overrides these on .ph-hero; the colour is not a token on purpose (see .ph-accent). */
+  --ph-accent-font: var(--font-script);
+  --ph-accent-style: normal;
+  --ph-accent-weight: inherit;
+  --ph-accent-size: 1em;
 
   position: relative;
   isolation: isolate;
@@ -195,6 +201,17 @@
 }
 .ph-hero--tall .ph-h1 {
   font-size: clamp(3rem, 7vw, 6rem);
+}
+/* The page's accent word in the headline (PhotoHero's `accent`, card 203). WHITE, like every
+   other word here, so it sits on the same shade and inherits the contrast promise; the unit test
+   fails if this or any site stylesheet gives .ph-accent another colour, an opacity, a size below
+   the headline's, or a clipped or stroked fill. A site varies the face only, via the tokens. */
+.ph-accent {
+  font-family: var(--ph-accent-font);
+  font-style: var(--ph-accent-style);
+  font-weight: var(--ph-accent-weight);
+  font-size: var(--ph-accent-size);
+  color: #ffffff;
 }
 .ph-intro {
   max-width: 34rem;

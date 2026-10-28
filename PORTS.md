@@ -334,6 +334,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 200  | Heading accent matches whole words only ("test" no longer inside "TESTING")               | no          | yes      | yes              | no            | n/a                 | staged         | no         | no      |
 | 201  | Preview: new section gets its layout card, Move submenu width, vertical drag              | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 202  | Studio Home: the site's own cards in the status rail (kitConfig.homeRail)                 | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
+| 203  | Photo hero shows the page's accent word, white under the same shade (accent prop, tokens) | no          | yes      | yes              | no            | no                  | no             | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12696,3 +12697,35 @@ takes the card with no config change.
 **Applied:** starter (this card), stonesteps-50k (its "Race results" card and
 `/api/studio/results-import/` route). The other sites carry the two files and get the empty
 slot when they sync.
+
+## Card 203: The photo hero shows the page's accent word (2026-10-28)
+
+**Origin:** reid-design-site, 2026-10-28. Staci's pages set one headline word in her Waterfall
+script (`scriptAccent`), but card 189's photo hero drew the headline plain, so choosing "Photo
+behind the words" on Services or E-Design quietly dropped her accent. Reid's Studio help even
+said so. **Canonical:** `src/components/PhotoHero.astro`, `src/styles/photo-hero.css`,
+`src/lib/photo-hero.test.ts` (all PORTABLE).
+
+**The fix.** `PhotoHero` takes `accent` (one word or short phrase of the headline). The shared
+splitter (`splitHeadingAccent`, whole word, any case, stega-safe) wraps the first match in
+`.ph-accent`. No word, or no match, renders the headline exactly as before. The accent stays
+WHITE on the same shade as every other word, so card 189's contrast promise covers it; a site
+changes only the face through four tokens on `.ph-hero`: `--ph-accent-font` (default
+`var(--font-script)`), `--ph-accent-style`, `--ph-accent-weight`, `--ph-accent-size` (default
+`1em`). A site stylesheet may add face-only rules on `.ph-accent` (such as `font-synthesis`).
+
+**The guard.** `photo-hero.test.ts` now reads every rule naming `.ph-accent` in any `src/**`
+stylesheet or component `<style>` block, and every `--ph-accent-size`, and fails on a colour
+other than white, any opacity, a clipped, stroked, blended or filtered fill, or a size below the
+headline's (under 1em). `tests/photo-hero.spec.ts` checks the rendered word on the wall
+(`/styleguide/photo-hero/home/` now sets `scriptAccent: 'promise'`): white, opacity 1, at least
+the h1's size.
+
+**Porting it.** Copy the three PORTABLE files, then in the site's own `Hero.astro` pass the word
+the site's hero already accents to `<PhotoHero accent={...} />`: the starter passes
+`scriptAccent` (not while the rotating first word runs); a site with its own accent field passes
+that. If the site's hero accent uses another face than `--font-script`, set the tokens on
+`.ph-hero` in the site's own stylesheet. Remove any Studio help that says the photo style drops
+the accent. Sites that never pass `accent` are unchanged.
+
+**Applied:** starter (this card), reid-design-site (Waterfall via the tokens).
