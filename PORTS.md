@@ -12731,7 +12731,7 @@ the accent. Sites that never pass `accent` are unchanged.
 
 **Applied:** starter (this card), reid-design-site (Waterfall via the tokens).
 
-## Card 204: Pin the Playwright job to ubuntu-24.04 while WebKit cannot launch on 26.04 (2026-10-30)
+## Card 206: Pin the Playwright job to ubuntu-24.04 while WebKit cannot launch on 26.04 (2026-10-30)
 
 **Origin:** stonesteps-50k and fbc-auburn, 2026-10-30. GitHub's `ubuntu-latest` began resolving
 to ubuntu-26.04, where Playwright's WebKit dies on launch (`browserType.launch: Target page,
