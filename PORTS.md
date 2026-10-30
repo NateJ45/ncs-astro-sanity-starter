@@ -12730,3 +12730,25 @@ that. If the site's hero accent uses another face than `--font-script`, set the 
 the accent. Sites that never pass `accent` are unchanged.
 
 **Applied:** starter (this card), reid-design-site (Waterfall via the tokens).
+
+## Card 204: Pin the Playwright job to ubuntu-24.04 while WebKit cannot launch on 26.04 (2026-10-30)
+
+**Origin:** stonesteps-50k and fbc-auburn, 2026-10-30. GitHub's `ubuntu-latest` began resolving
+to ubuntu-26.04, where Playwright's WebKit dies on launch (`browserType.launch: Target page,
+context or browser has been closed`), so every `[webkit-iphone]` test failed and the required
+`test` check went red on every PR. **Canonical:** the e2e job in `.github/workflows/ci.yml`
+(not PORTABLE, so the sync-check ordering rule does not apply).
+
+**The fix.** Pin only the job that installs and runs Playwright WebKit to `runs-on: ubuntu-24.04`,
+with a dated comment. Leave every other job on `ubuntu-latest`. `visual.yml`,
+`update-visual-baselines.yml` and `lighthouse.yml` run Chromium only, so they are unaffected. The job
+is `e2e` in the starter, fbcm, presacademy, reid-design-site, fbc-auburn and stonesteps-50k, and
+`test` in mas-monograms and nixoncreativestudio. Each repo's `docs/PENDING.md` carries an
+"unpin later" entry.
+
+**Unpinning.** When a Playwright release supports 26.04, try `ubuntu-latest` on a branch in one
+repo, then remove the pin and the PENDING entry everywhere. Vault gotcha:
+`playwright-webkit-ubuntu-26-04`.
+
+**Applied:** starter (this card), reid-design-site, fbcm, presacademy, mas-monograms,
+nixoncreativestudio, stonesteps-50k (#191), fbc-auburn (#255).
