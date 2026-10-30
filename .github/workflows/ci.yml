@@ -240,15 +240,24 @@ jobs:
       # the system libraries. Both projects in playwright.config.ts need a
       # browser: chromium (desktop) AND webkit-iphone. Installing only chromium
       # makes every webkit test die with "Executable doesn't exist".
+      # The key carries the runner image ($ImageOS: ubuntu24, ubuntu26) as well:
+      # Playwright downloads a WebKit build per Ubuntu release, and during the
+      # ubuntu-latest move to 26.04 (late October 2026) a 26.04 shard restored the
+      # 24.04 build and every webkit test died at launch with "libicudata.so.74:
+      # cannot open shared object file" (PORTS.md card 205). `env.ImageOS` is not
+      # readable in an expression (the env context holds only workflow env), so
+      # the step below echoes it into an output.
       - name: Resolve Playwright version
         id: pw
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "image=${ImageOS:-unknown}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache@v6
         id: pw-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.image }}-${{ steps.pw.outputs.version }}
 
       # `--with-deps` runs `apt-get update`, which fails outright when the
       # runner's third-party Chrome/Microsoft apt sources are mid-sync and

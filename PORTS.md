@@ -336,6 +336,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 202  | Studio Home: the site's own cards in the status rail (kitConfig.homeRail)                 | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 203  | Photo hero shows the page's accent word, white under the same shade (accent prop, tokens) | yes         | yes      | yes              | n/a           | no                  | yes            | n/a        | yes     |
 | 204  | Stack refresh: astro 7.4.4, adapter 14.4.3, Sanity 6.21.0 set, tailwind-variants 4        | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 205  | CI Playwright browser cache keyed by runner image (ubuntu24 vs ubuntu26)                  | no          | yes      | no               | n/a           | n/a                 | no             | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12787,3 +12788,28 @@ own Starwind copy checks its `variants.ts` files for `twMergeConfig` or
 `tailwind-variants/lite` before taking tailwind-variants 4.
 
 **Applied:** starter (this card).
+
+## Card 205: The Playwright browser cache is keyed by runner image (2026-10-30)
+
+**Origin:** starter PR #263, 2026-10-30. GitHub began moving `ubuntu-latest` from 24.04 to
+26.04. One e2e shard landed on a 26.04 runner, restored `~/.cache/ms-playwright` from the key
+`playwright-Linux-1.64.1` (saved on 24.04), and every webkit-iphone test died at launch:
+`MiniBrowser: error while loading shared libraries: libicudata.so.74`. The other shards, still
+on 24.04, passed. Playwright ships a WebKit build per Ubuntu release, so a cache shared across
+releases hands one of them the wrong binary. **Canonical:** `.github/workflows/ci.yml` (not
+PORTABLE; each site's copy is edited by hand).
+
+**The fix.** The "Resolve Playwright version" step also writes `image=${ImageOS}` (`ubuntu24`,
+`ubuntu26`) to its outputs, and the cache key becomes
+`playwright-${{ runner.os }}-${{ steps.pw.outputs.image }}-${{ steps.pw.outputs.version }}`.
+`env.ImageOS` cannot be read in an expression (the `env` context holds only workflow env), which
+is why it goes through a step output. Each image then saves and restores its own browsers; the
+first run on a new image misses once and downloads.
+
+**Porting it.** In each site's `ci.yml`, find `key: playwright-`, add the `image` line to the
+version step and the output to the key. A site whose cache key is already per image needs
+nothing. A red webkit shard showing `libicudata` or another missing `.so` while chromium passes
+is this bug.
+
+**Applied:** starter (this card). Due: presacademy, fbcm, stonesteps-50k, fbc-auburn,
+reid-design-site (all carry the old key).
