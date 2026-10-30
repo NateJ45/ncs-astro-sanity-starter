@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-30: stack refresh (PORTS card 204)._ astro 7.4.4 with `@astrojs/cloudflare` 14.4.3, the Sanity set on 6.21.0 (`@sanity/ui` 4.4.10, `@sanity/client` 8.14.1, `@sanity/astro` 3.6.0, `@sanity/visual-editing` 6.2.0), tailwind-variants 4 and every unpinned minor. wrangler stays 4.129, TypeScript 6, PrimeReact 10, unpdf 1 (Node 24 only). Checked with a real deploy to a throwaway Worker and the dev Studio on Windows.
+
 _2026-10-28: a site's own cards on Studio Home (PORTS card 202)._ `kitConfig.homeRail` takes a list of components drawn under Is it live?, so a site can add a card to Home without editing the PORTABLE `HomeTool.tsx`. Empty by default; Home is unchanged.
 
 _2026-10-27: wayfinding from first-baptist-auburn (PORTS card 191)._ Four opt-in Site settings pieces resolved by `src/lib/wayfinding.ts`: where-next rows at the top of the footer (`WhereNext.astro`, published-only via `published-links.ts`, current page via `page-path.ts`), phone menu groups with big display rows in `MobileNav.astro`, a compact footer style, and a sticky phone action bar (`ActionBar.astro`). Empty settings render byte-identical pages (parity 19/19).
