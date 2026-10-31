@@ -12730,3 +12730,39 @@ that. If the site's hero accent uses another face than `--font-script`, set the 
 the accent. Sites that never pass `accent` are unchanged.
 
 **Applied:** starter (this card), reid-design-site (Waterfall via the tokens).
+
+## Card 205: The starter's default copy reads as a placeholder, not a design studio (2026-10-30)
+
+**Origin:** the starter itself, 2026-10-30. Card 44 cleared the logo, palette, playbook and
+seeded lists, but the words a fresh clone draws with no content still sold interior design:
+the home hero "Design That Feels Like Home.", "About the Studio", a "Book a consultation"
+header and phone-menu button, "Ready to Love Your Space?", "From First Call to Final Reveal.",
+"Notes from the studio", footer columns headed "Studio / Work / Free tools & guides" (the last an empty heading on a fresh clone), "YOUR STUDIO" under the logo, schema `initialValue`s like "Rooms that feel finished." and "Words
+from real homes.", a process-step drawing of a sofa, a 404 fallback photo that was an asset in
+the original client's dataset, and a committed `public/llms-full.txt` that listed a $150
+consultation and E-Design. The deployed starter showed them. **Canonical:** none of these files
+is PORTABLE: `src/data/defaultSections.ts`, `src/lib/siteSettings.ts`, `FinalCta.astro`,
+`MobileNav.astro`, `ProcessStepIllustration.astro`, `src/pages/404.astro`, the page fallbacks,
+the schema defaults and `public/llms*.txt`.
+
+**The fix.** Every default is now a labelled placeholder ("Your Headline Goes Here.", "Get in
+touch", "Ready to Talk?", "News and Updates.", "Your Organisation") or structurally neutral. The
+process drawings are a notebook, a board, a pencil and a check mark. The built-in footer columns are Explore / More / Tools and guides, and a module-only column with nothing switched on draws an empty cell instead of a bare heading. The logo line says "YOUR TAGLINE". The 404 page has no
+fallback photo: with no image in the singleton it is one column of words. Palette, fonts and
+logos were already neutral (slate, Libre Baskerville and Inter, the "S" disc) and are unchanged.
+Services, FAQ and Journal stay as capabilities (`npm run scaffold -- --remove` drops them).
+
+**The audit.** Run in the starter, or in a fork before launch, to find default copy the fork
+never replaced:
+
+    git grep -n -i -E "feels like home|consultation|love your space|about the studio|final reveal|room overhaul|your space|notes from the studio|rooms that|real homes|e-design|studio name|happy client" -- src public scripts
+
+What is left in the starter is history (comments saying what was removed and why) and the
+anti-slop word lists, which name "investment in your space" on purpose.
+
+**Porting it.** Nothing to copy: a site's own copy replaced these defaults long ago. A fork should
+check its fallbacks still say its own words (the header button falls back to `FALLBACK_HEADER_CTA`
+in `src/lib/siteSettings.ts` when Site settings leaves it blank). No site repo carries the old
+404 photo asset id (checked 2026-10-30).
+
+**Applied:** starter (this card). Sites: n/a (own copy).

@@ -1,125 +1,32 @@
-# Studio Starter — Full Site Content
+# Studio Starter: Full Site Content
 
-> Studio Starter is a starter site built on Astro + Sanity. Replace this description with your own business details.
+> Studio Starter is a starter site built on Astro + Sanity. Replace this description with your own organisation's details.
 
-This is the expanded companion to /llms.txt. It inlines the substantive content of the site so a language model can answer questions about the studio from a single document. For the short link map, see /llms.txt.
+This is the expanded companion to /llms.txt. It inlines the substantive content of the site so a language model can answer questions about the organisation from a single document. For the short link map, see /llms.txt.
 
-## Services and pricing
+This file is a placeholder. Once the site has real content in Sanity, run `npm run llms:full` to regenerate it from the live services, process steps, FAQs, service area and journal.
 
-### Consultation — $150
-A 60 to 90 minute visit where we walk your space, talk through what's not working, and leave you with a clear plan.
-Best for: Clients who know something feels off but aren't sure where to start.
+## Services
 
-- 60 to 90 minute visit
-- Layout assessment and guidance
-- Color and finish direction
-- Clear next-steps plan
+### Service one (replace me)
+A sentence on what this service is and who it is for.
 
-### E-Design — starting at $450
-A fully digital design package for clients who prefer to manage the install themselves.
-Best for: Remote clients, hands-on clients, or anyone who wants a clear plan without the in-home install.
+### Service two (replace me)
+A sentence on what this service is and who it is for.
 
-- Full digital design plan delivered as a clickable PDF
-- Mood board and finish/material palette
-- 2D layout with furniture placement
-- Sourcing list with direct shopping links
-- One round of revisions
-- Two weeks of email follow-up while you shop
+## How it works
 
-### Full room design — starting at $650
-A complete plan for one room — layout, furniture, decor, paint direction, and a sourcing list with direct shopping links.
-Best for: A single-room reset where you want a plan you can act on at your own pace.
+### Step 1: Get in touch
+Replace this with what happens first.
 
-- Layout and furniture placement
-- Mood board and concept direction
-- Furniture and decor recommendations
-- Color palette and finish guidance
-- Curated sourcing list with shopping links
-- One revision round
-
-### Full room design + styling — starting at $850
-Everything in Full Room Design, plus hands-on help — shopping, picking paint, hanging the art, styling the shelves.
-Best for: When you'd rather hand the project off than manage it.
-
-- Everything in Full Room Design
-- Hands-on shopping and sourcing
-- Paint color selections
-- Rug, art, and styling direction
-- In-home styling and final reveal
-
-### Shopping & sourcing — $75 per hour
-Help finding the right pieces — billed hourly, no minimum, trade-vendor access included.
-Best for: When you have the vision and just need the right finds.
-
-- Trade-only and retail vendor sourcing
-- Curated finds matched to your style
-- Shopping coordination and in-store visits
-- Vendor and lead-time management
-
-### Partnerships — Custom
-For builders, realtors, and contractors. Finish selections, staging, move-in styling — whatever the project needs.
-Best for: Builders, realtors, and contractors looking for a design partner.
-
-- Finish selections and fixture packages for new construction
-- Staging for listings and move-in styling for buyers
-- Design-side coordination for renovation projects
-
-## How a project works
-
-### Step 1: Consultation (Single visit)
-A free intro chat to make sure we're a fit, then a 60 to 90 minute visit to walk your space and build a clear plan.
-
-### Step 2: Design plan created (2 to 3 weeks)
-Mood board, layout, furniture and decor selections, and a sourcing list with direct shopping links. You see everything before anything is purchased.
-
-### Step 3: Shopping + selections (Per project scope)
-You shop the curated list at your own pace, or we source and order it for you. Trade vendor access is included either way.
-
-### Step 4: Styling + final reveal (Final visit)
-Everything gets placed, styled, and accessorized.
+### Step 2: Replace this step
+Replace this with what happens next.
 
 ## Frequently asked questions
 
-### Do I need to buy all new furniture?
-Not at all. We love working with pieces you already own. We'll identify what's worth keeping, what can be repurposed, and what genuinely needs to go.
-
-### Are you available for commercial projects?
-Primary focus is residential, but open to small commercial spaces, boutiques, offices, short-term rentals. Reach out and describe your project.
-
-### Do you work with contractors?
-For full-service projects involving renovation, we coordinate with contractors but don't act as a general contractor. We can provide referrals to trusted tradespeople and manage design-side communication.
-
-### What if something arrives damaged?
-For full-service clients where we manage purchasing, we handle all claims, returns, and reorders. Vendor relationships and trade accounts come with better resolution processes than retail.
-
-### What if I don't like the design plan?
-Every package includes one full revision round. The thorough consultation up front means major revisions are rare, but the protection is always there. Nothing gets ordered until you give explicit approval.
-
-### Are there hidden fees I should know about?
-No. The design fee is stated upfront before any work begins. The only additional cost is the furnishings and materials you choose to purchase, and you're always in control of that budget.
-
-### How long does a project take?
-The consultation is a single 60 to 90 minute visit. The design plan typically takes 2 to 3 weeks to build after the consultation. From there, shopping and styling timing depends on scope and on furniture lead times.
-
-### How does trade vendor access work?
-We have accounts with vendors not open to the public. These lines offer more distinctive pieces, and trade pricing is passed along to you, frequently offsetting a portion of the design fee.
+### A question people ask (replace me)
+A short, direct answer.
 
 ## Service area and contact
-
-- Location: Your City
 - Email: hello@example.com
-- Availability: Accepting new clients
-
-## Portfolio projects
-
-- [Example Project One](https://example.com/portfolio/example-project-one/) (Your City, 2026): Replace with your own portfolio entry description.
-- [Example Project Two](https://example.com/portfolio/example-project-two/) (Your City, 2026): Replace with your own portfolio entry description.
-
-## Journal
-
-- [Example Journal Post](https://example.com/journal/example-post/): Replace with your own journal entry description.
-
-## Free guides
-
-- [Example Guide One](https://example.com/guides/example-guide-one/): Replace with your own guide description.
-- [Example Guide Two](https://example.com/guides/example-guide-two/): Replace with your own guide description.
+- Location: Your City

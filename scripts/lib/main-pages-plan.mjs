@@ -27,7 +27,7 @@ const hero = (key, doc, fallback) =>
 export const plans = {
   contactPage: (d) => [
     hero('ct-hero', d, {
-      eyebrow: 'Request a Consultation.',
+      eyebrow: 'Get in Touch.',
       headline: 'Start the Conversation.',
       subhead: '',
     }),
@@ -55,7 +55,7 @@ export const plans = {
     return [
       hero('jn-hero', d, {
         eyebrow: 'The Journal.',
-        headline: 'Notes from the studio.',
+        headline: 'News and Updates.',
         subhead:
           'Project walkthroughs, design thinking, and the occasional opinion. Written between projects.',
         scriptAccent: 'studio',

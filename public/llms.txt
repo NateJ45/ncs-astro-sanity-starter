@@ -1,25 +1,14 @@
 # Studio Starter
 
-> Studio Starter is a starter site built on Astro + Sanity. It serves as a neutral template for building content-managed websites with Astro, Sanity CMS, and Cloudflare Workers. Replace this description with your own business details.
+> Studio Starter is a starter site built on Astro + Sanity. It serves as a neutral template for building content-managed websites with Astro, Sanity CMS, and Cloudflare Workers. Replace this description with your own organisation's details.
 
 ## Key pages
-- [Services and pricing](https://example.com/services/): Every service tier and what it costs
-- [Process](https://example.com/process/): How a project works from first call to final reveal
-- [Portfolio](https://example.com/portfolio/): Recent projects
-- [E-Design](https://example.com/e-design/): Online offering delivered digitally, for clients anywhere
-- [About](https://example.com/about/): The studio's story and philosophy
-- [FAQ](https://example.com/faq/): Common questions about working together
-- [Contact](https://example.com/contact/): How to book a consultation
-- [Gift certificates](https://example.com/gift-certificates/): Give the studio's help as a gift
-
-## Tools and resources
-- [Style quiz](https://example.com/quiz/): A short quiz that suggests a direction
-- [Budget calculator](https://example.com/calculator/): A rough budget range for a project
-- [Free guides](https://example.com/guides/): Downloadable guides
-- [Resources](https://example.com/resources/): Tools and recommendations
-- [Journal](https://example.com/journal/): Articles and project notes
-- [Shop my favorites](https://example.com/shop/): Recommended pieces and sources
-- [Press](https://example.com/press/): Where the studio has been featured
+- [About](https://example.com/about/): Who we are. Replace this line.
+- [Services](https://example.com/services/): What we offer. Replace this line.
+- [Process](https://example.com/process/): What to expect. Replace this line.
+- [FAQ](https://example.com/faq/): Common questions. Replace this line.
+- [Journal](https://example.com/journal/): News and updates. Replace this line.
+- [Contact](https://example.com/contact/): How to get in touch
 
 ## Contact
 - Email: hello@example.com

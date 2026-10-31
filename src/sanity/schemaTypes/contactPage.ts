@@ -61,7 +61,7 @@ export const contactPage = defineType({
       title: 'Hero eyebrow',
       type: 'string',
       group: 'hero',
-      initialValue: 'Request a Consultation.',
+      initialValue: 'Get in Touch.',
     }),
     defineField({
       name: 'heroHeadline',
@@ -117,7 +117,7 @@ export const contactPage = defineType({
       type: 'array',
       group: 'form',
       description:
-        'The options shown in the "Project type" dropdown on the contact form. Order matters. Examples: "Single room", "Whole home", "Builder/realtor partnership".',
+        'The options shown in the "Project type" dropdown on the contact form. Order matters. Examples: "A question", "Booking", "Something else".',
       of: [defineArrayMember({ type: 'string' })],
     }),
     defineField({

@@ -1,5 +1,7 @@
 # Change history
 
+_2026-10-30: neutral default copy (PORTS card 205)._ A fresh clone no longer reads like the interior-design build it was forked from: the home, about, process and contact fallbacks, the header and phone-menu button ("Get in touch"), the footer columns (Explore / More / Tools and guides, an empty module column draws nothing), the logo tagline, schema `initialValue`s, the journal and RSS fallbacks, the process-step drawings (a pencil and a check mark instead of a shopping bag and a sofa), the 404 page (no fallback photo from the old client's dataset; one column until the singleton has an image) and `public/llms*.txt` are labelled placeholders. Palette, fonts and logos were already neutral and are unchanged. The home page's words change, so the layout baselines were regenerated in CI.
+
 _2026-10-28: a site's own cards on Studio Home (PORTS card 202)._ `kitConfig.homeRail` takes a list of components drawn under Is it live?, so a site can add a card to Home without editing the PORTABLE `HomeTool.tsx`. Empty by default; Home is unchanged.
 
 _2026-10-27: wayfinding from first-baptist-auburn (PORTS card 191)._ Four opt-in Site settings pieces resolved by `src/lib/wayfinding.ts`: where-next rows at the top of the footer (`WhereNext.astro`, published-only via `published-links.ts`, current page via `page-path.ts`), phone menu groups with big display rows in `MobileNav.astro`, a compact footer style, and a sticky phone action bar (`ActionBar.astro`). Empty settings render byte-identical pages (parity 19/19).

@@ -42,7 +42,7 @@ export const siteSettings = defineType({
       title: 'Site title',
       type: 'string',
       description: 'Used in the browser tab and search results.',
-      initialValue: 'Studio Name',
+      initialValue: 'Your Organisation',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -231,7 +231,7 @@ export const siteSettings = defineType({
 
     // The button at the right of the header (and at the top of the phone menu).
     // Everything is optional: an empty label keeps the built-in
-    // "Book a consultation" pointing at Contact, and turning it off removes the
+    // "Get in touch" pointing at Contact, and turning it off removes the
     // button everywhere.
     defineField({
       name: 'headerCta',
@@ -239,7 +239,7 @@ export const siteSettings = defineType({
       type: 'object',
       group: 'navigation',
       description:
-        'The one button at the right of the header. Leave the boxes blank to keep the built-in "Book a consultation" button.',
+        'The one button at the right of the header. Leave the boxes blank to keep the built-in "Get in touch" button.',
       options: { collapsible: true, collapsed: true },
       fields: [
         defineField({
@@ -253,7 +253,7 @@ export const siteSettings = defineType({
           name: 'label',
           title: 'Button text',
           type: 'string',
-          description: 'Leave blank for "Book a consultation".',
+          description: 'Leave blank for "Get in touch".',
         }),
         defineField({
           name: 'link',
@@ -265,7 +265,7 @@ export const siteSettings = defineType({
       preview: {
         select: { show: 'show', label: 'label' },
         prepare: ({ show, label }) => ({
-          title: label || 'Book a consultation',
+          title: label || 'Get in touch',
           subtitle: show === false ? 'Hidden' : 'Header button',
         }),
       },
@@ -539,7 +539,7 @@ export const siteSettings = defineType({
           name: 'alt',
           title: 'Alt text',
           type: 'string',
-          description: 'What the logo says, for screen readers. Example: "Studio Name".',
+          description: 'What the logo says, for screen readers. Example: "Your Organisation".',
           validation: (Rule) =>
             Rule.custom((value, ctx: any) =>
               ctx.parent?.asset && !value

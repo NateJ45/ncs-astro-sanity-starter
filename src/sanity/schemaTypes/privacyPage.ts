@@ -74,7 +74,7 @@ export const privacyPage = defineType({
       title: 'Hero eyebrow',
       type: 'string',
       group: 'hero',
-      initialValue: 'Studio Name.',
+      initialValue: 'Your Organisation.',
     }),
     defineField({
       name: 'heroHeadline',

@@ -25,18 +25,17 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
     _type: 'heroSection',
     _key: 'default-home-hero',
     eyebrow: 'Your City, Your State.',
-    headline: 'Design That Feels Like Home.',
-    subhead:
-      'We help people create spaces that work as hard as they do, and feel good to come home to.',
+    headline: 'Your Headline Goes Here.',
+    subhead: 'One or two sentences on what you do and who it is for. Replace this in the Studio.',
     size: 'tall',
     primaryCta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact/' },
-    secondaryCta: { _type: 'ctaBlock', label: 'About the Studio', href: '/about/' }, // scaffold: about
+    secondaryCta: { _type: 'ctaBlock', label: 'About Us', href: '/about/' }, // scaffold: about
   },
   {
     _type: 'richTextSection',
     _key: 'default-home-intro',
-    eyebrow: 'Meet the Founder.',
-    heading: 'Good design starts with a real conversation.',
+    eyebrow: 'Welcome.',
+    heading: 'A Short Introduction Goes Here.',
     body: [
       {
         _type: 'block',
@@ -46,7 +45,7 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
           {
             _type: 'span',
             _key: 'default-home-intro-p1-s1',
-            text: `Welcome to ${site.name}. Every project starts the same way: a conversation about how you actually use your space, not just how you want it to look. Add your founder intro in Sanity Studio under the Home Page document.`,
+            text: `Welcome to ${site.name}. Replace this with a few sentences on who you are, who you serve and what a visitor should do next. Edit it in Sanity Studio under the Home Page document.`,
           },
         ],
       },
@@ -61,29 +60,29 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
         _key: 'default-home-stat-1',
         number: 5,
         suffix: '+',
-        label: 'Years in Business',
+        label: 'A Number Worth Knowing',
       },
       {
         _type: 'statItem',
         _key: 'default-home-stat-2',
         number: 50,
         suffix: '+',
-        label: 'Projects Completed',
+        label: 'Another Number',
       },
       {
         _type: 'statItem',
         _key: 'default-home-stat-3',
         number: 100,
         suffix: '%',
-        label: 'Client Satisfaction',
+        label: 'A Third Number',
       },
     ],
   },
   {
     _type: 'imageTextSection',
     _key: 'default-home-services-intro',
-    eyebrow: 'The Studio.',
-    heading: 'Design Services for Every Space.',
+    eyebrow: 'What We Do.',
+    heading: 'Our Services.',
     body: [
       {
         _type: 'block',
@@ -93,7 +92,7 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
           {
             _type: 'span',
             _key: 'default-home-services-intro-p1-s1',
-            text: 'Whether you need a fresh set of eyes or a full room overhaul, there is a service for you. Once your Sanity Studio is seeded, this section will display your real services.',
+            text: 'Say in a sentence or two what you offer. Once your Sanity Studio is seeded, this section will display your real services.',
           },
         ],
       },
@@ -104,15 +103,14 @@ export const DEFAULT_HOME_SECTIONS: PageBuilderBlock[] = [
   {
     _type: 'quoteSection',
     _key: 'default-home-quote',
-    quote:
-      'Working with this studio was the best decision I made for my home. The whole process was clear and the result speaks for itself.',
-    attribution: 'A Happy Client',
+    quote: 'A short, real quote from someone you have helped goes here. Replace it in the Studio.',
+    attribution: 'Name, Role',
   },
   {
     _type: 'ctaBandSection',
     _key: 'default-home-cta',
     eyebrow: 'Ready to Begin?',
-    headline: 'Ready to Love Your Space?',
+    headline: 'Ready to Talk?',
     subhead: "Let's start with a conversation.",
     cta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact/' },
   },
@@ -125,16 +123,16 @@ export const DEFAULT_ABOUT_SECTIONS: PageBuilderBlock[] = [
   {
     _type: 'heroSection',
     _key: 'default-about-hero',
-    eyebrow: 'The Designer.',
-    headline: 'People Hire People.',
-    subhead: "Here's who you'd be working with.",
+    eyebrow: 'About Us.',
+    headline: 'Who We Are.',
+    subhead: 'A sentence about who you are goes here.',
     size: 'short',
   },
   {
     _type: 'richTextSection',
     _key: 'default-about-story',
-    eyebrow: 'My Story.',
-    heading: 'Why I Started This Studio.',
+    eyebrow: 'Our Story.',
+    heading: 'How We Started.',
     body: [
       {
         _type: 'block',
@@ -144,7 +142,7 @@ export const DEFAULT_ABOUT_SECTIONS: PageBuilderBlock[] = [
           {
             _type: 'span',
             _key: 'default-about-story-p1-s1',
-            text: `Replace this with your real origin story. Tell visitors what led you to design, what you noticed was missing in your market, and what you set out to do differently. Edit this in Sanity Studio under the About Page document.`,
+            text: `Replace this with your real origin story. Tell visitors how you began, what you noticed was missing, and what you set out to do differently. Edit this in Sanity Studio under the About Page document.`,
           },
         ],
       },
@@ -159,21 +157,21 @@ export const DEFAULT_ABOUT_SECTIONS: PageBuilderBlock[] = [
         _key: 'default-about-stat-1',
         number: 5,
         suffix: '+',
-        label: 'Years in Business',
+        label: 'A Number Worth Knowing',
       },
       {
         _type: 'statItem',
         _key: 'default-about-stat-2',
         number: 50,
         suffix: '+',
-        label: 'Projects Completed',
+        label: 'Another Number',
       },
       {
         _type: 'statItem',
         _key: 'default-about-stat-3',
         number: 100,
         suffix: '%',
-        label: 'Client Satisfaction',
+        label: 'A Third Number',
       },
     ],
   },
@@ -216,9 +214,8 @@ export const DEFAULT_SERVICES_SECTIONS: PageBuilderBlock[] = [
     _type: 'heroSection',
     _key: 'default-services-hero',
     eyebrow: 'What We Offer.',
-    headline: 'Design Services for Every Space and Stage.',
-    subhead:
-      'Whether you need a fresh perspective or want to hand the whole project over, there is a service for you.',
+    headline: 'Our Services.',
+    subhead: 'A sentence on what you offer and who it is for.',
     size: 'short',
   },
   {
@@ -235,7 +232,7 @@ export const DEFAULT_SERVICES_SECTIONS: PageBuilderBlock[] = [
           {
             _type: 'span',
             _key: 'default-services-intro-p1-s1',
-            text: 'Add your service documents in Sanity Studio. Once seeded, this page will display your full service tier list with pricing and features. Each pricing is discussed before any work begins.',
+            text: 'Add your service documents in Sanity Studio. Once seeded, this page will display your full service tier list with pricing and features.',
           },
         ],
       },
@@ -255,7 +252,7 @@ export const DEFAULT_SERVICES_SECTIONS: PageBuilderBlock[] = [
           {
             _type: 'span',
             _key: 'default-services-area-p1-s1',
-            text: 'We serve the greater metro area and surrounding region. Travel fees for out-of-area projects are always quoted upfront. Edit your service area details in Sanity Studio under Business Info.',
+            text: 'Say where you work or who you serve. Edit your service area details in Sanity Studio under Business Info.',
           },
         ],
       },
@@ -267,8 +264,7 @@ export const DEFAULT_SERVICES_SECTIONS: PageBuilderBlock[] = [
     _key: 'default-services-cta',
     eyebrow: "Let's Talk.",
     headline: 'Not sure which service is right?',
-    subhead:
-      'Send a message with a few details about your space. We will point you toward the best fit.',
+    subhead: 'Send a message and we will point you toward the right place.',
     cta: { _type: 'ctaBlock', label: 'Start a Conversation', href: '/contact/' },
   },
 ];
@@ -280,8 +276,8 @@ export const DEFAULT_PROCESS_SECTIONS: PageBuilderBlock[] = [
     _type: 'heroSection',
     _key: 'default-process-hero',
     eyebrow: 'The Process.',
-    headline: 'From First Call to Final Reveal.',
-    subhead: 'A clear, pressure-free process from the first inquiry through installation day.',
+    headline: 'What to Expect.',
+    subhead: 'A sentence on what happens after someone gets in touch.',
     size: 'short',
   },
   {
@@ -310,18 +306,18 @@ export const DEFAULT_PROCESS_SECTIONS: PageBuilderBlock[] = [
   },
   {
     _type: 'imageTextSection',
-    _key: 'default-process-consultation',
+    _key: 'default-process-inquiry',
     eyebrow: 'Step 1.',
     heading: 'Initial Inquiry.',
     body: [
       {
         _type: 'block',
-        _key: 'default-process-consultation-p1',
+        _key: 'default-process-inquiry-p1',
         style: 'normal',
         children: [
           {
             _type: 'span',
-            _key: 'default-process-consultation-p1-s1',
+            _key: 'default-process-inquiry-p1-s1',
             text: 'Fill out the contact form with a few details about your project. We review every inquiry personally and reply within two business days.',
           },
         ],
@@ -335,7 +331,7 @@ export const DEFAULT_PROCESS_SECTIONS: PageBuilderBlock[] = [
     _key: 'default-process-cta',
     eyebrow: 'Ready to Begin?',
     headline: 'Start the Conversation.',
-    subhead: 'Fill out the contact form with a few details about your space.',
+    subhead: 'Fill out the contact form and we will reply.',
     cta: { _type: 'ctaBlock', label: 'Get in Touch', href: '/contact/' },
   },
 ];

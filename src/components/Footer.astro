@@ -5,15 +5,15 @@
 //
 // Color decoupling: the footer uses bg-muted (Cream in light, dark warm in
 // dark) so it doesn't visually merge with the Charcoal Dark FinalCta. The
-// 4px Warm Bronze accent stripe at the top is the same brand signature
+// 4px accent stripe at the top is the same brand signature
 // used in the header and mobile menu drawer.
 //
 // Structure (top to bottom):
-//   1. Bronze accent stripe
+//   1. Accent stripe
 //   2. Optional newsletter signup (only when siteSettings.newsletter.enabled)
 //   3. Compact brand bar: logo + tagline side by side (one short row, not a
 //      tall stacked block) so the footer stays roughly half its old height.
-//   4. Five-column link grid: Studio / Work / Free tools / Latest projects /
+//   4. Five-column link grid: Explore / More / Tools / Latest projects /
 //      Get in touch (email, phone, location, socials).
 //   5. Thin bottom bar: auto-year copyright, privacy link, optional "Site
 //      by..." credit, all on one line.
@@ -140,11 +140,22 @@ const socialLinksToRender: SocialLink[] = chrome.showFooterSocials
 // (siteCredit + siteCreditUrl) is a SEPARATE concept that sits next to the
 // auto-year copyright in the thin bottom bar.
 const currentYear = new Date().getFullYear();
+
+// The built-in More and Tools columns list opt-in modules, so on a fresh clone
+// they can be empty; an empty one draws a blank grid cell, not a lone heading.
+const hasMoreLinks = [
+  visible.portfolio,
+  visible.journal, // scaffold: journal
+  visible.shop,
+  visible.giftCertificates,
+].some(Boolean);
+const hasToolLinks =
+  visible.styleQuiz || visible.budgetCalculator || visible.guides || visible.resources;
 const siteCredit = siteSettings?.footerCredit;
 const siteCreditUrl = siteSettings?.footerCreditUrl;
 
 // Optional editor-managed footer columns. When non-empty, these replace the
-// built-in Studio / Work / Free tools columns. "Get in touch" always renders
+// built-in Explore / More / Tools columns. "Get in touch" always renders
 // as the last column regardless. Additive: empty = built-in defaults.
 // Pages whose "Show in the footer" switch is on join the LAST custom column (card 187). With
 // the built-in footer there is no column list to add to, so they are not merged: that would
@@ -202,7 +213,7 @@ const actionBar =
   {/* Five-column link grid. Single centered column on mobile, five columns
        at md+ (left-aligned). The fifth column carries contact details.
        When siteSettings.footerColumns is non-empty, the custom Sanity columns
-       replace the built-in Studio / Work / Free tools columns. The Latest
+       replace the built-in Explore / More / Tools columns. The Latest
        Projects column and Get in touch column always render. */}
   {/* Compact (card 191): the brand row on top; the logo block at the foot is left out. */}
   {compact && (
@@ -276,10 +287,10 @@ const actionBar =
       <>
         {/* --- Built-in columns (default when footerColumns is empty) --- */}
 
-        {/* STUDIO */}
+        {/* EXPLORE */}
         <nav aria-labelledby="footer-studio">
           <p id="footer-studio" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
-            Studio
+            Explore
           </p>
           <ul class="list-none p-0 text-sm">
             {/* scaffold: about */}
@@ -335,115 +346,123 @@ const actionBar =
           </ul>
         </nav>
 
-        {/* WORK */}
-        <nav aria-labelledby="footer-work">
-          <p id="footer-work" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
-            Work
-          </p>
-          <ul class="list-none p-0 text-sm">
-            {visible.portfolio && (
-              <li>
-                <a
-                  href="/portfolio/"
-                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
-                >
-                  Portfolio
-                </a>
-              </li>
-            )}
-            {visible.portfolio && (
-              <li>
-                <a
-                  href="/portfolio/before-after/"
-                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
-                >
-                  Before &amp; After
-                </a>
-              </li>
-            )}
-            {/* scaffold: journal */}
-            {visible.journal && (
-              <li>
-                <a
-                  href="/journal/"
-                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
-                >
-                  Journal
-                </a>
-              </li>
-            )}
-            {/* scaffold:end */}
-            {visible.shop && (
-              <li>
-                <a
-                  href="/shop/"
-                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
-                >
-                  Shop
-                </a>
-              </li>
-            )}
-            {visible.giftCertificates && (
-              <li>
-                <a
-                  href="/gift-certificates/"
-                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
-                >
-                  Gift Certificates
-                </a>
-              </li>
-            )}
-          </ul>
-        </nav>
+        {/* MORE. A column with no visible link draws an empty grid cell, not a bare heading. */}
+        {hasMoreLinks ? (
+          <nav aria-labelledby="footer-work">
+            <p id="footer-work" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
+              More
+            </p>
+            <ul class="list-none p-0 text-sm">
+              {visible.portfolio && (
+                <li>
+                  <a
+                    href="/portfolio/"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
+                    Portfolio
+                  </a>
+                </li>
+              )}
+              {visible.portfolio && (
+                <li>
+                  <a
+                    href="/portfolio/before-after/"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
+                    Before &amp; After
+                  </a>
+                </li>
+              )}
+              {/* scaffold: journal */}
+              {visible.journal && (
+                <li>
+                  <a
+                    href="/journal/"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
+                    Journal
+                  </a>
+                </li>
+              )}
+              {/* scaffold:end */}
+              {visible.shop && (
+                <li>
+                  <a
+                    href="/shop/"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
+                    Shop
+                  </a>
+                </li>
+              )}
+              {visible.giftCertificates && (
+                <li>
+                  <a
+                    href="/gift-certificates/"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
+                    Gift Certificates
+                  </a>
+                </li>
+              )}
+            </ul>
+          </nav>
+        ) : (
+          <div aria-hidden="true" />
+        )}
 
-        {/* FREE TOOLS & GUIDES */}
-        <nav aria-labelledby="footer-tools">
-          <p id="footer-tools" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
-            Free tools &amp; guides
-          </p>
-          <ul class="list-none p-0 text-sm">
-            {visible.styleQuiz && (
-              <li>
-                <a
-                  href="/quiz/"
-                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
-                >
-                  Style Quiz
-                </a>
-              </li>
-            )}
-            {visible.budgetCalculator && (
-              <li>
-                <a
-                  href="/calculator/"
-                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
-                >
-                  Cost Calculator
-                </a>
-              </li>
-            )}
-            {visible.guides && (
-              <li>
-                <a
-                  href="/guides/"
-                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
-                >
-                  Guides
-                </a>
-              </li>
-            )}
-            {visible.resources && (
-              <li>
-                <a
-                  href="/resources/"
-                  class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
-                >
-                  Resources
-                </a>
-              </li>
-            )}
-          </ul>
-        </nav>
+        {/* TOOLS */}
+        {hasToolLinks ? (
+          <nav aria-labelledby="footer-tools">
+            <p id="footer-tools" class="mb-s text-xs tracking-eyebrow text-foreground/80 uppercase">
+              Tools and guides
+            </p>
+            <ul class="list-none p-0 text-sm">
+              {visible.styleQuiz && (
+                <li>
+                  <a
+                    href="/quiz/"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
+                    Style Quiz
+                  </a>
+                </li>
+              )}
+              {visible.budgetCalculator && (
+                <li>
+                  <a
+                    href="/calculator/"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
+                    Cost Calculator
+                  </a>
+                </li>
+              )}
+              {visible.guides && (
+                <li>
+                  <a
+                    href="/guides/"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
+                    Guides
+                  </a>
+                </li>
+              )}
+              {visible.resources && (
+                <li>
+                  <a
+                    href="/resources/"
+                    class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-foreground/85 transition-colors hover:text-link md:justify-start"
+                  >
+                    Resources
+                  </a>
+                </li>
+              )}
+            </ul>
+          </nav>
+        ) : (
+          <div aria-hidden="true" />
+        )}
       </>
     )}
 

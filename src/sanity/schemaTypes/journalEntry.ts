@@ -1,5 +1,5 @@
 // scaffold-file: journal
-// Journal/blog post. Designed to handle every kind of post the founder might write:
+// Journal/blog post. Designed to handle every kind of post the site might publish:
 // project walkthroughs, style guides, behind-the-scenes, source roundups,
 // process explainers, opinion pieces, announcements. The body field accepts
 // rich Portable Text plus seven custom inline blocks (pullQuote, beforeAfter,
@@ -102,7 +102,7 @@ export const journalEntry = defineType({
       name: 'author',
       title: 'Author',
       type: 'string',
-      description: 'Byline. Defaults to the founder. Change if a guest writes a post.',
+      description: 'Byline. Defaults to the main author. Change if a guest writes a post.',
       group: 'meta',
       initialValue: 'Your Name',
     }),
@@ -377,7 +377,7 @@ export const journalEntry = defineType({
           },
         }),
 
-        // Tip callout — a labeled aside ("Designer's note:", "Worth knowing:", etc.)
+        // Tip callout — a labeled aside ("A note:", "Worth knowing:", etc.)
         defineArrayMember({
           type: 'object',
           name: 'tipCallout',

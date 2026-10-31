@@ -172,7 +172,7 @@ export const businessInfo = defineType({
       title: 'Studio latitude',
       type: 'number',
       description:
-        'For local "near me" search. Your studio latitude coordinate. Find it in Google Maps by right-clicking your address. This feeds the business listing data that search engines read. Leave blank for fully remote businesses.',
+        'For local "near me" search. Your latitude. Find it in Google Maps by right-clicking your address. This feeds the business listing data that search engines read. Leave blank for fully remote businesses.',
       hidden: ({ document }) => document?.businessModel === 'remote',
     }),
     defineField({
@@ -180,7 +180,7 @@ export const businessInfo = defineType({
       title: 'Studio longitude',
       type: 'number',
       description:
-        'For local "near me" search. Your studio longitude coordinate. Pairs with the latitude above. Leave blank for fully remote businesses.',
+        'For local "near me" search. Your longitude. Pairs with the latitude above. Leave blank for fully remote businesses.',
       hidden: ({ document }) => document?.businessModel === 'remote',
     }),
 

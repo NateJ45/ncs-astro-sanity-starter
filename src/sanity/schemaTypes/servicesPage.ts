@@ -94,7 +94,7 @@ export const servicesPage = defineType({
       group: 'hero',
       hidden: true,
       readOnly: true,
-      initialValue: 'Design Services for Every Space and Stage.',
+      initialValue: 'Our Services.',
     }),
     defineField({
       name: 'heroSubhead',

@@ -1064,7 +1064,7 @@ docs.push({
     'Replace this with one sentence saying what gets written here, for search results.',
 
   heroEyebrow: 'The Journal.',
-  heroHeadline: 'Notes from the studio.',
+  heroHeadline: 'News and Updates.',
   heroSubhead: 'Replace this with what gets written about here and roughly how often.',
   stickyCtaLabel: 'Got a question?',
 

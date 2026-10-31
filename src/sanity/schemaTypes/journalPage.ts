@@ -68,7 +68,7 @@ export const journalPage = defineType({
       title: 'Hero headline',
       type: 'string',
       group: 'hero',
-      initialValue: 'Notes from the studio.',
+      initialValue: 'News and Updates.',
     }),
     defineField({
       name: 'heroSubhead',

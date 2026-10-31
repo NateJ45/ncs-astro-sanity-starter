@@ -26,7 +26,7 @@ describe('main-pages-plan', () => {
   it('uses the page fallbacks when the document has no hero words', () => {
     const out = plans.contactPage({});
     assert.equal(out[0].headline, 'Start the Conversation.');
-    assert.equal(out[0].eyebrow, 'Request a Consultation.');
+    assert.equal(out[0].eyebrow, 'Get in Touch.');
   });
 
   it('privacy: moves the body and the date into the policy block', () => {

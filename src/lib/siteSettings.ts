@@ -142,7 +142,7 @@ export function fallbackNavItems(visible: SectionVisibility): NavItem[] {
 /** Built-in header button. One unambiguous ask. */
 export const FALLBACK_HEADER_CTA: HeaderCta = {
   show: true,
-  label: 'Book a consultation',
+  label: 'Get in touch',
   href: '/contact/',
 };
 

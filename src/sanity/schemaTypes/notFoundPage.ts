@@ -85,7 +85,6 @@ export const notFoundPage = defineType({
           name: 'caption',
           title: 'Caption (optional)',
           type: 'string',
-          initialValue: 'From the studio',
         }),
       ],
     }),

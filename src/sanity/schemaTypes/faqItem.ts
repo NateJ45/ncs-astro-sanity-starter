@@ -20,7 +20,7 @@ export const faqItem = defineType({
       options: {
         canvasApp: {
           purpose:
-            'The question as a visitor would actually ask it — plain English, not jargon. Example: "How much does a full room design cost?" not "What is the pricing structure for full-room design services?"',
+            'The question as a visitor would actually ask it — plain English, not jargon. Example: "How much does it cost?" not "What is the pricing structure for sign services?"',
         },
       },
       validation: (Rule) => Rule.required(),
