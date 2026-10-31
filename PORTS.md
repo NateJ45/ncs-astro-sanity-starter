@@ -335,6 +335,8 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 201  | Preview: new section gets its layout card, Move submenu width, vertical drag              | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 202  | Studio Home: the site's own cards in the status rail (kitConfig.homeRail)                 | yes         | yes      | yes              | yes           | n/a                 | yes            | yes        | yes     |
 | 203  | Photo hero shows the page's accent word, white under the same shade (accent prop, tokens) | yes         | yes      | yes              | n/a           | no                  | yes            | n/a        | yes     |
+| 204  | Stack refresh: astro 7.4.4, adapter 14.4.3, Sanity 6.21.0 set, tailwind-variants 4        | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 205  | CI Playwright browser cache keyed by runner image (ubuntu24 vs ubuntu26)                  | no          | yes      | no               | n/a           | n/a                 | no             | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12730,3 +12732,84 @@ that. If the site's hero accent uses another face than `--font-script`, set the 
 the accent. Sites that never pass `accent` are unchanged.
 
 **Applied:** starter (this card), reid-design-site (Waterfall via the tokens).
+
+## Card 204: Stack refresh, astro 7.4.4, adapter 14.4.3, Sanity 6.21.0 (2026-10-30)
+
+**Origin:** starter, a planned stack session (rule 8). **Canonical:** `package.json`,
+`package-lock.json` (edited with `npm install`, never regenerated).
+
+**The move.** Every minor and patch the matched set allows, taken together:
+
+| Package                               | Was    | Now    | Note                                                       |
+| ------------------------------------- | ------ | ------ | ---------------------------------------------------------- |
+| `astro`                               | ^7.4.0 | ^7.4.4 | moves with the adapter                                     |
+| `@astrojs/cloudflare`                 | 14.4.0 | 14.4.3 | exact; still peers `astro ^7.4.0`, `wrangler ^4.125.0`     |
+| `sanity`, `@sanity/vision`            | 6.19.0 | 6.21.0 | depends on `@sanity/client ^8.11.0`                        |
+| `@sanity/ui`                          | 4.4.9  | 4.4.10 | `@sanity/visual-editing` 6.2.0 wants `^4.4.10`             |
+| `@sanity/client`                      | 8.9.0  | 8.14.1 |                                                            |
+| `@sanity/visual-editing` (+overrides) | 6.1.3  | 6.2.0  | both entries, same pass                                    |
+| `@sanity/astro`                       | 3.5.1  | 3.6.0  | dedupe regex still forward-slash only: card 60 stays       |
+| `@sanity/themer`                      | 0.10.4 | 0.10.6 |                                                            |
+| `sanity-plugin-media`                 | 6.3.5  | 6.6.0  |                                                            |
+| `sanity-plugin-asset-source-unsplash` | 7.0.29 | 7.0.30 |                                                            |
+| `tailwind-variants`                   | ^3.2.2 | ^4.0.0 | only plain `tv()` in the four Starwind `variants.ts` files |
+| `groq-js`                             | 2.0.0  | 2.0.1  | exact                                                      |
+
+Plus the unpinned minors (`@astrojs/mdx`, `@astrojs/react`, Tabler, lucide, motion, shadcn, sharp,
+yet-another-react-lightbox, eslint, typescript-eslint, tailwindcss, prettier and its astro plugin)
+and the transitive fixes Dependabot had open (fast-uri 3.1.9, follow-redirects 1.16.2,
+body-parser). Unchanged on purpose: `@sanity/icons` 5.2.3, `styled-components` 6.6.0,
+`@sanity/preview-url-secret` 4.1.5, `@sanity/orderable-document-list` 2.0.28 and
+`sanity-plugin-utils` 2.0.22 (already the latest), React 19.3.1 (latest).
+
+**Held back, with reasons.** `wrangler` stays `~4.129.0` (rule 8: the 4.14x and 4.15x lines bundle a
+miniflare 5 beta, and nothing needs them; the adapter's vite plugin already nests its own 4.151 for
+prerender). `typescript` 7 (breaks Astro's tooling, vault gotcha `typescript-not-7`). `primereact`
+11 (licence change, rule 8). `unpdf` 2 needs Node 24 and the family's CI runs Node 22.
+
+**npm trap.** Raising the `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser` and
+`typescript-eslint` ranges together in one `npm install` fails with ERESOLVE (the lockfile's
+`typescript-eslint` 8.72.0 pins the plugin at 8.72.0). Install with the old ranges, run
+`npm update typescript-eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser`, then
+raise the ranges.
+
+**Verified.** `format:check`, `typegen` (no generated change), `npm run check`, `npm run build`,
+`test:unit`. One `@sanity/ui`, one `@sanity/icons`, one React, one `errors.md#` chunk. No
+`legacy_env` in `dist/server/wrangler.json`. A REAL `wrangler deploy` (4.129.1) to a throwaway
+Worker succeeded with only the expected `k2` warning; the homepage rendered with no console
+errors and `/studio` mounted (Sanity's own "Project not found" screen for the placeholder id).
+`astro dev` on Windows: `/studio` hydrated with no `MISSING_EXPORT` and no missing-export
+`c`. This also closes card 97's open item (it had only a dry run).
+
+**Porting it.** Per site, in one branch: copy the version changes above into `package.json`
+(both visual-editing entries), `npm install`, use the typescript-eslint two-step, then the
+rule 8 invariants and a real deploy to the site's staging or a throwaway Worker. A site on its
+own Starwind copy checks its `variants.ts` files for `twMergeConfig` or
+`tailwind-variants/lite` before taking tailwind-variants 4.
+
+**Applied:** starter (this card).
+
+## Card 205: The Playwright browser cache is keyed by runner image (2026-10-30)
+
+**Origin:** starter PR #263, 2026-10-30. GitHub began moving `ubuntu-latest` from 24.04 to
+26.04. One e2e shard landed on a 26.04 runner, restored `~/.cache/ms-playwright` from the key
+`playwright-Linux-1.64.1` (saved on 24.04), and every webkit-iphone test died at launch:
+`MiniBrowser: error while loading shared libraries: libicudata.so.74`. The other shards, still
+on 24.04, passed. Playwright ships a WebKit build per Ubuntu release, so a cache shared across
+releases hands one of them the wrong binary. **Canonical:** `.github/workflows/ci.yml` (not
+PORTABLE; each site's copy is edited by hand).
+
+**The fix.** The "Resolve Playwright version" step also writes `image=${ImageOS}` (`ubuntu24`,
+`ubuntu26`) to its outputs, and the cache key becomes
+`playwright-${{ runner.os }}-${{ steps.pw.outputs.image }}-${{ steps.pw.outputs.version }}`.
+`env.ImageOS` cannot be read in an expression (the `env` context holds only workflow env), which
+is why it goes through a step output. Each image then saves and restores its own browsers; the
+first run on a new image misses once and downloads.
+
+**Porting it.** In each site's `ci.yml`, find `key: playwright-`, add the `image` line to the
+version step and the output to the key. A site whose cache key is already per image needs
+nothing. A red webkit shard showing `libicudata` or another missing `.so` while chromium passes
+is this bug.
+
+**Applied:** starter (this card). Due: presacademy, fbcm, stonesteps-50k, fbc-auburn,
+reid-design-site (all carry the old key).
