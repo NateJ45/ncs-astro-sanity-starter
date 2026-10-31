@@ -49,7 +49,7 @@ have to invent.
 
 ## Step 0 - Prerequisites
 
-- **Node 22.12+** (`node --version`).
+- **Node 22.23.4+** (`node --version`; the exact version is in `.nvmrc`).
 - **A GitHub repository** for the new project, created before you clone.
 - **A Cloudflare account** at [dash.cloudflare.com](https://dash.cloudflare.com).
   The Workers free tier covers most projects.
