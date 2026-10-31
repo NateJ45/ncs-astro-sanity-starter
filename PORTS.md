@@ -13104,7 +13104,7 @@ small and exercised (see below). 5. `npm install` re-resolves only the affected 
 lockfile moved 22 package versions, nearly all removals of a nested duplicate.
 
 **Starter result (2026-10-31).** 43 Dependabot alerts: 38 cleared by the lockfile (undici 23, js-yaml 5,
-smol-toml 3, sharp 2, tmp 2, qs 1, ip-address 1, uuid 1), 5 left. `npm audit` 62 to 47 total (the audit counts
+smol-toml 3, sharp 2, tmp 2, qs 1, ip-address 1, uuid 1), 5 left. `npm audit` 62 to 48 total (the audit counts
 the whole tool tree, not just the Dependabot list). Gates green on the new lockfile: typegen (no
 diff in `sanity.types.ts`), `astro check`, lint, `format:check`, 1892 script and lib tests, and the
 full build. The overrides:
@@ -13134,10 +13134,22 @@ cannot close while `@lhci/cli` is in the tree. Never run `npm audit fix --force`
 
 **Porting it.** Do not copy the block. In each site run the lockfile through the rules above (the
 alert list is `gh api "repos/NateJ45/<repo>/dependabot/alerts?state=open&per_page=100"`), keep only
-the overrides whose parent is in that site's tree, run `npm install`, then `npm ls` (must exit 0), the
+the overrides whose parent is in that site's tree, run `npm install`, then `npm ls --all` (must exit 0; plain `npm ls` only checks the top level), the
 site's gates and the build. `package.json` and `package-lock.json` are the only files, so the site PR
 can open at once; no `PORTABLE:` file changes and `sync-check` is unaffected. Re-check after a
 `wrangler`/`miniflare` or `@vercel/frameworks` bump: once the parent ships the patched pin, delete
 its override.
 
-**Applied:** starter (this card). Sites: see the matrix row.
+**Trap: a nested copy npm will not re-resolve.** After an override changes a version that is already
+nested in the lockfile (`@vercel/frameworks/node_modules/js-yaml`, `external-editor/node_modules/tmp`),
+`npm install` can leave the old copy in place and `npm ls --all` then prints `invalid`. Delete that
+entry (and its `node_modules` folder) from the lockfile and run `npm install` again; it resolves cleanly.
+A flat override that disagrees with a scoped one (mas-monograms' `undici` pinned to ^7 against a
+scoped `linkinator` 8) made `npm ls --all` report valid ranges as invalid; keep the scoped override
+out of a repo that already has the flat one.
+
+**Applied (2026-10-31, PRs open and green, none merged):** starter #278. Sites: presacademy #164,
+reid-design-site #208, mas-monograms #166, nixoncreativestudio #209 (lockfile only), stonesteps-50k #198,
+fbc-auburn #262, fbcm #139. Each derived its own overrides; the alerts left everywhere are `extract-zip`,
+`deepmerge`, `zod` 3 and `minimatch`. fbcm's alert list was still empty, so it was worked against the
+advisories of the sibling repos.
