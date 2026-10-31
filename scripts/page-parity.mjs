@@ -123,7 +123,7 @@
  *      block's .ics link). RFC 5545 stamps the moment the file was made, which
  *      for a static site is the build, so every rebuild differed. Only the
  *      value is masked; the rest of the event is compared. Added 2026-10-30,
- *      PORTS.md card 210; the rule lives in scripts/lib/parity-ics.mjs.
+ *      PORTS.md card 211; the rule lives in scripts/lib/parity-ics.mjs.
  *
  * Deliberately NOT stripped: data-sanity attributes (they never appear in the
  * static build, only in the SSR preview build, which this harness does not

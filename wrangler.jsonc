@@ -120,6 +120,8 @@
   // src/site-data.ts). ANALYTICS_PROVIDER picks the Visitors source
   // ("cloudflare" or "ga4"); unset means whichever is set up, Cloudflare first.
   // Steps: docs/agent/studio-kit.md, "Google Analytics and Search Console".
+  // The same pair sends each form submission to the dashboard Inbox (card 210,
+  // src/lib/site-inbox.ts); a site with forms but no GA4 still sets both.
   // "services": [
   //   { "binding": "SITE_DATA", "service": "studio-status", "entrypoint": "SiteData" }
   // ],

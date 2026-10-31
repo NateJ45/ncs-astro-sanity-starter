@@ -341,7 +341,8 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 207  | Starter default copy reads as a neutral placeholder, not a design studio                  | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | n/a        | n/a     |
 | 208  | Retire a stored field with a backup (retire-fields script), not "Remove field"            | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 209  | CI reads the Node version from .nvmrc (pinned 22.23.4)                                    | no          | yes      | no               | no            | no                  | no             | no         | no      |
-| 210  | Parity masks the build-time DTSTAMP in an event calendar link                             | n/a         | yes      | no               | no            | no                  | no             | no         | no      |
+| 210  | Form submissions reported to the studio dashboard Inbox (`site-inbox.ts`)                 | staged      | yes      | n/a              | staged        | n/a                 | staged         | staged     | n/a     |
+| 211  | Parity masks the build-time DTSTAMP in an event calendar link                             | n/a         | yes      | no               | no            | no                  | no             | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12948,7 +12949,42 @@ red build saying "Node.js v22.x is not supported by Astro" while a rerun passes 
 
 **Applied:** starter (this card). Sites: not yet.
 
-## Card 210: Parity ignores an event's build-time calendar stamp (2026-10-30)
+## Card 210: Form submissions reported to the studio dashboard Inbox (2026-10-30)
+
+**Origin:** studio-status, 2026-10-30. The dashboard was rebuilt with an Inbox (`/inbox`) that
+lists every site's enquiries in one place, and studio-status gained `SiteData.reportMessage`
+for it, but no site called it, so the page said "waiting for sites to report". The forms
+already store every submission in D1 and email it; this adds a notification, not a copy.
+**Canonical:** `src/lib/site-inbox.ts` and `src/lib/site-inbox.test.ts` (PORTABLE, new),
+`src/pages/api/contact.ts` and `src/pages/api/rsvp.ts` (PORTABLE), and the starter's
+`src/pages/api/form.ts` (safe to edit, so each site applies the same few lines).
+
+**The call.** After the route has stored the row (or sent the email), `reportToInbox(env,
+locals, { id, form, name, subject, preview })` calls `SITE_DATA.reportMessage(SITE_DATA_KEY,
+...)` inside `locals.cfContext.waitUntil`: the visitor's answer never waits on it, and a
+refusal or a throw is one `[inbox]` warning in the log. No binding, or a key that is not
+`[a-z0-9-]`, sends nothing. Ids are `contact-<row>`, `form-<row>`, `rsvp-<row>` (a random
+UUID when there is no database), so a retry is deduped on the dashboard.
+
+**Privacy.** Never the sender's email or phone. `inboxText()` replaces anything shaped like an
+address or a phone number with `[contact removed]`, strips control characters and cuts the
+preview to 200 characters on a word, before anything leaves the site; studio-status redacts
+again on arrival. A private form (mode Private) sends its title only. An RSVP sends the event,
+the name and "Going, party of 3" (or "Waiting list"). The contact preview is the message's start.
+
+**Porting it.** Copy the two new files, `contact.ts` and `rsvp.ts` (`sync-check` then reads
+SAME), and add the same lines to the site's `form.ts` if it has one. Match the site's own private mode there (fbc-auburn calls it `prayer`, so its check is `form.mode !== 'prayer'`). A site with its own route
+(mas-monograms' `/api/quote/`) calls `reportToInbox()` after its insert, with `form: 'quote'`.
+In `wrangler.jsonc`, set the `SITE_DATA` service binding (`{ "binding": "SITE_DATA",
+"service": "studio-status", "entrypoint": "SiteData" }`) and `"SITE_DATA_KEY"` in vars if card
+136 has not already; the key must be in studio-status's `SITE_DATA` map (a site with no GA4
+property still needs an entry, or the call answers `unknown-site`). Test with a site's own test
+path, never a real enquiry, and check `/inbox` on the dashboard.
+
+**Applied:** starter (this card). Sites: staged (presacademy, mas-monograms, stonesteps-50k,
+fbc-auburn); reid-design-site, nixoncreativestudio and fbcm have no form route.
+
+## Card 211: Parity ignores an event's build-time calendar stamp (2026-10-30)
 
 **Origin:** the starter, 2026-10-30 (PENDING 34). The builder kit's Event details block (card 173) links a `data:text/calendar` file, and RFC 5545 requires a `DTSTAMP` on every event: the
 moment the file was made, which for a static site is the build. So `npm run parity compare`

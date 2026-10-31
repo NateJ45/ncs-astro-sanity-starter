@@ -1,6 +1,6 @@
 # Change history
 
-_2026-10-30: parity ignores an event's calendar stamp (PORTS card 210)._ The Event details block's `.ics` link carries a build-time `DTSTAMP`, so parity failed that page on every rebuild. Rule 7 (`scripts/lib/parity-ics.mjs`, PORTABLE) masks the value only; the event itself is still compared. `/styleguide/sections/` was recaptured once.
+_2026-10-30: parity ignores an event's calendar stamp (PORTS card 211)._ The Event details block's `.ics` link carries a build-time `DTSTAMP`, so parity failed that page on every rebuild. Rule 7 (`scripts/lib/parity-ics.mjs`, PORTABLE) masks the value only; the event itself is still compared. `/styleguide/sections/` was recaptured once.
 
 _2026-10-30: CI reads Node from `.nvmrc` (PORTS card 209)._ A repo-root `.nvmrc` pins Node 22.23.4 and every workflow's setup-node step reads it (`node-version-file`), instead of `node-version: 22`, which took whatever 22.x the runner image had cached and let one PR #267 build land on 22.23.3, below astro 7.4.4's floor. `engines.node` rises to `>=22.23.4` to match.
 

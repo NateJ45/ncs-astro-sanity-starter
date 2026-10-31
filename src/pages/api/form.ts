@@ -61,6 +61,7 @@ import type { D1Database } from '@/lib/mail-db';
 import { sanityFetch } from '@/lib/sanity';
 import { site } from '@/data/site';
 import { workerMailer, type MailWorkerEnv } from '@/lib/mail-env';
+import { reportToInbox, type InboxEnv } from '@/lib/site-inbox';
 
 export const prerender = false;
 
@@ -195,7 +196,7 @@ export const GET: APIRoute = async () => {
   return json({ ready: canDeliver(e, await confirmedAddresses(e.CONTACT_DB)) });
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const e = env as unknown as FormEnv;
 
   // ---- Size first: never parse a body bigger than any real form ------------
@@ -300,6 +301,16 @@ export const POST: APIRoute = async ({ request }) => {
       return json({ ok: false, unavailable: true, error: 'Sorry, that did not send.' }, 502);
     }
   }
+
+  // The dashboard Inbox (card 210): a private form sends its title only.
+  const open = form.mode !== 'private';
+  reportToInbox(env as unknown as InboxEnv, locals, {
+    id: `form-${rowId ?? crypto.randomUUID()}`,
+    form: 'form',
+    subject: form.title,
+    name: open ? value.name : undefined,
+    preview: open ? value.answers.map((a) => `${a.label}: ${a.value}`).join('; ') : undefined,
+  });
   return json({ ok: true });
 };
 

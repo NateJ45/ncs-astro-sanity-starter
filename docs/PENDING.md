@@ -121,7 +121,7 @@ domain and their mail.
 
 ## Known gaps, deliberately open
 
-(PENDING 33, the E-Design switch, closed 2026-10-30 by card 208. PENDING 34, parity failing on the Event details calendar stamp, closed 2026-10-30 by card 210.)
+(PENDING 33, the E-Design switch, closed 2026-10-30 by card 208. PENDING 34, parity failing on the Event details calendar stamp, closed 2026-10-30 by card 211.)
 
 ### 32. Card 137: tours, clips and jobs per site, and the signed-in checks (opened 2026-10-19)
 

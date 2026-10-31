@@ -34,6 +34,7 @@ import {
 } from '@/lib/mail-rsvp';
 import { MAIL_BRAND, TIME_ZONE, mailAddress } from '@/lib/newsletter-content';
 import { sanityFetch } from '@/lib/sanity';
+import { reportToInbox, type InboxEnv } from '@/lib/site-inbox';
 import { FIXTURE_PAGE_ID, FIXTURE_RSVP_BLOCK, fixturesOn } from '@/lib/mail-fixtures';
 
 export const prerender = false;
@@ -78,7 +79,7 @@ export const GET: APIRoute = async ({ request }) => {
   });
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const e = mailEnv();
   let raw: RawRsvp & { event?: unknown };
   try {
@@ -149,6 +150,15 @@ export const POST: APIRoute = async ({ request }) => {
     .run()
     .catch((err: unknown) => console.error('[rsvp] could not record the email state:', err));
   if (failure) console.error('[rsvp] confirmation not sent:', failure);
+
+  // The dashboard Inbox (card 210): who, which event, and how many. No address.
+  reportToInbox(e as unknown as InboxEnv, locals, {
+    id: `rsvp-${placed.id}`,
+    form: 'rsvp',
+    name: value.name,
+    subject: ev.name,
+    preview: `${placed.status === 'going' ? 'Going' : 'Waiting list'}, party of ${value.partySize}`,
+  });
 
   return json({ ok: true, status: placed.status, emailed });
 };

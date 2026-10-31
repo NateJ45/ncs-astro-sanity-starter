@@ -6,7 +6,7 @@
 // `data:text/calendar` file, and RFC 5545 requires a DTSTAMP on every event:
 // the moment the file was MADE, which for a static site is the build. So two
 // identical rebuilds differ in that one value and parity fails the page every
-// time (PORTS.md card 210). Only the value is masked; the property itself,
+// time (PORTS.md card 211). Only the value is masked; the property itself,
 // DTSTART, DTEND, the summary and everything else in the file are still
 // compared, so a real change to the event still fails.
 //
