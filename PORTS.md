@@ -12814,7 +12814,29 @@ is this bug.
 **Applied:** starter (this card). Due: presacademy, fbcm, stonesteps-50k, fbc-auburn,
 reid-design-site (all carry the old key).
 
-## Card 206: The starter's default copy reads as a placeholder, not a design studio (2026-10-30)
+## Card 206: Pin the Playwright job to ubuntu-24.04 while WebKit cannot launch on 26.04 (2026-10-30)
+
+**Origin:** stonesteps-50k and fbc-auburn, 2026-10-30. GitHub's `ubuntu-latest` began resolving
+to ubuntu-26.04, where Playwright's WebKit dies on launch (`browserType.launch: Target page,
+context or browser has been closed`), so every `[webkit-iphone]` test failed and the required
+`test` check went red on every PR. **Canonical:** the e2e job in `.github/workflows/ci.yml`
+(not PORTABLE, so the sync-check ordering rule does not apply).
+
+**The fix.** Pin only the job that installs and runs Playwright WebKit to `runs-on: ubuntu-24.04`,
+with a dated comment. Leave every other job on `ubuntu-latest`. `visual.yml`,
+`update-visual-baselines.yml` and `lighthouse.yml` run Chromium only, so they are unaffected. The job
+is `e2e` in the starter, fbcm, presacademy, reid-design-site, fbc-auburn and stonesteps-50k, and
+`test` in mas-monograms and nixoncreativestudio. Each repo's `docs/PENDING.md` carries an
+"unpin later" entry.
+
+**Unpinning.** When a Playwright release supports 26.04, try `ubuntu-latest` on a branch in one
+repo, then remove the pin and the PENDING entry everywhere. Vault gotcha:
+`playwright-webkit-ubuntu-26-04`.
+
+**Applied:** starter (this card), reid-design-site, fbcm, presacademy, mas-monograms,
+nixoncreativestudio, stonesteps-50k (#191), fbc-auburn (#255).
+
+## Card 207: The starter's default copy reads as a placeholder, not a design studio (2026-10-30)
 
 **Origin:** the starter itself, 2026-10-30. Card 44 cleared the logo, palette, playbook and
 seeded lists, but the words a fresh clone draws with no content still sold interior design:

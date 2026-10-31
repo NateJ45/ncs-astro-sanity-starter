@@ -16,6 +16,8 @@ sequence).
 
 ## Waiting on a human
 
+- **The `e2e` job is pinned to ubuntu-24.04 (2026-10-30).** `ubuntu-latest` moved to 26.04, where Playwright's WebKit will not launch, so every `[webkit-iphone]` test failed. `ci.yml` now says `runs-on: ubuntu-24.04` on that job only. Unpin it once a Playwright release supports 26.04 (try it on a branch first). Starter PORTS.md card and vault gotcha `playwright-webkit-ubuntu-26-04`.
+
 ### 32. Card 136: GA4 and Search Console against a real property (opened 2026-10-19)
 
 **Blocker: studio-status deployed with `SiteData`, and one site bound to it.** The mapping is tested on fixture answers
@@ -119,9 +121,9 @@ domain and their mail.
 
 ## Known gaps, deliberately open
 
-### 33. Card 206: an "E-Design" switch for an archived module (opened 2026-10-30)
+### 33. Card 207: an "E-Design" switch for an archived module (opened 2026-10-30)
 
-Card 206 neutralised the starter's default copy, but Site settings > Section visibility still has `showEDesign` ("E-Design"), read by `sectionVisibility.ts`, `queries.ts` and its test, for a module that lives in `archive/modules/` and is wired nowhere. It is a stored field, so it goes out through the rule 16 retire flow (hide first, then a backup-then-delete script), not a schema edit. Low stakes: it switches nothing on a fresh clone.
+Card 207 neutralised the starter's default copy, but Site settings > Section visibility still has `showEDesign` ("E-Design"), read by `sectionVisibility.ts`, `queries.ts` and its test, for a module that lives in `archive/modules/` and is wired nowhere. It is a stored field, so it goes out through the rule 16 retire flow (hide first, then a backup-then-delete script), not a schema edit. Low stakes: it switches nothing on a fresh clone.
 
 ### 32. Card 137: tours, clips and jobs per site, and the signed-in checks (opened 2026-10-19)
 
