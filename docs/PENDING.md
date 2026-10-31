@@ -123,6 +123,10 @@ domain and their mail.
 
 (PENDING 33, the E-Design switch, closed 2026-10-30 by card 208. PENDING 34, parity failing on the Event details calendar stamp, closed 2026-10-30 by card 211.)
 
+### 35. From the nixoncreativestudio overhaul: a Pause motion switch and no-PII GA4 events (opened 2026-10-31)
+
+Cards 212 and 213 took that overhaul's two generic specs. Two more pieces generalise but need foundation edits, so they wait for a planned session rather than going in as unwired files. (a) The site-wide Pause motion switch (WCAG 2.2.2): a persisted `html[data-motion-paused]` state set before first paint by the head bootstrap, `[data-motion-toggle]` buttons with `aria-pressed`, one CSS rule that stops every `[data-motion="loop"]` while paused, off screen or in a hidden tab, and `tests/motion-pause.spec.ts`. The starter has looping motion (the hero slideshow and video, the flow layer) but no switch; the work is a `BaseLayout.astro` bootstrap line, a `globals.css` rule and a footer button. Origin: nixoncreativestudio `src/scripts/motion.ts`, `src/components/MotionToggle.astro`. (b) `track.ts`: a `track()` that is a no-op without `window.gtag`, drops any param that is not a short label, and a click layer driven by `data-cta` attributes (plus `mailto:` links), with `tests/track.spec.ts` stubbing gtag. It needs a privacy-page line per event and wiring into the contact routes, which are PORTABLE. Origin: nixoncreativestudio `src/lib/track.ts`.
+
 ### 32. Card 137: tours, clips and jobs per site, and the signed-in checks (opened 2026-10-19)
 
 The engine, the recorder and the capture script are in; each site writes its own `studio-tours.ts`, Quick update jobs, `shots.json` and video scripts, records its clips and fills `videos.ts`. Still to check signed in on a live Studio: a tour stop on a document (`publish`, `document-actions`; the harness opens documents read-only), the staff-view first-run tour, an `upload` and a `schedule` job saving for real. Sanity's own anchor selectors (`SANITY_ANCHORS` in `src/lib/studio-tour.ts`) are pinned to Sanity 6: re-check them on each Sanity upgrade (a stale one centres the popover, nothing breaks). Detail: `docs/agent/studio-kit.md` "Spotlight tours".
@@ -225,7 +229,7 @@ summary still reads 30 with the same 14/14/2 split, nothing has moved and this e
 If the numbers differ, find out which root moved before editing anything, and re-read the
 `--force` warning above before touching a dependency.
 
-**Update 2026-10-31 (PORTS.md card 212): the transitive Dependabot alerts.** Dependabot cannot
+**Update 2026-10-31 (PORTS.md card 214): the transitive Dependabot alerts.** Dependabot cannot
 fix an alert whose vulnerable copy is pinned by a parent, so 38 of the starter's 43 open alerts
 were cleared by hand: a scoped `overrides` block in `package.json` (miniflare, `@module-federation/dts-plugin`,
 linkinator, `@vercel/frameworks`, `@lhci/cli`, `tmp`) plus an in-place `npm update` of `qs` and
