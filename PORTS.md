@@ -341,7 +341,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 207  | Starter default copy reads as a neutral placeholder, not a design studio                  | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | n/a        | n/a     |
 | 208  | Retire a stored field with a backup (retire-fields script), not "Remove field"            | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | no         | n/a     |
 | 209  | CI reads the Node version from .nvmrc (pinned 22.23.4)                                    | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 210  | Form submissions reported to the studio dashboard Inbox (`site-inbox.ts`)                 | staged      | yes      | n/a              | staged        | n/a                 | staged         | staged     | n/a     |
+| 210  | Form submissions reported to the studio dashboard Inbox (`site-inbox.ts`)                 | yes         | yes      | n/a              | yes           | n/a                 | yes            | yes        | n/a     |
 | 211  | Parity masks the build-time DTSTAMP in an event calendar link                             | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | no         | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
@@ -12981,8 +12981,17 @@ In `wrangler.jsonc`, set the `SITE_DATA` service binding (`{ "binding": "SITE_DA
 property still needs an entry, or the call answers `unknown-site`). Test with a site's own test
 path, never a real enquiry, and check `/inbox` on the dashboard.
 
-**Applied:** starter (this card). Sites: staged (presacademy, mas-monograms, stonesteps-50k,
-fbc-auburn); reid-design-site, nixoncreativestudio and fbcm have no form route.
+**Applied:** starter (this card); stonesteps-50k #193, presacademy #161, mas-monograms #162 (its
+quote route also needed mas-monograms#163, below), fbc-auburn #258 (binding on, key `auburn`; reports once its
+D1 and email bindings are switched on), all 2026-10-31 and shipped together with card 209.
+reid-design-site, nixoncreativestudio and fbcm have no form route. Verified with a `wrangler dev` Worker
+running `reportToInbox()` against the live binding: the row reached KV `inbox` with the email and phone
+replaced, then was removed.
+
+**Trap found while porting.** mas-monograms' `quote.ts` read `locals.runtime.env`, which the Astro 6+
+adapter throws on, so its quotes had failed with an empty 500 since adapter 14 (2026-10-13). A route that
+reports to the Inbox must read bindings from `cloudflare:workers` (gotcha
+`astro-7-cloudflare-ssr-session-env-csrf`).
 
 ## Card 211: Parity ignores an event's build-time calendar stamp (2026-10-30)
 
