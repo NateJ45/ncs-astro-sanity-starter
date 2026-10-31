@@ -339,10 +339,10 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 205  | CI Playwright browser cache keyed by runner image (ubuntu24 vs ubuntu26)                  | yes         | yes      | yes              | n/a           | n/a                 | yes            | yes        | yes     |
 | 206  | Playwright job pinned to ubuntu-24.04 while WebKit cannot launch on 26.04                 | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 207  | Starter default copy reads as a neutral placeholder, not a design studio                  | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | n/a        | n/a     |
-| 208  | Retire a stored field with a backup (retire-fields script), not "Remove field"            | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 208  | Retire a stored field with a backup (retire-fields script), not "Remove field"            | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | no         | n/a     |
 | 209  | CI reads the Node version from .nvmrc (pinned 22.23.4)                                    | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 210  | Form submissions reported to the studio dashboard Inbox (`site-inbox.ts`)                 | staged      | yes      | n/a              | staged        | n/a                 | staged         | staged     | n/a     |
-| 211  | Parity masks the build-time DTSTAMP in an event calendar link                             | n/a         | yes      | no               | no            | no                  | no             | no         | no      |
+| 211  | Parity masks the build-time DTSTAMP in an event calendar link                             | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | no         | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12921,7 +12921,7 @@ deploys, then runs
 `node scripts/retire-fields.mjs --type siteSettings --field sectionVisibility.showEDesign`, reads
 the plan, and applies it under the write protocol. Commit the backup file.
 
-**Applied:** starter (this card). Sites: not yet.
+**Applied:** starter (this card); stonesteps-50k (PR #194, code only; its stored values are still to be cleared with the script under the write protocol); fbc-auburn PR #257 open, red only on card 209 and 210 drift it does not touch. n/a: reid-design-site (sells E-Design and keeps the field), and presacademy, mas-monograms, nixoncreativestudio and fbcm, which never had the field (checked 2026-10-30).
 
 ## Card 209: CI reads the Node version from `.nvmrc` (2026-10-30)
 
@@ -13006,4 +13006,4 @@ baseline holds a page with an Event details block recaptures that page once
 (`node scripts/page-parity.mjs capture <page>`) after a build; a site with none changes no
 baseline. Order: marked-file change, so the starter merges first and site PRs open after.
 
-**Applied:** starter (this card).
+**Applied:** starter (this card); fbcm (PR #138), stonesteps-50k (PR #194); fbc-auburn PR #257 open, red only on card 209 and 210 drift it does not touch. n/a: presacademy (no `page-parity.mjs`), and mas-monograms, reid-design-site and nixoncreativestudio, whose `page-parity.mjs` is an older unmarked fork without `parity-glob.mjs` (card 74); taking this card there means re-porting the whole harness first.
