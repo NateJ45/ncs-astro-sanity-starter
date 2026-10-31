@@ -4,7 +4,7 @@
 // never reaches the route. The three form routes must call it after they store.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import {
   inboxMessage,
   inboxTarget,
@@ -141,7 +141,12 @@ test('a refusal, a throw or a missing request context never rejects', async () =
 });
 
 test('the form routes report after they store, and never pass an email', () => {
-  for (const route of ['contact', 'form', 'rsvp']) {
+  // Each site has some of these (mas-monograms has quote only); every one it has must report.
+  const routes = ['contact', 'form', 'rsvp', 'quote'].filter((r) =>
+    existsSync(new URL(`../pages/api/${r}.ts`, import.meta.url)),
+  );
+  assert.ok(routes.length > 0, 'no form route found');
+  for (const route of routes) {
     const src = readFileSync(new URL(`../pages/api/${route}.ts`, import.meta.url), 'utf8');
     const at = src.indexOf('reportToInbox(');
     assert.ok(at > 0, `${route}.ts does not call reportToInbox`);
