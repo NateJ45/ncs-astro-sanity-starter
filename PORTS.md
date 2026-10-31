@@ -340,7 +340,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 206  | Playwright job pinned to ubuntu-24.04 while WebKit cannot launch on 26.04                 | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 207  | Starter default copy reads as a neutral placeholder, not a design studio                  | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | n/a        | n/a     |
 | 208  | Retire a stored field with a backup (retire-fields script), not "Remove field"            | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | no         | n/a     |
-| 209  | CI reads the Node version from .nvmrc (pinned 22.23.4)                                    | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 209  | CI reads the Node version from .nvmrc (pinned 22.23.4)                                    | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 210  | Form submissions reported to the studio dashboard Inbox (`site-inbox.ts`)                 | staged      | yes      | n/a              | staged        | n/a                 | staged         | staged     | n/a     |
 | 211  | Parity masks the build-time DTSTAMP in an event calendar link                             | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | no         | yes     |
 
@@ -12947,7 +12947,7 @@ those lines), and raise `engines.node` in `package.json` and the lockfile's root
 still on an Astro below 7.4.4 can take the pin as is; 22.23.4 satisfies every earlier floor. A
 red build saying "Node.js v22.x is not supported by Astro" while a rerun passes is this bug.
 
-**Applied:** starter (this card). Sites: not yet.
+**Applied:** starter (this card). Sites (2026-10-31): fbcm #137, reid-design-site #205 and nixoncreativestudio #154 on their own; presacademy #161, mas-monograms #162, stonesteps-50k #193 and fbc-auburn #258 in one PR with card 210, because both cards were live on starter `main` and `sync-check` needs the pair. Each also resynced `docs/agent/studio-kit.md` (card 210's Inbox section).
 
 ## Card 210: Form submissions reported to the studio dashboard Inbox (2026-10-30)
 
