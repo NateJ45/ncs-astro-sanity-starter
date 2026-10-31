@@ -12972,7 +12972,7 @@ again on arrival. A private form (mode Private) sends its title only. An RSVP se
 the name and "Going, party of 3" (or "Waiting list"). The contact preview is the message's start.
 
 **Porting it.** Copy the two new files, `contact.ts` and `rsvp.ts` (`sync-check` then reads
-SAME), and add the same lines to the site's `form.ts` if it has one. A site with its own route
+SAME), and add the same lines to the site's `form.ts` if it has one. Match the site's own private mode there (fbc-auburn calls it `prayer`, so its check is `form.mode !== 'prayer'`). A site with its own route
 (mas-monograms' `/api/quote/`) calls `reportToInbox()` after its insert, with `form: 'quote'`.
 In `wrangler.jsonc`, set the `SITE_DATA` service binding (`{ "binding": "SITE_DATA",
 "service": "studio-status", "entrypoint": "SiteData" }`) and `"SITE_DATA_KEY"` in vars if card
