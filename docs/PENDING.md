@@ -225,6 +225,16 @@ summary still reads 30 with the same 14/14/2 split, nothing has moved and this e
 If the numbers differ, find out which root moved before editing anything, and re-read the
 `--force` warning above before touching a dependency.
 
+**Update 2026-10-31 (PORTS.md card 212): the transitive Dependabot alerts.** Dependabot cannot
+fix an alert whose vulnerable copy is pinned by a parent, so 38 of the starter's 43 open alerts
+were cleared by hand: a scoped `overrides` block in `package.json` (miniflare, `@module-federation/dts-plugin`,
+linkinator, `@vercel/frameworks`, `@lhci/cli`, `tmp`) plus an in-place `npm update` of `qs` and
+`ip-address`. `npm audit` fell from 62 to 47. Five alerts stay open on purpose: `extract-zip` (2) and
+`deepmerge` (1) have no patched release, `zod` 3 needs a release of `sanity-plugin-media` and
+`chromium-bidi`, and `minimatch` cannot close while `@lhci/cli` keeps `rimraf` 3 (minimatch 3). When
+`wrangler`, `@vercel/frameworks` or `@lhci/cli` ships the patched pin, delete its override. Reasons
+are in the card.
+
 ### 5. Seven eslint warnings, all unused bindings
 
 `npm run lint` is a CI step now (2026-09-06) and exits clean, but it still prints seven
