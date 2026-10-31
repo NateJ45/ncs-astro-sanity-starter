@@ -1264,7 +1264,6 @@ export type SiteSettings = {
     showPortfolio?: boolean;
     showJournal?: boolean;
     showShop?: boolean;
-    showEDesign?: boolean;
     showGiftCertificates?: boolean;
     showPress?: boolean;
     showResources?: boolean;

@@ -15,7 +15,6 @@ interface RawSectionVisibility {
   showPortfolio?: boolean | null;
   showJournal?: boolean | null; // scaffold: journal
   showShop?: boolean | null;
-  showEDesign?: boolean | null;
   showGiftCertificates?: boolean | null;
   showPress?: boolean | null;
   showResources?: boolean | null;
@@ -29,7 +28,6 @@ export interface SectionVisibility {
   portfolio: boolean;
   journal: boolean; // scaffold: journal
   shop: boolean;
-  eDesign: boolean;
   giftCertificates: boolean;
   press: boolean;
   resources: boolean;
@@ -64,7 +62,6 @@ export function getSectionVisibility(raw?: RawSectionVisibility | null): Section
     // Module routes: off unless switched on.
     portfolio: raw?.showPortfolio === true,
     shop: raw?.showShop === true,
-    eDesign: raw?.showEDesign === true,
     giftCertificates: raw?.showGiftCertificates === true,
     press: raw?.showPress === true,
     resources: raw?.showResources === true,

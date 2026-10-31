@@ -12872,3 +12872,47 @@ in `src/lib/siteSettings.ts` when Site settings leaves it blank). No site repo c
 404 photo asset id (checked 2026-10-30).
 
 **Applied:** starter (this card). Sites: n/a (own copy).
+
+## Card 208: Retire a stored field with a backup, never "Remove field" (2026-10-30)
+
+**Origin:** the starter, 2026-10-30, closing PENDING 33. Site settings carried `showEDesign`
+("E-Design"), a section switch for a module the starter forked from Reid Design. The module
+went to `archive/` on 2026-09-18, and its archived form (virtual-services) brings its own
+`showVirtualServices` switch, so nothing anywhere read `showEDesign`. A removed schema field
+does not clear its data: every dataset that ever saved it shows an "Unknown fields" banner whose
+"Remove field" button deletes data (rule 1, gotcha
+`removed-schema-field-leaves-data-and-unknown-fields-banner`). The family had no general script
+for the safe way out; each site wrote a one-off (MAS `fix-orphan-data.mjs`, Stone Steps
+`retire-27k-records.mjs`). **Canonical:** `scripts/retire-fields.mjs`,
+`scripts/lib/retire-fields-plan.mjs` and its test (all PORTABLE, new).
+
+**The script.** `node scripts/retire-fields.mjs --type <documentType> --field <path>`
+(`--field` repeats; plain dotted paths only, checked before they reach GROQ). It reads every
+document of the type, drafts included (`perspective: 'raw'`), that still holds a field, writes
+those documents VERBATIM to `scripts/.retired/<date>-<dataset>-<type>-<fields>.json` (or
+`--out <dir>`), prints one line per document with the value it will unset, and writes nothing
+else. `--apply` unsets, each patch guarded on the document's `_rev` so a document edited after
+the read is skipped and reported, not overwritten. Built on `sanity-lib`, so it is dry by default
+and `--apply` on production needs `NCS_PRODUCTION_WRITE=yes` in the same command (card 86).
+Run it again to verify: a finished retire prints "Nothing to retire".
+
+**Order.** Remove (or hide) the field in the schema and deploy FIRST, then run the script, or an
+editor with an old Studio tab open can save the value straight back. Back up the dataset before
+`--apply` (rule 16).
+
+**In the starter.** `showEDesign` is gone from `siteSettings.ts`, `sectionVisibility.ts` (and
+its test, now nine fields), `queries.ts`, `seed-core.mjs`, `documentBadges.tsx`
+(`eDesignPage`) and `sanity.types.ts`. The starter has no dataset of its own, so there was no
+data to unset here. Verified: unit tests for the pure half; against a dummy host the script
+refuses production `--apply` without the second factor, rejects a path like `a) || true`, and a
+dry run that cannot reach Sanity stops before writing a backup; parity 23/23 on every page but the
+time-stamped `/styleguide/sections/` (PENDING 34).
+
+**Porting it.** Copy the three files. A site that still has `showEDesign` in its own
+`siteSettings.ts` and does not sell E-Design (checked 2026-10-30: stonesteps-50k and
+first-baptist-auburn carry it; reid-design-site uses it for real and keeps it) removes the field,
+deploys, then runs
+`node scripts/retire-fields.mjs --type siteSettings --field sectionVisibility.showEDesign`, reads
+the plan, and applies it under the write protocol. Commit the backup file.
+
+**Applied:** starter (this card). Sites: not yet.

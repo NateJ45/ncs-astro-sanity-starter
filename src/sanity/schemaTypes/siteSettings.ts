@@ -868,7 +868,7 @@ export const siteSettings = defineType({
     // completely unaffected until an editor intentionally turns something off.
     //
     // 2026-09-18: most of the toggles below name a module that now lives in
-    // `archive/modules/` (portfolio, shop, e-design/virtual-services, gift
+    // `archive/modules/` (portfolio, shop, virtual-services, gift
     // certificates, press, guides/lead-magnets, style quiz, budget calculator).
     // They are KEPT rather than removed, for two reasons: `getSectionVisibility`
     // treats a module route as hidden-unless-enabled, so an off switch for a
@@ -876,6 +876,10 @@ export const siteSettings = defineType({
     // archive needs its switch to still be here. `showJournal` and
     // `showResources` are the live ones: journal is core, resources is one of
     // the two modules still staged in `modules/`.
+    // 2026-10-30 (PORTS.md card 208): `showEDesign` was RETIRED. Its archived
+    // module (virtual-services) brings its own `showVirtualServices` switch, so
+    // nothing anywhere read it. Old values come out with
+    // `scripts/retire-fields.mjs` (rule 16), never "Remove field".
     defineField({
       name: 'sectionVisibility',
       title: 'Section visibility',
@@ -902,14 +906,6 @@ export const siteSettings = defineType({
         defineField({
           name: 'showShop',
           title: 'Shop',
-          type: 'boolean',
-          initialValue: true,
-          description:
-            'When off, this section disappears from the menu, footer, homepage, and its own page (which redirects home). Your drafts stay safe. Turn it back on when ready.',
-        }),
-        defineField({
-          name: 'showEDesign',
-          title: 'E-Design',
           type: 'boolean',
           initialValue: true,
           description:
