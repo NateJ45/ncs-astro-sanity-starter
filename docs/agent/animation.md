@@ -33,7 +33,7 @@ What replaced each thing it did:
 
 Once JavaScript runs, any element marked `data-reveal` starts at `opacity: 0; translate: 0 0.75rem`. An IntersectionObserver in BaseLayout adds `.is-visible` when the element crosses the viewport edge, transitioning to opacity 1 + no translate. The hidden start is scoped to `html.motion`, a class the inline theme bootstrap in `<head>` adds before first paint (and re-adds after every view-transition swap). With JavaScript off or blocked the class never appears and the page renders finished; `[data-stagger-grid]` children and `.img-curtain` follow the same rule (PORTS.md card 107). Reduced-motion users never get the class, and the global reset forces the end state as a backstop. A new hidden-until-JS state goes under `html.motion` too.
 
-Apply selectively to section blocks. Don't add `data-reveal` to above-the-fold content -- it defeats the purpose and hides content from users with slow connections before the observer fires.
+Apply selectively to section blocks. Don't add `data-reveal` to above-the-fold content -- it defeats the purpose and hides content from users with slow connections before the observer fires. `tests/first-viewport.spec.ts` (PORTS.md card 213) pins this: first-viewport H1s and media start at full opacity with no clip, and no on-screen reveal is still part-faded a second after load. Something hidden on purpose carries `data-first-viewport-exempt`.
 
 ### Grid stagger entrance (`[data-stagger-grid]` / `.is-staggered`)
 
