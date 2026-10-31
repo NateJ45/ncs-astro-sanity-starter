@@ -18,6 +18,10 @@
 // See PORTS.md card 45 for the setup, and why this exists rather than a form
 // service.
 //
+// THE STUDIO DASHBOARD (card 210): once the message is stored or sent, a short
+// preview (no email, no phone) goes to studio-status's Inbox through the
+// SITE_DATA binding, in the background. No binding means nothing is sent.
+//
 // WHERE THE EMAIL GOES (card 174): the address an administrator set and confirmed in
 // the Studio (Site settings > Forms, kept in CONTACT_DB, never the public dataset),
 // else CONTACT_TO. No table or no row means CONTACT_TO, exactly as before.
@@ -34,6 +38,7 @@ import { site } from '@/data/site';
 import { workerMailer, type MailWorkerEnv } from '@/lib/mail-env';
 import type { D1Database } from '@/lib/mail-db';
 import { contactRecipient } from '@/lib/form-recipients';
+import { reportToInbox, type InboxEnv } from '@/lib/site-inbox';
 
 export const prerender = false;
 
@@ -147,7 +152,7 @@ async function notifyByWeb3Forms(e: ContactEnv, s: CleanSubmission): Promise<str
   }
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const e = env as unknown as ContactEnv;
 
   let raw: Record<string, unknown>;
@@ -222,6 +227,14 @@ export const POST: APIRoute = async ({ request }) => {
       return json({ ok: false, error: 'Sorry, that did not send. Please email us directly.' }, 502);
     }
   }
+
+  reportToInbox(env as unknown as InboxEnv, locals, {
+    id: `contact-${rowId ?? crypto.randomUUID()}`,
+    form: 'contact',
+    name: value.name,
+    subject: value.subject,
+    preview: value.message,
+  });
 
   return json({ ok: true });
 };

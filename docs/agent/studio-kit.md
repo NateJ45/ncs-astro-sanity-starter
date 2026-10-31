@@ -289,6 +289,18 @@ only read. Numbers reach only signed-in Studio members.
 **Bench.** `/kit-harness/guide/?view=surfaces&part=google` draws the GA4 Visitors card, Found on Google and the
 connect state with made-up numbers.
 
+### The dashboard Inbox (card 210)
+
+The same binding also carries each form submission to Nathan's dashboard (studio-status `/inbox`), so every
+site's enquiries show in one list. `src/lib/site-inbox.ts` (PORTABLE) is called by `/api/contact/`, `/api/form/`
+and `/api/rsvp/` after the row is stored (or the email sent), and calls `SiteData.reportMessage(SITE_DATA_KEY, { id,
+form, name, subject, preview })` inside `locals.cfContext.waitUntil`, so the visitor's answer never waits on it and
+a failure is one `[inbox]` log line. It sends a 200-character preview with anything shaped like an email address or
+phone number replaced, never the sender's email; a private form (Form block, mode Private) sends its title only, and
+an RSVP sends the event, the name and the party size. No binding or no key: nothing is sent. A site with its own form
+route (mas-monograms' `/api/quote/`) calls `reportToInbox()` the same way. Setting it up is step 2 above; a site with
+no GA4 property still needs its key in studio-status's `SITE_DATA`, or the call answers `unknown-site`.
+
 ## Guide videos (card 115)
 
 A guide in `src/sanity/guides/content.ts` takes an optional `video`:
