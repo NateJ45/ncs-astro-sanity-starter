@@ -12919,3 +12919,29 @@ deploys, then runs
 the plan, and applies it under the write protocol. Commit the backup file.
 
 **Applied:** starter (this card). Sites: not yet.
+
+## Card 209: CI reads the Node version from `.nvmrc` (2026-10-30)
+
+**Origin:** starter PR #267, 2026-10-30. Card 204 moved the starter to astro 7.4.4, whose
+`engines` field requires Node `>=22.23.4`. Every workflow asked `actions/setup-node` for
+`node-version: 22`, which takes whatever 22.x the runner image has cached. The "Build and links"
+job landed on an image with 22.23.3 and `astro build` refused ("Node.js v22.23.3 is not supported
+by Astro! ... >=22.23.4"); a rerun on another runner passed. CI's Node version depended on which
+image a job drew. **Canonical:** `.nvmrc` (new) and every `.github/workflows/*.yml` (not
+PORTABLE; each site's copy is edited by hand).
+
+**The fix.** A repo-root `.nvmrc` holds one exact version, `22.23.4` (the first 22.x Astro 7.4.4
+accepts, Jod LTS). Every setup-node step reads it with `node-version-file: .nvmrc` instead of
+`node-version: 22`, so every job on every image runs the same Node, downloading it when the image
+has not cached it. `package.json` `engines.node` (and the root entry in `package-lock.json`) rises
+to `>=22.23.4` so a laptop on an older 22 gets npm's engine warning too. Moving Node later means
+one edit to `.nvmrc`, kept at or above the `engines` floor of `astro`.
+
+**Porting it.** In each site: add `.nvmrc` with the same version, replace every
+`node-version: 22` (or `'22'`, `22.x`) under `actions/setup-node` with
+`node-version-file: .nvmrc` (`grep -rn "node-version" .github/workflows/` should then print only
+those lines), and raise `engines.node` in `package.json` and the lockfile's root entry. A site
+still on an Astro below 7.4.4 can take the pin as is; 22.23.4 satisfies every earlier floor. A
+red build saying "Node.js v22.x is not supported by Astro" while a rerun passes is this bug.
+
+**Applied:** starter (this card). Sites: not yet.
