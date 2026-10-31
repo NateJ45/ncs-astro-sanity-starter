@@ -337,6 +337,8 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 203  | Photo hero shows the page's accent word, white under the same shade (accent prop, tokens) | yes         | yes      | yes              | n/a           | no                  | yes            | n/a        | yes     |
 | 204  | Stack refresh: astro 7.4.4, adapter 14.4.3, Sanity 6.21.0 set, tailwind-variants 4        | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 205  | CI Playwright browser cache keyed by runner image (ubuntu24 vs ubuntu26)                  | yes         | yes      | yes              | n/a           | n/a                 | yes            | yes        | yes     |
+| 206  | Playwright job pinned to ubuntu-24.04 while WebKit cannot launch on 26.04                 | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 207  | Starter default copy reads as a neutral placeholder, not a design studio                  | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | n/a        | n/a     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
