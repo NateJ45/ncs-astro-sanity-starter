@@ -49,7 +49,7 @@ export function primaryBudget<T>(
 // page body that goes where the header button goes (while the header shows it)
 // repeats it, so it draws the quieter secondary variant, never a second accent.
 // The page's own accent then passes to the next button that is NOT a repeat, or
-// to nothing, which is fine: a page does not need two "Get in touch".
+// to nothing, which is fine: a page does not need two "Book a consultation".
 //
 // Callers (SectionRenderer.astro) fold it into the `drawsPrimary` test: a block
 // whose main button repeats the header does not draw a primary one, so it never

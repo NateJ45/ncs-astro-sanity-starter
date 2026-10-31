@@ -372,7 +372,7 @@ export default defineConfig({
       // "Invalid hook call" followed by "Cannot read properties of null
       // (reading 'useState')". The page still answers 200, so it looks like a
       // component bug, not a build one. Upstream: withastro/astro#17834, fixed
-      // in @astrojs/cloudflare past 14.2.4 (we pin 14.4.0; see CLAUDE.md rule 8).
+      // in @astrojs/cloudflare past 14.2.4 (we pin 14.4.3; see CLAUDE.md rule 8).
       // Listing them here does the same job at startup, with no version move.
       //
       // Measured on this repo, one cold request to / (JSON logging, which is
