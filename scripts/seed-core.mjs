@@ -177,7 +177,6 @@ docs.push({
     showPortfolio: true,
     showJournal: true,
     showShop: true,
-    showEDesign: true,
     showGiftCertificates: true,
     showPress: true,
     showResources: true,

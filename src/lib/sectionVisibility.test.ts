@@ -5,13 +5,12 @@ import { getSectionVisibility } from './sectionVisibility.ts';
 // Two rules, one per kind of route (see sectionVisibility.ts):
 //   core route (journal) -> unset counts as VISIBLE, only `false` hides it
 //   module route         -> unset counts as HIDDEN, only `true` shows it
-// The module rule is the one that keeps a fresh clone from linking to nine
+// The module rule is the one that keeps a fresh clone from linking to eight
 // routes it never builds.
 
 const MODULE_KEYS = [
   'portfolio',
   'shop',
-  'eDesign',
   'giftCertificates',
   'press',
   'resources',
@@ -71,12 +70,11 @@ test('a null field value is not `false`, so the core route stays on', () => {
 });
 // scaffold:end
 
-test('all ten fields map correctly when every one is set on', () => {
+test('all nine fields map correctly when every one is set on', () => {
   const v = getSectionVisibility({
     showPortfolio: true,
     showJournal: true, // scaffold: journal
     showShop: true,
-    showEDesign: true,
     showGiftCertificates: true,
     showPress: true,
     showResources: true,
@@ -88,12 +86,11 @@ test('all ten fields map correctly when every one is set on', () => {
   for (const key of MODULE_KEYS) assert.equal(v[key], true, `${key} should be on`);
 });
 
-test('all ten fields map correctly when every one is set off', () => {
+test('all nine fields map correctly when every one is set off', () => {
   const v = getSectionVisibility({
     showPortfolio: false,
     showJournal: false, // scaffold: journal
     showShop: false,
-    showEDesign: false,
     showGiftCertificates: false,
     showPress: false,
     showResources: false,
