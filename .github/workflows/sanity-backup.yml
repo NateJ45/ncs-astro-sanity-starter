@@ -115,7 +115,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: npm
 
       # The sanity CLI comes from the ROOT install: the Studio folded into the
