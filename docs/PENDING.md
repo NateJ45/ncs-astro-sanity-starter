@@ -121,11 +121,7 @@ domain and their mail.
 
 ## Known gaps, deliberately open
 
-### 34. Parity flags the builder kit's calendar link on every build (opened 2026-10-30)
-
-`/styleguide/sections/` draws the Event details block, whose `.ics` link carries a `DTSTAMP` stamped at build time, so `npm run parity compare` reports that one page as DIFF on every build. Until the normaliser learns it, compare with `--exclude "styleguide/sections"` and read the rest. The fix is a `DTSTAMP` rule in `normalize()` in `scripts/page-parity.mjs`, which is PORTABLE: it needs its own card and the starter-then-sites order.
-
-(PENDING 33, the E-Design switch, closed 2026-10-30 by card 208.)
+(PENDING 33, the E-Design switch, closed 2026-10-30 by card 208. PENDING 34, parity failing on the Event details calendar stamp, closed 2026-10-30 by card 210.)
 
 ### 32. Card 137: tours, clips and jobs per site, and the signed-in checks (opened 2026-10-19)
 

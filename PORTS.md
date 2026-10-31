@@ -341,6 +341,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 207  | Starter default copy reads as a neutral placeholder, not a design studio                  | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | n/a        | n/a     |
 | 208  | Retire a stored field with a backup (retire-fields script), not "Remove field"            | no          | yes      | no               | no            | no                  | no             | no         | no      |
 | 209  | CI reads the Node version from .nvmrc (pinned 22.23.4)                                    | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 210  | Parity masks the build-time DTSTAMP in an event calendar link                             | n/a         | yes      | no               | no            | no                  | no             | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -12946,3 +12947,27 @@ still on an Astro below 7.4.4 can take the pin as is; 22.23.4 satisfies every ea
 red build saying "Node.js v22.x is not supported by Astro" while a rerun passes is this bug.
 
 **Applied:** starter (this card). Sites: not yet.
+
+## Card 210: Parity ignores an event's build-time calendar stamp (2026-10-30)
+
+**Origin:** the starter, 2026-10-30 (PENDING 34). The builder kit's Event details block (card 173) links a `data:text/calendar` file, and RFC 5545 requires a `DTSTAMP` on every event: the
+moment the file was made, which for a static site is the build. So `npm run parity compare`
+failed `/styleguide/sections/` (and any page with that block) on every rebuild, and the only
+way through was `--exclude`, which is how a gate gets ignored. **Canonical:**
+`scripts/page-parity.mjs` (rule 7 in its header) and `scripts/lib/parity-ics.mjs` with its test
+(new, all PORTABLE).
+
+**The fix.** `stripCalendarStamps()` replaces the `DTSTAMP` value with `STAMP` in both
+spellings it can take on a page (`DTSTAMP%3A20261031T001201Z` inside a data URI, `DTSTAMP:...`
+as text). The property stays, and `DTSTART`, `DTEND`, `UID` and the summary are still
+compared, so a real change to the event still fails. It lives in its own module because
+importing `page-parity.mjs` runs its CLI. Proved: 24/24 on two builds a minute apart whose
+stamps differed.
+
+**Porting it.** Copy `scripts/page-parity.mjs`, `scripts/lib/parity-ics.mjs` and
+`scripts/lib/parity-ics.test.mjs`. Baselines are stored already normalised, so a site whose
+baseline holds a page with an Event details block recaptures that page once
+(`node scripts/page-parity.mjs capture <page>`) after a build; a site with none changes no
+baseline. Order: marked-file change, so the starter merges first and site PRs open after.
+
+**Applied:** starter (this card).

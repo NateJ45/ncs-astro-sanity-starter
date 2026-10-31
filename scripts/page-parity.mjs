@@ -119,6 +119,11 @@
  *      is nested one level deeper inside a section wrapper; the browser does not
  *      care and neither should the diff. Whitespace INSIDE a text node is left
  *      alone, because that is content.
+ *   7. The DTSTAMP value inside an inline calendar file (an Event details
+ *      block's .ics link). RFC 5545 stamps the moment the file was made, which
+ *      for a static site is the build, so every rebuild differed. Only the
+ *      value is masked; the rest of the event is compared. Added 2026-10-30,
+ *      PORTS.md card 210; the rule lives in scripts/lib/parity-ics.mjs.
  *
  * Deliberately NOT stripped: data-sanity attributes (they never appear in the
  * static build, only in the SSR preview build, which this harness does not
@@ -136,6 +141,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync, readdirSy
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseExclude } from './lib/parity-glob.mjs';
+import { stripCalendarStamps } from './lib/parity-ics.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SNAP_DIR = join(ROOT, 'scripts', '.parity');
@@ -391,7 +397,9 @@ export function normalize(html) {
   return collapseWhitespace(
     stripTimerText(
       stripIslandPrefixes(
-        stripInlineStyles(stripAstroCids(stripAssetHashes(stripGeneratorMeta(html)))),
+        stripInlineStyles(
+          stripAstroCids(stripAssetHashes(stripGeneratorMeta(stripCalendarStamps(html)))),
+        ),
       ),
     ),
   );
