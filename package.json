@@ -107,7 +107,25 @@
   },
   "overrides": {
     "sanity-plugin-utils": "2.0.22",
-    "@sanity/visual-editing": "6.2.0"
+    "@sanity/visual-editing": "6.2.0",
+    "miniflare": {
+      "undici": "7.30.1",
+      "sharp": "0.35.5"
+    },
+    "@module-federation/dts-plugin": {
+      "undici": "7.30.1"
+    },
+    "linkinator": {
+      "undici": "8.12.2"
+    },
+    "@vercel/frameworks": {
+      "js-yaml": "3.15.2",
+      "smol-toml": "1.9.1"
+    },
+    "@lhci/cli": {
+      "uuid": "11.1.1"
+    },
+    "tmp": "0.2.6"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",

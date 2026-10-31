@@ -345,6 +345,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 211  | Parity masks the build-time DTSTAMP in an event calendar link                             | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | no         | yes     |
 | 212  | CLS under 0.05 on every route, scrolled to the bottom (`tests/cls.spec.ts`)               | no          | yes      | no               | no            | yes                 | no             | no         | no      |
 | 213  | First-viewport H1s and media never start hidden; no reveal left part-faded                | no          | yes      | no               | no            | yes                 | no             | no         | no      |
+| 214  | Transitive Dependabot alerts cleared with scoped npm overrides (derived per site)         | open        | yes      | open             | open          | open                | open           | open       | open    |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13076,3 +13077,79 @@ since nothing there is waiting on a transition; the origin site uses 300ms.
 
 **Applied:** starter (this card); nixoncreativestudio (origin, on its `redesign` branch going to
 `main` in PR #198, with its own site checks added). Sites: not yet.
+
+## Card 214: Clear the transitive Dependabot alerts Dependabot cannot fix, with `overrides` (2026-10-31)
+
+**Origin:** every repo in the family, 2026-10-31. Dependabot's security-update jobs failed with
+`security_update_not_possible` for `minimatch` and `undici` (mas-monograms run 41196462386: "The
+latest possible version that can be installed is 3.1.5 because of the following conflicting
+dependency"), and 25 to 55 alerts sat open per repo (starter 43). Almost all were transitive: a
+direct dependency pins the vulnerable copy exactly (`miniflare` pins `undici` 7.29.1 and `sharp`
+0.35.2, `@vercel/frameworks` pins `js-yaml` 3.13.1 and `smol-toml` 1.5.2, `@lhci/cli` asks for
+`uuid` ^8 and `tmp` ^0.1), or a stale lockfile holds a copy the range already allows
+(`undici` 7.29.0, `qs` 6.16.0, `ip-address` 10.7.3). Dependabot only edits a direct dependency, so
+it gives up. **Canonical:** the `overrides` block in the starter's `package.json` (not PORTABLE; each
+site derives its own from its own tree).
+
+**The order that worked.** 1. For each alert, `npm explain <pkg>` (or the lockfile) names the parent
+that wants the old copy. 2. If the parent's range already allows the patched version, only the
+lockfile is stale: `npm update <pkg>` moves it in place (no tree-wide update). 3. If the parent
+pins it exactly, add a scoped override (`"miniflare": { "undici": "7.30.1" }`) on the first patched
+version in the SAME major. Scope by parent, not globally, so a copy another parent needs is left
+alone. A package that two unrelated parents ask for in the same old version (`tmp`) takes a single
+top-level override, because a scoped override on the second parent (`external-editor`) left an
+`invalid` node that failed `npm ls`. 4. A cross-major override only where the parent's own use is
+small and exercised (see below). 5. `npm install` re-resolves only the affected edges; read
+`git diff --stat -- package-lock.json` and the version table before trusting it. The starter's
+lockfile moved 22 package versions, nearly all removals of a nested duplicate.
+
+**Starter result (2026-10-31).** 43 Dependabot alerts: 38 cleared by the lockfile (undici 23, js-yaml 5,
+smol-toml 3, sharp 2, tmp 2, qs 1, ip-address 1, uuid 1), 5 left. `npm audit` 62 to 48 total (the audit counts
+the whole tool tree, not just the Dependabot list). Gates green on the new lockfile: typegen (no
+diff in `sanity.types.ts`), `astro check`, lint, `format:check`, 1892 script and lib tests, and the
+full build. The overrides:
+
+```
+"miniflare": { "undici": "7.30.1", "sharp": "0.35.5" },
+"@module-federation/dts-plugin": { "undici": "7.30.1" },
+"linkinator": { "undici": "8.12.2" },
+"@vercel/frameworks": { "js-yaml": "3.15.2", "smol-toml": "1.9.1" },
+"@lhci/cli": { "uuid": "11.1.1" },
+"tmp": "0.2.6"
+```
+
+All are same-major except `uuid` (8 to 11, `@lhci/cli` uses only `uuid.v4()`) and `tmp` (0.0.33 and
+0.1.0 to 0.2.6; `@lhci/cli` uses only `tmp.fileSync`, `external-editor` only `tmp.fileSync`). Both were
+exercised directly (`uuid.v4()` returns 36 characters, `tmp.dirSync`/`fileSync` and
+`new ExternalEditor('x')` create and remove their files) against the nested tree, and the `lhci`
+CLI still starts.
+
+**Left, and why (do not retry these).** `extract-zip` (2, `@puppeteer/browsers` under `@lhci/cli`) and
+`deepmerge` (1, `shadcn`) have no patched version at all. `zod` 3.25.76 (alert asks 4.6.6): the parents,
+`sanity-plugin-media` and `chromium-bidi`, declare `zod` ^3, and 4 changes the schema API; it needs a
+parent release, not an override. `minimatch`: the top-level 10.2.6 would take 11 cleanly, but `glob`
+7 under `rimraf` 3 under `chrome-launcher` under `@lhci/cli` keeps a 3.1.5 copy (the "latest possible
+version is 3.1.5" Dependabot reports), and `minimatch` 3 to 11 changes the export shape, so the alert
+cannot close while `@lhci/cli` is in the tree. Never run `npm audit fix --force` (CLAUDE.md rule 8).
+
+**Porting it.** Do not copy the block. In each site run the lockfile through the rules above (the
+alert list is `gh api "repos/NateJ45/<repo>/dependabot/alerts?state=open&per_page=100"`), keep only
+the overrides whose parent is in that site's tree, run `npm install`, then `npm ls --all` (must exit 0; plain `npm ls` only checks the top level), the
+site's gates and the build. `package.json` and `package-lock.json` are the only files, so the site PR
+can open at once; no `PORTABLE:` file changes and `sync-check` is unaffected. Re-check after a
+`wrangler`/`miniflare` or `@vercel/frameworks` bump: once the parent ships the patched pin, delete
+its override.
+
+**Trap: a nested copy npm will not re-resolve.** After an override changes a version that is already
+nested in the lockfile (`@vercel/frameworks/node_modules/js-yaml`, `external-editor/node_modules/tmp`),
+`npm install` can leave the old copy in place and `npm ls --all` then prints `invalid`. Delete that
+entry (and its `node_modules` folder) from the lockfile and run `npm install` again; it resolves cleanly.
+A flat override that disagrees with a scoped one (mas-monograms' `undici` pinned to ^7 against a
+scoped `linkinator` 8) made `npm ls --all` report valid ranges as invalid; keep the scoped override
+out of a repo that already has the flat one.
+
+**Applied (2026-10-31, PRs open and green, none merged):** starter #278. Sites: presacademy #164,
+reid-design-site #208, mas-monograms #166, nixoncreativestudio #209 (lockfile only), stonesteps-50k #198,
+fbc-auburn #262, fbcm #139. Each derived its own overrides; the alerts left everywhere are `extract-zip`,
+`deepmerge`, `zod` 3 and `minimatch`. fbcm's alert list was still empty, so it was worked against the
+advisories of the sibling repos.
