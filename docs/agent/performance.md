@@ -9,7 +9,7 @@ Performance is a UX feature, not a vanity score. Lighthouse 100 on Performance i
 ### Core Web Vitals targets
 
 - **LCP (Largest Contentful Paint)** < 1.0s on the home hero, < 1.5s site-wide. The hero image is usually LCP -- size it for mobile (750px wide, quality ~65) and let it grow on larger viewports.
-- **CLS (Cumulative Layout Shift)** < 0.05. Reserve space for images with explicit width/height (or aspect-ratio CSS). Don't lazy-load above-the-fold images. Web fonts use `font-display: swap` to avoid invisible-text shifts.
+- **CLS (Cumulative Layout Shift)** < 0.05. Reserve space for images with explicit width/height (or aspect-ratio CSS). Don't lazy-load above-the-fold images. Web fonts use `font-display: swap` to avoid invisible-text shifts. `tests/cls.spec.ts` (PORTS.md card 212) holds every route in `tests/routes.ts` to this at 1440 and 390px, scrolling to the bottom so late shifts count too (Chromium only).
 - **INP (Interaction to Next Paint)** < 200ms. Keep React island hydration light. Favor `client:visible` and `client:idle` over `client:load` for anything below the fold.
 
 ### Bundle budgets

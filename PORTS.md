@@ -343,6 +343,8 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 209  | CI reads the Node version from .nvmrc (pinned 22.23.4)                                    | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 210  | Form submissions reported to the studio dashboard Inbox (`site-inbox.ts`)                 | yes         | yes      | n/a              | yes           | n/a                 | yes            | yes        | n/a     |
 | 211  | Parity masks the build-time DTSTAMP in an event calendar link                             | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | no         | yes     |
+| 212  | CLS under 0.05 on every route, scrolled to the bottom (`tests/cls.spec.ts`)               | no          | yes      | no               | no            | yes                 | no             | no         | no      |
+| 213  | First-viewport H1s and media never start hidden; no reveal left part-faded                | no          | yes      | no               | no            | yes                 | no             | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13016,3 +13018,61 @@ baseline holds a page with an Event details block recaptures that page once
 baseline. Order: marked-file change, so the starter merges first and site PRs open after.
 
 **Applied:** starter (this card); fbcm (PR #138), stonesteps-50k (PR #194); fbc-auburn PR #257 open, red only on card 209 and 210 drift it does not touch. n/a: presacademy (no `page-parity.mjs`), and mas-monograms, reid-design-site and nixoncreativestudio, whose `page-parity.mjs` is an older unmarked fork without `parity-glob.mjs` (card 74); taking this card there means re-porting the whole harness first.
+
+## Card 212: CLS under 0.05 on every route, scrolled to the bottom (2026-10-31)
+
+**Origin:** nixoncreativestudio's overhaul (package 1.6, ported in 4.9), 2026-10-31.
+Lighthouse CI gates CLS at 0.1, on page load only, and only on the URLs in `lighthouserc.json`.
+A lazy image with no reserved box, a reveal that changes layout or a late font swap further down
+a page never showed up in it. **Canonical:** `tests/cls.spec.ts` (new, not marked PORTABLE yet).
+
+**The check.** A buffered `PerformanceObserver` collects every `layout-shift` entry from before
+first paint, skipping shifts within 500ms of input (`hadRecentInput`, the browser's own rule). The
+page is scrolled to the bottom a screen at a time (`behavior: 'instant'`, so rule 5's smooth
+scroll does not glide), then left to settle for a second. The score is the largest session window
+(shifts under 1s apart, at most 5s long), which is how web-vitals and Lighthouse compute CLS; the
+failure message also prints the total, so one burst and a slow drip read differently. Every run
+records its score as a `CLS` annotation in the HTML report. Limit 0.05 (the target in
+`docs/agent/performance.md`), at 1440 and 390px, on every route in `tests/routes.ts`. Chromium
+only: the Layout Instability API is not in WebKit, and the `webkit-iphone` project only matches
+the suites it names, so `playwright.config.ts` needs no change. The starter's own routes pass
+(16/16 locally).
+
+**Porting it.** Copy the file. It imports from `./fixtures` (card 75); a site without
+`tests/fixtures.ts` imports from `@playwright/test` instead. Run it once before pushing: a site
+with photographs is the one it is for, and a failure names the route and width. A site whose
+`playwright.config.ts` runs every spec on WebKit adds `testIgnore` for this file there.
+
+**Applied:** starter (this card); nixoncreativestudio (origin, on its `redesign` branch going to
+`main` in PR #198). Sites: not yet.
+
+## Card 213: First-viewport H1s and media never start hidden (2026-10-31)
+
+**Origin:** nixoncreativestudio's overhaul (Part A ruling 3, packages 1.7 and 1.8), 2026-10-31. A
+heading or picture in the first screen that starts at opacity 0, or clipped shut, waits on a
+script and a transition before it can paint: a later Largest Contentful Paint, and a blank first
+screen when the script is slow. The same site also found the straddle case: a `[data-reveal]`
+block crossing the fold at load missed the observer and sat part-faded until the visitor
+scrolled, which failed Lighthouse colour contrast on its /photography (accessibility 0.96).
+`docs/agent/animation.md` already said "don't add `data-reveal` above the fold"; nothing checked
+it. **Canonical:** `tests/first-viewport.spec.ts` (new, not marked PORTABLE yet).
+
+**The check.** Part 1: on every route, at 1440 and 320px, straight after `load` with no wait,
+every visible `h1`, `img`, `picture`, `video`, `canvas` and `iframe` whose box touches the first
+viewport has computed `opacity: 1` and `clip-path: none`, and so does every ancestor (an image in
+an opacity-0 wrapper is just as hidden). Part 2: at Lighthouse's mobile size (412px) and 1440,
+one second after load (past the 600ms reveal transition), no `[data-reveal]` on screen is below
+full opacity. Something hidden on purpose (rotating lines where only the active one shows, a
+hover-only tag) carries `data-first-viewport-exempt`, or the site adds its selector to `EXEMPT`.
+The starter's own routes pass (32/32 locally).
+
+**Porting it.** Copy the file (same `./fixtures` note as card 212). On a red run, the fix is in
+the page, not the test: drop `data-reveal` (or the site's own start-hidden class) from the hero's
+heading and media, and make sure the reveal script marks whatever is already on screen at load as
+visible. Site-specific checks belong under it in the site's copy, as the origin site's do (its
+case-study cover must load eager with `fetchpriority="high"`, and its hero ticker lines are
+exempt). A site with a scroll-driven (`animation-timeline: view()`) reveal checks Part 2 sooner,
+since nothing there is waiting on a transition; the origin site uses 300ms.
+
+**Applied:** starter (this card); nixoncreativestudio (origin, on its `redesign` branch going to
+`main` in PR #198, with its own site checks added). Sites: not yet.
