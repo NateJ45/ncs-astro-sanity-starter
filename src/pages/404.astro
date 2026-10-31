@@ -9,7 +9,7 @@ import { withTrailingSlash } from '@/lib/href';
 // site with search off still offers somewhere useful to go (card 158).
 //
 // Layout: two-column on desktop (text + photograph), stacked on mobile. The
-// photo is sourced from Sanity and can be replaced with any studio photo.
+// photo is sourced from Sanity and can be replaced with any photo.
 // Asset is referenced by _ref so it pipes through the same SanityImage
 // CDN/transform pipeline as every other photo on the site.
 
@@ -20,12 +20,9 @@ import { site } from '@/data/site';
 
 const [notFoundPage, siteSettings] = await Promise.all([getNotFoundPage(), getSiteSettings()]);
 
-// Fallback photo — Studio dogs on the sofa, in case the singleton hasn't been
-// populated. Sanity singleton always wins if its image field is set.
-const fallbackPhoto = {
-  asset: { _ref: 'image-ce9be41407b946b7453724575c3cfd7aec2f7c4c-3024x4032-jpg' },
-  alt: 'Studio photo.',
-};
+// No fallback photo: until the singleton has an image the page is words only,
+// one column. (It used to point at a photo asset in the original client
+// build's dataset, which no other project has.)
 
 const seoTitle = notFoundPage?.seoTitle ?? 'Page not found';
 const seoDescription =
@@ -52,8 +49,8 @@ const tertiaryHref = withTrailingSlash(notFoundPage?.tertiaryCtaHref) ?? '/conta
 // Hand-written in src/data/site.ts, so they already end in a slash (rule 19).
 const suggestions = site.search.suggestions ?? [];
 
-const photo = notFoundPage?.heroImage ?? fallbackPhoto;
-const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
+const photo = notFoundPage?.heroImage;
+const caption = notFoundPage?.heroImage?.caption ?? '';
 ---
 
 <BaseLayout
@@ -67,7 +64,7 @@ const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
       1fr / 1.1fr at `md`, so its seam sat left of every other band's. The photo stays
       first in the DOM for the stacked phone order and `lg:order-2` puts it on the right. */}
   <section
-    class="split mx-auto max-w-content items-center px-m py-section-lg"
+    class:list={['mx-auto max-w-content items-center px-m py-section-lg', photo && 'split']}
     aria-labelledby="not-found-heading"
   >
     {/* Text column. Search (when the site has it), suggested pages, then the
@@ -162,17 +159,21 @@ const caption = notFoundPage?.heroImage?.caption ?? 'From the studio';
 
     {/* Photo column. Stacks above the text on mobile (lg:order-2 swaps it on
         desktop so the eye lands on text first, photo balances right). */}
-    <figure class="order-first lg:order-2">
-      <SanityImage
-        source={photo}
-        width={1200}
-        sizes="(min-width: 1024px) 45vw, 100vw"
-        quality={75}
-        class="h-auto w-full rounded-md"
-      />
-      <figcaption class="mt-s text-right text-xs tracking-eyebrow text-foreground/80 uppercase">
-        {caption}
-      </figcaption>
-    </figure>
+    {photo && (
+      <figure class="order-first lg:order-2">
+        <SanityImage
+          source={photo}
+          width={1200}
+          sizes="(min-width: 1024px) 45vw, 100vw"
+          quality={75}
+          class="h-auto w-full rounded-md"
+        />
+        {caption && (
+          <figcaption class="mt-s text-right text-xs tracking-eyebrow text-foreground/80 uppercase">
+            {caption}
+          </figcaption>
+        )}
+      </figure>
+    )}
   </section>
 </BaseLayout>

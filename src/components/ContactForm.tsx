@@ -805,7 +805,7 @@ export default function ContactForm({
           {/* Budget + timeline — paired row. Budget phrasing is deliberate ("rough"
           + "no judgment" hint) so the question doesn't feel transactional. The
           "Not sure yet" option in BUDGET_OPTIONS keeps the form approachable
-          for people who genuinely don't know what room design costs. */}
+          for people who genuinely don't know yet what something should cost. */}
           <div className="grid grid-cols-1 gap-m md:grid-cols-2">
             <div>
               <label htmlFor="budget" className="mb-1 block text-sm font-semibold text-foreground">
@@ -910,7 +910,7 @@ export default function ContactForm({
               </p>
             ) : (
               <p id="message-hint" className="mt-xs text-sm text-muted-foreground">
-                What room or rooms? What's not working? Any photos you can describe in words?
+                A few details help us reply with the right answer.
               </p>
             )}
           </div>

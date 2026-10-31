@@ -48,7 +48,7 @@ interface Props {
   primaryCta?: CtaBlock | null;
   secondaryCta?: CtaBlock | null;
   headingId: string;
-  /** "tall" = fills the viewport below the header on first load (homepage), "short" = generous but not full screen (interior pages). */
+  /** "tall" = fills the viewport below the header on first load (homepage), "short" = generous but not full screen (inner pages). */
   size?: 'tall' | 'short';
   /**
    * Optional list of words to cycle through in place of the FIRST word of the
@@ -173,7 +173,7 @@ const hasImage = heroVariant !== 'editorial' && effectiveImages.length > 0;
 // "tall" (homepage) fills the screen below the sticky header on first load.
 // The exact fill height comes from the .hero-fill class plus the measured
 // --header-h variable (see the inline script and scoped <style> below).
-// "short" stays a generous editorial band for interior pages.
+// "short" stays a generous editorial band for inner pages.
 const wrapperHeight =
   size === 'tall'
     ? 'hero-fill'
@@ -324,7 +324,7 @@ const wrapperHeight =
 
         Cream hairline beneath the eyebrow mirrors the SectionHeading
         inverse-tone treatment so heroes carry the same editorial signature
-        as every interior section heading.
+        as every inner section heading.
       */}
       <div class="hero-entry-stagger max-w-3xl">
         {eyebrow && (

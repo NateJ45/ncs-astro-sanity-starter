@@ -86,7 +86,7 @@ export const aboutPage = defineType({
       group: 'hero',
       hidden: true,
       readOnly: true,
-      initialValue: 'The Designer.',
+      initialValue: 'About Us.',
     }),
     defineField({
       name: 'heroHeadline',
@@ -154,7 +154,7 @@ export const aboutPage = defineType({
       group: 'story',
       hidden: true,
       readOnly: true,
-      initialValue: 'Why I Started This Studio.',
+      initialValue: 'How We Started.',
     }),
     defineField({
       name: 'storyContent',
@@ -201,7 +201,7 @@ export const aboutPage = defineType({
       group: 'story',
       hidden: true,
       readOnly: true,
-      initialValue: 'Your Name · Founder, Studio Name',
+      initialValue: 'Your Name, Your Role',
     }),
     defineField({
       name: 'backgroundLine',

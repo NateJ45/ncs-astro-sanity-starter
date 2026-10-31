@@ -268,7 +268,7 @@ export const homePage = defineType({
       group: 'featuredWork',
       hidden: true,
       readOnly: true,
-      initialValue: 'Rooms that feel finished.',
+      initialValue: 'Replace this headline.',
     }),
     defineField({
       name: 'featuredWorkSubhead',
@@ -280,8 +280,7 @@ export const homePage = defineType({
       readOnly: true,
       description:
         'Conversion-oriented paragraph under the headline. Tell visitors what a click reveals — the brief, the design thinking, the result — so the section sells the case-study depth, not just the photos.',
-      initialValue:
-        'A look at recent projects. Each one starts with a conversation about how the space actually needs to function, then the design follows from there. Open any project to see the brief, the design call, and exactly how the room came together.',
+      initialValue: 'Replace this with a sentence on recent work.',
     }),
     defineField({
       name: 'featuredWorkCta',
@@ -309,7 +308,7 @@ export const homePage = defineType({
       group: 'featuredJournal',
       hidden: true,
       readOnly: true,
-      initialValue: 'How I think about design.',
+      initialValue: 'Replace this headline.',
     }),
     defineField({
       name: 'featuredJournalSubhead',
@@ -320,9 +319,8 @@ export const homePage = defineType({
       hidden: true,
       readOnly: true,
       description:
-        'Conversion-oriented paragraph under the headline. Hint at the kinds of posts the founder writes — project walkthroughs, source roundups, design moves — so the section reads as the thinking behind every consultation, not just a blog.',
-      initialValue:
-        'Posts on the design moves that change a room, source roundups behind specific projects, and the occasional honest note about what I would do differently. The thinking that informs every consultation.',
+        'Conversion-oriented paragraph under the headline. Hint at the kinds of posts the site publishes, so the section reads as more than a list of links.',
+      initialValue: 'Replace this with a sentence on what the journal covers.',
     }),
     defineField({
       name: 'featuredJournalCta',
@@ -401,7 +399,7 @@ export const homePage = defineType({
       group: 'testimonials',
       hidden: true,
       readOnly: true,
-      initialValue: 'Words from real homes.',
+      initialValue: 'Replace this headline.',
     }),
     defineField({
       name: 'testimonialsScriptAccent',
@@ -455,7 +453,7 @@ export const homePage = defineType({
       group: 'services',
       hidden: true,
       readOnly: true,
-      initialValue: 'The Studio.',
+      initialValue: 'What We Do.',
     }),
     defineField({
       name: 'servicesGridHeadline',
@@ -529,7 +527,7 @@ export const homePage = defineType({
       group: 'final',
       hidden: true,
       readOnly: true,
-      initialValue: 'Ready to Love Your Space?',
+      initialValue: 'Ready to Talk?',
     }),
     defineField({
       name: 'finalCtaScriptAccent',

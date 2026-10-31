@@ -35,10 +35,10 @@ The `card-lift` utility class lives in `globals.css`. Defines `:hover { translat
 `.press-tactile` adds a 1px depress on `:active` so CTAs feel physical:
 
 ```html
-<a class="press-tactile bg-primary text-primary-foreground ...">Book a consultation</a>
+<a class="press-tactile bg-primary text-primary-foreground ...">Get in touch</a>
 ```
 
-Applied to CtaLink, header consultation pill, contact form submit, sticky CTA chip, filter chips. Honors reduced-motion via the global transition kill.
+Applied to CtaLink, header CTA pill, contact form submit, sticky CTA chip, filter chips. Honors reduced-motion via the global transition kill.
 
 ### Animated nav underline (`.nav-underline`)
 

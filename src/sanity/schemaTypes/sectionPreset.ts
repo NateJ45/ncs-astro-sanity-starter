@@ -1,7 +1,7 @@
 // =============================================================================
 // sectionPreset - a saved section, ready to drop onto another page
 // =============================================================================
-// THE PROBLEM. An editor spends twenty minutes getting a "Book a consultation"
+// THE PROBLEM. An editor spends twenty minutes getting a "Get in touch"
 // band right, then wants the same band on four more pages and rebuilds it by
 // hand each time (or duplicates a whole page to get at one strip of it).
 //

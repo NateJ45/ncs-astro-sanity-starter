@@ -32,12 +32,10 @@ const visible = getSectionVisibility(siteSettings?.sectionVisibility);
 if (!visible.journal) return Astro.redirect('/');
 
 const title = page?.seoTitle ?? 'Journal · Studio Starter';
-const description =
-  page?.seoDescription ??
-  'Notes from the studio — project walkthroughs, style thinking, and the occasional opinion.';
+const description = page?.seoDescription ?? 'News and updates. Replace this in the Studio.';
 
 const heroEyebrow = page?.heroEyebrow ?? 'The Journal.';
-const heroHeadline = page?.heroHeadline ?? 'Notes from the studio.';
+const heroHeadline = page?.heroHeadline ?? 'News and Updates.';
 const heroSubhead =
   page?.heroSubhead ??
   'Project walkthroughs, design thinking, and the occasional opinion. Written between projects.';

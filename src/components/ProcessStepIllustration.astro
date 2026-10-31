@@ -33,7 +33,7 @@ const { stepNumber, class: className = '' } = Astro.props as Props;
     aria-hidden="true"
     class:list={['block', className]}
   >
-    {/* Step 1 — Discovery / Consultation: a notebook with a coffee cup beside it. */}
+    {/* Step 1 — First conversation: a notebook with a coffee cup beside it. */}
     {/* Notebook */}
     <rect x="6" y="16" width="22" height="22" rx="2" />
     <path d="M10 22 H24" />
@@ -62,7 +62,7 @@ const { stepNumber, class: className = '' } = Astro.props as Props;
     aria-hidden="true"
     class:list={['block', className]}
   >
-    {/* Step 2 — Concept / Plan: a moodboard with stacked tiles and a swatch. */}
+    {/* Step 2 — Plan: a board with stacked tiles and a note. */}
     {/* Outer board */}
     <rect x="5" y="8" width="38" height="32" rx="1.5" />
     {/* Three sample tiles inside */}
@@ -90,13 +90,11 @@ const { stepNumber, class: className = '' } = Astro.props as Props;
     aria-hidden="true"
     class:list={['block', className]}
   >
-    {/* Step 3 — Shopping / Sourcing: a shopping bag with a hangtag. */}
-    <path d="M11 18 H37 V40 a2 2 0 0 1 -2 2 H13 a2 2 0 0 1 -2 -2 V18Z" />
-    {/* Handles */}
-    <path d="M17 18 V14 a7 7 0 0 1 14 0 V18" />
-    {/* Hangtag */}
-    <path d="M22 24 L26 28 L34 28 L34 34 L26 34 L22 30 Z" />
-    <circle cx="24" cy="26" r="0.9" fill="var(--color-tertiary)" stroke="none" />
+    {/* Step 3 — The work: a pencil drawing a line. */}
+    <path d="M30 8 L40 18 L18 40 L8 40 L8 30 Z" />
+    <path d="M26 12 L36 22" />
+    <path d="M8 30 L18 40" />
+    <path d="M24 42 H42" />
   </svg>
 )}
 
@@ -114,15 +112,8 @@ const { stepNumber, class: className = '' } = Astro.props as Props;
     aria-hidden="true"
     class:list={['block', className]}
   >
-    {/* Step 4 — Install / Reveal: a room with a sofa, a lamp, and keys. */}
-    {/* Room frame */}
-    <path d="M6 14 L24 6 L42 14" />
-    <path d="M9 14 V40 H39 V14" />
-    {/* Sofa */}
-    <path d="M14 32 H34 V38 H14 Z" />
-    <path d="M14 32 V28 a2 2 0 0 1 2 -2 H32 a2 2 0 0 1 2 2 V32" />
-    {/* Lamp */}
-    <path d="M38 16 L36 22 L40 22 Z" />
-    <path d="M38 22 V32" />
+    {/* Step 4 — Done: a check mark in a circle. */}
+    <circle cx="24" cy="24" r="17" />
+    <path d="M16 24 L22 30 L33 18" />
   </svg>
 )}

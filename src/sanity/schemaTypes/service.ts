@@ -1,5 +1,5 @@
 // scaffold-file: services
-// Paid offerings — Consultation, Full Room Design, Styling, Shopping, B&R Partnerships.
+// What the organisation offers, one document per service.
 // Used by both the Services page and the homepage services grid.
 
 import { defineType, defineField, defineArrayMember } from 'sanity';
@@ -14,7 +14,7 @@ export const service = defineType({
       name: 'name',
       title: 'Service name',
       type: 'string',
-      description: 'Public name. Example: "In-Home Consultation".',
+      description: 'Public name. Example: "First Visit".',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -80,7 +80,7 @@ export const service = defineType({
       title: 'Card image (optional)',
       type: 'image',
       description:
-        'Small image at the top of the service card. Use a finished-room photo that represents this tier. Cards without an image render gracefully.',
+        'Small image at the top of the service card. Use a photo that represents this service. Cards without an image render gracefully.',
       options: { hotspot: true },
       fields: [
         defineField({
@@ -99,7 +99,7 @@ export const service = defineType({
       options: {
         canvasApp: {
           purpose:
-            'Longer detail block shown lower on the Services page. Same voice as shortDescription but with room to walk through what the service actually looks like. Specific verbs (shopping with you, picking paint, hanging art) beat generic adjectives. Banned: transformative, curated, elevated, tailored, investment in your space.',
+            'Longer detail block shown lower on the Services page. Same voice as shortDescription but with room to walk through what the service actually looks like. Specific verbs (what you actually do) beat generic adjectives. Banned: transformative, curated, elevated, tailored, investment in your space.',
         },
       },
       of: [

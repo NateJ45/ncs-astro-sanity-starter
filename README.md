@@ -46,7 +46,7 @@ Every client project kept re-solving the same problems: a theme system, SEO, ima
 
 ## Provenance
 
-Extracted and genericized from a finished client build, and hardened across every project since. The lineage runs from a Reid Design build, through this starter, into the church and school sites the studio has shipped. It is not a minimal scaffold: it ships with the patterns and the documented landmines of real, live work.
+Extracted and genericized from a finished client build, and hardened across every project since. The lineage runs from a Reid Design build, through this starter, into the church and school sites the studio has shipped. Its default copy, palette and logo are labelled placeholders for any organisation (PORTS.md cards 44 and 207), so a fork that forgets one ships an obvious placeholder, not another business's words. It is not a minimal scaffold: it ships with the patterns and the documented landmines of real, live work.
 
 ---
 

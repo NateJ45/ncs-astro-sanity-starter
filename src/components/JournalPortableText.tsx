@@ -379,7 +379,7 @@ function makeComponents(): PortableTextComponents {
             aria-label={value.label ?? 'Note'}
           >
             <p className="mb-s text-xs font-semibold tracking-widest text-foreground/80 uppercase">
-              {value.label ?? "Designer's note"}
+              {value.label ?? 'A note'}
             </p>
             <div className="text-foreground/90 [&_a]:text-link [&_a]:underline [&_a]:underline-offset-2 [&_p]:my-s [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-s [&_ul]:list-disc [&_ul]:pl-l">
               <PT value={value.content} />

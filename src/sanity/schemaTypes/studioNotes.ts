@@ -17,7 +17,7 @@ export const studioNotes = defineType({
       title: 'Words to skip',
       type: 'array',
       of: [defineArrayMember({ type: 'string' })],
-      description: 'Designer-speak to avoid in writing.',
+      description: 'Jargon to avoid in writing.',
     }),
   ],
   preview: { prepare: () => ({ title: 'Business Notes' }) },

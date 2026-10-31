@@ -6,7 +6,7 @@
 // Pass lat/lng from siteSettings (geoLat/geoLng) to center the map on the
 // studio's actual location. When omitted, the component falls back to the
 // hardcoded Indianapolis-area defaults below.
-// To recenter or rezoom, update the hardcoded defaults to your studio location.
+// To recenter or rezoom, update the hardcoded defaults to your location.
 // Get a new bbox from openstreetmap.org/export.
 
 // Bbox delta spread derived from the original hardcoded Indianapolis bbox:
@@ -65,8 +65,8 @@ const link = `https://www.openstreetmap.org/?mlat=${markerLat}&mlon=${markerLon}
     width="100%"
     height={height}
     style="border: 0; border-radius: 0.5rem;"
-    title="Map showing the studio's service area"
-    aria-label="Map showing the studio's service area"
+    title="Map showing the service area"
+    aria-label="Map showing the service area"
     loading="lazy"
   ></iframe>
   <figcaption class="mt-xs text-xs text-muted-foreground">

@@ -121,6 +121,10 @@ domain and their mail.
 
 ## Known gaps, deliberately open
 
+### 33. Card 207: an "E-Design" switch for an archived module (opened 2026-10-30)
+
+Card 207 neutralised the starter's default copy, but Site settings > Section visibility still has `showEDesign` ("E-Design"), read by `sectionVisibility.ts`, `queries.ts` and its test, for a module that lives in `archive/modules/` and is wired nowhere. It is a stored field, so it goes out through the rule 16 retire flow (hide first, then a backup-then-delete script), not a schema edit. Low stakes: it switches nothing on a fresh clone.
+
 ### 32. Card 137: tours, clips and jobs per site, and the signed-in checks (opened 2026-10-19)
 
 The engine, the recorder and the capture script are in; each site writes its own `studio-tours.ts`, Quick update jobs, `shots.json` and video scripts, records its clips and fills `videos.ts`. Still to check signed in on a live Studio: a tour stop on a document (`publish`, `document-actions`; the harness opens documents read-only), the staff-view first-run tour, an `upload` and a `schedule` job saving for real. Sanity's own anchor selectors (`SANITY_ANCHORS` in `src/lib/studio-tour.ts`) are pinned to Sanity 6: re-check them on each Sanity upgrade (a stale one centres the popover, nothing breaks). Detail: `docs/agent/studio-kit.md` "Spotlight tours".

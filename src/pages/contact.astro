@@ -20,9 +20,9 @@ import ContactFormSection from '@/components/sections/ContactFormSection.astro';
 const [page, siteSettings] = await Promise.all([getContactPage(), getSiteSettings()]);
 
 const title = page?.seoTitle ?? `Contact ${site.name}`;
-const description = page?.seoDescription ?? 'Start a conversation about your space.';
+const description = page?.seoDescription ?? 'Send us a message.';
 
-const heroEyebrow = page?.heroEyebrow ?? 'Request a Consultation.';
+const heroEyebrow = page?.heroEyebrow ?? 'Get in Touch.';
 const heroHeadline = page?.heroHeadline ?? 'Start the Conversation.';
 const heroSubhead = page?.heroSubhead ?? '';
 
