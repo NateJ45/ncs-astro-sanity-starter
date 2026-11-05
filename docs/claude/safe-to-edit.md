@@ -28,3 +28,5 @@ These are the files where a project maintainer can make changes without risk of 
 - `docs/brand/voice.md` -- per-project voice and copy guidelines (fill in per project; the `/reskin` skill rewrites this during a full rebrand)
 
 **Enabling the script accent (opt-in):** The calligraphic script accent is OFF by default. No script font loads unless you opt in. To enable it for a project: (1) add a `@fontsource` import for your chosen calligraphic face (e.g. `@fontsource/great-vibes/400.css`), and (2) update `--font-script` in the `@theme` block to name that face first. Components using the `font-script` utility class will then render the calligraphic accent.
+
+- `src/config/events.ts` -- the site's own map for the GA4 event layer (card 217): its giving, registering and other link rules, events switched off, form and article selectors. The shared files that read it are PORTABLE.

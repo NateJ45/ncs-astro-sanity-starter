@@ -347,6 +347,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 213  | First-viewport H1s and media never start hidden; no reveal left part-faded                | no          | yes      | no               | no            | yes                 | no             | no         | no      |
 | 214  | Transitive Dependabot alerts cleared with scoped npm overrides (derived per site)         | open        | yes      | open             | open          | open                | open           | open       | open    |
 | 215  | Studio share tags; PNG cards shrunk, 600 KB warning (`finish-share-cards.mjs`)            | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 217  | GA4 event layer: link classifier, SiteEvents, per-site events map, privacy kinds          | no          | yes      | no               | no            | no                  | no             | no         | staged  |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13188,3 +13189,22 @@ A tap used to fade the viewer in from nowhere. Now the photo flies from its plac
 **Adapt per site:** copy the three PORTABLE files. No markup or data change.
 
 **Applied (2026-11-05):** reid-design-site, fbc-auburn. nixoncreativestudio keeps its own unmarked Lightbox; not applied.
+
+## Card 217: A shared GA4 event layer: link classifier, SiteEvents, the site's own events map (2026-11-05)
+
+**Origin:** fbcm, 2026-10-19 (its `SiteEvents.astro` and `track.ts`, built to bring the church site level with the sites that already counted giving, contact and video clicks). **Canonical:** `src/lib/track.ts`, `src/components/analytics/SiteEvents.astro`, `src/lib/event-kinds.ts`, and their tests `src/lib/track.test.ts` and `src/lib/event-kinds.test.ts`. Starter only, not marked: `src/config/events.ts` (the per-site map), `docs/agent/analytics.md`.
+
+Every site had its own idea of which clicks to count, or none. Now one delegated listener reads a clicked link's address and sends a GA4 event through the existing gtag, so a link an editor adds in the Studio is counted with no setup. What counts as a giving, registering or other link is the site's own map; the shared code carries only generic rules. Events: `contact_click` (email, phone), `watch_click` (YouTube, Vimeo: streams, video, channel), `directions_click`, `download_click`, `outbound_click`, `give_click` and `register_click` (from the map), `form_view`, `embed_interact`, `generate_lead` (a form calls `track()`), `site_search` and `search_no_results` (`trackSearch()`), `article_progress` and `article_read` (reading depth and time), `page_not_found`, `js_error`. Parameters are in `docs/agent/analytics.md`.
+
+**Rules:**
+
+- **It sends only when the tag loaded.** `window.gtag` exists only on the production hostname, outside automated browsers, with `PUBLIC_GA_ID` set (cards 54, 58, 96). Nothing here adds a second guard or weakens that one, and `GoogleAnalytics.astro` is untouched.
+- **A bundled script, not an inline one.** `SiteEvents.astro` imports the classifier and the map, so it ships as a file under `/_astro/`, not as an inline script the CSP builder must hash. It runs once per full load and again on `astro:page-load`.
+- **The map decides; the shared code never names a client.** Site rules are tried first, in order, first match wins; then the built-in ones. `off` lists events a site does not send (a site with GA4 Enhanced Measurement on usually switches off `outbound_click` and `download_click` so nothing is counted twice). An event in `off` stops the match; it does not fall through to a later rule.
+- **Nothing personal is sent.** The kind of an email or phone link, never its address; form names, never contents; search words withheld when they look like an email address or a phone number.
+- **The privacy page names the kinds of event, derived.** `eventKinds()` turns the map minus `off` into plain phrases and `PrivacyPolicy.astro` adds the sentence whenever GA4 is on, on the same footing as card 54's cookie wording. An event with no wording of its own is named "other links the site marks", so none is sent unmentioned. A privacy body stored in Sanity that lists events by hand would go stale, so none should.
+- **Old sites keep working.** The starter's own search code (`site-search-client.ts`, card 126) is not changed, because it is PORTABLE and every site would go red; `trackSearch()` is there for a site's own search box.
+
+**Adapt per site:** copy the five PORTABLE files and `docs/agent/analytics.md`; render `<SiteEvents />` in `BaseLayout.astro` after `<Analytics />`; write `src/config/events.ts` (giving, registering, apps, social, a calendar file; `off`; custom selectors if the markup differs; a `describe` line for any event of its own); put `data-page-not-found` on the 404 section, `data-article-body` round an article's text and `data-track-form` on forms; call `track('generate_lead', ...)` in a form's success path. Check the privacy page reads right with GA4 on; if it states events in its own words, delete them and let the derived sentence stand. Pin the site's own rules in its e2e spec.
+
+**Applied (2026-11-05):** starter. fbcm staged: it moves onto the PORTABLE files with its former rules in its map (Church Center giving, Church Trac, app stores, social, calendar files), `outbound_click` and `download_click` off, so it sends exactly the events and parameters it did before; its privacy sentence is now derived.

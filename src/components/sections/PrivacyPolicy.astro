@@ -13,6 +13,8 @@
 import PortableTextStatic from '@/components/PortableTextStatic.astro';
 import { getSiteSettings } from '@/lib/queries';
 import { hasCfAnalytics, hasGa } from '@/lib/analytics-config';
+import { eventsConfig } from '@/config/events';
+import { eventsSentence } from '@/lib/event-kinds';
 import { site } from '@/data/site';
 import { formatDate } from '@/lib/format-date';
 import type { PortableTextBlock } from '@portabletext/types';
@@ -103,9 +105,10 @@ const hasSanityBody = Array.isArray(body) ? body.length > 0 : Boolean(body);
               does set cookies on your device (named <code>_ga</code> and <code>_ga_</code> followed
               by a stream id) so returning visits are recognised as the same session. It records
               which pages are opened, roughly where in the world the visit came from, and what kind
-              of device was used. It is not used for advertising, and the data is not sold or shared
-              beyond Google's own processing. You can block these cookies in your browser settings,
-              or with any tracker-blocking extension, and the site will work exactly the same.
+              of device was used. {eventsSentence(eventsConfig)} It is not used for advertising, and
+              the data is not sold or shared beyond Google's own processing. You can block these
+              cookies in your browser settings, or with any tracker-blocking extension, and the site
+              will work exactly the same.
             </p>
           )}
         </div>

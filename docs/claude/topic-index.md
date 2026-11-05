@@ -36,6 +36,7 @@ Read these on demand. They are NOT auto-loaded, and they are referenced as plain
 | People: invite a Helper or an Administrator from the Studio, Simple view, roles by plan, the members secret | `docs/agent/studio-people.md`                                        |
 | Popups (one at a time, date-windowed, the guard rails; card 170)                                            | `docs/agent/popups.md`                                               |
 | Visitor site search (Pagefind, opt-in) + share buttons                                                      | `docs/agent/site-search.md`                                          |
+| GA4 events: what visitors do, the site map `src/config/events.ts`, privacy wording (card 217)               | `docs/agent/analytics.md`                                            |
 | Hidden pages, password pages (security note), Checkup link and heading checks                               | `docs/agent/private-pages.md`                                        |
 | Client notes: the pre-launch pill, yellow placeholders and "Photo needed" shot list (card 195)              | `docs/agent/client-notes.md`                                         |
 | Business facts once: address, phone, email, hours, To confirm, open now, hours changes (card 196)           | `docs/agent/business-facts.md`                                       |

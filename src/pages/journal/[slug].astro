@@ -207,7 +207,10 @@ const schemas = [
             (inline images, before/after slider, source cards, galleries) until
             the visitor scrolls the body into view. The article HTML is still
             server-rendered above the fold, so reading starts immediately. */}
-        <JournalPortableText client:visible value={entry.body} />
+        {/* data-article-body: reading depth and time for the GA4 events (card 217). */}
+        <div data-article-body>
+          <JournalPortableText client:visible value={entry.body} />
+        </div>
         {/* The post's photos open full screen (inline images and galleries). */}
         <Lightbox />
 
