@@ -130,6 +130,13 @@
     opacity: 1;
   }
 }
+/* While the photo grows out of the gallery, the viewer's own fades stand aside:
+   Lightbox.astro fades the room and flies the photo itself. */
+.lightbox.is-growing,
+.lightbox.is-growing .lightbox__img {
+  animation: none;
+  transition: none;
+}
 @keyframes lightbox-in {
   from {
     opacity: 0;

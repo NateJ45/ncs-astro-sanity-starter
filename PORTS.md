@@ -13172,3 +13172,19 @@ Some link previews (WhatsApp is the usual one) drop a picture over about 600 KB.
 **Applied (2026-11-04):** starter #279. Sites: reid-design-site #214 (its `/studio/` injection step deleted, the script is now the PORTABLE copy), presacademy #167, mas-monograms #169, nixoncreativestudio #216 (script only, no Studio), stonesteps-50k #201, fbc-auburn #267, fbcm #142. fbcm's `lighthouse` failed on its PR on a CLS assertion that already fails on its `main`; it is not a required check there.
 
 **Found by the check:** presacademy has 7 pages whose `og:image` is not in the build (`404`, `accessibility`, the style guide pages). Not caused by this card: the check is the first thing to report them.
+
+## Card 216: The photo viewer's photo grows out of the gallery (2026-11-05)
+
+**Origin:** reid-design-site, 2026-11-05, the Portfolio design pass. **Canonical:** `src/components/Lightbox.astro`, `src/styles/lightbox.css`, `tests/lightbox.spec.ts`.
+
+A tap used to fade the viewer in from nowhere. Now the photo flies from its place in the gallery to full size while the dark room fades up around it, and shrinks back on close (the close button, Escape or the surround).
+
+**Rules:** only when the reader has not asked for reduced motion, and only when the big photo decodes within 300ms of the tap: a slow connection gets the old plain fade instead of waiting for an effect. It shrinks back only if that photo is still on screen, since stepping may have moved far from it. Focus, the Tab trap, arrows and swipes are unchanged.
+
+**Do not use a view transition here.** That was the first version, and it crashed WebKit's page every time when run over the modal `<dialog>` (Playwright WebKit on Windows, three of three). It also needed every other `view-transition-name` on the page switched off, or a site's page-transition names painted its header over the dialog. `element.animate()` needs neither and ran clean in Chromium and WebKit, and any browser with it gets the same result.
+
+**Test note:** a contrast scan must wait for `.is-growing` to clear, or it measures the room part way through fading in.
+
+**Adapt per site:** copy the three PORTABLE files. No markup or data change.
+
+**Applied (2026-11-05):** reid-design-site, fbc-auburn. nixoncreativestudio keeps its own unmarked Lightbox; not applied.
