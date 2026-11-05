@@ -13188,4 +13188,3 @@ A tap used to fade the viewer in from nowhere. Now the photo flies from its plac
 **Adapt per site:** copy the three PORTABLE files. No markup or data change.
 
 **Applied (2026-11-05):** reid-design-site, fbc-auburn. nixoncreativestudio keeps its own unmarked Lightbox; not applied.
-
