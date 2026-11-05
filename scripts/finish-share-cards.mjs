@@ -75,15 +75,16 @@ if (sharp) {
 }
 
 // 2. The check. Redirect stubs (a section switched off) and Studio plumbing other
-// than the page itself have nothing to share. A picture on another host (a Sanity
-// image) cannot be looked at from here, so it is taken on trust.
+// than the page itself have nothing to share, and neither has a file with no <head>
+// (a search engine's verification file). A picture on another host (a Sanity image)
+// cannot be looked at from here, so it is taken on trust.
 const problems = [];
 for (const page of walk(dist, (n) => n.endsWith('.html'))) {
   const rel = relative(dist, page).replace(/\\/g, '/');
   if (rel.startsWith('studio/') && rel !== 'studio/index.html') continue;
   if (rel.startsWith('pagefind/') || rel.startsWith('kit-harness/')) continue;
   const html = readFileSync(page, 'utf8');
-  if (html.includes('http-equiv="refresh"')) continue;
+  if (html.includes('http-equiv="refresh"') || !html.includes('<head')) continue;
   const content = metaContent(html, 'og:image');
   if (!content) {
     problems.push(`${rel}: no og:image`);
@@ -91,15 +92,17 @@ for (const page of walk(dist, (n) => n.endsWith('.html'))) {
   }
   let image;
   let origin;
+  let file;
   try {
     image = new URL(content, metaContent(html, 'og:url') ?? 'https://site.invalid');
     origin = new URL(metaContent(html, 'og:url') ?? image.href).origin;
+    // A URL path is percent-encoded (h%C3%A4ndel); the file's name is not.
+    file = join(dist, decodeURIComponent(image.pathname));
   } catch {
     problems.push(`${rel}: og:image ${content} is not a URL`);
     continue;
   }
   if (image.origin !== origin) continue;
-  const file = join(dist, image.pathname);
   if (!existsSync(file)) problems.push(`${rel}: ${content} is not in the build`);
   else if (statSync(file).size > TOO_BIG) {
     problems.push(`${rel}: ${content} is ${Math.round(statSync(file).size / 1024)} KB`);

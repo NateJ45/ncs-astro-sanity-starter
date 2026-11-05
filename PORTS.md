@@ -346,7 +346,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 212  | CLS under 0.05 on every route, scrolled to the bottom (`tests/cls.spec.ts`)               | no          | yes      | no               | no            | yes                 | no             | no         | no      |
 | 213  | First-viewport H1s and media never start hidden; no reveal left part-faded                | no          | yes      | no               | no            | yes                 | no             | no         | no      |
 | 214  | Transitive Dependabot alerts cleared with scoped npm overrides (derived per site)         | open        | yes      | open             | open          | open                | open           | open       | open    |
-| 215  | Studio share tags; PNG cards shrunk, 600 KB warning (`finish-share-cards.mjs`)            | open        | yes      | open             | open          | open                | open           | open       | open    |
+| 215  | Studio share tags; PNG cards shrunk, 600 KB warning (`finish-share-cards.mjs`)            | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13166,3 +13166,9 @@ Some link previews (WhatsApp is the usual one) drop a picture over about 600 KB.
 **Rules:** the check only warns. A share picture must never stop a deploy or an editor's Publish, so missing sharp costs the saving and nothing else. A picture on another host (a Sanity image) is not checked. Redirect stubs and Studio plumbing other than the page itself are skipped.
 
 **Adapt per site:** copy the two PORTABLE files and `tests/studio-app.spec.ts` where the site has it, then run `node scripts/finish-share-cards.mjs` as the last share-card step of `npm run build`, after anything that writes `dist/client/og/`. It needs `sharp`, which every family repo already has. Sites with no Studio (nixoncreativestudio) take the script only. Each site's `public/og-default.png` must be 1200x630, since the Studio tags declare that size.
+
+**Correction (card 215, same day):** the first version flagged two false alarms in site CI: a picture whose URL path is percent-encoded (fbcm's `post-h%C3%A4ndel-...png`, the path was not decoded), and a search engine's verification file with no `<head>` (nixoncreativestudio). Both fixed in the script.
+
+**Applied (2026-11-04):** starter #279. Sites: reid-design-site #214 (its `/studio/` injection step deleted, the script is now the PORTABLE copy), presacademy #167, mas-monograms #169, nixoncreativestudio #216 (script only, no Studio), stonesteps-50k #201, fbc-auburn #267, fbcm #142. fbcm's `lighthouse` failed on its PR on a CLS assertion that already fails on its `main`; it is not a required check there.
+
+**Found by the check:** presacademy has 7 pages whose `og:image` is not in the build (`404`, `accessibility`, the style guide pages). Not caused by this card: the check is the first thing to report them.

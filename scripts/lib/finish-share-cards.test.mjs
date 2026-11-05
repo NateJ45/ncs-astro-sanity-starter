@@ -104,6 +104,19 @@ test('says all is well, skipping redirects, Studio plumbing and pictures on othe
   }
 });
 
+test('finds a file with an accent in its name, and ignores a file that is not a page', () => {
+  const dist = fakeBuild({
+    'post/index.html': page(`${site}/og/post-h%C3%A4ndel.png`),
+    'og/post-händel.png': Buffer.alloc(10),
+    'google123.html': 'google-site-verification: google123.html',
+  });
+  try {
+    assert.match(run(dist).output, /every page has a share picture under 600 KB/);
+  } finally {
+    rmSync(dist, { recursive: true, force: true });
+  }
+});
+
 test('a Studio page with no share tags is reported', () => {
   const dist = fakeBuild({ 'studio/index.html': page('', `${site}/studio/`) });
   try {
