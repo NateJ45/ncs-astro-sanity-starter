@@ -1,0 +1,199 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+// Foundation, edit with care
+/* ============================================================================
+   SiteEvents: what visitors do on the site, sent to GA4 as events
+   ============================================================================
+   PORTS.md card 217. Generalised from First Baptist Muncie's own version
+   (2026-10-19). Rendered by BaseLayout.astro next to <Analytics />.
+
+   ONE DELEGATED LISTENER, NOT A DATA ATTRIBUTE ON EVERY LINK. Nearly every
+   link on these sites comes from the Studio (a button, a menu item, a
+   rich-text link), so an editor can add a giving link or a video link with no
+   developer in the loop. The listener therefore reads the link's ADDRESS when
+   it is clicked and decides what it is (classifyLink in src/lib/track.ts).
+   Nothing is configured per link.
+
+   WHAT COUNTS AS WHAT IS THE SITE'S OWN MAP. This file is the same everywhere;
+   src/config/events.ts is not. It says which hosts and paths are giving,
+   registering or watching links, which events are off, and where the form and
+   article markup is. With that map empty only the generic rules run.
+
+   THE TAG IS NOT HERE. This file only calls window.gtag, which
+   GoogleAnalytics.astro defines on the production hostname outside automated
+   browsers (cards 54, 58, 96). Everywhere else window.gtag is undefined and
+   every call is a no-op, so tests and previews are never counted. This
+   component renders whether or not PUBLIC_GA_ID is set, so a spec can stub
+   gtag and watch the calls. Events sent before gtag.js arrives queue on the
+   dataLayer.
+
+   NOTHING PERSONAL IS SENT. See the header of src/lib/track.ts.
+
+   WHAT IT CANNOT SEE. A form or a video in another site's frame: the visitor's
+   clicks inside it never reach this page. So a form is counted when it comes
+   into view (form_view) and when the visitor first uses its frame
+   (embed_interact, the page losing focus to the frame), not when it is sent.
+   A gift or registration that finishes on another site is counted at the link.
+
+   A bundled script, not an inline one: it imports the classifier and the map.
+   It runs once per full load and again for each router page change through
+   astro:page-load.
+   ============================================================================ */
+---
+
+<script>
+  import { eventsConfig } from '@/config/events';
+  import { classifyLink, setEventsOff, track } from '@/lib/track';
+
+  const config = eventsConfig;
+  setEventsOff(config.off);
+
+  // Which part of the page a link sits in.
+  function region(el: Element): string {
+    const r = el.closest('header, footer, nav, main, aside');
+    if (!r) return 'page';
+    const tag = r.tagName.toLowerCase();
+    return tag === 'main' ? 'page' : tag;
+  }
+
+  document.addEventListener(
+    'click',
+    (e) => {
+      const target = e.target as Element | null;
+      const a = target?.closest ? target.closest<HTMLAnchorElement>('a[href]') : null;
+      if (!a) return;
+      const hit = classifyLink(
+        a.getAttribute('href') || '',
+        a.href,
+        location.hostname,
+        region(a),
+        config,
+      );
+      if (hit) track(hit.event, hit.params);
+    },
+    true,
+  );
+
+  // A JavaScript error in the site's own scripts, at most three a page view.
+  let errors = 0;
+  window.addEventListener('error', (ev) => {
+    if (errors >= 3 || !ev.filename || ev.filename.indexOf(location.origin) !== 0) return;
+    errors++;
+    track('js_error', {
+      error_message: String(ev.message || '').slice(0, 100),
+      error_source: (ev.filename.split('/').pop() ?? '').split('?')[0].slice(0, 60),
+    });
+  });
+
+  // ---- per page (the router swaps pages without reloading) ----------------
+  const formSelector = config.formSelector ?? 'form[data-track-form]';
+  const articleSelector = config.articleSelector ?? '[data-article-body]';
+  const notFoundSelector = config.notFoundSelector ?? '[data-page-not-found]';
+  const formFrame = config.formFrameSelector;
+
+  let io: IntersectionObserver | null = null;
+  let cleanup: Array<() => void> = [];
+
+  function formName(n: Element): string {
+    return (n.getAttribute('data-track-form') || n.getAttribute('title') || 'form').slice(0, 60);
+  }
+
+  function pageSetup() {
+    cleanup.forEach((f) => f());
+    cleanup = [];
+    if (io) io.disconnect();
+
+    // A 404 page.
+    if (document.querySelector(notFoundSelector)) {
+      let from = '';
+      try {
+        const r = new URL(document.referrer);
+        if (r.hostname !== location.hostname) from = r.hostname;
+      } catch {
+        from = '';
+      }
+      track('page_not_found', {
+        missing_path: location.pathname.slice(0, 100),
+        from_site: from || '(direct)',
+      });
+    }
+
+    // Forms and form frames coming into view.
+    const seen = new WeakSet<Element>();
+    if ('IntersectionObserver' in window) {
+      io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((en) => {
+            if (!en.isIntersecting || seen.has(en.target)) return;
+            seen.add(en.target);
+            track('form_view', { form_name: formName(en.target) });
+          });
+        },
+        { threshold: 0.4 },
+      );
+      const selector = formFrame ? `${formFrame} iframe, ${formSelector}` : formSelector;
+      document.querySelectorAll(selector).forEach((n) => io?.observe(n));
+    }
+
+    // First use of a frame: the page loses focus to it.
+    const used = new WeakSet<Element>();
+    const onBlur = () => {
+      setTimeout(() => {
+        const f = document.activeElement;
+        if (!f || f.tagName !== 'IFRAME' || used.has(f)) return;
+        used.add(f);
+        track('embed_interact', {
+          embed: formFrame && f.closest(formFrame) ? 'form' : 'video',
+          embed_name: (f.getAttribute('title') || '').slice(0, 60),
+        });
+      }, 0);
+    };
+    window.addEventListener('blur', onBlur);
+    cleanup.push(() => window.removeEventListener('blur', onBlur));
+
+    // Reading: how far down an article, and a finished read.
+    const body = document.querySelector(articleSelector);
+    if (body) {
+      const words = (body.textContent || '').trim().split(/\s+/).length;
+      const minSecs = Math.min(300, Math.max(30, Math.round((words / 220) * 60 * 0.3)));
+      const marks: Record<number, boolean> = { 25: false, 50: false, 75: false, 100: false };
+      let active = 0;
+      let lastAct = 0;
+      let finished = false;
+      const tick = setInterval(() => {
+        if (document.visibilityState === 'visible' && Date.now() - lastAct < 5000) active++;
+      }, 1000);
+      const act = () => {
+        lastAct = Date.now();
+      };
+      const onScroll = () => {
+        act();
+        const rect = body.getBoundingClientRect();
+        if (rect.height < 200) return;
+        const pct = ((window.innerHeight - rect.top) / rect.height) * 100;
+        [25, 50, 75, 100].forEach((m) => {
+          if (pct >= m && !marks[m]) {
+            marks[m] = true;
+            track('article_progress', { percent: m });
+          }
+        });
+        if (marks[100] && !finished && active >= minSecs) {
+          finished = true;
+          track('article_read', { read_seconds: active });
+        }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('pointermove', act, { passive: true });
+      window.addEventListener('keydown', act);
+      cleanup.push(() => {
+        clearInterval(tick);
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('pointermove', act);
+        window.removeEventListener('keydown', act);
+      });
+    }
+  }
+
+  // Fires on the first load and after every router navigation.
+  document.addEventListener('astro:page-load', pageSetup);
+</script>

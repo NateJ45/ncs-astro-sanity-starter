@@ -1,5 +1,7 @@
 # Change history
 
+_2026-11-05: a shared GA4 event layer (PORTS card 217)._ Generalised from First Baptist Muncie's own: `src/lib/track.ts` (classifier and sender), `src/components/analytics/SiteEvents.astro` (one delegated listener, rendered next to `<Analytics />`), `src/lib/event-kinds.ts` (privacy wording) and unit tests, all PORTABLE, reading the site's map in `src/config/events.ts`. The newsletter and contact forms send `generate_lead`; the 404 and journal body carry the markers it looks for. The privacy page names the kinds of event whenever GA4 is on. Detail in `docs/agent/analytics.md`.
+
 _2026-10-30: parity ignores an event's calendar stamp (PORTS card 211)._ The Event details block's `.ics` link carries a build-time `DTSTAMP`, so parity failed that page on every rebuild. Rule 7 (`scripts/lib/parity-ics.mjs`, PORTABLE) masks the value only; the event itself is still compared. `/styleguide/sections/` was recaptured once.
 
 _2026-10-30: CI reads Node from `.nvmrc` (PORTS card 209)._ A repo-root `.nvmrc` pins Node 22.23.4 and every workflow's setup-node step reads it (`node-version-file`), instead of `node-version: 22`, which took whatever 22.x the runner image had cached and let one PR #267 build land on 22.23.3, below astro 7.4.4's floor. `engines.node` rises to `>=22.23.4` to match.

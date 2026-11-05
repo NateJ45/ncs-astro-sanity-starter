@@ -44,6 +44,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { sendContactSubmission } from '@/lib/contact-transport';
 import { site } from '@/data/site';
+import { track } from '@/lib/track';
 import { parseCustomFieldEntries, type CustomFormField } from '@/lib/custom-form-fields';
 
 const DRAFT_KEY = `${site.storageKeyPrefix}-contact-draft`;
@@ -517,6 +518,7 @@ export default function ContactForm({
 
       if (result.ok) {
         setStatus('success');
+        track('generate_lead', { form_name: 'contact', form_location: 'contact_page' });
         try {
           draftStore()?.removeItem(DRAFT_KEY);
         } catch {

@@ -27,6 +27,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ownListReady, subscribeEmail } from '@/lib/subscribe';
+import { track } from '@/lib/track';
 
 export interface NewsletterConfig {
   /** Set by siteSettings.newsletter.enabled in Sanity. When false, render null. */
@@ -148,6 +149,7 @@ export default function NewsletterSignup({
     if (result.ok) {
       setDoneMessage(askName ? result.message : successMessage);
       setStatus('success');
+      track('generate_lead', { form_name: 'newsletter', form_location: source });
     } else {
       setStatus('error');
       setErrorMsg(result.message);

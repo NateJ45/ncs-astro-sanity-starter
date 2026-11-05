@@ -28,6 +28,7 @@ import ClientNotes from '@/components/ClientNotes.astro';
 import FlowMotion from '@/components/FlowMotion.astro';
 import BackToTop from '@/components/BackToTop';
 import Analytics from '@/components/Analytics.astro';
+import SiteEvents from '@/components/analytics/SiteEvents.astro';
 import '@/styles/globals.css';
 // Starwind UI CSS — accordion keyframes + @theme inline for new semantic tokens.
 // Imported AFTER globals.css so the brand :root declarations in globals.css win
@@ -322,6 +323,9 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
       consent decision. See src/components/Analytics.astro.
     */}
     <Analytics />
+
+    {/* What visitors do (clicks, forms, reading), sent through the tag above. PORTS.md card 217. */}
+    <SiteEvents />
 
     {/* Site settings' "Code for the page head" (PORTS.md card 121). Public
         pages only: never /studio or /preview. Runs directly on the page. */}
