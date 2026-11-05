@@ -11,6 +11,7 @@
 // opens a modal viewer with the caption and position, the arrow keys and the
 // buttons step and wrap inside ONE gallery, Tab stays inside the viewer,
 // Escape closes it and focus goes back to the photo, a swipe steps, and the
+// photo grows out of the gallery and back, reduced motion skips that, and the
 // looks wall passes axe (which measures the Feature band's text).
 // =============================================================================
 import { join } from 'node:path';
@@ -97,6 +98,48 @@ test('Tab stays inside the viewer, Escape closes and focus returns', async ({ pa
   await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe('');
 });
 
+/** Counts the viewer photo's grow and shrink, whichever way they were started. */
+const countFlights = (page: Page) =>
+  page.evaluate(() => {
+    const real = Element.prototype.animate;
+    (window as unknown as { flights: number }).flights = 0;
+    Element.prototype.animate = function (this: Element, ...args: Parameters<typeof real>) {
+      if (this.matches('.lightbox__img')) (window as unknown as { flights: number }).flights += 1;
+      return real.apply(this, args);
+    };
+  });
+const flights = (page: Page) =>
+  page.evaluate(() => (window as unknown as { flights: number }).flights);
+
+test('the photo grows open and shrinks shut, and leaves nothing behind', async ({ page }) => {
+  await load(page);
+  await countFlights(page);
+  const link = firstGallery(page).locator('a[data-lightbox]').first();
+  await link.click();
+  const dialog = page.locator('dialog.lightbox');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).not.toHaveClass(/is-growing/);
+  await expect(dialog.locator('.lightbox__img')).toHaveClass(/is-ready/);
+  expect(await flights(page)).toBe(1);
+
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(link).toBeFocused();
+  expect(await flights(page)).toBe(2);
+  expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe('');
+});
+
+test('with reduced motion the photo does not fly', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await load(page);
+  await countFlights(page);
+  await firstGallery(page).locator('a[data-lightbox]').first().click();
+  await expect(page.locator('dialog.lightbox')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('dialog.lightbox')).toBeHidden();
+  expect(await flights(page)).toBe(0);
+});
+
 test('a swipe steps to the next photo', async ({ page }) => {
   await load(page);
   await firstGallery(page).locator('a[data-lightbox]').first().click();
@@ -146,6 +189,8 @@ test('the viewer itself has no axe violations', async ({ page }) => {
   await load(page);
   await firstGallery(page).locator('a[data-lightbox]').first().click();
   await expect(page.getByRole('dialog', { name: 'Photo viewer' })).toBeVisible();
+  // Measure the settled viewer, not the room part way through fading in.
+  await expect(page.locator('dialog.lightbox')).not.toHaveClass(/is-growing/);
   const results = await new AxeBuilder({ page }).include('dialog.lightbox').analyze();
   expect(results.violations.map((v) => v.id)).toEqual([]);
 });

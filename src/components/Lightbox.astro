@@ -20,6 +20,13 @@
 //   - showModal() makes the page behind inert; Tab and Shift+Tab are also kept
 //     to the viewer's own buttons (the trap), and focus goes back to the photo
 //     that opened it.
+//   - The photo grows out of its place in the gallery and shrinks back on close.
+//     Only when the reader has not asked for reduced motion and the big photo is
+//     ready within READY_BUDGET_MS of the tap; otherwise the viewer simply fades
+//     in, so a slow connection is never kept waiting for an effect. Back on close
+//     only if that photo is still on screen (stepping may have moved far from it).
+//     Plain element.animate(), NOT a view transition: those crashed WebKit's page
+//     every time when run over this modal <dialog> (2026-11-05, Playwright WebKit).
 //   - The fade is only there when the reader has not asked for reduced motion.
 //   - The page behind does not scroll while it is open.
 //
@@ -33,10 +40,15 @@
   import { counterLabel, stepIndex, swipeStep, trapStep } from '@/lib/lightbox';
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
+  /** How long a tap may wait for the big photo before the viewer just fades in. */
+  const READY_BUDGET_MS = 300;
+  const GROW_MS = 420;
+  const GROW_EASE = 'cubic-bezier(0.16, 1, 0.3, 1)';
 
   interface Viewer {
     dialog: HTMLDialogElement;
     img: HTMLImageElement;
+    caption: HTMLElement;
     text: HTMLElement;
     count: HTMLElement;
     close: HTMLButtonElement;
@@ -49,6 +61,9 @@
   let index = 0;
   let opener: HTMLElement | null = null;
   let restoreOverflow = '';
+  let opening = false;
+  let closing = false;
+  let fades: Animation[] = [];
 
   /** A 24px line icon. Paths only, so it inherits currentColor. */
   function icon(d: string): SVGSVGElement {
@@ -108,7 +123,7 @@
     dialog.append(close, figure, prev, next);
     document.body.append(dialog);
 
-    close.addEventListener('click', () => dialog.close());
+    close.addEventListener('click', () => void shut());
     prev.addEventListener('click', () => go(-1));
     next.addEventListener('click', () => go(1));
 
@@ -133,7 +148,7 @@
     dialog.addEventListener('click', (e) => {
       if (swiped) return;
       const t = e.target as Element;
-      if (t === dialog || t === figure) dialog.close();
+      if (t === dialog || t === figure) void shut();
     });
 
     dialog.addEventListener('keydown', (e) => {
@@ -154,15 +169,25 @@
       }
     });
 
+    // Escape: take it over so it animates like the close button does.
+    dialog.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      void shut();
+    });
+
     dialog.addEventListener('close', () => {
       document.documentElement.style.overflow = restoreOverflow;
+      fades.forEach((a) => a.cancel());
+      fades = [];
+      img.getAnimations().forEach((a) => a.cancel());
+      dialog.classList.remove('is-growing');
       img.removeAttribute('src');
       img.removeAttribute('srcset');
       opener?.focus();
       opener = null;
     });
 
-    return { dialog, img, text, count, close, prev, next };
+    return { dialog, img, caption, text, count, close, prev, next };
   }
 
   function show(i: number) {
@@ -196,19 +221,115 @@
     show(index + delta);
   }
 
-  function open(link: HTMLAnchorElement) {
+  const wait = (ms: number) => new Promise<void>((done) => setTimeout(done, ms));
+
+  const motionAllowed = () => matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
+  /** True when the big photo is decoded within the budget. */
+  function bigPhotoReady(link: HTMLAnchorElement): Promise<boolean> {
+    const pre = new Image();
+    pre.sizes = '100vw';
+    if (link.dataset.lightboxSrcset) pre.srcset = link.dataset.lightboxSrcset;
+    pre.src = link.href;
+    return Promise.race([
+      pre.decode().then(
+        () => true,
+        () => false,
+      ),
+      wait(READY_BUDGET_MS).then(() => false),
+    ]);
+  }
+
+  /** The transform that lays the viewer's photo over a spot in the gallery. */
+  function overThumb(img: HTMLImageElement, thumb: DOMRect): string {
+    const box = img.getBoundingClientRect();
+    const dx = thumb.left + thumb.width / 2 - (box.left + box.width / 2);
+    const dy = thumb.top + thumb.height / 2 - (box.top + box.height / 2);
+    return `translate(${dx}px, ${dy}px) scale(${thumb.width / box.width})`;
+  }
+
+  /** The dark room and the viewer's controls, fading in (1) or out (-1). */
+  function fadeRoom(v: Viewer, direction: 1 | -1) {
+    const order = direction === 1 ? 'normal' : 'reverse';
+    const fade = {
+      duration: GROW_MS * 0.7,
+      easing: 'ease-out',
+      direction: order,
+      fill: 'both',
+    } as const;
+    fades.forEach((a) => a.cancel());
+    fades = [
+      v.dialog.animate({ backgroundColor: ['rgb(12 13 15 / 0)', 'rgb(12 13 15)'] }, fade),
+      v.dialog.animate({ opacity: [0, 1] }, { ...fade, pseudoElement: '::backdrop' }),
+      ...[v.caption, v.close, v.prev, v.next].map((el) => el.animate({ opacity: [0, 1] }, fade)),
+    ];
+  }
+
+  async function open(link: HTMLAnchorElement) {
+    if (opening || viewer?.dialog.open) return;
+    opening = true;
     const group = link.closest('[data-lightbox-group]') ?? document;
     items = Array.from(group.querySelectorAll<HTMLAnchorElement>('a[data-lightbox]'));
     viewer ??= build();
+    const v = viewer;
     const single = items.length < 2;
-    viewer.prev.hidden = single;
-    viewer.next.hidden = single;
+    v.prev.hidden = single;
+    v.next.hidden = single;
     opener = link;
+
+    const thumb = link.querySelector('img');
+    const grow = Boolean(thumb) && motionAllowed() && (await bigPhotoReady(link));
+    const from = thumb?.getBoundingClientRect();
+    v.dialog.classList.toggle('is-growing', grow);
+    show(Math.max(0, items.indexOf(link)));
+    if (grow) {
+      await Promise.race([v.img.decode().catch(() => {}), wait(100)]);
+      v.img.classList.add('is-ready');
+    }
     restoreOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
-    show(Math.max(0, items.indexOf(link)));
-    viewer.dialog.showModal();
-    viewer.close.focus();
+    v.dialog.showModal();
+    v.close.focus();
+    if (grow && from) {
+      fadeRoom(v, 1);
+      const photo = v.img.animate(
+        { transform: [overThumb(v.img, from), 'none'] },
+        { duration: GROW_MS, easing: GROW_EASE },
+      );
+      void photo.finished
+        .catch(() => {})
+        .finally(() => {
+          if (!closing) {
+            fades.forEach((a) => a.cancel());
+            fades = [];
+          }
+          v.dialog.classList.remove('is-growing');
+        });
+    }
+    opening = false;
+  }
+
+  /** Close, shrinking back into the gallery when that photo is on screen. */
+  async function shut() {
+    if (!viewer?.dialog.open || closing) return;
+    const v = viewer;
+    const thumb = items[index]?.querySelector('img');
+    const box = thumb?.getBoundingClientRect();
+    const onScreen = box && box.width > 0 && box.bottom > 0 && box.top < innerHeight;
+    const hasPhoto = v.img.complete && v.img.naturalWidth > 0;
+    if (box && onScreen && hasPhoto && motionAllowed()) {
+      closing = true;
+      v.img.getAnimations().forEach((a) => a.cancel());
+      fadeRoom(v, -1);
+      await v.img
+        .animate(
+          { transform: ['none', overThumb(v.img, box)] },
+          { duration: GROW_MS * 0.75, easing: GROW_EASE, fill: 'forwards' },
+        )
+        .finished.catch(() => {});
+      closing = false;
+    }
+    v.dialog.close();
   }
 
   document.addEventListener('click', (e) => {
@@ -219,6 +340,6 @@
     // No <dialog> support (very old browsers): let the link open the photo.
     if (typeof HTMLDialogElement !== 'function') return;
     e.preventDefault();
-    open(link);
+    void open(link);
   });
 </script>
