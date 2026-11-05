@@ -42,6 +42,10 @@
 // installStaleChunkGuard() (src/lib/studio-stale-chunk.ts): it shows "The
 // Studio was updated" and reloads once, or offers a Reload button if it
 // already reloaded a moment ago.
+//
+// SHARED AS A LINK (card 215). Someone texting this page to an editor gets a
+// picture and the site's name, not a bare URL: Open Graph and Twitter tags with
+// the site's own /og-default.png. noindex stays, so search engines still skip it.
 // =============================================================================
 import { StudioComponentHash } from '@sanity/astro/studio/studio-component.tsx';
 import brand from '../../../brand/brand.config.json';
@@ -62,6 +66,13 @@ const appName = studioEdges.app?.shortName ?? name;
 // Vite's own files and outlive the dev server.
 const registerWorker = import.meta.env.PROD;
 const workerScript = `if ('serviceWorker' in navigator) { addEventListener('load', function () { navigator.serviceWorker.register(${JSON.stringify(STUDIO_SW_PATH)}, { scope: ${JSON.stringify(STUDIO_SCOPE)} }).catch(function () {}); }); }`;
+
+// What a shared link shows (card 215). Absolute, because link previews need that.
+const shareOrigin = Astro.site ?? Astro.url;
+const shareUrl = new URL('/studio/', shareOrigin).href;
+const shareImage = new URL('/og-default.png', shareOrigin).href;
+const shareTitle = `${name} Studio`;
+const shareDescription = `Where the ${name} website gets edited. Sign in to make a change.`;
 
 // Palette: exactly what the Studio paints, so the hand-over does not flash.
 const paper = STUDIO_COLORS.white;
@@ -99,6 +110,19 @@ const splashVars = [
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <meta name="robots" content="noindex, nofollow" />
     <title>{name}</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={name} />
+    <meta property="og:title" content={shareTitle} />
+    <meta property="og:description" content={shareDescription} />
+    <meta property="og:url" content={shareUrl} />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={name} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={shareTitle} />
+    <meta name="twitter:description" content={shareDescription} />
+    <meta name="twitter:image" content={shareImage} />
     <meta name="theme-color" content={chrome} />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

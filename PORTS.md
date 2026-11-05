@@ -346,6 +346,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 212  | CLS under 0.05 on every route, scrolled to the bottom (`tests/cls.spec.ts`)               | no          | yes      | no               | no            | yes                 | no             | no         | no      |
 | 213  | First-viewport H1s and media never start hidden; no reveal left part-faded                | no          | yes      | no               | no            | yes                 | no             | no         | no      |
 | 214  | Transitive Dependabot alerts cleared with scoped npm overrides (derived per site)         | open        | yes      | open             | open          | open                | open           | open       | open    |
+| 215  | Studio share tags; PNG cards shrunk, 600 KB warning (`finish-share-cards.mjs`)            | open        | yes      | open             | open          | open                | open           | open       | open    |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13153,3 +13154,15 @@ reid-design-site #208, mas-monograms #166, nixoncreativestudio #209 (lockfile on
 fbc-auburn #262, fbcm #139. Each derived its own overrides; the alerts left everywhere are `extract-zip`,
 `deepmerge`, `zod` 3 and `minimatch`. fbcm's alert list was still empty, so it was worked against the
 advisories of the sibling repos.
+
+## Card 215: A shared Studio link shows a picture, and no share card is too big to send (2026-11-04)
+
+**Origin:** reid-design-site, 2026-11-04 (its PR 213). A link to `/studio/` sent by text showed no picture, and its share cards were 400 to 700 KB. **Canonical:** `src/pages/studio/index.astro` (the tags), `scripts/finish-share-cards.mjs` (the recompression and the check), `tests/studio-app.spec.ts` (the guard). Starter only, not marked: `scripts/lib/finish-share-cards.test.mjs`.
+
+The Studio page does not use BaseLayout, so it had no Open Graph tags at all, on every site. Reid got a local postbuild step that injected them, because editing the PORTABLE page alone would have turned the other sites' sync-check red. The page now carries them itself: the name from `brand.config.json`, the image `/og-default.png`, made absolute from the Astro `site`. `noindex` stays.
+
+Some link previews (WhatsApp is the usual one) drop a picture over about 600 KB. Reid's PNG cards came down by about three quarters with `png({ compressionLevel: 9, adaptiveFiltering: true, effort: 10 })`, the same pixels. The script runs on `dist/client`, not inside a card generator, because the family draws cards several ways (`build-og-cards.mjs`, `generate-og-pages.mjs`, committed `public/og/*.png`, Reid's own `og-cards.mjs`). JPEG cards (the starter's and Auburn's) are never re-encoded, since that would lose quality; the check still covers them. A card that does not shrink keeps its original bytes.
+
+**Rules:** the check only warns. A share picture must never stop a deploy or an editor's Publish, so missing sharp costs the saving and nothing else. A picture on another host (a Sanity image) is not checked. Redirect stubs and Studio plumbing other than the page itself are skipped.
+
+**Adapt per site:** copy the two PORTABLE files and `tests/studio-app.spec.ts` where the site has it, then run `node scripts/finish-share-cards.mjs` as the last share-card step of `npm run build`, after anything that writes `dist/client/og/`. It needs `sharp`, which every family repo already has. Sites with no Studio (nixoncreativestudio) take the script only. Each site's `public/og-default.png` must be 1200x630, since the Studio tags declare that size.
