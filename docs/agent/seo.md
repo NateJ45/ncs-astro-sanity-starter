@@ -21,6 +21,8 @@
 
 **The design is the site's own file.** `scripts/lib/og-card.mjs` exports `cardHtml`, `renderHtml` and `closeCards`. The starter's version is the generic card from `scripts/lib/render-og.mjs` (PORTABLE: `ogCardHtml`, `renderOgHtml`) in `scripts/og-theme.mjs`'s colors and face, with the `brand.config.json` name as the wordmark, the page title under it, an optional kicker and, when Site settings has a square icon, the icon above. A site with its own card design (first-baptist-auburn) replaces `og-card.mjs` and keeps the three exports.
 
+**The last check (PORTS.md card 215).** `scripts/finish-share-cards.mjs` (PORTABLE) runs right after the cards in `npm run build`. It recompresses every PNG card and `og-default.png` losslessly (JPEG cards are left alone), because some link previews drop a picture over about 600 KB, then warns about any built page whose `og:image` is missing, not in the build, or still over 600 KB. It never fails a build. The Studio page (`src/pages/studio/index.astro`) has its own Open Graph and Twitter tags using the site name and `/og-default.png`, since it does not use BaseLayout.
+
 **OG regeneration is a per-project step.** The `og-default.png` committed in the starter is a placeholder. Run `npm run og` after updating the brand inputs in `scripts/generate-og-default.mjs` (brand colors, tagline, wordmark) to regenerate it for the actual project.
 
 **llms.txt regeneration is also per-project.** `public/llms.txt` ships as an AI/LLM crawler index for the core routes. Update it when pages are added or removed, and review it before launch to make sure it describes the actual project.

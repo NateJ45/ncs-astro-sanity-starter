@@ -20,6 +20,18 @@ const stonePath = brand.studio?.look?.splash !== 'motif';
 // =============================================================================
 
 test.describe('Studio app', () => {
+  // Card 215: a texted link to the Studio shows a picture, on every site.
+  test('a shared link to the Studio has a picture that loads', async ({ page, request }) => {
+    await page.goto('/studio/');
+    const image = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(new URL(image ?? '').pathname).toBe('/og-default.png');
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+      'content',
+      'summary_large_image',
+    );
+    expect((await request.get('/og-default.png')).status()).toBe(200);
+  });
+
   test('the manifest is served, valid and scoped to /studio/', async ({ request }) => {
     const resp = await request.get('/studio/manifest.webmanifest');
     expect(resp.status()).toBe(200);
