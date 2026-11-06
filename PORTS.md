@@ -349,7 +349,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 215  | Studio share tags; PNG cards shrunk, 600 KB warning (`finish-share-cards.mjs`)            | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 217  | GA4 event layer: link classifier, SiteEvents, per-site events map, privacy kinds          | no          | yes      | no               | no            | no                  | no             | no         | yes     |
 | 218  | Studio Report tool: Month, Quarter, Year against last year, per-site `config/board.ts`    | no          | yes      | no               | no            | no                  | no             | no         | staged  |
-| 219  | Quarterly Report email, sent by the studio-status Worker                                  | n/a         | n/a      | no               | no            | n/a                 | no             | no         | yes     |
+| 219  | Quarterly Report email, sent by the studio-status Worker                                  | no          | n/a      | no               | no            | n/a                 | no             | no         | staged  |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
