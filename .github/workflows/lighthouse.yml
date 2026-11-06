@@ -4,7 +4,7 @@
 # a given repo builds. The ASSERTIONS in lighthouserc.json are the part that
 # must not diverge. Copy the shape, not the bytes.
 #
-# ── WHEN IT RUNS (card 70) ──────────────────────────────────────────────────
+# ── WHEN IT RUNS (cards 70, 221) ─────────────────────────────────────────────
 # Lighthouse was the slowest gate by a distance (749s of a 848s job on
 # wcp-website: 3 passes over every listed URL) and it ran on every PR, including
 # ones that cannot move a score. It is NOT a required status check (only

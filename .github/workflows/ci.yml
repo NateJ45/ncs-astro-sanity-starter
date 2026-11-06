@@ -276,8 +276,6 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit != 'true'
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
-          # A throwaway runner has no use for dpkg's fsync after every file.
-          echo force-unsafe-io | sudo tee /etc/dpkg/dpkg.cfg.d/force-unsafe-io > /dev/null
           timeout 360 npx playwright install --with-deps chromium webkit || {
             # The killed try's sudo apt-get keeps running and holds the dpkg lock, so the retry
             # died at once with "Could not get lock". Stop it, let apt wait for the lock, and
@@ -294,8 +292,6 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: |
           sudo rm -f /etc/apt/sources.list.d/google-chrome* /etc/apt/sources.list.d/microsoft*
-          # A throwaway runner has no use for dpkg's fsync after every file.
-          echo force-unsafe-io | sudo tee /etc/dpkg/dpkg.cfg.d/force-unsafe-io > /dev/null
           timeout 180 npx playwright install-deps chromium webkit || {
             # The killed try's sudo apt-get keeps running and holds the dpkg lock, so the retry
             # died at once with "Could not get lock". Stop it, let apt wait for the lock, and
