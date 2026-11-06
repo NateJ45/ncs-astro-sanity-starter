@@ -349,6 +349,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 215  | Studio share tags; PNG cards shrunk, 600 KB warning (`finish-share-cards.mjs`)            | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 217  | GA4 event layer: link classifier, SiteEvents, per-site events map, privacy kinds          | no          | yes      | no               | no            | no                  | no             | no         | yes     |
 | 218  | Studio Report tool: Month, Quarter, Year against last year, per-site `config/board.ts`    | no          | yes      | no               | no            | no                  | no             | no         | staged  |
+| 219  | Quarterly Report email, sent by the studio-status Worker                                  | no          | n/a      | no               | no            | n/a                 | no             | no         | staged  |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13238,3 +13239,15 @@ Home's Visitors card answers "how was this week?". Nobody could answer "how was 
 **Not covered, and why:** the signed-in tool against the real binding. Nothing local can reach `SITE_DATA`, so the route's live answer and the tool inside the Studio are checked by hand after the first deploy.
 
 **Applied (2026-11-05):** starter (off by default). fbcm staged.
+
+## Card 219: The Report's quarterly email, sent by the studio-status Worker (2026-11-05)
+
+**Origin:** the WordPress board report's summary email. **Canonical:** `src/site-report-email.ts` in `internal/studio-status` (studio-status #62). Nothing in a site repo changes and no `PORTABLE:` file is involved.
+
+On the first days of January, April, July and October the Worker builds the quarter just ended (in January, the year too) from the series feed and mails a summary: about six headline numbers against the same period a year before, table-cell bar charts, and a link to the Studio Report. The Report's rules hold: "Not tracked yet" before a site's start date, 0 after it, no change when the earlier period was not counted.
+
+**Adapt per site:** an entry in `SITE_REPORT_EMAIL` (name, host, first month, time zone, `since`, `gaps`, tiles), kept in step by hand with the site's `src/config/board.ts`.
+
+**Turning it on:** recipients live in KV, never in a repo (`report-email-to:<site>`, a JSON list). The Worker also needs the `REPORT_EMAIL_FROM` var or secret, an address on a domain with Cloudflare Email Sending. No recipients or no sender: nothing sends.
+
+**Applied (2026-11-05):** fbcm entry deployed, not yet switched on. Email Sending has not yet been proved on this Worker: send a test before the first quarter is due.
