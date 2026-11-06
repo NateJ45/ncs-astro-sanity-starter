@@ -350,6 +350,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 217  | GA4 event layer: link classifier, SiteEvents, per-site events map, privacy kinds          | yes         | yes      | yes              | yes           | no                  | yes            | no         | yes     |
 | 218  | Studio Report tool: Month, Quarter, Year against last year, per-site `config/board.ts`    | yes         | yes      | yes              | yes           | no                  | yes            | no         | yes     |
 | 219  | Quarterly Report email, sent by the studio-status Worker                                  | no          | n/a      | no               | no            | n/a                 | no             | no         | staged  |
+| 220  | Security overrides: tmp, zod, minimatch; drop extract-zip via @puppeteer/browsers 3       | staged      | yes      | staged           | staged        | staged              | staged         | staged     | staged  |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13260,3 +13261,23 @@ On the first days of January, April, July and October the Worker builds the quar
 **Turning it on:** recipients live in KV, never in a repo (`report-email-to:<site>`, a JSON list). The Worker also needs the `REPORT_EMAIL_FROM` var or secret, an address on a domain with Cloudflare Email Sending. No recipients or no sender: nothing sends.
 
 **Applied (2026-11-05):** fbcm entry deployed, not yet switched on. Email Sending has not yet been proved on this Worker: send a test before the first quarter is due.
+
+## Card 220: Clear the shared Dependabot alerts with four overrides and one bump (2026-11-06)
+
+**Origin:** a Dependabot sweep across the family, 2026-11-06. Eight repos held the same alerts and no PR, because each fix needs a package outside its parent's range, and Dependabot's own minimatch job failed on fbc-auburn. **Canonical:** `package.json` in the starter (`overrides` and `sanity-plugin-media`); no `PORTABLE:` file changes.
+
+| Alert                                 | Where it came from                                                      | Fix                                                             |
+| ------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `tmp` < 0.2.7 (high)                  | Our own `"tmp": "0.2.6"` pin, added to clear an older alert             | Pin 0.2.7                                                       |
+| `zod` < 4.6.6 (high)                  | The 3.25.76 copy nested under `sanity-plugin-media` (runtime)           | `sanity-plugin-media` 6.6.2, which moved to zod 4               |
+| `zod` < 4.6.6 (high)                  | The 3.25.76 copy nested under `chromium-bidi` (dev, through Lighthouse) | `"chromium-bidi": { "zod": "4.6.7" }`                           |
+| `extract-zip` <= 2.0.1 (high, no fix) | `@puppeteer/browsers` 2 (dev, through Lighthouse)                       | `"@puppeteer/browsers": "3.2.6"`, which no longer depends on it |
+| `minimatch` >= 7 < 11.0.1 (medium)    | ESLint, `glob`, `@oclif/core`, ts-morph                                 | `"minimatch@>=7 <11.0.1": "11.0.5"`                             |
+
+**Not fixed:** `deepmerge` <= 4.3.1 (low), through `shadcn`. No patched version exists, so that alert stays open. The `minimatch` 3.1.5 copy under `rimraf` is outside the advisory's range and stays.
+
+**Rules:** the range key on `minimatch` leaves the 3.x copy alone; a plain `"minimatch"` key would force `rimraf` onto a major it was never written for. `minimatch` 11 and `@puppeteer/browsers` 3 are major jumps past what their parents ask for, so remove those overrides once the parents catch up. `@lhci/cli` 0.16 brings Lighthouse 13 and `puppeteer-core` 25, which would make both Lighthouse overrides unnecessary; it was left out here because a Lighthouse major can move the scores the budgets assert on.
+
+**Proved in the starter:** `npm run lint`, `astro check`, `test:unit` (1938 and 197 pass, none fail), the full build and `check:links` all pass on the new lockfile, and `puppeteer-core`, `lighthouse` and the `chromium-bidi` mapper all load. The PR's CI covers e2e and a real Lighthouse run.
+
+**Adapt per site:** add the same keys to the site's `overrides`, keep its other overrides, and set `sanity-plugin-media` to 6.6.2 if the site has it (`nixoncreativestudio` has no Sanity). Run one `npm install`, then confirm the lockfile holds no `zod` under 4.6.6, no `extract-zip`, and `tmp` at 0.2.7. Older lockfiles can also hold `compression` and `fast-uri` below their fixes (fbcm): `npm update compression fast-uri`.
