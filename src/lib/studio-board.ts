@@ -431,6 +431,25 @@ export function gapsHit(cfg: Pick<BoardConfig, 'gaps'>, from: string, to: string
   return (cfg.gaps ?? []).filter((g) => g.months.some((ym) => a <= ym && ym <= b));
 }
 
+/** Google's names for how people arrived, in the words an editor uses. An unknown name passes through. */
+const CHANNEL_NAMES: Record<string, string> = {
+  Direct: 'Typed or bookmarked',
+  'Organic Search': 'Search engines',
+  Referral: 'Other websites',
+  'AI Assistant': 'AI assistants',
+  'Organic Social': 'Social media',
+  'Organic Video': 'Video sites',
+  'Organic Shopping': 'Shopping sites',
+  Email: 'Email',
+  'Paid Search': 'Search adverts',
+  'Paid Social': 'Social media adverts',
+  Display: 'Display adverts',
+  Unassigned: 'Not known',
+  '(not set)': 'Not known',
+  Other: 'Other ways',
+};
+export const channelName = (name: string): string => CHANNEL_NAMES[name] ?? name;
+
 /** The day a measure was first counted: its own `since`, else `all`, else the first month. */
 export function sinceFor(cfg: Pick<BoardConfig, 'since' | 'firstMonth'>, measure: string): string {
   const own = cfg.since?.[measure] ?? cfg.since?.all;
@@ -673,7 +692,10 @@ function listRows(r: SeriesReport, c: BoardChart): { rows: [string, number][]; n
         ),
       };
     case 'channels':
-      return { name: 'Visits', rows: top(r.channels.map((x) => [x.name, x.sessions])) };
+      return {
+        name: 'Visits',
+        rows: top(r.channels.map((x) => [channelName(x.name), x.sessions])),
+      };
     case 'places':
       return { name: 'Visitors', rows: top(r.regions.map((x) => [x.name, x.users])) };
     case 'countries':

@@ -1124,6 +1124,8 @@ before. The Astro twin of the WordPress board report (tm-theme `includes/ncs-boa
 | `src/sanity/kit/board/ncs-charts.js`, `.css`                       | The chart kit, the same bytes as the WordPress themes (no marker; a hash test pins them) |
 | `/styleguide/report/`, `BoardBench.tsx`, `studio-board-fixture.ts` | The screen on made-up numbers, for `tests/board-report.spec.ts` and for looking          |
 
+**Who sees it:** administrators only until `'report'` is added to the site's `staffTools` in `kit.config.ts`, because the staff view shows only the tools listed there. Add it once the client should have the Report; the route itself accepts any signed-in editor.
+
 **Switch:** `PUBLIC_BOARD_REPORT=true` at build time (a repository variable, passed by `deploy.yml`) sets
 `features.report`. Unset, the tool is not registered; the route and the bench still exist. The Worker needs card 136's
 `SITE_DATA` binding and `SITE_DATA_KEY`, and studio-status must have the `siteSeries` RPC.

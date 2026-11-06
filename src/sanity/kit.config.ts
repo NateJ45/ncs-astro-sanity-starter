@@ -68,16 +68,9 @@ export const kitConfig: KitConfig = {
   // can also be marked "Simple view" from the Studio, with no deploy.
   staff: [],
 
-  staffTools: [
-    'home',
-    'report',
-    'structure',
-    'presentation',
-    'messages',
-    'rsvps',
-    'site-guide',
-    'checkup',
-  ],
+  // The Report is left off so only administrators see it; add 'report' here
+  // when the client should have it (PORTS.md card 218).
+  staffTools: ['home', 'structure', 'presentation', 'messages', 'rsvps', 'site-guide', 'checkup'],
   toolOrder: [
     'home',
     'report',

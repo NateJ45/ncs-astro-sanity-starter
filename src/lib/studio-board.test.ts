@@ -12,6 +12,7 @@ import {
   boardPeriod,
   boardTtl,
   boardView,
+  channelName,
   gapsHit,
   monthWindow,
   NOT_TRACKED,
@@ -358,5 +359,13 @@ describe('the chart kit files', () => {
       sha('ncs-charts.css'),
       'a426cc8825b3fd16169e8c91a39c47e957e5e442149a59599e8b5e28d0a2ab3e',
     );
+  });
+});
+
+describe('channelName', () => {
+  it("puts Google's channel names in plain words and passes an unknown one through", () => {
+    assert.equal(channelName('Organic Search'), 'Search engines');
+    assert.equal(channelName('Direct'), 'Typed or bookmarked');
+    assert.equal(channelName('Something New'), 'Something New');
   });
 });
