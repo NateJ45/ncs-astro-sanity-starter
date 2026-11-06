@@ -28,7 +28,9 @@
 // DATES
 //   firstMonth  the first month the picker offers.
 //   since       the day a measure was first counted; before it the report says
-//               "Not tracked yet", never 0. `all` covers every measure.
+//               "Not tracked yet", never 0. `all` covers every measure and is the
+//               first day Google has anything, because the page and channel lists
+//               read it; a new event gets its own 'event:<name>' key.
 //   gaps        months when counting was down, with a sentence: left out of
 //               charts, and no year-on-year change on a period that touches one.
 // =============================================================================
