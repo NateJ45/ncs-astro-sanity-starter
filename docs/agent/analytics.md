@@ -75,3 +75,10 @@ stored in Sanity that lists events by hand would go stale; keep the event wordin
 
 Never by HTML scan. Open the live site in a real browser (not WebDriver; a content blocker stops gtag.js), then read
 GA4 Realtime by event name. The Playwright specs stub `window.gtag`.
+
+## The Report in the Studio (card 218)
+
+The events above come back to the site's editors in the Studio's `Report` tool: every number by Month, Quarter or Year
+against the same period a year before. `src/config/board.ts` (NOT portable) names the parts and words; a measure
+`event:<name>` needs the event sent here AND listed for the site in studio-status (`src/site-series-config.ts`). Full
+detail: `docs/agent/studio-kit.md`, "The Report".

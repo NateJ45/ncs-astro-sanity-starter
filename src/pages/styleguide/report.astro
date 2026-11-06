@@ -1,0 +1,36 @@
+---
+// PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+//
+// THE REPORT BENCH (PORTS.md card 218): the Studio's Report screen on made-up
+// numbers (src/lib/studio-board-fixture.ts), in the site's Studio colours, so
+// tests/board-report.spec.ts can drive it with no sign-in and no Google, and
+// so its look can be checked at any width. Options are in
+// src/sanity/kit/board/BoardBench.tsx. It is not the site's design system, so
+// it stands on a bare page like the Studio does. noindex, out of the sitemap
+// (astro.config.mjs filters '/styleguide') and under a reserved slug. No real
+// number is on this page.
+import BoardBench from '../../sanity/kit/board/BoardBench';
+import { boardConfig } from '../../config/board';
+import '../../sanity/studioFonts.css';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta property="og:image" content="/og-default.png" />
+    <title>Report bench (made-up numbers)</title>
+    <style is:global>
+      html,
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main data-pagefind-ignore="all">
+      <BoardBench client:only="react" siteConfig={boardConfig} />
+    </main>
+  </body>
+</html>

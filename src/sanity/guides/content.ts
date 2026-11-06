@@ -458,6 +458,44 @@ export const guides: Guide[] = [
   },
 
   {
+    slug: 'reading-your-report',
+    category: 'Housekeeping',
+    title: 'Reading your Report',
+    icon: 'info',
+    lead: 'How many people came and what they did, set against the same time a year before.',
+    diy: 'self',
+    body: [
+      { kind: 'h', text: 'Choosing a period' },
+      {
+        kind: 'p',
+        text: 'Open `Report` in the bar at the top of the Studio. Pick **Month**, **Quarter** or **Year**, then choose which one from the list beside it.',
+      },
+      {
+        kind: 'p',
+        text: 'A period that is not over yet says **so far**. It counts through yesterday and is set against the same days a year before, so a half-finished month is never measured against a whole one.',
+      },
+      { kind: 'h', text: 'What the words mean' },
+      {
+        kind: 'bullets',
+        items: [
+          '**Up 13%** compares this period with the same period a year before.',
+          '**Not tracked yet** means the website was not counting this then. It is not the same as zero.',
+          '**No comparison?** Either there is nothing a year back to compare with, or counting was down for part of that time. The report says which.',
+          'The small **i** beside a number says how it is counted.',
+        ],
+      },
+      { kind: 'h', text: 'Using a chart' },
+      {
+        kind: 'p',
+        text: 'Each chart can change shape with the buttons above it. **More** holds **Enlarge**, **Table**, **Save picture** and **Copy numbers**, which is handy for a board meeting or a newsletter.',
+      },
+      {
+        kind: 'p',
+        text: 'A click is not the same as the thing that follows it. A click through to a form or a payment page shows interest; the website cannot see what happened after that.',
+      },
+    ],
+  },
+  {
     slug: 'menus-and-footer',
     category: 'Housekeeping',
     title: 'Change the menu or the footer',

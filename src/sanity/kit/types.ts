@@ -294,6 +294,9 @@ export interface HomeBannerConfig {
 }
 
 export interface KitConfig {
+  /** Card 218: the site's Report (src/config/board.ts). The tool shows when features.report is on. */
+  board?: import('../../lib/studio-board').BoardConfig;
+
   /** The site's name as the editor says it ("the website"). */
   siteName: string;
 
@@ -439,6 +442,11 @@ export interface KitConfig {
      * False shows that sentence without asking.
      */
     visitors: boolean;
+    /**
+     * The Report tool (card 218): the site's numbers by Month, Quarter or Year
+     * against the year before. Needs `board` above. Missing counts as off.
+     */
+    report?: boolean;
     /**
      * Home's "Coming up" card (card 115): drafts with a "Publish automatically
      * at" time. Missing counts as on; it shows only when some type has publishAt.

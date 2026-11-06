@@ -1109,6 +1109,43 @@ and staff view place `messages`. PORTS.md card 117 has the full file list.
   `src/lib/mail-*.ts`; setup is OPERATIONS.md "Email".
 - **Morning change note**: not Studio code. `.github/workflows/change-note.yml` + `scripts/change-note.mjs`.
 
+## The Report (card 218)
+
+A Studio tool beside Home: a site's numbers by calendar Month, Quarter or Year, each against the same period a year
+before. The Astro twin of the WordPress board report (tm-theme `includes/ncs-board.php`).
+
+| Piece                                                              | What it is                                                                               |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `src/config/board.ts` (NOT portable)                               | The site's own parts, words, first month, `since` dates and gaps                         |
+| `src/lib/studio-board.ts`                                          | Pure arithmetic: period, change, gaps, "not tracked yet", tiles and chart specs          |
+| `src/pages/api/studio/board.ts`                                    | Same origin, Sanity session, then `siteSeries` on the `SITE_DATA` binding; Cache API     |
+| `src/sanity/kit/board/BoardScreen.tsx`, `boardCss.ts`              | The screen, no Sanity hooks; colours come from the site's Studio look                    |
+| `src/sanity/kit/board/BoardTool.tsx`                               | The Studio tool: the token and the theme                                                 |
+| `src/sanity/kit/board/ncs-charts.js`, `.css`                       | The chart kit, the same bytes as the WordPress themes (no marker; a hash test pins them) |
+| `/styleguide/report/`, `BoardBench.tsx`, `studio-board-fixture.ts` | The screen on made-up numbers, for `tests/board-report.spec.ts` and for looking          |
+
+**Who sees it:** administrators only until `'report'` is added to the site's `staffTools` in `kit.config.ts`, because the staff view shows only the tools listed there. Add it once the client should have the Report; the route itself accepts any signed-in editor.
+
+**Switch:** `PUBLIC_BOARD_REPORT=true` at build time (a repository variable, passed by `deploy.yml`) sets
+`features.report`. Unset, the tool is not registered; the route and the bench still exist. The Worker needs card 136's
+`SITE_DATA` binding and `SITE_DATA_KEY`, and studio-status must have the `siteSeries` RPC.
+
+**The rules (do not bend them):** a running period counts through yesterday against the same days last year and says
+so; a measure that did not exist yet is `null`, reads "Not tracked yet", is never 0 and never compared; `gaps` months are
+left out of charts and drop the change on any period that touches them, on either side; a Search Console year-before older
+than sixteen months is not compared. An event with no count in all 24 months is `null`, because studio-status gives its
+total as 0 either way. An answer with no page views in any month (how a Google Analytics failure arrives) is a failure and
+is never kept.
+
+**Words:** plain and warm, no em-dashes, no "sessions" or "engagement rate". The spec checks the rendered text.
+
+**Writing a site's config:** see the header of `src/config/board.ts`. A part is `{ id, title, nav?, explain?, tiles?,
+charts?, more? }`. `/styleguide/report/?config=site` shows the site's own parts on made-up numbers; a measure the fixture
+has no event for reads "Not tracked yet" there, which is the bench and not the site.
+
+**The chart kit:** change it in the WordPress theme first, copy it here unedited, update the two hashes in
+`src/lib/studio-board.test.ts`, and copy it to the sites. Never run prettier on it (`.prettierignore`).
+
 ## Rules that bite
 
 - Desk items that a link can reach need an **explicit `.id()`**. A singleton's id is its document id (`aboutPage`),
