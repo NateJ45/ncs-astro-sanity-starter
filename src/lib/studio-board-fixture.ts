@@ -158,6 +158,12 @@ export function fixtureReport(from: string, to: string): SeriesReport {
     generate_lead: [0.03, '2025-01'],
     form_view: [0.2, '2025-01'],
     give_click: [0.05, '2026-09'],
+    // The events other sites' configs name, so /styleguide/report/?config=site shows numbers.
+    watch_click: [0.12, '2025-01'],
+    directions_click: [0.04, '2025-01'],
+    contact_click: [0.06, '2025-01'],
+    article_read: [0.09, '2025-01'],
+    embed_interact: [0.05, '2025-01'],
   };
   const ev = (name: string) => (ym: string) =>
     ym < events[name][1] ? 0 : users(ym) * events[name][0];
