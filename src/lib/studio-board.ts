@@ -469,6 +469,8 @@ export const isListMeasure = (m: string) => (LIST_MEASURES as readonly string[])
 // -----------------------------------------------------------------------------
 
 interface Reading {
+  /** An event the feed knows but has never seen: its count for the period (0). */
+  neverSeen?: number;
   cur: number | null;
   prev: number | null;
   /** ym -> count (null: not tracked that month). Only the months the report holds. */
@@ -495,9 +497,10 @@ function read(r: SeriesReport, measure: string): Reading {
     const series = r.eventsByMonth?.[name];
     if (!e || !Array.isArray(series)) return { cur: null, prev: null, byMonth };
     r.months.forEach((m, i) => byMonth.set(m.ym, series[i] ?? null));
-    // Never seen in the 24 months: it did not exist yet, which is not a zero.
+    // Never seen in the 24 months: without a start date it did not exist yet, which is not a
+    // zero. Set against a site's own start date it is a true zero (see zeroFrom).
     if (series.every((v) => v === null || v === undefined))
-      return { cur: null, prev: null, byMonth };
+      return { cur: null, prev: null, byMonth, neverSeen: e.cur };
     return { cur: e.cur, prev: e.prev, byMonth };
   }
   if (measure === 'searchClicks' || measure === 'searchAppearances') {
@@ -568,6 +571,22 @@ export interface BoardView {
   parts: PartView[];
 }
 
+/**
+ * The first month an event counts as a true 0 rather than "not tracked": the day the site says it
+ * began counting. A site that gives no start date gets no zeros: the first event seen starts it.
+ */
+function zeroFrom(cfg: BoardConfig, measure: string): string | null {
+  if (!measure.startsWith('event:')) return null;
+  const day = cfg.since?.[measure] ?? cfg.since?.all;
+  return day ? day.slice(0, 7) : null;
+}
+
+/** A month's number. An event the feed does not list at all stays null, even with a start date. */
+function monthValue(got: Reading, ym: string, zero: string | null): number | null {
+  if (!got.byMonth.has(ym)) return null;
+  return got.byMonth.get(ym) ?? (zero !== null ? 0 : null);
+}
+
 function tileView(
   cfg: BoardConfig,
   per: BoardPeriod,
@@ -579,7 +598,9 @@ function tileView(
   const got = read(r, t.measure);
   const gaps = gapMonths(cfg);
   // Not counted at all in this period: null, never 0.
-  const value = since > per.to ? null : got.cur;
+  const zero = zeroFrom(cfg, t.measure);
+  const none = zero !== null && got.neverSeen !== undefined && since <= per.to;
+  const value = since > per.to ? null : none ? got.neverSeen! : got.cur;
   const hitGap =
     gapsHit(cfg, per.from, per.to).length > 0 ||
     gapsHit(cfg, per.prevStart, addDays(per.prevThru, -1)).length > 0;
@@ -596,7 +617,8 @@ function tileView(
         : since > per.to
           ? `Counting began ${dayLabel(since)}, ${since.slice(0, 4)}.`
           : 'No count has arrived for this yet.';
-  } else if (hitGap) line = 'Not compared: counting was down for part of this time.';
+  } else if (none) line = `None counted since ${dayLabel(since)}, ${since.slice(0, 4)}.`;
+  else if (hitGap) line = 'Not compared: counting was down for part of this time.';
   else if (!prevTracked) {
     line =
       since > per.from
@@ -610,7 +632,10 @@ function tileView(
   const sinceYm = since.slice(0, 7);
   const spark = monthWindow(per.lastYm, 12)
     .filter((ym) => !gaps.has(ym))
-    .map((ym) => ({ ym, value: ym < sinceYm ? null : (got.byMonth.get(ym) ?? null) }));
+    .map((ym) => ({
+      ym,
+      value: ym < sinceYm ? null : monthValue(got, ym, zero),
+    }));
   return {
     measure: t.measure,
     label: t.label,
@@ -628,7 +653,8 @@ function monthChart(cfg: BoardConfig, per: BoardPeriod, r: SeriesReport, c: Boar
   const since = sinceFor(cfg, c.measure).slice(0, 7);
   const gaps = gapMonths(cfg);
   const got = read(r, c.measure);
-  const at = (ym: string) => (ym < since ? null : (got.byMonth.get(ym) ?? null));
+  const zero = zeroFrom(cfg, c.measure);
+  const at = (ym: string) => (ym < since ? null : monthValue(got, ym, zero));
   const notes: string[] = [];
   if (c.note) notes.push(c.note);
   let months: string[];

@@ -13214,6 +13214,8 @@ Every site had its own idea of which clicks to count, or none. Now one delegated
 
 ## Card 218: The Report: a site's numbers by Month, Quarter or Year against the year before, in the Studio (2026-11-05)
 
+**Corrected 2026-11-05, on the first real data:** once the site's `since` date has passed, an event nobody has triggered reads 0 ("None counted since ..."), not "Not tracked yet". With no `since`, or an event the feed does not list, it stays null. Check on each site that its headline tiles can actually fire: First Baptist Muncie's forms sit in Church Trac frames, so its overview uses forms seen.
+
 **Origin:** the WordPress board report (tm-theme `includes/ncs-board.php`, `assets/admin/ncs-charts.*`), live on Theology Matters. Pilot here: fbcm. **Canonical:** `src/lib/studio-board.ts` and its test, `src/lib/studio-board-fixture.ts`, `src/pages/api/studio/board.ts`, `src/sanity/kit/board/` (`BoardScreen.tsx`, `BoardTool.tsx`, `BoardBench.tsx`, `boardCss.ts`), `src/pages/styleguide/report.astro`, `tests/board-report.spec.ts`. Changed: `src/sanity/kit/index.tsx`, `src/sanity/kit/types.ts`. Not marked, the same bytes as the WordPress themes and pinned by a hash in the unit test: `src/sanity/kit/board/ncs-charts.js`, `ncs-charts.css`. Each site's own: `src/config/board.ts`, the `board` and `features.report` lines in `kit.config.ts`, its `staffTools` and `toolOrder`, its Site Guide entry.
 
 Home's Visitors card answers "how was this week?". Nobody could answer "how was October, against last October?" without opening Google Analytics, and a raw GA4 number misleads an editor: a half-finished month against a whole one, a zero for something that was not counted yet.

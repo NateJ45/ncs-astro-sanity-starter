@@ -194,6 +194,30 @@ describe('not tracked yet', () => {
     assert.match(chart.empty!, new RegExp(NOT_TRACKED));
   });
 
+  it('after the start date, an event nobody has triggered is a true 0; with no start date or no feed it stays null', () => {
+    const per = boardPeriod(cfg, 'm', '2026-10', BENCH_TODAY);
+    const r = fixtureReport(per.from, per.to);
+    r.events = { ...r.events, give_click: { cur: 0, prev: 0 } };
+    r.eventsByMonth = { ...r.eventsByMonth, give_click: r.months.map(() => null) };
+    const counted = tile(boardView(cfg, per, r, BENCH_TODAY), 'event:give_click');
+    assert.equal(counted.value, 0);
+    assert.equal(counted.delta, null);
+    assert.match(counted.line, /None counted since September 1, 2026/);
+    assert.equal(counted.spark.at(-1)!.value, 0);
+    const noDate: BoardConfig = { ...cfg, since: {} };
+    assert.equal(
+      tile(
+        boardView(noDate, boardPeriod(noDate, 'm', '2026-10', BENCH_TODAY), r, BENCH_TODAY),
+        'event:give_click',
+      ).value,
+      null,
+    );
+    const noFeed = { ...r, events: {}, eventsByMonth: {} };
+    const unlisted = tile(boardView(cfg, per, noFeed, BENCH_TODAY), 'event:give_click');
+    assert.equal(unlisted.value, null);
+    assert.equal(unlisted.spark.at(-1)!.value, null);
+  });
+
   it('once counted it has a number, but no change until a year has passed', () => {
     const give = tile(view('m', '2026-10'), 'event:give_click');
     assert.ok(give.value! > 0);
@@ -231,13 +255,14 @@ describe('not tracked yet', () => {
     assert.equal(boardPeriod(c, 'm', '2026-09', BENCH_TODAY).k, '2026-11');
   });
 
-  it('an event the report has never seen is null, not 0', () => {
+  it('an event never seen and with no start date is null, and with one it is 0', () => {
     const per = boardPeriod(cfg, 'm', '2026-10', BENCH_TODAY);
     const r = fixtureReport(per.from, per.to);
     r.events.generate_lead = { cur: 0, prev: 0 };
     r.eventsByMonth.generate_lead = r.months.map(() => null);
-    const t = boardView(cfg, per, r, BENCH_TODAY).overview.tiles[2];
-    assert.equal(t.value, null);
+    assert.equal(boardView(cfg, per, r, BENCH_TODAY).overview.tiles[2].value, 0);
+    const noDate: BoardConfig = { ...cfg, since: {} };
+    assert.equal(boardView(noDate, per, r, BENCH_TODAY).overview.tiles[2].value, null);
     delete r.events.generate_lead;
     assert.equal(boardView(cfg, per, r, BENCH_TODAY).overview.tiles[2].value, null);
   });
