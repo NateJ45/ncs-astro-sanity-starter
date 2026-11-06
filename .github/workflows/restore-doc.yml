@@ -122,7 +122,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Look through the backups (writes nothing)
         if: inputs.mode == 'scan'

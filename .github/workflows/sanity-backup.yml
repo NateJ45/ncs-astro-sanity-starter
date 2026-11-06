@@ -122,7 +122,7 @@ jobs:
       # root package on 2026-08-28 (PORTS.md card 10), so there is no
       # `npm ci --prefix studio` step any more.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Export production dataset
         env:

@@ -351,6 +351,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 218  | Studio Report tool: Month, Quarter, Year against last year, per-site `config/board.ts`    | yes         | yes      | yes              | yes           | no                  | yes            | no         | yes     |
 | 219  | Quarterly Report email, sent by the studio-status Worker                                  | no          | n/a      | no               | no            | n/a                 | no             | no         | staged  |
 | 220  | Security overrides: tmp, zod, minimatch; drop extract-zip via @puppeteer/browsers 3       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 221  | CI waits: full Lighthouse off push to main, `npm ci --no-audit --no-fund` everywhere      | no          | yes      | no               | no            | no                  | partial        | no         | partial |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13283,3 +13284,16 @@ On the first days of January, April, July and October the Worker builds the quar
 **Write the lockfile with CI's npm:** CI runs Node 22, whose npm is 10. `@puppeteer/browsers` 3 has an optional peer on `proxy-agent` >=8, and npm 12 on this PC left it out, so its lockfile passed `npm ci` locally and failed `npm ci` in every CI job with `Missing: proxy-agent@8.0.2 from lock file`. Run `npm install` and then `npx -y npm@10 install`, and test with `npx -y npm@10 ci --dry-run`. Both are needed: npm 10 alone left the nested `zod` 3.25.76 under `chromium-bidi` in the lock (presacademy, mas-monograms, stonesteps-50k, fbcm), and only the newer npm removed it. A plain `npm ci` under a newer npm proves nothing here.
 
 **Adapt per site:** add the same keys to the site's `overrides`, keep its other overrides, and set `sanity-plugin-media` to 6.6.2 if the site has it (`nixoncreativestudio` has no Sanity). Write the lockfile as above, then confirm the lockfile holds no `zod` under 4.6.6, no `extract-zip`, and `tmp` at 0.2.7. Older lockfiles can also hold `compression` and `fast-uri` below their fixes (fbcm): `npm update compression fast-uri`.
+
+## Card 221: Spend less waiting on CI: full Lighthouse off push, no audit in npm ci (2026-11-06)
+
+**Origin:** the starter, 2026-11-06, while checking whether Astro 7.4.7 and the TypeScript 7.1 beta would shorten any waits (they would not: `astro check` only runs in the `static` job, which is parallel to and shorter than `site` then `e2e`). **Canonical:** `.github/workflows/lighthouse.yml`, and `npm ci --no-audit --no-fund` in `deploy.yml`, `visual.yml`, `sanity-backup.yml` and `restore-doc.yml`.
+
+Two changes survived measurement against the last five successful runs per workflow:
+
+- **Full Lighthouse no longer runs on a push to `main`.** It took 269 to 554s per merge across the family, is not a required check (reid-design-site's ruleset excepted, on PRs), and repeats templates the PR sample has just audited. The PR sample, the weekly full run and `workflow_dispatch` stay. Cost: a score drop that the sample's pages do not show waits for Monday's run, or a manual dispatch. Stone Steps already ran this shape.
+- **Plain `npm ci` runs an audit the workflow never reads.** `npm audit` alone took 27s on a first local run. In `visual.yml`, Stone Steps and FBCM already had the flags and installed in 21 and 26s, while the starter and FBC Auburn without them took 52 and 69s. The starter's PR run with the flags took 28s, one run against a previous range of 21 to 86s. Deploy installs of 52 to 75s against about 30s in CI have the same shape, but the starter's Deploy skips its real steps, so that saving is not measured until a site takes this.
+
+**Tried and dropped:** `force-unsafe-io` for dpkg in the Playwright system library step. Unpacking took 14.9s against 12.7s without it. The step's real problem is slow mirrors (usually about 30s, sometimes 63, 108 or 219s), which fsync does not touch.
+
+**Adapt per site:** in `lighthouse.yml` remove `push` and keep the path list under `pull_request`. Add the flags to each plain `run: npm ci`. Keep a site's own `lighthouserc.json` and sample URLs. Compare that site's next Deploy and Visual runs with its recent history.

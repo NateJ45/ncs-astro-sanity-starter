@@ -4,7 +4,7 @@
 # a given repo builds. The ASSERTIONS in lighthouserc.json are the part that
 # must not diverge. Copy the shape, not the bytes.
 #
-# ── WHEN IT RUNS (card 70) ──────────────────────────────────────────────────
+# ── WHEN IT RUNS (cards 70, 221) ─────────────────────────────────────────────
 # Lighthouse was the slowest gate by a distance (749s of a 848s job on
 # wcp-website: 3 passes over every listed URL) and it ran on every PR, including
 # ones that cannot move a score. It is NOT a required status check (only
@@ -15,9 +15,11 @@
 #     assets, scripts, config), and audited on a SAMPLE of URLs, one per
 #     distinct template, via --collect.url flags below. The full list in
 #     lighthouserc.json is untouched.
-#   - push to main, same path filter, FULL url list: the post-merge record.
 #   - weekly schedule, FULL url list: catches drift nobody pushed (a font host
-#     change, a dependency bump that landed on a different path).
+#     change, a dependency bump that landed on a different path), and is the
+#     full record now that a push to main no longer runs it (5 to 9 minutes on
+#     every merge for a check nothing waits on; the PR sample has already
+#     audited the same templates).
 #   - workflow_dispatch: a branch tip on demand, full list.
 #
 # A docs-only, content-only or workflow-only PR therefore runs no Lighthouse and
@@ -25,9 +27,8 @@
 name: Lighthouse
 
 on:
-  push:
-    branches: [main]
-    paths: &score-paths
+  pull_request:
+    paths:
       - 'src/**'
       - 'public/**'
       - 'scripts/serve-dist.mjs'
@@ -36,8 +37,6 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/lighthouse.yml'
-  pull_request:
-    paths: *score-paths
   schedule:
     - cron: '17 5 * * 1'
   # Dispatchable so a branch tip can be re-audited on demand, without pushing
