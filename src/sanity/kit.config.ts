@@ -23,6 +23,7 @@ import { TOURS, WELCOME, WHATS_NEW } from './studio-tours';
 import { guides, GUIDE_CATEGORIES, GUIDE_FOR_FIELD, GUIDES_FOR_TYPE } from './guides/content';
 import { makeGuideView } from './components/GuideView';
 import { envVal } from './urls';
+import { boardConfig } from '../config/board';
 import type { PageRules } from '../lib/page-guardrails';
 import { AddDocumentIcon } from '@sanity/icons/AddDocument';
 import { BellIcon } from '@sanity/icons/Bell';
@@ -52,6 +53,8 @@ const SEO_TYPES = [
 ];
 
 export const kitConfig: KitConfig = {
+  // The Report tool's parts and words (card 218).
+  board: boardConfig,
   siteName: 'the website',
 
   helper: {
@@ -65,9 +68,19 @@ export const kitConfig: KitConfig = {
   // can also be marked "Simple view" from the Studio, with no deploy.
   staff: [],
 
-  staffTools: ['home', 'structure', 'presentation', 'messages', 'rsvps', 'site-guide', 'checkup'],
+  staffTools: [
+    'home',
+    'report',
+    'structure',
+    'presentation',
+    'messages',
+    'rsvps',
+    'site-guide',
+    'checkup',
+  ],
   toolOrder: [
     'home',
+    'report',
     'structure',
     'presentation',
     'messages',
@@ -422,6 +435,9 @@ export const kitConfig: KitConfig = {
     // set up yet" until the Worker has CF_ANALYTICS_TOKEN, CF_ACCOUNT_ID and
     // CF_WEB_ANALYTICS_SITE_TAG (OPERATIONS.md, "Visitor numbers").
     visitors: true,
+    // The Report tool (card 218): on when the build has PUBLIC_BOARD_REPORT=true
+    // (deploy.yml passes the repository variable). Its parts are src/config/board.ts.
+    report: envVal('PUBLIC_BOARD_REPORT') === 'true',
     // The email backbone (card 127): the Newsletter card and RSVP counts. Each
     // says "not set up yet" until the Worker has the settings (OPERATIONS.md, "Email").
     mail: true,

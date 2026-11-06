@@ -347,7 +347,8 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 213  | First-viewport H1s and media never start hidden; no reveal left part-faded                | no          | yes      | no               | no            | yes                 | no             | no         | no      |
 | 214  | Transitive Dependabot alerts cleared with scoped npm overrides (derived per site)         | open        | yes      | open             | open          | open                | open           | open       | open    |
 | 215  | Studio share tags; PNG cards shrunk, 600 KB warning (`finish-share-cards.mjs`)            | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 217  | GA4 event layer: link classifier, SiteEvents, per-site events map, privacy kinds          | no          | yes      | no               | no            | no                  | no             | no         | staged  |
+| 217  | GA4 event layer: link classifier, SiteEvents, per-site events map, privacy kinds          | no          | yes      | no               | no            | no                  | no             | no         | yes     |
+| 218  | Studio Report tool: Month, Quarter, Year against last year, per-site `config/board.ts`    | no          | yes      | no               | no            | no                  | no             | no         | staged  |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13208,3 +13209,30 @@ Every site had its own idea of which clicks to count, or none. Now one delegated
 **Adapt per site:** copy the five PORTABLE files and `docs/agent/analytics.md`; render `<SiteEvents />` in `BaseLayout.astro` after `<Analytics />`; write `src/config/events.ts` (giving, registering, apps, social, a calendar file; `off`; custom selectors if the markup differs; a `describe` line for any event of its own); put `data-page-not-found` on the 404 section, `data-article-body` round an article's text and `data-track-form` on forms; call `track('generate_lead', ...)` in a form's success path. Check the privacy page reads right with GA4 on; if it states events in its own words, delete them and let the derived sentence stand. Pin the site's own rules in its e2e spec.
 
 **Applied (2026-11-05):** starter. fbcm staged: it moves onto the PORTABLE files with its former rules in its map (Church Center giving, Church Trac, app stores, social, calendar files), `outbound_click` and `download_click` off, so it sends exactly the events and parameters it did before; its privacy sentence is now derived.
+
+---
+
+## Card 218: The Report: a site's numbers by Month, Quarter or Year against the year before, in the Studio (2026-11-05)
+
+**Origin:** the WordPress board report (tm-theme `includes/ncs-board.php`, `assets/admin/ncs-charts.*`), live on Theology Matters. Pilot here: fbcm. **Canonical:** `src/lib/studio-board.ts` and its test, `src/lib/studio-board-fixture.ts`, `src/pages/api/studio/board.ts`, `src/sanity/kit/board/` (`BoardScreen.tsx`, `BoardTool.tsx`, `BoardBench.tsx`, `boardCss.ts`), `src/pages/styleguide/report.astro`, `tests/board-report.spec.ts`. Changed: `src/sanity/kit/index.tsx`, `src/sanity/kit/types.ts`. Not marked, the same bytes as the WordPress themes and pinned by a hash in the unit test: `src/sanity/kit/board/ncs-charts.js`, `ncs-charts.css`. Each site's own: `src/config/board.ts`, the `board` and `features.report` lines in `kit.config.ts`, its `staffTools` and `toolOrder`, its Site Guide entry.
+
+Home's Visitors card answers "how was this week?". Nobody could answer "how was October, against last October?" without opening Google Analytics, and a raw GA4 number misleads an editor: a half-finished month against a whole one, a zero for something that was not counted yet.
+
+**Rules (the product; do not bend them):**
+
+- **Calendar periods, a year apart.** Month, Quarter or Year. A period still running is counted through yesterday, against the same days a year before, and says "so far, through ...". On its first day that one day counts as it stands.
+- **Null is not zero.** A measure before its `since` date, or an event with no count in all 24 months, reads "Not tracked yet", is never compared, and draws as a hatched band.
+- **Gaps are left out.** Months in `gaps` are dropped from charts and sparklines, and any period touching one, on either side of the comparison, loses its change and says why.
+- **The picker offers any period that holds a counted month,** so a site whose first month is not January still has that quarter and that year (the same rule as the WordPress file).
+- **Search Console keeps about sixteen months,** so an older year-before is not compared.
+- **A failure is never kept or drawn as zeros.** An answer with no page views in any month is how a Google Analytics failure arrives: the route treats it as a failure. The cache is the Cache API: about three hours, a month once the period is three days over, one hour when Search Console did not answer.
+- **No chart library, no jargon, no em-dashes.** Long explanations sit behind an "i" button. "Visitors" and "pages viewed", never "sessions". The spec reads the rendered text.
+- **The period is worked out on the server** from the site's config. The caller sends a kind and a key, never dates.
+
+**Adapt per site:** copy the PORTABLE files and the two chart-kit files byte for byte; write `src/config/board.ts` in the site's words (`event:<name>` must also be in the site's entry in studio-status `src/site-series-config.ts`); add `board: boardConfig` and `report: envVal('PUBLIC_BOARD_REPORT') === 'true'` to `kit.config.ts`, and `'report'` to `staffTools` and `toolOrder`; add the two chart-kit paths to `.prettierignore`; pass `PUBLIC_BOARD_REPORT` in `deploy.yml`'s build env and set the repository variable to `true`. Needs card 136's `SITE_DATA` binding and `SITE_DATA_KEY`. Check `/styleguide/report/?config=site`, then the real tool signed in.
+
+**Gates:** `studio-board.test.ts` (year boundary, quarter keys, leap day, running period, first day, null against 0, gap overlap on both sides, first month, picker, Search Console's limit, cache times, the kit's hashes); `tests/board-report.spec.ts` on the bench (Month, Quarter, Year, a period before tracking, a gap, type buttons, Table, Show more, "i", the not-connected and failed screens, 320 px, axe light and dark).
+
+**Not covered, and why:** the signed-in tool against the real binding. Nothing local can reach `SITE_DATA`, so the route's live answer and the tool inside the Studio are checked by hand after the first deploy.
+
+**Applied (2026-11-05):** starter (off by default). fbcm staged.

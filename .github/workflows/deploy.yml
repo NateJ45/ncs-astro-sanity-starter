@@ -150,6 +150,8 @@ jobs:
           # no-op everywhere, so those builds simply ship no tag.
           PUBLIC_GA_ID: ${{ vars.PUBLIC_GA_ID }}
           PUBLIC_CF_ANALYTICS_TOKEN: ${{ vars.PUBLIC_CF_ANALYTICS_TOKEN }}
+          # The Studio's Report tool (PORTS.md card 218): "true" shows it.
+          PUBLIC_BOARD_REPORT: ${{ vars.PUBLIC_BOARD_REPORT }}
         run: |
           if [ -z "$PUBLIC_SANITY_PROJECT_ID" ]; then
             echo "::error::PUBLIC_SANITY_PROJECT_ID is not set. The build would ship empty pages over the live site."

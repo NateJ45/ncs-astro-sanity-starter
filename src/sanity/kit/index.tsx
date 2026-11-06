@@ -11,6 +11,7 @@
 //
 // What it adds:
 //   - Tools: Home (first, so the Studio opens on it), Site Guide, Checkup.
+//   - Card 218: the Report tool beside Home (features.report and config.board).
 //   - Plain tool names and order ("Content", "Live preview").
 //   - The staff view: listed accounts (or non-administrators) see only the
 //     staff tools, the staff desk, and no permanent Delete. A tab can switch
@@ -29,11 +30,13 @@
 
 import { definePlugin, type LayoutProps } from 'sanity';
 import { ActivityIcon } from '@sanity/icons/Activity';
+import { BarChartIcon } from '@sanity/icons/BarChart';
 import { BoltIcon } from '@sanity/icons/Bolt';
 import { BookIcon } from '@sanity/icons/Book';
 import { HomeIcon } from '@sanity/icons/Home';
 import { STAFF_TYPE, WEEK_TYPE } from '../../lib/studio-kit';
 import { TRASH_TYPE } from '../../lib/studio-trash';
+import { makeBoardTool } from './board/BoardTool';
 import { makeCheckupTool } from './CheckupTool';
 import { EMPTY_LIST_BUNDLE } from './emptyList';
 import { makeFieldGuide } from './FieldGuide';
@@ -86,6 +89,8 @@ export function ncsStudioKit(config: KitConfig) {
   const HomeTool = makeHomeTool(config);
   const GuideTool = makeGuideTool(config);
   const CheckupTool = makeCheckupTool(config);
+  // Card 218: the Report, only when the site switched it on and wrote its config.
+  const BoardTool = config.features.report && config.board ? makeBoardTool(config) : null;
   // Card 125: "Post a photo" alone is enough to give the tool.
   const QuickUpdateTool =
     config.quickUpdate?.length || config.postPhoto ? makeQuickUpdateTool(config) : null;
@@ -148,6 +153,12 @@ export function ncsStudioKit(config: KitConfig) {
           title: 'Home',
           icon: HomeIcon,
           component: HomeTool,
+        },
+        BoardTool && {
+          name: 'report',
+          title: 'Report',
+          icon: BarChartIcon,
+          component: BoardTool,
         },
         config.features.guide && {
           name: 'site-guide',
