@@ -487,7 +487,7 @@ export const guides: Guide[] = [
       { kind: 'h', text: 'Using a chart' },
       {
         kind: 'p',
-        text: 'Each chart can change shape with the buttons above it. `More` holds `Enlarge`, `Table`, `Save picture` and `Copy numbers`, which is handy for a board meeting or a newsletter.',
+        text: 'Each chart can change shape with the buttons above it. **More** holds **Enlarge**, **Table**, **Save picture** and **Copy numbers**, which is handy for a board meeting or a newsletter.',
       },
       {
         kind: 'p',
