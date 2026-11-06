@@ -78,7 +78,7 @@ export const BOARD_CSS = `
 .ncs-brd__fig, .ncs-brd__empty { margin: 0 0 24px; min-width: 0; }
 .ncs-brd .ncs-chart { margin: 0 0 24px; padding: 14px 0 6px; background: transparent; border-top-color: var(--brd-rule-strong); }
 .ncs-brd__empty { padding: 14px 0 18px; border-top: 1px solid var(--brd-rule-strong); }
-.ncs-brd__empty h3 { margin: 0 0 12px; font-family: var(--brd-display); font-weight: var(--brd-display-weight); font-size: 18px; color: var(--brd-heading); }
+.ncs-brd__empty h3 { margin: 0 0 12px; font-family: var(--brd-display); font-weight: 600; font-size: 18px; color: var(--brd-heading); }
 .ncs-brd__empty p { margin: 0; padding: 26px 16px; text-align: center; color: var(--brd-muted); font-style: italic; background: repeating-linear-gradient(135deg, transparent 0 7px, var(--brd-hatch) 7px 8px); }
 
 /* ---------- Parts ---------- */
