@@ -347,8 +347,8 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 213  | First-viewport H1s and media never start hidden; no reveal left part-faded                | no          | yes      | no               | no            | yes                 | no             | no         | no      |
 | 214  | Transitive Dependabot alerts cleared with scoped npm overrides (derived per site)         | open        | yes      | open             | open          | open                | open           | open       | open    |
 | 215  | Studio share tags; PNG cards shrunk, 600 KB warning (`finish-share-cards.mjs`)            | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 217  | GA4 event layer: link classifier, SiteEvents, per-site events map, privacy kinds          | no          | yes      | no               | no            | no                  | no             | no         | yes     |
-| 218  | Studio Report tool: Month, Quarter, Year against last year, per-site `config/board.ts`    | no          | yes      | no               | no            | no                  | no             | no         | staged  |
+| 217  | GA4 event layer: link classifier, SiteEvents, per-site events map, privacy kinds          | yes         | yes      | yes              | yes           | no                  | yes            | no         | yes     |
+| 218  | Studio Report tool: Month, Quarter, Year against last year, per-site `config/board.ts`    | yes         | yes      | yes              | yes           | no                  | yes            | no         | yes     |
 | 219  | Quarterly Report email, sent by the studio-status Worker                                  | no          | n/a      | no               | no            | n/a                 | no             | no         | staged  |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
@@ -13236,9 +13236,18 @@ Home's Visitors card answers "how was this week?". Nobody could answer "how was 
 
 **Gates:** `studio-board.test.ts` (year boundary, quarter keys, leap day, running period, first day, null against 0, gap overlap on both sides, first month, picker, Search Console's limit, cache times, the kit's hashes); `tests/board-report.spec.ts` on the bench (Month, Quarter, Year, a period before tracking, a gap, type buttons, Table, Show more, "i", the not-connected and failed screens, 320 px, axe light and dark).
 
+**What the rollout taught (2026-11-06; check each on every site):**
+
+- **`since.all` is the first day Google has anything, never the deploy day.** The page, channel, place and search lists read it, so set to today they all say "Not tracked yet" (Presbyterian Academy, first deploy). A new event gets its own `'event:<name>'` key.
+- **A headline must be able to fire on the live site today.** Trace it to the line that sends it and look at what the page renders: Muncie's forms sit in frames; Presbyterian Academy's intro link is an email address until a Calendly link is set.
+- **Our own test runs are in the older GA4 months** under `localhost` (Reid Design 237 sessions in July 2026, Stone Steps 347 in September). The Worker's `hosts` setting per site leaves them out, so give every site's entry its hostnames and do not draw them as a gap. The Report will then read lower than GA4's unfiltered total for those months.
+- **A site's auto-discovered route sweep** picks up `/styleguide/report/` and fails on the bench's title: leave `styleguide` out of it (mas-monograms `tests/routes.ts`).
+- **`form_view` needs 40% of the marked element in view.** On a tall form put `data-track-form` on the first question and set `formSelector` (mas-monograms, reid-design-site).
+- **A site deployed by Workers Builds has no `deploy.yml` to pass the variable:** set `report: true` in its `kit.config.ts` with a comment; turning it off is a one-line commit.
+
 **Not covered, and why:** the signed-in tool against the real binding. Nothing local can reach `SITE_DATA`, so the route's live answer and the tool inside the Studio are checked by hand after the first deploy.
 
-**Applied (2026-11-05):** starter (off by default). fbcm staged.
+**Applied (2026-11-06):** starter (off by default). LIVE for administrators on fbcm, stonesteps-50k, presacademy, mas-monograms and reid-design-site, each checked signed in against GA4. Auburn: see its row once its launch lands.
 
 ## Card 219: The Report's quarterly email, sent by the studio-status Worker (2026-11-05)
 
