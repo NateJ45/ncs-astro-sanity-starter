@@ -351,7 +351,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 218  | Studio Report tool: Month, Quarter, Year against last year, per-site `config/board.ts`    | yes         | yes      | yes              | yes           | no                  | yes            | no         | yes     |
 | 219  | Quarterly Report email, sent by the studio-status Worker                                  | no          | n/a      | no               | no            | n/a                 | no             | no         | staged  |
 | 220  | Security overrides: tmp, zod, minimatch; drop extract-zip via @puppeteer/browsers 3       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 221  | CI waits: full Lighthouse off push to main, `npm ci --no-audit --no-fund` everywhere      | no          | yes      | no               | no            | no                  | partial        | no         | partial |
+| 221  | CI waits: full Lighthouse off push to main, `npm ci --no-audit --no-fund` everywhere      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13292,8 +13292,12 @@ On the first days of January, April, July and October the Worker builds the quar
 Two changes survived measurement against the last five successful runs per workflow:
 
 - **Full Lighthouse no longer runs on a push to `main`.** It took 269 to 554s per merge across the family, is not a required check (reid-design-site's ruleset excepted, on PRs), and repeats templates the PR sample has just audited. The PR sample, the weekly full run and `workflow_dispatch` stay. Cost: a score drop that the sample's pages do not show waits for Monday's run, or a manual dispatch. Stone Steps already ran this shape.
-- **Plain `npm ci` runs an audit the workflow never reads.** `npm audit` alone took 27s on a first local run. In `visual.yml`, Stone Steps and FBCM already had the flags and installed in 21 and 26s, while the starter and FBC Auburn without them took 52 and 69s. The starter's PR run with the flags took 28s, one run against a previous range of 21 to 86s. Deploy installs of 52 to 75s against about 30s in CI have the same shape, but the starter's Deploy skips its real steps, so that saving is not measured until a site takes this.
+- **`npm ci --no-audit --no-fund` is insurance, not a current saving.** The drop in install time came from card 220, not this flag. FBC Auburn deploys on plain `npm ci` took 53 to 84s with 43 audit findings and 22s with 14, right after the overrides merged; with the flag the next one took 26s. FBCM: 71 to 89s, then 28s, then 27s with the flag. Stone Steps: 49s, then 32s, then 21s. The correlation with the finding count is the likely reason, not proven, and each after figure is one run. Keep the flag because no workflow reads the audit, and the slow install could come back as advisories build up.
 
 **Tried and dropped:** `force-unsafe-io` for dpkg in the Playwright system library step. Unpacking took 14.9s against 12.7s without it. The step's real problem is slow mirrors (usually about 30s, sometimes 63, 108 or 219s), which fsync does not touch.
+
+**Correction (same day):** the first version of this card credited the flag for the faster Visual and Deploy installs, from runs taken before the rollout. The deploy logs above replaced that claim.
+
+**Rollout trap:** `restore-doc.yml` is `PORTABLE`, so merging its flag in the starter put six sites in drift until each took the same copy, and their required `build` check would fail in the meantime. Grep a workflow for `PORTABLE` before changing it, and open the site branches first.
 
 **Adapt per site:** in `lighthouse.yml` remove `push` and keep the path list under `pull_request`. Add the flags to each plain `run: npm ci`. Keep a site's own `lighthouserc.json` and sample URLs. Compare that site's next Deploy and Visual runs with its recent history.
