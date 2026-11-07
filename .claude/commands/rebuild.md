@@ -16,14 +16,14 @@ until a rebuild runs (see docs/agent/deployment.md). This command triggers one.
    git push origin main
    ```
 
-   Cloudflare detects the push and runs `npm run build` (which re-fetches all
-   Sanity content at build time). Live in roughly 1 to 3 minutes.
+   The `deploy.yml` workflow (GitHub Actions) runs `npm run build` (which
+   re-fetches all Sanity content at build time) and deploys. Live in a few
+   minutes. `gh workflow run deploy.yml` does the same without a commit.
 
-3. Tell the user how to confirm: watch Cloudflare, Workers and Pages, then
-   Deployments, or reload the changed page after about 3 minutes (hard refresh;
+3. Tell the user how to confirm: watch the Deploy run in GitHub Actions, or reload the changed page after about 3 minutes (hard refresh;
    the edge cache can serve stale HTML briefly).
 
 Note: if rebuild-on-publish should be automatic, the durable fix is the
-Sanity webhook connected to a Cloudflare deploy hook described in
+Sanity webhook that sends a GitHub `repository_dispatch` (which `deploy.yml` listens for), described in
 docs/agent/deployment.md ("Sanity to live site rebuild model"). Offer to walk
 the user through it if they are triggering manual rebuilds repeatedly.
