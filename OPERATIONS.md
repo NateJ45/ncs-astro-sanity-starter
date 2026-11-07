@@ -120,7 +120,7 @@ git push -u origin fix/short-description
 gh pr create --base main
 ```
 
-Once the PR merges, Cloudflare detects the push to `main`, runs `npm run build` in their CI, and deploys the resulting `dist/` to the Worker. Takes about 1 to 2 minutes. Watch in the Cloudflare dashboard under Workers → [your-worker-name] → Deployments.
+Once the PR merges, `deploy.yml` runs on the push to `main` (a push that only touches docs is ignored), builds the site and runs `wrangler deploy -c dist/server/wrangler.json`. Takes a few minutes. Watch it with `gh run list --workflow deploy.yml` or the Actions tab on GitHub.
 
 **Verify a deploy landed:**
 
@@ -139,22 +139,22 @@ npm run deploy
 # = npm run build && wrangler deploy
 ```
 
-Only needed if you're testing a config change locally before committing, or if the auto-deploy webhook is broken.
+Only needed if you're testing a config change locally before committing, or if the Deploy workflow is broken.
 
-### Sanity → Cloudflare deploy hook
+### Sanity publish → GitHub → live (the publish webhook)
 
-The site is fully prerendered, so a Sanity content edit doesn't change the live HTML until a rebuild. A Sanity webhook is configured and hits a Cloudflare deploy hook. The flow:
+The site is fully prerendered, so a Sanity content edit changes nothing live until a rebuild. Cloudflare has no deploy hook in this setup; the rebuild is GitHub Actions' `deploy.yml`, which listens for a `repository_dispatch` of type `sanity-publish`. The Sanity webhook POSTs to `https://api.github.com/repos/<owner>/<repo>/dispatches` with a GitHub token and the projection `{"event_type": "sanity-publish"}`. The flow:
 
 1. Editor publishes a document in Sanity Studio
-2. Sanity POSTs to the Cloudflare deploy hook
-3. Cloudflare rebuilds + deploys in about 1 to 2 minutes
+2. Sanity POSTs to GitHub's dispatch endpoint
+3. `deploy.yml` builds and deploys in a few minutes
 4. New content is live
 
 If a content change isn't appearing on the live site after a few minutes:
 
-- Check the webhook fired (Sanity Studio → Manage → API → Webhooks)
-- Check the Cloudflare deploy hook is configured (Workers → Settings → Triggers → Deploy hooks)
-- Try a manual `git push` to force a rebuild
+- Check the webhook fired (Sanity Studio → Manage → API → Webhooks, attempt log). A 401 usually means a missing `Bearer` in the Authorization header or an expired token
+- Check GitHub → Actions for a Deploy run with the `repository_dispatch` event
+- Run `gh workflow run deploy.yml` to force a rebuild
 
 ### Rebuild webhook filter (recommended)
 

@@ -1,11 +1,11 @@
 # Deployment
 
-> Cloudflare Workers build model, the Sanity -> live-site rebuild model, environment variables, security headers, and privacy/analytics.
+> How the site deploys (GitHub Actions to Cloudflare Workers), the Sanity -> live-site rebuild model, environment variables, security headers, and privacy/analytics.
 
 ## Deployment
 
-- Production: pushes to `main` trigger a Cloudflare Workers build that serves your production domain.
-- Previews: any other branch gets its own preview URL via Cloudflare Workers.
+- Production: a push to `main` runs `.github/workflows/deploy.yml` (GitHub Actions), which builds and runs `wrangler deploy -c dist/server/wrangler.json` to the Worker that serves your production domain. Cloudflare's own git build is not connected.
+- Previews: none. Only `main` deploys; other branches get CI checks only.
 - Build command: `npm run build`. Output directory: `dist`.
 - `output: 'static'` in `astro.config.mjs` prerenders every page to HTML at build time. The `@astrojs/cloudflare` adapter stays installed so individual pages can opt into server rendering later via `export const prerender = false` in that page's frontmatter, but for a content-rich marketing site it's effectively inert.
 
@@ -30,14 +30,13 @@ what a Sanity webhook sends. So the publish webhook now points at GitHub's dispa
 endpoint for the repo, with an `Authorization: Bearer <token>` header (the word `Bearer`
 is load-bearing: without it GitHub answers 401 and Sanity reports only a failed attempt)
 and a projection of exactly `{"event_type": "sanity-publish"}`. The GROQ filter below is
-unchanged and still the right one. The Cloudflare build-hook steps that follow describe
-the older route, for a fork that builds through Cloudflare's own git integration instead.
+unchanged and still the right one. The setup steps below describe that route.
 `docs/bootstrap/NEW-PROJECT.md` Step 8 is the setup order.
 
 There are two ways the site rebuilds:
 
-1. **`git push origin main`** -- Cloudflare detects the push -- triggers `npm run build` -- site updates in ~1-3 min.
-2. **Cloudflare deploy hook** -- an HTTP POST to a private Cloudflare URL triggers the same build.
+1. **`git push origin main`** -- `deploy.yml` builds and deploys -- site updates in a few minutes.
+2. **`repository_dispatch` of type `sanity-publish`** -- the Sanity webhook POSTs to GitHub, which starts the same workflow. `gh workflow run deploy.yml` does it by hand.
 
 Without a webhook, every Sanity edit waits until the next code push. That's not a sustainable editor experience.
 
@@ -51,17 +50,17 @@ The old allow-list approach (listing every `_type` that should trigger a rebuild
 
 **The setup pattern (for reference / if it ever needs to be re-created):**
 
-1. **Create the Cloudflare deploy hook** at Cloudflare dashboard -> Workers & Pages -> your-project -> Settings -> Build hooks. Name it `Sanity content publish`, branch `main`. Copy the generated URL.
+1. **Create a GitHub token** (fine-grained, this repo only, Contents: Read and write) and keep it in the password manager. The webhook sends it as `Authorization: Bearer <token>`.
 
-2. **Create the Sanity webhook** at manage.sanity.io -> project -> API -> Webhooks. Name it `Rebuild live site`, dataset `production`, trigger on Create + Update + Delete, HTTP method POST, paste the Cloudflare URL. Apply the deny-list GROQ filter above.
+2. **Create the Sanity webhook** at manage.sanity.io -> project -> API -> Webhooks. Name it `Rebuild live site`, dataset `production`, trigger on Create + Update + Delete, HTTP method POST, URL `https://api.github.com/repos/<owner>/<repo>/dispatches`, projection `{"event_type": "sanity-publish"}`, the `Authorization` header above plus `Accept: application/vnd.github+json`. Apply the deny-list GROQ filter above.
 
-3. **Test:** edit a Sanity singleton field -> publish -> watch Cloudflare's Deployments tab -> new build kicks off within ~10 seconds -> live in ~1-3 min total.
+3. **Test:** edit a Sanity singleton field -> publish -> watch GitHub Actions: a Deploy run with the `repository_dispatch` event starts within seconds -> live in a few minutes.
 
 **Trade-offs to know:**
 
 - Every publish triggers a full ~45 second build. Reasonable for a marketing site. If the editor batch-edits many records, save the publish click until the end to consolidate builds.
 - There's always a 1-3 minute delay between publish and live render. Acceptable for a marketing site; would NOT be for breaking news.
-- Cloudflare's free tier covers 500 builds/month -- well clear of expected publish cadence.
+- Deploy runs queue (one `deploy-production` group) rather than cancel each other, so a burst of publishes is safe.
 - If near-instant updates are ever needed, the alternative is Incremental Static Regeneration or runtime-fetching from Sanity for specific pages. Both are larger architecture changes; the webhook is the right answer for most marketing sites.
 
 ### Video files and iPhones (card 222)
@@ -70,7 +69,7 @@ Cloudflare's asset store ignores `Range`, and Safari on an iPhone expects a 206 
 
 ### Environment variables
 
-Set in Cloudflare -> **Workers & Pages -> your-project -> Settings -> Variables** (Build section). All documented in `.env.example`; copy to `.env` and fill in real values for local dev.
+Build-time `PUBLIC_*` values are GitHub repo variables read by `deploy.yml`; Worker runtime secrets are set in Cloudflare -> **Workers & Pages -> your-project -> Settings -> Variables and Secrets**. All documented in `.env.example`; copy to `.env` and fill in real values for local dev.
 
 - `PUBLIC_SANITY_PROJECT_ID` -- Sanity project ID from manage.sanity.io. When absent, `sanityFetch` returns fallback values and the build completes cleanly (empty-state mode).
 - `PUBLIC_SANITY_DATASET` -- `production` (or your dataset name). Same graceful-empty behavior as above.
