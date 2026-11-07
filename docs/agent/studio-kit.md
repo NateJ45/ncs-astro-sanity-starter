@@ -1175,9 +1175,8 @@ Findings from the step 0 spike (2026-10-17), for the Worker half:
   send it as `Authorization: Bearer` to `/api/studio/*`. The route verifies it against
   `https://<projectId>.api.sanity.io/v2025-02-19/users/me`. A browser that signed in by cookie only would have no token;
   if that turns up, set `auth: { loginMethod: 'token' }`.
-- **Cron**: `@astrojs/cloudflare` 14 deploys `main: "@astrojs/cloudflare/entrypoints/server"`, which exports only
-  `{ fetch }`. A `scheduled` handler means pointing wrangler `main` at a small worker file that re-exports that `fetch`
-  and adds `scheduled`; not tried in a build yet. The GitHub Actions schedule calling a secret-guarded route stays the
+- **Cron**: `src/worker.ts` (card 222) is the Worker entry and exports only `{ fetch }`. A `scheduled` handler would be added
+  there, which forks that `PORTABLE` file; not tried in a build yet. The GitHub Actions schedule calling a secret-guarded route stays the
   fallback.
 
 ## Adopting it in a site

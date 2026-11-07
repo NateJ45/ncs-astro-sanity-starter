@@ -64,6 +64,10 @@ The old allow-list approach (listing every `_type` that should trigger a rebuild
 - Cloudflare's free tier covers 500 builds/month -- well clear of expected publish cadence.
 - If near-instant updates are ever needed, the alternative is Incremental Static Regeneration or runtime-fetching from Sanity for specific pages. Both are larger architecture changes; the webhook is the right answer for most marketing sites.
 
+### Video files and iPhones (card 222)
+
+Cloudflare's asset store ignores `Range`, and Safari on an iPhone expects a 206 for video. So `wrangler.jsonc` names `src/worker.ts` as `main` and sends `/*.mp4` and `/*.webm` to it first, and `src/lib/video-ranges.ts` answers with the requested bytes. Every other asset skips the Worker, and every other request goes to Astro's own `handle()`. To check a clip: `curl -s -o /dev/null -D - -H 'Range: bytes=0-1' <clip url>` says `206 Partial Content`. Test locally with `npm run preview` (workerd); other local servers handle ranges themselves and hide the bug.
+
 ### Environment variables
 
 Set in Cloudflare -> **Workers & Pages -> your-project -> Settings -> Variables** (Build section). All documented in `.env.example`; copy to `.env` and fill in real values for local dev.

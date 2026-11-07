@@ -156,8 +156,13 @@
   // "AI_HOURLY_LIMIT" (suggestions per person per hour, default 30). Without
   // the key the buttons do not appear. Steps: OPERATIONS.md, "Writing help".
 
-  "main": "@astrojs/cloudflare/entrypoints/server",
+  // src/worker.ts is Astro's handler plus video byte ranges (PORTS.md card 222).
+  "main": "./src/worker.ts",
   "assets": {
+    // These two reach the Worker first: the asset store ignores Range, and iPhones
+    // expect a 206 for video. Keep in step with isVideoPath in src/lib/video-ranges.ts.
+    // "/*.mp4" covers subfolders too. "/**/*.mp4" misses a clip at the root of public/.
+    "run_worker_first": ["/*.mp4", "/*.webm"],
     // @astrojs/cloudflare v14 splits the build into dist/client (static assets)
     // + dist/server (the SSR bundle: /studio, /preview/**, /api/draft-mode/*).
     //

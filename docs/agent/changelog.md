@@ -1,5 +1,7 @@
 # Change history
 
+_2026-11-07: video byte ranges (PORTS card 222)._ `src/worker.ts` wraps Astro's handler and `src/lib/video-ranges.ts` answers `*.mp4` and `*.webm` range requests with a 206, because the asset store sends the whole file with a 200 and Safari on an iPhone expects a partial answer. Every other request behaves as before. Detail: `docs/agent/deployment.md`.
+
 _2026-11-05: the Report tool in the Studio (PORTS card 218)._ A site's numbers by Month, Quarter or Year against the same period a year before, the Astro twin of the WordPress board report. `src/lib/studio-board.ts` is the arithmetic, `src/pages/api/studio/board.ts` the signed-in route onto `siteSeries`, `src/sanity/kit/board/` the screen and the chart kit (same bytes as the themes), `src/config/board.ts` the site's own parts and words. Off unless `PUBLIC_BOARD_REPORT=true`. See `docs/agent/studio-kit.md`.
 
 _2026-11-05: a shared GA4 event layer (PORTS card 217)._ Generalised from First Baptist Muncie's own: `src/lib/track.ts` (classifier and sender), `src/components/analytics/SiteEvents.astro` (one delegated listener, rendered next to `<Analytics />`), `src/lib/event-kinds.ts` (privacy wording) and unit tests, all PORTABLE, reading the site's map in `src/config/events.ts`. The newsletter and contact forms send `generate_lead`; the 404 and journal body carry the markers it looks for. The privacy page names the kinds of event whenever GA4 is on. Detail in `docs/agent/analytics.md`.
