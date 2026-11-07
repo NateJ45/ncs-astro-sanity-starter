@@ -352,7 +352,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 219  | Quarterly Report email, sent by the studio-status Worker                                  | no          | n/a      | no               | no            | n/a                 | no             | no         | staged  |
 | 220  | Security overrides: tmp, zod, minimatch; drop extract-zip via @puppeteer/browsers 3       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 221  | CI waits: full Lighthouse off push to main, `npm ci --no-audit --no-fund` everywhere      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 222  | Video byte ranges: `src/worker.ts` wraps Astro, so iPhones get a 206 for clips            | no          | yes      | no               | no            | partial             | no             | no         | no      |
+| 222  | Video byte ranges: `src/worker.ts` wraps Astro, so iPhones get a 206 for clips            | yes         | yes      | yes              | yes           | partial             | yes            | yes        | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13305,6 +13305,8 @@ Two changes survived measurement against the last five successful runs per workf
 
 ## Card 222: Video byte ranges, so a self-hosted clip can play on an iPhone (2026-11-07)
 
+**Status:** live 2026-11-07 on presacademy, reid-design-site, mas-monograms, stonesteps-50k, fbc-auburn and fbcm, each checked on the live site with a real clip (206 for mp4 and webm, `/studio/` 200). Not yet watched on a real iPhone.
+
 **Origin:** nixoncreativestudio.com, 2026-11-07. Cloudflare's static assets ignore a `Range` header and send the whole file with a 200 and no `Accept-Ranges`. Safari on an iPhone asks for the first bytes of a clip and expects a 206. Every family site with clips in `public/` answered 200 on the live check. Desktop browsers, Playwright on Chromium and Lighthouse all look fine, so nothing in CI could see it. The iPhone failure itself comes from Safari's documented behaviour; nobody has watched it fail on a device.
 
 **What it adds:**
@@ -13320,4 +13322,4 @@ Two changes survived measurement against the last five successful runs per workf
 - Test with `wrangler dev -c dist/server/wrangler.json`, never `http-server` or `astro preview`, which handle ranges themselves and hide the bug. Check: `curl -s -o /dev/null -D - -H 'Range: bytes=0-1' <clip url>` says `206 Partial Content`.
 - The Worker buffers the clip to slice it. That is fine for the family's clips, all well under the Worker memory limit. A long video belongs on a streaming host, not in `public/`.
 
-**Adapt per site:** copy the three files, then make the two `wrangler.jsonc` changes. A site with a Worker export of its own (none today) merges it into `src/worker.ts` and forks the file. nixoncreativestudio is assets only, so it keeps its own unmarked `src/worker.ts` and adds the Worker after the build (`scripts/add-video-worker.mjs`); the matrix says `partial` for that reason.
+**Adapt per site:** copy the three files, then make the two `wrangler.jsonc` changes. On a site that runs Vitest (reid-design-site), add `src/lib/video-ranges.test.ts` to the `exclude` list in `vitest.config.ts` and to `test:kit`, because it is written for node:test. A site with a Worker export of its own (none today) merges it into `src/worker.ts` and forks the file. nixoncreativestudio is assets only, so it keeps its own unmarked `src/worker.ts` and adds the Worker after the build (`scripts/add-video-worker.mjs`); the matrix says `partial` for that reason.
