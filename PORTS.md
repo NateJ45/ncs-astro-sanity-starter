@@ -352,6 +352,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 219  | Quarterly Report email, sent by the studio-status Worker                                  | no          | n/a      | no               | no            | n/a                 | no             | no         | staged  |
 | 220  | Security overrides: tmp, zod, minimatch; drop extract-zip via @puppeteer/browsers 3       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 221  | CI waits: full Lighthouse off push to main, `npm ci --no-audit --no-fund` everywhere      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 222  | Video byte ranges: `src/worker.ts` wraps Astro, so iPhones get a 206 for clips            | no          | yes      | no               | no            | partial             | no             | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13301,3 +13302,22 @@ Two changes survived measurement against the last five successful runs per workf
 **Rollout trap:** `restore-doc.yml` is `PORTABLE`, so merging its flag in the starter put six sites in drift until each took the same copy, and their required `build` check would fail in the meantime. Grep a workflow for `PORTABLE` before changing it, and open the site branches first.
 
 **Adapt per site:** in `lighthouse.yml` remove `push` and keep the path list under `pull_request`. Add the flags to each plain `run: npm ci`. Keep a site's own `lighthouserc.json` and sample URLs. Compare that site's next Deploy and Visual runs with its recent history.
+
+## Card 222: Video byte ranges, so a self-hosted clip can play on an iPhone (2026-11-07)
+
+**Origin:** nixoncreativestudio.com, 2026-11-07. Cloudflare's static assets ignore a `Range` header and send the whole file with a 200 and no `Accept-Ranges`. Safari on an iPhone asks for the first bytes of a clip and expects a 206. Every family site with clips in `public/` answered 200 on the live check. Desktop browsers, Playwright on Chromium and Lighthouse all look fine, so nothing in CI could see it. The iPhone failure itself comes from Safari's documented behaviour; nobody has watched it fail on a device.
+
+**What it adds:**
+
+- `src/lib/video-ranges.ts` (`PORTABLE`, unit tested in `video-ranges.test.ts`): reads the range and builds the 206, the 416 or the plain 200.
+- `src/worker.ts` (`PORTABLE`): the site's Worker. Clips go through `video-ranges`. Everything else goes to the same `handle()` the adapter's default entry calls.
+- `wrangler.jsonc`: `"main": "./src/worker.ts"` and `"run_worker_first": ["/*.mp4", "/*.webm"]` under `assets`. The adapter carries both into `dist/server/wrangler.json`, and every other asset still skips the Worker.
+
+**Traps:**
+
+- `/**/*.mp4` does not match a clip at the root of `public/`. `/*.mp4` matches the root and subfolders. Measured in workerd.
+- A `.mp4` path with no file behind it must fall through to Astro, or it skips the 404 page and any route that serves files itself. A site's own R2 route is the case to check.
+- Test with `wrangler dev -c dist/server/wrangler.json`, never `http-server` or `astro preview`, which handle ranges themselves and hide the bug. Check: `curl -s -o /dev/null -D - -H 'Range: bytes=0-1' <clip url>` says `206 Partial Content`.
+- The Worker buffers the clip to slice it. That is fine for the family's clips, all well under the Worker memory limit. A long video belongs on a streaming host, not in `public/`.
+
+**Adapt per site:** copy the three files, then make the two `wrangler.jsonc` changes. A site with a Worker export of its own (none today) merges it into `src/worker.ts` and forks the file. nixoncreativestudio is assets only, so it keeps its own unmarked `src/worker.ts` and adds the Worker after the build (`scripts/add-video-worker.mjs`); the matrix says `partial` for that reason.
