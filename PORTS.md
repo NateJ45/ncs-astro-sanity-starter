@@ -353,7 +353,8 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 220  | Security overrides: tmp, zod, minimatch; drop extract-zip via @puppeteer/browsers 3       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 221  | CI waits: full Lighthouse off push to main, `npm ci --no-audit --no-fund` everywhere      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 222  | Video byte ranges: `src/worker.ts` wraps Astro, so iPhones get a 206 for clips            | yes         | yes      | yes              | yes           | partial             | yes            | yes        | yes     |
-| 223  | Sticky header scroll room and axe 2.2 tags                                                | open        | yes      | open             | open          | open                | open           | open       | open    |
+| 223  | Sticky header scroll room and axe 2.2 tags                                                | open        | yes      | open             | open          | open                | yes            | yes        | yes     |
+| 224  | Sticky CTA chip renders into body, stays while focused                                    | n/a         | yes      | open             | n/a           | n/a                 | n/a            | yes        | n/a     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13327,7 +13328,7 @@ Two changes survived measurement against the last five successful runs per workf
 
 ## Card 223: Sticky header scroll room and axe 2.2 tags (2026-11-08)
 
-**Status:** starter 2026-11-08. First Baptist Auburn is the first site, in the same pass. Stone Steps and Muncie are being fixed on their own branches the same day; every other site is open.
+**Status:** starter 2026-11-08 (#294). Applied the same day: fbc-auburn #275 (with follow-ups #276, #277), stonesteps-50k #211, fbcm #155. Every other site is open.
 
 **Origin:** the WCAG 2.2 AA sweep of the live sites, 2026-11-08, at 390 by 844. Success criterion 2.4.11 (Focus Not Obscured, Minimum) failed on Auburn. The header is sticky and the root had no `scroll-padding-top`, so tabbing BACKWARDS scrolled each focused link to y=0, under the 73px header. Going forwards, the fixed bottom Sunday bar and the journal chip covered links near the bottom, because there was no `scroll-padding-bottom` either. The starter had bottom padding for ActionBar only and nothing at the top. Separately, both axe suites ran `analyze()` with no tags, so the 2.2 rules (target-size, 2.5.8) were never named in the run.
 
@@ -13347,3 +13348,23 @@ Two changes survived measurement against the last five successful runs per workf
 - Turning the tags on can surface target-size failures that were never reported. Fix them in the site, do not exclude the rule.
 
 **Adapt per site:** copy the new spec and the two edited specs, add the `scroll-padding` block to the site's own header CSS with its own measured heights, and add the `data-sticky-chip` attributes to `StickyCTAChip.tsx` if the site has the chip. Run the new spec before and after to see it fail then pass. nixoncreativestudio, presacademy, reid-design-site and mas-monograms will show DRIFT on the two a11y specs until they take the copy.
+
+## Card 224: Sticky CTA chip renders into body, stays while focused (2026-11-08)
+
+**Status:** starter 2026-11-08. First site: fbc-auburn #276 and #277. reid-design-site in the same pass. Sites without the chip, or whose `<main>` carries no `view-transition-name` (fbcm), are n/a.
+
+**Origin:** the WCAG 2.2 recheck after card 223. On Auburn's journal pages the "Got a question?" chip took keyboard focus while invisible. Two causes. First, `<main>` and the footer both carry a `view-transition-name` (`main-content`, `site-footer`), which makes each a stacking context, so the chip (fixed, z-40, inside `<main>`) could rise no higher than `<main>`, and the footer, later in the page, painted over it at the foot of every page. Its own computed styles all looked fine; only `elementsFromPoint` and a screenshot showed it. Reid's live /services/ page had the same fault. Second, scrolling back above the threshold faded the chip out even while one of its links held focus.
+
+**What it adds:**
+
+- `StickyCTAChip.tsx` renders through `createPortal(..., document.body)` once mounted; the server renders nothing (the chip only ever shows after hydration and a scroll).
+- `visible = scrolledIn || focusInside`, with `onFocus` and an `onBlur` that checks `relatedTarget`, so the chip stays while focus is inside it.
+- `tests/sticky-chip.spec.ts`: on a journal entry at 390px it waits for `body > [data-sticky-chip]`, hit-tests the chip at the foot of the page, then focuses its link, scrolls to the top and expects it still showing.
+
+**Traps:**
+
+- Do NOT fix it by lifting `<main>` (`z-index: 1`). That was tried on Auburn (#277, first commit) and the visual suite caught it hiding the footer's brick course, which is meant to rise over the bottom of `<main>`.
+- A test that counts the chip straight after load now finds none: wait for it after a scroll.
+- The chip moves to the end of `<body>`, so it is last in the tab order, after the footer.
+
+**Adapt per site:** port the three edits to the site's own `StickyCTAChip.tsx` (Reid's is restyled, so edit rather than copy), add `data-sticky-chip` and `data-chip-visible` if the site lacks them, and point the test at a page that has the chip.
