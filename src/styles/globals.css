@@ -607,6 +607,26 @@ html.motion [data-reveal].is-visible {
   transform: translateY(-100%);
 }
 
+/* Focus Not Obscured (WCAG 2.4.11; PORTS.md card 223). The header is sticky, so Shift+Tab
+   scrolled a focused link to y=0 underneath it. scroll-padding-top keeps the browser from
+   scrolling a focus target into the covered strip. These are the header's SHOWING height (the
+   scrolled state, after the lg compaction) plus about 12px: 85px under lg, 94px at 1023px, 69px
+   from lg. A site that changes its header height re-measures them (tests/focus-not-obscured.spec.ts
+   fails when they fall short). The fixed bottom bars add scroll-padding-bottom while they show:
+   ActionBar.astro for the action bar, and here for the StickyCTAChip, which sits 88px up and is
+   about 48px tall. */
+html {
+  scroll-padding-top: 6.75rem;
+}
+@media (min-width: 64rem) {
+  html {
+    scroll-padding-top: 5.5rem;
+  }
+}
+html:has([data-sticky-chip][data-chip-visible]) {
+  scroll-padding-bottom: 9.5rem;
+}
+
 /* Header compaction (PORTS.md card 157). Header.astro's script sets
    data-scrolled past 64px of scroll and clears it only at 8px or less, so the
    bar cannot flip back and forth near the top. Transforms only: the bar keeps

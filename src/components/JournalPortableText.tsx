@@ -128,7 +128,7 @@ function makeComponents(): PortableTextComponents {
       h2: ({ children }) => (
         <h2
           id={makeHeadingId(seen, children)}
-          className="mt-l mb-s scroll-mt-24 font-display text-h3 text-foreground"
+          className="mt-l mb-s font-display text-h3 text-foreground"
         >
           {children}
         </h2>
@@ -136,7 +136,7 @@ function makeComponents(): PortableTextComponents {
       h3: ({ children }) => (
         <h3
           id={makeHeadingId(seen, children)}
-          className="mt-l mb-xs scroll-mt-24 font-display text-h4 text-foreground"
+          className="mt-l mb-xs font-display text-h4 text-foreground"
         >
           {children}
         </h3>
@@ -144,7 +144,7 @@ function makeComponents(): PortableTextComponents {
       h4: ({ children }) => (
         <h4
           id={makeHeadingId(seen, children)}
-          className="mt-m mb-xs scroll-mt-24 font-display text-h5 text-foreground"
+          className="mt-m mb-xs font-display text-h5 text-foreground"
         >
           {children}
         </h4>

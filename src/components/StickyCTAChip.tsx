@@ -119,6 +119,9 @@ export default function StickyCTAChip({ label, href = '/contact/', threshold = 0
         visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0',
       ].join(' ')}
       aria-hidden={!visible}
+      // Read by html:has() in the stylesheet: scroll-padding-bottom while the chip shows.
+      data-sticky-chip
+      data-chip-visible={visible ? '' : undefined}
     >
       {/* Width sizing:
            - mobile: cap at 92vw so the chip never blows past the viewport

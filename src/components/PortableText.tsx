@@ -43,24 +43,18 @@ function makeComponents(): PortableTextComponents {
       h2: ({ children }) => (
         <h2
           id={headingId(children)}
-          className="mt-section-md mb-m scroll-mt-24 font-display text-h2 text-foreground"
+          className="mt-section-md mb-m font-display text-h2 text-foreground"
         >
           {children}
         </h2>
       ),
       h3: ({ children }) => (
-        <h3
-          id={headingId(children)}
-          className="mt-l mb-s scroll-mt-24 font-display text-h3 text-foreground"
-        >
+        <h3 id={headingId(children)} className="mt-l mb-s font-display text-h3 text-foreground">
           {children}
         </h3>
       ),
       h4: ({ children }) => (
-        <h4
-          id={headingId(children)}
-          className="mt-m mb-s scroll-mt-24 font-display text-h4 text-foreground"
-        >
+        <h4 id={headingId(children)} className="mt-m mb-s font-display text-h4 text-foreground">
           {children}
         </h4>
       ),
