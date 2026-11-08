@@ -353,6 +353,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 220  | Security overrides: tmp, zod, minimatch; drop extract-zip via @puppeteer/browsers 3       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 221  | CI waits: full Lighthouse off push to main, `npm ci --no-audit --no-fund` everywhere      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 222  | Video byte ranges: `src/worker.ts` wraps Astro, so iPhones get a 206 for clips            | yes         | yes      | yes              | yes           | partial             | yes            | yes        | yes     |
+| 223  | Sticky header scroll room and axe 2.2 tags                                                | open        | yes      | open             | open          | open                | open           | open       | open    |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13323,3 +13324,25 @@ Two changes survived measurement against the last five successful runs per workf
 - The Worker buffers the clip to slice it. That is fine for the family's clips, all well under the Worker memory limit. A long video belongs on a streaming host, not in `public/`.
 
 **Adapt per site:** copy the three files, then make the two `wrangler.jsonc` changes. On a site that runs Vitest (reid-design-site), add `src/lib/video-ranges.test.ts` to the `exclude` list in `vitest.config.ts` and to `test:kit`, because it is written for node:test. A site with a Worker export of its own (none today) merges it into `src/worker.ts` and forks the file. nixoncreativestudio is assets only, so it keeps its own unmarked `src/worker.ts` and adds the Worker after the build (`scripts/add-video-worker.mjs`); the matrix says `partial` for that reason.
+
+## Card 223: Sticky header scroll room and axe 2.2 tags (2026-11-08)
+
+**Status:** starter 2026-11-08. First Baptist Auburn is the first site, in the same pass. Stone Steps and Muncie are being fixed on their own branches the same day; every other site is open.
+
+**Origin:** the WCAG 2.2 AA sweep of the live sites, 2026-11-08, at 390 by 844. Success criterion 2.4.11 (Focus Not Obscured, Minimum) failed on Auburn. The header is sticky and the root had no `scroll-padding-top`, so tabbing BACKWARDS scrolled each focused link to y=0, under the 73px header. Going forwards, the fixed bottom Sunday bar and the journal chip covered links near the bottom, because there was no `scroll-padding-bottom` either. The starter had bottom padding for ActionBar only and nothing at the top. Separately, both axe suites ran `analyze()` with no tags, so the 2.2 rules (target-size, 2.5.8) were never named in the run.
+
+**What it adds:**
+
+- `html { scroll-padding-top }` in the stylesheet, one constant per header breakpoint: the header's SHOWING height (the scrolled state, after any compaction) plus about 12px.
+- `scroll-padding-bottom` for each fixed bottom element, set only while it shows: `html:has([data-sticky-chip][data-chip-visible])` for the StickyCTAChip (the island now carries both attributes), and the site's own bar the same way (Auburn: `html:has(.sundaybar:not([hidden]))`; the starter's ActionBar already does it with `html[data-action-bar-on]`).
+- `tests/focus-not-obscured.spec.ts` (`PORTABLE`): at 390 by 844 it Shift+Tabs up and Tabs down three routes and asserts, after every press, that `elementFromPoint` at nine points inside the focused element reaches it at least once. It fails on the old CSS (checked on Auburn) and passes on the new.
+- `tests/a11y.spec.ts` and `tests/a11y-dark.spec.ts` (`PORTABLE`): `.withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])`.
+
+**Traps:**
+
+- The constants are measured, not derived. Measure the header with the page scrolled and the bar showing (`getBoundingClientRect().bottom`), at 390, 768, one pixel under the large breakpoint and at it, and at 1280. The unscrolled desktop header is taller than the scrolled one on a site with an eyebrow strip (the starter: 147px against 69px), and the page is at the top then, so the smaller number is the one that matters.
+- A fixed bar that is always in the DOM but `hidden` must not add padding. Key the rule on the shown state.
+- Do not rely on a single Tab direction in the test. Backwards exposes the header, forwards exposes the bottom bar.
+- Turning the tags on can surface target-size failures that were never reported. Fix them in the site, do not exclude the rule.
+
+**Adapt per site:** copy the new spec and the two edited specs, add the `scroll-padding` block to the site's own header CSS with its own measured heights, and add the `data-sticky-chip` attributes to `StickyCTAChip.tsx` if the site has the chip. Run the new spec before and after to see it fail then pass. nixoncreativestudio, presacademy, reid-design-site and mas-monograms will show DRIFT on the two a11y specs until they take the copy.

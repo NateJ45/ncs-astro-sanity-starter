@@ -41,7 +41,9 @@ test.describe('Accessibility (dark mode): no axe violations', () => {
 
       await settle(page);
 
-      const results = await new AxeBuilder({ page }).analyze();
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])
+        .analyze();
       expect(
         results.violations,
         results.violations
