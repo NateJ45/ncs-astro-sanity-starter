@@ -14,7 +14,7 @@ interface Props {
 }
 
 // Scroll the TOC link to its heading natively. `scrollIntoView` honours the
-// `scroll-mt-24` on the headings, so the target clears the sticky header
+// `scroll-padding-top` on the root, so the target clears the sticky header
 // without a manual offset, matching where a plain anchor jump lands. It glides
 // unless the reader prefers reduced motion (Lenis was removed 2026-10-17,
 // PORTS.md card 102; the click is a press, so the page also carries

@@ -424,8 +424,8 @@ const announcementStyle = ANNOUNCEMENT_STYLES[announcement?.style ?? 'info'] ?? 
           copies the incoming document's <html> attributes onto the live
           one, which takes data-smooth-scroll off before it scrolls, and the
           next press puts it back.
-        - Anchors clear the sticky header through `scroll-mt-24` on the
-          targets, which native scrolling honours. */}
+        - Anchors clear the sticky header through `scroll-padding-top` on
+          the root (PORTS.md card 223), which native scrolling honours. */}
     <script>
       const smoothScroll = () => {
         const html = document.documentElement;

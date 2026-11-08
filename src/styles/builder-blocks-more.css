@@ -416,8 +416,8 @@
   }
 }
 .bb-hub__group {
-  /* A jump lands the group's name just under the header and the chip row. */
-  scroll-margin-top: calc(var(--hub-header, 4rem) + 4.5rem);
+  /* A jump lands the group's name just under the chip row (the header is the root's scroll-padding-top). */
+  scroll-margin-top: 4.5rem;
 }
 .bb-hub__group + .bb-hub__group {
   margin-top: var(--spacing-section-md);
@@ -507,7 +507,7 @@
   }
 }
 .bb-hcard {
-  scroll-margin-top: calc(var(--hub-header, 4rem) + 5rem);
+  scroll-margin-top: 5rem;
 }
 /* Phones: a card without a photo is a compact row, a 96px tile left and the words right. */
 @media (width < 40rem) {

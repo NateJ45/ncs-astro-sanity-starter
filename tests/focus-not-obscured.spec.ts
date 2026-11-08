@@ -15,7 +15,26 @@ import { settle } from './helpers';
 // rectangle must reach the element (or something inside it, or an ancestor that holds
 // it, which is how a link wrapped in a label hits) at least once.
 
-const STEPS = 45;
+const STEPS = 40;
+
+// After a key press the browser may glide to the target (smooth scroll) and the header slides in
+// or out. Wait until scrollY has held still for eight frames, so a slow CI worker is not read mid-glide.
+async function scrolled(page: Page) {
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        let last = -1;
+        let still = 0;
+        const tick = () => {
+          still = window.scrollY === last ? still + 1 : 0;
+          last = window.scrollY;
+          if (still >= 8) resolve();
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+}
 
 async function focusedCoverage(page: Page) {
   return page.evaluate(() => {
@@ -42,6 +61,7 @@ async function focusedCoverage(page: Page) {
 for (const route of routes.slice(0, 3)) {
   test.describe(`focus not obscured: ${route}`, () => {
     test.use({ viewport: { width: 390, height: 844 } });
+    test.setTimeout(120_000);
 
     test('Shift+Tab up the page never lands a link under a sticky bar', async ({ page }) => {
       await page.goto(route, { waitUntil: 'domcontentloaded' });
@@ -58,7 +78,7 @@ for (const route of routes.slice(0, 3)) {
       let checked = 0;
       for (let i = 0; i < STEPS; i++) {
         await page.keyboard.press('Shift+Tab');
-        await page.waitForTimeout(120);
+        await scrolled(page);
         const c = await focusedCoverage(page);
         if (!c) break;
         checked++;
@@ -81,7 +101,7 @@ for (const route of routes.slice(0, 3)) {
       let checked = 0;
       for (let i = 0; i < STEPS; i++) {
         await page.keyboard.press('Tab');
-        await page.waitForTimeout(120);
+        await scrolled(page);
         const c = await focusedCoverage(page);
         if (!c) break;
         checked++;

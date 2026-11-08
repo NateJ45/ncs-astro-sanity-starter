@@ -121,11 +121,11 @@ const items: RenderedItem[] = value.map((block) => {
   const style = block.style ?? 'normal';
   let html: string;
   if (style === 'h2') {
-    html = `<h2 class="mt-section-md mb-m font-display text-h2 text-foreground scroll-mt-24">${inner}</h2>`;
+    html = `<h2 class="mt-section-md mb-m font-display text-h2 text-foreground">${inner}</h2>`;
   } else if (style === 'h3') {
-    html = `<h3 class="mt-l mb-s font-display text-h3 text-foreground scroll-mt-24">${inner}</h3>`;
+    html = `<h3 class="mt-l mb-s font-display text-h3 text-foreground">${inner}</h3>`;
   } else if (style === 'h4') {
-    html = `<h4 class="mt-m mb-s font-display text-h4 text-foreground scroll-mt-24">${inner}</h4>`;
+    html = `<h4 class="mt-m mb-s font-display text-h4 text-foreground">${inner}</h4>`;
   } else if (style === 'blockquote') {
     html = `<blockquote class="my-l border-l-4 border-primary pl-m italic text-foreground/90">${inner}</blockquote>`;
   } else {
