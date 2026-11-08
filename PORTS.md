@@ -353,7 +353,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 220  | Security overrides: tmp, zod, minimatch; drop extract-zip via @puppeteer/browsers 3       | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 221  | CI waits: full Lighthouse off push to main, `npm ci --no-audit --no-fund` everywhere      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 222  | Video byte ranges: `src/worker.ts` wraps Astro, so iPhones get a 206 for clips            | yes         | yes      | yes              | yes           | partial             | yes            | yes        | yes     |
-| 223  | Sticky header scroll room and axe 2.2 tags                                                | open        | yes      | open             | open          | open                | yes            | yes        | yes     |
+| 223  | Sticky header scroll room and axe 2.2 tags                                                | partial     | yes      | partial          | partial       | partial             | yes            | yes        | yes     |
 | 224  | Sticky CTA chip renders into body, stays while focused                                    | n/a         | yes      | open             | n/a           | n/a                 | n/a            | yes        | n/a     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
@@ -13328,7 +13328,7 @@ Two changes survived measurement against the last five successful runs per workf
 
 ## Card 223: Sticky header scroll room and axe 2.2 tags (2026-11-08)
 
-**Status:** starter 2026-11-08 (#294). Applied the same day: fbc-auburn #275 (with follow-ups #276, #277), stonesteps-50k #211, fbcm #155. Every other site is open.
+**Status:** starter 2026-11-08 (#294). Applied the same day: fbc-auburn #275 (with follow-ups #276, #277), stonesteps-50k #211, fbcm #155. The axe tag half only, on the sites' own (unmarked) specs: nixoncreativestudio #246 (its own `tests/wcag22.spec.ts` covers 2.4.11), presacademy #176, mas-monograms #176, reid-design-site #225, all 2026-11-08. None of those four took `focus-not-obscured.spec.ts`; all four passed 2.4.11 in the live audit that day (presacademy and MAS already had `scroll-padding-top`). The same day the agent docs in the starter and every site moved their target from WCAG 2.1 AA to 2.2 AA (starter #296).
 
 **Origin:** the WCAG 2.2 AA sweep of the live sites, 2026-11-08, at 390 by 844. Success criterion 2.4.11 (Focus Not Obscured, Minimum) failed on Auburn. The header is sticky and the root had no `scroll-padding-top`, so tabbing BACKWARDS scrolled each focused link to y=0, under the 73px header. Going forwards, the fixed bottom Sunday bar and the journal chip covered links near the bottom, because there was no `scroll-padding-bottom` either. The starter had bottom padding for ActionBar only and nothing at the top. Separately, both axe suites ran `analyze()` with no tags, so the 2.2 rules (target-size, 2.5.8) were never named in the run.
 
@@ -13347,7 +13347,7 @@ Two changes survived measurement against the last five successful runs per workf
 - scroll-padding and scroll-margin ADD. Any `scroll-mt-24` or `scroll-margin-top: calc(header + ...)` that already cleared the header now double counts and lands the anchor a header too low (it also broke the Hub block's scrollspy, whose active line is a third of the way down). Remove the header part from those margins, keep only what clears the sticky chip row.
 - Turning the tags on can surface target-size failures that were never reported. Fix them in the site, do not exclude the rule.
 
-**Adapt per site:** copy the new spec and the two edited specs, add the `scroll-padding` block to the site's own header CSS with its own measured heights, and add the `data-sticky-chip` attributes to `StickyCTAChip.tsx` if the site has the chip. Run the new spec before and after to see it fail then pass. nixoncreativestudio, presacademy, reid-design-site and mas-monograms will show DRIFT on the two a11y specs until they take the copy.
+**Adapt per site:** copy the new spec and the two edited specs, add the `scroll-padding` block to the site's own header CSS with its own measured heights, and add the `data-sticky-chip` attributes to `StickyCTAChip.tsx` if the site has the chip. Run the new spec before and after to see it fail then pass. nixoncreativestudio, presacademy, reid-design-site and mas-monograms keep their own unmarked a11y specs, so sync-check does not compare them; they carry the same tag list by hand.
 
 ## Card 224: Sticky CTA chip renders into body, stays while focused (2026-11-08)
 
