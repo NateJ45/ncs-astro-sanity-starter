@@ -178,7 +178,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 42   | External link health, on its own schedule                                                 | no          | yes      | fork             | no            | no                  | yes            | yes        | yes     |
 | 43   | Contrast for what axe declines to judge                                                   | no          | yes      | no               | no            | no                  | yes            | yes        | partial |
 | 44   | Fork residue audit                                                                        | n/a         | yes      | n/a              | n/a           | n/a                 | yes            | yes        | yes     |
-| 45   | The site's own contact endpoint                                                           | staged      | yes      | no               | no            | no                  | yes            | yes        | partial |
+| 45   | The site's own contact endpoint                                                           | staged      | yes      | no               | no            | yes                 | yes            | yes        | partial |
 | 46   | Share cards in the brand's real typeface                                                  | no          | yes      | fork             | no            | no                  | yes            | yes        | partial |
 | 47   | The icon set, from one drawing                                                            | no          | yes      | yes              | no            | no                  | yes            | yes        | yes     |
 | 48   | Domain cutover script + zone audit                                                        | no          | yes      | no               | no            | no                  | partial        | yes        | yes     |
@@ -5109,6 +5109,40 @@ than none, since it gets shipped rather than replaced.
 gate that could see it.
 
 ---
+
+### Addendum, 2026-11-09: nixoncreativestudio, a static site with a custom Worker
+
+nixoncreativestudio applied the card on 2026-11-09 (nixoncreativestudio PRs #260 and #261),
+live-verified: a labelled test landed in D1 with `notified = 1` and Email Sending's activity
+log shows it Delivered. Three differences worth knowing for the next site of this shape:
+
+1. **The endpoint is NOT an Astro route.** The site builds `output: 'static'` and deploys
+   static assets plus a hand-written `src/worker.ts` (added to `dist/client/wrangler.json`
+   after the build, with `run_worker_first` limited to the paths that need code). A
+   `prerender = false` route switches the whole build to Astro's server layout
+   (`dist/server/wrangler.json`) and breaks that post-build step. So the handler lives in
+   `src/contact-endpoint.ts`, called from the Worker's `fetch` for `/api/contact/`, and
+   `/api/contact` + `/api/contact/` join `run_worker_first`. The pure lib and the migration
+   are still the canonical copies. Local D1 for this layout: `d1 execute --local -c
+dist/client/wrangler.json --file migrations/...`, because `migrations apply` cannot find
+   the migrations beside that generated config.
+2. **Email Sending on a root domain whose MX is Google Workspace.** Onboarding puts its
+   bounce MX, SPF and DKIM on `cf-bounce` / `cf-bounce._domainkey`, so Google keeps the apex
+   MX. Onboarding ALSO offers `_dmarc` `v=DMARC1; p=reject;`. The zone already had a
+   `p=quarantine` record with Cloudflare DMARC reports, and activation left that record alone
+   (verified against the authoritative nameserver afterwards). Check it on every onboarding:
+   two `_dmarc` records make receivers ignore DMARC entirely. Also check WHICH name was
+   onboarded: an `alerts.` subdomain was already onboarded in the account, and a `From` on the
+   bare root is refused until the root itself is onboarded.
+3. **A fallback delivery used to hide the primary failure.** With Web3Forms as the
+   server-side fallback, a row it delivered read `notified = 1` with `notify_error` null, the
+   same as an Email Sending delivery. PR #261 records `sent via web3forms; email failed:
+<reason>` and logs a warning. Generalise that into the starter's route when it next changes.
+   Separately, Email Sending's activity log can lag several minutes behind a send, so an empty
+   log right after a test is not a failure: read the D1 row first.
+
+This site's form has a dozen fields; a site-owned `src/lib/inquiry.ts` folds the extras into
+`message` as `Label: value` lines, the same approach as presacademy's `form-to-contact.ts`.
 
 ## Card 46: The share card was never in the brand's typeface (2026-09-13)
 
