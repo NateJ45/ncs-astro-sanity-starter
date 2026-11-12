@@ -355,7 +355,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 222  | Video byte ranges: `src/worker.ts` wraps Astro, so iPhones get a 206 for clips            | yes         | yes      | yes              | yes           | partial             | yes            | yes        | yes     |
 | 223  | Sticky header scroll room and axe 2.2 tags                                                | partial     | yes      | partial          | partial       | partial             | yes            | yes        | yes     |
 | 224  | Sticky CTA chip renders into body, stays while focused                                    | n/a         | yes      | open             | n/a           | n/a                 | n/a            | yes        | n/a     |
-| 225  | Declare `proxy-agent` as a devDependency so Dependabot's lockfile still passes `npm ci`    | yes         | yes      | staged           | yes           | yes                 | yes            | yes        | yes     |
+| 225  | Declare `proxy-agent` as a devDependency so Dependabot's lockfile still passes `npm ci`   | yes         | yes      | staged           | yes           | yes                 | yes            | yes        | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
