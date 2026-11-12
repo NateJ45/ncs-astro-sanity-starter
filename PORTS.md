@@ -355,6 +355,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 222  | Video byte ranges: `src/worker.ts` wraps Astro, so iPhones get a 206 for clips            | yes         | yes      | yes              | yes           | partial             | yes            | yes        | yes     |
 | 223  | Sticky header scroll room and axe 2.2 tags                                                | partial     | yes      | partial          | partial       | partial             | yes            | yes        | yes     |
 | 224  | Sticky CTA chip renders into body, stays while focused                                    | n/a         | yes      | open             | n/a           | n/a                 | n/a            | yes        | n/a     |
+| 225  | Declare `proxy-agent` as a devDependency so Dependabot's lockfile still passes `npm ci`   | yes         | yes      | staged           | yes           | yes                 | yes            | yes        | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13402,3 +13403,22 @@ Two changes survived measurement against the last five successful runs per workf
 - The chip moves to the end of `<body>`, so it is last in the tab order, after the footer.
 
 **Adapt per site:** port the three edits to the site's own `StickyCTAChip.tsx` (Reid's is restyled, so edit rather than copy), add `data-sticky-chip` and `data-chip-visible` if the site lacks them, and point the test at a page that has the chip.
+
+## Card 225: Declare proxy-agent so Dependabot lockfiles pass npm ci (2026-11-12)
+
+**Status:** starter #300, 2026-11-12. Applied the same day: mas-monograms #179 (first, merged), fbc-auburn #294, stonesteps-50k #215, nixoncreativestudio #285, presacademy #178, fbcm #158. reid-design-site waits on its own CI fix (its checks were red for an unrelated YouTube axe failure) and takes the same one-line change after it.
+
+**Origin:** every open Dependabot PR on every site was red for days, and none of them ever reached a build. Dependabot regenerates `package-lock.json` with its own npm and drops the nested `proxy-agent@8` that `@puppeteer/browsers` 3 (under `@lhci/cli`, via card 220) wants as an optional peer. `npm ci` then stops in seconds with `Missing: proxy-agent@8.0.2 from lock file`, and it looks like six broken checks.
+
+**What it adds:**
+
+- `"proxy-agent": "^8.0.2"` in `devDependencies`, so the package is a real top-level dependency and the lockfile keeps it however Dependabot regenerates it. The old nested copy under `@lhci/cli` stays at 6.5.0.
+- Checked before rolling out: with the change in place, an npm 10 `update fast-xml-parser --package-lock-only` (what Dependabot does) leaves `npm ci --dry-run` passing.
+
+**Traps:**
+
+- A PR that is already red from this needs the lockfile repaired once: `npm install`, then `npx -y npm@10 install`, then `npx -y npm@10 ci --dry-run` (see the gotcha `lockfile-from-newer-npm-fails-npm-ci-on-ci`). The change here only stops it happening again.
+- When two Dependabot PRs touch the lockfile, test the merged result before merging the second: merge main into it on a detached HEAD and run `npx -y npm@10 ci --dry-run`. A clean textual merge proves nothing.
+- Not verified until Dependabot opens its next PR on a repo with this change.
+
+**Adapt per site:** add the one line in sorted position, run `npm install` then `npx -y npm@10 install`, check `npx -y npm@10 ci --dry-run`. No file is `PORTABLE`.
