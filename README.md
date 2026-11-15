@@ -1,3 +1,7 @@
+<a href="https://nixoncreativestudio.com/work/"><img src="https://raw.githubusercontent.com/NateJ45/NateJ45/main/assets/cards/ncs-astro-sanity-starter.png" alt="NCS Astro + Sanity Starter, the foundation under every Nixon Creative Studio site" width="100%"></a>
+
+<p align="center"><a href="https://nixoncreativestudio.com/work/">The sites built on it</a> · <a href="https://nixoncreativestudio.com/">Nixon Creative Studio</a></p>
+
 <div align="center">
 
 # NCS Astro + Sanity Starter
