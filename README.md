@@ -102,6 +102,10 @@ are hard, performance / SEO / best-practices are warnings. The Playwright suites
 Chromium and a real WebKit iPhone profile, because that is where a Tailwind focus ring
 on a `<select>` turns out to be invisible.
 
+`dependabot-lockfile.yml` runs only on Dependabot's PRs. When Dependabot's npm writes a
+lockfile that CI's npm rejects (`Missing: ... from lock file`), it rebuilds the lock with
+CI's npm, commits it to the PR and re-runs `ci.yml` (PORTS.md card 226).
+
 Two more workflows ship dormant, gated on repo secrets and variables that do not exist
 in the template: `sanity-backup.yml` (nightly encrypted dataset export: full on Mondays and manual runs, documents only other nights, kept 14 days) and `uptime.yml`
 (hourly 200 check on four key pages). Set the secrets and uncomment the schedule to turn

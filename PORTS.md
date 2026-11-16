@@ -356,6 +356,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 223  | Sticky header scroll room and axe 2.2 tags                                                | partial     | yes      | partial          | partial       | partial             | yes            | yes        | yes     |
 | 224  | Sticky CTA chip renders into body, stays while focused                                    | n/a         | yes      | open             | n/a           | n/a                 | n/a            | yes        | n/a     |
 | 225  | Declare `proxy-agent` as a devDependency so Dependabot's lockfile still passes `npm ci`   | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 226  | Dependabot lockfile repair workflow: CI's npm rebuilds a lock Dependabot's npm broke      | no          | yes      | no               | no            | no                  | no             | no         | no      |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13422,3 +13423,22 @@ Two changes survived measurement against the last five successful runs per workf
 - Not verified until Dependabot opens its next PR on a repo with this change.
 
 **Adapt per site:** add the one line in sorted position, run `npm install` then `npx -y npm@10 install`, check `npx -y npm@10 ci --dry-run`. No file is `PORTABLE`.
+
+## Card 226: Dependabot lockfile repair workflow, so any dropped optional peer heals itself (2026-11-16)
+
+**Status:** starter only, 2026-11-16. Not yet ported. Not verified on a live Dependabot PR until Dependabot next opens one here.
+
+**Origin:** every family repo, 2026-11-16, four days after card 225. All twelve Dependabot PRs on the six Sanity sites were red again with `Missing: ajv@8.20.0 from lock file`, even a prettier-only bump. Same mechanism as card 225, different package: `@hookform/resolvers` (nested under `sanity-plugin-media`) has an optional peer on `ajv` ^8, Dependabot's npm drops the nested `sanity-plugin-media/node_modules/ajv` entry, and CI's npm 10 refuses the lock. Declaring each package one at a time (card 225's cure) only fixes the package we have already met. See the vault gotcha `lockfile-from-newer-npm-fails-npm-ci-on-ci`. **Canonical:** `.github/workflows/dependabot-lockfile.yml` (PORTABLE).
+
+**What it does:** on a Dependabot PR only, it sets up the Node in `.nvmrc` (so the same npm as CI), runs `npm ci --dry-run`, and if that fails runs `npm install --package-lock-only --ignore-scripts`, proves the dry run now passes, commits `package-lock.json` to the PR branch as github-actions[bot] and dispatches `ci.yml` on the branch. Checked locally on the broken starter #303 commit: npm 10 `--package-lock-only` put back the two missing entries (26 lines) and `npx -y npm@10 ci --dry-run` then passed.
+
+**Why the dispatch:** a push made with `GITHUB_TOKEN` never fires `pull_request`, so CI would not run on the repaired commit and the required `build` and `test` checks would never report. `workflow_dispatch` is the one event `GITHUB_TOKEN` may trigger, and its check runs sit on the same head SHA, which is what the ruleset reads. No PAT or secret. `ci.yml` has no event-specific conditions, so a dispatched run is the full PR run.
+
+**Traps:**
+
+- Only `ci.yml` is dispatched. Lighthouse and visual are not required checks, and a dispatched Lighthouse runs the full non-PR mode (card 221).
+- Once the bot commits, Dependabot stops rebasing that PR by itself. Comment `@dependabot recreate` to start it over.
+- Card 225's `proxy-agent` line stays: it stops the break for that package, and this workflow catches the rest.
+- If the rebuilt lock still fails the dry run, the job goes red and commits nothing. Then repair by hand as in card 225.
+
+**Adapt per site:** copy the file byte for byte (it is PORTABLE). It needs `ci.yml` to keep its `workflow_dispatch` trigger and the repo to have an `.nvmrc`. Nothing else is per site.
