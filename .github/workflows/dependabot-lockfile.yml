@@ -1,0 +1,83 @@
+# PORTABLE: canonical copy - ncs-astro-sanity-starter is the library of record for this file
+name: Dependabot lockfile repair
+
+# PORTS.md card 226. Dependabot regenerates package-lock.json with its own npm,
+# which does not agree with CI's npm (the one Node in .nvmrc ships) about
+# optional peers. It drops nested entries such as ajv@8 under
+# sanity-plugin-media (2026-11-16) or proxy-agent@8 under @lhci/cli (card 225),
+# and every check then dies in `npm ci` with "Missing: <pkg> from lock file".
+#
+# This job runs only on Dependabot's PRs. It asks CI's own npm whether the lock
+# is good (`npm ci --dry-run`). If not, it rebuilds the lock with that npm
+# (`npm install --package-lock-only`), proves the dry run passes, commits the
+# lock back to the PR branch and re-dispatches ci.yml on the new
+# commit. That works for any package, not just the ones we have met.
+#
+# Why the re-dispatch: a push made with GITHUB_TOKEN does not fire
+# `pull_request`, so CI would never run on the repaired commit and the
+# required `build` and `test` checks would never report. `workflow_dispatch`
+# is the one event GITHUB_TOKEN may trigger; its check runs land on the same
+# head SHA, which is what the ruleset reads. No PAT or extra secret needed.
+#
+# After this pushes, Dependabot stops rebasing that PR on its own (it sees a
+# commit that is not its own). Comment `@dependabot recreate` to start over.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: dependabot-lockfile-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  repair:
+    if: github.actor == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Check the lock with CI's npm
+        id: check
+        run: |
+          npm --version
+          if npm ci --dry-run --no-audit --no-fund > /dev/null 2> ci.err; then
+            echo "Lockfile is fine for npm $(npm --version); nothing to do."
+            echo "broken=false" >> "$GITHUB_OUTPUT"
+          else
+            grep -E 'Missing:|Invalid:' ci.err || tail -20 ci.err
+            echo "broken=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Rebuild the lock and prove it
+        if: steps.check.outputs.broken == 'true'
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm ci --dry-run --no-audit --no-fund > /dev/null
+          git diff --stat -- package-lock.json
+
+      - name: Commit and re-run the PR workflows
+        if: steps.check.outputs.broken == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "Repair package-lock.json for npm $(npm --version) (PORTS.md card 226)"
+          git push origin "HEAD:$BRANCH"
+          # Only ci.yml: it carries the required build and test checks.
+          # Lighthouse and visual are not required, and a dispatched
+          # Lighthouse runs the full non-PR mode (card 221), so skip them.
+          gh workflow run ci.yml --ref "$BRANCH"
