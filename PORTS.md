@@ -356,7 +356,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 223  | Sticky header scroll room and axe 2.2 tags                                                | partial     | yes      | partial          | partial       | partial             | yes            | yes        | yes     |
 | 224  | Sticky CTA chip renders into body, stays while focused                                    | n/a         | yes      | open             | n/a           | n/a                 | n/a            | yes        | n/a     |
 | 225  | Declare `proxy-agent` as a devDependency so Dependabot's lockfile still passes `npm ci`   | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
-| 226  | Dependabot lockfile repair workflow: CI's npm rebuilds a lock Dependabot's npm broke      | no          | yes      | no               | no            | no                  | no             | no         | no      |
+| 226  | Dependabot lockfile repair workflow: CI's npm rebuilds a lock Dependabot's npm broke      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13426,7 +13426,7 @@ Two changes survived measurement against the last five successful runs per workf
 
 ## Card 226: Dependabot lockfile repair workflow, so any dropped optional peer heals itself (2026-11-16)
 
-**Status:** starter only, 2026-11-16. Not yet ported. Not verified on a live Dependabot PR until Dependabot next opens one here.
+**Status:** starter #305, 2026-11-16. Ported the same day, byte for byte (sync-check SAME on each): fbcm #162, fbc-auburn #298, stonesteps-50k #219, presacademy #183, mas-monograms #183, reid-design-site #233, nixoncreativestudio #396. Not verified on a live Dependabot PR until Dependabot next opens one.
 
 **Origin:** every family repo, 2026-11-16, four days after card 225. All twelve Dependabot PRs on the six Sanity sites were red again with `Missing: ajv@8.20.0 from lock file`, even a prettier-only bump. Same mechanism as card 225, different package: `@hookform/resolvers` (nested under `sanity-plugin-media`) has an optional peer on `ajv` ^8, Dependabot's npm drops the nested `sanity-plugin-media/node_modules/ajv` entry, and CI's npm 10 refuses the lock. Declaring each package one at a time (card 225's cure) only fixes the package we have already met. See the vault gotcha `lockfile-from-newer-npm-fails-npm-ci-on-ci`. **Canonical:** `.github/workflows/dependabot-lockfile.yml` (PORTABLE).
 
