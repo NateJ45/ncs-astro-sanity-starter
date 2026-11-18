@@ -357,6 +357,8 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 224  | Sticky CTA chip renders into body, stays while focused                                    | n/a         | yes      | open             | n/a           | n/a                 | n/a            | yes        | n/a     |
 | 225  | Declare `proxy-agent` as a devDependency so Dependabot's lockfile still passes `npm ci`   | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 226  | Dependabot lockfile repair workflow: CI's npm rebuilds a lock Dependabot's npm broke      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
+| 227  | Header row uses the section gutter (`px-m`), so the wordmark lines up with headings       | fork        | yes      | fork             | fork          | fork                | no             | no         | yes     |
+| 228  | Rich-text body keeps a reading measure (`max-w-[40em]`) at full content width             | fork        | yes      | yes              | n/a           | n/a                 | no             | no         | yes     |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13442,3 +13444,27 @@ Two changes survived measurement against the last five successful runs per workf
 - If the rebuilt lock still fails the dry run, the job goes red and commits nothing. Then repair by hand as in card 225.
 
 **Adapt per site:** copy the file byte for byte (it is PORTABLE). It needs `ci.yml` to keep its `workflow_dispatch` trigger and the repo to have an `.nvmrc`. Nothing else is per site.
+
+## Card 227: The header row uses the section gutter, so the wordmark lines up with every heading (2026-11-18)
+
+**Status:** starter, 2026-11-18. **Canonical:** `src/components/Header.astro` (the eyebrow strip and `.site-header__row`). Not PORTABLE.
+
+**Origin:** erin-schmerr-photography, 2026-11-18, the design critique of every route at 1440 and 375. The header row and the eyebrow strip used `px-l` (`clamp(2rem, 4vw, 3rem)`) while every section, the footer and the page heads use `px-m` (`clamp(1rem, 2vw, 1.5rem)`). Both sit in the same `max-w-content` box, so the wordmark started 1 to 1.5rem to the right of every heading below it: two left edges on every page, against rule 17 ("one left edge"). Erin fixed it in its own layer (`.site-header__row { padding-inline: var(--spacing-m) }`, PR #21); the starter now ships `px-m` on both rows.
+
+**Rules:** chrome and content share one gutter token. `node scripts/measure-columns.mjs` on a page should show the logo's left edge equal to the first heading's.
+
+**Adapt per site:** change `px-l` to `px-m` on the two `max-w-content` rows in `Header.astro` (or set the row's `padding-inline` in the site layer), then check the header at 1024 (the tightest desktop width) for crowding: the row loses 2 to 3rem of inner width. Refresh visual baselines. Sites with their own header grammar (presacademy's `px-4 sm:px-6 lg:px-12`, fbcm's `px-gutter`) only need to confirm the header and sections use the same token.
+
+**Applied:** cells filled from a grep of each repo's `origin/main` on 2026-11-18. fbcm already uses one token (`px-gutter`) for both. stonesteps-50k and fbc-auburn still carry the starter's `px-l`. presacademy, reid-design-site, mas-monograms and nixoncreativestudio have their own headers (`fork`, alignment not measured). erin-schmerr-photography (no column) has it through its site layer.
+
+## Card 228: A rich-text body keeps a reading measure at the full content width (2026-11-18)
+
+**Status:** starter, 2026-11-18. **Canonical:** `src/components/sections/RichTextSection.astro` (`proseClass`). Not PORTABLE.
+
+**Origin:** erin-schmerr-photography, 2026-11-18. A Text section at the default `width: 'wide'` drew its body across the whole `max-w-content` box, about 130 characters a line at `text-lg` on a 1440 screen, well past the 45 to 75 that read comfortably. `narrow` existed, but it narrows the heading too, and an editor has no reason to know it is the fix. Erin capped the body (PR #25); the starter now does the same.
+
+**What changed:** the PortableText body gets `max-w-[40em]` (about 70 characters at `text-lg`), and `mx-auto` when the section is centred so the measure centres with its heading. The section box, heading and `narrow` option are unchanged, so a page's left edge does not move, and narrow sections (already `max-w-prose`) render the same.
+
+**Adapt per site:** add the two classes to `proseClass`, build, and check a wide Text section at 1280 and 375. Run `npm run parity compare` and expect a diff only on pages with a wide Text section. Sites with their own rich-text grammar (reid-design-site and fbcm set a measure already; presacademy's `RichTextBlock.astro`) skip it.
+
+**Applied:** cells from a grep of `origin/main` on 2026-11-18. reid-design-site and fbcm already set a measure of their own. stonesteps-50k and fbc-auburn carry the starter's unbounded body. mas-monograms and nixoncreativestudio have no Text section. erin-schmerr-photography (no column) has it.
