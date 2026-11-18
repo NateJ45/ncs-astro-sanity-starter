@@ -165,7 +165,7 @@ function isGroupActive(items: { href: string }[]) {
       appear once there's room for the full nav + CTA without squishing
       the logo. */}
   <div class="site-header__eyebrow hidden border-b border-border-soft bg-muted lg:block">
-    <div class="mx-auto flex max-w-content items-center justify-between px-l py-2">
+    <div class="mx-auto flex max-w-content items-center justify-between px-m py-2">
       <div class="flex items-center gap-m">
         <p class="text-xs tracking-eyebrow text-foreground/80 uppercase">
           {siteSettings?.tagline ?? site.name}
@@ -249,7 +249,7 @@ function isGroupActive(items: { href: string }[]) {
       justifies logo left, nav+CTA grouped right. Breakpoint matches the
       eyebrow strip above — at viewports between md and lg the desktop
       layout would squish, so mobile-style header stays in use. */}
-  <div class="site-header__row relative mx-auto flex max-w-content items-center justify-center border-b border-border px-l py-m lg:justify-between">
+  <div class="site-header__row relative mx-auto flex max-w-content items-center justify-center border-b border-border px-m py-m lg:justify-between">
     {/* Mobile-only availability pill, mirroring the hamburger menu's
         absolute-right placement. Gives mobile visitors an at-a-glance trust
         signal ("Open / accepting new clients") and a single-tap path to

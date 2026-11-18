@@ -37,7 +37,16 @@ const {
 const bg = surfaceClass(surface);
 const widthClass = width === 'narrow' ? 'max-w-prose' : 'max-w-content';
 const alignClass = align === 'center' ? 'text-center' : '';
-const proseClass = ['text-foreground/85 text-lg leading-relaxed', heading ? 'mt-l' : '', alignClass]
+// The body keeps a reading measure (about 70 characters at text-lg) even when
+// the section runs at the full content width: a wide band lets the heading and
+// any images span the page, but a 130-character line is hard to read (PORTS.md
+// card 228). Centred text centres the measure too.
+const proseClass = [
+  'max-w-[40em] text-foreground/85 text-lg leading-relaxed',
+  heading ? 'mt-l' : '',
+  align === 'center' ? 'mx-auto' : '',
+  alignClass,
+]
   .filter(Boolean)
   .join(' ');
 ---
