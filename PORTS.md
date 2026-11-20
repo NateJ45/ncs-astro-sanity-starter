@@ -359,6 +359,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 226  | Dependabot lockfile repair workflow: CI's npm rebuilds a lock Dependabot's npm broke      | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 227  | Header row uses the section gutter (`px-m`), so the wordmark lines up with headings       | fork        | yes      | fork             | fork          | fork                | no             | no         | yes     |
 | 228  | Rich-text body keeps a reading measure (`max-w-[40em]`) at full content width             | fork        | yes      | yes              | n/a           | n/a                 | no             | no         | yes     |
+| 229  | Contrast spec measures only painted text (clip-path inset); decorative flag on ancestor   | n/a         | yes      | n/a              | n/a           | n/a                 | fork           | no         | fork    |
 
 Rows 106 to 135 (2026-10-19) are recorded from the five-site rollout report. fbcm is not a column, so its rollout is on the card status lines only. A cell becomes `yes` only where the report names that card for that site. A broad round or a sync alone leaves the cell as it was, and the card says "synced, not individually verified". Rows 132 and 133 were missing from the matrix and are added here. PRs: fbcm #74 to #81, presacademy #107 to #116, reid-design-site #157 to #165, mas-monograms #117 to #126, stonesteps-50k #131 to #140 (#136 is its design-language PR).
 
@@ -13468,3 +13469,23 @@ Two changes survived measurement against the last five successful runs per workf
 **Adapt per site:** add the two classes to `proseClass`, build, and check a wide Text section at 1280 and 375. Run `npm run parity compare` and expect a diff only on pages with a wide Text section. Sites with their own rich-text grammar (reid-design-site and fbcm set a measure already; presacademy's `RichTextBlock.astro`) skip it.
 
 **Applied:** cells from a grep of `origin/main` on 2026-11-18. reid-design-site and fbcm already set a measure of their own. stonesteps-50k and fbc-auburn carry the starter's unbounded body. mas-monograms and nixoncreativestudio have no Text section. erin-schmerr-photography (no column) has it.
+
+## Card 229: The contrast spec measures only what is painted, and a decorative twin's children stay exempt (2026-11-20)
+
+**Status:** starter, 2026-11-20. **Canonical:** `tests/contrast.spec.ts` (PORTABLE).
+
+**Origin:** erin-schmerr-photography, 2026-11-20, the test milestone after its funnel cover redesign. The cover's headline is two copies of the same words laid over each other: ink text clipped with `clip-path: inset()` to the paper side, and an `aria-hidden` paper-coloured twin clipped to the photo side. The spec measured each copy's whole box, so it judged ink against the photo and the paper twin against the paper, and failed text that no visitor ever sees there. Separately, the twin carried `data-contrast-decorative`, but its `<em>` children were still measured, because the exemption only looked at the element itself.
+
+**What changed:**
+
+- The decorative exemption accepts `data-contrast-decorative` on the element OR an ancestor (`el.closest(...)`). It still requires an `aria-hidden="true"` ancestor, so a flag cannot hide text that assistive tech reads.
+- Text over a photo or gradient is measured only on its PAINTED part: the box is intersected with every ancestor's `clip-path: inset()`. Each inset is resolved by the browser through an absolutely placed, hidden probe with the same four offsets, so `calc()`, `min()` and `em` need no parsing. Text clipped away entirely is skipped.
+
+**Traps:**
+
+- Only `inset()` is read. A `polygon()`, `circle()` or `path()` clip still measures the whole box (the stricter answer).
+- The probe briefly sets `position: relative` on a static ancestor and puts it back; nothing is left in the page.
+
+**Adapt per site:** copy the file byte for byte and run `node scripts/sync-check.mjs`; it should report SAME. Then run the contrast spec on a snapshot build: a page with no clipped text measures exactly as before. fbcm and stonesteps-50k keep deliberate forks without the marker (light-only loop; `pinClock`), so they take the two hunks by hand if they ever need them.
+
+**Applied:** erin-schmerr-photography (origin, no column).

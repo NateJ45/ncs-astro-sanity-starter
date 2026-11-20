@@ -208,7 +208,7 @@ async function measure(page: Parameters<typeof settle>[0], selectors: string[]) 
       // attribute on its own is a loophole, and a gate with a loophole is a
       // gate that stops being trusted. Anything failing the second half is
       // still measured, and still fails.
-      if (el.hasAttribute('data-contrast-decorative') && el.closest('[aria-hidden="true"]')) {
+      if (el.closest('[data-contrast-decorative]') && el.closest('[aria-hidden="true"]')) {
         continue;
       }
 
@@ -230,7 +230,69 @@ async function measure(page: Parameters<typeof settle>[0], selectors: string[]) 
         // Measured in a second pass, from the rendered pixels. Recorded here
         // with the box so the caller can screenshot behind it. See
         // measureOverImages().
-        const r = (el as HTMLElement).getBoundingClientRect();
+        //
+        // ONLY THE PAINTED PART IS MEASURED. Text clipped with `clip-path: inset()`
+        // (the funnel cover's two-copy headline: ink on the paper side, a paper
+        // twin on the photo side, each clipped to its own side) is not drawn
+        // outside its inset, so the box is cut down to it. Each inset is resolved
+        // by the browser itself, through an absolutely placed probe with the same
+        // four offsets, so calc(), min() and em need no parsing here.
+        const insetOf = (n: HTMLElement, args: string): DOMRect | null => {
+          const parts: string[] = [];
+          let depth = 0;
+          let cur = '';
+          for (const ch of args.split(/\sround\s/)[0]!) {
+            if (ch === '(') depth++;
+            if (ch === ')') depth--;
+            if (ch === ' ' && depth === 0) {
+              if (cur) parts.push(cur);
+              cur = '';
+            } else cur += ch;
+          }
+          if (cur) parts.push(cur);
+          if (!parts.length) return null;
+          const [t, r2 = t, b = t, l = r2] = parts as [string, string?, string?, string?];
+          const probe = document.createElement('div');
+          probe.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;top:${t};right:${r2};bottom:${b};left:${l}`;
+          const was = n.style.position;
+          if (getComputedStyle(n).position === 'static') n.style.position = 'relative';
+          n.appendChild(probe);
+          const box = probe.getBoundingClientRect();
+          probe.remove();
+          n.style.position = was;
+          return box;
+        };
+        let r: {
+          left: number;
+          top: number;
+          right: number;
+          bottom: number;
+          width: number;
+          height: number;
+        } = (el as HTMLElement).getBoundingClientRect();
+        for (
+          let n: HTMLElement | null = el as HTMLElement;
+          n && n !== document.body;
+          n = n.parentElement
+        ) {
+          const m = /^inset\((.*)\)$/.exec(getComputedStyle(n).clipPath);
+          const c = m ? insetOf(n, m[1]!) : null;
+          if (!c) continue;
+          const left = Math.max(r.left, c.left);
+          const top = Math.max(r.top, c.top);
+          const right = Math.min(r.right, c.right);
+          const bottom = Math.min(r.bottom, c.bottom);
+          r = {
+            left,
+            top,
+            right,
+            bottom,
+            width: Math.max(0, right - left),
+            height: Math.max(0, bottom - top),
+          };
+        }
+        // Clipped away entirely: nothing is painted, so there is nothing to read.
+        if (r.width < 1 || r.height < 1) continue;
         out.push({
           selector: sel,
           text: text.slice(0, 40),
