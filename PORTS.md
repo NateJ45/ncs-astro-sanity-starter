@@ -231,7 +231,7 @@ has no column" or "fbcm is not a column" describe the matrix as it was when they
 | 95   | `audit:data`: live data vs compiled schema; `_type` backfill                              | no          | yes      | no               | fork          | n/a                 | no             | yes        | partial |
 | 96   | GA4 skips automated browsers (WebDriver, Lighthouse, PageSpeed, GTmetrix)                 | staged      | yes      | staged           | staged        | staged              | staged         | yes        | yes     |
 | 97   | astro 7.4 with adapter 14.4.0 (wrangler stays 4.129)                                      | no          | yes      | no               | no            | no                  | no             | yes        | partial |
-| 98   | Date labels independent of build-machine timezone (`formatDate`)                          | no          | yes      | no               | no            | no                  | no             | yes        | partial |
+| 98   | Date labels independent of build-machine timezone (`formatDate`)                          | yes         | yes      | yes              | yes           | yes                 | yes            | yes        | yes     |
 | 99   | Scaffold markers stay out of PORTABLE files; styleguide wall marked                       | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | partial    | partial |
 | 100  | Scaffold prunes the Lighthouse, smoke and uptime route lists                              | n/a         | yes      | n/a              | n/a           | n/a                 | n/a            | yes        | yes     |
 | 101  | Preview renders "no document" inside the layout, so Presentation connects                 | open        | yes      | open             | open          | n/a                 | open           | yes        | yes     |
@@ -8263,6 +8263,14 @@ times: a time of day needs the site's zone, never UTC, so pass it explicitly the
 **Status, 2026-10-17.** Starter: `yes` with this PR. Sites: `no`. Every live site in the matrix formats dates at build time
 (presacademy 16 files, stonesteps-50k 17, fbcm 8, reid-design-site 5, mas-monograms 5, nixoncreativestudio 3), so each one
 has the bug on a local build.
+
+**Status, 2026-11-20.** Every site `yes`, one PR each, each built under `TZ=America/New_York` and `TZ=UTC` with no date
+text differing: presacademy #185 (event times now in `site.timeZone`), stonesteps-50k #221 (race day label in
+`site.timeZone`; the helper had already arrived with card 193), fbcm #164 (privacy only; the Sunday labels run in the
+visitor's browser), reid-design-site #235, mas-monograms #184, nixoncreativestudio #427 (its local-noon parses were
+already day-safe; moved to the helper for one rule). Where a UTC build of the old `main` was compared, production output
+was unchanged. Lesson from the run: never `git stash` in a worktree to build a baseline; the stash stack is shared, and a
+failed stash let one agent pop another session's entry. Build the baseline in its own detached worktree.
 
 ## Card 99: scaffold markers stay out of PORTABLE files (2026-10-17)
 
